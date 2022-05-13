@@ -1,0 +1,6 @@
+/vendor/
+/runtime/
+/config/secrets.php
+/config/auth.php
+/config/INSTALLING_NOW
+/.idea/
