@@ -13,6 +13,15 @@ class AppLayout extends Component
      */
     public function render()
     {
-        return view('layouts.app');
+        return view('layouts.app', ['navigation' => $this->getNavigation()]);
+    }
+
+    /**
+     * @return string[] route => [Name, Icon]
+     */
+    public function getNavigation(){
+        return [
+            'dashboard' => 'Realms',
+        ];
     }
 }
