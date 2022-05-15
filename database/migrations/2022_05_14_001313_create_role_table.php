@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('id', true);
             $table->string('name', 64)->nullable();
             $table->integer('gremium_id')->index('roles_gremien_id_fk');
+            $table->timestamps();
         });
     }
 

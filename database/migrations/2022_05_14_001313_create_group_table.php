@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('id', true);
             $table->string('name', 64);
             $table->string('realm_uid', 32)->index('group_realm_uid_fk');
+            $table->timestamps();
         });
     }
 

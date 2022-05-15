@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('realm_uid', 32)->index('fk_domains_realms1');
             $table->boolean('forRegistration');
             $table->string('name', 128)->unique('name');
+            $table->timestamps();
         });
     }
 

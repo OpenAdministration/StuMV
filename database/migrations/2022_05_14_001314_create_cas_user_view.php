@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement("CREATE VIEW `cas_user` AS select `user_management`.`user`.`username` AS `username`,replace(`user_management`.`user`.`password`,'$2y$','$2a$') AS `password` from `user_management`.`user`");
+        DB::statement("CREATE VIEW `cas_user` AS select `user`.`username` AS `username`,replace(`user`.`password`,'$2y$','$2a$') AS `password` from `user`");
     }
 
     /**

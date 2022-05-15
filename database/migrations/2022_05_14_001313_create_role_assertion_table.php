@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('user_id')->nullable()->index('fk_role_assertion_user');
             $table->date('from');
             $table->date('until')->nullable();
+            $table->timestamps();
         });
     }
 

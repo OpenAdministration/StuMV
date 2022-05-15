@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('group_assertion', function (Blueprint $table) {
             $table->integer('group_id');
             $table->integer('role_id')->index('fk_group_assertion');
-
+            $table->timestamps();
             $table->primary(['group_id', 'role_id']);
         });
     }

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name', 128);
             $table->string('realm_uid', 32)->index('gremien_realms_uid_fk');
             $table->integer('parent_gremium_id')->nullable()->index('gremien_gremien_id_fk');
+            $table->timestamps();
         });
     }
 

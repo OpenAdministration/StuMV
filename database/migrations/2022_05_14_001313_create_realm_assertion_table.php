@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('realm_assertion', function (Blueprint $table) {
             $table->integer('user_id')->index('realm_assertion_userid');
             $table->string('realm_uid', 32)->index('fk_realm_assertions_realm');
-
+            $table->timestamps();
             $table->primary(['user_id', 'realm_uid']);
         });
     }
