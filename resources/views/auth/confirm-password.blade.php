@@ -11,20 +11,12 @@
         </div>
 
         <!-- Validation Errors -->
-        <x-auth-validation-errors class="mb-4" :errors="$errors" />
-
         <form method="POST" action="{{ route('password.confirm') }}">
             @csrf
-
             <!-- Password -->
-            <div>
-                <x-label for="password" :value="__('Password')" />
-
-                <x-input id="password" class="block mt-1 w-full"
-                                type="password"
-                                name="password"
-                                required autocomplete="current-password" />
-            </div>
+            <x-input.group id="password" type="password" required autocomplete="current-password">
+                <x-slot name="label">{{ __('Password') }}</x-slot>
+            </x-input.group>
 
             <div class="flex justify-end mt-4">
                 <x-button>

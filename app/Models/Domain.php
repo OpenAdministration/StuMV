@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Realm;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class Domain extends Model
 {
+    use HasFactory;
     /**
      * The table associated with the model.
      *
