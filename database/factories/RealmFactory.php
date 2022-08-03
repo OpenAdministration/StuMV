@@ -17,8 +17,8 @@ class RealmFactory extends Factory
     public function definition()
     {
         return [
-            'uid' => $this->faker->randomLetter() . $this->faker->randomLetter(),
-            'long_name' => $this->faker->company()
+            'uid' => $this->faker->randomLetter() . $this->faker->randomLetter() . $this->faker->randomLetter(),
+            'long_name' => $this->faker->unique()->company()
         ];
     }
 }

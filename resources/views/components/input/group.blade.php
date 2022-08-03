@@ -10,7 +10,7 @@
     $id = $id ?? $model;
 @endphp
 <div class="mt-4 space-y-1">
-    @if(isset($label))
+    @isset($label)
         <label for="{{ $id }}" {{ $label->attributes->class(['block font-medium text-sm text-gray-700']) }}">
         {{ $label }}
         </label>

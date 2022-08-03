@@ -16,8 +16,6 @@ class RegistrationTest extends TestCase
     use RefreshDatabase;
     use WithFaker;
 
-
-
     public function test_registration_screen_can_be_rendered_and_livewire_is_there(): void
     {
         $response = $this->get('/register');

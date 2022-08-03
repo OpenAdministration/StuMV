@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
-        Realm::factory(5)
+        Realm::factory(15)
             ->has(Domain::factory(4)->sequence(
                 ['forRegistration' => true],
                 ['forRegistration' => false],

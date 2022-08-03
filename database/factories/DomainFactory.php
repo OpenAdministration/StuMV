@@ -18,7 +18,7 @@ class DomainFactory extends Factory
     {
         return [
             'forRegistration' => true,
-            'name' => $this->faker->domainName(),
+            'name' => $this->faker->unique()->domainName(),
         ];
     }
 

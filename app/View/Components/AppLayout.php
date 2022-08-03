@@ -6,6 +6,9 @@ use Illuminate\View\Component;
 
 class AppLayout extends Component
 {
+
+    public function __construct(){}
+
     /**
      * Get the view / contents that represents the component.
      *
@@ -13,15 +16,7 @@ class AppLayout extends Component
      */
     public function render()
     {
-        return view('layouts.app', ['navigation' => $this->getNavigation()]);
+        return view('layouts.app', ['headline' => 'Default Headline - pls change']);
     }
 
-    /**
-     * @return string[] route => [Name, Icon]
-     */
-    public function getNavigation(){
-        return [
-            'dashboard' => 'Realms',
-        ];
-    }
 }

@@ -1,5 +1,5 @@
 <x-auth-card>
-    <x-slot name="logo"></x-slot>
+    <x-slot name="logo"><x-application-logo class="w-20 h-20 fill-current text-gray-500"/></x-slot>
     <form wire:submit.prevent="store">
         <!-- Email Address -->
         <x-input.group wire:model.lazy="user.email" autofocus>
