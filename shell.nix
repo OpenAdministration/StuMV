@@ -6,5 +6,7 @@ mkShell {
   buildInputs = [
     php80
     php80Packages.composer
+    nodePackages.npm
+    nodejs
   ];
 }
