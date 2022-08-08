@@ -2,7 +2,7 @@
     {{ Breadcrumbs::render('realms:index') }}
     <div class="flex justify-between">
         <x-input type="text" wire:model.debounce="search" placeholder="Durchsuche Realms"></x-input>
-        <x-button.primary class="flex"><x-fas-plus class="text-white align-middle"/> Neu </x-button.primary>
+        <x-button.primary class="flex"><x-fas-plus class="text-white align-middle"/>&nbsp;Neu</x-button.primary>
     </div>
     <x-table>
         <x-slot name="head">
@@ -51,7 +51,7 @@
                 </x-input.group>
             </x-slot:content>
             <x-slot:footer>
-                <x-button.secondary>Abbrechen</x-button.secondary>
+                <x-button.secondary wire:click="close()">Abbrechen</x-button.secondary>
                 <x-button.primary type="submit">Speichern</x-button.primary>
             </x-slot:footer>
         </x-modal.dialog>

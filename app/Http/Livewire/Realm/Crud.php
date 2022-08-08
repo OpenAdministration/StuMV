@@ -53,6 +53,11 @@ class Crud extends Component
         $this->editRealm = Realm::find($uid);
     }
 
+    public function close(): void
+    {
+        $this->showEditModal = false;
+    }
+
     public function save(): void
     {
         $this->validate();
