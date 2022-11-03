@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('realm', function (Blueprint $table) {
-            $table->string('uid', 32)->unique('uid');
-            $table->string('long_name', 128);
+        Schema::create('role_user_relation', function (Blueprint $table) {
+            $table->bigInteger('role_id')->unsigned();
+            $table->bigInteger('user_id')->unsigned();
+            $table->date('from');
+            $table->date('until')->nullable();
             $table->timestamps();
+            $table->primary(['role_id', 'user_id']);
         });
     }
 
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('realm');
+        Schema::dropIfExists('role_user_relation');
     }
 };

@@ -13,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('domain', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->boolean('activeMail')->default(false);
-            $table->string('realm_uid', 32)->index('fk_domains_realms1');
-            $table->boolean('forRegistration');
-            $table->string('name', 128)->unique('name');
+        Schema::create('group', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 64);
+            $table->string('realm_uid', 32);
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('domain');
+        Schema::dropIfExists('group');
     }
 };

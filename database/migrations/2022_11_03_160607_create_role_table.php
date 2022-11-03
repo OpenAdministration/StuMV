@@ -13,11 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('gremium', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->string('name', 128);
-            $table->string('realm_uid', 32)->index('gremien_realms_uid_fk');
-            $table->integer('parent_gremium_id')->nullable()->index('gremien_gremien_id_fk');
+        Schema::create('role', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 64)->nullable();
+            $table->bigInteger('committee_id')->unsigned();
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('gremium');
+        Schema::dropIfExists('role');
     }
 };

@@ -13,8 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('auth_item', function (Blueprint $table) {
-            $table->foreign(['rule_name'], 'auth_item_ibfk_1')->references(['name'])->on('auth_rule')->onUpdate('CASCADE')->onDelete('SET NULL');
+        Schema::create('committee', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 128);
+            $table->string('realm_uid', 32);
+            $table->bigInteger('parent_committee_id')->unsigned()->nullable();
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('auth_item', function (Blueprint $table) {
-            $table->dropForeign('auth_item_ibfk_1');
-        });
+        Schema::dropIfExists('committee');
     }
 };

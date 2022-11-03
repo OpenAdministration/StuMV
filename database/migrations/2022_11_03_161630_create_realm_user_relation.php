@@ -13,8 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('group', function (Blueprint $table) {
-            $table->foreign(['realm_uid'], 'group_realm_uid_fk')->references(['uid'])->on('realm');
+        Schema::create('realm_user_relation', function (Blueprint $table) {
+            $table->bigInteger('user_id')->unsigned();
+            $table->string('realm_uid', 32);
+            $table->timestamps();
+            $table->primary(['user_id', 'realm_uid']);
         });
     }
 
@@ -25,8 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('group', function (Blueprint $table) {
-            $table->dropForeign('group_realm_uid_fk');
-        });
+        Schema::dropIfExists('realm_user_relation');
     }
 };

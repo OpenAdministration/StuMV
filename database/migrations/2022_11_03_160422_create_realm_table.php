@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('group_assertion', function (Blueprint $table) {
-            $table->integer('group_id');
-            $table->integer('role_id')->index('fk_group_assertion');
+        Schema::create('realm', function (Blueprint $table) {
+            $table->id();
+            $table->string('uid', 32)->unique('uid');
+            $table->string('long_name', 128);
             $table->timestamps();
-            $table->primary(['group_id', 'role_id']);
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('group_assertion');
+        Schema::dropIfExists('realm');
     }
 };

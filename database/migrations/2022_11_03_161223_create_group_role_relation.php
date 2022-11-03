@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('role', function (Blueprint $table) {
-            $table->integer('id', true);
-            $table->string('name', 64)->nullable();
-            $table->integer('gremium_id')->index('roles_gremien_id_fk');
+        Schema::create('group_role_relation', function (Blueprint $table) {
+            $table->bigInteger('group_id')->unsigned();
+            $table->bigInteger('role_id')->unsigned();
             $table->timestamps();
+            $table->primary(['group_id', 'role_id']);
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('role');
+        Schema::dropIfExists('group_role_relation');
     }
 };
