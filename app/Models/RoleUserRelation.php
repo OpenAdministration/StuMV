@@ -5,28 +5,30 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Role;
-use App\Models\Group;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property integer $group_id
  * @property integer $role_id
+ * @property integer $user_id
+ * @property string $from
+ * @property string $until
  * @property Role $role
- * @property Group $group
+ * @property User $user
  */
-class GroupAssertion extends Model
+class RoleUserRelation extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'group_assertion';
+    protected $table = 'role_user_relation';
 
     /**
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['role_id', 'user_id', 'from', 'until'];
 
     /**
      * @return BelongsTo
@@ -39,8 +41,8 @@ class GroupAssertion extends Model
     /**
      * @return BelongsTo
      */
-    public function group() : Relation
+    public function user(): Relation
     {
-        return $this->belongsTo(Group::class);
+        return $this->belongsTo(User::class);
     }
 }

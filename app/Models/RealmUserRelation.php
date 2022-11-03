@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  * @property Realm $realm
  * @property User $user
  */
-class RealmAssertion extends Model
+class RealmUserRelation extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'realm_assertion';
+    protected $table = 'realm_user_relation';
 
     /**
      * @var array

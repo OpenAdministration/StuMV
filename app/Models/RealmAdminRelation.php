@@ -4,44 +4,41 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Role;
+use App\Models\Realm;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property integer $role_id
  * @property integer $user_id
- * @property string $from
- * @property string $until
- * @property Role $role
+ * @property string $realm_uid
+ * @property Realm $realm
  * @property User $user
  */
-class RoleAssertion extends Model
+class RealmAdminRelation extends Model
 {
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'role_assertion';
+    protected $table = 'realm_admin_relation';
 
     /**
      * @var array
      */
-    protected $fillable = ['role_id', 'user_id', 'from', 'until'];
+    protected $fillable = [];
 
     /**
      * @return BelongsTo
      */
-    public function role(): Relation
+    public function realm(): BelongsTo
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Realm::class, 'realm_uid', 'uid');
     }
 
     /**
      * @return BelongsTo
      */
-    public function user(): Relation
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

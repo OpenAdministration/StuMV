@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Group;
-use App\Models\RoleAssertion;
+use App\Models\RoleUserRelation;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
  * @property integer $id
- * @property integer $gremium_id
+ * @property integer $committee_id
  * @property string $name
  * @property Group[] $groups
- * @property Committee $gremium
- * @property RoleAssertion[] $roleAssertions
+ * @property Committee $committee
+ * @property RoleUserRelation[] $users
  */
 class Role extends Model
 {
@@ -30,20 +30,20 @@ class Role extends Model
     /**
      * @var array
      */
-    protected $fillable = ['gremium_id', 'name'];
+    protected $fillable = ['committee_id', 'name'];
 
     /**
      * @return BelongsToMany
      */
     public function groups(): Relation
     {
-        return $this->belongsToMany(Group::class, 'group_assertion');
+        return $this->belongsToMany(Group::class, 'group_role_relation');
     }
 
     /**
      * @return BelongsTo
      */
-    public function gremium(): Relation
+    public function committee(): Relation
     {
         return $this->belongsTo(Committee::class);
     }
@@ -51,8 +51,8 @@ class Role extends Model
     /**
      * @return HasMany
      */
-    public function roleAssertions(): Relation
+    public function users(): Relation
     {
-        return $this->hasMany(RoleAssertion::class);
+        return $this->hasMany(RoleUserRelation::class);
     }
 }

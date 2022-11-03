@@ -20,8 +20,8 @@ class DatabaseSeeder extends Seeder
 
         Realm::factory(15)
             ->has(Domain::factory(4)->sequence(
-                ['forRegistration' => true],
-                ['forRegistration' => false],
+                ['for_registration' => true],
+                ['for_registration' => false],
             ))
             ->create();
         \App\Models\User::factory(5)->create();

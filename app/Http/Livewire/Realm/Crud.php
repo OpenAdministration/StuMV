@@ -11,7 +11,7 @@ class Crud extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $sortField = '';
+    public string $sortField = 'uid';
     public string $sortDirection = 'asc';
 
     public bool $showEditModal = false;

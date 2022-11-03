@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 /**
  * @property integer $id
  * @property string $realm_uid
- * @property boolean $activeMail
- * @property boolean $forRegistration
+ * @property boolean $active_mail
+ * @property boolean $for_registration
  * @property string $name
  * @property Realm $realm
  */
@@ -28,7 +28,7 @@ class Domain extends Model
     /**
      * @var array
      */
-    protected $fillable = ['realm_uid', 'activeMail', 'forRegistration', 'name'];
+    protected $fillable = ['name', 'realm_uid', 'active_mail', 'for_registration'];
 
     /**
      * @return BelongsTo

@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 /**
  * @property integer $id
  * @property string $realm_uid
- * @property integer $parent_gremium_id
+ * @property integer $parent_committee_id
  * @property string $name
  * @property Committee $parentCommittee
  * @property Realm $realm
@@ -24,19 +24,19 @@ class Committee extends Model
      *
      * @var string
      */
-    protected $table = 'gremium';
+    protected $table = 'committee';
 
     /**
      * @var array
      */
-    protected $fillable = ['realm_uid', 'parent_gremium_id', 'name'];
+    protected $fillable = ['realm_uid', 'parent_committee_id', 'name'];
 
     /**
      * @return BelongsTo
      */
     public function parentCommittee(): Relation
     {
-        return $this->belongsTo(__CLASS__, 'parent_gremium_id');
+        return $this->belongsTo(__CLASS__, 'parent_committee_id');
     }
 
     /**

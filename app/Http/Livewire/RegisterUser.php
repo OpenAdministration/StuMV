@@ -32,7 +32,7 @@ class RegisterUser extends Component
             'user.email' => [
                 'required', 'string', 'email', 'max:255', 'unique:App\Models\User,email',
             ],
-            'domain' => [Rule::exists(Domain::class, 'name')->where('forRegistration', true)],
+            'domain' => [Rule::exists(Domain::class, 'name')->where('for_registration', true)],
             'password' => [
                 'required',
                 Password::min(8)->mixedCase()->numbers()->symbols(),

@@ -85,7 +85,7 @@ class Realm extends Model
      */
     public function admins(): Relation
     {
-        return $this->belongsToMany(User::class, 'realm_admin', 'realm_uid');
+        return $this->belongsToMany(User::class, 'realm_admin_relation', 'realm_uid');
     }
 
     /**
@@ -93,6 +93,6 @@ class Realm extends Model
      */
     public function members(): Relation
     {
-        return $this->belongsToMany(User::class, 'realm_assertion', 'realm_uid');
+        return $this->belongsToMany(User::class, 'realm_user_relation', 'realm_uid');
     }
 }

@@ -17,7 +17,7 @@ class DomainFactory extends Factory
     public function definition()
     {
         return [
-            'forRegistration' => true,
+            'for_registration' => true,
             'name' => $this->faker->unique()->domainName(),
         ];
     }
@@ -26,7 +26,7 @@ class DomainFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'forRegistration' => false,
+                'for_registration' => false,
             ];
         });
     }

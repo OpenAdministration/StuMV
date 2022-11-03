@@ -43,6 +43,6 @@ class Group extends Model
      */
     public function roles(): Relation
     {
-        return $this->belongsToMany(Role::class, 'group_assertion');
+        return $this->belongsToMany(Role::class, 'group_role_relation');
     }
 }
