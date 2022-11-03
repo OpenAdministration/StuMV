@@ -7,9 +7,9 @@ return [
     | Validierung Sprachzeilen
     |--------------------------------------------------------------------------
     |
-    | Die folgenden Sprachzeilen enthalten die Standard-Fehlermeldungen, die von 
-    | der Validator-Klasse verwendet werden. Einige dieser Regeln haben mehrere 
-    | Versionen wie die Größenregeln. Es steht Ihnen frei, jede dieser Meldungen 
+    | Die folgenden Sprachzeilen enthalten die Standard-Fehlermeldungen, die von
+    | der Validator-Klasse verwendet werden. Einige dieser Regeln haben mehrere
+    | Versionen wie die Größenregeln. Es steht Ihnen frei, jede dieser Meldungen
     | hier zu ändern.
     |
     */
@@ -87,18 +87,18 @@ return [
     ],
     'mac_address' => 'Das :attribute muss eine gültige MAC-Adresse sein.',
     'max' => [
-        'array' => 'Das :attribute muss :value Elemente oder mehr haben.',
-        'file' => 'Das :attribute muss größer oder gleich dem :value kilobytes sein.',
-        'numeric' => 'Das :attribute muss größer oder gleich :value sein.',
-        'string' => 'Das :attribute muss größer oder gleich :value Zeichen sein.',
+        'array' => 'Das :attribute muss :max Elemente oder mehr haben.',
+        'file' => 'Das :attribute muss größer oder gleich dem :max kilobytes sein.',
+        'numeric' => 'Das :attribute muss größer oder gleich :max sein.',
+        'string' => 'Das :attribute muss größer oder gleich :max Zeichen sein.',
     ],
     'mimes' => 'Das :attribute muss eine Datei vom Typ: :value sein.',
     'mimetypes' => 'Das :attribute muss eine Datei vom Typ: :values sein.',
     'min' => [
-        'array' => 'Das :attribute muss :value Elemente oder mehr haben.',
-        'file' => 'Das :attribute muss größer oder gleich dem :value kilobytes sein.',
-        'numeric' => 'Das :attribute muss größer oder gleich :value sein.',
-        'string' => 'Das :attribute muss größer oder gleich :value Zeichen sein.',
+        'array' => 'Das :attribute muss :min Elemente oder mehr haben.',
+        'file' => 'Das :attribute muss größer oder gleich dem :min kilobytes sein.',
+        'numeric' => 'Das :attribute muss größer oder gleich :min sein.',
+        'string' => 'Das :attribute muss größer oder gleich :min Zeichen sein.',
     ],
     'multiple_of' => 'Das :attribut muss ein Vielfaches von :value sein.',
     'not_in' => 'Das ausgewählte :attribut ist ungültig.',
@@ -126,10 +126,10 @@ return [
     'required_without_all' => 'Das :attribute Feld ist erforderlich, wenn keines der :values vorhanden ist.',
     'same' => 'Das :attribute und :other müssen übereinstimmen.',
     'size' => [
-        'array' => 'Das :attribute muss :value Elemente oder mehr haben.',
-        'file' => 'Das :attribute muss größer oder gleich dem :value kilobytes sein.',
-        'numeric' => 'Das :attribute muss größer oder gleich :value sein.',
-        'string' => 'Das :attribute muss größer oder gleich :value Zeichen sein.',
+        'array' => 'Das :attribute muss :ize Elemente oder mehr haben.',
+        'file' => 'Das :attribute muss größer oder gleich dem :size kilobytes sein.',
+        'numeric' => 'Das :attribute muss größer oder gleich :size sein.',
+        'string' => 'Das :attribute muss größer oder gleich :size Zeichen sein.',
     ],
     'starts_with' => 'Das :attribute muss mit einer der folgenden Angaben beginnen: :values.',
     'string' => 'Das :attribute muss ein String sein.',
@@ -144,9 +144,9 @@ return [
     | Benutzerdefinierte Validierungssprachenzeilen
     |--------------------------------------------------------------------------
     |
-    |  Hier können Sie benutzerdefinierte Validierungsmeldungen für Attribute 
-    | angeben, indem Sie die Konvention "attribute.rule" zur Benennung der Zeilen 
-    | verwenden. Dies macht es schnell möglich eine spezifische Sprachzeile für 
+    |  Hier können Sie benutzerdefinierte Validierungsmeldungen für Attribute
+    | angeben, indem Sie die Konvention "attribute.rule" zur Benennung der Zeilen
+    | verwenden. Dies macht es schnell möglich eine spezifische Sprachzeile für
     | eine bestimmte Attributregel anzugeben.
     |
     */
@@ -162,7 +162,7 @@ return [
     | Benutzerdefinierte Validierungsattribute
     |--------------------------------------------------------------------------
     |
-    | Die folgenden Sprachzeilen werden verwendet, um unseren Attributplatzhalter 
+    | Die folgenden Sprachzeilen werden verwendet, um unseren Attributplatzhalter
     | durch etwas Lesefreundlicheres zu ersetzen, z. B. "E-Mail-Adresse" anstelle von "email". Dies hilft uns einfach, unsere Nachricht ausdrucksstärker zu machen.
     |
     */
