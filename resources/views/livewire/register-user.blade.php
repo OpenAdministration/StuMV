@@ -26,6 +26,6 @@
             <x-slot name="label">{{ __('Confirm Password') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
-        <x-button.primary class="mt-2">Submit</x-button.primary>
+        <x-button.primary type="submit" class="mt-2">Submit</x-button.primary>
     </form>
 </x-auth-card>
