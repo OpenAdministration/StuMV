@@ -22,6 +22,11 @@ Breadcrumbs::for('realms:index', function (BreadcrumbTrail $trail) {
 
 // Home > Blog > [Category]
 Breadcrumbs::for('realms:details', function (BreadcrumbTrail $trail, Realm $realm) {
-    $trail->parent('realms');
+    $trail->parent('realms:index');
     $trail->push($realm->long_name, route('realms', $realm->uid));
+});
+
+Breadcrumbs::for('groups:index', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push(__('Groups'), route('groups'));
 });

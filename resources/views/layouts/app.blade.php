@@ -19,6 +19,7 @@
             @include('layouts.navigation', ['navigation' => [
                 'dashboard' => 'Dashboard',
                 'realms' => 'Realms',
+                'groups' => __('Groups'),
             ]])
 
             <!-- Page Heading -->
