@@ -17,7 +17,6 @@ class Crud extends Component
     public bool $showEditModal = false;
     public Realm $editRealm;
     public array $rules = [
-        'editRealm.uid' => 'required',
         'editRealm.long_name' => 'required',
     ];
 
@@ -49,8 +48,8 @@ class Crud extends Component
 
     public function edit($uid): void
     {
-        $this->showEditModal = true;
         $this->editRealm = Realm::find($uid);
+        $this->showEditModal = true;
     }
 
     public function close(): void
@@ -61,12 +60,7 @@ class Crud extends Component
     public function save(): void
     {
         $this->validate();
-        if($this->editRealm->isDirty('uid')){
-            $this->addError('editRealm.uid', 'Realm Kürzel kann nicht geändert werde');
-            $this->reset('editRealm.uid');
-        }else{
-            $this->editRealm->save();
-            $this->showEditModal = false;
-        }
+        $this->editRealm->save();
+        $this->showEditModal = false;
     }
 }

@@ -43,9 +43,6 @@
                 Realm
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="editRealm.uid">
-                    <x-slot:label>{{ __('realms.shortcode') }}</x-slot:label>
-                </x-input.group>
                 <x-input.group wire:model="editRealm.long_name">
                     <x-slot:label>{{ __('Full name') }}</x-slot:label>
                 </x-input.group>
