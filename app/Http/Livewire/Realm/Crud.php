@@ -15,10 +15,17 @@ class Crud extends Component
     public string $sortDirection = 'asc';
 
     public bool $showEditModal = false;
+    public bool $showNewModal = false;
+    public bool $showDeleteModal = false;
+
     public Realm $editRealm;
-    public array $rules = [
-        'editRealm.long_name' => 'required',
-    ];
+    public Realm $newRealm;
+    public Realm $deleteRealm;
+
+    public string $editRealmOldName = '';
+    public string $deleteRealmName = '';
+
+    public array $rules = [];
 
     protected $queryString = ['search', 'sortField', 'sortDirection'];
 
@@ -48,19 +55,55 @@ class Crud extends Component
 
     public function edit($uid): void
     {
+        $this->rules = [
+            'editRealm.long_name' => 'required',
+        ];
         $this->editRealm = Realm::find($uid);
+        $this->editRealmOldName = $this->editRealm->long_name;
         $this->showEditModal = true;
+    }
+
+    public function new(): void
+    {
+        $this->rules = [
+            'newRealm.uid' => 'required|min:3|max:5',
+            'newRealm.long_name' => 'required',
+        ];
+        $this->newRealm = new Realm();
+        $this->showNewModal = true;
+    }
+
+    public function deletePrepare($uid): void
+    {
+        $this->deleteRealm = Realm::find($uid);
+        $this->deleteRealmName = $this->deleteRealm->long_name;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteCommit(): void
+    {
+        $this->deleteRealm->delete();
+        $this->showDeleteModal = false;
     }
 
     public function close(): void
     {
         $this->showEditModal = false;
+        $this->showNewModal = false;
+        $this->showDeleteModal = false;
     }
 
-    public function save(): void
+    public function saveEdit(): void
     {
         $this->validate();
         $this->editRealm->save();
         $this->showEditModal = false;
+    }
+
+    public function saveNew(): void
+    {
+        $this->validate();
+        $this->newRealm->save();
+        $this->showNewModal = false;
     }
 }
