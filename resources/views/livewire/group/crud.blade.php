@@ -22,7 +22,7 @@
                 <x-table.cell>{{ $group->realm_uid }}</x-table.cell>
                 <x-table.cell>{{ $group->name }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link class="text-red-500 hover:text-red-700" wire:click="deletePrepare('{{ $group->id }}')">{{ __('Delete') }}</x-button.link>
+                    <x-button.link-danger wire:click="deletePrepare('{{ $group->id }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
                 <x-table.cell>
                     <x-button.link wire:click="edit('{{ $group->id }}')">{{ __('Edit') }}</x-button.link>
