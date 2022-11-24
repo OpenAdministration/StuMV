@@ -48,7 +48,7 @@ class Crud extends Component
     public function render()
     {
         return view('livewire.group.crud', [
-            'groups' => Group::query()->search('name', $this->search)
+            'groups' => Group::query()->search('name', $this->search)->search('realm_uid', $this->search)
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->paginate(10),
             'realms' => Realm::all(),
