@@ -16,6 +16,7 @@
                 {{ __('Name') }}
             </x-table.heading>
             <x-table.heading/>
+            <x-table.heading/>
         </x-slot>
         @forelse($realms as $realm)
             <x-table.row>

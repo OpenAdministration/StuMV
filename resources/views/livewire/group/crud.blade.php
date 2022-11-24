@@ -16,6 +16,7 @@
                 {{ __('Name') }}
             </x-table.heading>
             <x-table.heading/>
+            <x-table.heading/>
         </x-slot>
         @forelse($groups as $group)
             <x-table.row>
