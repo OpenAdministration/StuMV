@@ -83,11 +83,10 @@
                 </x-input.group>
                 <x-select wire:model="newGroup.realm_uid" class="mt-2">
                     <x-slot:label>Realm</x-slot:label>
-                    @forelse($realms as $realm)
+                    <option value="please-select" selected="selected">{{ __('Please select') }}</option>
+                    @foreach($realms as $realm)
                         <option value="{{ $realm->uid }}">{{ $realm->long_name }} ({{ $realm->uid }})</option>
-                    @empty
-                        <option value="invalid-realm">{{ __('realms.no_realms_exist') }}</option>
-                    @endforelse
+                    @endforeach
                 </x-select>
             </x-slot:content>
             <x-slot:footer>
