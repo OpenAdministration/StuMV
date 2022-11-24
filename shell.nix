@@ -4,8 +4,8 @@ with pkgs;
 
 mkShell {
   buildInputs = [
-    php80
-    php80Packages.composer
+    php81
+    php81Packages.composer
     nodePackages.npm
     nodejs
   ];
