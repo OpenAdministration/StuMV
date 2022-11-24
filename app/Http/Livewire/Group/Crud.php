@@ -72,6 +72,7 @@ class Crud extends Component
             'newGroup.realm_uid' => 'required',
         ];
         $this->newGroup = new Group();
+        $this->newGroup->realm_uid = 'please-select';
         $this->showNewModal = true;
     }
 
