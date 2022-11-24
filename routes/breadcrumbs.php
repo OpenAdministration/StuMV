@@ -30,3 +30,8 @@ Breadcrumbs::for('groups:index', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
     $trail->push(__('Groups'), route('groups'));
 });
+
+Breadcrumbs::for('committees:index', function (BreadcrumbTrail $trail) {
+    $trail->parent('dashboard');
+    $trail->push(__('Committees'), route('committees'));
+});

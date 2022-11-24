@@ -23,6 +23,7 @@ Route::middleware(['auth'])->group(function (){
     })->name('dashboard');
     Route::get('/realms', \App\Http\Livewire\Realm\Crud::class)->name('realms');
     Route::get('/groups', \App\Http\Livewire\Group\Crud::class)->name('groups');
+    Route::get('/committees', \App\Http\Livewire\Committee\Crud::class)->name('committees');
 });
 
 

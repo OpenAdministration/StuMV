@@ -20,6 +20,7 @@
                 'dashboard' => 'Dashboard',
                 'realms' => 'Realms',
                 'groups' => __('Groups'),
+                'committees' => __('Committees'),
             ]])
 
             <!-- Page Heading -->
