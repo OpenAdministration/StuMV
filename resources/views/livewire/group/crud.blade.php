@@ -67,7 +67,7 @@
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Löschen') }}</x-button.danger>
+                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
             </x-slot:footer>
         </x-modal.confirmation>
     </form>
