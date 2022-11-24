@@ -86,6 +86,12 @@ class Crud extends Component
     public function deleteCommit(): void
     {
         $this->deleteGroup->delete();
+
+        // reset everything to prevent a 404 modal
+        unset($this->deleteGroup);
+        unset($this->newGroup);
+        unset($this->editGroup);
+
         $this->showDeleteModal = false;
     }
 

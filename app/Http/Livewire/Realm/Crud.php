@@ -83,6 +83,12 @@ class Crud extends Component
     public function deleteCommit(): void
     {
         $this->deleteRealm->delete();
+
+        // reset everything to prevent a 404 modal
+        unset($this->deleteRealm);
+        unset($this->newRealm);
+        unset($this->editRealm);
+
         $this->showDeleteModal = false;
     }
 
