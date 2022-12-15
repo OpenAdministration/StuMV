@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -45,4 +47,28 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * @return BelongsToMany
+     */
+    public function admin_realms(): Relation
+    {
+        return $this->belongsToMany(Realm::class, 'realm_admin_relation');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function realms(): Relation
+    {
+        return $this->belongsToMany(Realm::class, 'realm_user_relation');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function roles(): Relation
+    {
+        return $this->belongsToMany(Role::class, 'role_user_relation')->withPivot('from', 'until');
+    }
 }

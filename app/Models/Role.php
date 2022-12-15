@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Group;
-use App\Models\RoleUserRelation;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
@@ -49,10 +48,10 @@ class Role extends Model
     }
 
     /**
-     * @return HasMany
+     * @return BelongsToMany
      */
     public function users(): Relation
     {
-        return $this->hasMany(RoleUserRelation::class);
+        return $this->belongsToMany(User::class, 'role_user_relation')->withPivot('from', 'until');
     }
 }

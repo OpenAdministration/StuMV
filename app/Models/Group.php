@@ -35,7 +35,7 @@ class Group extends Model
      */
     public function realm(): Relation
     {
-        return $this->belongsTo(Realm::class, 'realm_uid', 'uid');
+        return $this->belongsTo(Realm::class);
     }
 
     /**

@@ -61,7 +61,7 @@ class Realm extends Model
      */
     public function domains(): Relation
     {
-        return $this->hasMany(Domain::class, 'realm_uid', 'uid');
+        return $this->hasMany(Domain::class);
     }
 
     /**
@@ -69,7 +69,7 @@ class Realm extends Model
      */
     public function committee(): Relation
     {
-        return $this->hasMany(Committee::class, 'realm_uid', 'uid');
+        return $this->hasMany(Committee::class);
     }
 
     /**
@@ -77,7 +77,7 @@ class Realm extends Model
      */
     public function groups(): Relation
     {
-        return $this->hasMany(Group::class, 'realm_uid', 'uid');
+        return $this->hasMany(Group::class);
     }
 
     /**
@@ -85,7 +85,7 @@ class Realm extends Model
      */
     public function admins(): Relation
     {
-        return $this->belongsToMany(User::class, 'realm_admin_relation', 'realm_uid');
+        return $this->belongsToMany(User::class, 'realm_admin_relation');
     }
 
     /**
@@ -93,6 +93,6 @@ class Realm extends Model
      */
     public function members(): Relation
     {
-        return $this->belongsToMany(User::class, 'realm_user_relation', 'realm_uid');
+        return $this->belongsToMany(User::class, 'realm_user_relation');
     }
 }
