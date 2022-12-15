@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('domain', function (Blueprint $table) {
             $table->id();
             $table->string('name', 128)->unique('name');
-            $table->boolean('active_mail')->default(false);
             $table->string('realm_uid', 32);
             $table->boolean('for_registration');
             $table->timestamps();
