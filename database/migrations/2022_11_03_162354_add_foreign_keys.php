@@ -21,23 +21,23 @@ return new class extends Migration
             $table->foreign(['realm_uid'], 'fk_domain_realm')->references(['uid'])->on('realm')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
         Schema::table('group_role_relation', function (Blueprint $table) {
-            $table->foreign(['group_id'], 'fk_group_role_group')->references(['id'])->on('group');
-            $table->foreign(['role_id'], 'fk_group_role_role')->references(['id'])->on('role');
+            $table->foreign(['group_id'], 'fk_group_role_group')->references(['id'])->on('group')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['role_id'], 'fk_group_role_role')->references(['id'])->on('role')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
         Schema::table('group', function (Blueprint $table) {
-            $table->foreign(['realm_uid'], 'fk_group_realm')->references(['uid'])->on('realm');
+            $table->foreign(['realm_uid'], 'fk_group_realm')->references(['uid'])->on('realm')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
         Schema::table('realm_admin_relation', function (Blueprint $table) {
-            $table->foreign(['user_id'], 'fk_realm_admin_user')->references(['id'])->on('user');
-            $table->foreign(['realm_uid'], 'fk_realm_admin_realm')->references(['uid'])->on('realm');
+            $table->foreign(['user_id'], 'fk_realm_admin_user')->references(['id'])->on('user')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['realm_uid'], 'fk_realm_admin_realm')->references(['uid'])->on('realm')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
         Schema::table('realm_user_relation', function (Blueprint $table) {
-            $table->foreign(['user_id'], 'fk_realm_user_user')->references(['id'])->on('user');
-            $table->foreign(['realm_uid'], 'fk_realm_user_realm')->references(['uid'])->on('realm');
+            $table->foreign(['user_id'], 'fk_realm_user_user')->references(['id'])->on('user')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['realm_uid'], 'fk_realm_user_realm')->references(['uid'])->on('realm')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
         Schema::table('role_user_relation', function (Blueprint $table) {
-            $table->foreign(['user_id'], 'fk_role_user_user')->references(['id'])->on('user');
-            $table->foreign(['role_id'], 'fk_role_user_role')->references(['id'])->on('role');
+            $table->foreign(['user_id'], 'fk_role_user_user')->references(['id'])->on('user')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign(['role_id'], 'fk_role_user_role')->references(['id'])->on('role')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
         Schema::table('role', function (Blueprint $table) {
             $table->foreign(['committee_id'], 'fk_role_committee')->references(['id'])->on('committee')->onUpdate('CASCADE')->onDelete('CASCADE');
