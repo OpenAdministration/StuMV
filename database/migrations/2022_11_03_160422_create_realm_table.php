@@ -14,8 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('realm', function (Blueprint $table) {
-            $table->id();
-            $table->string('uid', 32)->unique('uid');
+            $table->string('uid', 32)->primary();
             $table->string('long_name', 128);
             $table->timestamps();
         });
