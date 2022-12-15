@@ -21,6 +21,7 @@
             </x-table.heading>
             <x-table.heading/>
             <x-table.heading/>
+            <x-table.heading/>
         </x-slot>
         @forelse($committees as $committee)
             <x-table.row>
@@ -38,6 +39,9 @@
                 </x-table.cell>
                 <x-table.cell>
                     <x-button.link wire:click="edit('{{ $committee->id }}')">{{ __('Edit') }}</x-button.link>
+                </x-table.cell>
+                <x-table.cell>
+                    <x-link href="{{ route('committees.detail', $committee->id) }}">{{ __('Details') }}</x-link>
                 </x-table.cell>
             </x-table.row>
         @empty

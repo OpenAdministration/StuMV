@@ -8,4 +8,5 @@ return [
     'delete_warning' => 'Soll das Gremium :name wirklich gelöscht werden? Dies löscht auch sämtliche untergeordneten Gremien dieses Gremiums.',
     'edit' => 'Gremium :name bearbeiten',
     'parent_committee' => 'Übergeordnetes Gremium',
+    'details_heading' => 'Details zum Gremium :name (:realm)',
 ];

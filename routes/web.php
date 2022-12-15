@@ -24,6 +24,7 @@ Route::middleware(['auth'])->group(function (){
     Route::get('/realms', \App\Http\Livewire\Realm\Crud::class)->name('realms');
     Route::get('/groups', \App\Http\Livewire\Group\Crud::class)->name('groups');
     Route::get('/committees', \App\Http\Livewire\Committee\Crud::class)->name('committees');
+    Route::get('/committees/{id}', \App\Http\Livewire\Committee\Detail::class)->name('committees.detail');
 });
 
 
