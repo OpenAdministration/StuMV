@@ -41,7 +41,7 @@
                     <x-button.link wire:click="edit('{{ $committee->id }}')">{{ __('Edit') }}</x-button.link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-link href="{{ route('committees.detail', $committee->id) }}">{{ __('Details') }}</x-link>
+                    <x-link href="{{ route('committees.roles', $committee->id) }}">{{ __('Roles') }}</x-link>
                 </x-table.cell>
             </x-table.row>
         @empty

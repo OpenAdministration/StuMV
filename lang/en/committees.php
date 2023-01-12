@@ -8,5 +8,5 @@ return [
     'delete_warning' => 'Do you really want to delete the committee :name? This will also delete all subordinate committees of this body.',
     'edit' => 'Edit committee :name',
     'parent_committee' => 'Parent committee',
-    'details_heading' => 'Details of the committee :name (:realm)',
+    'roles_heading' => 'Roles of the committee :name (:realm)',
 ];

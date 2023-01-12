@@ -24,5 +24,8 @@
     "Delete": "Löschen",
     "Committees": "Gremien",
     "None": "Keines",
-    "Please select": "Bitte auswählen"
+    "Please select": "Bitte auswählen",
+    "Roles": "Rollen",
+    "From": "Von",
+    "Until": "Bis"
 }
