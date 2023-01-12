@@ -30,12 +30,6 @@ class Crud extends Component
 
     protected $queryString = ['search', 'sortField', 'sortDirection'];
 
-    /*
-     * TODOs:
-     *   - Prevent parent committee from another realm
-     */
-
-
     public function sortBy($field){
         if($this->sortField === $field){
             // toggle direction
@@ -126,7 +120,7 @@ class Crud extends Component
 
             $parentCommittee = Committee::find($this->editCommittee->parent_committee_id);
 
-            if (empty($parentCommittee)) {
+            if (empty($parentCommittee) || $parentCommittee->realm_uid != $this->editCommittee->realm_uid) {
                 $this->addError('editCommittee.parent_committee_id', 'Ungültiges übergeordnetes Gremium!');
                 return;
             }
@@ -145,7 +139,7 @@ class Crud extends Component
         } else {
             $parentCommittee = Committee::find($this->newCommittee->parent_committee_id);
 
-            if (empty($parentCommittee)) {
+            if (empty($parentCommittee) || $parentCommittee->realm_uid != $this->newCommittee->realm_uid) {
                 $this->addError('newCommittee.parent_committee_id', 'Ungültiges übergeordnetes Gremium!');
 
                 // reset both selects because otherwise livewire does not remember the value of the other one
