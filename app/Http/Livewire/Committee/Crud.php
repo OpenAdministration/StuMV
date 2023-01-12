@@ -52,7 +52,6 @@ class Crud extends Component
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->paginate(10),
             'realms' => Realm::all(),
-            'all_committees' => Committee::all(),
         ])->layout('layouts.app', ['headline' => __('Committees')]);
     }
 

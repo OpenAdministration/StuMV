@@ -69,7 +69,7 @@
                     <x-slot:label>{{ __('committees.parent_committee') }}</x-slot:label>
                     <option value="please-select" selected="selected">{{ __('Please select') }}</option>
                     <option value="null">{{ __('None') }}</option>
-                    @foreach($all_committees->where('realm_uid', (empty($editCommittee->realm_uid) || empty($editCommittee)) ? 'null' : $editCommittee->realm_uid)->where('id', '!=', (empty($editCommittee->id) || empty($editCommittee)) ? 'null' : $editCommittee->id) as $committee)
+                    @foreach($editCommittee?->realm->committees()->where('id', '!=', $editCommittee->id)->get() ?? array() as $committee)
                         <option value="{{ $committee->id }}">{{ $committee->name }} ({{ $committee->realm_uid }})</option>
                     @endforeach
                 </x-select>
@@ -116,7 +116,7 @@
                     <x-slot:label>{{ __('committees.parent_committee') }}</x-slot:label>
                     <option value="please-select" selected="selected">{{ __('Please select') }}</option>
                     <option value="null">{{ __('None') }}</option>
-                    @foreach($all_committees->where('realm_uid', (empty($newCommittee->realm_uid) || empty($newCommittee)) ? 'null' : $newCommittee->realm_uid)->where('id', '!=', (empty($newCommittee->id) || empty($newCommittee)) ? 'null' : $newCommittee->id) as $committee)
+                    @foreach($newCommittee?->realm?->committees()->where('id', '!=', $newCommittee->id)->get() ?? array() as $committee)
                         <option value="{{ $committee->id }}">{{ $committee->name }} ({{ $committee->realm_uid }})</option>
                     @endforeach
                 </x-select>
