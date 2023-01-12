@@ -67,7 +67,7 @@ class Realm extends Model
     /**
      * @return HasMany
      */
-    public function committee(): Relation
+    public function committees(): Relation
     {
         return $this->hasMany(Committee::class);
     }
