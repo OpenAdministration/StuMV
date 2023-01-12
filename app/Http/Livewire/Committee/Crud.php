@@ -30,6 +30,12 @@ class Crud extends Component
 
     protected $queryString = ['search', 'sortField', 'sortDirection'];
 
+    /*
+     * TODOs:
+     *   - Prevent parent committee from another realm
+     */
+
+
     public function sortBy($field){
         if($this->sortField === $field){
             // toggle direction
