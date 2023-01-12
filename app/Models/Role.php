@@ -48,10 +48,10 @@ class Role extends Model
     }
 
     /**
-     * @return BelongsToMany
+     * @return HasMany
      */
-    public function users(): Relation
+    public function members(): Relation
     {
-        return $this->belongsToMany(User::class, 'role_user_relation')->withPivot('from', 'until');
+        return $this->hasMany(RoleUserRelation::class, 'role_id');
     }
 }
