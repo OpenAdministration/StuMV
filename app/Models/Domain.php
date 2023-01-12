@@ -28,7 +28,7 @@ class Domain extends Model
     /**
      * @var array
      */
-    protected $fillable = ['name', 'realm_uid', 'active_mail', 'for_registration'];
+    protected $fillable = ['name', 'realm_uid', 'for_registration'];
 
     /**
      * @return BelongsTo
