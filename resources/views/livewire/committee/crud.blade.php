@@ -15,7 +15,7 @@
                 {{ __('Name') }}
             </x-table.heading>
             <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
+                sortable wire:click="sortBy('parent_committee_id')" :direction="$sortField === 'parent_committee_id' ? $sortDirection : null"
             >
                 {{ __('committees.parent_committee') }}
             </x-table.heading>
