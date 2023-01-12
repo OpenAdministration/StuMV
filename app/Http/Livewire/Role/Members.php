@@ -27,34 +27,15 @@ class Members extends Component {
 
     public array $rules = [];
 
-    protected $queryString = ['search', 'sortField', 'sortDirection'];
-
     /*
      * TODOs:
      *   - Permission check if the role belongs to a controlled realm
-     *   - Fix sorting
-     *   - Add search
      *   - Add datepickers
      *   - Add check that from is earlier than until
      */
 
     public function mount($id) {
         $this->role = Role::findOrFail($id);
-    }
-
-    public function sortBy($field){
-        if($this->sortField === $field){
-            // toggle direction
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
-            $this->sortDirection = 'asc';
-            $this->sortField = $field;
-        }
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
     }
 
     public function render() {

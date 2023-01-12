@@ -5,19 +5,13 @@
     </div>
     <x-table>
         <x-slot name="head">
-            <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
-            >
+            <x-table.heading class="text-left">
                 {{ __('Name') }}
             </x-table.heading>
-            <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
-            >
+            <x-table.heading class="text-left">
                 {{ __('From') }}
             </x-table.heading>
-            <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
-            >
+            <x-table.heading class="text-left">
                 {{ __('Until') }}
             </x-table.heading>
             <x-table.heading/>
