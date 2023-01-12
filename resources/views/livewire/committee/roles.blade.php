@@ -11,9 +11,7 @@
             >
                 {{ __('Name') }}
             </x-table.heading>
-            <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
-            >
+            <x-table.heading  class="text-left">
                 {{ __('roles.members') }}
             </x-table.heading>
             <x-table.heading/>
