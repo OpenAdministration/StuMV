@@ -4,7 +4,10 @@
 return [
     'members' => 'Mitglieder',
     'no_members' => 'Keine',
+    'no_members_found' => 'Keine Mitglieder gefunden',
+    'no_roles_found' => 'Keine Rollen gefunden',
     'search' => 'Durchsuche Rollen',
+    'search_members' => 'Durchsuche Mitglieder',
     'manage_members' => 'Mitglieder verwalten',
     'members_heading' => 'Mitglieder der Rolle :name (:committee) verwalten',
     'new' => 'Neue Rolle anlegen',

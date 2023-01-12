@@ -4,7 +4,10 @@
 return [
     'members' => 'Members',
     'no_members' => 'None',
+    'no_members_found' => 'No members found',
+    'no_roles_found' => 'No roles found',
     'search' => 'Search roles',
+    'search_members' => 'Search members',
     'manage_members' => 'Manage members',
     'members_heading' => 'Manage members of the role :name (:committee)',
     'new' => 'Create new role',
