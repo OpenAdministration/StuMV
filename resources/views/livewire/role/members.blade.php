@@ -1,25 +1,32 @@
 <div class="flex-col space-y-4">
     {{ Breadcrumbs::render('roles:members', $role) }}
-    <div class="float-right">
+    <div class="flex justify-between">
+        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('roles.search_members') }}"></x-input>
         <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
     </div>
     <x-table>
         <x-slot name="head">
-            <x-table.heading class="text-left">
+            <x-table.heading
+                sortable wire:click="sortBy('full_name')" :direction="$sortField === 'full_name' ? $sortDirection : null"
+            >
                 {{ __('Name') }}
             </x-table.heading>
-            <x-table.heading class="text-left">
+            <x-table.heading
+                sortable wire:click="sortBy('from')" :direction="$sortField === 'from' ? $sortDirection : null"
+            >
                 {{ __('From') }}
             </x-table.heading>
-            <x-table.heading class="text-left">
+            <x-table.heading
+                sortable wire:click="sortBy('until')" :direction="$sortField === 'until' ? $sortDirection : null"
+            >
                 {{ __('Until') }}
             </x-table.heading>
             <x-table.heading/>
             <x-table.heading/>
         </x-slot>
-        @forelse($role->members as $role_members_rel)
+        @forelse($role_members as $role_members_rel)
             <x-table.row>
-                <x-table.cell>{{ $role_members_rel->user->full_name }}</x-table.cell>
+                <x-table.cell>{{ $role_members_rel->full_name }}</x-table.cell>
                 <x-table.cell>{{ $role_members_rel->from }}</x-table.cell>
                 <x-table.cell>{{ $role_members_rel->until }}</x-table.cell>
                 <x-table.cell>
@@ -39,6 +46,7 @@
             </x-table.row>
         @endforelse
     </x-table>
+    {{ $role_members->links() }}
 
     <form wire:submit.prevent="saveNew">
         <x-modal.dialog wire:model.defer="showNewModal">

@@ -6,10 +6,14 @@ use App\Models\Role;
 use App\Models\RoleUserRelation;
 use App\Models\User;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Members extends Component {
+
+    use WithPagination;
+
     public string $search = '';
-    public string $sortField = 'name';
+    public string $sortField = 'full_name';
     public string $sortDirection = 'asc';
 
     public Role $role;
@@ -27,6 +31,8 @@ class Members extends Component {
 
     public array $rules = [];
 
+    protected $queryString = ['search', 'sortField', 'sortDirection'];
+
     /*
      * TODOs:
      *   - Permission check if the role belongs to a controlled realm
@@ -38,10 +44,31 @@ class Members extends Component {
         $this->role = Role::findOrFail($id);
     }
 
+    public function sortBy($field){
+        if($this->sortField === $field){
+            // toggle direction
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        }else{
+            $this->sortDirection = 'asc';
+            $this->sortField = $field;
+        }
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function render() {
         return view(
             'livewire.role.members', [
                 'role' => $this->role,
+                'role_members' => RoleUserRelation::join('user', 'user_id', '=', 'user.id')
+                    ->select('role_user_relation.*', 'user.*', 'role_user_relation.id as id')
+                    ->search('user.full_name', $this->search)
+                    ->orderBy($this->sortField, $this->sortDirection)
+                    ->where('role_id', $this->role->id)
+                    ->paginate(10),
                 'realm_members' => $this->role->committee->realm->members,
             ]
         )->layout('layouts.app', [
