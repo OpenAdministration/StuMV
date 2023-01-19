@@ -132,7 +132,6 @@ class Roles extends Component {
         $this->showEditModal = false;
         $this->showNewModal = false;
         $this->showDeleteModal = false;
-        $this->showNewMemberModal = false;
     }
 
     public function saveEdit(): void

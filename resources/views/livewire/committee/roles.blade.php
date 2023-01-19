@@ -54,33 +54,6 @@
     </x-table>
     {{ $roles->links() }}
 
-    <form wire:submit.prevent="saveNewMember">
-        <x-modal.dialog wire:model.defer="showNewMemberModal">
-            <x-slot:title>
-                {{ __('roles.new_member') }}
-            </x-slot:title>
-            <x-slot:content>
-                <x-select wire:model="newMemberId" class="mt-2">
-                    <x-slot:label>{{ __('roles.new_member_label') }}</x-slot:label>
-                    <option value="-1" selected="selected">{{ __('Please select') }}</option>
-                    @foreach($realm_members as $realm_member)
-                        <option value="{{ $realm_member->id }}">{{ $realm_member->full_name }} ({{ $realm_member->username }})</option>
-                    @endforeach
-                </x-select>
-                <x-input.group wire:model="newMemberFrom">
-                    <x-slot:label>{{ __('From') }}</x-slot:label>
-                </x-input.group>
-                <x-input.group wire:model="newMemberUntil">
-                    <x-slot:label>{{ __('Until') }}</x-slot:label>
-                </x-input.group>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Save') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.dialog>
-    </form>
-
     <form wire:submit.prevent="saveEdit">
         <x-modal.dialog wire:model.defer="showEditModal">
             <x-slot:title>
