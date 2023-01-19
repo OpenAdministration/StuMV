@@ -2,6 +2,7 @@
 
 // Note: Laravel will automatically resolve `Breadcrumbs::` without
 // this import. This is nice for IDE syntax and refactoring.
+use App\Models\Group;
 use App\Models\Realm;
 use App\Models\Committee;
 use App\Models\Role;
@@ -22,9 +23,24 @@ Breadcrumbs::for('realms:index', function (BreadcrumbTrail $trail) {
     $trail->push('Realms', route('realms'));
 });
 
+Breadcrumbs::for('realms:members', function (BreadcrumbTrail $trail, Realm $realm) {
+    $trail->parent('realms:index');
+    $trail->push('Realm ' . $realm->long_name . ' (' . $realm->uid . '): ' . __('Members'), route('realms.members', $realm->uid));
+});
+
+Breadcrumbs::for('realms:admins', function (BreadcrumbTrail $trail, Realm $realm) {
+    $trail->parent('realms:index');
+    $trail->push('Realm ' . $realm->long_name . ' (' . $realm->uid . '): ' . __('Admins'), route('realms.members', $realm->uid));
+});
+
 Breadcrumbs::for('groups:index', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
     $trail->push(__('Groups'), route('groups'));
+});
+
+Breadcrumbs::for('groups:roles', function (BreadcrumbTrail $trail, Group $group) {
+    $trail->parent('groups:index');
+    $trail->push($group->name . ' (' . $group->realm->uid . ')', route('groups.roles', $group->id));
 });
 
 Breadcrumbs::for('committees:index', function (BreadcrumbTrail $trail) {

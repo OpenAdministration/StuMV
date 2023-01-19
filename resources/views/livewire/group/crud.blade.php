@@ -11,10 +11,10 @@
             </x-table.heading>
             <x-table.heading
                 sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
-                class="w-full"
             >
                 {{ __('Name') }}
             </x-table.heading>
+            <x-table.heading/>
             <x-table.heading/>
             <x-table.heading/>
         </x-slot>
@@ -22,6 +22,9 @@
             <x-table.row>
                 <x-table.cell>{{ $group->realm_uid }}</x-table.cell>
                 <x-table.cell>{{ $group->name }}</x-table.cell>
+                <x-table.cell>
+                    <x-link href="{{ route('groups.roles', $group->id) }}">{{ __('groups.manage_roles') }}</x-link>
+                </x-table.cell>
                 <x-table.cell>
                     <x-button.link-danger wire:click="deletePrepare('{{ $group->id }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
@@ -31,7 +34,7 @@
             </x-table.row>
         @empty
             <x-table.row>
-                <x-table.cell colspan="3">
+                <x-table.cell colspan="5">
                     <div class="flex justify-center item-center">
                         <span class="text-gray-400 text-xl py-2 font-medium">{{ __('groups.no_groups_found') }}</span>
                     </div>
