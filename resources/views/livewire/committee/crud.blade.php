@@ -35,18 +35,18 @@
                     @endif
                 </x-table.cell>
                 <x-table.cell>
+                    <x-link href="{{ route('committees.roles', $committee->id) }}">{{ __('committees.manage_roles') }}</x-link>
+                </x-table.cell>
+                <x-table.cell>
                     <x-button.link-danger wire:click="deletePrepare('{{ $committee->id }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
                 <x-table.cell>
                     <x-button.link wire:click="edit('{{ $committee->id }}')">{{ __('Edit') }}</x-button.link>
                 </x-table.cell>
-                <x-table.cell>
-                    <x-link href="{{ route('committees.roles', $committee->id) }}">{{ __('Roles') }}</x-link>
-                </x-table.cell>
             </x-table.row>
         @empty
             <x-table.row>
-                <x-table.cell colspan="3">
+                <x-table.cell colspan="6">
                     <div class="flex justify-center item-center">
                         <span class="text-gray-400 text-xl py-2 font-medium">{{ __('committees.no_committees_found') }}</span>
                     </div>

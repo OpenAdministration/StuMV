@@ -9,4 +9,5 @@ return [
     'edit' => 'Gremium :name bearbeiten',
     'parent_committee' => 'Übergeordnetes Gremium',
     'roles_heading' => 'Rollen des Gremiums :name (:realm)',
+    'manage_roles' => 'Rollen verwalten',
 ];

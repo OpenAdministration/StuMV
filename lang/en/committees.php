@@ -9,4 +9,5 @@ return [
     'edit' => 'Edit committee :name',
     'parent_committee' => 'Parent committee',
     'roles_heading' => 'Roles of the committee :name (:realm)',
+    'manage_roles' => 'Manage roles',
 ];
