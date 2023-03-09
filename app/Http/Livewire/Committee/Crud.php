@@ -4,11 +4,16 @@ namespace App\Http\Livewire\Committee;
 
 use App\Models\Realm;
 use App\Models\Committee;
+use App\Policies\CommitteePolicy;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Crud extends Component
 {
+    use AuthorizesRequests;
     use WithPagination;
 
     public string $search = '';
@@ -47,11 +52,25 @@ class Crud extends Component
 
     public function render()
     {
-        return view('livewire.committee.crud', [
-            'committees' => Committee::query()->search('name', $this->search)->search('realm_uid', $this->search)
+        $user = Auth::user();
+
+        if ($user->is_superuser) {
+            $committees = Committee::query()->search('name', $this->search)->search('realm_uid', $this->search)
                 ->orderBy($this->sortField, $this->sortDirection)
-                ->paginate(10),
-            'realms' => Realm::all(),
+                ->paginate(10);
+            $realms = Realm::all();
+        } else {
+            $committees = Committee::query()->search('name', $this->search)
+                ->whereIn('realm_uid', $user->admin_realms->modelKeys())
+                ->search('realm_uid', $this->search)
+                ->orderBy($this->sortField, $this->sortDirection)
+                ->paginate(10);
+            $realms = $user->admin_realms()->get();
+        }
+
+        return view('livewire.committee.crud', [
+            'committees' => $committees,
+            'realms' => $realms,
         ])->layout('layouts.app', ['headline' => __('Committees')]);
     }
 
@@ -88,6 +107,7 @@ class Crud extends Component
 
     public function deleteCommit(): void
     {
+        $this->authorize('delete', $this->deleteCommittee);
         $this->deleteCommittee->delete();
 
         // reset everything to prevent a 404 modal
@@ -125,6 +145,8 @@ class Crud extends Component
             }
         }
 
+        $this->authorize('update', $this->editCommittee);
+
         $this->editCommittee->save();
         $this->showEditModal = false;
     }
@@ -160,6 +182,8 @@ class Crud extends Component
 
             return;
         }
+
+        $this->authorize('create', [Committee::class, $committeeRealm]);
 
         $this->newCommittee->save();
         $this->showNewModal = false;

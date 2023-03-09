@@ -16,12 +16,19 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation', ['navigation' => [
-                'dashboard' => 'Dashboard',
-                'realms' => 'Realms',
-                'groups' => __('Groups'),
-                'committees' => __('Committees'),
-            ]])
+            @include('layouts.navigation', ['navigation' =>
+                array_merge([
+                    'dashboard' => 'Dashboard',
+                ],
+                (Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
+                    'committees' => __('Committees'),
+                ] : [],
+                (Auth::user()->is_superuser) ? [
+                    'realms' => 'Realms',
+                    'groups' => __('Groups'),
+                ] : []
+                )
+            ])
 
             <!-- Page Heading -->
             <header class="bg-white shadow">
