@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Role;
 use App\Models\Role;
 use App\Models\RoleUserRelation;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -42,6 +43,7 @@ class Members extends Component {
 
     public function mount($id) {
         $this->role = Role::findOrFail($id);
+        if(Auth::user()->cannot('view', $this->role->committee)) abort(403);
     }
 
     public function sortBy($field){

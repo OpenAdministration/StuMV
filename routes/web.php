@@ -24,8 +24,9 @@ Route::middleware(['auth'])->group(function (){
     Route::get('/committees', \App\Http\Livewire\Committee\Crud::class)->name('committees')
         ->can('viewAny', '\App\Models\Committee');
     Route::get('/committees/{id}', \App\Http\Livewire\Committee\Roles::class)->name('committees.roles')
-        ->can('viewAny', '\App\Models\Committee');;
-    Route::get('/roles/{id}', \App\Http\Livewire\Role\Members::class)->name('roles.members');
+        ->can('viewAny', '\App\Models\Committee');
+    Route::get('/roles/{id}', \App\Http\Livewire\Role\Members::class)->name('roles.members')
+        ->can('viewAny', '\App\Models\Committee');
 });
 
 Route::middleware(['auth', 'superuser'])->group(function (){

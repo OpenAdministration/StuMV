@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Committee;
 
 use App\Models\Committee;
 use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -40,6 +41,7 @@ class Roles extends Component {
 
     public function mount($id) {
         $this->committee = Committee::findOrFail($id);
+        if(Auth::user()->cannot('view', $this->committee)) abort(403);
     }
 
     public function sortBy($field){
