@@ -13,10 +13,13 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      *
-     * @return \Illuminate\View\View
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function create()
     {
+        if(!Auth::guest()){
+            return redirect(RouteServiceProvider::HOME);
+        }
         return view('auth.login');
     }
 

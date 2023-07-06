@@ -17,9 +17,9 @@
 
             <!-- Email Address -->
             <div>
-                <x-label for="email" :value="__('Email')" />
+                <x-label for="uid" :value="__('Username')" />
 
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+                <x-input id="uid" class="block mt-1 w-full" type="text" name="uid" :value="old('uid')" required autofocus />
             </div>
 
             <!-- Password -->

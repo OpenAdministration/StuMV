@@ -2,23 +2,22 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\Domain;
-use App\Models\User;
+use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Illuminate\Validation\Rules\Password;
-use Mockery\Generator\StringManipulation\Pass\Pass;
 
 class RegisterUser extends Component
 {
-    public User $user;
+    //public User $user;
 
-    public string $domain = '';
+    public string $email = '';
+    public string $name = '';
+    public string $username = '';
+
+    private string $domain = '';
 
     /** extra, so password can stay hidden in $user */
     public string $password = '';
@@ -27,6 +26,16 @@ class RegisterUser extends Component
     protected function rules() : array
     {
         return [
+            'email' => ['required', 'email'],
+            'name' => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:255'],
+            'password' => [
+                'required',
+                Password::min(8)->mixedCase()->numbers()->symbols(),
+                'confirmed',
+            ],
+        ];
+        /*[
             'user.full_name' => ['required', 'string', 'max:255'],
             'user.username' => ['required', 'string', 'max:255', 'unique:App\Models\User,username', 'regex:/[a-z_\.]/i' ],
             'user.email' => [
@@ -38,7 +47,7 @@ class RegisterUser extends Component
                 Password::min(8)->mixedCase()->numbers()->symbols(),
                 'confirmed',
             ],
-        ];
+        ];*/
     }
 
     /**
@@ -47,13 +56,13 @@ class RegisterUser extends Component
      */
     public function updatedUserEmail(): void
     {
-        $split = explode('@', $this->user->email);
+        $split = explode('@', $this->email);
         $this->domain = $split[1] ?? 'false';
         $this->validateOnly('email');
-        $this->validateOnly('domain');
+        //$this->validateOnly('domain');
         // if mail is valid try to prefill the fullName of the user
-        $this->user->full_name = ucwords(str_replace(['-', '_', '.'], ' ', $split[0]));
-        $this->validateOnly('user.full_name');
+        $this->name = ucwords(str_replace(['-', '_', '.'], ' ', $split[0]));
+        $this->validateOnly('name');
 
     }
 
@@ -69,14 +78,17 @@ class RegisterUser extends Component
 
     public function mount() : void
     {
-        $this->user = new User();
     }
 
     public function store(){
 
         $this->validate();
-        $this->user->password = Hash::make($this->password);
-        $this->user->save();
+
+        User::make([
+            'uid' => $this->username,
+            'cn' => $this->name,
+            'mail' => $this->email,
+        ]);
 
         event(new Registered($this->user));
 

@@ -11,12 +11,30 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
+use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements LdapAuthenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    use AuthenticatesWithLdap;
+
+
+    protected string $guidKey = 'uid';
+
+    public static array $objectClasses = [
+        'top',
+        'person',
+        'organizationalperson',
+        'inetOrgPerson',
+    ];
 
     protected $table = 'user';
+
+    public function getLdapGuidColumn()
+    {
+        return 'uid';
+    }
 
     /**
      * The attributes that are mass assignable.

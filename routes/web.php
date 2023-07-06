@@ -17,10 +17,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
+
 Route::middleware(['auth'])->group(function (){
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+
     Route::get('/committees', \App\Http\Livewire\Committee\Crud::class)->name('committees')
         ->can('viewAny', '\App\Models\Committee');
     Route::get('/committees/{id}', \App\Http\Livewire\Committee\Roles::class)->name('committees.roles')

@@ -61,9 +61,21 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'driver' => 'ldap',
+            'model' => App\Ldap\User::class,
+            'rules' => [],
+            'database' => [
+                'model' => App\Models\User::class,
+                'sync_passwords' => false,
+                'sync_existing' => true,
+                'sync_attributes' => [
+                    'full_name' => 'cn',
+                    'email' => 'mail',
+                    'username' => 'uid',
+                ],
+            ],
         ],
+
 
         // 'users' => [
         //     'driver' => 'database',
