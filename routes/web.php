@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Committee;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,20 +24,26 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth'])->group(function (){
 
-    Route::get('/committees', \App\Http\Livewire\Committee\Crud::class)->name('committees')
-        ->can('viewAny', '\App\Models\Committee');
-    Route::get('/committees/{id}', \App\Http\Livewire\Committee\Roles::class)->name('committees.roles')
-        ->can('viewAny', '\App\Models\Committee');
-    Route::get('/roles/{id}', \App\Http\Livewire\Role\Members::class)->name('roles.members')
-        ->can('viewAny', '\App\Models\Committee');
+    Route::get('/committees', \App\Livewire\Committee\Crud::class)->name('committees.list')
+        ->can('viewAny', Committee::class);
+    Route::get('/committees/{id}', \App\Livewire\Committee\Roles::class)->name('committees.roles')
+        ->can('viewAny', Committee::class);
+    Route::get('/roles/{id}', \App\Livewire\Role\Members::class)->name('roles.members')
+        ->can('viewAny', Committee::class);
 });
 
 Route::middleware(['auth', 'superuser'])->group(function (){
-    Route::get('/groups', \App\Http\Livewire\Group\Crud::class)->name('groups');
-    Route::get('/groups/{id}', \App\Http\Livewire\Group\Roles::class)->name('groups.roles');
-    Route::get('/realms', \App\Http\Livewire\Realm\Crud::class)->name('realms');
-    Route::get('/realms/members/{uid}', \App\Http\Livewire\Realm\Members::class)->name('realms.members');
-    Route::get('/realms/admins/{uid}', \App\Http\Livewire\Realm\Admins::class)->name('realms.admins');
+    Route::get('/groups', \App\Livewire\Group\Crud::class)->name('groups');
+    Route::get('/groups/{id}', \App\Livewire\Group\Roles::class)->name('groups.roles');
+    Route::get('/realms', \App\Livewire\Realm\ListRealms::class)->name('realms');
+    Route::get('/realms/new', \App\Livewire\Realm\NewRealm::class)->name('realms.new');
+    Route::get('/realms/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');
+    Route::get('/realms/members/{uid}', \App\Livewire\Realm\Members::class)->name('realms.members');
+    Route::get('/realms/members/{uid}/new', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
+    Route::get('/realms/mods/{uid}', \App\Livewire\Realm\Moderators::class)->name('realms.mods');
+    Route::get('/realms/mods/{uid}/new', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
+    Route::get('/realms/admins/{uid}', \App\Livewire\Realm\Admins::class)->name('realms.admins');
+    Route::get('/realms/admins/{uid}/new', \App\Livewire\Realm\NewAdmin::class)->name('realms.admins.new');
 });
 
 

@@ -1,28 +1,32 @@
 <x-auth-card>
     <x-slot name="logo"><x-application-logo class="w-20 h-20 fill-current text-gray-500"/></x-slot>
-    <form wire:submit.prevent="store">
+    <form wire:submit="store">
         <!-- Email Address -->
-        <x-input.group wire:model.lazy="user.email" autofocus>
+        <x-input.group wire:model.blur="email" autofocus>
             <x-slot name="label">{{ __('Email') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
         @error('domain') <small class="block text-red-500">{{ $message }}</small> @enderror
         <!-- Name -->
-        <x-input.group wire:model="user.full_name">
-            <x-slot name="label">{{ __('Full name') }}</x-slot>
+        <x-input.group wire:model.live="first_name">
+            <x-slot name="label">{{ __('First name') }}</x-slot>
+            <x-slot name="help"></x-slot>
+        </x-input.group>
+        <x-input.group wire:model.live="last_name">
+            <x-slot name="label">{{ __('Last name') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
         <!-- Username -->
-        <x-input.group wire:model="user.username">
+        <x-input.group wire:model.live="username">
             <x-slot name="label">{{ __('Username') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
         <!-- Password -->
-        <x-input.group wire:model.lazy="password" type="password">
+        <x-input.group wire:model.blur="password" type="password">
             <x-slot name="label">{{ __('Password') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
-        <x-input.group wire:model="password_confirmation" type="password">
+        <x-input.group wire:model.live="password_confirmation" type="password">
             <x-slot name="label">{{ __('Confirm Password') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>

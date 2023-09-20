@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     {{ Breadcrumbs::render('roles:members', $role) }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('roles.search_members') }}"></x-input>
+        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('roles.search_members') }}"></x-input>
         <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
     </div>
     <x-table>
@@ -48,23 +48,23 @@
     </x-table>
     {{ $role_members->links() }}
 
-    <form wire:submit.prevent="saveNew">
-        <x-modal.dialog wire:model.defer="showNewModal">
+    <form wire:submit="saveNew">
+        <x-modal.dialog wire:model="showNewModal">
             <x-slot:title>
                 {{ __('roles.new_member') }}
             </x-slot:title>
             <x-slot:content>
-                <x-select wire:model="newRoleUserRel.user_id" class="mt-2">
+                <x-select wire:model.live="newRoleUserRel.user_id" class="mt-2">
                     <x-slot:label>{{ __('roles.new_member_label') }}</x-slot:label>
                     <option value="-1" selected="selected">{{ __('Please select') }}</option>
                     @foreach($realm_members as $realm_member)
                         <option value="{{ $realm_member->id }}">{{ $realm_member->full_name }} ({{ $realm_member->username }})</option>
                     @endforeach
                 </x-select>
-                <x-input.group wire:model="newRoleUserRel.from">
+                <x-input.group wire:model.live="newRoleUserRel.from">
                     <x-slot:label>{{ __('From') }}</x-slot:label>
                 </x-input.group>
-                <x-input.group wire:model="newRoleUserRel.until">
+                <x-input.group wire:model.live="newRoleUserRel.until">
                     <x-slot:label>{{ __('Until') }}</x-slot:label>
                 </x-input.group>
             </x-slot:content>
@@ -75,16 +75,16 @@
         </x-modal.dialog>
     </form>
 
-    <form wire:submit.prevent="saveEdit">
-        <x-modal.dialog wire:model.defer="showEditModal">
+    <form wire:submit="saveEdit">
+        <x-modal.dialog wire:model="showEditModal">
             <x-slot:title>
                 {{ __('roles.edit_member', ['name' => $editMemberOldName]) }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="editRoleUserRel.from">
+                <x-input.group wire:model.live="editRoleUserRel.from">
                     <x-slot:label>{{ __('From') }}</x-slot:label>
                 </x-input.group>
-                <x-input.group wire:model="editRoleUserRel.until">
+                <x-input.group wire:model.live="editRoleUserRel.until">
                     <x-slot:label>{{ __('Until') }}</x-slot:label>
                 </x-input.group>
             </x-slot:content>
@@ -95,8 +95,8 @@
         </x-modal.dialog>
     </form>
 
-    <form wire:submit.prevent="deleteCommit">
-        <x-modal.confirmation wire:model.defer="showDeleteModal">
+    <form wire:submit="deleteCommit">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('roles.delete_member_title', ['name' => $deleteMemberName]) }}
             </x-slot:title>

@@ -18,19 +18,56 @@ Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail) {
 });
 
 // Home > Blog
-Breadcrumbs::for('realms:index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('realms', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
     $trail->push('Realms', route('realms'));
 });
 
-Breadcrumbs::for('realms:members', function (BreadcrumbTrail $trail, Realm $realm) {
-    $trail->parent('realms:index');
-    $trail->push('Realm ' . $realm->long_name . ' (' . $realm->uid . '): ' . __('Members'), route('realms.members', $realm->uid));
+Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail) {
+    $trail->parent('realms');
+    $trail->push('Neu', route('realms.new'));
 });
 
-Breadcrumbs::for('realms:admins', function (BreadcrumbTrail $trail, Realm $realm) {
-    $trail->parent('realms:index');
-    $trail->push('Realm ' . $realm->long_name . ' (' . $realm->uid . '): ' . __('Admins'), route('realms.members', $realm->uid));
+Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail) {
+    $trail->parent('realms');
+    $trail->push('Editieren', route('realms.edit'));
+});
+
+Breadcrumbs::for('realms.view', function (BreadcrumbTrail $trail, array $routeParams){
+    $trail->parent('realms', $routeParams);
+    $uid = $routeParams['uid'];
+    $community = \App\Ldap\Community::findOrFailByUid($uid);
+    $trail->push($community->description[0] . ' (' . $community->ou[0] . ')');//, route('realms.view', $uid)); // not yet defined
+});
+
+Breadcrumbs::for('realms.members', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.view', $routeParams);
+    $trail->push(__('Members'), route('realms.members', $routeParams));
+});
+
+Breadcrumbs::for('realms.members.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.members', $routeParams);
+    $trail->push(__('New'), route('realms.members.new', $routeParams));
+});
+
+Breadcrumbs::for('realms.mods', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.view', $routeParams);
+    $trail->push(__('Moderators'), route('realms.mods', $routeParams));
+});
+
+Breadcrumbs::for('realms.mods.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.mods', $routeParams);
+    $trail->push(__('New'), route('realms.mods.new', $routeParams));
+});
+
+Breadcrumbs::for('realms.admins', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.view', $routeParams);
+    $trail->push(__('Admins'), route('realms.admins', $routeParams));
+});
+
+Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.admins', $routeParams);
+    $trail->push(__('New'), route('realms.admins.new', $routeParams));
 });
 
 Breadcrumbs::for('groups:index', function (BreadcrumbTrail $trail) {
@@ -43,17 +80,17 @@ Breadcrumbs::for('groups:roles', function (BreadcrumbTrail $trail, Group $group)
     $trail->push($group->name . ' (' . $group->realm->uid . ')', route('groups.roles', $group->id));
 });
 
-Breadcrumbs::for('committees:index', function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');
-    $trail->push(__('Committees'), route('committees'));
+    $trail->push(__('Committees'), route('committees.list'));
 });
 
-Breadcrumbs::for('committees:roles', function (BreadcrumbTrail $trail, Committee $committee) {
-    $trail->parent('committees:index');
+Breadcrumbs::for('committees.roles', function (BreadcrumbTrail $trail, Committee $committee) {
+    $trail->parent('committees.list');
     $trail->push($committee->name . " (" . $committee->realm_uid . ")", route('committees.roles', $committee->id));
 });
 
 Breadcrumbs::for('roles:members', function (BreadcrumbTrail $trail, Role $role) {
-    $trail->parent('committees:roles', $role->committee);
+    $trail->parent('committees.roles', $role->committee);
     $trail->push($role->name, route('roles.members', $role->id));
 });

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Committee;
+namespace App\Livewire\Committee;
 
 use App\Models\Committee;
 use App\Models\Role;

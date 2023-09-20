@@ -1,22 +1,22 @@
 <div>
     <h1 class="text-2xl font-semibold text-gray-900">Profile</h1>
 
-    <form wire:submit.prevent="save">
+    <form wire:submit="save">
         <div class="mt-6 sm:mt-5">
             <x-input.group label="Username" for="username" :error="$errors->first('user.username')">
-                <x-input.text wire:model="user.username" id="username" leading-add-on="surge.com/" />
+                <x-input.text wire:model.live="user.username" id="username" leading-add-on="surge.com/" />
             </x-input.group>
 
             <x-input.group label="Birthday" for="birthday" :error="$errors->first('user.birthday')">
-                <x-input.date wire:model="user.birthday" id="birthday" placeholder="MM/DD/YYYY" />
+                <x-input.date wire:model.live="user.birthday" id="birthday" placeholder="MM/DD/YYYY" />
             </x-input.group>
 
             <x-input.group label="About" for="about" :error="$errors->first('user.about')" help-text="Write a few sentances about yourself.">
-                <x-input.rich-text wire:model.defer="user.about" id="about" />
+                <x-input.rich-text wire:model="user.about" id="about" />
             </x-input.group>
 
             <x-input.group label="Photo" for="photo" :error="$errors->first('upload')">
-                <x-input.file-upload wire:model="upload" id="photo">
+                <x-input.file-upload wire:model.live="upload" id="photo">
                     <span class="h-12 w-12 rounded-full overflow-hidden bg-gray-100">
                         @if ($upload)
                             <img src="{{ $upload->temporaryUrl() }}" alt="Profile Photo">

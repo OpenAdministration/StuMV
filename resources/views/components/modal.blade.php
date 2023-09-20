@@ -35,7 +35,7 @@ switch ($maxWidth ?? '2xl') {
 
 <div
     x-data="{
-        show: @entangle($attributes->wire('model')),
+        show: @entangle($attributes->wire('model')).live,
         focusables() {
             // All focusable element types...
             let selector = 'a, button, input, textarea, select, details, [tabindex]:not([tabindex=\'-1\'])'

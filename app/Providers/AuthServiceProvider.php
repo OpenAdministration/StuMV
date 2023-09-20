@@ -5,7 +5,13 @@ namespace App\Providers;
 use App\Models\Committee;
 use App\Policies\CommitteePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
+use LDAP\Connection;
+use LdapRecord\Auth\BindException;
+use LdapRecord\Container;
+use LdapRecord\Laravel\Testing\DirectoryEmulator;
+use LdapRecord\Ldap;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -27,7 +33,15 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-
-        //
+        /*
+        if(App::isLocal()){
+            try{
+                $ldapConnection = Container::getConnection('default');
+                $ldapConnection->connect();
+            } catch (\Exception $exception){
+                DirectoryEmulator::setup('default');
+            }
+        }
+        */
     }
 }

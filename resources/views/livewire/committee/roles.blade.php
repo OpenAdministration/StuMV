@@ -1,7 +1,6 @@
 <div class="flex-col space-y-4">
-    {{ Breadcrumbs::render('committees:roles', $committee) }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('roles.search') }}"></x-input>
+        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('roles.search') }}"></x-input>
         <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
     </div>
     <x-table>
@@ -54,13 +53,13 @@
     </x-table>
     {{ $roles->links() }}
 
-    <form wire:submit.prevent="saveEdit">
-        <x-modal.dialog wire:model.defer="showEditModal">
+    <form wire:submit="saveEdit">
+        <x-modal.dialog wire:model="showEditModal">
             <x-slot:title>
                 {{ __('roles.edit', ['name' => $editRoleOldName]) }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="editRole.name">
+                <x-input.group wire:model.live="editRole.name">
                     <x-slot:label>{{ __('Name') }}</x-slot:label>
                 </x-input.group>
             </x-slot:content>
@@ -71,8 +70,8 @@
         </x-modal.dialog>
     </form>
 
-    <form wire:submit.prevent="deleteCommit">
-        <x-modal.confirmation wire:model.defer="showDeleteModal">
+    <form wire:submit="deleteCommit">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('roles.delete_title', ['name' => $deleteRoleName]) }}
             </x-slot:title>
@@ -86,13 +85,13 @@
         </x-modal.confirmation>
     </form>
 
-    <form wire:submit.prevent="saveNew">
-        <x-modal.dialog wire:model.defer="showNewModal">
+    <form wire:submit="saveNew">
+        <x-modal.dialog wire:model="showNewModal">
             <x-slot:title>
                 {{ __('roles.new') }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="newRole.name">
+                <x-input.group wire:model.live="newRole.name">
                     <x-slot:label>{{ __('Name') }}</x-slot:label>
                 </x-input.group>
             </x-slot:content>

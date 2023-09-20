@@ -1,8 +1,7 @@
 <div class="flex-col space-y-4">
-    {{ Breadcrumbs::render('realms:admins', $realm) }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('realms.search_admins') }}"></x-input>
-        <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
+        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('realms.search_admins') }}"></x-input>
+        <x-button.link-primary href="{{ route('realms.admins.new', ['uid' => $community_name]) }}" class="flex"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
@@ -20,10 +19,10 @@
         </x-slot>
         @forelse($realm_admins as $realm_admin)
             <x-table.row>
-                <x-table.cell>{{ $realm_admin->full_name }}</x-table.cell>
-                <x-table.cell>{{ $realm_admin->username }}</x-table.cell>
+                <x-table.cell>{{ $realm_admin->cn[0] }}</x-table.cell>
+                <x-table.cell>{{ $realm_admin->uid[0] }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $realm_admin->id }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-button.link-danger wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty
@@ -36,31 +35,9 @@
             </x-table.row>
         @endforelse
     </x-table>
-    {{ $realm_admins->links() }}
 
-    <form wire:submit.prevent="saveNew">
-        <x-modal.dialog wire:model.defer="showNewModal">
-            <x-slot:title>
-                {{ __('realms.new_admin') }}
-            </x-slot:title>
-            <x-slot:content>
-                <x-select wire:model="newAdmin.id" class="mt-2">
-                    <x-slot:label>{{ __('realms.new_admin_label') }}</x-slot:label>
-                    <option value="-1" selected="selected">{{ __('Please select') }}</option>
-                    @foreach($free_admins as $free_admin)
-                        <option value="{{ $free_admin->id }}">{{ $free_admin->full_name }} ({{ $free_admin->username }})</option>
-                    @endforeach
-                </x-select>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Save') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.dialog>
-    </form>
-
-    <form wire:submit.prevent="deleteCommit">
-        <x-modal.confirmation wire:model.defer="showDeleteModal">
+    <form wire:submit="deleteCommit">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('realms.delete_admin_title', ['name' => $deleteAdminName]) }}
             </x-slot:title>

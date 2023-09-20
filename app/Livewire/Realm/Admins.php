@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Livewire\Realm;
+namespace App\Livewire\Realm;
 
-use App\Models\Realm;
-use App\Models\User;
+use App\Ldap\Community;
+use App\Ldap\User;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,29 +12,26 @@ class Admins extends Component {
 
     use WithPagination;
 
+    #[Url]
     public string $search = '';
+    #[Url]
     public string $sortField = 'full_name';
+    #[Url]
     public string $sortDirection = 'asc';
 
-    public Realm $realm;
+    public string $community_name;
 
-    public bool $showNewModal = false;
     public bool $showDeleteModal = false;
-
-    public User $newAdmin;
-    public User $deleteAdmin;
 
     public string $deleteAdminName = '';
 
-    public array $rules = [];
-
-    protected $queryString = ['search', 'sortField', 'sortDirection'];
 
     public function mount($uid) {
-        $this->realm = Realm::findOrFail($uid);
+        $this->community_name = $uid;
     }
 
-    public function sortBy($field){
+    public function sortBy($field): void
+    {
         if($this->sortField === $field){
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -48,24 +46,26 @@ class Admins extends Component {
         $this->resetPage();
     }
 
+    public function community(): ?Community
+    {
+        return Community::findByUid($this->community_name);
+    }
+
     public function render() {
+        $admins = $this->community()?->adminsGroup()->first()?->members()->get();
         return view(
             'livewire.realm.admins', [
-                'realm' => $this->realm,
-                'realm_admins' => User::join('realm_admin_relation', 'id', '=', 'user_id')
-                    ->search('full_name', $this->search)
-                    ->where('realm_uid', $this->realm->uid)
-                    ->search('username', $this->search)
-                    ->where('realm_uid', $this->realm->uid)
-                    ->orderBy($this->sortField, $this->sortDirection)
-                    ->paginate(10),
+                'realm' => $this->community(),
+                'realm_admins' => $admins,
+                    //->orderBy($this->sortField, $this->sortDirection)
+                    //->paginate(10),
                 // all users that aren't admins on this realm
-                'free_admins' => User::all()->except($this->realm->admins->modelKeys()),
+                //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
         )->layout('layouts.app', [
             'headline' => __('realms.admins_heading', [
-                'name' => $this->realm->long_name,
-                'uid' => $this->realm->uid
+                'name' => $this->community()->description[0],
+                'uid' => $this->community()->ou[0]
             ])
         ]);
     }
@@ -105,31 +105,27 @@ class Admins extends Component {
         $this->showNewModal = false;
     }
 
-    public function deletePrepare($id): void
+    public function deletePrepare($username): void
     {
-        $this->deleteAdmin = User::find($id);
-
-
-        $userBelongsToRealm = $this->deleteAdmin->admin_realms()->where('uid', $this->realm->uid)->exists();
-
+        $user = User::findByUsername($username);
+        $userBelongsToRealm = Community::findByUid($this->community_name)?->adminsGroup()->first()?->members()->get()->contains($user);
         if(!$userBelongsToRealm) {
-            // only allow deletes from the same realm
-            unset($this->deleteAdmin);
+            // check if the user to delete is an admin in this realm
+            unset($this->deleteAdminName);
             return;
         }
-
-        $this->deleteAdminName = $this->deleteAdmin->full_name;
+        $this->deleteAdminName = $username;
         $this->showDeleteModal = true;
     }
 
     public function deleteCommit(): void
     {
-        $this->realm->admins()->detach($this->deleteAdmin);
-        $this->realm->refresh();
+        $admins = Community::findByUid($this->community_name)?->adminsGroup()->first()?->members();
+        $user = User::findByUsername($this->deleteAdminName);
+        $admins->detach($user);
 
         // reset everything to prevent a 404 modal
-        unset($this->newAdmin);
-        unset($this->deleteAdmin);
+        unset($this->deleteAdminName);
 
         $this->showDeleteModal = false;
     }

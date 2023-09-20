@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\Role;
+namespace App\Livewire\Role;
 
 use App\Models\Role;
 use App\Models\RoleUserRelation;

@@ -1,7 +1,6 @@
 <div class="flex-col space-y-4">
-    {{ Breadcrumbs::render('committees:index') }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('committees.search') }}"></x-input>
+        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('committees.search') }}"></x-input>
         <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
     </div>
     <x-table>
@@ -56,16 +55,16 @@
     </x-table>
     {{ $committees->links() }}
 
-    <form wire:submit.prevent="saveEdit">
-        <x-modal.dialog wire:model.defer="showEditModal">
+    <form wire:submit="saveEdit">
+        <x-modal.dialog wire:model="showEditModal">
             <x-slot:title>
                 {{ __('committees.edit', ['name' => $editCommitteeOldName]) }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="editCommittee.name">
+                <x-input.group wire:model.live="editCommittee.name">
                     <x-slot:label>{{ __('Name') }}</x-slot:label>
                 </x-input.group>
-                <x-select wire:model="editCommittee.parent_committee_id" class="mt-2">
+                <x-select wire:model.live="editCommittee.parent_committee_id" class="mt-2">
                     <x-slot:label>{{ __('committees.parent_committee') }}</x-slot:label>
                     <option value="please-select" selected="selected">{{ __('Please select') }}</option>
                     <option value="null">{{ __('None') }}</option>
@@ -81,8 +80,8 @@
         </x-modal.dialog>
     </form>
 
-    <form wire:submit.prevent="deleteCommit">
-        <x-modal.confirmation wire:model.defer="showDeleteModal">
+    <form wire:submit="deleteCommit">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('committees.delete_title', ['name' => $deleteCommitteeName]) }}
             </x-slot:title>
@@ -96,23 +95,23 @@
         </x-modal.confirmation>
     </form>
 
-    <form wire:submit.prevent="saveNew">
-        <x-modal.dialog wire:model.defer="showNewModal">
+    <form wire:submit="saveNew">
+        <x-modal.dialog wire:model="showNewModal">
             <x-slot:title>
                 {{ __('committees.new') }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="newCommittee.name">
+                <x-input.group wire:model.live="newCommittee.name">
                     <x-slot:label>{{ __('Name') }}</x-slot:label>
                 </x-input.group>
-                <x-select wire:model="newCommittee.realm_uid" class="mt-2">
+                <x-select wire:model.live="newCommittee.realm_uid" class="mt-2">
                     <x-slot:label>Realm</x-slot:label>
                     <option value="please-select" selected="selected">{{ __('Please select') }}</option>
                     @foreach($realms as $realm)
                         <option value="{{ $realm->uid }}">{{ $realm->long_name }} ({{ $realm->uid }})</option>
                     @endforeach
                 </x-select>
-                <x-select wire:model="newCommittee.parent_committee_id" class="mt-2">
+                <x-select wire:model.live="newCommittee.parent_committee_id" class="mt-2">
                     <x-slot:label>{{ __('committees.parent_committee') }}</x-slot:label>
                     <option value="please-select" selected="selected">{{ __('Please select') }}</option>
                     <option value="null">{{ __('None') }}</option>

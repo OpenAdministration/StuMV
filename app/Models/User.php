@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,7 +17,6 @@ class User extends Authenticatable implements LdapAuthenticatable
     use HasApiTokens, HasFactory, Notifiable;
     use AuthenticatesWithLdap;
 
-
     protected string $guidKey = 'uid';
 
     public static array $objectClasses = [
@@ -31,7 +28,7 @@ class User extends Authenticatable implements LdapAuthenticatable
 
     protected $table = 'user';
 
-    public function getLdapGuidColumn()
+    public function getLdapGuidColumn() : string
     {
         return 'uid';
     }

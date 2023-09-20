@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     {{ Breadcrumbs::render('groups:index') }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('groups.search') }}"></x-input>
+        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('groups.search') }}"></x-input>
         <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
     </div>
     <x-table>
@@ -44,13 +44,13 @@
     </x-table>
     {{ $groups->links() }}
 
-    <form wire:submit.prevent="saveEdit">
-        <x-modal.dialog wire:model.defer="showEditModal">
+    <form wire:submit="saveEdit">
+        <x-modal.dialog wire:model="showEditModal">
             <x-slot:title>
                 {{ __('groups.edit', ['name' => $editGroupOldName]) }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="editGroup.name">
+                <x-input.group wire:model.live="editGroup.name">
                     <x-slot:label>{{ __('Name') }}</x-slot:label>
                 </x-input.group>
             </x-slot:content>
@@ -61,8 +61,8 @@
         </x-modal.dialog>
     </form>
 
-    <form wire:submit.prevent="deleteCommit">
-        <x-modal.confirmation wire:model.defer="showDeleteModal">
+    <form wire:submit="deleteCommit">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('groups.delete_title', ['name' => $deleteGroupName]) }}
             </x-slot:title>
@@ -76,16 +76,16 @@
         </x-modal.confirmation>
     </form>
 
-    <form wire:submit.prevent="saveNew">
-        <x-modal.dialog wire:model.defer="showNewModal">
+    <form wire:submit="saveNew">
+        <x-modal.dialog wire:model="showNewModal">
             <x-slot:title>
                 {{ __('groups.new') }}
             </x-slot:title>
             <x-slot:content>
-                <x-input.group wire:model="newGroup.name">
+                <x-input.group wire:model.live="newGroup.name">
                     <x-slot:label>{{ __('Name') }}</x-slot:label>
                 </x-input.group>
-                <x-select wire:model="newGroup.realm_uid" class="mt-2">
+                <x-select wire:model.live="newGroup.realm_uid" class="mt-2">
                     <x-slot:label>Realm</x-slot:label>
                     <option value="please-select" selected="selected">{{ __('Please select') }}</option>
                     @foreach($realms as $realm)

@@ -1,20 +1,23 @@
 <?php
 
-namespace App\Http\Livewire;
+namespace App\Livewire;
 
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use LdapRecord\LdapRecordException;
+use Livewire\Component;
 
 class RegisterUser extends Component
 {
     //public User $user;
 
     public string $email = '';
-    public string $name = '';
+    public string $first_name = '';
+    public string $last_name = '';
     public string $username = '';
 
     private string $domain = '';
@@ -27,7 +30,8 @@ class RegisterUser extends Component
     {
         return [
             'email' => ['required', 'email'],
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255'],
             'password' => [
                 'required',
@@ -84,15 +88,26 @@ class RegisterUser extends Component
 
         $this->validate();
 
-        User::make([
+        $user = new User([
             'uid' => $this->username,
-            'cn' => $this->name,
+            'cn' => $this->first_name  . ' ' . $this->last_name,
+            'sn'  => $this->last_name,
             'mail' => $this->email,
+            'userPassword'  => "{ARGON2}" . Hash::make($this->password),
+            // usually ldap SHOULD hash it itself - did not work
         ]);
 
-        event(new Registered($this->user));
+        $user->inside('ou=People,' . config('ldap.connections.default.base_dn'));
 
-        Auth::login($this->user);
+        try {
+            $user->save();
+        }  catch (LdapRecordException $ldapRecordException){
+            dump($ldapRecordException->getDetailedError());
+        }
+
+        event(new Registered($user));
+
+        Auth::attempt([$this->username, $this->password]);
 
         return redirect(RouteServiceProvider::HOME);
     }

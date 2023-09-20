@@ -21,7 +21,7 @@
                     'dashboard' => 'Dashboard',
                 ],
                 (Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
-                    'committees' => __('Committees'),
+                    'committees.list' => __('Committees'),
                 ] : [],
                 (Auth::user()->is_superuser) ? [
                     'realms' => 'Realms',
@@ -45,6 +45,7 @@
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="p-6 bg-white border-b border-gray-200">
+                                {{ Breadcrumbs::render(Route::current()->getName(), Route::current()->parameters())}}
                                 {{ $slot }}
                             </div>
                         </div>

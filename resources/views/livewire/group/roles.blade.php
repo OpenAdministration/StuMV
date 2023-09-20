@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     {{ Breadcrumbs::render('groups:roles', $group) }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.debounce="search" placeholder="{{ __('groups.search_roles') }}"></x-input>
+        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('groups.search_roles') }}"></x-input>
         <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
     </div>
     <x-table>
@@ -38,13 +38,13 @@
     </x-table>
     {{ $group_roles->links() }}
 
-    <form wire:submit.prevent="saveNew">
-        <x-modal.dialog wire:model.defer="showNewModal">
+    <form wire:submit="saveNew">
+        <x-modal.dialog wire:model="showNewModal">
             <x-slot:title>
                 {{ __('groups.new_role') }}
             </x-slot:title>
             <x-slot:content>
-                <x-select wire:model="newRole.id" class="mt-2">
+                <x-select wire:model.live="newRole.id" class="mt-2">
                     <x-slot:label>{{ __('groups.new_role_label') }}</x-slot:label>
                     <option value="-1" selected="selected">{{ __('Please select') }}</option>
                     @foreach($free_roles as $free_role)
@@ -59,8 +59,8 @@
         </x-modal.dialog>
     </form>
 
-    <form wire:submit.prevent="deleteCommit">
-        <x-modal.confirmation wire:model.defer="showDeleteModal">
+    <form wire:submit="deleteCommit">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('groups.delete_role_title', ['name' => $deleteRoleName]) }}
             </x-slot:title>

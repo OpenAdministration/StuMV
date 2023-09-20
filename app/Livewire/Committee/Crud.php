@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Http\Livewire\Committee;
+namespace App\Livewire\Committee;
 
-use App\Models\Realm;
 use App\Models\Committee;
-use App\Policies\CommitteePolicy;
+use App\Models\Realm;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -54,7 +52,7 @@ class Crud extends Component
     {
         $user = Auth::user();
 
-        if ($user->is_superuser) {
+        if ($user?->is_superuser) {
             $committees = Committee::query()->search('name', $this->search)->search('realm_uid', $this->search)
                 ->orderBy($this->sortField, $this->sortDirection)
                 ->paginate(10);
@@ -68,7 +66,7 @@ class Crud extends Component
             $realms = $user->admin_realms()->get();
         }
 
-        return view('livewire.committee.crud', [
+        return view('livewire.committee.list', [
             'committees' => $committees,
             'realms' => $realms,
         ])->layout('layouts.app', ['headline' => __('Committees')]);

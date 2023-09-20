@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class Role extends Model
 {
+    use HasFactory;
     /**
      * The table associated with the model.
      *
@@ -53,5 +56,11 @@ class Role extends Model
     public function members(): Relation
     {
         return $this->hasMany(RoleUserRelation::class, 'role_id');
+    }
+
+    public function addMember(User $user, Carbon $start, Carbon $end = null)
+    {
+        $this->members()->save($user, ['from' => $start, 'until' => $end]);
+        $this->refresh();
     }
 }

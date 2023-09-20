@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Livewire\Realm;
+namespace App\Livewire\Group;
 
+use App\Models\Group;
 use App\Models\Realm;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -11,19 +12,19 @@ class Crud extends Component
     use WithPagination;
 
     public string $search = '';
-    public string $sortField = 'uid';
+    public string $sortField = 'name';
     public string $sortDirection = 'asc';
 
     public bool $showEditModal = false;
     public bool $showNewModal = false;
     public bool $showDeleteModal = false;
 
-    public Realm $editRealm;
-    public Realm $newRealm;
-    public Realm $deleteRealm;
+    public Group $editGroup;
+    public Group $newGroup;
+    public Group $deleteGroup;
 
-    public string $editRealmOldName = '';
-    public string $deleteRealmName = '';
+    public string $editGroupOldName = '';
+    public string $deleteGroupName = '';
 
     public array $rules = [];
 
@@ -46,48 +47,50 @@ class Crud extends Component
 
     public function render()
     {
-        return view('livewire.realm.crud', [
-          'realms' => Realm::query()->search('uid', $this->search)->search('long_name', $this->search)
-              ->orderBy($this->sortField, $this->sortDirection)
-              ->paginate(10)
-        ])->layout('layouts.app', ['headline' => 'Realms']);
+        return view('livewire.group.crud', [
+            'groups' => Group::query()->search('name', $this->search)->search('realm_uid', $this->search)
+                ->orderBy($this->sortField, $this->sortDirection)
+                ->paginate(10),
+            'realms' => Realm::all(),
+        ])->layout('layouts.app', ['headline' => __('Groups')]);
     }
 
-    public function edit($uid): void
+    public function edit($id): void
     {
         $this->rules = [
-            'editRealm.long_name' => 'required',
+            'editGroup.name' => 'required',
         ];
-        $this->editRealm = Realm::find($uid);
-        $this->editRealmOldName = $this->editRealm->long_name;
+        $this->editGroup = Group::find($id);
+        $this->editGroupOldName = $this->editGroup->name;
         $this->showEditModal = true;
     }
 
     public function new(): void
     {
         $this->rules = [
-            'newRealm.uid' => 'required|min:3|max:5',
-            'newRealm.long_name' => 'required',
+            'newGroup.name' => 'required',
+            'newGroup.realm_uid' => 'required',
         ];
-        $this->newRealm = new Realm();
+        $this->newGroup = new Group();
+        $this->newGroup->realm_uid = 'please-select';
         $this->showNewModal = true;
     }
 
-    public function deletePrepare($uid): void
+    public function deletePrepare($id): void
     {
-        $this->deleteRealm = Realm::find($uid);
-        $this->deleteRealmName = $this->deleteRealm->long_name;
+        $this->deleteGroup = Group::find($id);
+        $this->deleteGroupName = $this->deleteGroup->name;
         $this->showDeleteModal = true;
     }
 
     public function deleteCommit(): void
     {
-        $this->deleteRealm->delete();
+        $this->deleteGroup->delete();
 
         // reset everything to prevent a 404 modal
-        unset($this->deleteRealm);
-        unset($this->newRealm);
-        unset($this->editRealm);
+        unset($this->deleteGroup);
+        unset($this->newGroup);
+        unset($this->editGroup);
 
         $this->showDeleteModal = false;
     }
@@ -102,14 +105,22 @@ class Crud extends Component
     public function saveEdit(): void
     {
         $this->validate();
-        $this->editRealm->save();
+        $this->editGroup->save();
         $this->showEditModal = false;
     }
 
     public function saveNew(): void
     {
         $this->validate();
-        $this->newRealm->save();
+
+        $groupRealm = Realm::find($this->newGroup->realm_uid);
+
+        if (empty($groupRealm)) {
+            $this->addError('newGroup.realm_uid', 'Ungültiger Realm!');
+            return;
+        }
+
+        $this->newGroup->save();
         $this->showNewModal = false;
     }
 }

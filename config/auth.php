@@ -66,12 +66,15 @@ return [
             'rules' => [],
             'database' => [
                 'model' => App\Models\User::class,
-                'sync_passwords' => false,
-                'sync_existing' => true,
+                'sync_passwords' => true,
+                'sync_existing' => [
+                    'email' => 'mail'
+                ],
                 'sync_attributes' => [
                     'full_name' => 'cn',
                     'email' => 'mail',
                     'username' => 'uid',
+                    'password'  => 'userPassword'
                 ],
             ],
         ],
