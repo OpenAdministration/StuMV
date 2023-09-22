@@ -66,7 +66,7 @@ return [
             'rules' => [],
             'database' => [
                 'model' => App\Models\User::class,
-                'sync_passwords' => true,
+                'sync_passwords' => false,
                 'sync_existing' => [
                     'email' => 'mail'
                 ],
@@ -104,7 +104,7 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
-            'table' => 'password_resets',
+            'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],

@@ -97,8 +97,7 @@ class RegisterUser extends Component
             // usually ldap SHOULD hash it itself - did not work
         ]);
 
-        $user->inside('ou=People,' . config('ldap.connections.default.base_dn'));
-
+        $user->setDn("uid=$this->username,ou=People," . config('ldap.connections.default.base_dn'));
         try {
             $user->save();
         }  catch (LdapRecordException $ldapRecordException){

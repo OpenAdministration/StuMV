@@ -10,27 +10,16 @@
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <!-- Validation Errors -->
-        <x-auth-validation-errors class="mb-4" :errors="$errors" />
+
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
             <!-- Email Address -->
-            <div>
-                <x-label for="uid" :value="__('Username')" />
-
-                <x-input id="uid" class="block mt-1 w-full" type="text" name="uid" :value="old('uid')" required autofocus />
-            </div>
+            <x-input.group :label="__('Username')" class="block mt-1 w-full" name="uid" id="uid" :value="old('uid')" required autofocus />
 
             <!-- Password -->
-            <div class="mt-4">
-                <x-label for="password" :value="__('Password')" />
-
-                <x-input id="password" class="block mt-1 w-full"
-                                type="password"
-                                name="password"
-                                required autocomplete="current-password" />
-            </div>
+            <x-input.group type="password" class="block mt-1 w-full" :label="__('Password')" id="password" name="password" required autocomplete="current-password"/>
 
             <!-- Remember Me -->
             <div class="block mt-4">

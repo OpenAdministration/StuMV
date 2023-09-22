@@ -18,18 +18,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
-
 Route::middleware(['auth'])->group(function (){
-
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
     Route::get('/committees', \App\Livewire\Committee\Crud::class)->name('committees.list')
         ->can('viewAny', Committee::class);
     Route::get('/committees/{id}', \App\Livewire\Committee\Roles::class)->name('committees.roles')
         ->can('viewAny', Committee::class);
     Route::get('/roles/{id}', \App\Livewire\Role\Members::class)->name('roles.members')
         ->can('viewAny', Committee::class);
+    Route::get('/profile', \App\Livewire\Profile::class)->name('profile');
 });
 
 Route::middleware(['auth', 'superuser'])->group(function (){

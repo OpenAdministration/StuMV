@@ -16,30 +16,14 @@
             <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
             <!-- Email Address -->
-            <div>
-                <x-label for="email" :value="__('Email')" />
-
-                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus />
-            </div>
+            <x-input.group id="mail" name="mail" :label="__('E-Mail')" :value="old('mail', $request->mail)" required autofocus/>
 
             <!-- Password -->
-            <div class="mt-4">
-                <x-label for="password" :value="__('Password')" />
-
-                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required />
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="mt-4">
-                <x-label for="password_confirmation" :value="__('Confirm Password')" />
-
-                <x-input id="password_confirmation" class="block mt-1 w-full"
-                                    type="password"
-                                    name="password_confirmation" required />
-            </div>
+            <x-input.group id="password" name="password" :label="__('Password')" type="password" required/>
+            <x-input.group id="password_confirmation" name="password_confirmation" :label="__('Confirm Password')" type="password" required/>
 
             <div class="flex items-center justify-end mt-4">
-                <x-button>
+                <x-button type="submit">
                     {{ __('Reset Password') }}
                 </x-button>
             </div>

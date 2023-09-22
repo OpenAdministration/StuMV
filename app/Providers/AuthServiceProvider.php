@@ -3,7 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Committee;
+use App\Models\User;
 use App\Policies\CommitteePolicy;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
@@ -33,6 +36,13 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
+
+        ResetPassword::createUrlUsing(function (User $user, string $token) {
+            return url(route('password.reset', [
+                'token' => $token,
+                'mail' => $user->getEmailForPasswordReset(),
+            ], false));
+        });
         /*
         if(App::isLocal()){
             try{
