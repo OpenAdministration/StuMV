@@ -21,6 +21,11 @@ Breadcrumbs::for('profile', function (BreadcrumbTrail $trail) {
     $trail->push(__('Profile'), route('profile'));
 });
 
+Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail) {
+    $trail->parent('profile');
+    $trail->push(__('Change password'), route('password.change'));
+});
+
 // Home > Blog
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail) {
     $trail->parent('dashboard');

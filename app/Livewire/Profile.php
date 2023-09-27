@@ -18,7 +18,8 @@ class Profile extends Component
     #[Rule('email|required')]
     public string $email;
 
-    public function mount(){
+    public function mount()
+    {
         $username = Auth::user()->username;
         $user = User::findOrFailByUsername($username);
         $this->uid = $user->getFirstAttribute('uid');
@@ -31,9 +32,10 @@ class Profile extends Component
         return view('livewire.profile');
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
-        if(Auth::user()->username !== $this->uid){
+        if (Auth::user()->username !== $this->uid) {
             abort('500');
         }
         $user = User::findOrFailByUsername($this->uid);

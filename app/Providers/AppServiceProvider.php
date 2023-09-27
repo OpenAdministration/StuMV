@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,8 +25,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Password::defaults(static function () {
+            return Password::min(12)
+                ->letters()
+                ->mixedCase()
+                ->numbers()
+                ->symbols()
+                ->uncompromised();
+        });
+
         Builder::macro('search', function ($field, $string){
             return $string ? $this->orWhere($field, 'like', '%' . $string . '%') : $this;
         });
     }
 }
+

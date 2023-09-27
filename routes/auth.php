@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Livewire\ChangePassword;
 use App\Livewire\RegisterUser;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +48,9 @@ Route::middleware('auth')->group(function () {
                 ->name('password.confirm');
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
+
+    Route::any('change-password', ChangePassword::class)
+        ->name('password.change');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
