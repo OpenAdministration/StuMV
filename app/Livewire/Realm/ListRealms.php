@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Realm;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
@@ -49,15 +50,12 @@ class ListRealms extends Component
 
     public function render()
     {
-        $realmsQuerry = Community::query();
-        if(!empty($this->search)){
-            $realmsQuerry = $realmsQuerry
-                ->search('ou', $this->search)
-                ->search('description', $this->search)
-            ;
-        }
-        // fixme
-        $slice = $realmsQuerry->slice(1, 10, $this->sortField, $this->sortDirection);
+        $slice = Community::query()
+            ->list() // only first level
+            ->setDn(Community::$rootDn)
+            ->search('ou', $this->search)
+            ->search('description', $this->search)
+            ->slice(1, 10, $this->sortField, $this->sortDirection);
 
         return view('livewire.realm.index', [
           'realmSlice' => $slice

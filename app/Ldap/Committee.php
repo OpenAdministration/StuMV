@@ -3,7 +3,7 @@
 namespace App\Ldap;
 
 use App\Ldap\Traits\SearchScopeTrait;
-use Illuminate\Support\Str;
+use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Model\Builder;
 
@@ -39,8 +39,8 @@ class Committee extends OrganizationalUnit
 
     public function parentCommittee() : ?Committee
     {
-        $dn = Str::of($this->getDn());
-        $parentDn = $dn->explode(',')->slice(1)->implode(',');
+        $dn = DistinguishedName::make($this->getDn());
+        $parentDn = $dn->parent();
         if(!str_contains($parentDn, ',ou=Committees,')){
             return null;
         }
