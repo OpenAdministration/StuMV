@@ -1,8 +1,9 @@
 <div class="flex-col space-y-4">
-    {{ Breadcrumbs::render('groups:roles', $group) }}
     <div class="flex justify-between">
-        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('groups.search_roles') }}"></x-input>
-        <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
+        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('groups.search_roles') }}"/>
+        <x-button.link-primary :href="route('realms.groups.roles.add', ['uid' => $realm_uid, 'cn' => $group_cn])" class="flex" >
+            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
+        </x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
@@ -36,7 +37,6 @@
             </x-table.row>
         @endforelse
     </x-table>
-    {{ $group_roles->links() }}
 
     <form wire:submit="saveNew">
         <x-modal.dialog wire:model="showNewModal">
@@ -62,10 +62,10 @@
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
-                {{ __('groups.delete_role_title', ['name' => $deleteRoleName]) }}
+                {{ __('groups.delete_role_title', ['name' => $deleteRoleDN]) }}
             </x-slot:title>
             <x-slot:content>
-                {{ __('groups.delete_role_warning', ['name' => $deleteRoleName]) }}
+                {{ __('groups.delete_role_warning', ['name' => $deleteRoleDN]) }}
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>

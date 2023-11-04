@@ -20,12 +20,11 @@
                 array_merge([
                     'dashboard' => 'Dashboard',
                 ],
-                (Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
+                /*(Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
                     'committees.list' => __('Committees'),
-                ] : [],
+                ] : [],*/
                 (Auth::user()->is_superuser) ? [
                     'realms' => 'Realms',
-                    'groups' => __('Groups'),
                 ] : []
                 )
             ])

@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     <x-success-alert/>
     <div class="flex justify-between">
-        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('realms.search') }}"></x-input>
+        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search') }}"/>
         <x-button.link-primary href="{{ route('realms.new') }}">Neuer Realm</x-button.link-primary>
     </div>
     <x-table>
@@ -33,6 +33,9 @@
                 </x-table.cell>
                 <x-table.cell>
                     <x-link href="{{ route('realms.members', $realm->getShortCode()) }}">{{ __('realms.manage_members') }}</x-link>
+                </x-table.cell>
+                <x-table.cell>
+                    <x-link href="{{ route('realms.groups', $realm->getShortCode()) }}">{{ __('realms.manage_groups') }}</x-link>
                 </x-table.cell>
                 <x-table.cell>
                     <x-button.link-danger

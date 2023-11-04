@@ -66,4 +66,31 @@ class Community extends OrganizationalUnit implements LdapImportable
         return $this->hasOneChild(Group::class, 'cn=admins');
     }
 
+    public function generateSkeleton() {
+
+        $this->save();
+
+        // generate mayor ou's
+        foreach (['Groups' => 'The Group ou',
+                  'Committees' => 'The Committees OU',
+                 ] as $ouName => $ouDescription){
+            $ou = new OrganizationalUnit([
+                'ou' => $ouName,
+                'description' => $ouDescription
+            ]);
+            $ou->setDn("ou=$ouName," . $this->getDn());
+            $ou->save();
+        }
+
+        // generate mayor Groups
+        foreach (['admins', 'moderators', 'members'] as $gName){
+            $g = new Group([
+                'cn' => $gName,
+                'uniqueMember' => '',
+            ]);
+            $g->setDn("cn=$gName," . $this->getDn());
+            $g->save();
+        }
+    }
+
 }

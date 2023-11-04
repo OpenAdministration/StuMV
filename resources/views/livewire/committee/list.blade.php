@@ -1,17 +1,19 @@
 <div class="flex-col space-y-4">
     <div class="flex justify-between">
-        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('committees.search') }}"></x-input>
-        <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
+        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('committees.search') }}"></x-input.group>
+        <x-button.link-primary class="flex" :href="route('committees.new', ['uid' => $realm_uid])"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
-            <x-table.heading sortable wire:click="sortBy('realm_uid')" :direction="$sortField === 'realm_uid' ? $sortDirection : null">
-                Realm {{ __('realms.shortcode') }}
+            <x-table.heading
+                sortable wire:click="sortBy('ou')" :direction="$sortField === 'name' ? $sortDirection : null"
+            >
+                {{ __('Short Name') }}
             </x-table.heading>
             <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
+                sortable wire:click="sortBy('description')" :direction="$sortField === 'name' ? $sortDirection : null"
             >
-                {{ __('Name') }}
+                {{ __('Full Name') }}
             </x-table.heading>
             <x-table.heading
                 sortable wire:click="sortBy('parent_committee_id')" :direction="$sortField === 'parent_committee_id' ? $sortDirection : null"
@@ -22,25 +24,25 @@
             <x-table.heading/>
             <x-table.heading/>
         </x-slot>
-        @forelse($committees as $committee)
+        @forelse($committeesSlice->items() as $committee)
             <x-table.row>
-                <x-table.cell>{{ $committee->realm_uid }}</x-table.cell>
-                <x-table.cell>{{ $committee->name }}</x-table.cell>
+                <x-table.cell>{{ $committee->getFirstAttribute('ou') }}</x-table.cell>
+                <x-table.cell>{{ $committee->getFirstAttribute('description') }}</x-table.cell>
                 <x-table.cell>
-                    @if(empty($committee->parentCommittee))
+                    @if(empty($committee->parentCommittee()))
                         {{ __('None') }}
                     @else
-                        {{ $committee->parentCommittee->name }} ({{ $committee->parentCommittee->realm_uid }})
+                        {{ $committee->parentCommittee()->getFirstAttribute('ou') }}
                     @endif
                 </x-table.cell>
                 <x-table.cell>
-                    <x-link href="{{ route('committees.roles', $committee->id) }}">{{ __('committees.manage_roles') }}</x-link>
+                    <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'id' => $committee->getFirstAttribute('ou')]) }}">{{ __('committees.manage_roles') }}</x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $committee->id }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-button.link-danger wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link wire:click="edit('{{ $committee->id }}')">{{ __('Edit') }}</x-button.link>
+                    <x-button.link>{{ __('Edit') }}</x-button.link>
                 </x-table.cell>
             </x-table.row>
         @empty
@@ -53,32 +55,6 @@
             </x-table.row>
         @endforelse
     </x-table>
-    {{ $committees->links() }}
-
-    <form wire:submit="saveEdit">
-        <x-modal.dialog wire:model="showEditModal">
-            <x-slot:title>
-                {{ __('committees.edit', ['name' => $editCommitteeOldName]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <x-input.group wire:model.live="editCommittee.name">
-                    <x-slot:label>{{ __('Name') }}</x-slot:label>
-                </x-input.group>
-                <x-select wire:model.live="editCommittee.parent_committee_id" class="mt-2">
-                    <x-slot:label>{{ __('committees.parent_committee') }}</x-slot:label>
-                    <option value="please-select" selected="selected">{{ __('Please select') }}</option>
-                    <option value="null">{{ __('None') }}</option>
-                    @foreach($editCommittee?->realm->committees()->where('id', '!=', $editCommittee->id)->get() ?? array() as $committee)
-                        <option value="{{ $committee->id }}">{{ $committee->name }} ({{ $committee->realm_uid }})</option>
-                    @endforeach
-                </x-select>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Save') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.dialog>
-    </form>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
@@ -86,44 +62,16 @@
                 {{ __('committees.delete_title', ['name' => $deleteCommitteeName]) }}
             </x-slot:title>
             <x-slot:content>
-                {{ __('committees.delete_warning', ['name' => $deleteCommitteeName]) }}
+                <div class="y">
+                    <span>{{ __('committees.delete_warning', ['name' => $deleteCommitteeName]) }}</span>
+                    <span>{{ __('committees.delete.confirm') }}<strong>{{ $deleteCommitteeOu }}</strong></span>
+                </div>
+                <x-input.group wire:model="deleteConfirmText" :placeholder="$deleteCommitteeOu"/>
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
                 <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
             </x-slot:footer>
         </x-modal.confirmation>
-    </form>
-
-    <form wire:submit="saveNew">
-        <x-modal.dialog wire:model="showNewModal">
-            <x-slot:title>
-                {{ __('committees.new') }}
-            </x-slot:title>
-            <x-slot:content>
-                <x-input.group wire:model.live="newCommittee.name">
-                    <x-slot:label>{{ __('Name') }}</x-slot:label>
-                </x-input.group>
-                <x-select wire:model.live="newCommittee.realm_uid" class="mt-2">
-                    <x-slot:label>Realm</x-slot:label>
-                    <option value="please-select" selected="selected">{{ __('Please select') }}</option>
-                    @foreach($realms as $realm)
-                        <option value="{{ $realm->uid }}">{{ $realm->long_name }} ({{ $realm->uid }})</option>
-                    @endforeach
-                </x-select>
-                <x-select wire:model.live="newCommittee.parent_committee_id" class="mt-2">
-                    <x-slot:label>{{ __('committees.parent_committee') }}</x-slot:label>
-                    <option value="please-select" selected="selected">{{ __('Please select') }}</option>
-                    <option value="null">{{ __('None') }}</option>
-                    @foreach($newCommittee?->realm?->committees()->where('id', '!=', $newCommittee->id)->get() ?? array() as $committee)
-                        <option value="{{ $committee->id }}">{{ $committee->name }} ({{ $committee->realm_uid }})</option>
-                    @endforeach
-                </x-select>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Save') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.dialog>
     </form>
 </div>

@@ -13,39 +13,39 @@ use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
 // Home
-Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail) {
-    $trail->push('Home', route('dashboard'));
+Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push('Home', route('dashboard', $routeParams));
 });
 
-Breadcrumbs::for('profile', function (BreadcrumbTrail $trail) {
-    $trail->push(__('Profile'), route('profile'));
+Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('Profile'), route('profile', $routeParams));
 });
 
-Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail) {
-    $trail->parent('profile');
-    $trail->push(__('Change password'), route('password.change'));
+Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('profile', $routeParams);
+    $trail->push(__('Change password'), route('password.change', $routeParams));
 });
 
 // Home > Blog
-Breadcrumbs::for('realms', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push('Realms', route('realms'));
+Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('dashboard', $routeParams);
+    $trail->push('Realms', route('realms', $routeParams));
 });
 
-Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail) {
-    $trail->parent('realms');
-    $trail->push('Neu', route('realms.new'));
+Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms', $routeParams);
+    $trail->push('Neu', route('realms.new', $routeParams));
 });
 
-Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail) {
-    $trail->parent('realms');
-    $trail->push('Editieren', route('realms.edit'));
+Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms', $routeParams);
+    $trail->push('Editieren', route('realms.edit', $routeParams));
 });
 
 Breadcrumbs::for('realms.view', function (BreadcrumbTrail $trail, array $routeParams){
     $trail->parent('realms', $routeParams);
     $uid = $routeParams['uid'];
-    $community = \App\Ldap\Community::findOrFailByUid($uid);
+    $community = \App\Ldap\Community::findOrFailByUid($uid); // FIXME?
     $trail->push($community->description[0] . ' (' . $community->ou[0] . ')');//, route('realms.view', $uid)); // not yet defined
 });
 
@@ -79,19 +79,31 @@ Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $r
     $trail->push(__('New'), route('realms.admins.new', $routeParams));
 });
 
-Breadcrumbs::for('groups:index', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push(__('Groups'), route('groups'));
+Breadcrumbs::for('realms.groups', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms', $routeParams);
+    $trail->push($routeParams['uid']);
+    $trail->push(__('Groups'), route('realms.groups', $routeParams));
 });
 
-Breadcrumbs::for('groups:roles', function (BreadcrumbTrail $trail, Group $group) {
-    $trail->parent('groups:index');
-    $trail->push($group->name . ' (' . $group->realm->uid . ')', route('groups.roles', $group->id));
+Breadcrumbs::for('realms.groups.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.groups', $routeParams);
+    $trail->push(__('New Group'), route('realms.groups.new', $routeParams));
 });
 
-Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail) {
-    $trail->parent('dashboard');
-    $trail->push(__('Committees'), route('committees.list'));
+Breadcrumbs::for('realms.groups.roles', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.groups', $routeParams);
+    $name = $routeParams['cn'];
+    $trail->push( $name, route('realms.groups.roles', $routeParams));
+});
+
+Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('dashboard',  $routeParams);
+    $trail->push(__('Committees'), route('committees.list', $routeParams));
+});
+
+Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.list',  $routeParams);
+    $trail->push(__('New Committee'), route('committees.new', $routeParams));
 });
 
 Breadcrumbs::for('committees.roles', function (BreadcrumbTrail $trail, Committee $committee) {

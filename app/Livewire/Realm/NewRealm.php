@@ -31,15 +31,7 @@ class NewRealm extends Component
                 'description' => $this->name,
             ]);
             $realm->setDn("ou=$this->uid,ou=Communities,{$realm->getBaseDn()}");
-            $realm->save();
-            foreach (['admins', 'moderators', 'members'] as $gName){
-                $g = new Group([
-                    'cn' => $gName,
-                    'uniqueMember' => '',
-                ]);
-                $g->setDn("cn=$gName," . $realm->getDn());
-                $g->save();
-            }
+            $realm->generateSkeleton();
 
             return redirect()->route('realms')->with('status', 'Neuer Realm angelegt');
         } catch (LdapRecordException $exception){

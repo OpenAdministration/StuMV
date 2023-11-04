@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Group;
 
-use App\Models\Group;
-use App\Models\Role;
+use App\Ldap\Group;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,26 +11,25 @@ class Roles extends Component {
 
     use WithPagination;
 
+    #[Url]
     public string $search = '';
+    #[Url]
     public string $sortField = 'name';
+    #[Url]
     public string $sortDirection = 'asc';
 
-    public Group $group;
+    public string $group_dn;
+    public string $realm_uid;
+    public string $group_cn;
 
-    public bool $showNewModal = false;
+
     public bool $showDeleteModal = false;
+    public string $deleteRoleDN;
 
-    public Role $newRole;
-    public Role $deleteRole;
-
-    public string $deleteRoleName = '';
-
-    public array $rules = [];
-
-    protected $queryString = ['search', 'sortField', 'sortDirection'];
-
-    public function mount($id) {
-        $this->group = Group::findOrFail($id);
+    public function mount($uid, $cn) {
+        $this->realm_uid = $uid;
+        $this->group_cn = $cn;
+        $this->group_dn = Group::dnFrom($uid, $cn);
     }
 
     public function sortBy($field){
@@ -49,10 +48,10 @@ class Roles extends Component {
     }
 
     public function render() {
+        $group = Group::query()->findOrFail($this->group_dn);
         return view(
             'livewire.group.roles', [
-                'group' => $this->group,
-                'group_roles' => Role::join('group_role_relation', 'role.id', '=', 'group_role_relation.role_id')
+                'group_roles' => []/*Role::join('group_role_relation', 'role.id', '=', 'group_role_relation.role_id')
                     ->join('committee', 'role.committee_id', '=', 'committee.id')
                     ->select('committee.name as committee_name', 'role.name as name', 'role.id as id')
                     ->search('role.name', $this->search)
@@ -60,17 +59,17 @@ class Roles extends Component {
                     ->search('committee.name', $this->search)
                     ->where('group_role_relation.group_id', $this->group->id)
                     ->orderBy($this->sortField, $this->sortDirection)
-                    ->paginate(10),
+                    ->paginate(10)*/,
                 // all users that aren't admins on this realm
-                'free_roles' => Role::join('committee', 'role.committee_id', '=', 'committee.id')
+                'free_roles' => [] /* Role::join('committee', 'role.committee_id', '=', 'committee.id')
                     ->select('committee.name as committee_name', 'committee.realm_uid as realm_uid', 'role.name as name', 'role.id as id')
                     ->where('committee.realm_uid', '=', $this->group->realm->uid)
                     ->get()
-                    ->except($this->group->roles->modelKeys()),
+                    ->except($this->group->roles->modelKeys()) */,
             ]
         )->layout('layouts.app', [
             'headline' => __('groups.roles_heading', [
-                'name' => $this->group->name,
+                'name' => $group->getFirstAttribute('description'),
             ])
         ]);
     }
