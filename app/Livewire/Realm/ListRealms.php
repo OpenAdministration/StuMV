@@ -26,11 +26,6 @@ class ListRealms extends Component
     public bool $showDeleteModal = false;
     public string $deleteRealmName = '';
 
-    public array $rules = [];
-
-    //protected array $queryString = ['search', 'sortField', 'sortDirection'];
-
-
 
     public function sortBy($field): void
     {
@@ -50,6 +45,7 @@ class ListRealms extends Component
 
     public function render()
     {
+        session()->forget('realm_uid');
         $slice = Community::query()
             ->list() // only first level
             ->setDn(Community::$rootDn)
@@ -57,7 +53,7 @@ class ListRealms extends Component
             ->search('description', $this->search)
             ->slice(1, 10, $this->sortField, $this->sortDirection);
 
-        return view('livewire.realm.index', [
+        return view('livewire.realm.list', [
           'realmSlice' => $slice
         ])->layout('layouts.app', ['headline' => 'Realms']);
     }
@@ -82,5 +78,9 @@ class ListRealms extends Component
         $this->showDeleteModal = false;
     }
 
+    public function register($realm_uid) {
+        session(['realm_uid' => $realm_uid]);
+        return $this->redirectRoute('dashboard', ['uid' => $realm_uid]);
+    }
 
 }

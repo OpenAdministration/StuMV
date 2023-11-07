@@ -33,7 +33,7 @@ class NewRealm extends Component
             $realm->setDn("ou=$this->uid,ou=Communities,{$realm->getBaseDn()}");
             $realm->generateSkeleton();
 
-            return redirect()->route('realms')->with('status', 'Neuer Realm angelegt');
+            return redirect()->route('realms.pick')->with('message', 'Neuer Realm angelegt');
         } catch (LdapRecordException $exception){
             $this->addError('uid', $exception->getMessage());
             return false;

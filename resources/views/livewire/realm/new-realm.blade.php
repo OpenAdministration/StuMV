@@ -7,5 +7,5 @@
         <x-slot:label>{{ __('Name') }}</x-slot:label>
         <x-slot:help>Erforderlich</x-slot:help>
     </x-input.group>
-    <x-slot:abort_route>{{ route('realms') }}</x-slot:abort_route>
+    <x-slot:abort_route>{{ route('realms.pick') }}</x-slot:abort_route>
 </x-livewire-form>

@@ -18,13 +18,16 @@
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation', ['navigation' =>
                 array_merge([
-                    'dashboard' => 'Dashboard',
+                    'dashboard' => __('Dashboard'),
+                    'committees.list' => __('Committees'),
+                    //'user' => __('User Management'),
+                    'realms.groups' => __('Groups'),
                 ],
                 /*(Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
                     'committees.list' => __('Committees'),
                 ] : [],*/
                 (Auth::user()->is_superuser) ? [
-                    'realms' => 'Realms',
+                    'realms.pick' => 'Realms',
                 ] : []
                 )
             ])
@@ -45,6 +48,7 @@
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="p-6 bg-white border-b border-gray-200">
                                 {{ Breadcrumbs::render(Route::current()->getName(), Route::current()->parameters())}}
+                                <x-alert/>
                                 {{ $slot }}
                             </div>
                         </div>

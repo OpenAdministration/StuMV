@@ -12,9 +12,17 @@ use Diglactic\Breadcrumbs\Breadcrumbs;
 //  with `$trail`. This is nice for IDE type checking and completion.
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 
-// Home
+Breadcrumbs::for('realms.pick', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('Enter a Realm'));
+});
+
+Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(session('realm_uid', 'u should never see this...'), route('realms.pick', $routeParams));
+});
+
 Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->push('Home', route('dashboard', $routeParams));
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('Dashboard'), route('dashboard', $routeParams));
 });
 
 Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams) {
@@ -26,11 +34,11 @@ Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $rou
     $trail->push(__('Change password'), route('password.change', $routeParams));
 });
 
-// Home > Blog
-Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->parent('dashboard', $routeParams);
-    $trail->push('Realms', route('realms', $routeParams));
+Breadcrumbs::for('pick-realm', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push('Wähle Realm', route('pick-realm', $routeParams));
 });
+
+// Home > Blog
 
 Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('realms', $routeParams);
@@ -42,15 +50,9 @@ Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routePa
     $trail->push('Editieren', route('realms.edit', $routeParams));
 });
 
-Breadcrumbs::for('realms.view', function (BreadcrumbTrail $trail, array $routeParams){
-    $trail->parent('realms', $routeParams);
-    $uid = $routeParams['uid'];
-    $community = \App\Ldap\Community::findOrFailByUid($uid); // FIXME?
-    $trail->push($community->description[0] . ' (' . $community->ou[0] . ')');//, route('realms.view', $uid)); // not yet defined
-});
 
 Breadcrumbs::for('realms.members', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->parent('realms.view', $routeParams);
+    $trail->parent('realms', $routeParams);
     $trail->push(__('Members'), route('realms.members', $routeParams));
 });
 
@@ -60,7 +62,7 @@ Breadcrumbs::for('realms.members.new', function (BreadcrumbTrail $trail, array $
 });
 
 Breadcrumbs::for('realms.mods', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->parent('realms.view', $routeParams);
+    $trail->parent('realms', $routeParams);
     $trail->push(__('Moderators'), route('realms.mods', $routeParams));
 });
 
@@ -70,7 +72,7 @@ Breadcrumbs::for('realms.mods.new', function (BreadcrumbTrail $trail, array $rou
 });
 
 Breadcrumbs::for('realms.admins', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->parent('realms.view', $routeParams);
+    $trail->parent('realms', $routeParams);
     $trail->push(__('Admins'), route('realms.admins', $routeParams));
 });
 
@@ -81,7 +83,6 @@ Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $r
 
 Breadcrumbs::for('realms.groups', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('realms', $routeParams);
-    $trail->push($routeParams['uid']);
     $trail->push(__('Groups'), route('realms.groups', $routeParams));
 });
 
@@ -97,7 +98,7 @@ Breadcrumbs::for('realms.groups.roles', function (BreadcrumbTrail $trail, array 
 });
 
 Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->parent('dashboard',  $routeParams);
+    $trail->parent('realms',  $routeParams);
     $trail->push(__('Committees'), route('committees.list', $routeParams));
 });
 
