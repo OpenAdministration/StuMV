@@ -39,7 +39,8 @@ class NewGroup extends Component
             ]);
             $group->setDn("cn=$this->cn,ou=Groups,ou=$this->realm_uid,ou=Communities,{$group->getBaseDn()}");
             $group->save();
-            return redirect()->route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn])->with('status', 'Neue Gruppe angelegt');
+            return redirect()->route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn])
+                ->with('message', __('Added new Group'));
         } catch (LdapRecordException $exception){
             $this->addError('cn', $exception->getMessage());
             return false;

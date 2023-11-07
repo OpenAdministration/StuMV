@@ -42,6 +42,6 @@ class Profile extends Component
         $user->setAttribute('mail', $this->email);
         $user->setAttribute('cn', $this->fullName);
         $user->save();
-        return redirect()->route('profile')->with('status', __('Saved'));
+        return redirect()->route('profile')->with('message', __('Saved'));
     }
 }

@@ -38,7 +38,8 @@ class NewAdmin extends Component
             $user = User::findOrFail($this->dn);
             $realm = Community::findOrFailByUid($this->realm_uid);
             $realm->adminsGroup()->first()?->members()->attach($user);
-            return redirect()->route('realms.admins', ['uid' => $this->realm_uid])->with('status', 'Neuer Admin hinzugefügt');
+            return redirect()->route('realms.admins', ['uid' => $this->realm_uid])
+                ->with('message', __('Added new Admin'));
         } catch (LdapRecordException $exception){
             $this->addError('dn', $exception->getMessage());
             return false;

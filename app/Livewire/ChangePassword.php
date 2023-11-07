@@ -34,6 +34,6 @@ class ChangePassword extends Component
         $ldapUser = User::findOrFailByUsername($username);
         $ldapUser->setAttribute('userPassword', "{ARGON2}" . Hash::make($this->password));
         $ldapUser->save();
-        return redirect('dashboard')->with('status', __('Password has been changed'));
+        return redirect('dashboard')->with('message', __('Password has been changed'));
     }
 }

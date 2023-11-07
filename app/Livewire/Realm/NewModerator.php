@@ -38,7 +38,8 @@ class NewModerator extends Component
             $user = User::findOrFail($this->dn);
             $realm = Community::findOrFailByUid($this->realm_uid);
             $realm->moderatorsGroup()->first()?->members()->attach($user);
-            return redirect()->route('realms.mods', ['uid' => $this->realm_uid])->with('status', 'Neuer Moderator hinzugefügt');
+            return redirect()->route('realms.mods', ['uid' => $this->realm_uid])
+                ->with('message', __('Added new Moderator'));
         } catch (LdapRecordException $exception){
             $this->addError('dn', $exception->getMessage());
             return false;
