@@ -17,21 +17,21 @@
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation', ['navigation' =>
-                array_merge([
-                    'dashboard' => __('Dashboard'),
+                array_merge((Auth::user()->is_superuser) ? [
+                    'realms.pick' => 'Realms',
+                ] : [],
+                [
                     'committees.list' => __('Committees'),
-                    //'user' => __('User Management'),
+                    'realms.members' => __('Members'),
+                    'realms.mods' => __('Mods'),
+                    'realms.admins' => __('Admins'),
                     'realms.groups' => __('Groups'),
                 ],
+                ),
                 /*(Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
                     'committees.list' => __('Committees'),
                 ] : [],*/
-                (Auth::user()->is_superuser) ? [
-                    'realms.pick' => 'Realms',
-                ] : []
-                )
             ])
-
             <!-- Page Heading -->
             <header class="bg-white shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

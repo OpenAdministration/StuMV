@@ -26,7 +26,7 @@
                 <x-table.cell>{{ $realm->getLongName() }}</x-table.cell>
                 <x-table.cell>
                     <x-link href="#" wire:click="register('{{ $realm->getShortCode() }}')">
-                        <x-fas-dungeon class="inline w-10 h-10"/>{{ __('Enter') }}
+                        <x-fas-dungeon class="inline w-10 h-10"/> {{ __('Enter') }}
                     </x-link>
                 </x-table.cell>
                 <x-table.cell>

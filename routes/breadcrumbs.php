@@ -2,18 +2,20 @@
 
 // Note: Laravel will automatically resolve `Breadcrumbs::` without
 // this import. This is nice for IDE syntax and refactoring.
-use App\Models\Group;
-use App\Models\Realm;
-use App\Models\Committee;
-use App\Models\Role;
+use App\Ldap\Committee;
 use Diglactic\Breadcrumbs\Breadcrumbs;
 
 // This import is also not required, and you could replace `BreadcrumbTrail $trail`
 //  with `$trail`. This is nice for IDE type checking and completion.
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
+use LdapRecord\Models\Attributes\DistinguishedNameBuilder;
 
 Breadcrumbs::for('realms.pick', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->push(__('Enter a Realm'));
+});
+
+Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('Add new Realm'), route('realms.new', $routeParams));
 });
 
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
@@ -36,13 +38,6 @@ Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $rou
 
 Breadcrumbs::for('pick-realm', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->push('Wähle Realm', route('pick-realm', $routeParams));
-});
-
-// Home > Blog
-
-Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->parent('realms', $routeParams);
-    $trail->push('Neu', route('realms.new', $routeParams));
 });
 
 Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routeParams) {
@@ -107,12 +102,26 @@ Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $rout
     $trail->push(__('New Committee'), route('committees.new', $routeParams));
 });
 
-Breadcrumbs::for('committees.roles', function (BreadcrumbTrail $trail, Committee $committee) {
-    $trail->parent('committees.list');
-    $trail->push($committee->name . " (" . $committee->realm_uid . ")", route('committees.roles', $committee->id));
+Breadcrumbs::for('committees.details', function (BreadcrumbTrail $trail, array $routeParams){
+    $trail->parent('committees.list', $routeParams);
+    $c = Committee::findByOrFail('ou', $routeParams['ou']);
+    foreach ($c->committeePath() as $committee){
+        $routeParams['ou'] = $committee;
+        $trail->push($committee, route('committees.roles', $routeParams));
+    }
 });
 
-Breadcrumbs::for('roles:members', function (BreadcrumbTrail $trail, Role $role) {
-    $trail->parent('committees.roles', $role->committee);
-    $trail->push($role->name, route('roles.members', $role->id));
+Breadcrumbs::for('committees.roles', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.details', $routeParams);
+    $trail->push(__('Roles'), route('committees.roles', $routeParams));
+});
+
+Breadcrumbs::for('committees.roles.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.roles', $routeParams);
+    $trail->push(__('New'), route('committees.roles.new', $routeParams));
+});
+
+Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.roles', $routeParams);
+    $trail->push($routeParams['cn'], route('committees.roles.members', $routeParams));
 });

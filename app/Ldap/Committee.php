@@ -2,14 +2,20 @@
 
 namespace App\Ldap;
 
+use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
+use Illuminate\Support\Arr;
 use LdapRecord\Models\Attributes\DistinguishedName;
+use LdapRecord\Models\Attributes\DistinguishedNameBuilder;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
+use LdapRecord\Query\Collection;
 use LdapRecord\Query\Model\Builder;
 
 class Committee extends OrganizationalUnit
 {
     use SearchScopeTrait;
+    use FromCommunityScopeTrait;
+
 
     public static function dnFrom(string $uid, string $ou, array|string $parent_ou = null){
         if(empty($parent_ou)){
@@ -21,14 +27,14 @@ class Committee extends OrganizationalUnit
         return "ou=$ou," . $parent_ou;
     }
 
-    public static function scopeFromCommunity(Builder $query, string $realm_uid): Builder
+    public static function scopeFromCommunity(Builder $query, string $uid): Builder
     {
-        return $query->in(self::dnRoot($realm_uid))
+        return $query->in(self::dnRoot($uid))
             ->whereNotEquals('ou', 'Committees');
     }
 
     public static function dnRoot(string $uid){
-        return "ou=Committees,ou=$uid,ou=Communities," . config('ldap.connections.default.base_dn');
+        return "ou=Committees,ou=$uid,ou=Communities,{base}";
     }
 
     public function setDnFrom(string $uid, string|array $ous): static
@@ -45,6 +51,33 @@ class Committee extends OrganizationalUnit
             return null;
         }
         return self::findOrFail($parentDn);
+    }
+
+    public function getFullName() : string{
+        return $this->getFirstAttribute('description');
+    }
+
+    public function getShortName() : string{
+        return $this->getFirstAttribute('ou');
+    }
+
+    /**
+     * @return array returns all ou's inside the ou=Committees path starting with the uppermost Entry
+     */
+    public function committeePath(): array {
+        $dn = new DistinguishedNameBuilder($this->getDn());
+        $ous = $dn->pop(5); // only real parents are left
+        $ous =$ous->components();
+        return array_reverse(Arr::map($ous, function ($entry){
+            return $entry[1];
+        }));
+    }
+
+    /**
+     * @return array returns all ou's inside the ou=Committees path starting with the uppermost Entry but without itself
+     */
+    public function parentCommitteePath() : array {
+        return array_slice($this->committeePath(), -1);
     }
 
 }

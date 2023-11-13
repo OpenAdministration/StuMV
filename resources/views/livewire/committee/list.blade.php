@@ -36,7 +36,7 @@
                     @endif
                 </x-table.cell>
                 <x-table.cell>
-                    <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'id' => $committee->getFirstAttribute('ou')]) }}">{{ __('committees.manage_roles') }}</x-link>
+                    <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">{{ __('committees.manage_roles') }}</x-link>
                 </x-table.cell>
                 <x-table.cell>
                     <x-button.link-danger wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">{{ __('Delete') }}</x-button.link-danger>

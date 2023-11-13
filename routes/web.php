@@ -43,7 +43,9 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
     Route::get('/{uid}/group/{cn}/add-role', \App\Livewire\Group\Roles::class)->name('realms.groups.roles.add');
     Route::get('/{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
     Route::get('/{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
-    Route::get('/{uid}/committees/{id}', \App\Livewire\Committee\Roles::class)->name('committees.roles');
+    Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
+    Route::get('/{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
+    Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
 });
 
 

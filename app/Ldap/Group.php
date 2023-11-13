@@ -4,8 +4,6 @@ namespace App\Ldap;
 
 use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
-use LdapRecord\Models\Model;
-use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 
 class Group extends \LdapRecord\Models\OpenLDAP\Group
 {
