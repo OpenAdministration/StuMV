@@ -196,7 +196,6 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         // Custom
-        Krlove\EloquentModelGenerator\Provider\GeneratorServiceProvider::class,
 
     ],
 
