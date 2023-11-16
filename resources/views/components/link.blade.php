@@ -8,7 +8,7 @@
 -- Purchase here: https://tailwindui.com/
 --}}
 
-<a
+<a wire:navigate
     {{ $attributes->merge([
         'class' => 'text-indigo-600 hover:text-indigo-900' . ($attributes->get('disabled') ? ' opacity-75 cursor-not-allowed' : ''),
     ]) }}
