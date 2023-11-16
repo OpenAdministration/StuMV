@@ -1,7 +1,9 @@
 <div class="flex-col space-y-4">
     <div class="flex justify-between">
-        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('realms.search_members') }}"></x-input>
-        <x-button.link-primary href="{{ route('realms.members.new', ['uid' => $community_name]) }}" class="flex"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.link-primary>
+        <x-input.group type="text" wire:model.live="search" placeholder="{{ __('realms.search_members') }}"></x-input.group>
+        <x-button.link-primary href="{{ route('realms.members.new', ['uid' => $community_name]) }}" class="flex">
+            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
+        </x-button.link-primary>
 
     </div>
     <x-table>

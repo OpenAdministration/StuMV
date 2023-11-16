@@ -7,6 +7,7 @@ use App\Ldap\Traits\SearchScopeTrait;
 use Illuminate\Support\Arr;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\Attributes\DistinguishedNameBuilder;
+use LdapRecord\Models\Model;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Collection;
 use LdapRecord\Query\Model\Builder;
@@ -18,13 +19,14 @@ class Committee extends OrganizationalUnit
 
 
     public static function dnFrom(string $uid, string $ou, array|string $parent_ou = null){
+        // standardize input (esp. for null and empty arrays)
         if(empty($parent_ou)){
-            $parent_ou = self::dnRoot($uid);
+            $parent_ou = "";
         }
         if(is_array($parent_ou)){
             $parent_ou = implode(',ou=', $parent_ou);
         }
-        return "ou=$ou," . $parent_ou;
+        return "ou=$ou," . $parent_ou . self::dnRoot($uid);
     }
 
     public static function scopeFromCommunity(Builder $query, string $uid): Builder
@@ -78,6 +80,20 @@ class Committee extends OrganizationalUnit
      */
     public function parentCommitteePath() : array {
         return array_slice($this->committeePath(), -1);
+    }
+
+    /**
+     * @return Builder returns a querry wich
+     */
+    public function roles() : Builder {
+        return Role::query()
+            ->list()
+            ->setBaseDn($this->getDn())
+        ;
+    }
+
+    public static function findByName(string $uid, string $name) : self {
+        return self::fromCommunity($uid)->where('ou', $name)->first();
     }
 
 }

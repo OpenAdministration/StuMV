@@ -30,11 +30,13 @@ class ListCommittees extends Component
 
     public string $deleteConfirmText;
 
-    public function mount($uid){
+    public function mount($uid): void
+    {
         $this->realm_uid = $uid;
     }
 
-    public function sortBy($field){
+    public function sortBy($field): void
+    {
         if($this->sortField === $field){
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -80,14 +82,12 @@ class ListCommittees extends Component
         }
         $c->delete(recursive: true);
 
-        // reset everything to prevent a 404 modal
-        unset($this->deleteCommitteeDn);
-
-        $this->showDeleteModal = false;
+        $this->close();
     }
 
     public function close(): void
     {
+        unset($this->deleteCommitteeDn);
         $this->showDeleteModal = false;
     }
 

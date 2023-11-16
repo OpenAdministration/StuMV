@@ -14,14 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::middleware(['auth'])->group(function (){
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+
     Route::get('/profile', \App\Livewire\Profile::class)->name('profile');
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
 
@@ -31,6 +25,9 @@ Route::middleware(['auth'])->group(function (){
 });
 
 Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(function (){
+    Route::get('/{uid}/dashboard', function (){
+        return view('dashboard');
+    })->name('dashboard');
     Route::get('/{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');
     Route::get('/{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
     Route::get('/{uid}/mods/', \App\Livewire\Realm\Moderators::class)->name('realms.mods');

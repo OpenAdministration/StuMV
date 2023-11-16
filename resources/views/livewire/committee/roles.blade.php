@@ -1,44 +1,46 @@
 <div class="flex-col space-y-4">
     <div class="flex justify-between">
-        <x-input type="text" wire:model.live.debounce="search" placeholder="{{ __('roles.search') }}"></x-input>
-        <x-button.primary class="flex" wire:click="new()"><x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.primary>
+        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('roles.search') }}"></x-input.group>
+        <x-button.link-primary :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])">
+            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
+        </x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
-            <x-table.heading
-                sortable wire:click="sortBy('name')" :direction="$sortField === 'name' ? $sortDirection : null"
-            >
-                {{ __('Name') }}
+            <x-table.heading sortable wire:click="sortBy('cn')" :direction="$sortField === 'cn' ? $sortDirection : null">
+                {{ __('Short Name') }}
+            </x-table.heading>
+            <x-table.heading sortable wire:click="sortBy('description')" :direction="$sortField === 'description' ? $sortDirection : null">
+                {{ __('Full Name') }}
             </x-table.heading>
             <x-table.heading  class="text-left">
-                {{ __('roles.members') }}
+                {{ __('Members') }}
             </x-table.heading>
             <x-table.heading/>
             <x-table.heading/>
             <x-table.heading/>
         </x-slot>
-        @forelse($roles as $role)
+        @forelse($rolesSlice->items() as $role)
             <x-table.row>
-                <x-table.cell>{{ $role->name }}</x-table.cell>
+                <x-table.cell>{{ $role->getFirstAttribute('cn') }}</x-table.cell>
+                <x-table.cell>{{ $role->getFirstAttribute('description') }}</x-table.cell>
                 <x-table.cell>
-                    @forelse($role->members as $user_rel)
-                        @if($loop->last)
-                            {{ $user_rel->user->full_name }}
-                        @else
-                            {{ $user_rel->user->full_name }},
-                        @endif
+                    @forelse($role->getAttribute('uniqueMember') as $memberDn)
+                        {{ $memberDn }}
                     @empty
-                        {{ __('roles.no_members') }}
+                        {{ __('No members found') }}
                     @endforelse
                 </x-table.cell>
                 <x-table.cell>
-                    <x-link href="{{ route('roles.members', $role->id) }}">{{ __('roles.manage_members') }}</x-link>
+                    <x-link href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}">
+                        {{ __('roles.manage_members') }}
+                    </x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $role->id }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-button.link-danger wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link wire:click="edit('{{ $role->id }}')">{{ __('Edit') }}</x-button.link>
+                   edit
                 </x-table.cell>
             </x-table.row>
         @empty
@@ -51,29 +53,11 @@
             </x-table.row>
         @endforelse
     </x-table>
-    {{ $roles->links() }}
-
-    <form wire:submit="saveEdit">
-        <x-modal.dialog wire:model="showEditModal">
-            <x-slot:title>
-                {{ __('roles.edit', ['name' => $editRoleOldName]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <x-input.group wire:model.live="editRole.name">
-                    <x-slot:label>{{ __('Name') }}</x-slot:label>
-                </x-input.group>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Save') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.dialog>
-    </form>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
-                {{ __('roles.delete_title', ['name' => $deleteRoleName]) }}
+                {{ __('roles.delete_title', ['name' => $deleteRoleCn]) }}
             </x-slot:title>
             <x-slot:content>
                 {{ __('roles.delete_warning', ['name' => $deleteRoleName]) }}
@@ -83,22 +67,5 @@
                 <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
             </x-slot:footer>
         </x-modal.confirmation>
-    </form>
-
-    <form wire:submit="saveNew">
-        <x-modal.dialog wire:model="showNewModal">
-            <x-slot:title>
-                {{ __('roles.new') }}
-            </x-slot:title>
-            <x-slot:content>
-                <x-input.group wire:model.live="newRole.name">
-                    <x-slot:label>{{ __('Name') }}</x-slot:label>
-                </x-input.group>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Save') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.dialog>
     </form>
 </div>
