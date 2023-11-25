@@ -20,9 +20,9 @@ class NewModerator extends Component
     public string $realm_uid = "";
 
 
-    public function mount($uid) : void
+    public function mount(Community $uid) : void
     {
-        $this->realm_uid = $uid;
+        $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
     #[Title('realms.new_member')]

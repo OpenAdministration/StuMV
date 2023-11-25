@@ -36,7 +36,7 @@
                 <x-table.cell>{{ $realm->getShortCode() }}</x-table.cell>
                 <x-table.cell>{{ $realm->getLongName() }}</x-table.cell>
                 <x-table.cell>
-                    <x-link href="#" wire:click="register('{{ $realm->getShortCode() }}')">
+                    <x-link href="#" wire:click="enter('{{ $realm->getShortCode() }}')">
                         <x-fas-dungeon/> {{ __('Enter') }}
                     </x-link>
                 </x-table.cell>

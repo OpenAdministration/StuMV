@@ -3,6 +3,7 @@
 namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
+use App\Ldap\Community;
 use App\Ldap\Role;
 use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Computed;
@@ -38,8 +39,8 @@ class ListRoles extends Component {
      *     - Remove dupes from member overview
      */
 
-    public function mount($uid, $ou) {
-       $this->uid = $uid;
+    public function mount(Community $uid, $ou) {
+       $this->uid = $uid->getFirstAttribute('ou');
        $this->ou = $ou;
     }
 

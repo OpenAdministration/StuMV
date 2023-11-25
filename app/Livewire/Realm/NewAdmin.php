@@ -18,8 +18,8 @@ class NewAdmin extends Component
     public string $realm_uid = "";
 
 
-    public function mount($uid):void{
-        $this->realm_uid = $uid;
+    public function mount(Community $uid):void{
+        $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application

@@ -18,15 +18,19 @@ class ActiveRealm
     public function handle(Request $request, Closure $next)
     {
         if (!session()->exists('realm_uid')){
+            // auto-pick if unset
             $realms = Community::query()
                 ->list() // only first level
-                ->setDn(Community::$rootDn)->get('ou');
+                ->setDn(Community::$rootDn)->get();
             if($realms->count() !== 1){
                 return redirect()->route('realms.pick')
                     ->with('status', 'warning')
                     ->with('message', __('Enter a Dungeon first'));
             }
-            session(['realm_uid' => $realms->first()->getFirstAttribute('ou')]);
+            // enter the community
+            $community  = $realms->first();
+            $request->user()->can('enter', $community);
+            session(['realm_uid' => $community->getFirstAttribute('ou')]);
         }
         return $next($request);
     }

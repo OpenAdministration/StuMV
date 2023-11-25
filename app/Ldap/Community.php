@@ -54,6 +54,10 @@ class Community extends OrganizationalUnit implements LdapImportable
         });
     }
 
+    public function getRouteKeyName() : string {
+        return 'ou';
+    }
+
     public function membersGroup() : Group {
         return Group::query()->in($this->getDn())->where('cn', 'members')->first();
     }

@@ -20,7 +20,8 @@ class EditRealm extends Component
     #[Rule('required|min:6')]
     public string $name = '';
 
-    public function mount(){
+    public function mount(): void
+    {
         // here is an implicit search for the realm and return 404 if not existent
         $this->name = $this->realm->description[0] ?? "";
     }

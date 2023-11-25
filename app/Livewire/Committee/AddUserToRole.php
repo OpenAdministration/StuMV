@@ -21,8 +21,8 @@ class AddUserToRole extends Component
 
     public string $user_dn;
 
-    public function mount($uid, $ou, $cn){
-        $this->uid = $uid;
+    public function mount(Community $uid, $ou, $cn){
+        $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
     }

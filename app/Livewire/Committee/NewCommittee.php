@@ -3,6 +3,7 @@
 namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
+use App\Ldap\Community;
 use App\Rules\UniqueCommittee;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -21,8 +22,8 @@ class NewCommittee extends Component
 
     public string $description = "";
 
-    public function mount($uid){
-        $this->realm_uid = $uid;
+    public function mount(Community $uid){
+        $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
     public function rules(): array

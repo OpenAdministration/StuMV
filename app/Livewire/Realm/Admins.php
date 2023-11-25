@@ -26,8 +26,8 @@ class Admins extends Component {
     public string $deleteAdminName = '';
 
 
-    public function mount($uid) {
-        $this->community_name = $uid;
+    public function mount(Community $uid) {
+        $this->community_name = $uid->getFirstAttribute('ou');
     }
 
     public function sortBy($field): void
@@ -62,12 +62,10 @@ class Admins extends Component {
                 // all users that aren't admins on this realm
                 //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
-        )->layout('layouts.app', [
-            'headline' => __('realms.admins_heading', [
+        )->title(__('realms.admins_heading', [
                 'name' => $this->community()->description[0],
                 'uid' => $this->community()->ou[0]
-            ])
-        ]);
+        ]));
     }
 
     public function deletePrepare($username): void

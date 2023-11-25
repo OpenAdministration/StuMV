@@ -39,6 +39,4 @@ class NewRealm extends Component
             return false;
         }
     }
-
-
 }

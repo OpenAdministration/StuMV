@@ -4,6 +4,8 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Livewire\Attributes\Url;
@@ -13,6 +15,7 @@ use Livewire\WithPagination;
 class ListRealms extends Component
 {
     use WithPagination;
+    use AuthorizesRequests;
 
     #[Url]
     public string $search = '';
@@ -54,18 +57,20 @@ class ListRealms extends Component
             ->slice(1, 10, $this->sortField, $this->sortDirection);
 
         return view('livewire.realm.list-communities', [
-          'realmSlice' => $slice
-        ])->layout('layouts.app', ['headline' => 'Realms']);
+            'realmSlice' => $slice
+        ]);
     }
 
     public function deletePrepare($uid): void
     {
+        $this->authorize('delete', Community::class);
         $this->deleteRealmName = $uid;
         $this->showDeleteModal = true;
     }
 
     public function deleteCommit(): void
     {
+        $this->authorize('delete', Community::class);
         $community = Community::findOrFailByUid($this->deleteRealmName);
         $community->delete(recursive: true);
         // reset everything to prevent a 404 modal
@@ -78,9 +83,15 @@ class ListRealms extends Component
         $this->showDeleteModal = false;
     }
 
-    public function register($realm_uid) {
+    /**
+     * @param $realm_uid string the selected realm_uid
+     * @return void
+     */
+    public function enter(string $realm_uid){
+        $c = Community::findOrFailByUid($realm_uid);
+        $this->authorize('enter', $c);
         session(['realm_uid' => $realm_uid]);
-        return $this->redirectRoute('dashboard', ['uid' => $realm_uid]);
+        $this->redirectRoute('committees.list', ['uid' => $realm_uid]);
     }
 
 }

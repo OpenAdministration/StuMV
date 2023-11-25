@@ -25,14 +25,11 @@ class Members extends Component {
 
     public string $deleteMemberName = '';
 
-    public array $rules = [];
-
-    #[Rule('required')]
     public string $community_name;
 
-    public function mount($uid): void
+    public function mount(Community $uid): void
     {
-        $this->community_name = $uid;
+        $this->community_name = $uid->getFirstAttribute('ou');
     }
 
     public function sortBy($field){
@@ -57,17 +54,14 @@ class Members extends Component {
             'livewire.realm.members', [
                 'realm_members' => $members,
             ]
-        )->layout('layouts.app', [
-            'headline' => __('realms.members_heading', [
-                'name' => $community->description[0],
-                'uid' => $community->ou[0],
-            ])
-        ]);
+        )->title(__('realms.members_heading', [
+            'name' => $community->description[0],
+            'uid' => $community->ou[0],
+        ]));
     }
 
     public function deletePrepare($uid): void
     {
-
         $community = Community::findOrFailByUid($this->community_name);
         $userBelongsToRealm = $community->membersGroup()->members()->whereEquals('uid', $uid)->get();
         if(!$userBelongsToRealm) {

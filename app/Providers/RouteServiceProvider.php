@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Ldap\Community;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/dashboard';
+    public const HOME = '/realm-pick';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
@@ -27,6 +28,8 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->configureRateLimiting();
+
+        $this->model('uid', Community::class);
 
         $this->routes(function () {
             Route::middleware('api')

@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Ldap\Community;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -43,6 +44,7 @@ class ListSuperUsers extends Component {
     }
 
 
+    #[Title('Manage Superadmins')]
     public function render() {
         $superGroup = SuperUserGroup::group();
         $listSuperusers = $superGroup->members()
@@ -57,9 +59,7 @@ class ListSuperUsers extends Component {
                 // all users that aren't admins on this realm
                 //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
-        )->layout('layouts.app', [
-            'headline' => __('Manage Superadmins')
-        ]);
+        );
     }
 
     public function deletePrepare($username): void

@@ -3,6 +3,7 @@
 namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
+use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueRole;
 use Livewire\Attributes\Locked;
@@ -20,8 +21,8 @@ class NewRole extends Component
 
     public string $description;
 
-    public function mount($uid, $ou){
-        $this->uid = $uid;
+    public function mount(Community $uid, $ou){
+        $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 
@@ -46,7 +47,7 @@ class NewRole extends Component
         $r = new Role([
             'cn' => $this->cn,
             'description' => $this->description,
-            'uniqueMember' => '',
+            'member' => '',
         ]);
         $r->inside($c);
         $r->save();

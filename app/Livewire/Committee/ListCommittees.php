@@ -3,7 +3,9 @@
 namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
+use App\Ldap\Community;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,9 +32,9 @@ class ListCommittees extends Component
 
     public string $deleteConfirmText;
 
-    public function mount($uid): void
+    public function mount(Community $uid): void
     {
-        $this->realm_uid = $uid;
+        $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
     public function sortBy($field): void
@@ -51,6 +53,7 @@ class ListCommittees extends Component
         $this->resetPage();
     }
 
+    #[Title('Committees')]
     public function render()
     {
         $committeesSlice = Committee::fromCommunity($this->realm_uid)
@@ -60,7 +63,7 @@ class ListCommittees extends Component
 
         return view('livewire.committee.list', [
             'committeesSlice' => $committeesSlice,
-        ])->layout('layouts.app', ['headline' => __('Committees')]);
+        ]);
     }
 
 

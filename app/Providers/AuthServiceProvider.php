@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\User;
 use App\Policies\CommitteePolicy;
@@ -18,7 +19,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
-        Community::class => CommunityPolicy::class
+        Community::class => CommunityPolicy::class,
+        Committee::class => CommitteePolicy::class,
     ];
 
     /**

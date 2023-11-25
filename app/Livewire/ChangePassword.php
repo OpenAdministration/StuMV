@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Ldap\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,6 @@ class ChangePassword extends Component
         $ldapUser = User::findOrFailByUsername($username);
         $ldapUser->setAttribute('userPassword', "{ARGON2}" . Hash::make($this->password));
         $ldapUser->save();
-        return redirect('dashboard')->with('message', __('Password has been changed'));
+        return redirect(RouteServiceProvider::HOME)->with('message', __('Password has been changed'));
     }
 }

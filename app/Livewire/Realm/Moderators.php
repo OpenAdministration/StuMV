@@ -27,9 +27,9 @@ class Moderators extends Component {
     #[Rule('required')]
     public string $community_name;
 
-    public function mount($uid): void
+    public function mount(Community $uid): void
     {
-        $this->community_name = $uid;
+        $this->community_name = $uid->getFirstAttribute('ou');
     }
 
     public function sortBy($field){

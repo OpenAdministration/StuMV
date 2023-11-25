@@ -13,6 +13,7 @@ use PhpParser\Node\Expr\AssignOp\Mod;
 
 class User extends \LdapRecord\Models\OpenLDAP\User
 {
+    use SearchScopeTrait;
     public static function findByUsername(string $username) : ?static
     {
         return self::query()->where('uid', '=', $username)->first();

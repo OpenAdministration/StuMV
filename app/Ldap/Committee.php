@@ -92,7 +92,7 @@ class Committee extends OrganizationalUnit
         ;
     }
 
-    public static function findByName(string $uid, string $name) : self {
+    public static function findByName(string $uid, string $name) : ?self {
         return self::fromCommunity($uid)->where('ou', $name)->first();
     }
 

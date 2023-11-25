@@ -18,7 +18,7 @@
                             {{ __('Committees') }}
                         </x-nav-link>
                         <x-nav-link wire:navigate :active="request()->routeIs('realms.members')"
-                                    :href="route('realms.members', ['uid' => session('realm_uid', 'default')])"
+                                    :href="route('realms.members', ['uid' => session('realm_uid')])"
                         >
                             {{ __('Members') }}
                         </x-nav-link>
