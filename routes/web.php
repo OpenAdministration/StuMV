@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth'])->group(function (){
-
+    Route::get('/', function (){
+        return redirect()->route('dashboard', session('realm_uid', 'default'));
+    });
     Route::get('/profile', \App\Livewire\Profile::class)->name('profile');
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
 
@@ -43,6 +45,11 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
     Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
     Route::get('/{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
     Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
+});
+
+Route::middleware(['superuser', 'auth'])->group(function (){
+    Route::get('/superusers', \App\Livewire\ListSuperUsers::class)->name('superusers.list');
+    Route::get('/add-superuser', \App\Livewire\AddSuperUser::class)->name('superusers.add');
 });
 
 

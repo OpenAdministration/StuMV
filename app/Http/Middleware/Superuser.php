@@ -2,8 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Ldap\SuperUserGroup;
+use App\Ldap\User;
 use Closure;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Http\Request;
 
 class Superuser
 {
@@ -28,16 +31,18 @@ class Superuser
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        if ($this->auth->getUser()->is_superuser === false) {
+        $username = $this->auth->user()?->username;
+        $u = User::findOrFailByUsername($username);
+        $isSuperUser = SuperUserGroup::group()->members()->exists($u);
+        if (!$isSuperUser) {
             abort(403, 'Unauthorized action.');
         }
-
         return $next($request);
     }
 }

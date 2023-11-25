@@ -125,3 +125,11 @@ Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, a
     $trail->parent('committees.roles', $routeParams);
     $trail->push($routeParams['cn'], route('committees.roles.members', $routeParams));
 });
+
+Breadcrumbs::for('superusers.list', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('Superusers'), route('superusers.list', $routeParams));
+});
+
+Breadcrumbs::for('superusers.add', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('New'), route('superusers.add', $routeParams));
+});
