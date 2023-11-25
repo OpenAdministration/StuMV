@@ -11,21 +11,8 @@ use LdapRecord\Models\Relations\HasMany;
 use LdapRecord\Models\Relations\Relation;
 use PhpParser\Node\Expr\AssignOp\Mod;
 
-class User extends Model implements Authenticatable
+class User extends \LdapRecord\Models\OpenLDAP\User
 {
-    use CanAuthenticate;
-    use HasPassword;
-    use SearchScopeTrait;
-
-    protected string $guidKey = 'uid';
-
-    public static array $objectClasses = [
-        'top',
-        'person',
-        'organizationalPerson',
-        'inetOrgPerson',
-    ];
-
     public static function findByUsername(string $username) : ?static
     {
         return self::query()->where('uid', '=', $username)->first();
@@ -39,6 +26,10 @@ class User extends Model implements Authenticatable
     public function groups(): HasMany
     {
         return $this->hasMany(Group::class, 'uniqueMember');
+    }
+
+    public function isSuperAdmin() : bool{
+        return SuperUserGroup::group()->members()->exists($this);
     }
 
     public function adminOf(): HasMany

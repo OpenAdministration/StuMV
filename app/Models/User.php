@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,19 +18,14 @@ class User extends Authenticatable implements LdapAuthenticatable
     use HasApiTokens, HasFactory, Notifiable;
     use AuthenticatesWithLdap;
 
-    protected string $guidKey = 'uid';
-
-    public static array $objectClasses = [
-        'top',
-        'person',
-        'organizationalperson',
-        'inetOrgPerson',
-    ];
-
     protected $table = 'user';
 
+    /***
+     * @inheritDoc
+     */
     public function getLdapGuidColumn() : string
     {
+        // openLdap specific
         return 'uid';
     }
 
@@ -43,7 +39,6 @@ class User extends Authenticatable implements LdapAuthenticatable
         'username',
         'email',
         'password',
-        'is_superuser',
     ];
 
     /**
@@ -63,30 +58,14 @@ class User extends Authenticatable implements LdapAuthenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'is_superuser' => 'boolean',
     ];
 
     /**
-     * @return BelongsToMany
+     * @return \App\Ldap\User Returns the equivalent LDAP user
      */
-    public function admin_realms(): Relation
+    public function ldap() : \App\Ldap\User
     {
-        return $this->belongsToMany(Realm::class, 'realm_admin_relation');
+        return \App\Ldap\User::findOrFailByUsername($this->username);
     }
 
-    /**
-     * @return BelongsToMany
-     */
-    public function realms(): Relation
-    {
-        return $this->belongsToMany(Realm::class, 'realm_user_relation');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function roles(): Relation
-    {
-        return $this->hasMany(RoleUserRelation::class, 'user_id');
-    }
 }
