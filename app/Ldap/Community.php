@@ -55,15 +55,15 @@ class Community extends OrganizationalUnit implements LdapImportable
     }
 
     public function membersGroup() : Group {
-        return Group::query()->in($this->getDn())->where('cn', 'members')->sole();
+        return Group::query()->in($this->getDn())->where('cn', 'members')->first();
     }
 
     public function moderatorsGroup() : Group {
-        return Group::query()->in($this->getDn())->where('cn', 'moderators')->sole();
+        return Group::query()->in($this->getDn())->where('cn', 'moderators')->first();
     }
 
     public function adminsGroup() : Group {
-        return Group::query()->in($this->getDn())->where('cn', 'moderators')->sole();
+        return Group::query()->in($this->getDn())->where('cn', 'moderators')->first();
     }
 
     public function generateSkeleton() {

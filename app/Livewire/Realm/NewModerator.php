@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class NewModerator extends Component
@@ -23,6 +24,7 @@ class NewModerator extends Component
         $this->realm_uid = $uid;
     }
 
+    #[Title('Test')]
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $c = Community::findOrFailByUid($this->realm_uid);
