@@ -10,7 +10,8 @@ use Livewire\Component;
 
 class NewModerator extends Component
 {
-    public string $search = "";
+    #public string $search = "";
+
     #[Rule('required|string')]
     public string $dn = "";
 
@@ -24,10 +25,8 @@ class NewModerator extends Component
 
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $userList = User::query()
-            ->search('uid', $this->search)
-            ->search('dn', $this->search)
-            ->get();
+        $c = Community::findOrFailByUid($this->realm_uid);
+        $userList = $c->membersGroup()->members()->get();
         return view('livewire.realm.new-moderator', ['selectable_users' => $userList]);
     }
 
@@ -37,7 +36,7 @@ class NewModerator extends Component
         try{
             $user = User::findOrFail($this->dn);
             $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->moderatorsGroup()->first()?->members()->attach($user);
+            $realm->moderatorsGroup()->members()->attach($user);
             return redirect()->route('realms.mods', ['uid' => $this->realm_uid])
                 ->with('message', __('Added new Moderator'));
         } catch (LdapRecordException $exception){

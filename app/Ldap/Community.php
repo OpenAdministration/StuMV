@@ -54,16 +54,16 @@ class Community extends OrganizationalUnit implements LdapImportable
         });
     }
 
-    public function membersGroup() : HasOneChild {
-        return $this->hasOneChild(Group::class, 'cn=members');
+    public function membersGroup() : Group {
+        return Group::query()->in($this->getDn())->where('cn', 'members')->sole();
     }
 
-    public function moderatorsGroup() : HasOneChild {
-        return $this->hasOneChild(Group::class, 'cn=moderators');
+    public function moderatorsGroup() : Group {
+        return Group::query()->in($this->getDn())->where('cn', 'moderators')->sole();
     }
 
-    public function adminsGroup() : HasOneChild {
-        return $this->hasOneChild(Group::class, 'cn=admins');
+    public function adminsGroup() : Group {
+        return Group::query()->in($this->getDn())->where('cn', 'moderators')->sole();
     }
 
     public function generateSkeleton() {

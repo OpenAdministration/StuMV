@@ -52,7 +52,7 @@ class Members extends Component {
 
     public function render() {
         $community = Community::findOrFailByUid($this->community_name);
-        $members = $community->membersGroup()->first()?->members()->get();
+        $members = $community->membersGroup()->members()->get();
         return view(
             'livewire.realm.members', [
                 'realm_members' => $members,
@@ -69,7 +69,7 @@ class Members extends Component {
     {
 
         $community = Community::findOrFailByUid($this->community_name);
-        $userBelongsToRealm = $community->membersGroup()->first()?->members()->whereEquals('uid', $uid)->get();
+        $userBelongsToRealm = $community->membersGroup()->members()->whereEquals('uid', $uid)->get();
         if(!$userBelongsToRealm) {
             // only allow deletes from the same realm
             return;
@@ -82,7 +82,7 @@ class Members extends Component {
     {
         $community = Community::findOrFailByUid($this->community_name);
         $user = User::findOrFailByUsername($this->deleteMemberName);
-        $community->membersGroup()->first()?->members()->detach($user);
+        $community->membersGroup()->members()->detach($user);
         $this->showDeleteModal = false;
     }
 

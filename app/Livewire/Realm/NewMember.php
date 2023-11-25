@@ -38,7 +38,7 @@ class NewMember extends Component
         try {
             $user = User::findOrFail($this->dn);
             $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->membersGroup()->first()?->members()->attach($user);
+            $realm->membersGroup()->members()->attach($user);
             return redirect()->route('realms.members', ['uid' => $this->realm_uid])
                 ->with('message', __('Added new Member'));
         } catch (LdapRecordException $exception) {

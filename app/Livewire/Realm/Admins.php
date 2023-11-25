@@ -52,7 +52,7 @@ class Admins extends Component {
     }
 
     public function render() {
-        $admins = $this->community()?->adminsGroup()->first()?->members()->get();
+        $admins = $this->community()?->adminsGroup()->members()->get();
         return view(
             'livewire.realm.admins', [
                 'realm' => $this->community(),
@@ -70,45 +70,10 @@ class Admins extends Component {
         ]);
     }
 
-    public function new(): void
-    {
-        $this->rules = [
-            'newAdmin.id' => 'required|integer',
-        ];
-
-        $this->newAdmin = new User();
-        $this->showNewModal = true;
-    }
-
-    public function saveNew(): void
-    {
-        $this->validate();
-
-        $newAdmin = User::find($this->newAdmin->id);
-
-        if (empty($newAdmin)) {
-            $this->addError('newAdmin.id', 'Benutzer nicht gefunden!');
-            $this->showNewModal = false;
-            return;
-        }
-
-        $userBelongsToRealm = $newAdmin->admin_realms()->where('uid', $this->realm->uid)->exists();
-
-        if($userBelongsToRealm) {
-            $this->addError('newAdmin.id', 'Ungültiger Benutzer!');
-            $this->showNewModal = false;
-            return;
-        }
-
-        $this->realm->admins()->attach($newAdmin);
-        $this->realm->refresh();
-        $this->showNewModal = false;
-    }
-
     public function deletePrepare($username): void
     {
         $user = User::findByUsername($username);
-        $userBelongsToRealm = Community::findByUid($this->community_name)?->adminsGroup()->first()?->members()->get()->contains($user);
+        $userBelongsToRealm = Community::findByUid($this->community_name)?->adminsGroup()->members()->get()->contains($user);
         if(!$userBelongsToRealm) {
             // check if the user to delete is an admin in this realm
             unset($this->deleteAdminName);
@@ -120,19 +85,17 @@ class Admins extends Component {
 
     public function deleteCommit(): void
     {
-        $admins = Community::findByUid($this->community_name)?->adminsGroup()->first()?->members();
+        $admins = Community::findByUid($this->community_name)?->adminsGroup()->members();
         $user = User::findByUsername($this->deleteAdminName);
         $admins->detach($user);
 
         // reset everything to prevent a 404 modal
-        unset($this->deleteAdminName);
-
-        $this->showDeleteModal = false;
+        $this->close();
     }
 
     public function close(): void
     {
-        $this->showNewModal = false;
+        unset($this->deleteAdminName);
         $this->showDeleteModal = false;
     }
 }

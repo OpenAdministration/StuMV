@@ -5,6 +5,7 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Rules\UniqueCommittee;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class NewCommittee extends Component
@@ -15,6 +16,7 @@ class NewCommittee extends Component
 
     public string $parent_ou = "";
 
+    #[Validate]
     public string $ou = "";
 
     public string $description = "";
@@ -39,10 +41,6 @@ class NewCommittee extends Component
         return view('livewire.committee.new-committee', [
             'select_parents' => $parents,
         ]);
-    }
-
-    public function updating(){
-        $this->validate();
     }
 
     public function save(){
