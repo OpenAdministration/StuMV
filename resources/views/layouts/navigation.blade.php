@@ -38,11 +38,11 @@
                             {{ __('Gruppen') }}
                         </x-nav-link>
                     @endcan
-                    @can('superuser')
-                        <x-nav-link wire:navigate :active="request()->routeIs('superusers.list')"
-                                    :href="route('superusers.list', ['uid' => session('realm_uid', 'default')])"
+                    @can('superadmin', \App\Models\User::class)
+                        <x-nav-link wire:navigate :active="request()->routeIs('superadmins.list')"
+                                    :href="route('superadmins.list')"
                         >
-                            {{ __('Superuser') }}
+                            {{ __('Superadmin') }}
                         </x-nav-link>
                     @endcan
                     <x-nav-link :active="request()->routeIs('realms.pick')"

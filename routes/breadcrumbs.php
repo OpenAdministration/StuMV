@@ -19,7 +19,7 @@ Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routePar
 });
 
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->push(session('realm_uid', 'u should never see this...'), route('realms.pick', $routeParams));
+    $trail->push(session('realm_uid', 'u should never see this...'), route('realms.pick' /* no route params! */));
 });
 
 Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail, array $routeParams) {
@@ -37,7 +37,7 @@ Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $rou
 });
 
 Breadcrumbs::for('pick-realm', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->push('Wähle Realm', route('pick-realm', $routeParams));
+    $trail->push('Wähle Realm', route('pick-realm' /* no route params! */));
 });
 
 Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routeParams) {
@@ -126,10 +126,10 @@ Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, a
     $trail->push($routeParams['cn'], route('committees.roles.members', $routeParams));
 });
 
-Breadcrumbs::for('superusers.list', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->push(__('Superusers'), route('superusers.list', $routeParams));
+Breadcrumbs::for('superadmins.list', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('Superusers'), route('superadmins.list' /* none */));
 });
 
-Breadcrumbs::for('superusers.add', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->push(__('New'), route('superusers.add', $routeParams));
+Breadcrumbs::for('superadmins.add', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->push(__('New'), route('superadmins.add' /* none */));
 });

@@ -41,7 +41,6 @@ class DatabaseSeeder extends Seeder
             'username' =>  'admin',
             'full_name' => 'admin',
             'email' => 'admin@example.com',
-            'is_superuser' => true,
             'password' => Hash::make('admin'),
             'uid' => '61616161-6161-6161-6164-61646d696e',
             'domain' => 'default'

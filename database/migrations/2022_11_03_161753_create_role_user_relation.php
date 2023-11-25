@@ -15,10 +15,13 @@ return new class extends Migration
     {
         Schema::create('role_user_relation', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('role_id')->unsigned();
-            $table->bigInteger('user_id')->unsigned();
+            $table->string('role_cn');
+            $table->string('committee_dn');
+            $table->string('username');
             $table->date('from');
             $table->date('until')->nullable();
+            $table->date('decided')->nullable();
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }

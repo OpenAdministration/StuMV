@@ -47,13 +47,13 @@ class ListSuperUsers extends Component {
     #[Title('Manage Superadmins')]
     public function render() {
         $superGroup = SuperUserGroup::group();
-        $listSuperusers = $superGroup->members()
+        $listSuperadmins = $superGroup->members()
             //->search('cn', $this->search)
             ->get()
         ;
         return view(
-            'livewire.list-super-users', [
-                'superusers' => $listSuperusers,
+            'livewire.list-super-admins', [
+                'superadmins' => $listSuperadmins,
                 //->orderBy($this->sortField, $this->sortDirection)
                 //->paginate(10),
                 // all users that aren't admins on this realm

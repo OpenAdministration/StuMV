@@ -7,6 +7,7 @@ use App\Ldap\Community;
 use App\Models\User;
 use App\Policies\CommitteePolicy;
 use App\Policies\CommunityPolicy;
+use App\Policies\UserPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -19,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        User::class => UserPolicy::class,
         Community::class => CommunityPolicy::class,
         Committee::class => CommitteePolicy::class,
     ];

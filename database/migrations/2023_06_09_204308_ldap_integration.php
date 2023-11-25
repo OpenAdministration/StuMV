@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
 
-    private static array $items = ['user', 'domain', 'group', 'role', 'committee'];
+    private static array $items = ['user', 'domain'];
 
     /**
      * Run the migrations.

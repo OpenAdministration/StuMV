@@ -8,21 +8,11 @@ use App\Models\User;
 
 class CommunityPolicy
 {
-    /**
-     * Short-circuit all other methods and allows if super admin
-     * @param User $user
-     * @param string $ability
-     * @return true|null
-     */
-    public function before(User $user, string $ability): true|null{
-        if($user->ldap()->isSuperAdmin()){
-            return true;
-        }
-        return null;
-    }
+
     public function create(User $user){
-        return $user->ldap()->isSuperAdmin();
+        return $user->can('superadmin', User::class);
     }
+
 
     public function picked() : bool
     {
@@ -30,7 +20,8 @@ class CommunityPolicy
     }
 
     public function enter(User $user, Community $community) : bool{
-        return $this->member($user, $community)
+        return $user->can('superadmin', User::class)
+            || $this->member($user, $community)
             || $this->moderator($user, $community)
             || $this->admin($user, $community);
     }

@@ -8,6 +8,6 @@ class AddSuperUser extends Component
 {
     public function render()
     {
-        return view('livewire.add-super-user');
+        return view('livewire.add-super-admins');
     }
 }

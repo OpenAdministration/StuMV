@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     <div class="flex justify-between">
-        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('superusers.search_placeholder') }}"></x-input.group>
-        <x-button.link-primary href="{{ route('superusers.add') }}" class="flex">
+        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('superadmins.search_placeholder') }}"></x-input.group>
+        <x-button.link-primary href="{{ route('superadmins.add') }}" class="flex">
             <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.link-primary>
     </div>
     <x-table>
@@ -18,12 +18,12 @@
             </x-table.heading>
             <x-table.heading/>
         </x-slot>
-        @forelse($superusers as $superuser)
+        @forelse($superadmins as $superadmin)
             <x-table.row>
-                <x-table.cell>{{ $superuser->cn[0] }}</x-table.cell>
-                <x-table.cell>{{ $superuser->uid[0] }}</x-table.cell>
+                <x-table.cell>{{ $superadmin->cn[0] }}</x-table.cell>
+                <x-table.cell>{{ $superadmin->uid[0] }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $superuser->uid[0] }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-button.link-danger wire:click="deletePrepare('{{ $superadmin->uid[0] }}')">{{ __('Delete') }}</x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty

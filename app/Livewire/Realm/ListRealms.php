@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Livewire\Attributes\Url;
@@ -29,6 +30,11 @@ class ListRealms extends Component
     public bool $showDeleteModal = false;
     public string $deleteRealmName = '';
 
+
+    public function mount(){
+        session()->forget('realm_uid');
+        session()->save();
+    }
 
     public function sortBy($field): void
     {

@@ -47,7 +47,7 @@ class NewRole extends Component
         $r = new Role([
             'cn' => $this->cn,
             'description' => $this->description,
-            'member' => '',
+            'uniqueMember' => '',
         ]);
         $r->inside($c);
         $r->save();

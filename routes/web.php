@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\SuperAdminMiddleware;
 use App\Models\Committee;
 use Illuminate\Support\Facades\Route;
 
@@ -43,9 +44,9 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
     Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
 });
 
-Route::middleware(['superuser', 'auth'])->group(function (){
-    Route::get('/superusers', \App\Livewire\ListSuperUsers::class)->name('superusers.list');
-    Route::get('/add-superuser', \App\Livewire\AddSuperUser::class)->name('superusers.add');
+Route::middleware([SuperAdminMiddleware::class, 'auth'])->group(function (){
+    Route::get('/superadmins', \App\Livewire\ListSuperUsers::class)->name('superadmins.list');
+    Route::get('/add-superadmin', \App\Livewire\AddSuperUser::class)->name('superadmins.add');
 
     Route::get('/new-realm', \App\Livewire\Realm\NewRealm::class)->name('realms.new');
     Route::get('/{uid}/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');

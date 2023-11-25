@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('role', function (Blueprint $table) {
             $table->id();
             $table->string('name', 64)->nullable();
-            $table->bigInteger('committee_id')->unsigned();
+            $table->string('committee_dn');
             $table->timestamps();
         });
     }
