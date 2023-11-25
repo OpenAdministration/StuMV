@@ -38,11 +38,11 @@ return [
 
         'fallback' => '',
 
-        'class' => 'w-4 h-4',
+        'class' => '',
 
         'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
+            'width' => 16, // w-4
+            'height' => 16, // h-4
         ],
 
     ],

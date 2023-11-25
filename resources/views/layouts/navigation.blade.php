@@ -11,11 +11,45 @@
                 </div>
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    @foreach($navigation as $route => $name)
-                        <x-nav-link :href="route($route, ['uid' => session('realm_uid', 'default')])" :active="request()->routeIs($route)">
-                            {{ __($name) }}
+                    @can('picked', \App\Ldap\Community::class)
+                        <x-nav-link wire:navigate :active="request()->routeIs('committees.list')"
+                                    :href="route('committees.list', ['uid' => session('realm_uid', 'default')])"
+                        >
+                            {{ __('Committees') }}
                         </x-nav-link>
-                    @endforeach
+                        <x-nav-link wire:navigate :active="request()->routeIs('realms.members')"
+                                    :href="route('realms.members', ['uid' => session('realm_uid', 'default')])"
+                        >
+                            {{ __('Members') }}
+                        </x-nav-link>
+                        <x-nav-link wire:navigate :active="request()->routeIs('realms.mods')"
+                                    :href="route('realms.mods', ['uid' => session('realm_uid', 'default')])"
+                        >
+                            {{ __('Mods') }}
+                        </x-nav-link>
+                        <x-nav-link wire:navigate :active="request()->routeIs('realms.admins')"
+                                    :href="route('realms.admins', ['uid' => session('realm_uid', 'default')])"
+                        >
+                            {{ __('Admins') }}
+                        </x-nav-link>
+                        <x-nav-link wire:navigate :active="request()->routeIs('realms.groups')"
+                                    :href="route('realms.groups', ['uid' => session('realm_uid', 'default')])"
+                        >
+                            {{ __('Gruppen') }}
+                        </x-nav-link>
+                    @endcan
+                    @can('superuser')
+                        <x-nav-link wire:navigate :active="request()->routeIs('superusers.list')"
+                                    :href="route('superusers.list', ['uid' => session('realm_uid', 'default')])"
+                        >
+                            {{ __('Superuser') }}
+                        </x-nav-link>
+                    @endcan
+                    <x-nav-link :active="request()->routeIs('realms.pick')"
+                                :href="route('realms.pick')"
+                    >
+                        <x-fas-door-open/> {{ __('Change Realm') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -41,7 +75,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                             onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -66,7 +100,7 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard', ['uid' => session('realm_uid', 'default')])" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('FIXME') }}
             </x-responsive-nav-link>
         </div>
 
@@ -83,7 +117,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                                           onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

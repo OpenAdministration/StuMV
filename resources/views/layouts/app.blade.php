@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ $title ?? '' }}</title>
+        <title>{{ __($title ?? '') }}</title>
 
         <!-- Styles -->
         <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -16,28 +16,12 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation', ['navigation' =>
-                array_merge((Auth::user()->is_superuser) ? [
-                    'realms.pick' => 'Realms',
-                ] : [],
-                [
-                    'committees.list' => __('Committees'),
-                    'realms.members' => __('Members'),
-                    'realms.mods' => __('Mods'),
-                    'realms.admins' => __('Admins'),
-                    'realms.groups' => __('Groups'),
-                    'superusers.list' => __('Superusers'),
-                ],
-                ),
-                /*(Auth::user()->can('viewAny', App\Models\Committee::class)) ? [
-                    'committees.list' => __('Committees'),
-                ] : [],*/
-            ])
+            @include('layouts.navigation')
             <!-- Page Heading -->
             <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                        {{ $title ?? '' }}
+                <div class="max-w-7xl mx-auto py-3.5 px-4 sm:px-6 lg:px-8">
+                    <h2 class="font-semibold text-xl text-gray-800 leading-tight pl-3">
+                        {{ Breadcrumbs::render(Route::current()->getName(), Route::current()->parameters())}}
                     </h2>
                 </div>
             </header>
@@ -48,7 +32,7 @@
                     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div class="p-6 bg-white border-b border-gray-200">
-                                {{ Breadcrumbs::render(Route::current()->getName(), Route::current()->parameters())}}
+
                                 <x-alert/>
                                 {{ $slot }}
                             </div>

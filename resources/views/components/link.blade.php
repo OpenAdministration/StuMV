@@ -8,9 +8,9 @@
 -- Purchase here: https://tailwindui.com/
 --}}
 
-<a wire:navigate
+<a
     {{ $attributes->merge([
-        'class' => 'text-indigo-600 hover:text-indigo-900' . ($attributes->get('disabled') ? ' opacity-75 cursor-not-allowed' : ''),
+        'class' => 'flex gap-x-1.5 items-center text-indigo-600 hover:text-indigo-900' . ($attributes->get('disabled') ? ' opacity-75 cursor-not-allowed' : ''),
     ]) }}
 >
     {{ $slot }}
