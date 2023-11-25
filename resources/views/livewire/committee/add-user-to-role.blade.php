@@ -3,7 +3,7 @@
     <x-input.group :label="__('Short Rolename')" wire:model="cn" disabled/>
     <x-select :label="__('Add new User')" wire:model="username">
         @foreach($users as $user)
-            <option value="{{ $user->getFirstAttribute('uid') }}}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</option>
+            <option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</option>
         @endforeach
     </x-select>
     <x-input.group type="date" wire:model="start_date" :label="__('Starting')"/>

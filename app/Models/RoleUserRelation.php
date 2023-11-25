@@ -26,7 +26,15 @@ class RoleUserRelation extends Model
     /**
      * @var array
      */
-    protected $fillable = ['role_id', 'user_id', 'from', 'until'];
+    protected $fillable = [
+        'role_cn',
+        'committee_dn',
+        'username',
+        'from',
+        'until',
+        'decided',
+        'comment',
+    ];
 
     /**
      * @return BelongsTo

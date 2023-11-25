@@ -6,8 +6,11 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\Role;
+use App\Models\RoleUserRelation;
+use App\Rules\UserIsMember;
 use Carbon\Carbon;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -23,20 +26,33 @@ class AddUserToRole extends Component
     #[Locked]
     public string $cn;
 
-    #[Required]
-    public string $username;
+    #[Validate]
+    public string $username = '';
 
-    public string $start_date;
-    public string $end_date;
-    public string $decision_date;
+    #[Validate('date:Y-m-d', as: 'Starting Date')]
+    public $start_date;
+    #[Validate('date:Y-m-d', as: 'Ending Date')]
+    public $end_date = '';
+    #[Validate('date:Y-m-d', as: 'Decision Date')]
+    public $decision_date = '';
 
-    public string $comment;
+    #[Validate('string')]
+    public string $comment = '';
 
     public function mount(Community $uid, $ou, $cn){
         $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
         $this->start_date = today()->format('Y-m-d');
+    }
+
+    public function rules(){
+        return [
+            'username' => [
+                'required',
+                new UserIsMember($this->uid)
+            ]
+        ];
     }
 
     public function render()
@@ -48,18 +64,25 @@ class AddUserToRole extends Component
     }
 
     public function save(){
-        $committee = Committee::findByName($this->uid, $this->ou);
-        $user = User::findOrFailByUsername($this->username);
+        $this->validate();
 
-        Role::create([
-            'role_dn' => $this->cn,
+        $committee = Committee::findByName($this->uid, $this->ou);
+        RoleUserRelation::create([
+            'role_cn' => $this->cn,
             'committee_dn' => $committee->getDn(),
             'username' => $this->username,
             'from' => $this->start_date,
-            'until' => $this->end_date,
-            'decided' => $this->decision_date,
+            'until' => !empty($this->end_date) ? $this->end_date : null,
+            'decided' => !empty($this->decision_date) ? $this->end_date : null,
             'comment' => $this->comment,
         ]);
+        return redirect()->route('committees.roles', [
+            'uid' => $this->uid,
+            'ou' => $this->ou
+            ])
+            ->with('message', __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]))
+        ;
+
     }
 
 }
