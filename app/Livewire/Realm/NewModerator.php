@@ -20,11 +20,12 @@ class NewModerator extends Component
     public string $realm_uid = "";
 
 
-    public function mount($uid):void{
+    public function mount($uid) : void
+    {
         $this->realm_uid = $uid;
     }
 
-    #[Title('Test')]
+    #[Title('realms.new_member')]
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $c = Community::findOrFailByUid($this->realm_uid);

@@ -1,7 +1,18 @@
 <div class="flex-col space-y-4">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">Users</h1>
+            <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <x-button.link-primary href="{{ route('realms.new') }}" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
+                Neuer Realm
+            </x-button.link-primary>
+        </div>
+    </div>
+
     <div class="flex justify-between">
         <x-input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search') }}"/>
-        <x-button.link-primary href="{{ route('realms.new') }}">Neuer Realm</x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
@@ -26,7 +37,7 @@
                 <x-table.cell>{{ $realm->getLongName() }}</x-table.cell>
                 <x-table.cell>
                     <x-link href="#" wire:click="register('{{ $realm->getShortCode() }}')">
-                        <x-fas-dungeon class="inline w-10 h-10"/> {{ __('Enter') }}
+                        <x-fas-dungeon/> {{ __('Enter') }}
                     </x-link>
                 </x-table.cell>
                 <x-table.cell>

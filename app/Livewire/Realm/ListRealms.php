@@ -53,7 +53,7 @@ class ListRealms extends Component
             ->search('description', $this->search)
             ->slice(1, 10, $this->sortField, $this->sortDirection);
 
-        return view('livewire.realm.list', [
+        return view('livewire.realm.list-communities', [
           'realmSlice' => $slice
         ])->layout('layouts.app', ['headline' => 'Realms']);
     }

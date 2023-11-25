@@ -20,10 +20,6 @@ Route::middleware(['auth'])->group(function (){
     });
     Route::get('/profile', \App\Livewire\Profile::class)->name('profile');
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
-
-    // super user only
-    Route::get('/new-realm', \App\Livewire\Realm\NewRealm::class)->name('realms.new');
-    Route::get('/{uid}/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');
 });
 
 Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(function (){
@@ -50,6 +46,9 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
 Route::middleware(['superuser', 'auth'])->group(function (){
     Route::get('/superusers', \App\Livewire\ListSuperUsers::class)->name('superusers.list');
     Route::get('/add-superuser', \App\Livewire\AddSuperUser::class)->name('superusers.add');
+
+    Route::get('/new-realm', \App\Livewire\Realm\NewRealm::class)->name('realms.new');
+    Route::get('/{uid}/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');
 });
 
 

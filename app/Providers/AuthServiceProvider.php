@@ -2,19 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\Committee;
+use App\Ldap\Community;
 use App\Models\User;
 use App\Policies\CommitteePolicy;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Policies\CommunityPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Gate;
-use LDAP\Connection;
-use LdapRecord\Auth\BindException;
-use LdapRecord\Container;
-use LdapRecord\Laravel\Testing\DirectoryEmulator;
-use LdapRecord\Ldap;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -25,7 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Models\Model' => 'App\Policies\ModelPolicy',
-        Committee::class => CommitteePolicy::class,
+        Community::class => CommunityPolicy::class
     ];
 
     /**
