@@ -1,9 +1,17 @@
 <div class="flex-col space-y-4">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">Lorem Ipsum</h1>
+            <p class="mt-2 text-sm text-gray-700">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,</p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <x-button.link-primary :href="route('committees.new', ['uid' => $realm_uid])" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
+                {{ __('New Committee') }}
+            </x-button.link-primary>
+        </div>
+    </div>
     <div class="flex justify-between">
         <x-input.group wire:model.live.debounce="search" placeholder="{{ __('committees.search') }}"></x-input.group>
-        <x-button.link-primary class="flex" :href="route('committees.new', ['uid' => $realm_uid])">
-            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
-        </x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
@@ -24,7 +32,6 @@
             </x-table.heading>
             <x-table.heading/>
             <x-table.heading/>
-            <x-table.heading/>
         </x-slot>
         @forelse($committeesSlice->items() as $committee)
             <x-table.row>
@@ -38,13 +45,14 @@
                     @endif
                 </x-table.cell>
                 <x-table.cell>
-                    <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">{{ __('committees.manage_roles') }}</x-link>
+                    <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">
+                        <x-fas-info /> {{ __('committees.link_manage') }}
+                    </x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">{{ __('Delete') }}</x-button.link-danger>
-                </x-table.cell>
-                <x-table.cell>
-                    <x-button.link>{{ __('Edit') }}</x-button.link>
+                    <x-button.link-danger wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">
+                        <x-fas-trash/> {{ __('Delete') }}
+                    </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty

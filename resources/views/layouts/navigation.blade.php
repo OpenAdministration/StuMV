@@ -42,7 +42,7 @@
                         <x-nav-link wire:navigate :active="request()->routeIs('superadmins.list')"
                                     :href="route('superadmins.list')"
                         >
-                            {{ __('Superadmin') }}
+                            <x-fas-dragon/> {{ __('Superadmin') }}
                         </x-nav-link>
                     @endcan
                     <x-nav-link :active="request()->routeIs('realms.pick')"

@@ -16,15 +16,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth'])->group(function (){
-    Route::get('/', function (){
-        return redirect()->route('dashboard', session('realm_uid', 'default'));
+    Route::get('/', static function (){
+        return redirect()->route('realms.pick');
     });
     Route::get('/profile', \App\Livewire\Profile::class)->name('profile');
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
 });
 
 Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(function (){
-    Route::get('/{uid}/dashboard', function (){
+    Route::get('/{uid}/dashboard', static function (){
         return view('dashboard');
     })->name('dashboard');
     Route::get('/{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');

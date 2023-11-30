@@ -29,7 +29,11 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
-        $this->model('uid', Community::class);
+
+        Route::bind('uid', function (string $value) {
+            return Community::findByOrFail('ou', $value);
+        });
+        //$this->model('uid', Community::class);
 
         $this->routes(function () {
             Route::middleware('api')

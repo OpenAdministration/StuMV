@@ -96,8 +96,7 @@ class RegisterUser extends Component
             'userPassword'  => "{ARGON2}" . Hash::make($this->password),
             // usually ldap SHOULD hash it itself - did not work
         ]);
-
-        $user->setDn("uid=$this->username,ou=People," . config('ldap.connections.default.base_dn'));
+        $user->setDn("uid=$this->username,ou=People,{base}");
         try {
             $user->save();
         }  catch (LdapRecordException $ldapRecordException){
@@ -108,6 +107,6 @@ class RegisterUser extends Component
 
         Auth::attempt([$this->username, $this->password]);
 
-        return redirect(RouteServiceProvider::HOME);
+        return redirect()->route('login')->with('message', __('Successfully Registered'));
     }
 }

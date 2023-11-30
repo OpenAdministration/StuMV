@@ -1,8 +1,8 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">Users</h1>
-            <p class="mt-2 text-sm text-gray-700">A list of all the users in your account including their name, title, email and role.</p>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">Lorem Ipsum</h1>
+            <p class="mt-2 text-sm text-gray-700">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary href="{{ route('realms.new') }}" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
