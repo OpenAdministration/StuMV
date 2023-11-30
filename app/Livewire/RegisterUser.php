@@ -77,7 +77,7 @@ class RegisterUser extends Component
 
     public function render()
     {
-        return view('livewire.register-user')->layout('layouts.guest');
+        return view('livewire.register-user');
     }
 
     public function mount() : void

@@ -67,11 +67,7 @@ class Roles extends Component {
                     ->get()
                     ->except($this->group->roles->modelKeys()) */,
             ]
-        )->layout('layouts.app', [
-            'headline' => __('groups.roles_heading', [
-                'name' => $group->getFirstAttribute('description'),
-            ])
-        ]);
+        );
     }
 
     public function new(): void

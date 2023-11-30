@@ -73,12 +73,7 @@ class Members extends Component {
                     ->paginate(10),
                 'realm_members' => $this->role->committee->realm->members,
             ]
-        )->layout('layouts.app', [
-            'headline' => __('roles.members_heading', [
-                'name' => $this->role->name,
-                'committee' => $this->role->committee->name
-            ])
-        ]);
+        );
     }
 
     public function edit($id): void

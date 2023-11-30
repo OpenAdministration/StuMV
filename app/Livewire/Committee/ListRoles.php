@@ -70,12 +70,7 @@ class ListRoles extends Component {
                 'committee' => $committee,
                 'rolesSlice' => $rolesSlice,
             ]
-        )->layout('layouts.app', [
-            'headline' => __('committees.roles_heading', [
-                'name' => $committee->getFullName(),
-                'realm' => $committee->getShortName(),
-            ])
-        ]);
+        );
     }
 
     #[Computed]

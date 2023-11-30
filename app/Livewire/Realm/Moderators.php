@@ -54,12 +54,7 @@ class Moderators extends Component {
             'livewire.realm.moderators', [
                 'realm_members' => $mods,
             ]
-        )->layout('layouts.app', [
-            'headline' => __('realms.members_heading', [
-                'name' => $community->description[0],
-                'uid' => $community->ou[0],
-            ])
-        ]);
+        );
     }
 
     public function deletePrepare($uid): void
