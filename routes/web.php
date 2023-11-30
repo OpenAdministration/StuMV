@@ -52,8 +52,20 @@ Route::middleware([SuperAdminMiddleware::class, 'auth'])->group(function (){
     Route::get('/{uid}/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');
 });
 
+Route::get('/about', function (){
+    return redirect(config('app.about_url'));
+})->name('about');
+
+Route::get('/privacy', function (){
+    return redirect(config('app.privacy_url'));
+})->name('privacy');
+
+Route::get('/terms', function (){
+    return redirect(config('app.terms_url'));
+})->name('terms');
+
 Route::fallback(function (){
     return view('errors.404');
-});
+})->name('404');
 
 require __DIR__.'/auth.php';

@@ -70,6 +70,21 @@
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile')">{{ __('Profile') }}</x-dropdown-link>
                         <x-dropdown-link :href="route('password.change')">{{ __('Change Password') }}</x-dropdown-link>
+
+                        <hr class="h-px my-1 mx-1 bg-gray-200 border-0">
+
+                        <x-dropdown-link target="_blank" :href="route('terms')">
+                            {{ __('Terms of Use') }} <x-fas-arrow-up-right-from-square class="inline-flex h-2.5 w-2.5 text-indigo-400 ml-1"/>
+                        </x-dropdown-link>
+                        <x-dropdown-link target="_blank" :href="route('privacy')">
+                            {{ __('Privacy Policy') }} <x-fas-arrow-up-right-from-square class="inline-flex h-2.5 w-2.5 text-indigo-400 ml-1"/>
+                        </x-dropdown-link>
+                        <x-dropdown-link target="_blank" :href="route('about')">
+                            {{ __('About') }} <x-fas-arrow-up-right-from-square class="inline-flex h-2.5 w-2.5 text-indigo-400 ml-1"/>
+
+                        </x-dropdown-link>
+                        <hr class="h-px my-1 mx-1 bg-gray-200 border-0">
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
