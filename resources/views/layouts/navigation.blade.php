@@ -5,8 +5,8 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard', ['uid' => session('realm_uid', 'default')]) }}">
-                        <x-application-logo class="block h-10 w-auto fill-current text-gray-600" />
+                    <a href="{{ route('realms.pick') }}">
+                        <x-application-logo/>
                     </a>
                 </div>
                 <!-- Navigation Links -->
