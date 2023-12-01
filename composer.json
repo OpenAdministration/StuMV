@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "dacoto/laravel-domain-validation": "^3.0",
         "diglactic/laravel-breadcrumbs": "^8.1",
         "directorytree/ldaprecord-laravel": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
