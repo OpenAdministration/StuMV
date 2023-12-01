@@ -8,7 +8,7 @@ use LdapRecord\Models\OpenLDAP\Entry;
 
 class AppLayout extends Component
 {
-    public $routeParams;
+    public array $routeParams;
 
     public function __construct(){
         // Maybe there is a more Laravel way to make this work ...
