@@ -6,7 +6,7 @@ use App\Ldap\Domain;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class DomainRegistrationRule implements ValidationRule
+class UniqueDomain implements ValidationRule
 {
     /**
      * Run the validation rule.
@@ -15,9 +15,10 @@ class DomainRegistrationRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $exists = Domain::findBy('dc', $value)?->exists();
-        if(!$exists){
-            $fail('domain.domain_unknown_for_registration')->translate(['domain' => $value]);
+        // probably has to be superadmin, otherwise other domains might not be visable
+        $exists = Domain::query()->findBy('dc', $value)?->exists();
+        if($exists){
+            $fail('validation.unique')->translate(['attribute' => $attribute]);
         }
     }
 }

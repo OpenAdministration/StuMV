@@ -2,92 +2,87 @@
 
 namespace App\Livewire;
 
+use App\Ldap\Domain;
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
+use App\Rules\DomainRegistrationRule;
+use App\Rules\UniqueDomain;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class RegisterUser extends Component
 {
     //public User $user;
 
+    #[Validate('required|email')]
     public string $email = '';
+    #[Validate('required|string|max:255')]
     public string $first_name = '';
+    #[Validate('required|string|max:255')]
     public string $last_name = '';
+
+    #[Validate('required|string|max:255')]
     public string $username = '';
 
-    private string $domain = '';
-
-    /** extra, so password can stay hidden in $user */
+    #[Validate]
     public string $password = '';
+    #[Validate]
     public string $password_confirmation = '';
+
+    #[Validate]
+    public string $domain = '';
 
     protected function rules() : array
     {
         return [
-            'email' => ['required', 'email'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:255'],
             'password' => [
                 'required',
                 Password::min(8)->mixedCase()->numbers()->symbols(),
                 'confirmed',
+            ],
+            'domain' => [
+                new DomainRegistrationRule()
             ],
         ];
-        /*[
-            'user.full_name' => ['required', 'string', 'max:255'],
-            'user.username' => ['required', 'string', 'max:255', 'unique:App\Models\User,username', 'regex:/[a-z_\.]/i' ],
-            'user.email' => [
-                'required', 'string', 'email', 'max:255', 'unique:App\Models\User,email',
-            ],
-            'domain' => [Rule::exists(Domain::class, 'name')->where('for_registration', true)],
-            'password' => [
-                'required',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
-                'confirmed',
-            ],
-        ];*/
     }
 
     /**
-     * Do some stuff if email after email was changed
+     * Do some stuff if email was changed
      * @return void
      */
-    public function updatedUserEmail(): void
+    public function updatingEmail($email): void
     {
-        $split = explode('@', $this->email);
-        $this->domain = $split[1] ?? 'false';
         $this->validateOnly('email');
-        //$this->validateOnly('domain');
+        $split = explode('@', $email);
+        $this->domain = $split[1] ?? 'false';
+        $this->validateOnly('domain');
         // if mail is valid try to prefill the fullName of the user
-        $this->name = ucwords(str_replace(['-', '_', '.'], ' ', $split[0]));
-        $this->validateOnly('name');
-
-    }
-
-    public function updated($propertyName): void
-    {
-        $this->validateOnly($propertyName);
+        $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
+        $this->first_name = $guessedName[0];
+        $this->last_name = $guessedName[1];
+        $this->validateOnly(['first_name', 'last_name']);
     }
 
     public function render()
     {
-        return view('livewire.register-user');
+        return view('livewire.register-user')->layout('layouts.guest');
     }
 
     public function mount() : void
     {
     }
 
-    public function store(){
+    public function save(){
 
         $this->validate();
-
+        $domain = Domain::findByOrFail('dc', $this->domain);
+        $community = $domain->community();
         $user = new User([
             'uid' => $this->username,
             'cn' => $this->first_name  . ' ' . $this->last_name,
@@ -99,6 +94,7 @@ class RegisterUser extends Component
         $user->setDn("uid=$this->username,ou=People,{base}");
         try {
             $user->save();
+            $community->membersGroup()->members()->attach($user);
         }  catch (LdapRecordException $ldapRecordException){
             dump($ldapRecordException->getDetailedError());
         }
@@ -107,6 +103,6 @@ class RegisterUser extends Component
 
         Auth::attempt([$this->username, $this->password]);
 
-        return redirect()->route('login')->with('message', __('Successfully Registered'));
+        return redirect()->route('register-success')->with('message', __('Successfully Registered'));
     }
 }

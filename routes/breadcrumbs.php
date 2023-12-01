@@ -76,6 +76,16 @@ Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $r
     $trail->push(__('New'), route('realms.admins.new', $routeParams));
 });
 
+Breadcrumbs::for('realms.domains', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('Domains'), route('realms.domains', $routeParams));
+});
+
+Breadcrumbs::for('realms.domains.new', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.domains', $routeParams);
+    $trail->push(__('New Domain'), route('realms.domains.new', $routeParams));
+});
+
 Breadcrumbs::for('realms.groups', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('realms', $routeParams);
     $trail->push(__('Groups'), route('realms.groups', $routeParams));

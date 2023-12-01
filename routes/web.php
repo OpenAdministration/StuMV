@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth'])->group(function (){
+Route::middleware(['auth', 'verified'])->group(function (){
     Route::get('/', static function (){
         return redirect()->route('realms.pick');
     });
@@ -27,21 +27,29 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
     Route::get('/{uid}/dashboard', static function (){
         return view('dashboard');
     })->name('dashboard');
+
+    // member
     Route::get('/{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');
-    Route::get('/{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
     Route::get('/{uid}/mods/', \App\Livewire\Realm\Moderators::class)->name('realms.mods');
-    Route::get('/{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
     Route::get('/{uid}/admins/', \App\Livewire\Realm\Admins::class)->name('realms.admins');
+    Route::get('/{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
+
+    // mod
+    Route::get('/{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
+    Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
+    Route::get('/{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
+    Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
+    Route::get('/{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
+    Route::get('/{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
+
+    // admin
     Route::get('/{uid}/new-admin', \App\Livewire\Realm\NewAdmin::class)->name('realms.admins.new');
     Route::get('/{uid}/groups', \App\Livewire\Group\ListGroups::class)->name('realms.groups');
     Route::get('/{uid}/new-group', \App\Livewire\Group\NewGroup::class)->name('realms.groups.new');
     Route::get('/{uid}/group/{cn}/roles', \App\Livewire\Group\Roles::class)->name('realms.groups.roles');
     Route::get('/{uid}/group/{cn}/add-role', \App\Livewire\Group\Roles::class)->name('realms.groups.roles.add');
-    Route::get('/{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
-    Route::get('/{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
-    Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
-    Route::get('/{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
-    Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
+    Route::get('/{uid}/domains', \App\Livewire\Realm\ListDomains::class)->name('realms.domains');
+    Route::get('/{uid}/new-domain', \App\Livewire\Realm\NewDomain::class)->name('realms.domains.new');
 });
 
 Route::middleware([SuperAdminMiddleware::class, 'auth'])->group(function (){

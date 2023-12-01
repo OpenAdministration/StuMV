@@ -77,8 +77,10 @@ class Community extends OrganizationalUnit implements LdapImportable
         $this->save();
 
         // generate mayor ou's
-        foreach (['Groups' => 'The Group ou',
-                  'Committees' => 'The Committees OU',
+        foreach ([
+            'Groups' => 'The Groups',
+            'Committees' => 'The Committees',
+            'Domains' => 'The Domains'
                  ] as $ouName => $ouDescription){
             $ou = new OrganizationalUnit([
                 'ou' => $ouName,

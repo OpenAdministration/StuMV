@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use LdapRecord\LdapRecordException;
 
 class LoginRequest extends FormRequest
 {
@@ -49,8 +50,13 @@ class LoginRequest extends FormRequest
             'uid' => $this->get('uid'),
             'password' => $this->get('password'),
         ];
-
-        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+        try {
+            $auth = Auth::attempt($credentials, $this->boolean('remember'));
+        } catch (LdapRecordException $ldapRecordException){
+            // this should not be needed :/
+            $auth = false;
+        }
+        if (!$auth) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
