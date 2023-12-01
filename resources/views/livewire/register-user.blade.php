@@ -1,6 +1,10 @@
 <x-auth-card>
-    <x-slot name="logo"><x-application-logo class="w-20 h-20 fill-current text-gray-500"/></x-slot>
-    <form wire:submit="store">
+    <x-slot name="logo" class="">
+        <x-application-logo class="w-20 h-20 fill-current text-gray-500"/>
+        <span class="text-5xl font-bold leading-7 text-gray-900">StuMV</span>
+    </x-slot>
+    <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('user.register') }}</h2>
+    <x-livewire-form>
         <!-- Email Address -->
         <x-input.group wire:model.blur="email" autofocus>
             <x-slot name="label">{{ __('Email') }}</x-slot>
@@ -30,6 +34,6 @@
             <x-slot name="label">{{ __('Confirm Password') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
-        <x-button.primary type="submit" class="mt-2">Submit</x-button.primary>
-    </form>
+        <x-slot:abort_route>{{ route('login') }}</x-slot:abort_route>
+    </x-livewire-form>
 </x-auth-card>

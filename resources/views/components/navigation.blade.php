@@ -13,29 +13,33 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     @can('picked', \App\Ldap\Community::class)
                         <x-nav-link wire:navigate :active="request()->routeIs('committees.list')"
-                                    :href="route('committees.list', ['uid' => session('realm_uid', 'default')])"
+                                    :href="route('committees.list', ['uid' => $uid])"
                         >
                             {{ __('Committees') }}
                         </x-nav-link>
                         <x-nav-link wire:navigate :active="request()->routeIs('realms.members')"
-                                    :href="route('realms.members', ['uid' => session('realm_uid')])"
+                                    :href="route('realms.members', ['uid' => $uid])"
                         >
                             {{ __('Members') }}
                         </x-nav-link>
                         <x-nav-link wire:navigate :active="request()->routeIs('realms.mods')"
-                                    :href="route('realms.mods', ['uid' => session('realm_uid', 'default')])"
+                                    :href="route('realms.mods', ['uid' => $uid])"
                         >
                             {{ __('Mods') }}
                         </x-nav-link>
                         <x-nav-link wire:navigate :active="request()->routeIs('realms.admins')"
-                                    :href="route('realms.admins', ['uid' => session('realm_uid', 'default')])"
+                                    :href="route('realms.admins', ['uid' => $uid])"
                         >
                             {{ __('Admins') }}
                         </x-nav-link>
                         <x-nav-link wire:navigate :active="request()->routeIs('realms.groups')"
-                                    :href="route('realms.groups', ['uid' => session('realm_uid', 'default')])"
+                                    :href="route('realms.groups', ['uid' => $uid])"
                         >
                             {{ __('Gruppen') }}
+                        </x-nav-link>
+                        <x-nav-link :active="request()->routeIs('realms.domains')"
+                                    :href="route('realms.domains', ['uid' => $uid])">
+                            {{ __('Domains') }}
                         </x-nav-link>
                     @endcan
                     @can('superadmin', \App\Models\User::class)
@@ -45,9 +49,9 @@
                             <x-fas-dragon/> {{ __('Superadmin') }}
                         </x-nav-link>
                     @endcan
+
                     <x-nav-link :active="request()->routeIs('realms.pick')"
-                                :href="route('realms.pick')"
-                    >
+                                :href="route('realms.pick')">
                         <x-fas-door-open/> {{ __('Change Realm') }}
                     </x-nav-link>
                 </div>
@@ -114,7 +118,7 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard', ['uid' => session('realm_uid', 'default')])" :active="request()->routeIs('dashboard')">
+            <x-responsive-nav-link :active="request()->routeIs('dashboard')">
                 {{ __('FIXME') }}
             </x-responsive-nav-link>
         </div>
