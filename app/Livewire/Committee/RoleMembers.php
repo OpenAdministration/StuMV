@@ -53,7 +53,10 @@ class RoleMembers extends Component
         $members = RoleUserRelation::query()
             ->where('role_cn', $this->cn)
             ->where('committee_dn', $committee->getDn())
-            ->get();
+            ->where(function ($query){ $query
+                ->search('username', $this->search)
+                ->search('comment', $this->search);
+            })->get();
         return view('livewire.committee.role-members', ['members' => $members]);
     }
 
@@ -79,6 +82,22 @@ class RoleMembers extends Component
             ->with('message', __('roles.message_terminate_member_success'));
     }
 
+    public function prepareDeletion($id){
+        //auth()->user()?->can()
+        $membership = RoleUserRelation::findOrFail($id);
+        $this->showDeleteModal = true;
+        $this->deleteUsername = $membership->username;
+        $this->deleteId = $membership->id;
+    }
+
+    public function commitDeletion(){
+        $membership = RoleUserRelation::findOrFail($this->deleteId);
+        $membership->delete();
+        $this->close();
+        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn])
+            ->with('message', __('roles.message_delete_member_success'));
+    }
+
     public function close(){
         $this->showTerminateModal = false;
         unset($this->terminateUsername, $this->terminateId, $this->terminateDate);
@@ -86,5 +105,7 @@ class RoleMembers extends Component
         $this->showDeleteModal = false;
         unset($this->deleteUsername, $this->deleteId);
     }
+
+
 
 }

@@ -87,7 +87,7 @@
         @endforelse
     </x-table>
 
-    <form wire:submit="deleteCommit">
+    <form wire:submit="commitDeletion">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('roles.members.delete_title', ['name' => $deleteUsername]) }}
