@@ -1,8 +1,4 @@
 <x-auth-card>
-    <x-slot name="logo" class="">
-        <x-application-logo class="w-20 h-20 fill-current text-gray-500"/>
-        <span class="text-5xl font-bold leading-7 text-gray-900">StuMV</span>
-    </x-slot>
     <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('user.register') }}</h2>
     <x-livewire-form>
         <!-- Email Address -->

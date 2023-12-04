@@ -4,7 +4,7 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <div class="shrink-0 flex items-center">
+                <div class="ml-2.5 shrink-0 flex items-center">
                     <a href="{{ route('realms.pick') }}">
                         <x-application-logo/>
                     </a>

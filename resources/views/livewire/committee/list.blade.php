@@ -50,8 +50,9 @@
                     </x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">
-                        <x-fas-trash/> {{ __('Delete') }}
+                    <x-button.link-danger icon-leading="fas-trash"
+                        wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">
+                        {{ __('Delete') }}
                     </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>

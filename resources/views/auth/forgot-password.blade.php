@@ -1,11 +1,5 @@
 <x-guest-layout>
     <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
-
         <div class="mb-4 text-sm text-gray-600">
             {{ __('auth.forgot_password_text') }}
         </div>
@@ -18,10 +12,11 @@
             <!-- Email Address -->
             <x-input.group id="mail" name="mail" :label="__('Email')" :value="old('email')" required/>
 
-            <div class="flex items-center justify-end mt-4">
-                <x-button type="submit">
-                    {{ __('Email Password Reset Link') }}
-                </x-button>
+            <div class="flex gap-x-6 items-center justify-end mt-5">
+                <a href="{{ route('login') }}" class="text-sm font-semibold leading-6 text-gray-900">{{  __('Cancel') }}</a>
+                <x-button.primary type="submit">
+                    {{ __('Send Reset Link') }}
+                </x-button.primary>
             </div>
         </form>
     </x-auth-card>
