@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 class CommunityAdmin
@@ -15,7 +16,11 @@ class CommunityAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(auth()->user()->can('admin', ))
-        return $next($request);
+        $community = $request->route()?->parameter('uid');
+        $user = auth()->user();
+        if($user?->can('admin', $community) || $user?->ldap()->isSuperAdmin()){
+            return $next($request);
+        }
+        abort(403);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Ldap\Community;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class ActiveRealm
 {
@@ -30,8 +31,11 @@ class ActiveRealm
             // enter the community
             $community  = $realms->first();
             $request->user()->can('enter', $community);
+            // this session entry might be needed in some livewire components,
+            // where their routes do not have realm uid / community
             session(['realm_uid' => $community->getFirstAttribute('ou')]);
         }
+
         return $next($request);
     }
 

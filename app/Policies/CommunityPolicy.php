@@ -5,6 +5,7 @@ namespace App\Policies;
 
 use App\Ldap\Community;
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 class CommunityPolicy
 {
@@ -16,7 +17,8 @@ class CommunityPolicy
 
     public function picked() : bool
     {
-        return session()->exists('realm_uid');
+        return Route::current()?->hasParameter('uid');
+        //return session()->exists('realm_uid');
     }
 
     public function enter(User $user, Community $community) : bool{

@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Http\Middleware\ActiveRealm;
 use App\Http\Middleware\CommunityAdmin;
+use App\Http\Middleware\CommunityModerator;
 use App\Http\Middleware\SuperAdminMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -69,6 +70,7 @@ class Kernel extends HttpKernel
         // custom
         'superadmin' => SuperAdminMiddleware::class,
         'communityAdmin' => CommunityAdmin::class,
+        'communityMod' => CommunityModerator::class,
         'picked-community' => ActiveRealm::class,
     ];
 }

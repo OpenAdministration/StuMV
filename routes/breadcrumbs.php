@@ -19,7 +19,8 @@ Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routePar
 });
 
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
-    $trail->push(session('realm_uid', 'u should never see this...'), route('realms.pick' /* no route params! */));
+    $community = \Illuminate\Support\Facades\Route::current()->parameter('uid');
+    $trail->push($community->getFirstAttribute('ou'), route('realms.pick' /* no route params! */));
 });
 
 Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail, array $routeParams) {

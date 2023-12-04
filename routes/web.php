@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ActiveRealm;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Models\Committee;
 use Illuminate\Support\Facades\Route;
@@ -23,7 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
 });
 
-Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(function (){
+Route::middleware(['picked-community', 'auth'])->group(function (){
     Route::get('/{uid}/dashboard', static function (){
         return view('dashboard');
     })->name('dashboard');
@@ -33,7 +34,9 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
     Route::get('/{uid}/mods/', \App\Livewire\Realm\Moderators::class)->name('realms.mods');
     Route::get('/{uid}/admins/', \App\Livewire\Realm\Admins::class)->name('realms.admins');
     Route::get('/{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
+});
 
+Route::middleware(['communityMod', 'auth'])->group(function (){
     // mod
     Route::get('/{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
     Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
@@ -41,7 +44,9 @@ Route::middleware([\App\Http\Middleware\ActiveRealm::class, 'auth'])->group(func
     Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
     Route::get('/{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
     Route::get('/{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
+});
 
+Route::middleware(['communityAdmin', 'auth'])->group(function (){
     // admin
     Route::get('/{uid}/new-admin', \App\Livewire\Realm\NewAdmin::class)->name('realms.admins.new');
     Route::get('/{uid}/groups', \App\Livewire\Group\ListGroups::class)->name('realms.groups');

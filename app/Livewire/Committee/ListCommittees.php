@@ -18,7 +18,7 @@ class ListCommittees extends Component
     #[Url]
     public string $search = '';
     #[Url]
-    public string $sortField = 'name';
+    public string $sortField = 'ou';
     #[Url]
     public string $sortDirection = 'asc';
 
@@ -58,8 +58,8 @@ class ListCommittees extends Component
     {
         $committeesSlice = Committee::fromCommunity($this->realm_uid)
             ->search('ou', $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->slice(1, 10);
+            ->orderBy('ou:caseIgnoreIA5Match', 'asc')
+            ->slice(1, 100);
 
         return view('livewire.committee.list', [
             'committeesSlice' => $committeesSlice,
