@@ -21,7 +21,7 @@ class RoleMembers extends Component
     #[Url]
     public string $sortDirection = 'asc';
 
-    public bool $showDeleteModal = false;
+
 
     #[Locked]
     public string $uid;
@@ -30,12 +30,13 @@ class RoleMembers extends Component
     #[Locked]
     public string $cn;
 
+    public bool $showDeleteModal = false;
     public string $deleteUsername;
     public int $deleteId;
 
+    public bool $showTerminateModal = false;
     public string $terminateUsername;
-    public string $terminateId;
-    #[Validate('date')]
+    public int $terminateId;
     public string $terminateDate;
 
     public function mount(Community $uid, string $ou, string $cn) : void
@@ -56,5 +57,34 @@ class RoleMembers extends Component
         return view('livewire.committee.role-members', ['members' => $members]);
     }
 
+    public function prepareTermination(int $id): void
+    {
+        //auth()->user()?->can()
+        $membership = RoleUserRelation::findOrFail($id);
+        $this->showTerminateModal = true;
+        $this->terminateDate = today()->format('Y-m-d');
+        $this->terminateUsername = $membership->username;
+        $this->terminateId = $membership->id;
+    }
+
+    public function commitTermination()
+    {
+        //auth()->user()?->can()
+        $membership = RoleUserRelation::findOrFail($this->terminateId);
+        $this->validate(['terminateDate' => 'date:Y-m-d|after_or_equal:' . $membership->from->format('Y-m-d')]);
+        $membership->until = $this->terminateDate;
+        $membership->save();
+        $this->close();
+        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn])
+            ->with('message', __('roles.message_terminate_member_success'));
+    }
+
+    public function close(){
+        $this->showTerminateModal = false;
+        unset($this->terminateUsername, $this->terminateId, $this->terminateDate);
+        $this->resetErrorBag('terminateDate');
+        $this->showDeleteModal = false;
+        unset($this->deleteUsername, $this->deleteId);
+    }
 
 }

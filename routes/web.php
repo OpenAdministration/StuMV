@@ -44,6 +44,7 @@ Route::middleware(['communityMod', 'auth'])->group(function (){
     Route::get('/{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
     Route::get('/{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
     Route::get('/{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
+    Route::get('/{uid}/committees/{ou}/role/{cn}/membership/{id}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members.edit');
     Route::get('/{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
     Route::get('/{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
 });

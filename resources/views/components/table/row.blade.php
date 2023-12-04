@@ -8,6 +8,6 @@
 -- Purchase here: https://tailwindui.com/
 --}}
 
-<tr {{ $attributes->merge(['class' => 'bg-white']) }}>
+<tr {{ $attributes->merge(['class' => 'bg-white group']) }}>
     {{ $slot }}
 </tr>

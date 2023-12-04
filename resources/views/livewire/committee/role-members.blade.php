@@ -50,7 +50,9 @@
                 </span></x-table.cell>
                 <x-table.cell><span class="flex justify-center">
                     @empty($member->until)
-                        <x-fas-forward-fast class="text-indigo-600 hover:text-indigo-500"/>
+                        <x-fas-forward-fast
+                            wire:click="prepareTermination({{ $member->id }})"
+                            class="text-indigo-600 hover:text-indigo-500 cursor-pointer"/>
                     @else
                         {{ $member->until->format('d.m.Y') }}
                     @endempty
@@ -69,16 +71,16 @@
                         {{ $member->comment }}
                     @endempty
                 </x-table.cell>
-                <x-table.cell><span class="flex gap-x-6">
-                    <x-fas-pencil class="text-indigo-300 hover:text-indigo-600"/>
-                    <x-fas-trash class="text-red-300 hover:text-red-600"/>
+                <x-table.cell><span class="flex gap-x-6 group-hover:opacity-100 opacity-0">
+                    <x-fas-pencil :href="route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id])" class="text-indigo-500 hover:text-indigo-400"/>
+                    <x-fas-trash class="text-red-500 hover:text-red-400 cursor-pointer" wire:click="prepareDeletion({{ $member->id }})"/>
                 </span></x-table.cell>
             </x-table.row>
         @empty
             <x-table.row>
                 <x-table.cell colspan="6">
                     <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('roles.no_committees_found') }}</span>
+                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('roles.no_members_found') }}</span>
                     </div>
                 </x-table.cell>
             </x-table.row>
@@ -86,7 +88,7 @@
     </x-table>
 
     <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal()">
+        <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
                 {{ __('roles.members.delete_title', ['name' => $deleteUsername]) }}
             </x-slot:title>
@@ -99,17 +101,20 @@
             </x-slot:footer>
         </x-modal.confirmation>
     </form>
-    <form wire:submit="terminateCommit">
+
+
+    <form wire:submit="commitTermination">
         <x-modal.confirmation wire:model="showTerminateModal">
             <x-slot:title>
                 {{ __('roles.members.terminate_title', ['name' => $terminateUsername]) }}
             </x-slot:title>
             <x-slot:content>
                 <span>{{ __('roles.members.terminate_text', ['name' => $terminateUsername]) }}</span>
+                <x-input.group autofocus type="date" :label="__('Terminiation Date')" wire:model="terminateDate"/>
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
+                <x-button.primary type="submit">{{ __('Terminate') }}</x-button.primary>
             </x-slot:footer>
         </x-modal.confirmation>
     </form>

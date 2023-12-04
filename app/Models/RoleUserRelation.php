@@ -60,6 +60,9 @@ class RoleUserRelation extends Model
     }
 
     public function isActive() : bool {
-        return Carbon::now()->between($this->from, $this->until);
+        return Carbon::today()->betweenIncluded(
+            $this->from->format('Y-m-d'),
+            $this->until?->format('Y-m-d')
+        );
     }
 }

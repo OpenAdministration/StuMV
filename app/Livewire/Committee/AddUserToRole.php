@@ -80,10 +80,7 @@ class AddUserToRole extends Component
             'uid' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
-            ])
-            ->with('message', __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]))
-        ;
-
+        ])->with('message', __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]));
     }
 
 }

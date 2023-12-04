@@ -1,8 +1,9 @@
 <div class="flex-col space-y-4">
     <div class="flex justify-between">
         <x-input.group wire:model.live.debounce="search" placeholder="{{ __('superadmins.search_placeholder') }}"></x-input.group>
-        <x-button.link-primary href="{{ route('superadmins.add') }}" class="flex">
-            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}</x-button.link-primary>
+        <x-button.link-primary icon-leading="fas-plus" href="{{ route('superadmins.add') }}" class="flex">
+            {{ __('New') }}
+        </x-button.link-primary>
     </div>
     <x-table>
         <x-slot name="head">
