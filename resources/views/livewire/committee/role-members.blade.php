@@ -72,7 +72,9 @@
                     @endempty
                 </x-table.cell>
                 <x-table.cell><span class="flex gap-x-6 group-hover:opacity-100 opacity-0">
-                    <x-fas-pencil :href="route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id])" class="text-indigo-500 hover:text-indigo-400"/>
+                    <a href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}">
+                        <x-fas-pencil  class="cursor-pointer text-indigo-500 hover:text-indigo-400"/>
+                    </a>
                     <x-fas-trash class="text-red-500 hover:text-red-400 cursor-pointer" wire:click="prepareDeletion({{ $member->id }})"/>
                 </span></x-table.cell>
             </x-table.row>
