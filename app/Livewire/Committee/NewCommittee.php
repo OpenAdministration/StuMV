@@ -15,11 +15,12 @@ class NewCommittee extends Component
     #[Locked]
     public string $realm_uid;
 
-    public string $parent_ou = "";
+    public string $parent_dn = "";
 
     #[Validate]
     public string $ou = "";
 
+    #[Validate('required|min:3')]
     public string $description = "";
 
     public function mount(Community $uid){
@@ -29,7 +30,10 @@ class NewCommittee extends Component
     public function rules(): array
     {
         return [
-            'ou' => new UniqueCommittee($this->realm_uid)
+            'ou' => [
+                'alpha_dash',
+                new UniqueCommittee($this->realm_uid)
+            ]
         ];
     }
 
@@ -48,7 +52,7 @@ class NewCommittee extends Component
 
         $this->validate();
 
-        $dn = Committee::dnFrom($this->realm_uid, $this->ou, $this->parent_ou);
+        $dn = Committee::dnFrom($this->realm_uid, $this->ou, parentDn: $this->parent_dn);
         $c = new Committee([
             'ou' => $this->ou,
             'description' => $this->description

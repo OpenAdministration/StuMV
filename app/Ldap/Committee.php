@@ -18,15 +18,17 @@ class Committee extends OrganizationalUnit
     use FromCommunityScopeTrait;
 
 
-    public static function dnFrom(string $uid, string $ou, array|string $parent_ou = null){
-        // standardize input (esp. for null and empty arrays)
-        if(empty($parent_ou)){
-            $parent_ou = "";
+    public static function dnFrom(string $uid, string $ou, array $parent_ous = null, string $parentDn = ''){
+        // if dn is given short circuit the method
+        if(!empty($parentDn)){
+            return "ou=$ou," . $parentDn;
         }
-        if(is_array($parent_ou)){
-            $parent_ou = implode(',ou=', $parent_ou);
+        // standardize input
+        if(is_null($parent_ous)){
+            $parent_ous = [];
         }
-        return "ou=$ou," . $parent_ou . self::dnRoot($uid);
+        $parents = implode(',ou=', $parent_ous);
+        return "ou=$ou," . $parents . self::dnRoot($uid);
     }
 
     public static function scopeFromCommunity(Builder $query, string $uid): Builder

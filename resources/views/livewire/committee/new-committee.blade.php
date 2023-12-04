@@ -4,7 +4,7 @@
     </x-slot:title>
 
     <x-input.group :label="__('Realm Name')" wire:model.live="realm_uid" disabled/>
-    <x-select :label="__('Parent Committee')" wire:model.live="parent_ou">
+    <x-select :label="__('Parent Committee')" wire:model.live="parent_dn">
         <option>{{ __('none') }}</option>
         @foreach($select_parents as $select_parent)
             <option value="{{ $select_parent->getDn() }}">{{ $select_parent->getFirstAttribute('description') }}</option>
