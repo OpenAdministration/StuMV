@@ -137,6 +137,11 @@ Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, a
     $trail->push($routeParams['cn'], route('committees.roles.members', $routeParams));
 });
 
+Breadcrumbs::for('committees.roles.add-member', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.roles.members', $routeParams);
+    $trail->push(__('New Member'), route('committees.roles.add-member', $routeParams));
+});
+
 Breadcrumbs::for('superadmins.list', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->push(__('Superusers'), route('superadmins.list' /* none */));
 });

@@ -35,7 +35,6 @@ class ActiveRealm
             // where their routes do not have realm uid / community
             session(['realm_uid' => $community->getFirstAttribute('ou')]);
         }
-
         return $next($request);
     }
 

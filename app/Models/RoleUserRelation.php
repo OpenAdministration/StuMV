@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -36,6 +37,12 @@ class RoleUserRelation extends Model
         'comment',
     ];
 
+    protected $casts = [
+        'from' => 'date',
+        'until' => 'date',
+        'decided' => 'date',
+    ];
+
     /**
      * @return BelongsTo
      */
@@ -50,5 +57,9 @@ class RoleUserRelation extends Model
     public function user(): Relation
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isActive() : bool {
+        return Carbon::now()->between($this->from, $this->until);
     }
 }

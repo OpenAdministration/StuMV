@@ -73,12 +73,13 @@ class AddUserToRole extends Component
             'username' => $this->username,
             'from' => $this->start_date,
             'until' => !empty($this->end_date) ? $this->end_date : null,
-            'decided' => !empty($this->decision_date) ? $this->end_date : null,
-            'comment' => $this->comment,
+            'decided' => !empty($this->decision_date) ? $this->decision_date : null,
+            'comment' => !empty($this->comment) ? $this->comment : null,
         ]);
-        return redirect()->route('committees.roles', [
+        return redirect()->route('committees.roles.members', [
             'uid' => $this->uid,
-            'ou' => $this->ou
+            'ou' => $this->ou,
+            'cn' => $this->cn,
             ])
             ->with('message', __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]))
         ;

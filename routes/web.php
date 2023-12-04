@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth', 'verified'])->group(function (){
+
     Route::get('/', static function (){
         return redirect()->route('realms.pick');
     });
@@ -25,23 +26,24 @@ Route::middleware(['auth', 'verified'])->group(function (){
 });
 
 Route::middleware(['picked-community', 'auth'])->group(function (){
+
     Route::get('/{uid}/dashboard', static function (){
         return view('dashboard');
     })->name('dashboard');
-
     // member
     Route::get('/{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');
     Route::get('/{uid}/mods/', \App\Livewire\Realm\Moderators::class)->name('realms.mods');
     Route::get('/{uid}/admins/', \App\Livewire\Realm\Admins::class)->name('realms.admins');
     Route::get('/{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
+    Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
+    Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\RoleMembers::class)->name('committees.roles.members');
 });
 
 Route::middleware(['communityMod', 'auth'])->group(function (){
     // mod
     Route::get('/{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
-    Route::get('/{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
     Route::get('/{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
-    Route::get('/{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.members');
+    Route::get('/{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
     Route::get('/{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
     Route::get('/{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
 });
