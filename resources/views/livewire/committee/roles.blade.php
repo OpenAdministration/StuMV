@@ -34,11 +34,11 @@
                 <x-table.cell>{{ $role->getFirstAttribute('cn') }}</x-table.cell>
                 <x-table.cell>{{ $role->getFirstAttribute('description') }}</x-table.cell>
                 <x-table.cell>
-                    @forelse($role->getAttribute('uniqueMember') as $memberDn)
-                        {{ $memberDn }}
-                    @empty
-                        {{ __('No members found') }}
-                    @endforelse
+                    @empty($this->getMembersString($role))
+                        <span class="text-gray-400">{{ __('No members found') }}</span>
+                    @else
+                        {{ $this->getMembersString($role) }}
+                    @endempty
                 </x-table.cell>
                 <x-table.cell>
                     <x-link href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}">

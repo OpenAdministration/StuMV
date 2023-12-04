@@ -73,6 +73,18 @@ class ListRoles extends Component {
         );
     }
 
+    public function getMembersString(Role $role) : string
+    {
+        $members = $role->dbMemberships()->distinct()
+            ->limit(4)->pluck('username');
+        if($members->count() === 4){
+            // replace last one with dots
+            $members->pop();
+            $members->add('...');
+        }
+        return $members->implode(',');
+    }
+
     #[Computed]
     public function committee() : Committee {
         return Committee::findByName($this->uid, $this->ou);
