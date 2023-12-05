@@ -47,6 +47,7 @@ class RegisterUser extends Component
             ],
             'domain' => [
                 'required',
+                new \dacoto\DomainValidator\Validator\Domain(),
                 new DomainRegistrationRule()
             ],
         ];
