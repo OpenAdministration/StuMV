@@ -36,6 +36,10 @@ return [
             'timeout' => env('LDAP_TIMEOUT', 5),
             'use_ssl' => env('LDAP_SSL', false),
             'use_tls' => env('LDAP_TLS', false),
+            'options' => [
+                // See: http://php.net/ldap_set_option
+                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER
+            ],
         ],
     ],
 
