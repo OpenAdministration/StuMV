@@ -3,6 +3,7 @@
 
 return [
     'members' => 'Mitglieder',
+    'members.search' => 'Durchsuche Mitglieder',
     'no_members' => 'Keine',
     'no_members_found' => 'Keine Mitglieder gefunden',
     'no_roles_found' => 'Keine Rollen gefunden',
@@ -13,10 +14,16 @@ return [
     'new' => 'Neue Rolle anlegen',
     'edit_member' => 'Mitgliedschaft von :name bearbeiten',
     'new_member' => 'Neues Mitglied hinzufügen',
-    'new_member_label' => 'Verfügbare Benutzer',
+    'new_member_label' => 'Verfügbare Nutzer*innen',
     'delete_title' => 'Rolle :name löschen',
-    'delete_member_title' => 'Mitgliedschaft von :name löschen',
+    'members.delete_title' => 'Mitgliedschaft von :name löschen',
+    'members.delete_text' => 'Soll die Mitgliedschaft von :name wirklich gelöscht werden?',
     'delete_warning' => 'Soll die Rolle :name wirklich gelöscht werden?',
-    'delete_member_warning' => 'Soll die Mitgliedschaft von :name wirklich gelöscht werden?',
+    'message_delete_member_success' => 'Das Mitglied wurde erfolgreich aus der Rolle entfernt.',
     'edit' => 'Rolle :name bearbeiten',
+    'added_user' => 'Mitglieder wurden erfolgreich hinzugefügt.',
+    'members.terminate_title' => 'Mitgliedschaft beenden',
+    'members.terminate_text' => 'Gib an, zu welchem Datum die Mitgliedschaft von :name beendet werden soll.',
+    'message_terminate_member_success' => 'Das Enddatum der Mitgliedschaft wurde erfolgreich gesetzt.',
+    'members-title' => 'Rolle :name'
 ];

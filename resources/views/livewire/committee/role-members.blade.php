@@ -112,7 +112,7 @@
             </x-slot:title>
             <x-slot:content>
                 <span>{{ __('roles.members.terminate_text', ['name' => $terminateUsername]) }}</span>
-                <x-input.group autofocus type="date" :label="__('Terminiation Date')" wire:model="terminateDate"/>
+                <x-input.group autofocus type="date" :label="__('Termination Date')" wire:model="terminateDate"/>
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>

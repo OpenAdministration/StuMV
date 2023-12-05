@@ -121,7 +121,7 @@ class Members extends Component {
         $newMember = User::find($this->newRoleUserRel->user_id);
 
         if (empty($newMember)) {
-            $this->addError('newRoleUserRel.user_id', 'Benutzer nicht gefunden!');
+            $this->addError('newRoleUserRel.user_id', 'Nutzer*in nicht gefunden!');
             $this->showNewModal = false;
             return;
         }
@@ -129,7 +129,7 @@ class Members extends Component {
         $userBelongsToCommitteeRealm = $newMember->realms()->where('uid', $this->role->committee->realm_uid)->exists();
 
         if(!$userBelongsToCommitteeRealm) {
-            $this->addError('newRoleUserRel.user_id', 'Ungültiger Benutzer!');
+            $this->addError('newRoleUserRel.user_id', 'Ungültige*r Nutzer*in!');
             $this->showNewModal = false;
             return;
         }

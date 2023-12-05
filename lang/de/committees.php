@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'no_committees_found' => 'Keine Gremien gefunden!',
+    'no_committees_found' => 'Keine Gremien gefunden',
     'search' => 'Durchsuche Gremien',
     'new' => 'Neues Gremium anlegen',
     'delete_title' => 'Gremium :name löschen',
@@ -11,4 +11,6 @@ return [
     'parent_committee' => 'Übergeordnetes Gremium',
     'roles_heading' => 'Rollen des Gremiums :name (:realm)',
     'manage_roles' => 'Rollen verwalten',
+    'link_roles' => 'Rollen',
+    'link_edit' => 'Bearbeiten'
 ];

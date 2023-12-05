@@ -47,7 +47,7 @@ return [
     'digits_between' => 'Das :attribute muss zwischen :min und :max Stellen liegen.',
     'dimensions' => 'Das :attribute hat ungültige Bildabmessungen.',
     'distinct' => 'Das Feld :attribute hat einen doppelten Wert.',
-    'email' => 'Das :attribute muss eine gültige Email-Adresse sein.',
+    'email' => 'Die :attribute muss eine gültige E-Mail-Adresse sein.',
     'ends_with' => 'Das :attribute muss mit einem der folgenden enden: :values.',
     'enum' => 'Das ausgewählte :attribute ist ungültig.',
     'exists' => 'Das gewählte :attribute ist ungültig.',

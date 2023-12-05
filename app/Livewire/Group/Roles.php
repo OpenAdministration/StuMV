@@ -87,13 +87,13 @@ class Roles extends Component {
         $newRole = Role::find($this->newRole->id);
 
         if (empty($newRole)) {
-            $this->addError('newRole.id', 'Benutzer nicht gefunden!');
+            $this->addError('newRole.id', 'Nutzer*in nicht gefunden!');
             $this->showNewModal = false;
             return;
         }
 
         if($newRole->committee->realm->uid != $this->group->realm->uid) {
-            $this->addError('newRole.id', 'Ungültiger Benutzer!');
+            $this->addError('newRole.id', 'Ungültiger Nutzer*in!');
             $this->showNewModal = false;
             return;
         }

@@ -20,7 +20,7 @@ class RegisterUser extends Component
 {
     //public User $user;
 
-    #[Validate('required|email')]
+    #[Validate('required|email',as:'E-Mail')]
     public string $email = '';
     #[Validate('required|string|max:255')]
     public string $first_name = '';
