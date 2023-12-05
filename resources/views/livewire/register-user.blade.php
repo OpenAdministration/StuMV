@@ -2,22 +2,22 @@
     <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('user.register') }}</h2>
     <x-livewire-form>
         <!-- Email Address -->
-        <x-input.group wire:model.blur="email" autofocus>
+        <x-input.group wire:model.live="email" autofocus>
             <x-slot name="label">{{ __('Email') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
         @error('domain') <small class="block text-red-500">{{ $message }}</small> @enderror
         <!-- Name -->
-        <x-input.group wire:model.live="first_name">
+        <x-input.group wire:model.blur="first_name">
             <x-slot name="label">{{ __('First name') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
-        <x-input.group wire:model.live="last_name">
+        <x-input.group wire:model.blur="last_name">
             <x-slot name="label">{{ __('Last name') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>
         <!-- Username -->
-        <x-input.group wire:model.live="username">
+        <x-input.group wire:model.blur="username">
             <x-slot name="label">{{ __('Username') }}</x-slot>
             <x-slot name="help"></x-slot>
         </x-input.group>

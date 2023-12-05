@@ -35,7 +35,6 @@ class RegisterUser extends Component
     #[Validate]
     public string $password_confirmation = '';
 
-    #[Validate]
     public string $domain = '';
 
     protected function rules() : array
@@ -47,6 +46,7 @@ class RegisterUser extends Component
                 'confirmed',
             ],
             'domain' => [
+                'required',
                 new DomainRegistrationRule()
             ],
         ];
@@ -63,10 +63,11 @@ class RegisterUser extends Component
         $this->domain = $split[1] ?? 'false';
         $this->validateOnly('domain');
         // if mail is valid try to prefill the fullName of the user
+        $this->username = $split[0];
         $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
-        $this->first_name = $guessedName[0];
-        $this->last_name = $guessedName[1];
-        $this->validateOnly(['first_name', 'last_name']);
+        $this->first_name = $guessedName[0] ?? "";
+        $this->last_name = $guessedName[1] ?? "";
+        $this->validateOnly('username');
     }
 
     public function render()
@@ -80,6 +81,7 @@ class RegisterUser extends Component
 
     public function save(){
 
+        $this->updatingEmail($this->email);
         $this->validate();
         $domain = Domain::findByOrFail('dc', $this->domain);
         $community = $domain->community();
@@ -103,6 +105,6 @@ class RegisterUser extends Component
 
         Auth::attempt([$this->username, $this->password]);
 
-        return redirect()->route('register-success')->with('message', __('Successfully Registered'));
+        return redirect()->route('login')->with('message', __('Successfully Registered'));
     }
 }

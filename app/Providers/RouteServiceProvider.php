@@ -18,7 +18,7 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @var string
      */
-    public const HOME = '/realm-pick';
+    public const HOME = '/pick-realm';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.

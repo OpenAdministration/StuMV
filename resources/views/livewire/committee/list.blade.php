@@ -46,7 +46,12 @@
                 </x-table.cell>
                 <x-table.cell>
                     <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">
-                        <x-fas-info /> {{ __('committees.link_manage') }}
+                        <x-fas-user-group /> {{ __('committees.link_roles') }}
+                    </x-link>
+                </x-table.cell>
+                <x-table.cell>
+                    <x-link href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">
+                        <x-fas-pencil /> {{ __('committees.link_edit') }}
                     </x-link>
                 </x-table.cell>
                 <x-table.cell>
