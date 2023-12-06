@@ -66,8 +66,8 @@ class RegisterUser extends Component
         // if mail is valid try to prefill the fullName of the user
         $this->username = $split[0];
         $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
-        $this->first_name = $guessedName[0] ?? "";
-        $this->last_name = $guessedName[1] ?? "";
+        $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
+        $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
         $this->validateOnly('username');
     }
 
