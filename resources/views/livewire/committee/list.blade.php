@@ -1,8 +1,8 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">Lorem Ipsum</h1>
-            <p class="mt-2 text-sm text-gray-700">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,</p>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('commitees.list.headline') }}</h1>
+            <p class="mt-2 text-sm text-gray-700">{{ __('committees.list.explain_text') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary :href="route('committees.new', ['uid' => $realm_uid])" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
@@ -30,8 +30,9 @@
             >
                 {{ __('committees.parent_committee') }}
             </x-table.heading>
-            <x-table.heading/>
-            <x-table.heading/>
+            <x-table.heading>
+                {{__('Actions')}}
+            </x-table.heading>
         </x-slot>
         @forelse($committeesSlice->items() as $committee)
             <x-table.row>
@@ -44,19 +45,19 @@
                         {{ $committee->parentCommittee()->getFirstAttribute('ou') }}
                     @endif
                 </x-table.cell>
-                <x-table.cell>
+                <x-table.cell class="flex space-x-7 shrink-0">
                     <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">
                         <x-fas-user-group /> {{ __('committees.link_roles') }}
                     </x-link>
-                </x-table.cell>
-                <x-table.cell>
-                    <x-link href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">
+                    <x-link href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                            :disabled="auth()->user()->cannot('edit', [$committee, $community])"
+                    >
                         <x-fas-pencil /> {{ __('committees.link_edit') }}
                     </x-link>
-                </x-table.cell>
-                <x-table.cell>
                     <x-button.link-danger icon-leading="fas-trash"
-                        wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')">
+                        wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')"
+                        :disabled="auth()->user()->cannot('edit', [$committee, $community])"
+                    >
                         {{ __('Delete') }}
                     </x-button.link-danger>
                 </x-table.cell>

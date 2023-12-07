@@ -56,6 +56,7 @@ class ListCommittees extends Component
     #[Title('Committees')]
     public function render()
     {
+        $community = Community::findByUid($this->realm_uid);
         $committeesSlice = Committee::fromCommunity($this->realm_uid)
             ->search('ou', $this->search)
             ->orderBy('ou:caseIgnoreIA5Match', 'asc')
@@ -63,13 +64,16 @@ class ListCommittees extends Component
 
         return view('livewire.committee.list', [
             'committeesSlice' => $committeesSlice,
+            'community' => $community,
         ]);
     }
 
 
     public function deletePrepare(string $dn): void
     {
+        $community = Community::findByUid($this->realm_uid);
         $c = Committee::findOrFail($dn);
+        $this->authorize('delete', [$c, $community]);
         $this->deleteCommitteeDn = $dn;
         $this->deleteCommitteeName = $c->getFirstAttribute('description');
         $this->deleteCommitteeOu = $c->getFirstAttribute('ou');
@@ -78,7 +82,10 @@ class ListCommittees extends Component
 
     public function deleteCommit(): void
     {
+        $community = Community::findByUid($this->realm_uid);
         $c = Committee::findOrFail($this->deleteCommitteeDn);
+        $this->authorize('delete', [$c, $community]);
+
         if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')){
             $this->addError('deleteConfirmText', __('Does not equal :text', $c->getFirstAttribute('ou')));
             return;

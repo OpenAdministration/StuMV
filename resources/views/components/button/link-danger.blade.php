@@ -1,7 +1,7 @@
 <button
     {{ $attributes->merge([
         'type' => 'button',
-        'class' => 'flex gap-x-1.5 items-center text-red-500 hover:text-red-700' . ($attributes->get('disabled') ? ' opacity-75 cursor-not-allowed' : ''),
+        'class' => 'flex gap-x-1.5 items-center text-red-500 hover:text-red-600' . ($attributes->get('disabled') ? ' opacity-25 cursor-not-allowed' : ''),
     ]) }}
 >
     @if($attributes->has('icon-leading'))
