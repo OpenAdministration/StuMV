@@ -49,6 +49,7 @@ class RoleMembers extends Component
     #[Title('roles.members-title')]
     public function render()
     {
+        $community = Community::findOrFailByUid($this->uid);
         $committee = Committee::findByName($this->uid, $this->ou);
         $members = RoleUserRelation::query()
             ->where('role_cn', $this->cn)
@@ -57,13 +58,20 @@ class RoleMembers extends Component
                 ->search('username', $this->search)
                 ->search('comment', $this->search);
             })->get();
-        return view('livewire.committee.role-members', ['members' => $members]);
+        return view('livewire.committee.role-members', [
+            'members' => $members,
+            'committee' => $committee,
+            'community' => $community,
+        ]);
     }
 
     public function prepareTermination(int $id): void
     {
-        //auth()->user()?->can()
         $membership = RoleUserRelation::findOrFail($id);
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findOrFailByUid($this->uid);
+        $this->authorize('terminate', [$membership, $committee, $community]);
+
         $this->showTerminateModal = true;
         $this->terminateDate = today()->format('Y-m-d');
         $this->terminateUsername = $membership->username;
@@ -72,9 +80,12 @@ class RoleMembers extends Component
 
     public function commitTermination()
     {
-        //auth()->user()?->can()
         $membership = RoleUserRelation::findOrFail($this->terminateId);
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findOrFailByUid($this->uid);
+        $this->authorize('terminate', [$membership, $committee, $community]);
         $this->validate(['terminateDate' => 'date:Y-m-d|after_or_equal:' . $membership->from->format('Y-m-d')]);
+
         $membership->until = $this->terminateDate;
         $membership->save();
         $this->close();
@@ -82,23 +93,33 @@ class RoleMembers extends Component
             ->with('message', __('roles.message_terminate_member_success'));
     }
 
-    public function prepareDeletion($id){
-        //auth()->user()?->can()
+    public function prepareDeletion($id)
+    {
         $membership = RoleUserRelation::findOrFail($id);
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findOrFailByUid($this->uid);
+        $this->authorize('delete', [$membership, $committee, $community]);
+
         $this->showDeleteModal = true;
         $this->deleteUsername = $membership->username;
         $this->deleteId = $membership->id;
     }
 
-    public function commitDeletion(){
+    public function commitDeletion()
+    {
         $membership = RoleUserRelation::findOrFail($this->deleteId);
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findOrFailByUid($this->uid);
+        $this->authorize('delete', [$membership, $committee, $community]);
+
         $membership->delete();
         $this->close();
         return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn])
             ->with('message', __('roles.message_delete_member_success'));
     }
 
-    public function close(){
+    public function close()
+    {
         $this->showTerminateModal = false;
         unset($this->terminateUsername, $this->terminateId, $this->terminateDate);
         $this->resetErrorBag('terminateDate');

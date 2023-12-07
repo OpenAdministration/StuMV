@@ -1,12 +1,14 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">Lorem Ipsum</h1>
-            <p class="mt-2 text-sm text-gray-700">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,</p>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('roles.membership_headline', ['name' => $cn]) }}</h1>
+            <p class="mt-2 text-sm text-gray-700">{{ __('roles.membership_explanation') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                                   icon-leading="fas-plus" :disabled="false">
+                                   :disabled="auth()->user()->cannot('create', [\App\Models\RoleUserRelation::class, $committee, $community])"
+                                   icon-leading="fas-plus"
+            >
                 {{ __('Add Member') }}
             </x-button.link-primary>
         </div>
@@ -50,33 +52,41 @@
                 </span></x-table.cell>
                 <x-table.cell><span class="flex justify-center">
                     @empty($member->until)
-                        <x-fas-forward-fast
+                        <x-button.link
+                            :disabled="auth()->user()->cannot('create', [\App\Models\RoleUserRelation::class, $committee, $community])"
                             wire:click="prepareTermination({{ $member->id }})"
-                            class="text-indigo-600 hover:text-indigo-500 cursor-pointer"/>
+                        >
+                            <x-fas-forward-fast/>
+                        </x-button.link>
                     @else
                         {{ $member->until->format('d.m.Y') }}
                     @endempty
                 </span></x-table.cell>
                 <x-table.cell><span class="flex justify-center">
                     @empty($member->decided)
-                        <hr class="w-16"/>
+                        <hr class="mx-5 grow"/>
                     @else
                         {{ $member->decided->format('d.m.Y') }}
                     @endempty
                 </span></x-table.cell>
                 <x-table.cell>
                     @empty($member->comment)
-                        <hr class="w-16"/>
+                        <hr class="mx-5 grow"/>
                     @else
                         {{ $member->comment }}
                     @endempty
                 </x-table.cell>
-                <x-table.cell><span class="flex gap-x-6">
-                    <a href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}">
-                        <x-fas-pencil  class="cursor-pointer text-indigo-500 hover:text-indigo-400"/>
-                    </a>
-                    <x-fas-trash class="text-red-400 hover:text-red-600 cursor-pointer" wire:click="prepareDeletion({{ $member->id }})"/>
-                </span></x-table.cell>
+                <x-table.cell class="flex gap-x-6 items-center">
+                    <x-link :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
+                        href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}">
+                        <x-fas-pencil/>
+                    </x-link>
+                    <x-button.link-danger
+                        wire:click="prepareDeletion({{ $member->id }})"
+                        :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])">
+                        <x-fas-trash/>
+                    </x-button.link-danger>
+                </x-table.cell>
             </x-table.row>
         @empty
             <x-table.row>
