@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('roles.membership_headline', ['name' => $cn]) }}</h1>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}</h1>
             <p class="mt-2 text-sm text-gray-700">{{ __('roles.membership_explanation') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">

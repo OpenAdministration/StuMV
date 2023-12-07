@@ -4,12 +4,11 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Models\Role;
+use App\Ldap\Role;
 use App\Models\RoleUserRelation;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class RoleMembers extends Component
@@ -51,6 +50,7 @@ class RoleMembers extends Component
     {
         $community = Community::findOrFailByUid($this->uid);
         $committee = Committee::findByName($this->uid, $this->ou);
+        $role = $committee?->roles()->where('cn', $this->cn)->first();
         $members = RoleUserRelation::query()
             ->where('role_cn', $this->cn)
             ->where('committee_dn', $committee->getDn())
@@ -62,6 +62,7 @@ class RoleMembers extends Component
             'members' => $members,
             'committee' => $committee,
             'community' => $community,
+            'role' => $role,
         ]);
     }
 

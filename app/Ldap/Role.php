@@ -23,4 +23,5 @@ class Role extends \LdapRecord\Models\OpenLDAP\Group
             ->where('role_cn', $cn)
             ->where('committee_dn', $dn);
     }
+
 }
