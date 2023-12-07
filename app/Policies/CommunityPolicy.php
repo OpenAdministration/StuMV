@@ -38,19 +38,16 @@ class CommunityPolicy
 
     public function member(User $user, Community $community): bool
     {
-        $mg = $community->membersGroup();
-        return $user->ldap()->memberOf()->exists($mg);
+        return $community->membersGroup()->members()->exists($user->ldap());
     }
 
     public function moderator(User $user, Community $community): bool
     {
-        $mg = $community->moderatorsGroup();
-        return $user->ldap()->memberOf()->exists($mg);
+        return $community->moderatorsGroup()->members()->exists($user->ldap());
     }
 
     public function admin(User $user, Community $community): bool
     {
-        $ag = $community->adminsGroup();
-        return $user->ldap()->memberOf()->exists($ag);
+        return $community->adminsGroup()->members()->exists($user->ldap());
     }
 }
