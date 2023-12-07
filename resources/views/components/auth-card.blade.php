@@ -1,4 +1,4 @@
-<div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+<div class="flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
     <div class="flex space-y-5">
         <div class="flex items-center space-x-3">
             @empty($logo)

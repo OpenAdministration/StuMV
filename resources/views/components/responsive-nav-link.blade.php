@@ -7,5 +7,8 @@ $classes = ($active ?? false)
 @endphp
 
 <a wire:navigate {{ $attributes->merge(['class' => $classes]) }}>
-    {{ $slot }}
+    <span class="flex space-x-3 items-center">
+        {{ $icon ?? '' }}
+        <span>{{ $slot }}</span>
+    </span>
 </a>
