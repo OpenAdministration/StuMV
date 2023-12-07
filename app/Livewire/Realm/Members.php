@@ -53,11 +53,9 @@ class Members extends Component {
         return view(
             'livewire.realm.members', [
                 'realm_members' => $members,
+                'community' => $community
             ]
-        )->title(__('realms.members_heading', [
-            'name' => $community->description[0],
-            'uid' => $community->ou[0],
-        ]));
+        );
     }
 
     public function deletePrepare($uid): void

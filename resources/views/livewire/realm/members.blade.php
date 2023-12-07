@@ -1,9 +1,19 @@
 <div class="flex-col space-y-4">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.members_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</h1>
+            <p class="mt-2 text-sm text-gray-700">{{ __('realms.members_explanation') }}</p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <x-button.link-primary
+                href="{{ route('realms.members.new', ['uid' => $community_name]) }}" icon-leading="fas-plus" :disabled="auth()->user()->cannot('add-member', $community)">
+                {{ __('Add Member') }}
+            </x-button.link-primary>
+        </div>
+    </div>
+
     <div class="flex justify-between">
         <x-input.group type="text" wire:model.live="search" placeholder="{{ __('realms.search_members') }}"></x-input.group>
-        <x-button.link-primary href="{{ route('realms.members.new', ['uid' => $community_name]) }}" class="flex">
-            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
-        </x-button.link-primary>
 
     </div>
     <x-table>

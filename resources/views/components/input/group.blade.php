@@ -29,7 +29,7 @@
         disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200
         placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6',
         'type' => 'text',
-        'disabled' => $attributes->has('disabled')
+        'disabled' => $attributes->has('disabled') // enforce disabled attribute being there (?)
     ]) }}/>
 
     @error($model) <small wire:key="{{ $model }}" class="block text-red-500">{{ $message }}</small> @enderror

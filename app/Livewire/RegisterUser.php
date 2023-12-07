@@ -7,6 +7,7 @@ use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use App\Rules\DomainRegistrationRule;
 use App\Rules\UniqueDomain;
+use App\Rules\UniqueEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -20,14 +21,13 @@ class RegisterUser extends Component
 {
     //public User $user;
 
-    #[Validate('required|email',as:'E-Mail')]
     public string $email = '';
-    #[Validate('required|string|max:255')]
+    #[Validate('required|string|alpha|max:255')]
     public string $first_name = '';
-    #[Validate('required|string|max:255')]
+    #[Validate('required|string|alpha|max:255')]
     public string $last_name = '';
 
-    #[Validate('required|string|max:255')]
+    #[Validate('required|string|alpha_dash|max:255')]
     public string $username = '';
 
     #[Validate]
@@ -40,14 +40,19 @@ class RegisterUser extends Component
     protected function rules() : array
     {
         return [
+            'email' => [
+                'required',
+                'email',
+                new UniqueEmail(),
+            ],
             'password' => [
                 'required',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
+                Password::default(),
                 'confirmed',
             ],
             'domain' => [
                 'required',
-                new \dacoto\DomainValidator\Validator\Domain(),
+                //new \dacoto\DomainValidator\Validator\Domain(),
                 new DomainRegistrationRule()
             ],
         ];
@@ -57,7 +62,7 @@ class RegisterUser extends Component
      * Do some stuff if email was changed
      * @return void
      */
-    public function updatingEmail($email): void
+    public function updatedEmail($email): void
     {
         $this->validateOnly('email');
         $split = explode('@', $email);
@@ -106,6 +111,6 @@ class RegisterUser extends Component
 
         Auth::attempt([$this->username, $this->password]);
 
-        return redirect()->route('login')->with('message', __('Successfully Registered'));
+        return redirect()->route('verification.notice')->with('message', __('Successfully Registered'));
     }
 }

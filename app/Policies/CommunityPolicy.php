@@ -41,6 +41,11 @@ class CommunityPolicy
         return $community->membersGroup()->members()->exists($user->ldap());
     }
 
+    public function add_member(User $user, Community $community): bool
+    {
+        return $community->membersGroup()->members()->exists($user->ldap());
+    }
+
     public function moderator(User $user, Community $community): bool
     {
         return $community->moderatorsGroup()->members()->exists($user->ldap());
