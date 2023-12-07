@@ -7,7 +7,7 @@
         {{ $slot }}
     </a>
 @else
-    <span {{ $attributes->merge([
+    <span {{ $attributes->except('wire:click')->merge([
             'class' => 'opacity-25 cursor-not-allowed flex gap-x-1.5 items-center text-indigo-600'
     ])}}>
             {{ $slot }}
