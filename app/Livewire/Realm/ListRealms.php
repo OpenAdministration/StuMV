@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
@@ -52,10 +53,12 @@ class ListRealms extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(Request $request)
     {
         session()->forget('realm_uid');
-        $slice = Community::query()
+        session()->save();
+
+        $communitySlice = Community::query()
             ->list() // only first level
             ->setDn(Community::$rootDn)
             ->search('ou', $this->search)
@@ -63,21 +66,22 @@ class ListRealms extends Component
             ->slice(1, 10, $this->sortField, $this->sortDirection);
 
         return view('livewire.realm.list-communities', [
-            'realmSlice' => $slice
+            'realmSlice' => $communitySlice,
         ]);
     }
 
     public function deletePrepare($uid): void
     {
-        $this->authorize('delete', Community::class);
+        $c = Community::findOrFailByUid($uid);
+        $this->authorize('delete', $c);
         $this->deleteRealmName = $uid;
         $this->showDeleteModal = true;
     }
 
     public function deleteCommit(): void
     {
-        $this->authorize('delete', Community::class);
         $community = Community::findOrFailByUid($this->deleteRealmName);
+        $this->authorize('delete', $community);
         $community->delete(recursive: true);
         // reset everything to prevent a 404 modal
         unset($this->deleteRealmName);

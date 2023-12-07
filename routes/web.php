@@ -30,8 +30,8 @@ Route::middleware(['picked-community', 'auth', 'verified'])->group(function (){
     Route::get('/{uid}/dashboard', static function (){
         return view('dashboard');
     })->name('dashboard');
-    // member
 
+    // member
     Route::get('/{uid}/mods/', \App\Livewire\Realm\Moderators::class)->name('realms.mods');
     Route::get('/{uid}/admins/', \App\Livewire\Realm\Admins::class)->name('realms.admins');
     Route::get('/{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');

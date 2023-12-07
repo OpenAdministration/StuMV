@@ -36,21 +36,21 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     public function adminOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn', 'admins');
+        $hm->getQuery()->where('cn','=', 'members');
         return $hm;
     }
 
     public function moderatorOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn', 'moderators');
+        $hm->getQuery()->where('cn','=', 'members');
         return $hm;
     }
 
     public function memberOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn', 'members');
+        $hm->getQuery()->where('cn','=', 'members');
         return $hm;
     }
 

@@ -23,8 +23,16 @@ class CommunityPolicy
 
     public function enter(User $user, Community $community) : bool{
         return $user->can('superadmin', User::class)
-            || $this->member($user, $community)
-            || $this->moderator($user, $community)
+            || $this->member($user, $community);
+    }
+
+    public function edit(User $user, Community $community) : bool{
+        return $user->can('superadmin', User::class)
+            || $this->admin($user, $community);
+    }
+
+    public function delete(User $user, Community $community) : bool{
+        return $user->can('superadmin', User::class)
             || $this->admin($user, $community);
     }
 

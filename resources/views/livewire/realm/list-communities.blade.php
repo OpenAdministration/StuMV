@@ -36,17 +36,23 @@
                 <x-table.cell>{{ $realm->getShortCode() }}</x-table.cell>
                 <x-table.cell>{{ $realm->getLongName() }}</x-table.cell>
                 <x-table.cell>
-                    <x-link href="#" wire:click="enter('{{ $realm->getShortCode() }}')">
+                    <x-link :disabled="Auth::user()->cannot('enter', $realm)"
+                        href="#" wire:click="enter('{{ $realm->getShortCode() }}')" >
                         <x-fas-dungeon/> {{ __('Enter') }}
                     </x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger
-                        wire:click="deletePrepare('{{ $realm->getShortCode() }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-link :disabled="Auth::user()->cannot('edit', $realm)"
+                        href="{{ route('realms.edit', ['uid' => $realm->getShortCode()]) }}">
+                        <x-fas-pencil/> {{ __('Edit') }}
+                    </x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-link
-                        href="{{ route('realms.edit', ['uid' => $realm->getShortCode()]) }}">{{ __('Edit') }}</x-link>
+                    <x-button.link-danger icon-leading="fas-trash"
+                        :disabled="Auth::user()->cannot('delete', $realm)"
+                        wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
+                        {{ __('Delete') }}
+                    </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty
