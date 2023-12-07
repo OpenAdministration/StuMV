@@ -98,4 +98,9 @@ class Committee extends OrganizationalUnit
         return self::fromCommunity($uid)->where('ou', $name)->first();
     }
 
+    public static function findByNameOrFail(string $uid, string $name) : self
+    {
+        return self::fromCommunity($uid)->where('ou', $name)->first() ?? abort(404);
+    }
+
 }

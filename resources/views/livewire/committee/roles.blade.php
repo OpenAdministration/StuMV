@@ -7,7 +7,7 @@
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary
                 :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])"
-                icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', [\App\Ldap\Role::class, $committee])">
+                icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', [\App\Ldap\Role::class, $committee, $community])">
                 {{ __('New Role') }}
             </x-button.link-primary>
         </div>
@@ -46,11 +46,11 @@
                     <x-link href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}">
                         <x-fas-users/>{{ __('roles.link_members') }}
                     </x-link>
-                    <x-link :disabled="auth()->user()->cannot('edit', [$role, $committee])">
+                    <x-link :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])">
                         <x-fas-pencil/>{{ __('roles.link_edit') }}
                     </x-link>
                     <x-button.link-danger icon-leading="fas-trash"
-                        :disabled="auth()->user()->cannot('delete', [$role, $committee])"
+                        :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
                         wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
                         {{ __('Delete') }}
                     </x-button.link-danger>

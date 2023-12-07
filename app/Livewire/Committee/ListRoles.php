@@ -60,15 +60,18 @@ class ListRoles extends Component {
     }
 
     public function render() {
-        $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findByUid($this->uid);
+        $committee = Committee::findByNameOrFail($this->uid, $this->ou);
         $rolesSlice = $committee->roles()
             ->search('cn', $this->search)
             ->search('description', $this->search)
             ->slice(1,10);
         return view(
             'livewire.committee.roles', [
+                'community' => $community,
                 'committee' => $committee,
                 'rolesSlice' => $rolesSlice,
+
             ]
         );
     }
