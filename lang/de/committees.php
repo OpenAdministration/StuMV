@@ -10,7 +10,10 @@ return [
     'edit' => 'Gremium :name bearbeiten',
     'parent_committee' => 'Übergeordnetes Gremium',
     'roles_heading' => 'Rollen des Gremiums :name',
+    'roles_explanation' => 'Hier findest du alle Rollen des Gremiums. Einem Gremium können Nutzer*innen durch eine*n Moderator*in über Rollen zugeordnet werden. Das Löschen und Bearbeiten von Rollen ist nur Moderator*innen möglich.',
     'manage_roles' => 'Rollen verwalten',
     'link_roles' => 'Rollen',
-    'link_edit' => 'Bearbeiten'
+    'link_edit' => 'Bearbeiten',
+    'list.headline' => 'Gremien von :name',
+    'list.explain_text' => 'Das ist die Liste der Gremien und Organisationen. Gremien können nur von Moderator*innen bearbeitet oder gelöscht werden.'
 ];
