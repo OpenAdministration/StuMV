@@ -5,7 +5,8 @@
             <p class="mt-2 text-sm text-gray-700">{{ __('committees.list.explain_text') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary :href="route('committees.new', ['uid' => $realm_uid])" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
+            <x-button.link-primary
+                :href="route('committees.new', ['uid' => $realm_uid])" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', [\App\Ldap\Committee::class, $community])">
                 {{ __('New Committee') }}
             </x-button.link-primary>
         </div>

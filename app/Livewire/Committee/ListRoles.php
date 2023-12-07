@@ -82,7 +82,7 @@ class ListRoles extends Component {
             $members->pop();
             $members->add('...');
         }
-        return $members->implode(',');
+        return $members->implode(', ');
     }
 
     #[Computed]
@@ -92,6 +92,7 @@ class ListRoles extends Component {
     public function deletePrepare($cn): void
     {
         $r = $this->committee()->roles()->where('cn', $cn)->firstOrFail();
+        $this->authorize('delete', $r);
         $this->deleteRoleCn = $cn;
         $this->deleteRoleName = $r->getFirstAttribute('description');
         $this->showDeleteModal = true;
@@ -100,6 +101,7 @@ class ListRoles extends Component {
     public function deleteCommit(): \Livewire\Features\SupportRedirects\Redirector
     {
         $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
+        $this->authorize('delete', $role);
         $role->delete();
         return redirect()->route('committees.roles', ['uid' => $this->uid, 'ou' => $this->ou])
             ->with('status', 'success')

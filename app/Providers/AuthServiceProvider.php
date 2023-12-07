@@ -4,9 +4,13 @@ namespace App\Providers;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Role;
+use App\Models\RoleUserRelation;
 use App\Models\User;
 use App\Policies\CommitteePolicy;
 use App\Policies\CommunityPolicy;
+use App\Policies\MembershipPolicy;
+use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -23,6 +27,8 @@ class AuthServiceProvider extends ServiceProvider
         User::class => UserPolicy::class,
         Community::class => CommunityPolicy::class,
         Committee::class => CommitteePolicy::class,
+        Role::class => RolePolicy::class,
+        RoleUserRelation::class => MembershipPolicy::class
     ];
 
     /**

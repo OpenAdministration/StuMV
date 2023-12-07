@@ -9,7 +9,7 @@ return [
     'delete.confirm' => 'Wenn du dir sicher bist tippe in das nachfolgende Textfeld: ',
     'edit' => 'Gremium :name bearbeiten',
     'parent_committee' => 'Übergeordnetes Gremium',
-    'roles_heading' => 'Rollen des Gremiums :name (:realm)',
+    'roles_heading' => 'Rollen des Gremiums :name',
     'manage_roles' => 'Rollen verwalten',
     'link_roles' => 'Rollen',
     'link_edit' => 'Bearbeiten'

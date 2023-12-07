@@ -1,11 +1,13 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">Lorem Ipsum</h1>
-            <p class="mt-2 text-sm text-gray-700">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,</p>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('committees.roles_heading', ['name' => $ou]) }}</h1>
+            <p class="mt-2 text-sm text-gray-700">{{ __('committees.roles_explanation') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
+            <x-button.link-primary
+                :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])"
+                icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', [\App\Ldap\Role::class, $committee])">
                 {{ __('New Role') }}
             </x-button.link-primary>
         </div>
@@ -40,16 +42,18 @@
                         {{ $this->getMembersString($role) }}
                     @endempty
                 </x-table.cell>
-                <x-table.cell>
+                <x-table.cell class="flex space-x-5">
                     <x-link href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}">
-                        {{ __('roles.manage_members') }}
+                        <x-fas-users/>{{ __('roles.link_members') }}
                     </x-link>
-                </x-table.cell>
-                <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">{{ __('Delete') }}</x-button.link-danger>
-                </x-table.cell>
-                <x-table.cell>
-                   edit
+                    <x-link :disabled="auth()->user()->cannot('edit', [$role, $committee])">
+                        <x-fas-pencil/>{{ __('roles.link_edit') }}
+                    </x-link>
+                    <x-button.link-danger icon-leading="fas-trash"
+                        :disabled="auth()->user()->cannot('delete', [$role, $committee])"
+                        wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
+                        {{ __('Delete') }}
+                    </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty
