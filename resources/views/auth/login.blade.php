@@ -10,7 +10,7 @@
             @csrf
 
             <!-- Email Address -->
-            <x-input.group :label="__('Username')" class="block mt-1 w-full" name="uid" id="uid" :value="old('uid')" required autofocus />
+            <x-input.group :label="__('Username or Mail')" class="block mt-1 w-full" name="uid" id="uid" :value="old('uid')" required autofocus />
 
             <!-- Password -->
             <x-input.group type="password" class="block mt-1 w-full" :label="__('Password')" id="password" name="password" required autocomplete="current-password"/>

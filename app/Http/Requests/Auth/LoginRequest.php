@@ -6,6 +6,7 @@ use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use LdapRecord\LdapRecordException;
@@ -47,9 +48,17 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         $credentials = [
-            'uid' => $this->get('uid'),
             'password' => $this->get('password'),
         ];
+
+        $validator = Validator::make(['email' => $this->get('uid')], [
+            'email' => 'required|email'
+        ]);
+        if($validator->passes()){
+            $credentials['mail'] = $this->get('uid');
+        }else{
+            $credentials['uid'] = $this->get('uid');
+        }
         try {
             $auth = Auth::attempt($credentials, $this->boolean('remember'));
         } catch (LdapRecordException $ldapRecordException){

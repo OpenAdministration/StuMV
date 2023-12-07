@@ -27,7 +27,7 @@ class RegisterUser extends Component
     #[Validate('required|string|alpha|max:255')]
     public string $last_name = '';
 
-    #[Validate('required|string|alpha_dash|max:255')]
+    #[Validate('required|string|min:3|max:255|alpha_dash')]
     public string $username = '';
 
     #[Validate]
@@ -62,14 +62,14 @@ class RegisterUser extends Component
      * Do some stuff if email was changed
      * @return void
      */
-    public function updatedEmail($email): void
+    public function updatedEmail(): void
     {
         $this->validateOnly('email');
-        $split = explode('@', $email);
+        $split = explode('@', $this->email);
         $this->domain = $split[1] ?? 'false';
         $this->validateOnly('domain');
         // if mail is valid try to prefill the fullName of the user
-        $this->username = $split[0];
+        $this->username = str_replace('.', '-', $split[0]);
         $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
         $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
         $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
@@ -87,7 +87,7 @@ class RegisterUser extends Component
 
     public function save(){
 
-        $this->updatingEmail($this->email);
+        $this->updatedEmail();
         $this->validate();
         $domain = Domain::findByOrFail('dc', $this->domain);
         $community = $domain->community();
