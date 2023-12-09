@@ -6,55 +6,37 @@
                 <!-- Logo -->
                 <div class="ml-2.5 shrink-0 flex items-center">
                     <a href="{{ route('realms.pick') }}" class="flex space-x-3 items-center">
-                        <x-application-logo/>
+                        <x-application-logo />
                         <span class="text-3xl font-extrabold text-gray-800 tracking-tighter">StuMV</span>
                     </a>
                 </div>
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     @can('picked', \App\Ldap\Community::class)
+                        <x-nav-link wire:navigate :active="request()->routeIs('realms.dashboard')"
+                                    :href="route('realms.dashboard', ['uid' => $uid])"
+                        >
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
                         <x-nav-link wire:navigate :active="request()->routeIs('committees.list')"
                                     :href="route('committees.list', ['uid' => $uid])"
                         >
                             {{ __('Committees') }}
-                        </x-nav-link>
-                        <x-nav-link wire:navigate :active="request()->routeIs('realms.members')"
-                                    :href="route('realms.members', ['uid' => $uid])"
-                        >
-                            {{ __('Members') }}
-                        </x-nav-link>
-                        <x-nav-link wire:navigate :active="request()->routeIs('realms.mods')"
-                                    :href="route('realms.mods', ['uid' => $uid])"
-                        >
-                            {{ __('Mods') }}
-                        </x-nav-link>
-                        <x-nav-link wire:navigate :active="request()->routeIs('realms.admins')"
-                                    :href="route('realms.admins', ['uid' => $uid])"
-                        >
-                            {{ __('Admins') }}
-                        </x-nav-link>
-                        <x-nav-link wire:navigate :active="request()->routeIs('realms.groups')"
-                                    :href="route('realms.groups', ['uid' => $uid])"
-                        >
-                            {{ __('Gruppen') }}
-                        </x-nav-link>
-                        <x-nav-link :active="request()->routeIs('realms.domains')"
-                                    :href="route('realms.domains', ['uid' => $uid])">
-                            {{ __('Domains') }}
                         </x-nav-link>
                     @endcan
                     @can('superadmin', \App\Models\User::class)
                         <x-nav-link wire:navigate :active="request()->routeIs('superadmins.list')"
                                     :href="route('superadmins.list')"
                         >
-                            <x-fas-dragon/> {{ __('Superadmin') }}
+                            <x-fas-dragon/> {{ __('Superadmins') }}
+                        </x-nav-link>
+                        <x-nav-link :active="request()->routeIs('realms.pick')"
+                                    :href="route('realms.pick')">
+                            <x-fas-repeat/> {{ __('Change Realm') }}
                         </x-nav-link>
                     @endcan
 
-                    <x-nav-link :active="request()->routeIs('realms.pick')"
-                                :href="route('realms.pick')">
-                        <x-fas-door-open/> {{ __('Change Realm') }}
-                    </x-nav-link>
+
                 </div>
             </div>
 
@@ -109,49 +91,48 @@
         <div class="pt-2 pb-3 space-y-1">
             @can('picked', \App\Ldap\Community::class)
                 <x-responsive-nav-link wire:navigate :active="request()->routeIs('committees.list')"
-                            :href="route('committees.list', ['uid' => $uid])"
+                                       :href="route('committees.list', ['uid' => $uid])"
                 >
                     {{ __('Committees') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link wire:navigate :active="request()->routeIs('realms.members')"
-                            :href="route('realms.members', ['uid' => $uid])"
+                                       :href="route('realms.members', ['uid' => $uid])"
                 >
                     {{ __('Members') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link wire:navigate :active="request()->routeIs('realms.mods')"
-                            :href="route('realms.mods', ['uid' => $uid])"
+                                       :href="route('realms.mods', ['uid' => $uid])"
                 >
                     {{ __('Mods') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link wire:navigate :active="request()->routeIs('realms.admins')"
-                            :href="route('realms.admins', ['uid' => $uid])"
+                                       :href="route('realms.admins', ['uid' => $uid])"
                 >
                     {{ __('Admins') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link wire:navigate :active="request()->routeIs('realms.groups')"
-                            :href="route('realms.groups', ['uid' => $uid])"
+                                       :href="route('realms.groups', ['uid' => $uid])"
                 >
                     {{ __('Gruppen') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :active="request()->routeIs('realms.domains')"
-                            :href="route('realms.domains', ['uid' => $uid])">
+                                       :href="route('realms.domains', ['uid' => $uid])">
                     {{ __('Domains') }}
                 </x-responsive-nav-link>
             @endcan
             @can('superadmin', \App\Models\User::class)
                 <x-responsive-nav-link wire:navigate :active="request()->routeIs('superadmins.list')"
-                            :href="route('superadmins.list')"
+                                       :href="route('superadmins.list')"
                 >
                     <x-slot:icon><x-fas-dragon/></x-slot:icon>
-                    {{ __('Superadmin') }}
+                    {{ __('Superadmins') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :active="request()->routeIs('realms.pick')"
+                                       :href="route('realms.pick')">
+                    <x-slot:icon><x-fas-door-open/></x-slot:icon>
+                    {{ __('Change Realm') }}
                 </x-responsive-nav-link>
             @endcan
-
-            <x-responsive-nav-link :active="request()->routeIs('realms.pick')"
-                        :href="route('realms.pick')">
-                <x-slot:icon><x-fas-door-open/></x-slot:icon>
-                {{ __('Change Realm') }}
-            </x-responsive-nav-link>
 
 
         </div>

@@ -11,7 +11,6 @@ class CommunityDashboard extends Component
     public string $uid;
 
     public function mount(?Community $uid){
-        dd('dash');
         $this->uid = $uid?->getShortCode() ?? session('realm_uid');
     }
     public function render()

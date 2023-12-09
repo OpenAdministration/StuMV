@@ -27,9 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
 
 Route::middleware(['picked-community', 'auth', 'verified'])->group(function (){
 
-    Route::get('{uid}/dashboard', static function (){
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('{uid}/dashboard', \App\Livewire\Realm\CommunityDashboard::class)->name('realms.dashboard');
 
     // member
     Route::get('{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');

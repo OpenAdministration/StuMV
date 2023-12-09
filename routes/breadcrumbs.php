@@ -20,12 +20,12 @@ Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routePar
 
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams) {
     $community = \Illuminate\Support\Facades\Route::current()->parameter('uid');
-    $trail->push($community->getFirstAttribute('ou'), route('realms.pick' /* no route params! */));
+    $trail->push($community->getFirstAttribute('ou'), route('realms.dashboard', $community->getFirstAttribute('ou')));
 });
 
-Breadcrumbs::for('dashboard', function (BreadcrumbTrail $trail, array $routeParams) {
+Breadcrumbs::for('realms.dashboard', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('realms', $routeParams);
-    $trail->push(__('Dashboard'), route('dashboard', $routeParams));
+    $trail->push(__('Dashboard'), route('realms.dashboard', $routeParams));
 });
 
 Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams) {
