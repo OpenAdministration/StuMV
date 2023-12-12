@@ -50,7 +50,7 @@ class RouteServiceProvider extends ServiceProvider
 
     public static function home($uid = null) {
         if(empty($uid)){
-            return \route('realms.pick');
+            return route('realms.pick');
         }
         return route('realms.dashboard', $uid);
     }
