@@ -42,6 +42,7 @@ class EditRealm extends Component
         $r = Community::findOrFailByUid($this->uid);
         $r->description =  [$this->name];
         $r->save();
-        return redirect()->route('realms.pick')->with('message', __("Realm :uid has been changed.", ['uid' => $this->uid]));
+        return redirect()->route('realms.pick')
+            ->with('message', __("Realm :uid has been changed.", ['uid' => $this->uid]));
     }
 }

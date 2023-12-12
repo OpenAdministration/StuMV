@@ -14,7 +14,6 @@
 
     <div class="flex justify-between">
         <x-input.group type="text" wire:model.live="search" placeholder="{{ __('realms.search_members') }}"></x-input.group>
-
     </div>
     <x-table>
         <x-slot name="head">

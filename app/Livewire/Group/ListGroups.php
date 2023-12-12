@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Group;
 
+use App\Ldap\Community;
 use App\Ldap\Group;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -42,8 +43,8 @@ class ListGroups extends Component
         $this->resetPage();
     }
 
-    public function mount($uid){
-        $this->realm_uid = $uid;
+    public function mount(Community $uid){
+        $this->realm_uid = $uid->getShortCode();
     }
     public function render()
     {
@@ -52,7 +53,7 @@ class ListGroups extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->slice(1, 10)
         ;
-        return view('livewire.group.crud', [
+        return view('livewire.group.list-group', [
             'groupSlice' => $groups,
         ]);
     }

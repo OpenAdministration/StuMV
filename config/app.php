@@ -214,8 +214,10 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+
     // app specific custom config
     'about_url' => env('ABOUT_URL', 'https://open-administration.de/index.php/kontakt-und-impressum/'),
     'privacy_url' => env('PRIVACY_URL', 'https://open-administration.de/index.php/datenschutz/'),
+    'help_contact_mail' => env('HELP_CONTACT_MAIL', 'stumv@open-administration.de'),
 
 ];

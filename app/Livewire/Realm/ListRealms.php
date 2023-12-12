@@ -101,7 +101,7 @@ class ListRealms extends Component
         $c = Community::findOrFailByUid($realm_uid);
         $this->authorize('enter', $c);
         session(['realm_uid' => $realm_uid]);
-        $this->redirectRoute('committees.list', ['uid' => $realm_uid]);
+        $this->redirectRoute('realms.dashboard', ['uid' => $realm_uid]);
     }
 
 }
