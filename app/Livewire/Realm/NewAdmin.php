@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class NewAdmin extends Component
@@ -22,13 +23,18 @@ class NewAdmin extends Component
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
+    #[Title('realms.new_admin_headline')]
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        $community = Community::findOrFailByUid($this->realm_uid);
         $userList = User::query()
             ->search('uid', $this->search)
             ->search('dn', $this->search)
             ->get();
-        return view('livewire.realm.new-admin', ['selectable_users' => $userList]);
+        return view('livewire.realm.new-admin', [
+            'selectable_users' => $userList,
+            'community' => $community,
+        ]);
     }
 
     public function save()

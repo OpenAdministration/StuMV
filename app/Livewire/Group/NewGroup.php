@@ -19,8 +19,8 @@ class NewGroup extends Component
     #[Rule('required|min:6')]
     public string $name = "";
 
-    public function mount($uid){
-        $this->realm_uid = $uid;
+    public function mount(Community $uid){
+        $this->realm_uid = $uid->getShortCode();
     }
 
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application

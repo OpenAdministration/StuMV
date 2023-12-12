@@ -2,11 +2,16 @@
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
             <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.list_headline') }}</h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('realms.list_explanation') }}</p>
+            <p class="mt-2 text-sm text-gray-700">
+                {{  __('realms.list_explanation') }}
+                <x-link class="inline-flex items-baseline" href="mailto:{{ config('app.help_contact_mail') }}">
+                    <x-fas-envelope class="w-3 h-3 items-baseline ml-1"/> {{ __('Contact us') }}
+                </x-link>
+            </p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary href="{{ route('realms.new') }}" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
-                Neuer Realm
+                {{ __('New Realm') }}
             </x-button.link-primary>
         </div>
     </div>

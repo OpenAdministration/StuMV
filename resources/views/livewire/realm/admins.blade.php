@@ -1,9 +1,23 @@
 <div class="flex-col space-y-4">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.admins_headline') }}</h1>
+            <p class="mt-2 text-sm text-gray-700">
+                {{  __('realms.admins_explanation') }}
+                <x-link class="inline-flex items-baseline" href="mailto:{{ config('app.help_contact_mail') }}">
+                    <x-fas-envelope class="w-3 h-3 items-baseline ml-1"/> {{ __('Contact us') }}
+                </x-link>
+            </p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <x-button.link-primary href="{{ route('realms.admins.new', ['uid' => $community_name]) }}" class="flex">
+                <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('Add Admin') }}
+            </x-button.link-primary>
+        </div>
+    </div>
     <div class="flex justify-between">
         <x-input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search_admins') }}"/>
-        <x-button.link-primary href="{{ route('realms.admins.new', ['uid' => $community_name]) }}" class="flex">
-            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
-        </x-button.link-primary>
+
     </div>
     <x-table>
         <x-slot name="head">

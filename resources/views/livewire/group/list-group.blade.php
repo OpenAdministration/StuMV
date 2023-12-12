@@ -1,9 +1,20 @@
 <div class="flex-col space-y-4">
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.groups_headline') }}</h1>
+            <p class="mt-2 text-sm text-gray-700">
+                {{  __('realms.groups_explanation') }}
+            </p>
+        </div>
+        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+            <x-button.link-primary :href="route('realms.groups.new', ['uid' => $realm_uid])" class="flex">
+                <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New Group') }}
+            </x-button.link-primary>
+        </div>
+    </div>
     <div class="flex justify-between">
         <x-input.group wire:model.live.debounce="search" placeholder="{{ __('groups.search') }}"/>
-        <x-button.link-primary :href="route('realms.groups.new', ['uid' => $realm_uid])" class="flex">
-            <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('New') }}
-        </x-button.link-primary>
+
     </div>
     <x-table>
         <x-slot name="head">
@@ -11,7 +22,7 @@
                 {{ __('Short Name') }}
             </x-table.heading>
             <x-table.heading sortable wire:click="sortBy('description')" :direction="$sortField === 'description' ? $sortDirection : null">
-                {{ __('Long Name') }}
+                {{ __('Full Name') }}
             </x-table.heading>
             <x-table.heading/>
             <x-table.heading/>

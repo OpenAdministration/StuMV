@@ -52,6 +52,7 @@ class Moderators extends Component {
         $mods = $community->moderatorsGroup()->members()->get();
         return view(
             'livewire.realm.moderators', [
+                'community' => $community,
                 'realm_members' => $mods,
             ]
         );

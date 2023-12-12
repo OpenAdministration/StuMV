@@ -29,11 +29,11 @@ class AddUserToRole extends Component
     #[Validate]
     public string $username = '';
 
-    #[Validate('date:Y-m-d', as: 'Starting Date')]
+    #[Validate('date:Y-m-d')]
     public $start_date;
-    #[Validate('date:Y-m-d', as: 'Ending Date')]
+    #[Validate('date:Y-m-d')]
     public $end_date = '';
-    #[Validate('date:Y-m-d', as: 'Decision Date')]
+    #[Validate('date:Y-m-d')]
     public $decision_date = '';
 
     #[Validate('string')]

@@ -167,6 +167,13 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'email' => 'E-Mail-Adresse',
+        'start_date' => 'Start Datum',
+        'end_date' => 'End Datum',
+        'decision_date' => 'Beschluss Datum',
+
+
+    ],
 
 ];
