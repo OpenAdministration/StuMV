@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,6 +20,7 @@ class Admins extends Component {
     #[Url]
     public string $sortDirection = 'asc';
 
+    #[Locked]
     public string $community_name;
 
     public bool $showDeleteModal = false;
@@ -55,7 +57,7 @@ class Admins extends Component {
         $admins = $this->community()?->adminsGroup()->members()->get();
         return view(
             'livewire.realm.admins', [
-                'realm' => $this->community(),
+                'community' => $this->community(),
                 'realm_admins' => $admins,
                     //->orderBy($this->sortField, $this->sortDirection)
                     //->paginate(10),

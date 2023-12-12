@@ -36,6 +36,10 @@ Route::middleware(['picked-community', 'auth', 'verified'])->group(function (){
     Route::get('{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
     Route::get('{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
     Route::get('{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\RoleMembers::class)->name('committees.roles.members');
+
+    // fine grained permissions
+    Route::get('{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new')
+        ->can('add_moderator', 'uid');
 });
 
 Route::middleware(['communityMod', 'auth', 'verified'])->group(function (){
@@ -46,7 +50,7 @@ Route::middleware(['communityMod', 'auth', 'verified'])->group(function (){
     Route::get('{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
     Route::get('{uid}/committees/{ou}/role/{cn}/membership/{id}', \App\Livewire\Committee\EditRoleMembership::class)->name('committees.roles.members.edit');
 
-    Route::get('{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new');
+
 });
 
 Route::middleware(['communityAdmin', 'auth', 'verified'])->group(function (){

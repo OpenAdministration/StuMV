@@ -1,7 +1,7 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.admins_headline') }}</h1>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.admins_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</h1>
             <p class="mt-2 text-sm text-gray-700">
                 {{  __('realms.admins_explanation') }}
                 <x-link class="inline-flex items-baseline" href="mailto:{{ config('app.help_contact_mail') }}">
@@ -10,7 +10,9 @@
             </p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary href="{{ route('realms.admins.new', ['uid' => $community_name]) }}" class="flex">
+            <x-button.link-primary :href="route('realms.admins.new', ['uid' => $community_name])" class="flex"
+                :disabled="auth()->user()->can('add_admin', $community)"
+            >
                 <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('Add Admin') }}
             </x-button.link-primary>
         </div>
