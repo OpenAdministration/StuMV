@@ -12,15 +12,6 @@ use Illuminate\Support\Facades\Route;
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * The path to the "home" route for your application.
-     *
-     * Typically, users are redirected here after authentication.
-     *
-     * @var string
-     */
-    public const HOME = '/pick-realm';
-
-    /**
      * Define your route model bindings, pattern filters, and other route configuration.
      *
      * @return void
@@ -55,5 +46,12 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+    }
+
+    public static function home($uid = null) {
+        if(empty($uid)){
+            return \route('realms.pick');
+        }
+        return route('realms.dashboard', $uid);
     }
 }

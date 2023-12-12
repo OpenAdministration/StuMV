@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="ml-2.5 shrink-0 flex items-center">
-                    <a href="{{ route('realms.pick') }}" class="flex space-x-3 items-center">
+                    <a href="{{ \App\Providers\RouteServiceProvider::home($uid) }}" wire:navigate class="flex space-x-3 items-center">
                         <x-application-logo />
                         <span class="text-3xl font-extrabold text-gray-800 tracking-tighter">StuMV</span>
                     </a>
@@ -13,7 +13,7 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     @can('picked', \App\Ldap\Community::class)
-                        <x-nav-link wire:navigate :active="request()->routeIs('realms.dashboard')"
+                        <x-nav-link wire:navigate :active="Route::is('realms.dashboard')"
                                     :href="route('realms.dashboard', ['uid' => $uid])"
                         >
                             {{ __('Dashboard') }}
@@ -21,7 +21,12 @@
                         <x-nav-link wire:navigate :active="request()->routeIs('committees.list')"
                                     :href="route('committees.list', ['uid' => $uid])"
                         >
-                            {{ __('Committees') }}
+                            {{ __('Committees and Roles') }}
+                        </x-nav-link>
+                        <x-nav-link wire:navigate :active="request()->routeIs('realms.members')"
+                                    :href="route('realms.members', ['uid' => $uid])"
+                        >
+                            {{ __('People') }}
                         </x-nav-link>
                     @endcan
                     @can('superadmin', \App\Models\User::class)
@@ -35,8 +40,6 @@
                             <x-fas-repeat/> {{ __('Change Realm') }}
                         </x-nav-link>
                     @endcan
-
-
                 </div>
             </div>
 
