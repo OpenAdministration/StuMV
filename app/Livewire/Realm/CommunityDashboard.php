@@ -15,6 +15,12 @@ class CommunityDashboard extends Component
     }
     public function render()
     {
-        return view('livewire.realm.community-dashboard');
+        $community = Community::findOrFailByUid($this->uid);
+        $name = $community->getFirstAttribute('description');
+
+        return view('livewire.realm.community-dashboard', [
+            'community' => $community,
+            'name' => $name,
+        ]);
     }
 }
