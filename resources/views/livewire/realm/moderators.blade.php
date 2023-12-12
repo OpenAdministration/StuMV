@@ -5,7 +5,9 @@
             <p class="mt-2 text-sm text-gray-700">{{ __('realms.mods_explanation') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary href="{{ route('realms.mods.new', ['uid' => $community_name]) }}" class="flex">
+            <x-button.link-primary :href="route('realms.mods.new', ['uid' => $community_name])" class="flex"
+                :disabled="auth()->user()->cannot('add_moderator', $community)"
+            >
                 <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('Add Moderators') }}
             </x-button.link-primary>
         </div>

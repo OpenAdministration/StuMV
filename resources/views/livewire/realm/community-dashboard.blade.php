@@ -40,7 +40,7 @@
         </x-dashboard-card>
 
         <x-dashboard-card :href="route('realms.edit', $uid)" color="bg-sky-100 text-sky-700" icon="fas-wand-magic-sparkles"
-                          :disabled="auth()->user()->cannot('admin', $community)">
+                          :disabled="auth()->user()->cannot('edit', $community)">
             <x-slot:headline>
                 {{ __('realms.dashboard.realms_edit_headline', ['name' => $name]) }}
             </x-slot:headline>
@@ -48,7 +48,7 @@
         </x-dashboard-card>
 
         <x-dashboard-card :href="route('realms.groups', $uid)" color="bg-blue-100 text-blue-700" icon="fas-user-tag"
-                          :disabled="auth()->user()->cannot('admin', $community)">
+                          :disabled="auth()->user()->cannot('viewAny', [\App\Ldap\Group::class, $community])">
             <x-slot:headline>
                 {{ __('realms.dashboard.groups_headline', ['name' => $name]) }}
             </x-slot:headline>
@@ -56,7 +56,7 @@
         </x-dashboard-card>
 
         <x-dashboard-card :href="route('realms.domains', $uid)" color="bg-indigo-100 text-indigo-700" icon="fab-internet-explorer"
-                          :disabled="auth()->user()->cannot('admin', $community)">
+                          :disabled="auth()->user()->cannot('viewAny', [\App\Ldap\Domain::class, $community])">
             <x-slot:headline>
                 {{ __('realms.dashboard.domains_headline', ['name' => $name]) }}
             </x-slot:headline>

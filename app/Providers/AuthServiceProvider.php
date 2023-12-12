@@ -4,11 +4,15 @@ namespace App\Providers;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Domain;
+use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Models\RoleUserRelation;
 use App\Models\User;
 use App\Policies\CommitteePolicy;
 use App\Policies\CommunityPolicy;
+use App\Policies\DomainPolicy;
+use App\Policies\GroupPolicy;
 use App\Policies\MembershipPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
@@ -28,7 +32,9 @@ class AuthServiceProvider extends ServiceProvider
         Community::class => CommunityPolicy::class,
         Committee::class => CommitteePolicy::class,
         Role::class => RolePolicy::class,
-        RoleUserRelation::class => MembershipPolicy::class
+        RoleUserRelation::class => MembershipPolicy::class,
+        Group::class => GroupPolicy::class,
+        Domain::class => DomainPolicy::class,
     ];
 
     /**

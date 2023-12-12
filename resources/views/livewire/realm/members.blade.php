@@ -6,7 +6,8 @@
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary
-                href="{{ route('realms.members.new', ['uid' => $community_name]) }}" icon-leading="fas-plus" :disabled="auth()->user()->cannot('add-member', $community)">
+                href="{{ route('realms.members.new', ['uid' => $community_name]) }}" icon-leading="fas-plus"
+                :disabled="auth()->user()->cannot('add_member', $community)">
                 {{ __('Add Member') }}
             </x-button.link-primary>
         </div>
