@@ -9,7 +9,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Admins extends Component {
+class ListAdmins extends Component {
 
     use WithPagination;
 
@@ -56,25 +56,27 @@ class Admins extends Component {
     public function render() {
         $admins = $this->community()?->adminsGroup()->members()->get();
         return view(
-            'livewire.realm.admins', [
+            'livewire.realm.list-admins', [
                 'community' => $this->community(),
                 'realm_admins' => $admins,
-                    //->orderBy($this->sortField, $this->sortDirection)
-                    //->paginate(10),
+                //->orderBy($this->sortField, $this->sortDirection)
+                //->paginate(10),
                 // all users that aren't admins on this realm
                 //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
         )->title(__('realms.admins_heading', [
-                'name' => $this->community()->description[0],
-                'uid' => $this->community()->ou[0]
+            'name' => $this->community()->description[0],
+            'uid' => $this->community()->ou[0]
         ]));
     }
 
     public function deletePrepare($username): void
     {
         $user = User::findByUsername($username);
-        $userBelongsToRealm = Community::findByUid($this->community_name)?->adminsGroup()->members()->get()->contains($user);
-        if(!$userBelongsToRealm) {
+        $community = Community::findOrFailByUid($this->community_name);
+        $this->authorize('remove_admin', $community);
+        $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
+        if(!$userIsAdmin) {
             // check if the user to delete is an admin in this realm
             unset($this->deleteAdminName);
             return;
@@ -85,7 +87,9 @@ class Admins extends Component {
 
     public function deleteCommit(): void
     {
-        $admins = Community::findByUid($this->community_name)?->adminsGroup()->members();
+        $community = Community::findOrFailByUid($this->community_name);
+        $this->authorize('remove_admin', $community);
+        $admins = $community?->adminsGroup()->members();
         $user = User::findByUsername($this->deleteAdminName);
         $admins->detach($user);
 

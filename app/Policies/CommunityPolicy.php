@@ -70,7 +70,14 @@ class CommunityPolicy
 
     public function add_admin(User $user, Community $community): bool
     {
-        return $this->admin($user, $community);
+        return $user->can('superadmin', User::class)
+            || $this->admin($user, $community);
+    }
+
+    public function remove_admin(User $user, Community $community): bool
+    {
+        return $user->can('superadmin', User::class)
+            || $this->admin($user, $community);
     }
 
 }

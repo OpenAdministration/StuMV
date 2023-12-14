@@ -11,7 +11,7 @@
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary :href="route('realms.admins.new', ['uid' => $community_name])" class="flex"
-                :disabled="auth()->user()->can('add_admin', $community)"
+                :disabled="auth()->user()->cannot('add_admin', $community)"
             >
                 <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('Add Admin') }}
             </x-button.link-primary>
@@ -40,7 +40,9 @@
                 <x-table.cell>{{ $realm_admin->cn[0] }}</x-table.cell>
                 <x-table.cell>{{ $realm_admin->uid[0] }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-button.link-danger :disabled="auth()->user()->cannot('remove_admin', $community)"
+                        wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')">{{ __('Delete') }}
+                    </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty

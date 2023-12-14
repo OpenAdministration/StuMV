@@ -29,7 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::get('{uid}/dashboard', \App\Livewire\Realm\CommunityDashboard::class)->name('realms.dashboard');
         Route::get('{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');
         Route::get('{uid}/mods/', \App\Livewire\Realm\Moderators::class)->name('realms.mods');
-        Route::get('{uid}/admins/', \App\Livewire\Realm\Admins::class)->name('realms.admins');
+        Route::get('{uid}/admins/', \App\Livewire\Realm\ListAdmins::class)->name('realms.admins');
         Route::get('{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
         Route::get('{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
         Route::get('{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\RoleMembers::class)->name('committees.roles.members');
