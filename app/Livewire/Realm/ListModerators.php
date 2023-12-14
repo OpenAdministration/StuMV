@@ -4,12 +4,13 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Moderators extends Component {
+class ListModerators extends Component {
 
     use WithPagination;
 
@@ -24,7 +25,7 @@ class Moderators extends Component {
 
     public string $deleteMemberName = '';
 
-    #[Rule('required')]
+    #[Locked]
     public string $community_name;
 
     public function mount(Community $uid): void
@@ -51,7 +52,7 @@ class Moderators extends Component {
         $community = Community::findOrFailByUid($this->community_name);
         $mods = $community->moderatorsGroup()->members()->get();
         return view(
-            'livewire.realm.moderators', [
+            'livewire.realm.list-moderators', [
                 'community' => $community,
                 'realm_members' => $mods,
             ]
@@ -60,8 +61,8 @@ class Moderators extends Component {
 
     public function deletePrepare($uid): void
     {
-
         $community = Community::findOrFailByUid($this->community_name);
+        $this->authorize('remove_moderator', $community);
         $userBelongsToRealm = $community->moderatorsGroup()->members()->whereEquals('uid', $uid)->get();
         if(!$userBelongsToRealm) {
             // only allow deletes from the same realm
@@ -74,6 +75,7 @@ class Moderators extends Component {
     public function deleteCommit(): void
     {
         $community = Community::findOrFailByUid($this->community_name);
+        $this->authorize('remove_moderator', $community);
         $user = User::findOrFailByUsername($this->deleteMemberName);
         $community->moderatorsGroup()->members()->detach($user);
         $this->showDeleteModal = false;
@@ -81,7 +83,6 @@ class Moderators extends Component {
 
     public function close(): void
     {
-        $this->showNewModal = false;
         $this->showDeleteModal = false;
     }
 }

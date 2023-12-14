@@ -63,6 +63,13 @@ class CommunityPolicy
             || $this->moderator($user, $community);
     }
 
+    public function remove_moderator(User $user, Community $community): bool
+    {
+        return $user->can('superadmin', User::class)
+            || $this->admin($user, $community)
+            || $this->moderator($user, $community);
+    }
+
     public function admin(User $user, Community $community): bool
     {
         return $community->adminsGroup()->members()->exists($user->ldap());
