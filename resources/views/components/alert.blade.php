@@ -11,6 +11,7 @@
     <div @class([
         "rounded-md",
         "p-4",
+        "mb-6",
         "bg-green-100" => $isSuccess,
         "bg-yellow-100" => $isWarning,
         "bg-red-100" => $isError,
