@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  * @property Role $role
  * @property User $user
  */
-class RoleUserRelation extends Model
+class RoleMembership extends Model
 {
     /**
      * The table associated with the model.
@@ -56,7 +57,7 @@ class RoleUserRelation extends Model
      */
     public function user(): Relation
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'username', 'username');
     }
 
     public function isActive() : bool {
@@ -64,5 +65,17 @@ class RoleUserRelation extends Model
             $this->from->format('Y-m-d'),
             $this->until?->format('Y-m-d')
         );
+    }
+
+    public function scopeActive(Builder $query, Carbon $date = null)
+    {
+        if(is_null($date)){
+            $date = today();
+        }
+        $query->whereDate('from', '<=', $date)
+            ->where(function ($query) use ($date){
+                $query->whereDate('until', '>=', $date)
+                    ->orWhereNull('until');
+            });
     }
 }

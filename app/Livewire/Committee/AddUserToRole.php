@@ -6,7 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\Role;
-use App\Models\RoleUserRelation;
+use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use Carbon\Carbon;
 use Livewire\Attributes\Locked;
@@ -67,7 +67,7 @@ class AddUserToRole extends Component
         $this->validate();
 
         $committee = Committee::findByName($this->uid, $this->ou);
-        RoleUserRelation::create([
+        RoleMembership::create([
             'role_cn' => $this->cn,
             'committee_dn' => $committee->getDn(),
             'username' => $this->username,

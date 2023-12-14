@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  * @property string $name
  * @property Group[] $groups
  * @property Committee $committee
- * @property RoleUserRelation[] $users
+ * @property RoleMembership[] $users
  */
 class Role extends Model
 {
@@ -55,7 +55,7 @@ class Role extends Model
      */
     public function members(): Relation
     {
-        return $this->hasMany(RoleUserRelation::class, 'role_id');
+        return $this->hasMany(RoleMembership::class, 'role_id');
     }
 
     public function addMember(User $user, Carbon $start, Carbon $end = null)

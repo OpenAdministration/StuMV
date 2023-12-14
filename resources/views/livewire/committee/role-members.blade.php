@@ -5,9 +5,10 @@
             <p class="mt-2 text-sm text-gray-700">{{ __('roles.membership_explanation') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                                   :disabled="auth()->user()->cannot('create', [\App\Models\RoleUserRelation::class, $committee, $community])"
-                                   icon-leading="fas-plus"
+            <x-button.link-primary
+                    :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                    :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+                    icon-leading="fas-plus"
             >
                 {{ __('Add Member') }}
             </x-button.link-primary>
@@ -52,22 +53,22 @@
                 </span></x-table.cell>
                 <x-table.cell><span class="flex justify-center">
                     @empty($member->until)
-                        <x-button.link
-                            :disabled="auth()->user()->cannot('create', [\App\Models\RoleUserRelation::class, $committee, $community])"
-                            wire:click="prepareTermination({{ $member->id }})"
-                        >
+                            <x-button.link
+                                    :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+                                    wire:click="prepareTermination({{ $member->id }})"
+                            >
                             <x-fas-forward-fast/>
                         </x-button.link>
-                    @else
-                        {{ $member->until->format('d.m.Y') }}
-                    @endempty
+                        @else
+                            {{ $member->until->format('d.m.Y') }}
+                        @endempty
                 </span></x-table.cell>
                 <x-table.cell><span class="flex justify-center">
                     @empty($member->decided)
-                        <hr class="mx-5 grow"/>
-                    @else
-                        {{ $member->decided->format('d.m.Y') }}
-                    @endempty
+                            <hr class="mx-5 grow"/>
+                        @else
+                            {{ $member->decided->format('d.m.Y') }}
+                        @endempty
                 </span></x-table.cell>
                 <x-table.cell>
                     @empty($member->comment)
@@ -78,12 +79,12 @@
                 </x-table.cell>
                 <x-table.cell class="flex gap-x-6 items-center">
                     <x-link :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
-                        href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}">
+                            href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}">
                         <x-fas-pencil/>
                     </x-link>
                     <x-button.link-danger
-                        wire:click="prepareDeletion({{ $member->id }})"
-                        :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])">
+                            wire:click="prepareDeletion({{ $member->id }})"
+                            :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])">
                         <x-fas-trash/>
                     </x-button.link-danger>
                 </x-table.cell>

@@ -5,7 +5,7 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
-use App\Models\RoleUserRelation;
+use App\Models\RoleMembership;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -51,7 +51,7 @@ class RoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $committee = Committee::findByName($this->uid, $this->ou);
         $role = $committee?->roles()->where('cn', $this->cn)->first();
-        $members = RoleUserRelation::query()
+        $members = RoleMembership::query()
             ->where('role_cn', $this->cn)
             ->where('committee_dn', $committee->getDn())
             ->where(function ($query){ $query
@@ -68,7 +68,7 @@ class RoleMembers extends Component
 
     public function prepareTermination(int $id): void
     {
-        $membership = RoleUserRelation::findOrFail($id);
+        $membership = RoleMembership::findOrFail($id);
         $committee = Committee::findByName($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('terminate', [$membership, $committee, $community]);
@@ -81,7 +81,7 @@ class RoleMembers extends Component
 
     public function commitTermination()
     {
-        $membership = RoleUserRelation::findOrFail($this->terminateId);
+        $membership = RoleMembership::findOrFail($this->terminateId);
         $committee = Committee::findByName($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('terminate', [$membership, $committee, $community]);
@@ -96,7 +96,7 @@ class RoleMembers extends Component
 
     public function prepareDeletion($id)
     {
-        $membership = RoleUserRelation::findOrFail($id);
+        $membership = RoleMembership::findOrFail($id);
         $committee = Committee::findByName($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('delete', [$membership, $committee, $community]);
@@ -108,7 +108,7 @@ class RoleMembers extends Component
 
     public function commitDeletion()
     {
-        $membership = RoleUserRelation::findOrFail($this->deleteId);
+        $membership = RoleMembership::findOrFail($this->deleteId);
         $committee = Committee::findByName($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('delete', [$membership, $committee, $community]);

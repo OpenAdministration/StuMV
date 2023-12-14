@@ -6,7 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\Role;
-use App\Models\RoleUserRelation;
+use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use Carbon\Carbon;
 use Livewire\Attributes\Locked;
@@ -47,7 +47,7 @@ class EditRoleMembership extends Component
         $this->ou = $ou;
         $this->cn = $cn;
         $this->id = $id;
-        $membership = RoleUserRelation::findOrFail($id);
+        $membership = RoleMembership::findOrFail($id);
         $this->username = $membership->username;
         $this->start_date = $membership->from?->format('Y-m-d');
         $this->end_date = $membership->until?->format('Y-m-d');
@@ -62,7 +62,7 @@ class EditRoleMembership extends Component
 
     public function save(){
         $this->validate();
-        $membership = RoleUserRelation::findOrFail($this->id);
+        $membership = RoleMembership::findOrFail($this->id);
         $membership->update([
             'from' => $this->start_date,
             'until' => !empty($this->end_date) ? $this->end_date : null,
