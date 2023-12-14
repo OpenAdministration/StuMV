@@ -9,6 +9,11 @@ use App\Models\User;
 
 class CommitteePolicy
 {
+    public function moderator(User $user, Committee $committee, Community $community,)
+    {
+        return $user->can('moderator', $community);
+    }
+
     public function create(User $user, Community $community) : bool {
         return // add committee mods
             $user->can('moderator', $community);
@@ -22,7 +27,7 @@ class CommitteePolicy
         return $user->can('moderator', $community);
     }
 
-    public function view(User $user, Community $community) : bool {
+    public function viewAny(User $user, Community $community) : bool {
         return $user->can('member', $community)
             || $user->can('superadmin');
     }

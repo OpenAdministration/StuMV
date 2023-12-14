@@ -9,7 +9,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Members extends Component {
+class ListMembers extends Component {
 
     use WithPagination;
 

@@ -27,12 +27,12 @@ Route::middleware(['auth', 'verified'])->group(function (){
     Route::middleware(['communityMember'])->group(function (){
         // member
         Route::get('{uid}/dashboard', \App\Livewire\Realm\CommunityDashboard::class)->name('realms.dashboard');
-        Route::get('{uid}/members/', \App\Livewire\Realm\Members::class)->name('realms.members');
+        Route::get('{uid}/members/', \App\Livewire\Realm\ListMembers::class)->name('realms.members');
         Route::get('{uid}/mods/', \App\Livewire\Realm\ListModerators::class)->name('realms.mods');
         Route::get('{uid}/admins/', \App\Livewire\Realm\ListAdmins::class)->name('realms.admins');
         Route::get('{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
         Route::get('{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
-        Route::get('{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\RoleMembers::class)->name('committees.roles.members');
+        Route::get('{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\ListRoleMembers::class)->name('committees.roles.members');
         // end member
     });
 

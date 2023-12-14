@@ -71,7 +71,6 @@ class ListRoles extends Component {
                 'community' => $community,
                 'committee' => $committee,
                 'rolesSlice' => $rolesSlice,
-
             ]
         );
     }

@@ -52,7 +52,7 @@ class EditRoleMembership extends Component
         $this->start_date = $membership->from?->format('Y-m-d');
         $this->end_date = $membership->until?->format('Y-m-d');
         $this->decision_date = $membership->decided?->format('Y-m-d');
-        $this->comment = $membership->comment;
+        $this->comment = $membership->comment ?? '';
     }
 
     public function render()

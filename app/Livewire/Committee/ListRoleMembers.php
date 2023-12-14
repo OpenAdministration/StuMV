@@ -11,7 +11,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-class RoleMembers extends Component
+class ListRoleMembers extends Component
 {
     #[Url]
     public string $search = '';
@@ -45,7 +45,6 @@ class RoleMembers extends Component
         $this->cn = $cn;
     }
 
-    #[Title('roles.members-title')]
     public function render()
     {
         $community = Community::findOrFailByUid($this->uid);
@@ -63,7 +62,7 @@ class RoleMembers extends Component
             'committee' => $committee,
             'community' => $community,
             'role' => $role,
-        ]);
+        ])->title(__('roles.members-title', ['name' => $this->cn]));
     }
 
     public function prepareTermination(int $id): void
