@@ -61,6 +61,7 @@ class Members extends Component {
     public function deletePrepare($uid): void
     {
         $community = Community::findOrFailByUid($this->community_name);
+        $this->authorize('remove_member', $community);
         $userBelongsToRealm = $community->membersGroup()->members()->whereEquals('uid', $uid)->get();
         if(!$userBelongsToRealm) {
             // only allow deletes from the same realm
@@ -73,6 +74,7 @@ class Members extends Component {
     public function deleteCommit(): void
     {
         $community = Community::findOrFailByUid($this->community_name);
+        $this->authorize('remove_member', $community);
         $user = User::findOrFailByUsername($this->deleteMemberName);
         $community->membersGroup()->members()->detach($user);
         $this->showDeleteModal = false;

@@ -27,12 +27,13 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        // db model
         User::class => UserPolicy::class,
+        RoleMembership::class => MembershipPolicy::class,
+        // ldap
         Community::class => CommunityPolicy::class,
         Committee::class => CommitteePolicy::class,
         Role::class => RolePolicy::class,
-        RoleMembership::class => MembershipPolicy::class,
         Group::class => GroupPolicy::class,
         Domain::class => DomainPolicy::class,
     ];

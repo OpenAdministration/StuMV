@@ -43,7 +43,12 @@ class CommunityPolicy
 
     public function add_member(User $user, Community $community): bool
     {
-        return $community->membersGroup()->members()->exists($user->ldap());
+        return $user->can('superadmin', User::class);
+    }
+
+    public function remove_member(User $user, Community $community): bool
+    {
+        return $user->can('superadmin', User::class);
     }
 
     public function moderator(User $user, Community $community): bool

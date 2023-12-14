@@ -32,11 +32,6 @@ class ListRealms extends Component
     public string $deleteRealmName = '';
 
 
-    public function mount(){
-        session()->forget('realm_uid');
-        session()->save();
-    }
-
     public function sortBy($field): void
     {
         if($this->sortField === $field){
@@ -55,9 +50,6 @@ class ListRealms extends Component
 
     public function render(Request $request)
     {
-        session()->forget('realm_uid');
-        session()->save();
-
         $communitySlice = Community::query()
             ->list() // only first level
             ->setDn(Community::$rootDn)
@@ -100,7 +92,6 @@ class ListRealms extends Component
     public function enter(string $realm_uid){
         $c = Community::findOrFailByUid($realm_uid);
         $this->authorize('enter', $c);
-        session(['realm_uid' => $realm_uid]);
         $this->redirectRoute('realms.dashboard', ['uid' => $realm_uid]);
     }
 

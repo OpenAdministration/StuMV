@@ -35,7 +35,9 @@
                 <x-table.cell>{{ $realm_member->cn[0] }}</x-table.cell>
                 <x-table.cell>{{ $realm_member->uid[0] }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $realm_member->uid[0] }}')">{{ __('Delete') }}</x-button.link-danger>
+                    <x-button.link-danger :disabled="auth()->user()->cannot('remove_member', $community)"
+                        wire:click="deletePrepare('{{ $realm_member->uid[0] }}')">{{ __('Delete') }}
+                    </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
         @empty
