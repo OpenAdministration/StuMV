@@ -23,7 +23,7 @@ class CommunityMember
         if(!($community instanceof Community)){
             abort(404);
         }
-        if($request->user()->cannot('enter', $community) && $request->user()->cannot('superadmin', User::class)){
+        if($request->user()->cannot('enter', $community)){
             abort(403);
         }
         return $next($request);
