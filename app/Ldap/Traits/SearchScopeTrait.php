@@ -26,7 +26,7 @@ trait SearchScopeTrait{
      * 'not_contains'
      * @return void
      */
-    public function scopeSearch(Builder $query, string $attributeName, string $searchString, string $operator = 'contains'): void
+    public function scopeSearch(Builder $query, string $attributeName, ?string $searchString, string $operator = 'contains'): void
     {
         if(!empty($searchString)){
             $query->OrWhere($attributeName, $operator, $searchString);
