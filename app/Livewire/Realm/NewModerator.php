@@ -30,9 +30,11 @@ class NewModerator extends Component
     {
         $c = Community::findOrFailByUid($this->realm_uid);
         $userList = $c->membersGroup()->members()->get();
+        $moderators = $c->moderatorsGroup()->members()->get();
+
         return view('livewire.realm.new-moderator', [
             'community' => $c,
-            'selectable_users' => $userList,
+            'selectable_users' => $userList->except($moderators->keys()),
         ]);
     }
 

@@ -13,6 +13,6 @@
         @endforeach
     </x-select>
     <x-slot:abort_route>
-        {{ route('realms.admins', ['uid' => $realm_uid]) }}
+        {{ route('realms.mods', ['uid' => $realm_uid]) }}
     </x-slot:abort_route>
 </x-livewire-form>
