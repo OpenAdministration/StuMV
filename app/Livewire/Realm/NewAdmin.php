@@ -11,7 +11,6 @@ use Livewire\Component;
 
 class NewAdmin extends Component
 {
-    public string $search = "";
     #[Rule('required|string')]
     public string $dn = "";
 
@@ -27,10 +26,8 @@ class NewAdmin extends Component
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $community = Community::findOrFailByUid($this->realm_uid);
-        $userList = User::query()
-            ->search('uid', $this->search)
-            ->search('dn', $this->search)
-            ->get();
+        $userList =  $community->membersGroup()->members()->get();
+
         return view('livewire.realm.new-admin', [
             'selectable_users' => $userList,
             'community' => $community,
