@@ -103,6 +103,11 @@ Breadcrumbs::for('realms.groups.roles', function (BreadcrumbTrail $trail, array 
     $trail->push( $name, route('realms.groups.roles', $routeParams));
 });
 
+Breadcrumbs::for('realms.groups.roles.add', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms.groups.roles', $routeParams);
+    $trail->push( __('Add'), route('realms.groups.roles.add', $routeParams));
+});
+
 Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('realms',  $routeParams);
     $trail->push(__('Committees'), route('committees.list', $routeParams));

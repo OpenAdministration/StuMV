@@ -4,10 +4,12 @@ namespace App\Ldap;
 
 use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
+use LdapRecord\Models\OpenLDAP\User;
+use LdapRecord\Models\Relations\HasManyIn;
+use LdapRecord\Query\Builder;
 
 class Group extends \LdapRecord\Models\OpenLDAP\Group
 {
-    use FromCommunityScopeTrait;
     use SearchScopeTrait;
 
     protected static function boot(): void
@@ -28,6 +30,26 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
     {
         $dn = self::dnFrom($uid, $cn);
         return parent::setDn($dn);
+    }
+
+    public function scopeFromCommunity(Builder $query, string $uid): void
+    {
+        $query->setBaseDn( "ou=Groups,ou=$uid," . \App\Ldap\Community::$rootDn);
+    }
+
+    public function members(): HasManyIn
+    {
+        return $this->hasManyIn([Role::class, User::class], 'uniquemember')->using($this, 'uniquemember');
+    }
+
+    public function roles(): HasManyIn
+    {
+        return $this->hasManyIn([Role::class], 'uniquemember')->using($this, 'uniquemember');
+    }
+
+    public function users(): HasManyIn
+    {
+        return $this->hasManyIn([User::class], 'uniquemember')->using($this, 'uniquemember')->recursive();
     }
 
 }

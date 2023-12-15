@@ -52,8 +52,8 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::get('{uid}/new-admin', \App\Livewire\Realm\NewAdmin::class)->name('realms.admins.new');
         Route::get('{uid}/groups', \App\Livewire\Group\ListGroups::class)->name('realms.groups');
         Route::get('{uid}/new-group', \App\Livewire\Group\NewGroup::class)->name('realms.groups.new');
-        Route::get('{uid}/group/{cn}/roles', \App\Livewire\Group\Roles::class)->name('realms.groups.roles');
-        Route::get('{uid}/group/{cn}/add-role', \App\Livewire\Group\Roles::class)->name('realms.groups.roles.add');
+        Route::get('{uid}/group/{cn}/roles', \App\Livewire\Group\ListRolesInGroup::class)->name('realms.groups.roles');
+        Route::get('{uid}/group/{cn}/add-role', \App\Livewire\Group\AddRoleToGroup::class)->name('realms.groups.roles.add');
         Route::get('{uid}/domains', \App\Livewire\Realm\ListDomains::class)->name('realms.domains');
         Route::get('{uid}/new-domain', \App\Livewire\Realm\NewDomain::class)->name('realms.domains.new');
         Route::get('{uid}/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');

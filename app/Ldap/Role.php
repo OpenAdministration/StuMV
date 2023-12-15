@@ -24,4 +24,9 @@ class Role extends \LdapRecord\Models\OpenLDAP\Group
             ->where('committee_dn', $dn);
     }
 
+    public function committee() : ?Committee
+    {
+        return Committee::find($this->getParentDn());
+    }
+
 }
