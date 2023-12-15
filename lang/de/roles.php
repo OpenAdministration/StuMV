@@ -29,5 +29,5 @@ return [
     'link_members' => 'Alle Mitglieder',
     'link_edit' => 'Bearbeiten',
     'membership_headline' => 'Nutzer*innen in der Rolle :name',
-    'membership_explanation' => 'Unten findest du die Liste der Nutzer*innen, die der Rolle zugeordnet sind. Es gibt ein Start- und ein Enddatum, für die Zuordnung.'
+    'membership_explanation' => 'Unten findest du die Liste der Nutzer*innen, die der Rolle zugeordnet sind. Es gibt ein Start- und ein Enddatum für die Zuordnung.'
 ];

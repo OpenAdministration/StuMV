@@ -34,7 +34,7 @@ Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams
 
 Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('profile', $routeParams);
-    $trail->push(__('Change password'), route('password.change', $routeParams));
+    $trail->push(__('Change Password'), route('password.change', $routeParams));
 });
 
 Breadcrumbs::for('pick-realm', function (BreadcrumbTrail $trail, array $routeParams) {
