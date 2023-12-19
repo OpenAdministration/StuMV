@@ -47,7 +47,7 @@ class LdapAuthenticationTest extends TestCase
             'uid' => $user->uid[0],
             'password' => $password,
         ])->assertSessionHasNoErrors()
-          ->assertRedirect(RouteServiceProvider::HOME);
+          ->assertRedirect(RouteServiceProvider::home());
 
         $user = Auth::user();
 

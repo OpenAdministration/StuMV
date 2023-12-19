@@ -39,7 +39,7 @@ class RegistrationTest extends TestCase
 
         $this->assertAuthenticated();
         $this->assertEquals('John Doe', auth()->user()->full_name);
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect(RouteServiceProvider::home());
     }
 
     public function test_domain_is_not_for_registration():void {
