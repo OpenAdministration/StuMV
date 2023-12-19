@@ -30,7 +30,8 @@
                     {{ $headline }}
                 </a>
             @else
-                <span class="focus:outline-none">
+                <span class="focus:outline-none cursor-not-allowed">
+                    <span class="absolute inset-0" aria-hidden="true"></span>
                     {{ $headline }}
                 </span>
             @endif
