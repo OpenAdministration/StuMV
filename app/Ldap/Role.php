@@ -20,6 +20,8 @@ class Role extends \LdapRecord\Models\OpenLDAP\Group
         $cn = explode("=", $this->getRdn(), 2)[1];
         $dn = $this->getParentDn();
         return RoleMembership::query()
+            //->join('user', 'user.uid', '=', 'role_user_relation.username', 'left')
+            //->select('role_user_relation.*', 'user.full_name')
             ->where('role_cn', $cn)
             ->where('committee_dn', $dn);
     }

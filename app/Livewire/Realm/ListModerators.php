@@ -57,7 +57,7 @@ class ListModerators extends Component {
                 'community' => $community,
                 'realm_members' => $mods,
             ]
-        );
+        )->title(__('realms.mods_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
     }
 
     public function deletePrepare($uid): void

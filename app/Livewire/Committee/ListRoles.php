@@ -72,7 +72,7 @@ class ListRoles extends Component {
                 'committee' => $committee,
                 'rolesSlice' => $rolesSlice,
             ]
-        );
+        )->title(__('committees.roles_title', ['name' => $this->ou]));
     }
 
     public function getMembersString(Role $role) : string

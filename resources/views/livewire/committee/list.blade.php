@@ -48,7 +48,7 @@
                 </x-table.cell>
                 <x-table.cell class="flex space-x-7 shrink-0">
                     <x-link href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}">
-                        <x-fas-user-group /> {{ __('committees.link_roles') }}
+                        <x-fas-user-tag /> {{ __('committees.link_roles') }}
                     </x-link>
                     <x-link href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
                             :disabled="auth()->user()->cannot('edit', [$committee, $community])"

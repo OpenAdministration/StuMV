@@ -31,7 +31,7 @@ return [
     'new_mod_explanation' => 'Wähle eine/n Nutzer*in aus, der/die Mod werden soll.',
     'admins_heading' => 'Admins von :name (:uid) verwalten',
     'admins_headline' => 'Administrator*innen von :name (:uid)',
-    'admins_explanation' => 'Die Admins deiner Studierendenschaft übernehmen die eher technische Verwaltung. Sie können Rechte anlegen, bearbeiten, löschen und Rollen zuweisen. Außerdem verwalten sie die Domains der Studierendenschaften, damit z.B. die automatische Zuordnung neuer Nutzer*innen ermöglicht wird. Der Admin kann die Liste der Mods und Admins verwalten. Das Hinzufügen und Löschen von Admins kann auch Open Administration übernehmen.',
+    'admins_explanation' => 'Die Admins deiner Studierendenschaft übernehmen die eher technische Verwaltung. Sie können Rechte anlegen, bearbeiten, löschen und Rollen damit verknüpfen. Außerdem verwalten sie die Domains der Studierendenschaften, damit z.B. die automatische Zuordnung neuer Nutzer*innen ermöglicht wird. Der Admin kann die Liste der Mods und Admins verwalten. Das Hinzufügen und Löschen von Admins kann auch Open Administration übernehmen.',
     'new_admin' => 'Neuen Admin hinzufügen',
     'new_admin_label' => 'Verfügbare Nutzer*innen',
     'new_admin_headline' => 'Neue/n Administrator*in in :name (:uid) hinzufügen',

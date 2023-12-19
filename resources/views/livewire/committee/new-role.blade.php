@@ -1,10 +1,15 @@
 <x-livewire-form>
-    <x-slot:title>
-        {{ __('roles.new') }}
-    </x-slot:title>
-    <x-input.group :label="__('Realm Name')" wire:model="uid" disabled/>
-    <x-input.group :label="__('Short Rolename')" wire:model.live="cn"/>
-    <x-input.group :label="__('Full Rolename')" wire:model="description"/>
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('New Role') }}</h1>
+        </div>
+    </div>
+    <x-input.group :label="__('Short Rolename')" wire:model.live="cn">
+        <x-slot:help>{{ __('roles.new_hint_shortname') }}</x-slot:help>
+    </x-input.group>
+    <x-input.group :label="__('Full Rolename')" wire:model="description">
+        <x-slot:help>{{ __('roles.new_hint_longname') }}</x-slot:help>
+    </x-input.group>
     <x-slot:abort_route>
         {{ route('committees.roles', ['uid' => $uid, 'ou' => $ou]) }}
     </x-slot:abort_route>

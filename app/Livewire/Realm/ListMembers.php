@@ -55,7 +55,7 @@ class ListMembers extends Component {
                 'realm_members' => $members,
                 'community' => $community
             ]
-        );
+        )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
     }
 
     public function deletePrepare($uid): void

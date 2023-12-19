@@ -18,7 +18,7 @@
             {{ __('realms.dashboard.committee_explanation', ['name' => $name]) }}
         </x-dashboard-card>
 
-        <x-dashboard-card :href="route('realms.members', $uid)" color="bg-lime-100 text-lime-700" icon="fas-user-group">
+        <x-dashboard-card :href="route('realms.members', $uid)" color="bg-lime-100 text-lime-700" icon="fas-users">
             <x-slot:headline>
                 {{ __('realms.dashboard.members_heading', ['name' => $name]) }}
             </x-slot:headline>
@@ -47,7 +47,7 @@
             {{ __('realms.dashboard.realms_edit_explanation', ['name' => $name]) }}
         </x-dashboard-card>
 
-        <x-dashboard-card :href="route('realms.groups', $uid)" color="bg-blue-100 text-blue-700" icon="fas-user-tag"
+        <x-dashboard-card :href="route('realms.groups', $uid)" color="bg-blue-100 text-blue-700" icon="fas-scroll"
                           :disabled="auth()->user()->cannot('viewAny', [\App\Ldap\Group::class, $community])">
             <x-slot:headline>
                 {{ __('realms.dashboard.groups_headline', ['name' => $name]) }}

@@ -1,8 +1,10 @@
 <x-livewire-form>
-    <x-slot:title>
-        {{ __('realms.new_admin') }}
-    </x-slot:title>
-
+    <div class="sm:flex sm:items-center">
+        <div class="sm:flex-auto">
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.members_new_heading') }}</h1>
+            <p class="mt-2 text-sm text-gray-700">{{ __('realms.members_new_explanation') }}</p>
+        </div>
+    </div>
     <x-select wire:model.live="dn" class="mt-2">
         <x-slot:label>{{ __('realms.new_admin_label') }}</x-slot:label>
         @foreach($selectable_users as $user)

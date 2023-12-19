@@ -34,7 +34,7 @@ class NewRole extends Component
 
     public function render(): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory
     {
-        return view('livewire.committee.new-role');
+        return view('livewire.committee.new-role')->title(__('New Role'));
     }
 
     public function updated(): void

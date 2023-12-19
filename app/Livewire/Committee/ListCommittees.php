@@ -59,7 +59,7 @@ class ListCommittees extends Component
         $community = Community::findByUid($this->realm_uid);
         $committeesSlice = Committee::fromCommunity($this->realm_uid)
             ->search('ou', $this->search)
-            ->orderBy('ou:caseIgnoreIA5Match', 'asc')
+            //->orderBy('ou:caseIgnoreIA5Match', 'asc')
             ->slice(1, 100);
 
         return view('livewire.committee.list', [

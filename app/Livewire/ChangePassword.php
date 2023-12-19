@@ -26,7 +26,8 @@ class ChangePassword extends Component
     }
     public function render()
     {
-        return view('livewire.change-password');
+        return view('livewire.change-password')
+            ->title(__('Change Password'));
     }
 
     public function save(){

@@ -44,7 +44,7 @@
                 </x-table.cell>
                 <x-table.cell class="flex space-x-5">
                     <x-link href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}">
-                        <x-fas-users/>{{ __('roles.link_members') }}
+                        <x-fas-user-group/>{{ __('roles.link_members') }}
                     </x-link>
                     <x-link :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])">
                         <x-fas-pencil/>{{ __('roles.link_edit') }}

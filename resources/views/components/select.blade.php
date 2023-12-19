@@ -23,10 +23,12 @@
             <span class="text-sm leading-6 text-gray-500" id="{{ $id }}-note">{{ $note }}</span>
         @endisset
     </div>
+
     <select id="{{ $id }}" {{ $attributes->merge(['class' => 'mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm']) }}>
         <option value="" selected>{{ __('Nothing chosen') }}</option>
         {{ $slot }}
     </select>
+
     @error($model) <small wire:key="{{ $model }}" class="block text-red-500">{{ $message }}</small> @enderror
     @isset($help) <small class="block text-xs text-gray-400">{{ $help }}</small> @endisset
 </div>
