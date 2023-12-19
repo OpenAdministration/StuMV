@@ -24,6 +24,7 @@ class ListModerators extends Component {
     public bool $showDeleteModal = false;
 
     public string $deleteMemberName = '';
+    public string $deleteMemberUsername = '';
 
     #[Locked]
     public string $community_name;
@@ -63,12 +64,14 @@ class ListModerators extends Component {
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_moderator', $community);
-        $userBelongsToRealm = $community->moderatorsGroup()->members()->whereEquals('uid', $uid)->get();
+        $user = User::findOrFailByUsername($uid);
+        $userBelongsToRealm = $community->moderatorsGroup()->members()->contains($user);
         if(!$userBelongsToRealm) {
             // only allow deletes from the same realm
             return;
         }
-        $this->deleteMemberName = $uid;
+        $this->deleteMemberUsername = $uid;
+        $this->deleteMemberName = $user->getFirstAttribute('cn');
         $this->showDeleteModal = true;
     }
 
@@ -76,7 +79,7 @@ class ListModerators extends Component {
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_moderator', $community);
-        $user = User::findOrFailByUsername($this->deleteMemberName);
+        $user = User::findOrFailByUsername($this->deleteMemberUsername);
         $community->moderatorsGroup()->members()->detach($user);
         $this->showDeleteModal = false;
     }
@@ -84,5 +87,6 @@ class ListModerators extends Component {
     public function close(): void
     {
         $this->showDeleteModal = false;
+        unset($this->deleteMemberUsername, $this->deleteMemberName);
     }
 }

@@ -14,7 +14,6 @@
     </div>
     <div class="flex justify-between">
         <x-input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search_moderators') }}"/>
-
     </div>
     <x-table>
         <x-slot name="head">
@@ -35,8 +34,9 @@
                 <x-table.cell>{{ $realm_member->cn[0] }}</x-table.cell>
                 <x-table.cell>{{ $realm_member->uid[0] }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger :disabled="auth()->user()->cannot('remove_moderator', $community)"
-                        wire:click="deletePrepare('{{ $realm_member->uid[0] }}')">{{ __('Delete') }}
+                    <x-button.link-danger icon-leading="fas-trash"
+                        :disabled="auth()->user()->cannot('remove_moderator', $community)"
+                        wire:click="deletePrepare('{{ $realm_member->uid[0] }}')">{{ __('Remove Moderator') }}
                     </x-button.link-danger>
                 </x-table.cell>
             </x-table.row>
@@ -54,10 +54,10 @@
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
-                {{ __('realms.delete_member_title', ['name' => $deleteMemberName]) }}
+                {{ __('realms.delete_member_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
             </x-slot:title>
             <x-slot:content>
-                {{ __('realms.delete_member_warning', ['name' => $deleteMemberName]) }}
+                {{ __('realms.delete_member_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>

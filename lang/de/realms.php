@@ -18,7 +18,7 @@ return [
     'new_member' => 'Neues Mitglied hinzufügen',
     'new_member_label' => 'Verfügbare Nutzer*innen',
     'delete_member_title' => 'Mitgliedschaft von :name löschen',
-    'delete_member_warning' => 'Soll die Mitgliedschaft von :name wirklich gelöscht werden?',
+    'delete_member_warning' => 'Soll die Mitgliedschaft von :name (:username) wirklich gelöscht werden?',
     'no_admins_found' => 'Keine Admins gefunden',
     'no_moderators_found' => 'Keine Moderator*innen gefunden',
     'search_admins' => 'Durchsuche Admins',
