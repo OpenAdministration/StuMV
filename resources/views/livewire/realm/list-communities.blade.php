@@ -41,7 +41,7 @@
                 <x-table.cell>{{ $realm->getShortCode() }}</x-table.cell>
                 <x-table.cell>{{ $realm->getLongName() }}</x-table.cell>
                 <x-table.cell>
-                    <x-link :disabled="Auth::user()->cannot('enter', $realm)"
+                    <x-link :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
                         href="#" wire:click="enter('{{ $realm->getShortCode() }}')" >
                         <x-fas-dungeon/> {{ __('Enter') }}
                     </x-link>

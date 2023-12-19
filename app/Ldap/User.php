@@ -1,6 +1,7 @@
 <?php
 namespace App\Ldap;
 
+use App\Ldap\Scopes\AddMemberOfAttributeScope;
 use App\Ldap\Traits\SearchScopeTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
 use LdapRecord\Models\Concerns\CanAuthenticate;
@@ -14,6 +15,17 @@ use PhpParser\Node\Expr\AssignOp\Mod;
 class User extends \LdapRecord\Models\OpenLDAP\User
 {
     use SearchScopeTrait;
+
+    /**
+     * The "booting" method of the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(new AddMemberOfAttributeScope());
+    }
+
     public static function findByUsername(string $username) : ?static
     {
         return self::query()->where('uid', '=', $username)->first();

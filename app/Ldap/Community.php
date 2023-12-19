@@ -7,6 +7,7 @@ use App\Ldap\Traits\HasRelationships;
 use App\Ldap\Traits\SearchScopeTrait;
 use LdapRecord\Laravel\ImportableFromLdap;
 use LdapRecord\Laravel\LdapImportable;
+use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Models\Relations\Relation;
@@ -23,6 +24,12 @@ class Community extends OrganizationalUnit implements LdapImportable
     use HasRelationships;
 
     public static string $rootDn = 'ou=Communities,{base}';
+
+    public static function rootDn()
+    {
+        // would be nice if we could substitute a bit more elegant
+        return 'ou=Communities,' . config('ldap.connections.default.base_dn');
+    }
 
     public static function findByUid(string $uid): self|null
     {
