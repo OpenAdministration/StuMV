@@ -4,19 +4,20 @@ namespace App\Livewire;
 
 use App\Ldap\User;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 class Profile extends Component
 {
-    #[Rule('string|required')]
+    #[Locked]
     public string $uid;
+
+    #[Locked]
+    public string $email;
 
     #[Rule('string|required')]
     public string $fullName;
-
-    #[Rule('email|required')]
-    public string $email;
 
     public function mount()
     {

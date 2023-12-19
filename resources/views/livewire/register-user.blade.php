@@ -17,7 +17,7 @@
         <!-- Username -->
         <x-input.group wire:model.blur="username">
             <x-slot name="label">{{ __('Username') }}</x-slot>
-            <x-slot name="help">{{ __('validation.alpha_dash', ['attribute' => __('Username')]) }}</x-slot>
+            <x-slot name="help">{{ __('validation.username', ['attribute' => __('Username')]) }}</x-slot>
         </x-input.group>
         <!-- Password -->
         <x-input.group wire:model.blur="password" type="password">

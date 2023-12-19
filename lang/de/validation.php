@@ -22,7 +22,8 @@ return [
     'after' => 'Das :attribute muss ein Datum nach :date sein.',
     'after_or_equal' => 'Das :attribute muss ein Datum nach oder gleich dem :date sein.',
     'alpha' => 'Das :attribute darf nur Buchstaben enthalten.',
-    'alpha_dash' => 'Das :attribute darf nur Buchstaben, Zahlen, Bindestriche und Unterstriche enthalten.',
+    'alpha_dash' => 'Das :attribute darf nur Buchstaben, Zahlen, Bindestriche, Unterstriche enthalten.',
+    'username' => 'Darf nur Buchstaben, Zahlen, Bindestriche, Unterstriche und Punkte enthalten.',
     'alpha_num' => 'Das :attribute darf nur Buchstaben und Zahlen enthalten.',
     'array' => 'Das :attribute muss ein Array sein.',
     'before' => 'Das :attribute muss ein Datum vor :date sein.',
@@ -138,6 +139,7 @@ return [
     'uploaded' => 'Das :attribute konnte nicht hochgeladen werden.',
     'url' => 'Das :attribute muss eine gültige URL sein.',
     'uuid' => 'Das :attribute muss eine gültige UUID sein.',
+    'disabled' => 'Kann nicht verändert werden.',
 
     /*
     |--------------------------------------------------------------------------
@@ -172,8 +174,9 @@ return [
         'start_date' => 'Start Datum',
         'end_date' => 'End Datum',
         'decision_date' => 'Beschluss Datum',
-
-
+        'password' => 'Passwort',
+        'username' => 'Nutzer:innenname',
+        'mail' => 'E-Mail-Adresse',
     ],
 
 ];

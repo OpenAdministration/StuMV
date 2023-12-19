@@ -27,7 +27,7 @@ class RegisterUser extends Component
     #[Validate('required|string|alpha|max:255')]
     public string $last_name = '';
 
-    #[Validate('required|string|min:3|max:255|alpha_dash')]
+    #[Validate('required|string|min:3|max:255|regex:/^[0-9a-zA-Z_\-\.]*$/')]
     public string $username = '';
 
     #[Validate]
@@ -64,16 +64,26 @@ class RegisterUser extends Component
      */
     public function updatedEmail(): void
     {
-        $this->validateOnly('email');
+        $this->validateDomain();
+        $this->preFillFromMail();
+    }
+
+    public function preFillFromMail()
+    {
         $split = explode('@', $this->email);
-        $this->domain = $split[1] ?? 'false';
-        $this->validateOnly('domain');
-        // if mail is valid try to prefill the fullName of the user
-        $this->username = str_replace('.', '-', $split[0]);
+        $this->username = $split[0] ?? $this->username ?? '';
         $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
         $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
         $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
         $this->validateOnly('username');
+    }
+
+    public function validateDomain()
+    {
+        $this->validateOnly('email');
+        $split = explode('@', $this->email);
+        $this->domain = $split[1] ?? 'false';
+        $this->validateOnly('domain');
     }
 
     public function render()
@@ -87,7 +97,7 @@ class RegisterUser extends Component
 
     public function save(){
 
-        $this->updatedEmail();
+        $this->validateDomain();
         $this->validate();
         $domain = Domain::findByOrFail('dc', $this->domain);
         $community = $domain->community();
@@ -95,6 +105,7 @@ class RegisterUser extends Component
             'uid' => $this->username,
             'cn' => $this->first_name  . ' ' . $this->last_name,
             'sn'  => $this->last_name,
+            'givenName' => $this->first_name,
             'mail' => $this->email,
             'userPassword'  => "{ARGON2}" . Hash::make($this->password),
             // usually ldap SHOULD hash it itself - did not work
@@ -103,14 +114,12 @@ class RegisterUser extends Component
         try {
             $user->save();
             $community->membersGroup()->members()->attach($user);
+            event(new Registered($user));
+            Auth::attempt([$this->username, $this->password]);
+            return redirect()->route('verification.notice')->with('message', __('Successfully Registered'));
+
         }  catch (LdapRecordException $ldapRecordException){
             dump($ldapRecordException->getDetailedError());
         }
-
-        event(new Registered($user));
-
-        Auth::attempt([$this->username, $this->password]);
-
-        return redirect()->route('verification.notice')->with('message', __('Successfully Registered'));
     }
 }

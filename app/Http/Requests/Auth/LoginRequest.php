@@ -62,7 +62,7 @@ class LoginRequest extends FormRequest
         try {
             $auth = Auth::attempt($credentials, $this->boolean('remember'));
         } catch (LdapRecordException $ldapRecordException){
-            // this should not be needed :/
+            // this should not be needed, but it is for bad credentials right now -> TLS Error :/
             $auth = false;
         }
         if (!$auth) {
