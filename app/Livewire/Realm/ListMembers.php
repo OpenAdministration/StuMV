@@ -20,10 +20,10 @@ class ListMembers extends Component {
     #[Url]
     public string $sortDirection = 'asc';
 
-    public bool $showNewModal = false;
     public bool $showDeleteModal = false;
 
     public string $deleteMemberName = '';
+    public string $deleteMemberUsername = '';
 
     public string $community_name;
 
@@ -61,13 +61,15 @@ class ListMembers extends Component {
     public function deletePrepare($uid): void
     {
         $community = Community::findOrFailByUid($this->community_name);
+        $user = User::findOrFailByUsername($uid);
         $this->authorize('remove_member', $community);
         $userBelongsToRealm = $community->membersGroup()->members()->whereEquals('uid', $uid)->get();
         if(!$userBelongsToRealm) {
             // only allow deletes from the same realm
             return;
         }
-        $this->deleteMemberName = $uid;
+        $this->deleteMemberName = $user->getFirstAttribute('cn');
+        $this->deleteMemberUsername = $uid;
         $this->showDeleteModal = true;
     }
 
@@ -75,14 +77,14 @@ class ListMembers extends Component {
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_member', $community);
-        $user = User::findOrFailByUsername($this->deleteMemberName);
+        $user = User::findOrFailByUsername($this->deleteMemberUsername);
         $community->membersGroup()->members()->detach($user);
         $this->showDeleteModal = false;
     }
 
     public function close(): void
     {
-        $this->showNewModal = false;
         $this->showDeleteModal = false;
+        unset($this->deleteMemberName, $this->deleteMemberUsername);
     }
 }
