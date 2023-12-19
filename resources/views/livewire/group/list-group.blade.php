@@ -32,10 +32,17 @@
                 <x-table.cell>{{ $group->getFirstAttribute('cn') }}</x-table.cell>
                 <x-table.cell>{{ $group->getFirstAttribute('description') }}</x-table.cell>
                 <x-table.cell>
-                    <x-link href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}">{{ __('groups.manage_roles') }}</x-link>
+                    <x-link href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}">
+                        <x-fas-user-tag/> {{ __('groups.manage_roles') }}
+                    </x-link>
                 </x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger
+                    <x-link href="{{ route('realms.groups.edit', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}">
+                        <x-fas-pencil/> {{ __('groups.link_edit') }}
+                    </x-link>
+                </x-table.cell>
+                <x-table.cell>
+                    <x-button.link-danger icon-leading="fas-trash"
                         wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
                         wire:confirm="test"
                     >

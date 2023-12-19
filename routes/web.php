@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
         // admin
         Route::get('{uid}/new-admin', \App\Livewire\Realm\NewAdmin::class)->name('realms.admins.new');
         Route::get('{uid}/groups', \App\Livewire\Group\ListGroups::class)->name('realms.groups');
+        Route::get('{uid}/groups/{cn}/edit', \App\Livewire\Group\EditGroup::class)->name('realms.groups.edit');
         Route::get('{uid}/new-group', \App\Livewire\Group\NewGroup::class)->name('realms.groups.new');
         Route::get('{uid}/group/{cn}/roles', \App\Livewire\Group\ListRolesInGroup::class)->name('realms.groups.roles');
         Route::get('{uid}/group/{cn}/add-role', \App\Livewire\Group\AddRoleToGroup::class)->name('realms.groups.roles.add');
