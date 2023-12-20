@@ -97,7 +97,7 @@ class ListCommittees extends Component
 
     public function close(): void
     {
-        unset($this->deleteCommitteeDn);
+        unset($this->deleteCommitteeDn, $this->deleteCommitteeOu, $this->deleteCommitteeName, $this->deleteConfirmText);
         $this->showDeleteModal = false;
     }
 

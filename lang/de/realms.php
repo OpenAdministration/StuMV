@@ -14,7 +14,7 @@ return [
     'search_members' => 'Durchsuche Mitglieder',
     'manage_members' => 'Mitglieder verwalten',
     'members_heading' => 'Mitglieder von :name (:uid) verwalten',
-    'members_explanation' => 'Alle Nutzer*innen, die deiner Studierendenschaft zugeordnet sind, werden hier aufgelistet. Mods können dir Mitgliedschaften bearbeiten.',
+    'members_explanation' => 'Alle Nutzer*innen, die deiner Studierendenschaft zugeordnet sind, werden hier aufgelistet. Die Organisationszugehörigkeit sollte nur in absoluten Ausnahmefällen aufgelöst werden',
     'new_member' => 'Neues Mitglied hinzufügen',
     'new_member_label' => 'Verfügbare Nutzer*innen',
     'delete_member_title' => 'Mitgliedschaft von :name löschen',

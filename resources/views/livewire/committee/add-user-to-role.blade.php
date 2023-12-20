@@ -1,5 +1,4 @@
 <x-livewire-form>
-    <x-input.group :label="__('Realm Name')" wire:model="uid" disabled/>
     <x-input.group :label="__('Short Rolename')" wire:model="cn" disabled/>
     <x-select :label="__('Add new User')" wire:model="username">
         @foreach($users as $user)
