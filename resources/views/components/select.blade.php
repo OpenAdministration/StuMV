@@ -1,5 +1,4 @@
 @props([
-    'label',
     'help',
     'id' ,
     'error' => true,
