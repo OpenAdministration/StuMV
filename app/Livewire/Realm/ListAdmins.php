@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -48,6 +49,7 @@ class ListAdmins extends Component {
         $this->resetPage();
     }
 
+    #[Computed]
     public function community(): ?Community
     {
         return Community::findByUid($this->community_name);

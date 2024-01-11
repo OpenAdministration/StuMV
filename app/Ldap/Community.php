@@ -76,7 +76,7 @@ class Community extends OrganizationalUnit implements LdapImportable
     }
 
     public function adminsGroup() : Group {
-        return Group::query()->in($this->getDn())->where('cn', 'moderators')->first();
+        return Group::query()->in($this->getDn())->where('cn', 'admins')->first();
     }
 
     public function generateSkeleton() {
