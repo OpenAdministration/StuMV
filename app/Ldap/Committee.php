@@ -15,7 +15,6 @@ use LdapRecord\Query\Model\Builder;
 class Committee extends OrganizationalUnit
 {
     use SearchScopeTrait;
-    use FromCommunityScopeTrait;
 
 
     public static function dnFrom(string $uid, string $ou, array $parent_ous = null, string $parentDn = ''){
@@ -98,8 +97,13 @@ class Committee extends OrganizationalUnit
         return self::fromCommunity($uid)->where('ou', $name)->first();
     }
 
-    public static function findByNameOrFail(string $uid, string $name) : self
+    public static function findByNameOrFail(string|Community $community, string $name) : self
     {
+        if($community instanceof Community){
+            $uid = $community->getFirstAttribute('ou');
+        }else{
+            $uid = $community;
+        }
         return self::fromCommunity($uid)->where('ou', $name)->first() ?? abort(404);
     }
 

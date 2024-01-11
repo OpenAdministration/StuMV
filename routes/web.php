@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::get('{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
         Route::get('{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
         Route::get('{uid}/committees/{ou}/edit', \App\Livewire\Committee\EditCommittee::class)->name('committees.edit');
+        Route::get('{uid}/committees/{ou}/role/{cn}/edit', \App\Livewire\Committee\EditRole::class)->name('committees.roles.edit');
         Route::get('{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
         Route::get('{uid}/committees/{ou}/role/{cn}/membership/{id}', \App\Livewire\Committee\EditRoleMembership::class)->name('committees.roles.members.edit');
         // end mod

@@ -91,10 +91,16 @@ class ListRoles extends Component {
     public function committee() : Committee {
         return Committee::findByName($this->uid, $this->ou);
     }
+
+    #[Computed]
+    public function community() : Community {
+        return Community::findByUid($this->uid);
+    }
+
     public function deletePrepare($cn): void
     {
         $r = $this->committee()->roles()->where('cn', $cn)->firstOrFail();
-        $this->authorize('delete', $r);
+        $this->authorize('delete', [$r, $this->committee(), $this->community()]);
         $this->deleteRoleCn = $cn;
         $this->deleteRoleName = $r->getFirstAttribute('description');
         $this->showDeleteModal = true;
@@ -103,7 +109,7 @@ class ListRoles extends Component {
     public function deleteCommit(): \Livewire\Features\SupportRedirects\Redirector
     {
         $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
-        $this->authorize('delete', $role);
+        $this->authorize('delete', [$role, $this->committee(), $this->community()]);
         $role->delete();
         return redirect()->route('committees.roles', ['uid' => $this->uid, 'ou' => $this->ou])
             ->with('status', 'success')

@@ -1,14 +1,19 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}</h1>
+            <h1 class="text-base font-semibold leading-6 text-gray-900 inline-flex items-center">
+                {{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}
+                <x-link :href="route('committees.roles.edit', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])" >
+                    <x-fas-pencil class="mx-2"/>
+                </x-link>
+            </h1>
             <p class="mt-2 text-sm text-gray-700">{{ __('roles.membership_explanation') }}</p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
             <x-button.link-primary
-                    :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                    :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
-                    icon-leading="fas-plus"
+                :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+                icon-leading="fas-plus"
             >
                 {{ __('Add Member') }}
             </x-button.link-primary>

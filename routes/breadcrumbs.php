@@ -147,6 +147,11 @@ Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, a
     $trail->push($routeParams['cn'], route('committees.roles.members', $routeParams));
 });
 
+Breadcrumbs::for('committees.roles.edit', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.roles.members', $routeParams);
+    $trail->push(__('Edit'), route('committees.roles.edit', $routeParams));
+});
+
 Breadcrumbs::for('committees.roles.add-member', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('committees.roles.members', $routeParams);
     $trail->push(__('New Membership'), route('committees.roles.add-member', $routeParams));
