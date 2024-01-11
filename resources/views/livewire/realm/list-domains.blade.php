@@ -42,7 +42,7 @@
             <x-table.row>
                 <x-table.cell colspan="6">
                     <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('domains.nothing_found') }}</span>
+                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('domain.nothing_found') }}</span>
                     </div>
                 </x-table.cell>
             </x-table.row>
@@ -52,11 +52,11 @@
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
-                {{ __('domains.delete_title', ['name' => $deleteDomain]) }}
+                {{ __('domain.delete_title', ['name' => $deleteDomain]) }}
             </x-slot:title>
             <x-slot:content>
                 <div class="y">
-                    <span>{{ __('domains.delete_warning', ['name' => $deleteDomain]) }}</span>
+                    <span>{{ __('domain.delete_warning', ['name' => $deleteDomain]) }}</span>
                 </div>
             </x-slot:content>
             <x-slot:footer>

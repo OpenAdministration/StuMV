@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'no_realms_found' => 'Keine Studischaft gefunden',
-    'search' => 'Durchsuche Studischaften',
+    'no_realms_found' => 'Keine Studierendenschaft gefunden',
+    'search' => 'Durchsuche Studierendenschaften',
     'shortcode' => 'Kürzel',
-    'new' => 'Neue Studischaft anlegen',
-    'delete_title' => 'Studischaft :name löschen',
+    'new' => 'Neue Studierendenschaft anlegen',
+    'delete_title' => 'Studierendenschaft :name löschen',
     'delete_warning' => 'Soll :name wirklich gelöscht werden?',
     'edit' => ':name bearbeiten',
     'edit_headline' => 'Studierendenschaft :name ändern',
@@ -41,7 +41,10 @@ return [
     'list_headline' => 'Studierendenschaften',
     'list_explanation' => 'Hier findest du alle Studierendenschaften, denen du beitreten kannst. Nur ein/e Administrator*in (Admin) der Studierendenschaft kann grundlegende Einstellungen, wie das Setzen von Domains und Verwalten von (Rechte-)Gruppen übernehmen. Wer diese Rolle aktuell inne hat können Admins und Moderator*innen der jeweiligen Studierendenschaft einsehen. Neue Admins können von aktuellen Admins oder durch Open Administration hinzugefügt werden.',
     'groups_headline' => 'Rechteverwaltung',
-    'groups_explanation' => 'Hier findest du die Liste aller rechtegruppen. Diese sind insbesondere für die Verwaltung von Zugriffsrechten im StuFiS notwendig. Sie können auch in anderen Webanwendungen verwendet werden, wenn diese an das StuMV angeschlossen sind. Die Verwaltung dieser Rechte kann nur von Admin vorgenommen werden.',
+    'groups_explanation' => 'Hier findest du die Liste aller Rechtegruppen. Diese sind insbesondere für die Verwaltung von Zugriffsrechten im StuFiS notwendig. Sie können auch in anderen Webanwendungen verwendet werden, wenn diese an das StuMV angeschlossen sind. Die Verwaltung dieser Rechte kann nur von Admin vorgenommen werden.',
+    'domains_headline' => 'Domains',
+    'domains_explanation' => 'Die hier angegebenen Domains werden dazu verwendet neu angemeldete Nutzer*innen direkt deiner Studierendenschaft hinzuzufügen. Dafür muss der/die Nutzer*in sich mit einer E-Mail-Adresse registrieren, die eine der unten stehenden Domains verwendet. Bei Problemen Problemen meldet euch bei uns.',
+    'domains_edit_headline' => 'Füge hier eine Domain für deine Studierendenschaft hinzu',
     'dashboard.headline' => 'Übersicht in :name',
     'dashboard.explanation' => 'Hier findest du alle Funktionen, auf die du innerhalb deiner Studierendenschaft Zugriff hast.',
     'dashboard.members_heading' => 'Mitglieder',
@@ -57,7 +60,7 @@ return [
     'dashboard.domains_headline' => 'Domains',
     'dashboard.domains_explanation' => 'Admins können hier Domains hinterlegen, die der Studierendenschaft zuzuordnen sind. Hierüber können automatische Zuordnungen von neuen Nutzer*innen gesteuert werden.',
     'dashboard.committee_headline' => 'Gremien',
-    'dashboard.committee_explanation' => 'Hier gehts zur Liste aller Gremien und Organisationen deiner Studierendenschaft.',
+    'dashboard.committee_explanation' => 'Hier gehts zur Liste aller Gremien, Organisationen und Gliederungen (kurz: Gremien) deiner Studierendenschaft.',
     'dashboard.profile_heading' => 'Profil bearbeiten',
     'dashboard.profile_explanation' => 'Wenn du deine persönlichen Daten anpassen möchtest, bist du hier genau richtig.'
 ];

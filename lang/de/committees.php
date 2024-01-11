@@ -15,5 +15,7 @@ return [
     'link_roles' => 'Rollen',
     'link_edit' => 'Bearbeiten',
     'list.headline' => 'Gremien von :name',
-    'list.explain_text' => 'Das ist die Liste der Gremien und Organisationen. Gremien können nur von Moderator*innen bearbeitet oder gelöscht werden.'
+    'list.explain_text' => 'Das ist die Liste der Gremien, Organisationen und Gliederungen (kurz: Gremien). Gremien können nur von Moderator*innen bearbeitet oder gelöscht werden.',
+    'edit_headline' => 'Gremium :name bearbeiten',
+    'edit_explanation' => 'Hier kannst du das Gremium/die Organisation/die Gliederung bearbeiten.'
 ];
