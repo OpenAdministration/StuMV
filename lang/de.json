@@ -67,7 +67,7 @@
     "Remove Moderator": "Moderator*in entfernen",
     "Manage Superadmins": "Super Admins verwalten",
     "Superusers": "Super Admins",
-    "Added new Admin": "Neuer Admin wurde hinzugefügt",
+    "Added new Admin": "Neue*r Admin wurde hinzugefügt",
     "First name": "Vorname",
     "Last name": "Nachname",
     "Enter": "Eintreten",
@@ -95,7 +95,11 @@
     "Regards": "Viele Grüße",
     "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:": "Falls du Probleme hast den Knopf zu drücken, kannst du den folgenden Link verwenden:",
     "Add Role": "Rolle hinzufügen",
-    "New Domain": "Domain hinzufügen"
-
-
+    "New Domain": "Domain hinzufügen",
+    "Committee": "Gremium/ Organisation",
+    "Role": "Rolle",
+    "New Role created": "Neue Rolle wurde angelegt",
+    "Add new Realm": "Neue Studierendenschaft anlegen",
+    "The Domain is not a valid domain.": "Diese Domain ist nicht gültig. Bitte gib etwas im Format mein-domain.de ein.",
+    "Added new Group": "Neue Rechtegruppe erstellt. Füge hier jetzt die Rollen hinzu."
 }

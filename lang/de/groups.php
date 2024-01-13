@@ -20,5 +20,8 @@ return [
     'role_name' => 'Zugeordnete Rolle',
     'roles.search' => 'Tabelle durchsuchen',
     'roles_headline' => 'Zur Gruppe :name zugeordnete Rollen',
-    'roles_explanation' => 'In der unten stehenden Tabelle sind alle Rollen aufgeführt, die die aktuell ausgewählte Rechtegruppe verwenden.'
+    'roles_explanation' => 'In der unten stehenden Tabelle sind alle Rollen aufgeführt, die die aktuell ausgewählte Rechtegruppe verwenden.',
+    'success_role_add' => 'Die Rolle wurde erfolgreich hinzugefügt.',
+    'roles_add_headline' => 'Die Rechte :name einer Rolle hinzufügen',
+    'roles_add_explanation' => 'Wähle ein Gremium und dann die Rolle aus, die die Rechte erhalten soll.'
 ];

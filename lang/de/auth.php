@@ -18,7 +18,7 @@ return [
     'throttle' => 'Zu viele Anmeldeversuche. Bitte versuche es in :seconds Sekunden nochmal.',
     'secure_area_text' => 'Dies ist ein geschützter Bereich der Anwendung. Bitte bestätige zunächst dein Passwort.',
     'forgot_password_text' => 'Du hast dein Passwort vergessen? Das ist kein Problem! Teile uns einfach deine E-Mail-Adresse mit und wir senden dir einen Link zum Zurücksetzen des Passworts zu, mit dem du ein neues Passwort setzen kannst.',
-    'verification_text' => 'Danke für deine Registrierung! Um dich zu verifizieren, nutze den unten stehenden Button, der dir deine Verifizierungs-E-Mail zusendet.',
+    'verification_text' => 'Danke für deine Registrierung! Um dich zu verifizieren, nutze den unten stehenden Button. Du bekommst dann eine E-Mail mit einem Link zugesandt, um deine Identität zu bestätigen.',
     'verification_link_sent_text' => 'Ein neuer Verifizierungslink wurde an die E-Mail-Adresse gesendet, die du bei der Registrierung angegeben hast.',
 
     'verification_mail_subject' => 'E-Mail-Adresse bestätigen',
