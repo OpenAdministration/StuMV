@@ -38,7 +38,8 @@ class SamlAssertionAttributesListener
         $groupDns = $groups->map(function ($item){
             return $item->getDn();
         })->reject(function (string $dn){
-            return !str_contains($dn, 'ou=Groups');
+            // throw out the roles. only memberships and permissions inside
+            return str_contains($dn, 'ou=Committees');
         })->toArray();
 
         //$committees = Committee::query()->where('dn', "=", $committeeDns, 'or')->get();
