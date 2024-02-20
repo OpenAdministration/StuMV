@@ -29,10 +29,10 @@ class SamlAssertionAttributesListener
             return !str_contains($dn, 'ou=Committees');
         })->toArray();
 
-        $groupsQuery = Group::query();
-        foreach ($roles as $role){
-            $groupsQuery->orWhere('uniqueMember', '=', $role->getDn());
-        }
+        $groupsQuery = Group::query()->where('memberOf', '=', $userDn);
+        //foreach ($roles as $role){
+        //    $groupsQuery->orWhere('uniqueMember', '=', $role->getDn());
+        //}
         $groups = $groupsQuery->get();
 
         $groupDns = $groups->map(function ($item){
