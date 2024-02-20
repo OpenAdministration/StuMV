@@ -8,7 +8,7 @@
 
         <form method="POST" action="{{ route('login') }}">
             @csrf
-
+            @samlidp
             <!-- Email Address -->
             <x-input.group :label="__('Username or Mail')" class="block mt-1 w-full" name="uid" id="uid" :value="old('uid')" required autofocus />
 
