@@ -55,7 +55,9 @@ class ImportUserFromLegacy extends Command
                 $ldapUser->setDn('uid=' . $user->username . ',ou=People,dc=open-administration,dc=de');
                 $ldapUser->save();
             }
-            $realms[$user->realm_uid]->membersGroup()->members()->attach($ldapUser);
+            if(!$realms[$user->realm_uid]->membersGroup()->members()->exists($ldapUser)){
+                $realms[$user->realm_uid]->membersGroup()->members()->attach($ldapUser);
+            }
         }
     }
 }

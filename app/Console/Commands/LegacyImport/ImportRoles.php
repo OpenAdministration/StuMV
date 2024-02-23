@@ -48,7 +48,7 @@ class ImportRoles extends Command
             if(!isset($realms[$role->realm_uid])){
                 $realms[$role->realm_uid] = Community::findByUid($role->realm_uid);
             }
-            $this->comment('Importing Com ' . $role->name . ' to Realm ' . $role->realm_uid . ' ...');
+            $this->comment('Importing Com-Role ' . $role->name . ' to Realm ' . $role->realm_uid . ' ...');
 
             $c = Committee::findByName($role->realm_uid, $role->gshort);
             $r = $c?->roles()->where('cn', $role->rshort);
@@ -77,7 +77,6 @@ class ImportRoles extends Command
                     'from' => $assertion->from,
                     'until' => $assertion->until,
                 ]);
-
             }
         }
     }
