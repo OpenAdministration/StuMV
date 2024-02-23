@@ -47,6 +47,7 @@ class ImportUserFromLegacy extends Command
                 $ldapUser = User::make([
                     'uid' => $user->username,
                     'sn' => $name[1] ?? $user->fullName,
+                    'givenName' => $name[0] ?? $user->fullName,
                     'cn' => $user->fullName,
                     'mail' => $user->email,
                     'userPassword' => $user->authKey, // something more or less random
