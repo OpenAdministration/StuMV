@@ -44,7 +44,6 @@
                 <x-table.cell>
                     <x-button.link-danger icon-leading="fas-trash"
                         wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
-                        wire:confirm="test"
                     >
                         {{ __('Delete') }}
                     </x-button.link-danger>
