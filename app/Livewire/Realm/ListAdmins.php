@@ -83,7 +83,7 @@ class ListAdmins extends Component {
             unset($this->deleteAdminName);
             return;
         }
-        $this->deleteAdminName = $username;
+        $this->deleteAdminName = $user->getFirstAttribute('cn');
         $this->showDeleteModal = true;
     }
 

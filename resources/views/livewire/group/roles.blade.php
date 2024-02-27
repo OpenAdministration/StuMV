@@ -1,9 +1,9 @@
 <div class="flex-col space-y-4">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('groups.roles_headline') }}</h1>
+            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('groups.roles_headline', ['name' => $group_cn]) }}</h1>
             <p class="mt-2 text-sm text-gray-700">
-                {{  __('groups.roles_explanation') }}
+                {{  __('groups.roles_explanation', ['name' => $group_cn]) }}
             </p>
         </div>
         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
@@ -56,13 +56,13 @@
         @endforelse
     </x-table>
 
-    <form wire:submit="deleteCommit">
+    <form wire:submit="deleteCommit()">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
-                {{ __('groups.delete_role_title', ['name' => $deleteRoleDN]) }}
+                {{ __('groups.delete_role_title', $deleteRoleName) }}
             </x-slot:title>
             <x-slot:content>
-                {{ __('groups.delete_role_warning', ['name' => $deleteRoleDN]) }}
+                {{ __('groups.delete_role_warning', $deleteRoleName) }}
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>

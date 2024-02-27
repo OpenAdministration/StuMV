@@ -4,7 +4,7 @@ namespace App\Livewire\Group;
 
 use App\Ldap\Community;
 use App\Ldap\Group;
-use App\Ldap\User;
+use App\Ldap\Role;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -21,12 +21,13 @@ class ListRolesInGroup extends Component {
     public string $sortDirection = 'asc';
 
     public string $group_dn;
-    public string $realm_uid;
     public string $group_cn;
+    public string $realm_uid;
 
 
     public bool $showDeleteModal = false;
-    public string $deleteRoleDN;
+    public string $deleteRoleDN = "";
+    public array $deleteRoleName = [];
 
     public function mount(Community $uid, $cn) {
         $this->realm_uid = $uid->getFirstAttribute('ou');
@@ -64,37 +65,44 @@ class ListRolesInGroup extends Component {
         )->title(__('groups.roles_list_title', ['name' => $this->group_cn]));
     }
 
-
-    public function deletePrepare($id): void
+    public function deletePrepare(string $role_dn): void
     {
-        $this->deleteRole = Role::find($id);
+        $community = Community::findByUid($this->realm_uid);
+        $this->authorize('delete', [Group::class, $community]);
 
+        $group = Group::findOrFail($this->group_dn);
+        $role = Role::findOrFail($role_dn);
+        $committee = $role->committee();
 
-        if($this->deleteRole->committee->realm->uid != $this->group->realm->uid) {
-            // only allow deletes from the same realm
-            unset($this->deleteRole);
-            return;
-        }
+        $this->deleteRoleDN = $role_dn;
+        $this->deleteRoleName = [
+            'role_short' => $role->getFirstAttribute('description'),
+            'role_name' => $role->getFirstAttribute('cn'),
+            'committee_name' => $committee?->getFirstAttribute('description'),
+            'committee_short' => $committee?->getFirstAttribute('ou'),
+            'group_short' => $group->getFirstAttribute('cn'),
+            'group_name' => $group->getFirstAttribute('description')
+        ];
 
-        $this->deleteRoleName = $this->deleteRole->name;
         $this->showDeleteModal = true;
     }
 
     public function deleteCommit(): void
     {
-        $this->group->roles()->detach($this->deleteRole);
-        $this->group->refresh();
+        $community = Community::findByUid($this->realm_uid);
+        $this->authorize('delete', [Group::class, $community]);
 
-        // reset everything to prevent a 404 modal
-        unset($this->newRole);
-        unset($this->deleteRole);
+        $group = Group::findOrFail($this->group_dn);
+        $role = Role::findOrFail($this->deleteRoleDN);
 
-        $this->showDeleteModal = false;
+        $group->roles()->detach($role);
+
+        $this->close();
     }
 
     public function close(): void
     {
-        $this->showNewModal = false;
+        unset($this->deleteRoleDN, $this->deleteRoleName);
         $this->showDeleteModal = false;
     }
 }

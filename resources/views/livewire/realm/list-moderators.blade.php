@@ -54,10 +54,10 @@
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>
-                {{ __('realms.delete_member_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
+                {{ __('realms.delete_mod_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
             </x-slot:title>
             <x-slot:content>
-                {{ __('realms.delete_member_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
+                {{ __('realms.delete_mod_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
             </x-slot:content>
             <x-slot:footer>
                 <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
