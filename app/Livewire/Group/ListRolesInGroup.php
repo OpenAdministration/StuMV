@@ -59,8 +59,9 @@ class ListRolesInGroup extends Component {
             'livewire.group.roles', [
                 'roles' => $roles,
                 'users' => $users,
+                'group' => $group,
             ]
-        );
+        )->title(__('groups.roles_list_title', ['name' => $this->group_cn]));
     }
 
 

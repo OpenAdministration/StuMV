@@ -44,7 +44,6 @@ class ListSuperUsers extends Component {
     }
 
 
-    #[Title('Manage Superadmins')]
     public function render() {
         $superGroup = SuperUserGroup::group();
         $listSuperadmins = $superGroup->members()
@@ -59,7 +58,7 @@ class ListSuperUsers extends Component {
                 // all users that aren't admins on this realm
                 //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
-        );
+        )->title(__('list_superusers_title'));
     }
 
     public function deletePrepare($username): void

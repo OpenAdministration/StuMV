@@ -22,7 +22,6 @@ class NewAdmin extends Component
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    #[Title('realms.new_admin_headline')]
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $community = Community::findOrFailByUid($this->realm_uid);
@@ -32,7 +31,7 @@ class NewAdmin extends Component
         return view('livewire.realm.new-admin', [
             'selectable_users' => $userList->except($admins->keys()),
             'community' => $community,
-        ]);
+        ])->title(__('realms.admins_new_title', ['realm' => $this->realm_uid]));
     }
 
     public function save()

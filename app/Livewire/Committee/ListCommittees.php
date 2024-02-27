@@ -53,7 +53,6 @@ class ListCommittees extends Component
         $this->resetPage();
     }
 
-    #[Title('Committees')]
     public function render()
     {
         $community = Community::findByUid($this->realm_uid);
@@ -65,7 +64,7 @@ class ListCommittees extends Component
         return view('livewire.committee.list', [
             'committeesSlice' => $committeesSlice,
             'community' => $community,
-        ]);
+        ])->title(__('committees.list_title'));
     }
 
 

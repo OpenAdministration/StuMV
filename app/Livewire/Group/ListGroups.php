@@ -55,7 +55,7 @@ class ListGroups extends Component
         ;
         return view('livewire.group.list-group', [
             'groupSlice' => $groups,
-        ]);
+        ])->title(__('groups.list_title' ));
     }
 
     public function deletePrepare($uid, $cn): void

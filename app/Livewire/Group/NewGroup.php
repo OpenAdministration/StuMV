@@ -25,7 +25,7 @@ class NewGroup extends Component
 
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        return view('livewire.group.new-group');
+        return view('livewire.group.new-group')->title(__('groups.new_title'));
     }
 
     public function save()

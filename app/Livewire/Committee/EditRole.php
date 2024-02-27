@@ -40,7 +40,7 @@ class EditRole extends Component
 
     public function render()
     {
-        return view('livewire.committee.edit-role');
+        return view('livewire.committee.edit-role')->title(__('roles.edit_title'));
     }
 
     public function save(){

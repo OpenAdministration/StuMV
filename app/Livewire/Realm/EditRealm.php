@@ -35,14 +35,14 @@ class EditRealm extends Component
 
     public function render()
     {
-        return view('livewire.edit-realm');
+        return view('livewire.edit-realm')->title(__('realms.dashboard.title', ['realm' => $this->uid]));
     }
 
     public function save(){
         $r = Community::findOrFailByUid($this->uid);
         $r->description =  [$this->name];
         $r->save();
-        return redirect()->route('realms.pick')
-            ->with('message', __("Realm :uid has been changed.", ['uid' => $this->uid]));
+        return redirect()->route('realms.dashboard', ['uid' => $this->uid])
+            ->with('message', __('realms.edit_success', ['realm' => $this->uid]));
     }
 }

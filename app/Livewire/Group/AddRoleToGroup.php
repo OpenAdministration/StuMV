@@ -37,7 +37,7 @@ class AddRoleToGroup extends Component
         return view('livewire.group.add-role-to-group', [
             'committees' => $committees,
             'roles' => $roles,
-        ]);
+        ])->title(__('groups.roles_add_title', ['group' => $this->group_cn]));
     }
 
     public function save()

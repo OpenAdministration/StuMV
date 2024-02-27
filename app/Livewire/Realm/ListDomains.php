@@ -32,7 +32,8 @@ class ListDomains extends Component
         $domainSlice = Domain::fromCommunity($this->uid)
             ->search('ou', $this->search)
             ->slice(1, 10, $this->sortField, $this->sortDirection);
-        return view('livewire.realm.list-domains', ['domainSlice' => $domainSlice]);
+        return view('livewire.realm.list-domains', ['domainSlice' => $domainSlice])
+            ->title(__('realms.domains.list_title'));
     }
 
     public function deletePrepare($dc): void

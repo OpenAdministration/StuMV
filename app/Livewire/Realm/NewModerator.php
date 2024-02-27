@@ -25,7 +25,6 @@ class NewModerator extends Component
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    #[Title('realms.new_mod_title')]
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $c = Community::findOrFailByUid($this->realm_uid);

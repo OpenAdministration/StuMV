@@ -78,7 +78,7 @@ class ListRealms extends Component
         return view('livewire.realm.list-communities', [
             'realmSlice' => $communitySlice,
             'canEnter' => $canEnter,
-        ]);
+        ])->title(__('realms.list_title'));
     }
 
     public function deletePrepare($uid): void

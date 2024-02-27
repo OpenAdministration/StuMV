@@ -4,15 +4,11 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\User;
-use App\Models\Role;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
-use Carbon\Carbon;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class AddUserToRole extends Component
 {
@@ -60,7 +56,8 @@ class AddUserToRole extends Component
         $c = Community::findByOrFail('ou', $this->uid);
         $users = $c->membersGroup()->members()->get();
 
-        return view('livewire.committee.add-user-to-role', ['users' => $users]);
+        return view('livewire.committee.add-user-to-role', ['users' => $users])
+            ->title(__('realms.add_members_to_role_title', ['role' => $this->cn]));
     }
 
     public function save(){

@@ -45,7 +45,7 @@ class EditCommittee extends Component
         ;
         return view('livewire.committee.edit-committee', [
             'select_parents' => $parents,
-        ]);
+        ])->title(__('committees.edit_title', ['committee' => $this->ou]));
     }
 
     public function save(){

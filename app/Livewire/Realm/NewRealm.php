@@ -19,7 +19,8 @@ class NewRealm extends Component
 
     public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        return view('livewire.realm.new-realm');
+        return view('livewire.realm.new-realm')
+            ->title(__('realms.new_realm_title', ['realm' => $this->uid]));
     }
 
     public function save()

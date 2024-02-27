@@ -33,7 +33,7 @@ class NewDomain extends Component
     }
     public function render()
     {
-        return view('livewire.realm.new-domain');
+        return view('livewire.realm.new-domain')->title(__('realms.new_domain_title', ['realm' => $this->uid]));
     }
 
     public function save(){

@@ -45,7 +45,7 @@ class NewCommittee extends Component
         ;
         return view('livewire.committee.new-committee', [
             'select_parents' => $parents,
-        ]);
+        ])->title(__('committees.new_title'));
     }
 
     public function save(){

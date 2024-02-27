@@ -21,6 +21,6 @@ class CommunityDashboard extends Component
         return view('livewire.realm.community-dashboard', [
             'community' => $community,
             'name' => $name,
-        ]);
+        ])->title(__('realms.dashboard.title'));
     }
 }

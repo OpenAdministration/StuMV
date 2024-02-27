@@ -29,7 +29,8 @@ class NewMember extends Component
             ->search('uid', $this->search)
             ->search('dn', $this->search)
             ->get();
-        return view('livewire.realm.new-member', ['selectable_users' => $userList]);
+        return view('livewire.realm.new-member', ['selectable_users' => $userList])
+            ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));
     }
 
     public function save()
