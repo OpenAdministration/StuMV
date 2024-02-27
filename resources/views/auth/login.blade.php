@@ -4,8 +4,7 @@
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <!-- Validation Errors -->
-
-
+        <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('Login') }}</h2>
         <form method="POST" action="{{ route('login') }}">
             @csrf
             @samlidp
