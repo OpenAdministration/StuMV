@@ -101,5 +101,6 @@
     "New Role created": "Neue Rolle wurde angelegt",
     "Add new Realm": "Neue Studierendenschaft anlegen",
     "The Domain is not a valid domain.": "Diese Domain ist nicht gültig. Bitte gib etwas im Format mein-domain.de ein.",
-    "Added new Group": "Neue Rechtegruppe erstellt. Füge hier jetzt die Rollen hinzu."
+    "Added new Group": "Neue Rechtegruppe erstellt. Füge hier jetzt die Rollen hinzu.",
+    "Role was deleted": "Rolle wurde erfolgreich gelöscht"
 }

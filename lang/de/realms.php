@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'list_title' => 'Studierendenschaft auswählen',
     'no_realms_found' => 'Keine Studierendenschaft gefunden',
     'search' => 'Durchsuche Studierendenschaften',
     'shortcode' => 'Kürzel',
@@ -17,6 +18,8 @@ return [
     'members_explanation' => 'Alle Nutzer*innen, die deiner Studierendenschaft zugeordnet sind, werden hier aufgelistet. Die Organisationszugehörigkeit sollte nur in absoluten Ausnahmefällen aufgelöst werden',
     'new_member' => 'Neues Mitglied hinzufügen',
     'new_member_label' => 'Verfügbare Nutzer*innen',
+    'add_members_to_role_heading' => 'Nutzer*in der Rolle hinzufügen',
+    'add_members_to_role_title' => 'Nutzer*in hinzufügen',
     'delete_member_title' => 'Mitgliedschaft von :name löschen',
     'delete_member_warning' => 'Soll die Mitgliedschaft von :name (:username) wirklich gelöscht werden?',
     'no_admins_found' => 'Keine Admins gefunden',
@@ -29,10 +32,11 @@ return [
     'mods_explanation' => 'Moderator*innen verwalten Gremien und Rollen, können diese anlegen, löschen und bearbeiten. Außerdem sind Mods die einzigen, die dich zu Rollen zuordnen können. Neue Mods können durch bestehende Mods und Admins hinzugefügt werden.',
     'new_mod_headline' => 'Neue/n Moderator*in in :name (:uid) hinzufügen',
     'new_mod_explanation' => 'Wähle eine/n Nutzer*in aus, der/die Mod werden soll.',
-    'admins_heading' => 'Admins von :name (:uid) verwalten',
+    'admins_heading' => 'Admins verwalten',
     'admins_headline' => 'Administrator*innen von :name (:uid)',
     'admins_explanation' => 'Die Admins deiner Studierendenschaft übernehmen die eher technische Verwaltung. Sie können Rechte anlegen, bearbeiten, löschen und Rollen damit verknüpfen. Außerdem verwalten sie die Domains der Studierendenschaften, damit z.B. die automatische Zuordnung neuer Nutzer*innen ermöglicht wird. Der Admin kann die Liste der Mods und Admins verwalten. Das Hinzufügen und Löschen von Admins kann auch Open Administration übernehmen.',
     'new_admin' => 'Neuen Admin hinzufügen',
+    'admins_new_title' => 'Neuen Admin hinzufügen',
     'new_admin_label' => 'Verfügbare Nutzer*innen',
     'new_admin_headline' => 'Neue/n Administrator*in in :name (:uid) hinzufügen',
     'new_admin_explanation' => 'Wähle eine/n Nutzer*in aus, der/die Admin werden soll.',
@@ -45,6 +49,7 @@ return [
     'domains_headline' => 'Domains',
     'domains_explanation' => 'Die hier angegebenen Domains werden dazu verwendet neu angemeldete Nutzer*innen direkt deiner Studierendenschaft hinzuzufügen. Dafür muss der/die Nutzer*in sich mit einer E-Mail-Adresse registrieren, die eine der unten stehenden Domains verwendet. Bei Problemen Problemen meldet euch bei uns.',
     'domains_edit_headline' => 'Füge hier eine Domain für deine Studierendenschaft hinzu',
+    'dashboard.title' => 'Übersicht',
     'dashboard.headline' => 'Übersicht in :name',
     'dashboard.explanation' => 'Hier findest du alle Funktionen, auf die du innerhalb deiner Studierendenschaft Zugriff hast.',
     'dashboard.members_heading' => 'Mitglieder',
@@ -65,8 +70,12 @@ return [
     'dashboard.profile_explanation' => 'Wenn du deine persönlichen Daten anpassen möchtest, bist du hier genau richtig.',
     'members_new_heading' => 'Nutzer*in der Studierendenschaft hinzufügen',
     'members_new_explanation' => 'Füge einen bestehenden Account der Studierendenschaft hinzu. Normalerweise ist das händisch nicht notwendig, da die Mitglieder einer Studierendenschaft über die Domain automatisch hinzugefügt werden.',
+    'domains.list_title' => 'Domains',
+    'new_domain_title' => 'Domain hinzufügen',
     'domains_edit_heading' => 'Domain hinzufügen',
     'domains_edit_explanation' => 'Füge hier eine Domain im Format "meine-domain.de" im Feld FQDN ein. Alle E-Mail-Adressen, die zu dieser Domain gehören werden dann automatisch deiner Studierendenschaft zugeordnet.',
     'members_title' => 'Mitglieder',
-    'mods_title' => 'Moderator*innen'
+    'new_member_title' => 'Neues Mitglied hinzufügen',
+    'mods_title' => 'Moderator*innen',
+    'new_realm_title' => 'Neue Studischaft hinzufügen'
 ];

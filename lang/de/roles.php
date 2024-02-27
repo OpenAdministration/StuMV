@@ -33,4 +33,7 @@ return [
     'new_hint_shortname' => 'Gib hier einen kurzen Namen oder eine Abkürzung für die Rolle ein. Er sollte möglichst eindeutig sein. Z. B. HHV',
     'new_hint_longname' => ' Gib hier den vollen Namen ein. Z. B. Haushaltsverantwortung',
     'edit_explanation' => 'Rolle :name bearbeiten',
+    'edit_title' => 'Rolle bearbeiten',
+    'edit_heading' => 'Rolle bearbeiten',
+    'edit_success' => 'Rolle erfolgreich bearbeitet'
 ];

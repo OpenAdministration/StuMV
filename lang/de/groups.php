@@ -3,6 +3,7 @@
 return [
     'no_groups_found' => 'Keine Gruppen gefunden',
     'search' => 'Durchsuche Rechte',
+    'new_title' => 'Neue Rechtegruppe erstellen',
     'new' => 'Neue Gruppe anlegen',
     'delete_title' => 'Gruppe :name löschen',
     'delete_warning' => 'Soll die Gruppe :name wirklich gelöscht werden?',
@@ -19,9 +20,12 @@ return [
     'link_edit' => 'Bearbeiten',
     'role_name' => 'Zugeordnete Rolle',
     'roles.search' => 'Tabelle durchsuchen',
+    'roles_list_title' => 'Rollen in Rechtegruppe :name',
+    'roles_add_title' => 'Rolle in Rechte hinzufügen',
     'roles_headline' => 'Zur Gruppe :name zugeordnete Rollen',
     'roles_explanation' => 'In der unten stehenden Tabelle sind alle Rollen aufgeführt, die die aktuell ausgewählte Rechtegruppe verwenden.',
     'success_role_add' => 'Die Rolle wurde erfolgreich hinzugefügt.',
-    'roles_add_headline' => 'Die Rechte :name einer Rolle hinzufügen',
-    'roles_add_explanation' => 'Wähle ein Gremium und dann die Rolle aus, die die Rechte erhalten soll.'
+    'roles_add_headline' => 'Einer Rolle mit dem Recht :name verknüpfen',
+    'roles_add_explanation' => 'Wähle ein Gremium und dann die Rolle aus, die die Rechte erhalten soll.',
+    'list_title' => 'Rechtegruppen'
 ];
