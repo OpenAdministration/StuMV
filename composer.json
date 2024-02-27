@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "ext-ldap": "*",
+        "ext-pdo": "*",
         "codegreencreative/laravel-samlidp": "^5.2",
         "dacoto/laravel-domain-validation": "^3.0",
         "diglactic/laravel-breadcrumbs": "^8.1",

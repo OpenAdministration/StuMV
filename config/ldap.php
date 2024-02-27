@@ -38,7 +38,8 @@ return [
             'use_tls' => env('LDAP_TLS', false),
             'options' => [
                 // See: http://php.net/ldap_set_option
-                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER
+                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
+                LDAP_OPT_PROTOCOL_VERSION => 3,
             ],
         ],
     ],
