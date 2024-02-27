@@ -1,6 +1,6 @@
 <?php
 
-namespace App\listeners;
+namespace App\Listeners;
 
 use App\Ldap\Committee;
 use App\Ldap\Group;
@@ -29,10 +29,10 @@ class SamlAssertionAttributesListener
             return !str_contains($dn, 'ou=Committees');
         })->toArray();
 
-        $groupsQuery = Group::query()->where('uniqueMember', '=', $userDn);
-        //foreach ($roles as $role){
-        //    $groupsQuery->orWhere('uniqueMember', '=', $role->getDn());
-        //}
+        $groupsQuery = Group::query()->orWhere('uniqueMember', '=', $userDn);
+        foreach ($roles as $role){
+            $groupsQuery->orWhere('uniqueMember', '=', $role->getDn());
+        }
         $groups = $groupsQuery->get();
 
         $groupDns = $groups->map(function ($item){

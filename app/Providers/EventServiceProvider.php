@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\listeners\SamlAssertionAttributesListener;
+use App\Listeners\SamlAssertionAttributesListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
