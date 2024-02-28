@@ -29,6 +29,15 @@ class SamlAssertionAttributesListener
             return !str_contains($dn, 'ou=Committees');
         })->toArray();
 
+        //Issue: returns all Committees from all realms, SAML has no easy more segmented solution
+        $committeeQuery = Committee::query();
+        foreach ($committeeDns as $committeeDn){
+            $committeeQuery->orWhere('dn', '=', $committeeDn);
+        }
+        $committees = $committeeQuery->get()->map(function ($item){
+           return $item->getFirstAttribute('description');
+        });
+
         $groupsQuery = Group::query()->orWhere('uniqueMember', '=', $userDn);
         foreach ($roles as $role){
             $groupsQuery->orWhere('uniqueMember', '=', $role->getDn());
@@ -59,7 +68,7 @@ class SamlAssertionAttributesListener
             ->addAttribute(new Attribute(ClaimTypes::GROUP, $groupDns))
             ->addAttribute(new Attribute('group', $groupDns))
 
-            ->addAttribute(new Attribute('committees', $committeeDns))
+            ->addAttribute(new Attribute('committees', $committees))
         ;
     }
 }
