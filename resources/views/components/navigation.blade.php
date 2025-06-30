@@ -7,7 +7,7 @@
                 <div class="ml-2.5 shrink-0 flex items-center">
                     <a href="{{ \App\Providers\RouteServiceProvider::home($uid) }}" wire:navigate class="flex space-x-3 items-center">
                         <x-application-logo />
-                        <span class="text-3xl font-extrabold text-gray-800 tracking-tighter">StuMV</span>
+                        <span class="text-3xl font-extrabold text-gray-800 tracking-tighter">{{ Config::get('app.name') }}</span>
                     </a>
                 </div>
                 <!-- Navigation Links -->
