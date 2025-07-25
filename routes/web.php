@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
         return redirect()->route('realms.pick');
     });
     Route::get('/profile', \App\Livewire\Profile::class)->name('profile');
+    Route::get('/profile/memberships', \App\Livewire\Profile\Memberships::class)->name('profile.memberships');
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
 
     Route::middleware(['communityMember'])->group(function (){

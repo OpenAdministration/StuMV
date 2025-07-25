@@ -32,6 +32,11 @@ Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams
     $trail->push(__('Profile'), route('profile', $routeParams));
 });
 
+Breadcrumbs::for('profile.memberships', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('profile', $routeParams);
+    $trail->push(__('profile.memberships'), route('profile.memberships', $routeParams));
+});
+
 Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('profile', $routeParams);
     $trail->push(__('Change Password'), route('password.change', $routeParams));
