@@ -9,6 +9,8 @@ use App\Ldap\Role;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
+use App\Models\GroupMembership;
+
 class AddRoleToGroup extends Component
 {
     #[Locked]
@@ -42,9 +44,12 @@ class AddRoleToGroup extends Component
 
     public function save()
     {
-        /** @var Group $group */
-        $group = Group::findOrFail(Group::dnFrom($this->uid, $this->group_cn));
-        $group->members()->attach($this->selected_role_dn);
+        $group_dn = Group::findOrFail(Group::dnFrom($this->uid, $this->group_cn));
+        GroupMembership::create([
+            'group_dn' => $group_dn,
+            'role_dn' => $this->selected_role_dn,
+        ]);
+
         return redirect()->route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->group_cn])
             ->with('message', __('groups.success_role_add'))
         ;

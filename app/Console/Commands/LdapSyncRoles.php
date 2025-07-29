@@ -4,11 +4,14 @@ namespace App\Console\Commands;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Group;
 use App\Ldap\Role;
+use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
+use Illuminate\Support\Facades\DB;
 
 class LdapSyncRoles extends Command
 {
@@ -45,6 +48,9 @@ class LdapSyncRoles extends Command
             ->setDn(Community::$rootDn)
             ->search('ou', $this->argument('community'))
             ->get();
+
+        $this->comment("Committees:");
+
         foreach ($realms as $realm){
             $committees = Committee::fromCommunity($realm->getFirstAttribute('ou'))
                 ->search('ou', $this->argument('committee'))
@@ -60,7 +66,7 @@ class LdapSyncRoles extends Command
                         ->where('committee_dn', $committee->getDn())
                         ->where('role_cn', $role->getFirstAttribute('cn'))
                         ->get();
-                    $this->comment("  |-> " .$role->getDn());
+                    $this->comment("  |-> " . $role->getDn());
                     // delete all members so far
                     $role->setAttribute('uniqueMember', ['']);
                     $ldapMembers = $role->members();
@@ -68,6 +74,39 @@ class LdapSyncRoles extends Command
                         /** @var RoleMembership $membership */
                         // add only active members back
                         $this->comment("  |   |-> $membership->username");
+                        $ldapMembers->attach($membership->user->ldap());
+                    }
+                }
+            }
+        }
+
+        $this->comment("\nGroups:");
+
+        foreach ($realms as $realm) {
+            $groups = Group::fromCommunity($realm->getFirstAttribute('ou'))
+                ->search('ou', $this->argument('group'))
+                ->get();
+
+            foreach ($groups as $group) {
+                $this->comment("> " . $group->getDn());
+
+                // delete all members so far
+                $group->setAttribute('uniqueMember', ['']);
+
+                $roles = GroupMembership::where('group_dn', $group->getDn())->get();
+                
+                foreach ($roles as $role) {
+                    $roleCn = str_replace('cn=', '', substr($role->role_dn, 0, strpos($role->role_dn, ',')));
+                    $committeeDn = strstr($role->role_dn, "ou=");
+                    $activeMemberships = RoleMembership::active($date)
+                        ->where('committee_dn', $committeeDn)
+                        ->where('role_cn', $roleCn)
+                        ->get();
+
+                    $ldapMembers = $group->users();
+                    foreach ($activeMemberships as $membership) {
+                        // add only active members back
+                        $this->comment("  |-> $membership->username");
                         $ldapMembers->attach($membership->user->ldap());
                     }
                 }
