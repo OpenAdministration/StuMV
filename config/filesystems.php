@@ -29,13 +29,12 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
             'throw' => false,
         ],
-
+        
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -43,12 +42,6 @@ return [
             'visibility' => 'public',
             'throw' => false,
         ],
-
-        'samlidp' => [
-            'driver' => 'local',
-            'root' => storage_path('samlidp'),
-        ],
-
     ],
 
     /*
@@ -63,7 +56,7 @@ return [
     */
 
     'links' => [
-    public_path('storage') => storage_path('app/public'),
-],
+        public_path('storage') => storage_path('app/public'),
+    ],
 
 ];
