@@ -64,10 +64,7 @@
                                 </button>
                             </x-slot>
                             <x-slot name="content">
-                                <x-dropdown-link :href="route('profile')">{{ __('Profile') }}</x-dropdown-link>
-                                <x-dropdown-link :href="route('password.change')">{{ __('Change Password') }}</x-dropdown-link>
-
-                                <hr class="h-px my-1 mx-1 bg-gray-200 border-0">
+                                <x-dropdown-link :href="route('profile', ['username' => auth()->user()->username])">{{ __('Profile') }}</x-dropdown-link>
 
                                 <!-- Authentication -->
                                 <form method="POST" action="{{ route('logout') }}">
@@ -141,7 +138,7 @@
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
             </div>
             <x-responsive-nav-link :active="request()->routeIs('profile')"
-                                   :href="route('profile')">
+                                   :href="route('profile', ['username' => auth()->user()->username])">
                 {{ __('Profil') }}
             </x-responsive-nav-link>
             <div>

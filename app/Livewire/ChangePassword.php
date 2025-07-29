@@ -18,6 +18,19 @@ class ChangePassword extends Component
 
     public string $password_confirmation;
 
+    public $currentUsername;
+
+    public function mount($username)
+    {
+        if ($username == auth()->user()->username || auth()->user()->can('superadmin', User::class)) {
+            $this->currentUsername = $username;
+        } elseif ($username == auth()->user()->username) {
+            $this->currentUsername = auth()->user()->username;
+        } else {
+            abort('403');
+        }
+    }
+
     public function rules(): array
     {
         return [
