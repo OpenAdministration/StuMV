@@ -20,7 +20,7 @@ return [
     'list.explain_text' => 'Das ist die Liste der Gremien, Organisationen und Gliederungen (kurz: Gremien). Gremien können nur von Moderator:innen bearbeitet oder gelöscht werden.',
     'edit_title' => 'Gremium bearbeiten',
     'edit_headline' => 'Gremium :name bearbeiten',
-    'edit_explanation' => 'Hier kannst du das Gremium/die Organisation/die Gliederung bearbeiten.',
+    'edit_explanation' => 'Hier kannst du das Gremium, die Organisation bzw. die Gliederung bearbeiten.',
     'new_title' => 'Neues Gremium erstellen',
     'new_hint_shortname' => 'Gib hier eine Kurzbezeichnung für das Gremium ein. Sie sollte eineindeutig und zusammen geschrieben sein.',
     'new_hint_longname' => 'Gib hier eine lange Bezeichnung für das Gremium ein.',
