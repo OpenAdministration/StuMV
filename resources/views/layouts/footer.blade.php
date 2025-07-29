@@ -11,6 +11,7 @@
             <a class="text-indigo-600" href="https://open-administration.de">Open Administration</a>
             @else
             <span>{{ Config::get('app.name') }} is based on <a href="https://github.com/OpenAdministration/StuMV" target="_blank" rel="noopener noreferrer">StuMV</a>.</span>
+            @endif
         </span>
     </div>
     <div class="flex">
