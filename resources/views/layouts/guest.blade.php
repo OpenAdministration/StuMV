@@ -16,7 +16,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between font-sans text-gray-900 bg-gray-100 antialiased">
     <span></span>
-    <main class="">
+    <main class="flex flex-col my-auto py-8">
         {{ $slot }}
     </main>
     @include('layouts.footer')

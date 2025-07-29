@@ -17,7 +17,7 @@ return [
     'sent' => 'Wir haben dir einen Link zum Zurücksetzen per Mail zugesendet!',
     'throttled' => 'Bitte warte etwas bis zu deinem nächten Versuch.',
     'token' => 'Dieser Token zum Zurücksetzen des Passwortes ist ungültig.',
-    'user' => "Wir können keine*n Benutzer*in mit der angegebenen E-Mail-Adresse finden.",
+    'user' => "Wir können keine:n Benutzer:in mit der angegebenen E-Mail-Adresse finden.",
 
     'reset_mail_subject' => 'Passwort zurücksetzen',
     'reset_mail_line_between_greeting_and_action' => 'Du hast diese Nachricht erhalten, weil für deinen Account die Passwort-Zurücksetzen-Funktion im StuMV verwendet wurde.',
