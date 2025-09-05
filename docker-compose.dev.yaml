@@ -1,0 +1,100 @@
+# Based on https://github.com/dockersamples/laravel-docker-examples
+# (c) 2024 Sergei Shitikov
+# License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
+
+services:
+    ldap:
+        image: symas/openldap:latest
+        ports:
+            - "10389:389"
+        volumes:
+            - openldap-data:/openldap
+        networks:
+            - stumv
+        env_file:
+            - .env
+        environment:
+            LDAP_ADMIN_USERNAME: "admin"
+            LDAP_ADMIN_DN: "cn=admin,dc=stumv,dc=de"
+            LDAP_ADMIN_PASSWORD: "${LDAP_PASSWORD}"
+            LDAP_USERS: "${LDAP_INITIAL_USERS}"
+            LDAP_PASSWORDS: "${LDAP_INITIAL_USERS_PASSWORDS}"
+            LDAP_ROOT: "${LDAP_BASE_DN}"
+            LDAP_EXTRA_SCHEMAS: "core, cosine, dyngroup, inetorgperson, namedobject, nis"
+            LDAP_CUSTOM_LDIF_DIR: ./docker/openldap/ldif
+    nginx:
+        image: nginx:latest
+        ports:
+            - "8080:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        networks:
+            - stumv
+        environment:
+            - NGINX_HOST=localhost
+        depends_on:
+            php-fpm:
+                condition: service_started
+    php-fpm:
+        build:
+            context: .
+            dockerfile: ./docker/php-fpm/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        volumes:
+            - ./:/var/www
+        networks:
+            - stumv
+        env_file:
+            - .env
+        user: "${UID:-1000}:${GID:-1000}"
+        depends_on:
+            mariadb:
+                condition: service_healthy
+    mariadb:
+        image: mariadb:latest
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+            MYSQL_USER: "${DB_USERNAME}"
+            MYSQL_PASSWORD: "${DB_PASSWORD}"
+            MYSQL_DATABASE: "${DB_DATABASE}"
+        volumes:
+            - mysql-data:/var/lib/mysql
+        ports:
+            - 13306:3306
+        env_file:
+            - .env
+        networks:
+            - stumv
+        healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            start_period: 10s
+            interval: 10s
+            timeout: 5s
+            retries: 3
+    workspace:
+        build:
+            context: .
+            dockerfile: ./docker/workspace/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        ports:
+            - "${VITE_PORT:-5173}:5173"
+        tty: true  # Enables an interactive terminal
+        stdin_open: true  # Keeps standard input open for "docker exec"
+        env_file:
+            - .env
+        volumes:
+            - ./:/var/www
+        networks:
+            - stumv
+volumes:
+    openldap-data:
+    mysql-data:
+
+networks:
+    stumv:
