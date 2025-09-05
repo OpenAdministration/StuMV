@@ -1,33 +1,43 @@
 <x-auth-card>
-    <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('user.register') }}</h2>
+    <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
     <x-livewire-form>
-        <!-- Email Address -->
-        <x-input.group wire:model.blur="email" autofocus>
-            <x-slot name="label">{{ __('Email') }}</x-slot>
-            <x-slot name="help">{{ __('user.help.only_uni_mail') }}</x-slot>
-        </x-input.group>
-        @error('domain') <small class="block text-red-500">{{ $message }}</small> @enderror
-        <!-- Name -->
-        <x-input.group wire:model.blur="first_name">
-            <x-slot name="label">{{ __('First name') }}</x-slot>
-        </x-input.group>
-        <x-input.group wire:model.blur="last_name">
-            <x-slot name="label">{{ __('Last name') }}</x-slot>
-        </x-input.group>
-        <!-- Username -->
-        <x-input.group wire:model.blur="username">
-            <x-slot name="label">{{ __('Username') }}</x-slot>
-            <x-slot name="help">{{ __('validation.username', ['attribute' => __('Username')]) }}</x-slot>
-        </x-input.group>
-        <!-- Password -->
-        <x-input.group wire:model.blur="password" type="password">
-            <x-slot name="label">{{ __('Password') }}</x-slot>
-            <x-slot name="help">{{ __('user.help.password') }}</x-slot>
-        </x-input.group>
-        <x-input.group wire:model.live="password_confirmation" type="password">
-            <x-slot name="label">{{ __('Confirm Password') }}</x-slot>
-            <x-slot name="help"></x-slot>
-        </x-input.group>
+        <div class="grid md:grid-cols-2 gap-6">
+            <flux:field>
+                <flux:label>{{ __('Email') }}</flux:label>
+                <flux:input wire:model.blur="email" type="email" autofocus />
+                <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
+                <flux:error name="email" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Username') }}</flux:label>
+                <flux:input wire:model.blur="username" type="text" />
+                <flux:description>{{ __('validation.username', ['attribute' => __('Username')]) }}</flux:description>
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('First name') }}</flux:label>
+                <flux:input wire:model.blur="first_name" type="text" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Last name') }}</flux:label>
+                <flux:input wire:model.blur="last_name" type="text" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Password') }}</flux:label>
+                <flux:input wire:model.blur="password" type="password" />
+                <flux:description>{{ __('user.help.password') }}</flux:description>
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('Confirm Password') }}</flux:label>
+                <flux:input wire:model.blur="password_confirmation" type="password" />
+                <flux:description></flux:description>
+            </flux:field>
+        </div>
+
         <x-slot:abort_route>{{ route('login') }}</x-slot:abort_route>
     </x-livewire-form>
 </x-auth-card>

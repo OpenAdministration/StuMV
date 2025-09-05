@@ -4,40 +4,38 @@
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <!-- Validation Errors -->
-        <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('Login') }}</h2>
+        <flux:heading size="xl">{{ __('Login') }}</flux:heading>
         <form method="POST" action="{{ route('login') }}">
             @csrf
-            <!-- Email Address -->
-            <x-input.group :label="__('Username or Mail')" class="block mt-1 w-full" name="uid" id="uid" :value="old('uid')" required autofocus />
+            <div class="grid gap-6 w-full sm:w-[25rem]">
+                <flux:field>
+                    <flux:label>{{ __('Username or Mail') }}</flux:label>
+                    <flux:input type="text" name="uid" id="uid" :value="old('uid')" required autofocus />
+                    <flux:error name="uid" />
+                </flux:field>
 
-            <!-- Password -->
-            <x-input.group type="password" class="block mt-1 w-full" :label="__('Password')" id="password" name="password" required autocomplete="current-password"/>
+                <flux:field>
+                    <div class="mb-3 flex justify-between">
+                        <flux:label>{{ __('Password') }}</flux:label>
+                        @if (Route::has('password.request'))
+                            <flux:link wire:navigate href="{{ route('password.request') }}" variant="subtle" class="text-sm">{{ __('Forgot your password?') }}</flux:link>
+                        @endif
+                    </div>
+                    <flux:input type="password" name="password" id="password" required />
+                    <flux:error name="" />
+                </flux:field>
 
-            <!-- Remember Me -->
-            <div class="block mt-4">
-                <label for="remember_me" class="inline-flex items-center">
-                    <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" name="remember">
-                    <span class="ml-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-                </label>
-            </div>
+                <flux:field variant="inline">
+                    <flux:checkbox name="remember" />
+                    <flux:label>{{ __('Remember me') }}</flux:label>
+                </flux:field>
 
-            <div class="flex items-center justify-end mt-4">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-indigo-500 hover:text-indigo-700" href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
-                    </a>
-                @endif
+                <flux:button variant="primary" type="submit">{{ __('Log in') }}</flux:button>
 
-                <x-button.primary class="ml-3" type="submit">
-                    {{ __('Log in') }}
-                </x-button.primary>
+                <flux:separator />
+
+                <flux:button href="{{ route('register') }}">{{ __('Sign up and get started!') }}</flux:button>
             </div>
         </form>
-        <x-slot:footer class="text-sm space-x-1">
-            <span class="text-gray-500">{{ __("Don't have an account?") }}</span>
-            <a class="underline text-indigo-600 hover:text-indigo-700" href="{{ route('register') }}">
-                {{ __('Sign up and get started!') }}
-            </a>
-        </x-slot:footer>
     </x-auth-card>
 </x-guest-layout>

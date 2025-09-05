@@ -1,22 +1,27 @@
 <x-guest-layout>
     <x-auth-card>
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('auth.forgot_password_text') }}
-        </div>
-
-        <!-- Session Status -->
-        <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <form method="POST" action="{{ route('password.email') }}">
             @csrf
-            <!-- Email Address -->
-            <x-input.group id="mail" name="mail" :label="__('Email')" :value="old('email')" required/>
+            <div class="grid gap-6 sm:w-[25rem]">
+                <flux:heading size="xl">{{ __('Forgot your password?') }}</flux:heading>
 
-            <div class="flex gap-x-6 items-center justify-end mt-5">
-                <a href="{{ route('login') }}" class="text-sm font-semibold leading-6 text-gray-900">{{  __('Cancel') }}</a>
-                <x-button.primary type="submit">
-                    {{ __('Send Reset Link') }}
-                </x-button.primary>
+                <flux:text>{{ __('auth.forgot_password_text') }}</flux:text>
+
+                <!-- Session Status -->
+                <x-auth-session-status :status="session('status')" />
+
+                <flux:field>
+                    <flux:label>{{ __('Email') }}</flux:label>
+                    <flux:input type="text" name="mail" :value="old('email')" required />
+                </flux:field>
+
+                <div class="flex gap-x-3 items-center justify-end">
+                    <flux:button href="{{ route('login') }}">{{  __('Cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">
+                        {{ __('Send Reset Link') }}
+                    </flux:button>
+                </div>
             </div>
         </form>
     </x-auth-card>
