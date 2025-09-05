@@ -5,12 +5,21 @@
             <p class="mt-2 text-sm text-gray-700">{{ __('realms.members_new_explanation') }}</p>
         </div>
     </div>
-    <x-select wire:model.live="dn" class="mt-2">
-        <x-slot:label>{{ __('realms.new_admin_label') }}</x-slot:label>
-        @foreach($selectable_users as $user)
-            <option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</option>
-        @endforeach
-    </x-select>
+
+    <flux:field>
+        <flux:label>{{ __('realms.new_admin_label') }}</flux:label>
+        <flux:select
+            variant="listbox"
+            searchable
+            placeholder="{{ __('realms.select_user') }}"
+            wire:model="dn"
+        >
+            @foreach($selectable_users as $user)
+                <flux:select.option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</flux:select.option>
+            @endforeach
+        </flux:select>
+    </flux:field>
+
     <x-slot:abort_route>
         {{ route('realms.admins', ['uid' => $realm_uid]) }}
     </x-slot:abort_route>

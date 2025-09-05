@@ -22,6 +22,12 @@ php artisan key:generate
 php artisan migrate
 ```
 
+Zur Aktivierung von [Flux Pro](https://fluxui.dev/) ist die Eingabe eines Lizenzschlüssels nötig.
+
+```
+php artisan flux:activate
+```
+
 Nun müssen in der Datei `.env` noch ein paar Einstellungen wie App-Einstellungen, die Zugangsdaten für die Datenbank und E-Mail-Versand gesetzt werden.
 
 ## Security

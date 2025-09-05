@@ -44,18 +44,18 @@
         <div x-data="cropper">
             <div>
                 @if ($pictureUrl)
-                <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="{{ $pictureUrl }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
+                <img class="h-60 rounded-md shadow-sm border border-zinc-200" src="{{ $pictureUrl }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
                 @else
                 <input
                     id="imageInput"
                     type="file"
                     accept="image/*"
-                    class="w-full h-[15rem] px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
+                    class="w-full h-60 px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
                     :value="imageCropped"
                     x-show="!imageIsSelected"
                     x-on:change="loadImage"
                 >
-                <img id="image" class="h-[15rem]" x-show="imageIsSelected">
+                <img id="image" class="h-60" x-show="imageIsSelected">
                 @endif
             </div>
             <div class="mt-6 flex items-center justify-end gap-x-6">

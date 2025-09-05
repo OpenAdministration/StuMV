@@ -3,7 +3,7 @@
         <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.dashboard.headline', ['name' => $name]) }}</h1>
         <p class="mt-2 text-sm text-gray-700">{{ __('realms.dashboard.explanation', ['name' => $name]) }}</p>
     </div>
-    <div class="-mx-6 -mb-6 mt-10 border-t divide-y-1 divide-gray-200 overflow-hidden rounded-b-lg bg-gray-200 sm:grid sm:grid-cols-2 sm:gap-px sm:divide-y-0">
+    <div class="-mx-6 -mb-6 mt-10 border-t divide-y divide-gray-200 overflow-hidden rounded-b-lg bg-gray-200 sm:grid sm:grid-cols-2 sm:gap-px sm:divide-y-0">
         <x-dashboard-card :href="route('profile')" color="bg-yellow-100 text-yellow-700" icon="fas-user-gear">
             <x-slot:headline>
                 {{ __('realms.dashboard.profile_heading', ['name' => $name]) }}
