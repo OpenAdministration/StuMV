@@ -6,6 +6,7 @@ FROM php:8.3-fpm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    git \
     libonig-dev \
     libssl-dev \
     libxml2-dev \
