@@ -32,14 +32,31 @@
         </x-slot>
         @forelse($realm_members as $realm_member)
             <x-table.row>
-                <x-table.cell>{{ $realm_member->cn[0] }}</x-table.cell>
-                <x-table.cell>{{ $realm_member->uid[0] }}</x-table.cell>
                 <x-table.cell>
-                    <x-button.link-danger
-                        icon-leading="fas-triangle-exclamation"
-                        :disabled="auth()->user()->cannot('remove_member', $community)"
-                        wire:click="deletePrepare('{{ $realm_member->uid[0] }}')">{{ __('Remove Member') }}
-                    </x-button.link-danger>
+                    @if (auth()->user()->can('superadmin', \App\Ldap\User::class))
+                    <a wire:navigate href="{{ route('profile', ['username' => $realm_member->getFirstAttribute('uid')]) }}">
+                        {{ $realm_member->getFirstAttribute('cn') }}
+                    </a>
+                    @else
+                    {{ $realm_member->getFirstAttribute('cn') }}
+                    @endif
+                </x-table.cell>
+                <x-table.cell>{{ $realm_member->getFirstAttribute('uid') }}</x-table.cell>
+                <x-table.cell>
+                    <div class="flex gap-3">
+                        <x-button.link-primary
+                            wire:click="exportPdf('{{ $realm_member->getFirstAttribute('uid') }}')"
+                            :disabled="auth()->user()->cannot('edit', $community)"
+                            class="ml-auto"
+                        >
+                            {{ __('profile.membershipsAsPdf') }}
+                        </x-button.link-primary>
+                        <x-button.link-danger
+                            icon-leading="fas-triangle-exclamation"
+                            :disabled="auth()->user()->cannot('remove_member', $community)"
+                            wire:click="deletePrepare('{{ $realm_member->getFirstAttribute('uid') }}')">{{ __('Remove Member') }}
+                        </x-button.link-danger>
+                    </div>
                 </x-table.cell>
             </x-table.row>
         @empty

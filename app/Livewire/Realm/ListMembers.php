@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -86,5 +87,21 @@ class ListMembers extends Component {
     {
         $this->showDeleteModal = false;
         unset($this->deleteMemberName, $this->deleteMemberUsername);
+    }
+
+    public function exportPdf($username)
+    {
+        $memberships = app('App\Livewire\Profile\Memberships')->getMemberships($username, false);
+        $user = User::findOrFailByUsername($username);
+        $community = Community::findOrFailByUid($this->community_name);
+        $pdf = Pdf::loadView('pdfs.memberships', [
+            'fullName' => $user->cn[0],
+            'community' => $community->description[0],
+            'memberships' => $memberships,
+        ]);
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->stream();
+        }, 'memberships-' . $username . '.pdf');;
     }
 }
