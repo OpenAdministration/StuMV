@@ -7,7 +7,6 @@
         <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('Login') }}</h2>
         <form method="POST" action="{{ route('login') }}">
             @csrf
-            @samlidp
             <!-- Email Address -->
             <x-input.group :label="__('Username or Mail')" class="block mt-1 w-full" name="uid" id="uid" :value="old('uid')" required autofocus />
 

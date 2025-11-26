@@ -5,6 +5,7 @@ namespace App\Livewire\Group;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Ldap\Role;
+use App\Models\GroupMembership;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -51,16 +52,15 @@ class ListRolesInGroup extends Component {
     }
 
     public function render() {
-        /** @var Group $group */
-        $group = Group::findOrFail($this->group_dn);
-        $roles = $group->members()->get();
-        $users = $group->users()->get();
-        // slice breaks it, whyever - get to go.
+        $rolesDB = GroupMembership::select('role_dn')->where('group_dn', $this->group_dn)->get();
+        $roles = [];
+        foreach ($rolesDB as $row) {
+            $role = Role::findOrFail($row->role_dn);
+            array_push($roles, $role);
+        }
         return view(
             'livewire.group.roles', [
                 'roles' => $roles,
-                'users' => $users,
-                'group' => $group,
             ]
         )->title(__('groups.roles_list_title', ['name' => $this->group_cn]));
     }
@@ -75,14 +75,7 @@ class ListRolesInGroup extends Component {
         $committee = $role->committee();
 
         $this->deleteRoleDN = $role_dn;
-        $this->deleteRoleName = [
-            'role_short' => $role->getFirstAttribute('description'),
-            'role_name' => $role->getFirstAttribute('cn'),
-            'committee_name' => $committee?->getFirstAttribute('description'),
-            'committee_short' => $committee?->getFirstAttribute('ou'),
-            'group_short' => $group->getFirstAttribute('cn'),
-            'group_name' => $group->getFirstAttribute('description')
-        ];
+        $this->deleteRoleName = [ $role->getFirstAttribute('cn') ];
 
         $this->showDeleteModal = true;
     }
@@ -92,10 +85,7 @@ class ListRolesInGroup extends Component {
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
 
-        $group = Group::findOrFail($this->group_dn);
-        $role = Role::findOrFail($this->deleteRoleDN);
-
-        $group->roles()->detach($role);
+        GroupMembership::where('group_dn', $this->group_dn)->where('role_dn', $this->deleteRoleDN)->delete();
 
         $this->close();
     }

@@ -20,6 +20,7 @@
         "tailwindcss": "^3.0.18"
     },
     "dependencies": {
+        "cropperjs": "^1.6.2",
         "laravel-mix": "^6.0.49"
     }
 }
