@@ -6,11 +6,14 @@ use App\Ldap\User;
 use App\Ldap\Role;
 use App\Models\RoleMembership;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Memberships extends Component
 {
+    #[Locked]
     public $currentUsername;
+
     public bool $showOnlyActive = true;
 
     public function mount($username)
@@ -34,13 +37,13 @@ class Memberships extends Component
         $memberships = [];
         foreach ($roleMemberships as $row) {
             $role = Role::findOrFail('cn=' . $row->role_cn . ',' . $row->committee_dn);
-            array_push($memberships, [
+            $memberships[] = [
                 'role' => $role,
                 'from' => $row->from,
                 'until' => $row->until,
                 'decided' => $row->decided,
                 'comment' => $row->comment,
-            ]);
+            ];
         }
         return $memberships;
     }
@@ -66,6 +69,6 @@ class Memberships extends Component
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
-        }, 'memberships-' . $this->currentUsername . '.pdf');;
+        }, strtolower(trans('profile.memberships')) . '_' . $this->currentUsername . '.pdf');
     }
 }
