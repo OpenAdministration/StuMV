@@ -56,17 +56,16 @@ class ListCommittees extends Component
     public function render()
     {
         $community = Community::findByUid($this->realm_uid);
-        $committeesSlice = Committee::fromCommunity($this->realm_uid)
-            ->search('ou', $this->search)
-            //->orderBy('ou:caseIgnoreIA5Match', 'asc')
-            ->slice(1, 100);
+        $committees = Committee::fromCommunity($this->realm_uid)
+            ->orderBy('cn')
+            ->list()
+            ->get();
 
         return view('livewire.committee.list', [
-            'committeesSlice' => $committeesSlice,
+            'committees' => $committees,
             'community' => $community,
         ])->title(__('committees.list_title'));
     }
-
 
     public function deletePrepare(string $dn): void
     {

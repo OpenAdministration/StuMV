@@ -1,29 +1,26 @@
-<footer class="grid xl:grid-cols-3 items-center xl:justify-between opacity-60 px-6 pt-8 pb-4 gap-2 mt-auto text-sm">
-    <div class="flex">
-        <span class="mx-auto xl:ml-0">Provided under AGPL</span>
-    </div>
-    <div class="flex">
-        <span class="flex space-x-1 items-center mx-auto">
+<footer class="grid lg:grid-cols-2 items-center lg:justify-between px-6 py-4 gap-6 mt-auto text-sm border-t border-zinc-200 dark:border-zinc-800">
+    <div class="flex justify-center lg:justify-start">
+        <span class="flex space-x-1 items-center justify-center text-baser">
             @if (Config::get('app.name') == 'StuMV')
-            <span>{{ __('code with') }}</span>
-            <x-fas-heart class="text-red-600"/>
-            <span>{{ __('by') }}</span>
-            <a class="text-indigo-600" href="https://open-administration.de">Open Administration</a>
+                <span>{{ __('code with') }}</span>
+                <x-fas-heart class="text-red-600"/>
+                <span>{{ __('by') }}</span>
+                <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration</flux:link>
             @else
-            <span>{{ Config::get('app.name') }} is based on <a href="https://github.com/OpenAdministration/StuMV" target="_blank" rel="noopener noreferrer">StuMV</a>.</span>
+            <span>{{ Config::get('app.name') }} is based on <flux:link href="https://www.stufis.de/stumv" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</span>
             @endif
         </span>
     </div>
-    <div class="flex">
-        <span class="flex items-center space-x-5 mx-auto xl:mr-0">
+    <div class="flex justify-center lg:justify-end">
+        <span class="flex gap-2">
             @if (Config::get('app.about_url') != '')
-            <x-link target="_blank" :href="route('about')">{{ __('About') }}</x-link>
+            <flux:button size="sm" target="_blank" icon="external-link" :href="route('about')">{{ __('About') }}</flux:button>
             @endif
             @if (Config::get('app.terms_url') != '')
-            <x-link target="_blank" :href="route('terms')">{{ __('Terms') }}</x-link>
+            <flux:button size="sm" target="_blank" icon="external-link" :href="route('terms')">{{ __('Terms') }}</flux:button>
             @endif
             @if (Config::get('app.privacy_url') != '')
-            <x-link target="_blank" :href="route('privacy')">{{ __('Privacy') }}</x-link>
+            <flux:button size="sm" target="_blank" icon="external-link" :href="route('privacy')">{{ __('Privacy') }}</flux:button>
             @endif
         </span>
     </div>

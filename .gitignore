@@ -1,5 +1,6 @@
 /node_modules
 /public/hot
+/public/build
 /public/storage
 /public/css
 /public/js
@@ -15,3 +16,4 @@ yarn-error.log
 /.idea
 /.vscode
 /.env.testing
+auth.json

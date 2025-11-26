@@ -219,6 +219,7 @@ return [
     'about_url' => env('ABOUT_URL', ''),
     'privacy_url' => env('PRIVACY_URL', ''),
     'terms_url' => env('TERMS_URL', ''),
+    'source_code_url' => env('SOURCE_CODE_URL', 'https://github.com/openadministration/stumv'),
     'help_contact_mail' => env('HELP_CONTACT_MAIL', 'stumv@open-administration.de'),
 
 ];

@@ -1,17 +1,40 @@
 <x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.add_members_to_role_heading') }}</h1>
-        </div>
+    <div class="mb-6">
+        <flux:heading size="xl">{{ __('realms.add_members_to_role_heading') }}</flux:heading>
     </div>
-    <x-input.group :label="__('Short Rolename')" wire:model="cn" disabled/>
-    <x-select :label="__('Add new User')" wire:model="username">
-        @foreach($users as $user)
-            <option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</option>
-        @endforeach
-    </x-select>
-    <x-input.group type="date" wire:model="start_date" :label="__('Starting')"/>
-    <x-input.group type="date" wire:model="end_date" :label="__('Ending')"/>
-    <x-input.group type="date" wire:model="decision_date" :label="__('Decided')"/>
-    <x-input.group wire:model="comment" :label="__('Comment')"/>
+    <div class="grid sm:grid-cols-2 gap-6 mb-6">
+        <flux:field class="col-span-full">
+            <flux:label>{{ __('Short Rolename') }}</flux:label>
+            <flux:input wire:model="cn" disabled />
+        </flux:field>
+        <flux:field class="col-span-full">
+            <flux:label>{{ __('Add new User') }}</flux:label>
+            <flux:select
+                variant="listbox"
+                searchable
+                placeholder="{{ __('committees.select_user') }}"
+                wire:model="username"
+            >
+                @foreach($users as $user)
+                    <flux:select.option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</flux:select.option>
+                @endforeach
+            </flux:select>
+        </flux:field>
+        <flux:field>
+            <flux:label>{{ __('Starting') }}</flux:label>
+            <flux:date-picker start-day="1" wire:model="start_date" />
+        </flux:field>
+        <flux:field>
+            <flux:label>{{ __('Ending') }}</flux:label>
+            <flux:date-picker start-day="1" wire:model="end_date" />
+        </flux:field>
+        <flux:field>
+            <flux:label>{{ __('Decided') }}</flux:label>
+            <flux:date-picker start-day="1" wire:model="decision_date" />
+        </flux:field>
+        <flux:field>
+            <flux:label>{{ __('Comment') }}</flux:label>
+            <flux:input wire:model="comment" />
+        </flux:field>
+    </div>
 </x-livewire-form>

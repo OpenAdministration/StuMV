@@ -17,7 +17,7 @@
         "bg-red-100" => $isError,
     ])>
         <div class="flex">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 @if($isSuccess)
                     <x-fas-award class="h-5 w-5 text-green-400"/>
                 @elseif($isWarning)

@@ -12,8 +12,9 @@ use Livewire\Component;
 class NewMember extends Component
 {
     public string $search = "";
-    #[Rule('required|string')]
-    public string $dn = "";
+
+    #[Rule('required|array')]
+    public array $selectedUsers = [];
 
     #[Rule('required|string')]
     public string $realm_uid = "";
@@ -36,17 +37,17 @@ class NewMember extends Component
     public function save()
     {
         $this->validate();
-        try {
-            $user = User::findOrFail($this->dn);
-            $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->membersGroup()->members()->attach($user);
-            return redirect()->route('realms.members', ['uid' => $this->realm_uid])
-                ->with('message', __('Added new Member'));
-        } catch (LdapRecordException $exception) {
-            $this->addError('dn', $exception->getMessage());
-            return false;
+        foreach($this->selectedUsers as $dn) {
+            try {
+                $user = User::findOrFail($dn);
+                $realm = Community::findOrFailByUid($this->realm_uid);
+                $realm->membersGroup()->members()->attach($user);
+            } catch (LdapRecordException $exception) {
+                $this->addError('dn', $exception->getMessage());
+                return false;
+            }
         }
+        return redirect()->route('realms.members', ['uid' => $this->realm_uid])
+                    ->with('message', __('Added new Member'));
     }
-
-
 }

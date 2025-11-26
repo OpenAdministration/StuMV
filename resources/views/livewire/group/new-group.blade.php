@@ -1,16 +1,22 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.groups_headline') }}</h1>
-            <p class="mt-2 text-sm text-gray-700">
-                {{  __('realms.groups_explanation') }}
-            </p>
-        </div>
+<x-livewire-form class="space-y-8">
+    <div>
+        <flux:heading size="xl" class="mb-4">{{ __('realms.groups_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('realms.groups_explanation') }}</flux:text>
     </div>
 
-    <x-input.group :label="__('Realm Name')" wire:model="realm_uid" disabled/>
-    <x-input.group :label="__('Short Groupname')" wire:model="cn"/>
-    <x-input.group :label="__('Full Groupname')" wire:model="name"/>
+    <flux:field>
+        <flux:label>{{ __('Realm Name') }}</flux:label>
+        <flux:input wire:model="realm_uid" disabled />
+    </flux:field>
+    <flux:field>
+        <flux:label>{{ __('Short Groupname') }}</flux:label>
+        <flux:input wire:model="cn" />
+    </flux:field>
+    <flux:field>
+        <flux:label>{{ __('Full Groupname') }}</flux:label>
+        <flux:input wire:model="name" />
+    </flux:field>
+    
     <x-slot:abort_route>
         {{ route('realms.groups', ['uid' => $realm_uid]) }}
     </x-slot:abort_route>

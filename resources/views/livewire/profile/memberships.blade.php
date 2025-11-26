@@ -1,77 +1,50 @@
 <div>
-    <div class="w-full">
-        <div class="mb-4 -mx-6 -mt-6 px-6 flex border-b border-zinc-200 gap-3">
-            <a wire:navigate href="{{ route('profile', ['username' => $currentUsername]) }}" class="inline-flex items-center gap-x-1.5 px-2 pt-4 pb-3 border-b-2 border-transparent font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">{{ __('Profile') }}</a>
-            <a wire:navigate href="{{ route('profile.memberships', ['username' => $currentUsername]) }}" class="inline-flex items-center gap-x-1.5 px-2 pt-4 pb-3 border-b-2 border-indigo-400 font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-indigo-400 focus:outline-none focus:text-gray-700 focus:border-indigo-400 transition duration-150 ease-in-out">{{ __('profile.memberships') }}</a>
-            <a wire:navigate href="{{ route('password.change', ['username' => $currentUsername]) }}" class="inline-flex items-center gap-x-1.5 px-2 pt-4 pb-3 border-b-2 border-transparent font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">{{ __('Change Password') }}</a>
-        </div>
-    </div>
+    <x-navbar-profile :username="$currentUsername" />
     
-    <div>
-        <div class="mt-6 flex">
-            <div class="ml-auto">
-                <x-button.primary wire:click="exportPdf">{{ __('profile.exportAsPdf') }}</x-button.primary>
+    <div class="mt-12 space-y-8">
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="flex items-center">
+                <flux:switch wire:model.change="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
+            </div>
+            <div class="flex justify-end">
+                <flux:button variant="primary" wire:click="exportPdf">{{ __('profile.exportAsPdf') }}</flux:button>
             </div>
         </div>
-        <div class="mt-6 mb-6">
-            <input id="showOnlyActive" type="checkbox" wire:model.change="showOnlyActive" class="rounded-sm border-indigo-400">
-            <label for="showOnlyActive" class="ml-4">{{ __('profile.showOnlyActiveMemberships') }}</label>
-        </div>
-        <x-table>
-            <x-slot name="head">
-                <x-table.heading>
-                    {{ __('profile.role') }}
-                </x-table.heading>
-                <x-table.heading>
-                    {{ __('profile.committee') }}
-                </x-table.heading>
-                <x-table.heading>
-                    {{ __('profile.from') }}
-                </x-table.heading>
-                <x-table.heading>
-                    {{ __('profile.until') }}
-                </x-table.heading>
-                <x-table.heading>
-                    {{ __('profile.decision') }}
-                </x-table.heading>
-                <x-table.heading>
-                    {{ __('profile.comment') }}
-                </x-table.heading>
-            </x-slot>
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('profile.role') }}</flux:table.column>
+                <flux:table.column>{{ __('profile.committee') }}</flux:table.column>
+                <flux:table.column>{{ __('profile.from') }}</flux:table.column>
+                <flux:table.column>{{ __('profile.until') }}</flux:table.column>
+                <flux:table.column>{{ __('profile.decision') }}</flux:table.column>
+                <flux:table.column>{{ __('profile.comment') }}</flux:table.column>
+            </flux:table.columns>
+            <flux:table.rows>
             @forelse($memberships as $row)
-                <x-table.row>
-                    <x-table.cell>
-                        {{ $row['role']->getFirstAttribute('description') }}
-                    </x-table.cell>
-                    <x-table.cell>
-                        {{ $row['role']->committee()->getFirstAttribute('description') }}
-                    </x-table.cell>
-                    <x-table.cell>
-                        {{ \Carbon\Carbon::parse($row['from'])->format('Y-m-d') }}
-                    </x-table.cell>
-                    <x-table.cell>
+                <flux:table.row>
+                    <flux:table.cell>{{ $row['role']->getFirstAttribute('description') }}</flux:table.cell>
+                    <flux:table.cell>{{ $row['role']->committee()->getFirstAttribute('description') }}</flux:table.cell>
+                    <flux:table.cell>{{ \Carbon\Carbon::parse($row['from'])->format('Y-m-d') }}</flux:table.cell>
+                    <flux:table.cell>
                         @if ($row['until'] != '')
-                        {{ \Carbon\Carbon::parse($row['until'])->format('Y-m-d') }}
+                            {{ \Carbon\Carbon::parse($row['until'])->format('Y-m-d') }}
                         @else
-                        {{ __('profile.today') }}
+                            {{ __('profile.today') }}
                         @endif
-                    </x-table.cell>
-                    <x-table.cell>
-                        {{ \Carbon\Carbon::parse($row['decided'])->format('Y-m-d') }}
-                    </x-table.cell>
-                    <x-table.cell>
-                        {{ $row['comment'] }}
-                    </x-table.cell>
-                </x-table.row>
+                    </flux:table.cell>
+                    <flux:table.cell>{{ \Carbon\Carbon::parse($row['decided'])->format('Y-m-d') }}</flux:table.cell>
+                    <flux:table.cell>{{ $row['comment'] }}</flux:table.cell>
+                </flux:table.row>
             @empty
-                <x-table.row>
-                    <x-table.cell colspan="4">
+                <flux:table.row>
+                    <flux:table.cell colspan="4">
                         <div class="flex justify-center item-center">
                             <span class="text-gray-400 text-xl py-2 font-medium">{{ __('groups.no_roles_found') }}</span>
                         </div>
-                    </x-table.cell>
-                </x-table.row>
+                    </flux:table.cell>
+                </flux:table.row>
             @endforelse
-        </x-table>
+            </flux:table.rows>
+        </flux:table>
     </div>
 </div>

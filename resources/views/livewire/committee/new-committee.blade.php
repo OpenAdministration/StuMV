@@ -1,21 +1,29 @@
 <x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('New Committee') }}</h1>
-        </div>
-    </div>
-    <x-select :label="__('Parent Committee')" wire:model.live="parent_dn">
-        <option>{{ __('none') }}</option>
-        @foreach($select_parents as $select_parent)
-            <option value="{{ $select_parent->getDn() }}">{{ $select_parent->getFirstAttribute('description') }}</option>
-        @endforeach
-    </x-select>
-    <x-input.group :label="__('Short Committee Name')" wire:model.live="ou">
-        <x-slot:help>{{ __('committees.new_hint_shortname') }}</x-slot:help>
-    </x-input.group>
-    <x-input.group :label="__('Full Committee Name')" wire:model.live="description">
-        <x-slot:help>{{ __('committees.new_hint_longname') }}</x-slot:help>
-    </x-input.group>
+    <flux:heading size="xl" class="mb-6">{{ __('New Committee') }}</flux:heading>
+    <flux:field class="mb-6">
+        <flux:label>{{ __('Parent Committee') }}</flux:label>
+        <flux:select
+            variant="listbox"
+            searchable
+            placeholder="{{ __('committees.select_committee') }}"
+            wire:model="parent_dn"
+        >
+            <flux:select.option>{{ __('none') }}</flux:select.option>
+            @foreach($select_parents as $select_parent)
+                <flux:select.option value="{{ $select_parent->getDn() }}">{{ $select_parent->getFirstAttribute('description') }}</flux:select.option>
+            @endforeach
+        </flux:select>
+    </flux:field>
+    <flux:field class="mb-6">
+        <flux:label>{{ __('Short Committee Name') }}</flux:label>
+        <flux:description>{{ __('committees.new_hint_shortname') }}</flux:description>
+        <flux:input type="text" wire:model.live="ou" required />
+    </flux:field>
+    <flux:field>
+        <flux:label>{{ __('Full Committee Name') }}</flux:label>
+        <flux:description>{{ __('committees.new_hint_longname') }}</flux:description>
+        <flux:input type="text" wire:model.live="description" required />
+    </flux:field>
     <x-slot:abort_route>
         {{ route('committees.list', ['uid' => $realm_uid]) }}
     </x-slot:abort_route>

@@ -1,72 +1,87 @@
-<div class="flex-col space-y-4">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('committees.roles_explanation') }}</p>
+<div class="flex-col space-y-8">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div>
+            <flux:heading size="xl" class="mb-4">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
+            <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary
+        <div>
+            <flux:button
+                variant="primary"
+                icon="plus"
                 :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])"
-                icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', [\App\Ldap\Role::class, $committee, $community])">
+                :disabled="auth()->user()->cannot('create', [\App\Ldap\Role::class, $committee, $community])"
+            >
                 {{ __('New Role') }}
-            </x-button.link-primary>
+            </flux:button>
         </div>
     </div>
 
-    <div class="flex justify-between">
-        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('roles.search') }}"></x-input.group>
-    </div>
-    <x-table>
-        <x-slot name="head">
-            <x-table.heading sortable wire:click="sortBy('cn')" :direction="$sortField === 'cn' ? $sortDirection : null">
-                {{ __('Short Name') }}
-            </x-table.heading>
-            <x-table.heading sortable wire:click="sortBy('description')" :direction="$sortField === 'description' ? $sortDirection : null">
-                {{ __('Full Name') }}
-            </x-table.heading>
-            <x-table.heading  class="text-left">
-                {{ __('Members') }}
-            </x-table.heading>
-            <x-table.heading/>
-            <x-table.heading/>
-            <x-table.heading/>
-        </x-slot>
+    <flux:field>
+        <flux:label>{{ __('roles.search') }}</flux:label>
+        <flux:input icon="search" clearable wire:model.live.debounce="search" />
+    </flux:field>
+
+    <flux:table>
+        <flux:table.columns>
+            <flux:table.column>{{ __('Full Name') }}</flux:table.column>
+            <flux:table.column>{{ __('Members') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
+        </flux:table.columns>
+        <flux:table.rows>
         @forelse($rolesSlice->items() as $role)
-            <x-table.row>
-                <x-table.cell>{{ $role->getFirstAttribute('cn') }}</x-table.cell>
-                <x-table.cell>{{ $role->getFirstAttribute('description') }}</x-table.cell>
-                <x-table.cell>
-                    @empty($this->getMembersString($role))
-                        <span class="text-gray-400">{{ __('No members found') }}</span>
-                    @else
-                        {{ $this->getMembersString($role) }}
-                    @endempty
-                </x-table.cell>
-                <x-table.cell class="flex space-x-5">
-                    <x-link :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])">
-                        <x-fas-user-group/>{{ __('roles.link_members') }}
-                    </x-link>
-                    <x-link :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                        :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])">
-                        <x-fas-pencil/>{{ __('roles.link_edit') }}
-                    </x-link>
-                    <x-button.link-danger icon-leading="fas-trash"
-                        :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
-                        wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
-                        {{ __('Delete') }}
-                    </x-button.link-danger>
-                </x-table.cell>
-            </x-table.row>
+            <flux:table.row>
+                <flux:table.cell>
+                    <flux:link
+                        wire:navigate
+                        href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
+                    >
+                        {{ $role->getFirstAttribute('description') }}
+                    </flux:link>
+                </flux:table.cell>
+                <flux:table.cell>
+                    {{ $this->getMembersString($role) }}
+                </flux:table.cell>
+                <flux:table.cell class="flex justify-end gap-2">
+                    <flux:button
+                        size="sm"
+                        variant="primary"
+                        icon="users"
+                        :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                    >
+                        {{ __('roles.link_members') }}
+                    </flux:button>
+                    <flux:dropdown>
+                        <flux:button size="sm" icon="ellipsis-vertical" />
+                        <flux:menu>
+                            <flux:menu.item
+                                icon="pencil"
+                                :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
+                            >
+                                {{ __('roles.link_edit') }}
+                            </flux:menu.item>
+                            <flux:menu.item
+                                variant="danger"
+                                icon="trash-2"
+                                :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
+                                wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
+                                {{ __('Delete') }}
+                            </flux:menu.item>
+                        </flux:menu>
+                    </flux:dropdown>
+                </flux:table.cell>
+            </flux:table.row>
         @empty
-            <x-table.row>
-                <x-table.cell colspan="4">
+            <flux:table.row>
+                <flux:table.cell colspan="4">
                     <div class="flex justify-center item-center">
                         <span class="text-gray-400 text-xl py-2 font-medium">{{ __('roles.no_roles_found') }}</span>
                     </div>
-                </x-table.cell>
-            </x-table.row>
+                </flux:table.cell>
+            </flux:table.row>
         @endforelse
-    </x-table>
+        </flux:table.rows>
+    </flux:table>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">

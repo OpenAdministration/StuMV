@@ -1,17 +1,24 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.members_new_heading') }}</h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('realms.members_new_explanation') }}</p>
-        </div>
+<x-livewire-form class="space-y-8">
+    <div class="space-y-4">
+        <flux:heading size="xl">{{ __('realms.members_new_heading') }}</flux:heading>
+        <flux:text class="text-base">{{ __('realms.members_new_explanation') }}</flux:text>
     </div>
-    <x-select wire:model.live="dn" class="mt-2">
-        <x-slot:label>{{ __('realms.new_admin_label') }}</x-slot:label>
-        @foreach($selectable_users as $user)
-            <option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</option>
-        @endforeach
-    </x-select>
+
+    <flux:field>
+        <flux:label>{{ __('realms.new_admin_label') }}</flux:label>
+        <flux:pillbox
+            multiple
+            searchable
+            placeholder="{{ __('realms.select_users') }}"
+            wire:model="selectedUsers"
+        >
+            @foreach($selectable_users as $user)
+                <flux:pillbox.option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</flux:pillbox.option>
+            @endforeach
+        </flux:pillbox>
+    </flux:field>
+
     <x-slot:abort_route>
-        {{ route('realms.admins', ['uid' => $realm_uid]) }}
+        {{ route('realms.members', ['uid' => $realm_uid]) }}
     </x-slot:abort_route>
 </x-livewire-form>

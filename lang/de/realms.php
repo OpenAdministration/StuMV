@@ -77,5 +77,6 @@ return [
     'members_title' => 'Mitglieder',
     'new_member_title' => 'Neues Mitglied hinzufügen',
     'mods_title' => 'Moderator:innen',
-    'new_realm_title' => 'Neue Studischaft hinzufügen'
+    'new_realm_title' => 'Neue Studischaft hinzufügen',
+    'select_user' => 'Wähle eine:n Benutzer:in',
 ];

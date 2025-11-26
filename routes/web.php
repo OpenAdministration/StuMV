@@ -90,4 +90,8 @@ Route::get('terms', function (){
     return redirect(config('app.terms_url'));
 })->name('terms');
 
+Route::get('source-code', function (){
+    return redirect("https://github.com/openadministration/stumv");
+})->name('source-code');
+
 require __DIR__.'/auth.php';

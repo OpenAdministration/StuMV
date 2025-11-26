@@ -1,27 +1,34 @@
 @unless ($breadcrumbs->isEmpty())
-    <nav class="container mx-auto">
-        <ol class="flex flex-wrap text-sm text-gray-800">
-            @foreach ($breadcrumbs as $breadcrumb)
-
-                @if ($breadcrumb->url && !$loop->last)
-                    <li>
-                        <a wire:navigate href="{{ $breadcrumb->url }}" class="text-blue-600 hover:text-blue-900 hover:underline focus:text-blue-900 focus:underline">
-                            {{ $breadcrumb->title }}
-                        </a>
-                    </li>
+    <flux:breadcrumbs>
+        @if(count($breadcrumbs) < 5)
+            @foreach($breadcrumbs as $breadcrumb)
+                @if($breadcrumb->url && !$loop->last)
+                    <flux:breadcrumbs.item href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</flux:breadcrumbs.item>
                 @else
-                    <li>
-                        {{ $breadcrumb->title }}
-                    </li>
+                    <flux:breadcrumbs.item>{{ $breadcrumb->title }}</flux:breadcrumbs.item>
                 @endif
-
-                @unless($loop->last)
-                    <li class="text-gray-500 px-2">
-                        /
-                    </li>
-                @endif
-
             @endforeach
-        </ol>
-    </nav>
+        @else
+            <flux:breadcrumbs.item href="{{ $breadcrumbs[0]->url }}">{{ $breadcrumbs[0]->title }}</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ $breadcrumbs[1]->url }}">{{ $breadcrumbs[1]->title }}</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item>
+                <flux:dropdown>
+                    <flux:button icon="ellipsis" variant="ghost" size="sm" />
+                    <flux:navmenu>
+                        @foreach($breadcrumbs as $index => $breadcrumb)
+                            @if($breadcrumb->url && !$loop->first && !$loop->last && $index !== 1)
+                                <flux:navmenu.item icon="corner-down-right" href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</flux:navmenu.item>
+                            @endif
+                        @endforeach
+                    </flux:navmenu>
+                </flux:dropdown>
+            </flux:breadcrumbs.item>
+
+            @foreach($breadcrumbs as $breadcrumb)
+                @if($breadcrumb->url && $loop->last)
+                    <flux:breadcrumbs.item>{{ $breadcrumb->title }}</flux:breadcrumbs.item>
+                @endif
+            @endforeach
+        @endif
+    </flux:breadcrumbs>
 @endunless
