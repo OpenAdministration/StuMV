@@ -1,0 +1,66 @@
+# Based on https://github.com/dockersamples/laravel-docker-examples
+# (c) 2024 Sergei Shitikov
+# License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
+
+FROM php:8.3-fpm AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    libonig-dev \
+    libssl-dev \
+    libzip-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    libldap2-dev \
+    && docker-php-ext-install -j$(nproc) \
+    ldap \
+    pdo_mysql \
+    zip \
+    && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+WORKDIR /var/www
+
+COPY . /var/www
+
+# Install Composer and dependencies
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+
+USER root
+
+# Add ARGs for syncing permissions
+ARG UID=1000
+ARG GID=1000
+
+# Create a new user with the specified UID and GID, reusing an existing group if GID exists
+RUN if getent group ${GID}; then \
+      group_name=$(getent group ${GID} | cut -d: -f1); \
+      useradd -m -u ${UID} -g ${GID} -s /bin/bash www; \
+    else \
+      groupadd -g ${GID} www && \
+      useradd -m -u ${UID} -g www -s /bin/bash www; \
+      group_name=www; \
+    fi
+
+# Dynamically update php-fpm to use the new user and group
+RUN sed -i "s/user = www-data/user = www/g" /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i "s/group = www-data/group = $group_name/g" /usr/local/etc/php-fpm.d/www.conf
+
+# Set the working directory
+WORKDIR /var/www
+
+# Copy the entrypoint script
+COPY ./docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Switch back to the non-privileged user to run the application
+USER www-data
+
+# Change the default command to run the entrypoint script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]

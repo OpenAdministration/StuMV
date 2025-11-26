@@ -1,0 +1,26 @@
+dn: dc=stumv,dc=de
+dc: stumv
+o: Studentische Mitgliederverwaltung
+objectclass: dcObject
+objectclass: organization
+
+dn: ou=Communities,dc=stumv,dc=de
+objectclass: organizationalUnit
+objectClass: top
+ou: Communities
+
+dn: ou=People,dc=stumv,dc=de
+objectclass: organizationalUnit
+objectClass: top
+ou: People
+
+dn: ou=Policies,dc=stumv,dc=de
+objectclass: organizationalUnit
+objectClass: top
+ou: Policies
+
+dn: ou=Services,dc=stumv,dc=de
+objectclass: organizationalUnit
+objectClass: top
+ou: Services
+
