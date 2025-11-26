@@ -1,15 +1,19 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.domains_edit_explanation') }}</h1>
-            <p class="mt-2 text-sm text-gray-700">
-                {{  __('realms.domains_edit_explanation') }}
-            </p>
-        </div>
+<x-livewire-form class="space-y-8">
+    <div>
+        <flux:heading size="xl" class="mb-4">{{ __('realms.domains_edit_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('realms.domains_edit_explanation') }}</flux:text>
     </div>
 
-    <x-input.group :label="__('Realm Name')" wire:model.live="uid" disabled/>
-    <x-input.group :label="__('Domain FQDN')" wire:model.live="dc"/>
+    <flux:field>
+        <flux:label>{{ __('Realm Name') }}</flux:label>
+        <flux:input wire:model="uid" disabled />
+    </flux:field>
+
+    <flux:field>
+        <flux:label>{{ __('Domain FQDN') }}</flux:label>
+        <flux:input wire:model="dc" />
+    </flux:field>
+
     <x-slot:abort_route>
         {{ route('realms.domains', ['uid' => $uid]) }}
     </x-slot:abort_route>

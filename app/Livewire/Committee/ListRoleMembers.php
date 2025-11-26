@@ -5,6 +5,7 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
+use App\Ldap\User;
 use App\Models\RoleMembership;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
@@ -29,14 +30,14 @@ class ListRoleMembers extends Component
     #[Locked]
     public string $cn;
 
-    public bool $showDeleteModal = false;
     public string $deleteUsername;
     public int $deleteId;
 
-    public bool $showTerminateModal = false;
     public string $terminateUsername;
     public int $terminateId;
     public string $terminateDate;
+
+    public bool $showOnlyActive = true;
 
     public function mount(Community $uid, string $ou, string $cn) : void
     {
@@ -50,13 +51,18 @@ class ListRoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $committee = Committee::findByName($this->uid, $this->ou);
         $role = $committee?->roles()->where('cn', $this->cn)->first();
-        $members = RoleMembership::query()
-            ->where('role_cn', $this->cn)
-            ->where('committee_dn', $committee->getDn())
-            ->where(function ($query){ $query
-                ->search('username', $this->search)
-                ->search('comment', $this->search);
-            })->get();
+        $membersQuery = $role->dbMemberships();
+        
+        if ($this->showOnlyActive) {
+            $membersQuery->active(today());
+        }
+
+        if ($this->search !== "") {
+            $membersQuery->where('cn', $this->search);
+        }
+        
+        $members = $membersQuery->get();
+
         return view('livewire.committee.role-members', [
             'members' => $members,
             'committee' => $committee,
@@ -72,9 +78,8 @@ class ListRoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('terminate', [$membership, $committee, $community]);
 
-        $this->showTerminateModal = true;
         $this->terminateDate = today()->format('Y-m-d');
-        $this->terminateUsername = $membership->username;
+        $this->terminateUsername = User::findOrFailByUsername($membership->username)->getFirstAttribute('cn');
         $this->terminateId = $membership->id;
     }
 
@@ -100,8 +105,7 @@ class ListRoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('delete', [$membership, $committee, $community]);
 
-        $this->showDeleteModal = true;
-        $this->deleteUsername = $membership->username;
+        $this->deleteUsername = User::findOrFailByUsername($membership->username)->getFirstAttribute('cn');
         $this->deleteId = $membership->id;
     }
 

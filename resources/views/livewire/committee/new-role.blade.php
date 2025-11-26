@@ -1,15 +1,20 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('New Role') }}</h1>
-        </div>
+<x-livewire-form class="space-y-8">
+    <div>
+        <flux:heading size="xl">{{ __('New Role') }}</flux:heading>
     </div>
-    <x-input.group :label="__('Short Rolename')" wire:model.live="cn">
-        <x-slot:help>{{ __('roles.new_hint_shortname') }}</x-slot:help>
-    </x-input.group>
-    <x-input.group :label="__('Full Rolename')" wire:model="description">
-        <x-slot:help>{{ __('roles.new_hint_longname') }}</x-slot:help>
-    </x-input.group>
+
+    <flux:field>
+        <flux:label>{{ __('Short Rolename') }}</flux:label>
+        <flux:description>{{ __('roles.new_hint_shortname') }}</flux:description>
+        <flux:input wire:model="cn" />
+    </flux:field>
+    
+    <flux:field>
+        <flux:label>{{ __('Full Rolename') }}</flux:label>
+        <flux:description>{{ __('roles.new_hint_longname') }}</flux:description>
+        <flux:input wire:model="description" />
+    </flux:field>
+
     <x-slot:abort_route>
         {{ route('committees.roles', ['uid' => $uid, 'ou' => $ou]) }}
     </x-slot:abort_route>

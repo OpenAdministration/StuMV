@@ -1,60 +1,73 @@
-<div class="flex-col space-y-4">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.admins_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</h1>
-            <p class="mt-2 text-sm text-gray-700">
-                {{  __('realms.admins_explanation') }}
-                <x-link class="inline-flex items-baseline" href="mailto:{{ config('app.help_contact_mail') }}">
-                    <x-fas-envelope class="w-3 h-3 items-baseline ml-1"/> {{ __('Contact us') }}
-                </x-link>
-            </p>
+<div class="flex-col space-y-8">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="space-y-4">
+            <flux:heading size="xl">{{ __('realms.admins_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</flux:heading>
+            <flux:text class="text-base">{{  __('realms.admins_explanation') }}</flux:text>
+            <flux:button
+                size="sm"
+                variant="primary"
+                icon="mail"
+                href="mailto:{{ config('app.help_contact_mail') }}"
+            >
+                {{ __('Contact us') }}
+            </flux:button>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary :href="route('realms.admins.new', ['uid' => $community_name])" class="flex"
+        <div>
+            <flux:button
+                variant="primary"
+                icon="user-plus"
+                wire:navigate
+                :href="route('realms.admins.new', ['uid' => $community_name])"
                 :disabled="auth()->user()->cannot('add_admin', $community)"
             >
-                <x-fas-plus class="text-white align-middle"/>&nbsp;{{ __('Add Admin') }}
-            </x-button.link-primary>
+                {{ __('Add Admin') }}
+            </flux:button>
         </div>
     </div>
-    <div class="flex justify-between">
-        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search_admins') }}"/>
 
-    </div>
-    <x-table>
-        <x-slot name="head">
-            <x-table.heading
-                sortable wire:click="sortBy('full_name')" :direction="$sortField === 'full_name' ? $sortDirection : null"
-            >
-                {{ __('Name') }}
-            </x-table.heading>
-            <x-table.heading
-                sortable wire:click="sortBy('username')" :direction="$sortField === 'from' ? $sortDirection : null"
-            >
-                {{ __('Username') }}
-            </x-table.heading>
-            <x-table.heading/>
-        </x-slot>
+    <!--<flux:field>
+        <flux:label>{{ __('realms.search_admins') }}</flux:label>
+        <flux:input type="text" icon="magnifying-glass" wire:model.live.debounce="search" />
+    </flux:field>-->
+
+    <flux:table>
+        <flux:table.columns>
+            <flux:table.column>{{ __('Name') }}</flux:table.column>
+            <flux:table.column>{{ __('Username') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
+        </flux:table.columns>
+        <flux:table.rows>
         @forelse($realm_admins as $realm_admin)
-            <x-table.row>
-                <x-table.cell>{{ $realm_admin->cn[0] }}</x-table.cell>
-                <x-table.cell>{{ $realm_admin->uid[0] }}</x-table.cell>
-                <x-table.cell>
-                    <x-button.link-danger :disabled="auth()->user()->cannot('remove_admin', $community)"
-                        wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')">{{ __('Delete') }}
-                    </x-button.link-danger>
-                </x-table.cell>
-            </x-table.row>
+            <flux:table.row>
+                <flux:table.cell>{{ $realm_admin->cn[0] }}</flux:table.cell>
+                <flux:table.cell>{{ $realm_admin->uid[0] }}</flux:table.cell>
+                <flux:table.cell class="flex justify-end gap-2">
+                    <flux:dropdown>
+                        <flux:button size="sm" icon="ellipsis-vertical" />
+                        <flux:menu>
+                            <flux:menu.item
+                                variant="danger"
+                                icon="user-minus"
+                                :disabled="auth()->user()->cannot('remove_admin', $community)"
+                                wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
+                            >
+                                {{ __('Delete') }}
+                            </flux:menu.item>
+                        </flux:menu>
+                    </flux:dropdown>
+                </flux:table.cell>
+            </flux:table.row>
         @empty
-            <x-table.row>
-                <x-table.cell colspan="4">
+            <flux:table.row>
+                <flux:table.cell colspan="4">
                     <div class="flex justify-center item-center">
                         <span class="text-gray-400 text-xl py-2 font-medium">{{ __('realms.no_admins_found') }}</span>
                     </div>
-                </x-table.cell>
-            </x-table.row>
+                </flux:table.cell>
+            </flux:table.row>
         @endforelse
-    </x-table>
+        </flux:table.rows>
+    </flux:table>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">

@@ -1,12 +1,18 @@
 <x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('Change Password') }}</h1>
-        </div>
+    <x-navbar-profile :username="$currentUsername" />
+
+    <div class="mt-12 space-y-8">
+        <flux:field>
+            <flux:label>{{ __('Password') }}</flux:label>
+            <flux:description>{{ __('user.help.password') }}</flux:description>
+            <flux:input type="password" wire:model="password" />
+        </flux:field>
+
+        <flux:field>
+            <flux:label>{{ __('Password confirm') }}</flux:label>
+            <flux:input type="password" wire:model="password_confirmation" />
+        </flux:field>
+
+        <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
     </div>
-    <x-input.group type="password" wire:model="password" :label="__('Password')">
-        <x-slot:help>{{ __('user.help.password') }}</x-slot:help>
-    </x-input.group>
-    <x-input.group type="password" wire:model="password_confirmation" :label="__('Password confirm')"/>
-    <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
 </x-livewire-form>

@@ -12,8 +12,8 @@
     "Email Password Reset Link": "Link zum Passwort zurücksetzen senden",
     "Forgot your password?": "Passwort vergessen?",
     "Resend verification Email": "Verifizierungs-E-Mail (erneut) senden",
-    "Log in": "Einloggen",
-    "Log out": "Ausloggen",
+    "Log in": "Anmelden",
+    "Log out": "Abmelden",
     "Confirm": "Bestätigen",
     "Username": "Anmeldename",
     "Username or Mail": "Anmeldename oder E-Mail",
@@ -44,8 +44,8 @@
     "New Role": "Neue Rolle",
     "Short Rolename": "Rollenkürzel / kurzer Rollenname",
     "Full Rolename": "Rollenname",
-    "From": "Von",
-    "Until": "Bis",
+    "From": "von",
+    "Until": "bis",
     "Members": "Mitglieder",
     "No members found": "Keine Mitglieder gefunden",
     "Short Name": "Kürzel",
@@ -103,5 +103,8 @@
     "The Domain is not a valid domain.": "Diese Domain ist nicht gültig. Bitte gib etwas im Format mein-domain.de ein.",
     "Added new Group": "Neue Rechtegruppe erstellt. Füge hier jetzt die Rollen hinzu.",
     "Role was deleted": "Rolle wurde erfolgreich gelöscht",
-    "Confirm logout" : "Bestätige Logout"
+    "Confirm logout" : "Bestätige Logout",
+    "License": "Lizenz",
+    "Source code": "Quelltext",
+    "is based on": "basiert auf"
 }

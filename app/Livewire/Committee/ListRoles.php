@@ -5,6 +5,7 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
+use App\Ldap\User;
 use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -77,14 +78,24 @@ class ListRoles extends Component {
 
     public function getMembersString(Role $role) : string
     {
-        $members = $role->dbMemberships()->distinct()
-            ->limit(4)->pluck('username');
-        if($members->count() === 4){
-            // replace last one with dots
-            $members->pop();
-            $members->add('...');
+        $usernames = $role->dbMemberships()
+            ->active(today())
+            ->distinct()
+            ->limit(4)
+            ->pluck('username');
+
+        $members = [];
+        foreach($usernames as $user) {
+            array_push($members, User::findOrFailByUsername($user)->getFirstAttribute('cn'));
         }
-        return $members->implode(', ');
+        
+        if (count($members) === 4) {
+            // replace last one with dots
+            array_pop($members);
+            array_push($members, '…');
+        }
+
+        return implode(', ', $members);
     }
 
     #[Computed]

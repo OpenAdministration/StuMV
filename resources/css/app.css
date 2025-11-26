@@ -1,48 +1,107 @@
 @import 'tailwindcss';
-
 @import '../../vendor/livewire/flux/dist/flux.css';
-
 @import 'cropperjs/dist/cropper.min.css';
-
-@plugin '@tailwindcss/forms';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
-@theme {
-  --color-accent: var(--color-sky-600);
-  --color-accent-content: var(--color-sky-600);
-  --color-accent-foreground: var(--color-white);
+:root {
+    --color-accent: var(--color-indigo-600);
+    --color-accent-content: var(--color-indigo-700);
+    --color-accent-foreground: var(--color-white);
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
-@layer theme {
+:root {
     .dark {
-        --color-accent: var(--color-sky-600);
-        --color-accent-content: var(--color-sky-400);
+        --color-accent: var(--color-indigo-600);
+        --color-accent-content: var(--color-indigo-300);
         --color-accent-foreground: var(--color-white);
     }
+}
+
+:root {
+    --livewire-progress-bar-color: var(--color-accent-content) !important;
+}
+
+body {
+    @apply h-full overflow-hidden bg-zinc-50 dark:bg-zinc-900;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+main {
+    @apply h-full overflow-y-auto;
+}
+
+main > div {
+    @apply w-full;
+}
+
+/* Flux */
+
+table th,
+table td {
+    @apply text-base! text-zinc-800! dark:text-white!;
+}
+
+table th {
+    @apply font-bold!;
+}
+
+ui-label {
+    @apply text-base! font-semibold! mb-2! text-zinc-600 dark:text-zinc-300;
+}
+
+ui-toast-group {
+    @apply mt-[5.5rem]!;
+}
+
+.flux-input-rounded-br-md > button,
+.flux-input-rounded-br-md > input {
+    @apply rounded-none! rounded-br-md!;
+}
+
+.breadcrumbs svg {
+    @apply text-zinc-400 dark:text-zinc-500;
+}
+
+ui-sidebar ui-tooltip > a {
+    @apply h-10! -mx-3! w-[calc(100%_+_1.5rem)]!;
+}
+
+ui-sidebar ui-tooltip > a > div:last-of-type {
+    @apply text-base! font-medium! text-zinc-800 dark:text-white;
+}
+
+ui-sidebar ui-tooltip a svg {
+    @apply size-6!;
+}
+
+ui-modal dialog {
+    @apply mx-6 mb-6 sm:m-auto dark:bg-zinc-900!;
+}
+
+ui-modal .modal-header {
+    @apply mb-6 -mx-6 -mt-6 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 font-semibold!;
+}
+
+ui-modal button {
+    @apply -mt-2 -mr-2;
+}
+
+nav a {
+    @apply text-base!;
+}
+
+ui-dropdown nav a svg {
+    @apply mr-3!;
+}
+
+input:disabled {
+    @apply bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed;
 }

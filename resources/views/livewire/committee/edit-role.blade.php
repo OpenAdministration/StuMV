@@ -1,11 +1,15 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{  __('roles.edit_heading', ['name' => $cn]) }}</h1>
-        </div>
+<x-livewire-form class="space-y-8">
+    <div>
+        <flux:heading size="xl">{{  __('roles.edit_heading', ['name' => $cn]) }}</flux:heading>
     </div>
 
-    <x-input.group :label="__('Short Rolename')" wire:model="cn" disabled />
-    <x-input.group wire:model="description" :label="__('Full Name')"/>
+    <flux:field>
+        <flux:label>{{ __('Short Rolename') }}</flux:label>
+        <flux:input wire:model="cn" disabled />
+    </flux:field>
 
+    <flux:field>
+        <flux:label>{{ __('Full Name') }}</flux:label>
+        <flux:input wire:model="description" />
+    </flux:field>
 </x-livewire-form>
