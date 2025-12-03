@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 use Mockery\Generator\StringManipulation\Pass\Pass;
@@ -17,6 +18,20 @@ class ChangePassword extends Component
     public string $password;
 
     public string $password_confirmation;
+
+    #[Locked]
+    public $currentUsername;
+
+    public function mount($username)
+    {
+        if ($username === auth()->user()->username || auth()->user()->can('superadmin', User::class)) {
+            $this->currentUsername = $username;
+        } elseif ($username === auth()->user()->username) {
+            $this->currentUsername = auth()->user()->username;
+        } else {
+            abort('403');
+        }
+    }
 
     public function rules(): array
     {

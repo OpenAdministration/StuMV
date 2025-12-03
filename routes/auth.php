@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-    Route::any('change-password', ChangePassword::class)
+    Route::any('profile/{username}/password', ChangePassword::class)
         ->name('password.change');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])

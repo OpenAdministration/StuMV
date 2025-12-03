@@ -33,10 +33,18 @@ class Profile extends Component
     public $picture;
     public $pictureUrl;
 
-    public function mount()
+    public $currentUsername;
+
+    public function mount($username)
     {
-        $username = Auth::user()->username;
-        $user = User::findOrFailByUsername($username);
+        if ($username == auth()->user()->username || auth()->user()->can('superadmin', User::class)) {
+            $this->currentUsername = $username;
+        } elseif ($username == auth()->user()->username) {
+            $this->currentUsername = auth()->user()->username;
+        } else {
+            abort('403');
+        }
+        $user = User::findOrFailByUsername($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
         $this->givenName = $user->getFirstAttribute('givenName');
         $this->sn = $user->getFirstAttribute('sn');
@@ -57,9 +65,6 @@ class Profile extends Component
     public function save()
     {
         $this->validate();
-        if (Auth::user()->username !== $this->uid) {
-            abort('403');
-        }
         $user = User::findOrFailByUsername($this->uid);
         $user->setAttribute('mail', $this->email);
         $user->setAttribute('givenName', $this->givenName);
