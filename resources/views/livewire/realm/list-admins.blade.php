@@ -78,8 +78,8 @@
                 {{ __('realms.delete_admin_warning', ['name' => $deleteAdminName]) }}
             </x-slot:content>
             <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
+                <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
+                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
             </x-slot:footer>
         </x-modal.confirmation>
     </form>
