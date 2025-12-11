@@ -28,7 +28,7 @@
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
-        @forelse($rolesSlice->items() as $role)
+        @forelse($roles as $role)
             <flux:table.row>
                 <flux:table.cell>
                     <flux:link

@@ -66,12 +66,15 @@ class ListRoles extends Component {
         $rolesSlice = $committee->roles()
             ->search('cn', $this->search)
             ->search('description', $this->search)
-            ->slice(1,10);
+            ->orderBy('cn')
+            ->list()
+            ->get();
+
         return view(
             'livewire.committee.roles', [
                 'community' => $community,
                 'committee' => $committee,
-                'rolesSlice' => $rolesSlice,
+                'roles' => $rolesSlice,
             ]
         )->title(__('committees.roles_title', ['name' => $this->ou]));
     }
