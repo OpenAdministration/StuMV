@@ -3,7 +3,7 @@
         <span class="flex space-x-1 items-center justify-center text-baser">
             @if (Config::get('app.name') == 'StuMV')
                 <span>{{ __('code with') }}</span>
-                <x-fas-heart class="text-red-600"/>
+                <flux:icon name="heart" class="text-red-600" />
                 <span>{{ __('by') }}</span>
                 <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration</flux:link>
             @else
