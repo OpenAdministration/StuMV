@@ -17,7 +17,7 @@
                 @endif
                 <div class="mt-2 mb-6 flex space-x-1 items-center justify-center">
                     <span>{{ __('code with') }}</span>
-                    <flux:icon name="heart" class="text-red-600" />
+                    <flux:icon name="heart" class="size-4 text-red-600" />
                     <span>{{ __('by') }}</span>
                     <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration</flux:link>
                 </div>
