@@ -71,10 +71,11 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "repositories": {
-        "flux-pro": {
+    "repositories": [
+        {
+            "name": "flux-pro",
             "type": "composer",
             "url": "https://composer.fluxui.dev"
         }
-    }
+    ]
 }
