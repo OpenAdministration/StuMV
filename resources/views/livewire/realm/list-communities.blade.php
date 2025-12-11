@@ -93,7 +93,7 @@
             </x-slot:content>
             <x-slot:footer>
                 <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger type="submit">{{ __('Delete') }}</flux:button>
+                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
             </x-slot:footer>
         </x-modal.confirmation>
     </form>
