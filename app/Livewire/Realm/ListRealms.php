@@ -49,11 +49,12 @@ class ListRealms extends Component
     public function render(Request $request)
     {
         $communitySlice = Community::query()
-            ->list() // only first level
             ->setDn(Community::$rootDn)
             ->search('ou', $this->search)
             ->search('description', $this->search)
-            ->slice(1, 10, $this->sortField, $this->sortDirection);
+            ->orderBy('ou')
+            ->list()
+            ->get();
 
         $ldapUser = Auth::user()->ldap();
         if($ldapUser->isSuperAdmin()) {
@@ -75,7 +76,7 @@ class ListRealms extends Component
         }
 
         return view('livewire.realm.list-communities', [
-            'realmSlice' => $communitySlice,
+            'realms' => $communitySlice,
             'canEnter' => $canEnter,
         ])->title(__('realms.list_title'));
     }

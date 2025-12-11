@@ -36,7 +36,7 @@
         </flux:table.columns>
         <flux:table.rows>
         @php /** @var \App\Ldap\Community $realm */ @endphp
-        @forelse($realmSlice->items() as $realm)
+        @forelse($realms as $realm)
             <flux:table.row>
                 <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
                 <flux:table.cell>{{ $realm->getLongName() }}</flux:table.cell>
