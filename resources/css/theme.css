@@ -1,12 +1,15 @@
-:root {
-    --color-accent: var(--color-indigo-500);
-    --color-accent-content: var(--color-indigo-600);
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+
+@theme {
+    --color-accent: var(--color-indigo-600);
+    --color-accent-content: var(--color-indigo-700);
     --color-accent-foreground: var(--color-white);
 }
 
-:root {
+@layer theme {
     .dark {
-        --color-accent: var(--color-indigo-500);
+        --color-accent: var(--color-indigo-600);
         --color-accent-content: var(--color-indigo-300);
         --color-accent-foreground: var(--color-white);
     }
