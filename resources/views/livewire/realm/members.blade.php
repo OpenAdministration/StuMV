@@ -34,9 +34,9 @@
                     <flux:link
                         wire:navigate
                         :disabled="auth()->user()->cannot('admin', [$community])"
-                        href="{{ route('profile', ['username' => $realm_member->uid[0]]) }}"
+                        href="{{ route('profile', ['username' => $realm_member->username]) }}"
                     >
-                        {{ $realm_member->cn[0] }}
+                        {{ $realm_member->full_name }}
                     </flux:link>
                 </flux:table.cell>
                 <flux:table.cell>{{ $realm_member->uid[0] }}</flux:table.cell>
@@ -45,7 +45,7 @@
                         size="sm"
                         variant="primary"
                         icon="file-text"
-                        wire:click="exportPdf('{{ $realm_member->uid[0] }}')"
+                        wire:click="exportPdf('{{ $realm_member->username }}')"
                     >
                         {{ __('profile.membershipsAsPdf') }}
                     </flux:button>
@@ -56,7 +56,7 @@
                                 icon="pencil"
                                 :disabled="auth()->user()->cannot('admin', $community)"
                                 wire:navigate
-                                href="{{ route('profile', ['username' => $realm_member->uid[0]]) }}"
+                                href="{{ route('profile', ['username' => $realm_member->username]) }}"
                             >
                                 {{ __('Edit') }}
                             </flux:menu.item>
@@ -64,7 +64,7 @@
                                 variant="danger"
                                 icon="user-minus"
                                 :disabled="auth()->user()->cannot('remove_member', $community)"
-                                wire:click="deletePrepare('{{ $realm_member->uid[0] }}')"
+                                wire:click="deletePrepare('{{ $realm_member->username }}')"
                             >
                                 {{ __('Remove Member') }}
                             </flux:menu.item>
