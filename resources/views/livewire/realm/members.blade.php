@@ -84,6 +84,8 @@
         </flux:table.rows>
     </flux:table>
 
+    <flux:pagination :paginator="$realm_members" />
+
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
             <x-slot:title>

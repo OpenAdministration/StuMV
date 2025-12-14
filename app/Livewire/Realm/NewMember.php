@@ -42,6 +42,8 @@ class NewMember extends Component
                 $user = User::findOrFail($dn);
                 $realm = Community::findOrFailByUid($this->realm_uid);
                 $realm->membersGroup()->members()->attach($user);
+
+                \App\Models\User::where('username', $user->getFirstAttribute('uid'))->update(['realm' => $this->realm_uid]);
             } catch (LdapRecordException $exception) {
                 $this->addError('dn', $exception->getMessage());
                 return false;

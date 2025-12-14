@@ -36,6 +36,7 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
         'username',
         'email',
         'password',
+        'realm',
     ];
 
     /**
