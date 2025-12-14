@@ -85,7 +85,7 @@
     </flux:table>
 
     @if(count($realm_members) > 0)
-        <div class="-mt-8">
+        <div class="pagination -mt-8">
             <flux:pagination :paginator="$realm_members" />
         </div>
     @endif
