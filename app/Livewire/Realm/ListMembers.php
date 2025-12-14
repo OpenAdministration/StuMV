@@ -54,8 +54,8 @@ class ListMembers extends Component {
         // Get users from database
         $membersQuery = \App\Models\User::where('realm', $this->community_name)->orderBy('full_name');
         if ($this->search != '') {
-            $query->where('full_name', 'like', '%' . $this->search . '%');
-            $query->orWhere('username', 'like', '%' . $this->search . '%');
+            $membersQuery->where('full_name', 'like', '%' . $this->search . '%');
+            $membersQuery->orWhere('username', 'like', '%' . $this->search . '%');
         }
         $members = $membersQuery->paginate(10);
         
