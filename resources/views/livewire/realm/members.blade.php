@@ -85,7 +85,9 @@
     </flux:table>
 
     @if(count($realm_members) > 0)
-        <flux:pagination :paginator="$realm_members" />
+        <div class="-mt-8">
+            <flux:pagination :paginator="$realm_members" />
+        </div>
     @endif
 
     <form wire:submit="deleteCommit">
