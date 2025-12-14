@@ -60,16 +60,20 @@ class RoleMembership extends Model
         return $this->belongsTo(User::class, 'username', 'username');
     }
 
-    public function ldapRole() : \App\Ldap\Role
+    public function ldapRole()
     {
         return \App\Ldap\Role::find("cn=$this->role_cn,$this->committee_dn");
     }
 
     public function isActive() : bool {
-        return Carbon::today()->betweenIncluded(
-            $this->from->format('Y-m-d'),
-            $this->until?->format('Y-m-d')
-        );
+        if ($this->until) {
+            return Carbon::today()->betweenIncluded(
+                $this->from->format('Y-m-d'),
+                $this->until?->format('Y-m-d')
+            );
+        } else {
+            return true;
+        }
     }
 
     public function isPending() : bool {
