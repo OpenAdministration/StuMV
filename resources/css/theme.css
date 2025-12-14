@@ -9,8 +9,8 @@
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-indigo-600);
-        --color-accent-content: var(--color-indigo-300);
-        --color-accent-foreground: var(--color-white);
+        --color-accent: var(--color-indigo-600) !important;
+        --color-accent-content: var(--color-indigo-300) !important;
+        --color-accent-foreground: var(--color-white) !important;
     }
 }
