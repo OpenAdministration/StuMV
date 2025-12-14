@@ -84,7 +84,7 @@
         </flux:table.rows>
     </flux:table>
 
-    @if(count($members) > 0)
+    @if(count($realm_members) > 0)
         <flux:pagination :paginator="$realm_members" />
     @endif
 
