@@ -49,8 +49,9 @@ class ListMembers extends Component {
     }
 
     public function render() {
-        $members = User::where('realm', $this->community_name)->orderBy('full_name')->paginate(10);
-
+        $community = Community::findOrFailByUid($this->community_name);
+        $members = User::where('realm', $this->community_name)->orderBy('full_name')->get();
+        
         return view(
             'livewire.realm.members', [
                 'realm_members' => $members,
