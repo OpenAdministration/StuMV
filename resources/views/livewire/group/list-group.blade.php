@@ -73,6 +73,11 @@
         </flux:table.rows>
     </flux:table>
 
+    @if($groupSlice->hasPages())
+        <div class="-mt-8">
+            <flux:pagination :paginator="$groupSlice" />
+        </div>
+    @endif
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
