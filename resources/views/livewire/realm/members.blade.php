@@ -84,7 +84,9 @@
         </flux:table.rows>
     </flux:table>
 
-    <flux:pagination :paginator="$realm_members" />
+    @if(count($members) > 0)
+        <flux:pagination :paginator="$realm_members" />
+    @endif
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
