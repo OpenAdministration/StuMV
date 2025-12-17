@@ -12,16 +12,16 @@
             <input type="hidden" name="mail" value="{{ $request->mail }}">
 
             <!-- Email Address -->
-            <x-input.group id="mail" name="mail" :label="__('E-Mail')" :value="old('mail', $request->mail)" required disabled/>
+            <flux:input id="mail" name="mail" :label="__('E-Mail')" :value="old('mail', $request->mail)" required disabled/>
 
             <!-- Password -->
-            <x-input.group id="password" name="password" :label="__('Password')" type="password" required autofocus/>
-            <x-input.group id="password_confirmation" name="password_confirmation" :label="__('Confirm Password')" type="password" required/>
+            <flux:input id="password" name="password" :label="__('Password')" type="password" required autofocus/>
+            <flux:input id="password_confirmation" name="password_confirmation" :label="__('Confirm Password')" type="password" required/>
 
             <div class="flex items-center justify-end mt-6">
-                <x-button.primary type="submit">
+                <flux:button variant="primary" type="submit">
                     {{ __('Reset Password') }}
-                </x-button.primary>
+                </flux:button>
             </div>
         </form>
     </x-auth-card>
