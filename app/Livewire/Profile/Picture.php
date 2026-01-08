@@ -63,7 +63,7 @@ class Picture extends Component
         $user->setAttribute('jpegPhoto', $imgBase64);
         $user->save();
 
-        return redirect()->route('profile.picture')->with('message', __('Saved'));
+        return redirect()->route('profile.picture', ['username' => $this->uid])->with('message', __('Saved'));
     }
 
     public function deletePicture()
@@ -73,6 +73,6 @@ class Picture extends Component
         $user->removeAttribute('jpegPhoto');
         $user->save();
 
-        return redirect()->route('profile.picture')->with('message', __('ImageRemoved'));
+        return redirect()->route('profile.picture', ['username' => $this->uid])->with('message', __('ImageRemoved'));
     }
 }
