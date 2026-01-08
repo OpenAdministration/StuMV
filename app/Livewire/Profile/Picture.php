@@ -15,8 +15,6 @@ class Picture extends Component
     #[Locked]
     public ?string $uid = null;
 
-    public ?string $jpegPhoto = null;
-
     public $picture = null;
 
     public function mount($username)
@@ -34,9 +32,12 @@ class Picture extends Component
     {
         $user = User::findOrFailByUsername($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
-        $this->jpegPhoto = $user->getFirstAttribute('jpegPhoto');
 
-        return view('livewire.profile.picture');
+        return view('livewire.profile.picture', [
+            'jpegPhoto' => $user->getFirstAttribute('jpegPhoto'),
+            'givenName' => $user->getFirstAttribute('givenName'),
+            'sn' => $user->getFirstAttribute('sn'),
+        ]);
     }
 
     public function savePicture()
