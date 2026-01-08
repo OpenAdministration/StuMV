@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Profile;
 
+use App\Ldap\User;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 

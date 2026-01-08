@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Ldap\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
