@@ -2,23 +2,11 @@
     <x-navbar-profile :username="$currentUsername" />
 
     <div class="mt-12 space-y-8">
-        <div class="sm:flex sm:items-center mt-6">
-            <div class="sm:flex-auto">
-                <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('Picture') }}</h1>
-            </div>
-        </div>
-        <div class="mt-8 sm:mt-5">
-            <div x-data="cropper">
-                <div>
-                    @if ($pictureUrl)
-                    <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="{{ $pictureUrl }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
-                    @else
-                    <flux:file-upload wire:model="photos" multiple label="Upload files">
-                        <flux:file-upload.dropzone
-                            heading="Drop files here or click to browse"
-                            text="JPG, PNG, GIF up to 10MB"
-                        />
-                    </flux:file-upload>
+        <div x-data="cropper">
+            <div>
+                @if($jpegPhoto)
+                    <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="data:image/jpeg;base64,{{ $jpegPhoto }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
+                @else
                     <input
                         id="imageInput"
                         type="file"
@@ -29,22 +17,21 @@
                         x-on:change="loadImage"
                     >
                     <img id="image" class="h-[15rem]" x-show="imageIsSelected">
-                    @endif
-                </div>
-                <div class="mt-6 flex items-center justify-end gap-x-6">
-                    @if ($pictureUrl)
+                @endif
+            </div>
+            <div class="mt-6 flex items-center justify-end gap-x-6">
+                @if($jpegPhoto)
                     <flux:button variant="danger" wire:click="deletePicture">
                         {{ __('Entfernen') }}
                     </flux:button>
-                    @else
+                @else
                     <flux:button @click="cancelPicture">
                         {{ __('Abbrechen') }}
                     </flux:button>
                     <flux:button variant="primary" @click="cropPicture">
                         {{ __('Speichern') }}
                     </flux:button>
-                    @endif
-                </div>
+                @endif
             </div>
         </div>
     </div>

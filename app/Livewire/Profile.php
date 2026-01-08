@@ -28,9 +28,6 @@ class Profile extends Component
     public $postalCode;
     public $city;
     public $phone;
-    
-    public $picture;
-    public $pictureUrl;
 
     public $currentUsername;
 
@@ -53,7 +50,6 @@ class Profile extends Component
         $this->postalCode = $user->getFirstAttribute('postalCode');
         $this->city = $user->getFirstAttribute('l');
         $this->phone = $user->getFirstAttribute('telephoneNumber');
-        $this->pictureUrl = $user->getFirstAttribute('jpegPhoto');
     }
 
     public function render()

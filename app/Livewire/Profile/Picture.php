@@ -15,6 +15,10 @@ class Picture extends Component
     #[Locked]
     public ?string $uid = null;
 
+    public ?string $jpegPhoto = null;
+
+    public $picture = null;
+
     public function mount($username)
     {
         if ($username == auth()->user()->username || auth()->user()->can('superadmin', User::class)) {
@@ -30,49 +34,44 @@ class Picture extends Component
     {
         $user = User::findOrFailByUsername($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
+        $this->jpegPhoto = $user->getFirstAttribute('jpegPhoto');
 
         return view('livewire.profile.picture');
     }
 
     public function savePicture()
     {
-        $img = imagecreatefromstring(base64_decode(str_replace('data:image/jpeg;base64,', '', $this->picture))); // convert base64 string to image object
-        $imgSize = 400; // size the image should be resized to
-        $imgFileName = Str::uuid() . '.jpg'; // generate a file name
+        $imgBase64 = str_replace('data:image/jpeg;base64,', '', $this->picture);
+        $img = imagecreatefromstring(base64_decode($imgBase64)); // convert base64 string to image object
         $width = imagesx($img); // initial width of the image
         $height = imagesy($img); // initial height of the image
+        $imgSize = 400; // size the image should be resized to
 
-        // Resize the image
-        $thumb = imagecreatetruecolor($imgSize, $imgSize);
-        imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
-        ob_start();
-        imagejpeg($thumb, NULL);
-        $imgResized = ob_get_clean();
-
-        // Put resized image into Laravel Storage
-        Storage::disk('public')->put('pictures/' . $imgFileName, $imgResized, 'public');
-
-        // Set picture URL
-        $this->pictureUrl = Storage::disk('public')->url('pictures/' . $imgFileName);
+        if ($width > $imgSize || $height > $imgSize) {
+            // Resize the image
+            $thumb = imagecreatetruecolor($imgSize, $imgSize);
+            imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
+            ob_start();
+            imagejpeg($thumb, NULL);
+            $imgResized = ob_get_clean();
+            $imgBase64 = base64_encode($imgResized);
+        }
 
         // Write image URL to LDAP
         $user = User::findOrFailByUsername($this->uid);
-        $user->setAttribute('jpegPhoto', $this->pictureUrl);
+        $user->setAttribute('jpegPhoto', $imgBase64);
         $user->save();
 
-        return redirect()->route('profile')->with('message', __('Saved'));
+        return redirect()->route('profile.picture')->with('message', __('Saved'));
     }
 
     public function deletePicture()
     {
-        // Remove image from Laravel Storage
-        Storage::disk('public')->delete(str_replace(config('app.url') . '/storage/', '', $this->pictureUrl));
-
         // Remove image URL from LDAP
         $user = User::findOrFailByUsername($this->uid);
         $user->removeAttribute('jpegPhoto');
         $user->save();
 
-        return redirect()->route('profile')->with('message', __('ImageRemoved'));
+        return redirect()->route('profile.picture')->with('message', __('ImageRemoved'));
     }
 }
