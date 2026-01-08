@@ -54,12 +54,22 @@
 
             .table th,
             .table td {
-                border: 1px solid black;
-                padding: .25rem .5rem;
+                border-top: 1px solid #ddd;
+                padding: .5rem .75rem;
             }
 
-            .table th {
-                background-color: #dddddd;
+            .table tr th:first-of-type,
+            .table tr td:first-of-type {
+                padding-left: 0;
+            }
+
+            .table tr th:last-of-type,
+            .table tr td:last-of-type {
+                padding-right: 0;
+            }
+
+            .table tr:last-of-type {
+                border-bottom: 1px solid #ddd;
             }
 
             .float-right {
@@ -83,7 +93,7 @@
             }
 
             .w-date {
-                width: 3.5rem;
+                width: 1.5cm;
             }
         </style>
     </head>
