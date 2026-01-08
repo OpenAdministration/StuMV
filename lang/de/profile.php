@@ -11,7 +11,7 @@ return [
     'in' => 'in',
     'memberships' => 'Mitgliedschaften',
     'membershipsAsPdf' => 'Mitgliedschaften als PDF',
-    'picture' => 'Picture',
+    'picture' => 'Bild',
     'role' => 'Rolle',
     'showOnlyActiveMemberships' => 'Zeige nur aktive Mitgliedschaften',
     'today' => 'heute',

@@ -12,8 +12,8 @@ class Picture extends Component
 
     #[Locked]
     public ?string $uid = null;
-    
-    public function render()
+
+    public function mount($username)
     {
         if ($username == auth()->user()->username || auth()->user()->can('superadmin', User::class)) {
             $this->currentUsername = $username;
@@ -22,6 +22,10 @@ class Picture extends Component
         } else {
             abort('403');
         }
+    }
+    
+    public function render()
+    {
         $user = User::findOrFailByUsername($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
 
