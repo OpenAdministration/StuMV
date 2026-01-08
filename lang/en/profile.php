@@ -11,6 +11,7 @@ return [
     'in' => 'in',
     'memberships' => 'Memberships',
     'membershipsAsPdf' => 'Memberships as PDF',
+    'picture' => 'Picture',
     'role' => 'Role',
     'showOnlyActiveMemberships' => 'Show only active memberships',
     'today' => 'today',

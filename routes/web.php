@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
     });
     Route::get('/profile/{username}', \App\Livewire\Profile::class)->name('profile');
     Route::get('/profile/{username}/memberships', \App\Livewire\Profile\Memberships::class)->name('profile.memberships');
+    Route::get('/profile/{username}/picture', \App\Livewire\Profile\Picture::class)->name('profile.picture');
     Route::get('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
 
     Route::middleware(['communityMember'])->group(function (){
