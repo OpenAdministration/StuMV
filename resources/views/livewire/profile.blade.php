@@ -1,4 +1,4 @@
-<div class="max-w-[calc(100%_+_4rem)] w-[calc(100%_+_4rem)] flex flex-col -m-6! sm:-m-8!">
+<div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-m-8!">
     <x-navbar-profile :username="$currentUsername" />
 
     <div class="flex-1 p-6 sm:p-8">
