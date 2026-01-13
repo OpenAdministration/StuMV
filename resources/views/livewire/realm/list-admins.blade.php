@@ -1,6 +1,6 @@
 <div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
-        <div class="space-y-4">
+        <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.admins_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</flux:heading>
             <flux:text class="text-base">{{  __('realms.admins_explanation') }}</flux:text>
             <flux:button

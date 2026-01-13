@@ -1,6 +1,6 @@
 <div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
-        <div>
+        <div class="flex-1">
             <flux:heading size="xl" class="mb-4">{{ __('realms.groups_headline') }}</flux:heading>
             <flux:text class="text-base">{{  __('realms.groups_explanation') }}</flux:text>
         </div>
