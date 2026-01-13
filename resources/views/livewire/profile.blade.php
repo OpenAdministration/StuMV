@@ -1,8 +1,8 @@
-<div class="max-w-full! flex flex-col -pt-6 sm:-pt-8">
+<div class="max-w-full! flex flex-col -m-6 sm:-m-8">
     <x-navbar-profile :username="$currentUsername" />
 
-    <div class="flex-1">
-        <div class="max-w-6xl mx-auto mt-6 space-y-6">
+    <div class="flex-1 p-6 sm:p-8">
+        <div class="max-w-6xl mx-autospace-y-6">
             <x-livewire-form :abort_route="null" wire:submit="save">
                 <div class="sm:mt-5 grid lg:grid-cols-2 gap-6">
                     <flux:field>
