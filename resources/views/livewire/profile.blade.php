@@ -1,7 +1,7 @@
 <div>
     <x-navbar-profile :username="$currentUsername" />
 
-    <div class="mt-12 space-y-8">
+    <div class="mt-6 space-y-8">
         <x-livewire-form :abort_route="null" wire:submit="save">
             <div class="sm:mt-5 grid lg:grid-cols-2 gap-6">
                 <flux:field>
