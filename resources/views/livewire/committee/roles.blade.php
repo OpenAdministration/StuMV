@@ -1,7 +1,7 @@
 <div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
-        <div>
-            <flux:heading size="xl" class="mb-4">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
+        <div class="flex-1 space-y-4">
+            <flux:heading size="xl">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
         <div>
