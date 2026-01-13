@@ -1,7 +1,7 @@
 <div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-m-8!">
     <x-navbar-profile :username="$currentUsername" />
 
-    <div class="flex-1 p-6 sm:p-8">
+    <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto space-y-6">
             <x-livewire-form :abort_route="null" wire:submit="save">
                 <div class="grid lg:grid-cols-2 gap-6">
