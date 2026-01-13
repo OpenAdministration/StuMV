@@ -1,7 +1,7 @@
 <div>
     <x-navbar-profile :username="$currentUsername" />
     
-    <div class="mt-12 space-y-8">
+    <div class="mt-6 space-y-6">
         <div class="grid md:grid-cols-2 gap-6">
             <div class="flex items-center">
                 <flux:switch wire:model.change="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />

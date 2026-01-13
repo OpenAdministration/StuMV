@@ -1,7 +1,7 @@
 <div>
     <x-navbar-profile :username="$currentUsername" />
 
-    <div class="mt-12 space-y-8">
+    <div class="mt-6 space-y-6">
         <div x-data="cropper">
             <div>
                 @if($jpegPhoto)
