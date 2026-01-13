@@ -1,4 +1,4 @@
-<div class="max-w-full flex flex-col">
+<div class="max-w-full! flex flex-col -pt-6 sm:-pt-8">
     <x-navbar-profile :username="$currentUsername" />
 
     <div class="flex-1">
