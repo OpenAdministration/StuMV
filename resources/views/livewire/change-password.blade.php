@@ -1,8 +1,8 @@
 <div>
     <x-navbar-profile :username="$currentUsername" />
 
-    <x-livewire-form>
-        <div class="mt-12 space-y-8">
+    <div class="mt-6 space-y-8">
+        <x-livewire-form>
             <flux:field>
                 <flux:label>{{ __('Password') }}</flux:label>
                 <flux:description>{{ __('user.help.password') }}</flux:description>
@@ -15,6 +15,6 @@
             </flux:field>
 
             <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
-        </div>
-    </x-livewire-form>
+        </x-livewire-form>
+    </div>
 </div>
