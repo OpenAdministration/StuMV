@@ -8,7 +8,7 @@
             wire:navigate
             href="{{ route('profile', auth()->user()->username) }}"
             aria-label="{{ __('realms.dashboard.profile_heading', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.circle-user class="size-5" />
@@ -22,7 +22,7 @@
             wire:navigate
             href="{{ route('committees.list', $uid) }}"
             aria-label="{{ __('realms.dashboard.committee_headline', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.network class="size-5" />
@@ -36,7 +36,7 @@
             wire:navigate
             href="{{ route('realms.members', $uid) }}"
             aria-label="{{ __('realms.dashboard.members_heading', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.users class="size-5" />
@@ -50,7 +50,7 @@
             wire:navigate
             href="{{ route('realms.mods', $uid) }}"
             aria-label="{{ __('realms.dashboard.mods_headline', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.user-star class="size-5" />
@@ -64,7 +64,7 @@
             wire:navigate
             href="{{ route('realms.admins', $uid) }}"
             aria-label="{{ __('realms.dashboard.admin_headline', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.shield-user class="size-5" />
@@ -79,7 +79,7 @@
             href="{{ route('realms.edit', $uid) }}"
             aria-label="{{ __('realms.dashboard.realms_edit_headline', ['name' => $name]) }}"
             disabled="{{ auth()->user()->cannot('edit', $community) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.landmark class="size-5" />
@@ -94,7 +94,7 @@
             href="{{ route('realms.groups', $uid) }}"
             aria-label="{{ __('realms.dashboard.groups_headline', ['name' => $name]) }}"
             disabled="{{ auth()->user()->cannot('viewAny', [\App\Ldap\Group::class, $community]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.key-round class="size-5" />
@@ -109,7 +109,7 @@
             href="{{ route('realms.domains', $uid) }}"
             aria-label="{{ __('realms.dashboard.domains_headline', ['name' => $name]) }}"
             disabled="{{ auth()->user()->cannot('viewAny', [\App\Ldap\Domain::class, $community]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content)"
+            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
             <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
                 <flux:icon.globe class="size-5" />
