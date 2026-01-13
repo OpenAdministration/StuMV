@@ -31,13 +31,17 @@
         @forelse($realm_members as $realm_member)
             <flux:table.row>
                 <flux:table.cell>
-                    <flux:link
-                        wire:navigate
-                        :disabled="auth()->user()->cannot('admin', [$community])"
-                        href="{{ route('profile', ['username' => $realm_member->username]) }}"
-                    >
+                    @can('admin', $community)
+                        <flux:link
+                            wire:navigate
+                            :disabled="auth()->user()->cannot('admin', [$community])"
+                            href="{{ route('profile', ['username' => $realm_member->username]) }}"
+                        >
+                            {{ $realm_member->full_name }}
+                        </flux:link>
+                    @else
                         {{ $realm_member->full_name }}
-                    </flux:link>
+                    @endcan
                 </flux:table.cell>
                 <flux:table.cell>{{ $realm_member->username }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
