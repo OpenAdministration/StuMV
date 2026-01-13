@@ -29,13 +29,9 @@
 }
 
 body {
-    @apply h-full overflow-hidden bg-zinc-50 dark:bg-zinc-900;
+    @apply h-full bg-zinc-50 dark:bg-zinc-900;
     word-wrap: break-word;
     hyphens: auto;
-}
-
-main {
-    @apply h-full overflow-y-auto;
 }
 
 main > div {
@@ -54,7 +50,7 @@ table th {
 }
 
 ui-label {
-    @apply text-base! font-semibold! mb-2! text-zinc-600 dark:text-zinc-300;
+    @apply font-semibold! mb-2! text-zinc-600 dark:text-zinc-300;
 }
 
 ui-toast-group {
