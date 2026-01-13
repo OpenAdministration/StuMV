@@ -1,20 +1,22 @@
-<div>
+<div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_3rem)]! sm:w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-m-8!">
     <x-navbar-profile :username="$currentUsername" />
 
-    <div class="mt-6">
-        <x-livewire-form class="space-y-6">
-            <flux:field>
-                <flux:label>{{ __('Password') }}</flux:label>
-                <flux:description>{{ __('user.help.password') }}</flux:description>
-                <flux:input type="password" wire:model="password" />
-            </flux:field>
+    <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <x-livewire-form class="space-y-6">
+                <flux:field>
+                    <flux:label>{{ __('Password') }}</flux:label>
+                    <flux:description>{{ __('user.help.password') }}</flux:description>
+                    <flux:input type="password" wire:model="password" />
+                </flux:field>
 
-            <flux:field>
-                <flux:label>{{ __('Password confirm') }}</flux:label>
-                <flux:input type="password" wire:model="password_confirmation" />
-            </flux:field>
+                <flux:field>
+                    <flux:label>{{ __('Password confirm') }}</flux:label>
+                    <flux:input type="password" wire:model="password_confirmation" />
+                </flux:field>
 
-            <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
-        </x-livewire-form>
+                <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
+            </x-livewire-form>
+        </div>
     </div>
 </div>

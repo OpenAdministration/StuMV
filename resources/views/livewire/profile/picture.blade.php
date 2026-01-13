@@ -1,37 +1,39 @@
-<div>
+<div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_3rem)]! sm:w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-m-8!">
     <x-navbar-profile :username="$currentUsername" />
 
-    <div class="mt-6 space-y-6">
-        <div x-data="cropper">
-            <div>
-                @if($jpegPhoto)
-                    <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="data:image/jpeg;base64,{{ $jpegPhoto }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
-                @else
-                    <input
-                        id="imageInput"
-                        type="file"
-                        accept="image/*"
-                        class="w-full h-[15rem] px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
-                        :value="imageCropped"
-                        x-show="!imageIsSelected"
-                        x-on:change="loadImage"
-                    >
-                    <img id="image" class="h-[15rem]" x-show="imageIsSelected">
-                @endif
-            </div>
-            <div class="mt-6 flex items-center justify-end gap-x-6">
-                @if($jpegPhoto)
-                    <flux:button variant="danger" wire:click="deletePicture">
-                        {{ __('Entfernen') }}
-                    </flux:button>
-                @else
-                    <flux:button @click="cancelPicture">
-                        {{ __('Abbrechen') }}
-                    </flux:button>
-                    <flux:button variant="primary" @click="cropPicture">
-                        {{ __('Speichern') }}
-                    </flux:button>
-                @endif
+    <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
+        <div class="max-w-6xl mx-auto space-y-6">
+            <div x-data="cropper">
+                <div>
+                    @if($jpegPhoto)
+                        <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="data:image/jpeg;base64,{{ $jpegPhoto }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
+                    @else
+                        <input
+                            id="imageInput"
+                            type="file"
+                            accept="image/*"
+                            class="w-full h-[15rem] px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
+                            :value="imageCropped"
+                            x-show="!imageIsSelected"
+                            x-on:change="loadImage"
+                        >
+                        <img id="image" class="h-[15rem]" x-show="imageIsSelected">
+                    @endif
+                </div>
+                <div class="mt-6 flex items-center justify-end gap-x-6">
+                    @if($jpegPhoto)
+                        <flux:button variant="danger" wire:click="deletePicture">
+                            {{ __('Entfernen') }}
+                        </flux:button>
+                    @else
+                        <flux:button @click="cancelPicture">
+                            {{ __('Abbrechen') }}
+                        </flux:button>
+                        <flux:button variant="primary" @click="cropPicture">
+                            {{ __('Speichern') }}
+                        </flux:button>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
