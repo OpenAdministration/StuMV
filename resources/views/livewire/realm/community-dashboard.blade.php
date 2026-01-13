@@ -1,9 +1,9 @@
 <div>
-    <div class="mb-8">
-        <flux:heading size="xl" class="mb-4">{{ __('realms.dashboard.headline', ['name' => $name]) }}</flux:heading>
+    <div class="mb-8 space-y-4">
+        <flux:heading size="xl">{{ __('realms.dashboard.headline', ['name' => $name]) }}</flux:heading>
         <flux:text class="text-base">{{ __('realms.dashboard.explanation', ['name' => $name]) }}</flux:text>
     </div>
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid md:grid-cols-2 2xl:grid-cols-3 gap-6">
         <a
             wire:navigate
             href="{{ route('profile', auth()->user()->username) }}"
