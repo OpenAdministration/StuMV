@@ -1,6 +1,6 @@
 <div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
-        <div class="space-y-4">
+        <div class="flex-1 space-y-4">
             <flux:heading size="xl" class="flex gap-4">
                 {{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}
                 <flux:button
