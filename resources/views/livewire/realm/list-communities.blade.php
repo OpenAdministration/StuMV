@@ -38,7 +38,14 @@
         @php /** @var \App\Ldap\Community $realm */ @endphp
         @forelse($realms as $realm)
             <flux:table.row>
-                <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
+                <flux:table.cell>
+                    <flux:link
+                        :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
+                        wire:click="enter('{{ $realm->getShortCode() }}')"
+                    >
+                        {{ $realm->getShortCode() }}
+                    </flux:link>
+                </flux:table.cell>
                 <flux:table.cell>{{ $realm->getLongName() }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
                     <flux:button
@@ -57,6 +64,7 @@
                                 icon="pencil"
                                 :disabled="Auth::user()->cannot('edit', $realm)"
                                 href="{{ route('realms.edit', ['uid' => $realm->getShortCode()]) }}"
+                                wire:navigate
                             >
                                 {{ __('Edit') }}
                             </flux:menu.item>
