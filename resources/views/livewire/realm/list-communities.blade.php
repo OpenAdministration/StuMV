@@ -42,6 +42,7 @@
                     <flux:link
                         :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
                         wire:click="enter('{{ $realm->getShortCode() }}')"
+                        class="cursor-pointer"
                     >
                         {{ $realm->getShortCode() }}
                     </flux:link>
