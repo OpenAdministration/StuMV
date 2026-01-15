@@ -69,7 +69,7 @@ class Picture extends Component
 
         Flux::toast(variant: 'success', text: trans('profile.pictureAdded'));
 
-        return redirect(navigate: true)->route('profile.picture', ['username' => $this->uid]);
+        return redirect()->route('profile.picture', ['username' => $this->uid]);
     }
 
     public function deletePicture()
@@ -81,6 +81,6 @@ class Picture extends Component
 
         Flux::toast(variant: 'success', text: trans('profile.pictureRemoved'));
 
-        return redirect(navigate: true)->route('profile.picture', ['username' => $this->uid]);
+        return redirect()->route('profile.picture', ['username' => $this->uid]);
     }
 }
