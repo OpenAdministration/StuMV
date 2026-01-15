@@ -11,6 +11,7 @@ return [
     'in' => 'in',
     'memberships' => 'Memberships',
     'membershipsAsPdf' => 'Memberships as PDF',
+    'personalData' => 'Personal Data',
     'picture' => 'Picture',
     'role' => 'Role',
     'showOnlyActiveMemberships' => 'Show only active memberships',

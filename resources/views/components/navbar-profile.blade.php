@@ -2,7 +2,7 @@
     <div class="mx-6 sm:mx-8">
         <div class="max-w-6xl mx-auto -mb-[1px] overflow-x-auto">
             <flux:navbar>
-                <flux:navbar.item wire:navigate href="{{ route('profile', ['username' => $username]) }}">{{ __('Profile') }}</flux:navbar.item>
+                <flux:navbar.item wire:navigate href="{{ route('profile', ['username' => $username]) }}">{{ __('profile.personalData') }}</flux:navbar.item>
                 <flux:navbar.item wire:navigate href="{{ route('profile.picture', ['username' => $username]) }}">{{ __('profile.picture') }}</flux:navbar.item>
                 <flux:navbar.item wire:navigate href="{{ route('profile.memberships', ['username' => $username]) }}">{{ __('profile.memberships') }}</flux:navbar.item>
                 <flux:navbar.item wire:navigate href="{{ route('password.change', ['username' => $username]) }}">{{ __('Change Password') }}</flux:navbar.item>
