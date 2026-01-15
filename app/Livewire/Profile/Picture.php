@@ -49,15 +49,13 @@ class Picture extends Component
         $height = imagesy($img); // initial height of the image
         $imgSize = 400; // size the image should be resized to
 
-        if ($width > $imgSize || $height > $imgSize) {
-            // Resize the image
-            $thumb = imagecreatetruecolor($imgSize, $imgSize);
-            imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
-            ob_start();
-            imagejpeg($thumb, NULL);
-            $img = ob_get_clean();
-            $imgBase64 = base64_encode($img);
-        }
+        // Resize the image
+        $thumb = imagecreatetruecolor($imgSize, $imgSize);
+        imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
+        ob_start();
+        imagejpeg($thumb, NULL);
+        $imgResized = ob_get_clean();
+        $imgBase64 = base64_encode($imgResized);
 
         // Write image URL to LDAP
         $user = User::findOrFailByUsername($this->uid);
@@ -65,7 +63,7 @@ class Picture extends Component
         $user->save();
 
         // Save image to storage
-        Storage::put('avatars/' . $this->currentUsername . '.jpg', $img);
+        Storage::put('avatars/' . $this->currentUsername . '.jpg', $imgResized);
 
         Flux::toast(variant: 'success', text: trans('profile.pictureAdded'));
 
