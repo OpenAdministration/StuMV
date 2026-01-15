@@ -28,11 +28,11 @@
                     <flux:label class="mb-0!">{{ __('Remember me') }}</flux:label>
                 </flux:field>
 
-                <flux:button variant="primary" type="submit" tabindex="3">{{ __('Log in') }}</flux:button>
+                <flux:button variant="primary" icon="log-in" type="submit" tabindex="3">{{ __('Log in') }}</flux:button>
 
                 <flux:separator />
 
-                <flux:button href="{{ route('register') }}">{{ __('Sign up and get started!') }}</flux:button>
+                <flux:button icon="user-plus" href="{{ route('register') }}">{{ __('Sign up and get started!') }}</flux:button>
             </flux:card>
         </form>
     </x-auth-card>
