@@ -3,10 +3,12 @@
 
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto space-y-6">
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('profile.noteProfilePicturesPublic') }}" />
+
             <div x-data="cropper">
                 <div>
-                    @if($jpegPhoto)
-                        <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="data:image/jpeg;base64,{{ $jpegPhoto }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
+                    @if($avatarID)
+                        <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200" src="{{ asset('storage/avatars/' . $avatarID . '.jpg') }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
                     @else
                         <input
                             id="imageInput"
@@ -21,7 +23,7 @@
                     @endif
                 </div>
                 <div class="mt-6 flex items-center justify-end gap-x-6">
-                    @if($jpegPhoto)
+                    @if($avatarID)
                         <flux:button variant="danger" wire:click="deletePicture">
                             {{ __('Entfernen') }}
                         </flux:button>

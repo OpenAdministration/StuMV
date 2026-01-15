@@ -11,6 +11,7 @@ return [
     'in' => 'in',
     'memberships' => 'Memberships',
     'membershipsAsPdf' => 'Memberships as PDF',
+    'noteProfilePicturesPublic' => 'Profile pictures are publicly accessible! By uploading a picture, you agree to its publication.',
     'personalData' => 'Personal Data',
     'picture' => 'Picture',
     'pictureAdded' => 'The picture has been added successfully.',
