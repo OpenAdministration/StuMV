@@ -65,7 +65,7 @@ class Picture extends Component
         $user->save();
 
         // Save image to storage
-        Storage::put('avatars/' . $currentUsername . '.jpg', $img);
+        Storage::put('avatars/' . $this->currentUsername . '.jpg', $img);
 
         return redirect()->route('profile.picture', ['username' => $this->uid])->with('message', __('Saved'));
     }
