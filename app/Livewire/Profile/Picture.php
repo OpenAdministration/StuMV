@@ -3,6 +3,7 @@
 namespace App\Livewire\Profile;
 
 use App\Ldap\User;
+use Flux\Flux;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -54,14 +55,17 @@ class Picture extends Component
             imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
             ob_start();
             imagejpeg($thumb, NULL);
-            $imgResized = ob_get_clean();
-            $imgBase64 = base64_encode($imgResized);
+            $img = ob_get_clean();
+            $imgBase64 = base64_encode($img);
         }
 
         // Write image URL to LDAP
         $user = User::findOrFailByUsername($this->uid);
-        $user->setAttribute('jpegPhoto', $imgBase64);
+        $user->setAttribute('jpegPhoto', 'data:image/jpeg;base64,' . $imgBase64);
         $user->save();
+
+        // Save image to storage
+        Storage::put('avatars/' . $currentUsername . '.jpg', $img);
 
         return redirect()->route('profile.picture', ['username' => $this->uid])->with('message', __('Saved'));
     }
