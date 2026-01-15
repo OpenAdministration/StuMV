@@ -67,7 +67,9 @@ class Picture extends Component
         // Save image to storage
         Storage::put('avatars/' . $this->currentUsername . '.jpg', $img);
 
-        return redirect()->route('profile.picture', ['username' => $this->uid])->with('message', __('Saved'));
+        Flux::toast(variant: 'success', text: trans('profile.pictureAdded'));
+
+        return redirect(navigate: true)->route('profile.picture', ['username' => $this->uid]);
     }
 
     public function deletePicture()
@@ -77,6 +79,8 @@ class Picture extends Component
         $user->removeAttribute('jpegPhoto');
         $user->save();
 
-        return redirect()->route('profile.picture', ['username' => $this->uid])->with('message', __('ImageRemoved'));
+        Flux::toast(variant: 'success', text: trans('profile.pictureRemoved'));
+
+        return redirect(navigate: true)->route('profile.picture', ['username' => $this->uid]);
     }
 }

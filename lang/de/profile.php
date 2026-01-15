@@ -13,6 +13,8 @@ return [
     'membershipsAsPdf' => 'Mitgliedschaften als PDF',
     'personalData' => 'Stammdaten',
     'picture' => 'Bild',
+    'pictureAdded' => 'Das Bild wurde hinzugefügt.',
+    'pictureRemoved' => 'Das Bild wurde entfernt.',
     'role' => 'Rolle',
     'showOnlyActiveMemberships' => 'Zeige nur aktive Mitgliedschaften',
     'today' => 'heute',

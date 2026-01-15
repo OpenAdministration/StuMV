@@ -13,6 +13,8 @@ return [
     'membershipsAsPdf' => 'Memberships as PDF',
     'personalData' => 'Personal Data',
     'picture' => 'Picture',
+    'pictureAdded' => 'The picture has been added successfully.',
+    'pictureRemoved' => 'The picture has been removed successfully.',
     'role' => 'Role',
     'showOnlyActiveMemberships' => 'Show only active memberships',
     'today' => 'today',
