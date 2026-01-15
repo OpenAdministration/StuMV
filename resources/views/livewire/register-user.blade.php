@@ -2,7 +2,7 @@
     <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 sm:max-w-[25rem]! md:max-w-2xl! lg:max-w-4xl! mx-auto border-0 sm:border-1 sm:shadow-xs">
         <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
         <x-livewire-form>
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="flex flex-col gap-6">
                 <flux:field>
                     <flux:label>{{ __('Email') }}</flux:label>
                     <flux:input wire:model.blur="email" type="email" autofocus />
