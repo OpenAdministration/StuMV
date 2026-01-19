@@ -7,7 +7,7 @@
         </flux:callout.heading>
 
         <flux:callout.text>
-            <ul class="list-disc list-inside">
+            <ul class="list-disc ml-6">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
