@@ -1,7 +1,9 @@
 <x-guest-layout>
     <x-auth-card>
         <!-- Session Status -->
-        <x-auth-session-status class="mb-4" :status="session('status')" />
+        <div class="max-w-[28rem]! mb-6">
+            <x-auth-session-status :status="session('status')" />
+        </div>
 
         <form method="POST" action="{{ route('login') }}" class="w-full flex">
             @csrf
