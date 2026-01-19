@@ -1,8 +1,7 @@
 @props(['errors'])
 
 @if ($errors->any())
-    <flux:callout variant="danger" icon="circle-x" />
-    <div {{ $attributes }}>
+    <flux:callout variant="danger" icon="circle-x">
         <flux:callout.heading>
             {{ __('Whoops! Something went wrong.') }}
         </flux:callout.heading>
@@ -14,5 +13,5 @@
                 @endforeach
             </ul>
         </flux:callout.text>
-    </div>
+    </flux:callout>
 @endif
