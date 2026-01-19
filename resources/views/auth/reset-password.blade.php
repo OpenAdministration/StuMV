@@ -19,7 +19,7 @@
                 <flux:input id="password" name="password" :label="__('Password')" type="password" required autofocus/>
                 <flux:input id="password_confirmation" name="password_confirmation" :label="__('Confirm Password')" type="password" required/>
 
-                <div class="flex items-center justify-end mt-6">
+                <div class="flex items-center justify-end">
                     <flux:button variant="primary" type="submit">
                         {{ __('Reset Password') }}
                     </flux:button>
