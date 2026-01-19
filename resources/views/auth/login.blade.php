@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-auth-card>
         <!-- Session Status -->
-        <div class="max-w-[28rem]! mb-6">
+        <div class="w-full max-w-[28rem]! mb-6">
             <x-auth-session-status :status="session('status')" />
         </div>
 
