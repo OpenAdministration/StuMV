@@ -2,9 +2,9 @@
     <x-auth-card>
         <!-- Session Status -->
         @if(session('status'))
-        <div class="w-full max-w-[28rem]!">
-            <x-auth-session-status :status="session('status')" />
-        </div>
+            <div class="w-full max-w-[28rem]!">
+                <x-auth-session-status :status="session('status')" />
+            </div>
         @endif
 
         <form method="POST" action="{{ route('login') }}" class="w-full flex">

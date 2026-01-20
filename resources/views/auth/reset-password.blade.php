@@ -21,7 +21,7 @@
                 <flux:input id="password_confirmation" name="password_confirmation" :label="__('Confirm Password')" type="password" required/>
 
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit">
+                    <flux:button variant="primary" icon="rotate-ccw-key" type="submit">
                         {{ __('Reset Password') }}
                     </flux:button>
                 </div>
