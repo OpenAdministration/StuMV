@@ -15,7 +15,7 @@
                     <flux:input name="mail" :value="old('email')" required />
                 </flux:field>
 
-                <div class="flex flex-wrap gap-x-3 items-center justify-end">
+                <div class="flex flex-wrap gap-3 items-center justify-end">
                     <flux:button icon="ban" href="{{ route('login') }}">{{  __('Cancel') }}</flux:button>
                     <flux:button variant="primary" icon="send" type="submit">
                         {{ __('Send Reset Link') }}
