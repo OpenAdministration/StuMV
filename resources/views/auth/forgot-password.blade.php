@@ -16,8 +16,8 @@
                 </flux:field>
 
                 <div class="flex gap-x-3 items-center justify-end">
-                    <flux:button href="{{ route('login') }}">{{  __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">
+                    <flux:button icon="ban" href="{{ route('login') }}">{{  __('Cancel') }}</flux:button>
+                    <flux:button variant="primary" icon="send" type="submit">
                         {{ __('Send Reset Link') }}
                     </flux:button>
                 </div>
