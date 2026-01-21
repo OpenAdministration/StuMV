@@ -1,7 +1,7 @@
 <x-guest-layout>
     <x-auth-card>
         <!-- Validation Errors -->
-        @if(session('status'))
+        @if(session('errors'))
             <div class="w-full max-w-[28rem]!">
                 <x-auth-validation-errors :errors="$errors" />
             </div>
