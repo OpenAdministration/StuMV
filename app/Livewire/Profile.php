@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Ldap\User;
+use Flux\Flux;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
@@ -71,6 +72,8 @@ class Profile extends Component
         $user->setAttribute('l', $this->city);
         $user->setAttribute('telephoneNumber', $this->phone);
         $user->save();
-        return redirect()->route('profile', ['username' => $this->uid])->with('message', __('Saved'));
+
+        Flux::toast(variant: 'success', text: __('Saved'));
+        return redirect()->route('profile', ['username' => $this->uid]);
     }
 }
