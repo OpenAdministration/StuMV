@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8 pb-6 sm:pb-8">
+<div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
@@ -21,7 +21,7 @@
         <flux:input icon="search" clearable wire:model.live.debounce="search" />
     </flux:field>
 
-    <flux:table>
+    <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
             <flux:table.column>{{ __('Full Name') }}</flux:table.column>
             <flux:table.column>{{ __('Members') }}</flux:table.column>
