@@ -45,14 +45,16 @@
                 </flux:table.cell>
                 <flux:table.cell>{{ $realm_member->username }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
-                    <flux:button
-                        size="sm"
-                        variant="primary"
-                        icon="file-text"
-                        wire:click="exportPdf('{{ $realm_member->username }}')"
-                    >
-                        {{ __('profile.membershipsAsPdf') }}
-                    </flux:button>
+                    @can('moderator', $community)
+                        <flux:button
+                            size="sm"
+                            variant="primary"
+                            icon="file-text"
+                            wire:click="exportPdf('{{ $realm_member->username }}')"
+                        >
+                            {{ __('profile.membershipsAsPdf') }}
+                        </flux:button>
+                    @endcan
                     <flux:dropdown>
                         <flux:button size="sm" icon="ellipsis-vertical" />
                         <flux:menu>
