@@ -1,10 +1,14 @@
 <x-guest-layout>
     <x-auth-card>
+        <!-- Validation Errors -->
+        @if(session('status'))
+            <div class="w-full max-w-[28rem]!">
+                <x-auth-validation-errors :errors="$errors" />
+            </div>
+        @endif
+
         <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-xs">
             <flux:heading size="xl">{{ __('Reset Password') }}</flux:heading>
-
-            <!-- Validation Errors -->
-            <x-auth-validation-errors :errors="$errors" />
 
             <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-6">
                 @csrf
