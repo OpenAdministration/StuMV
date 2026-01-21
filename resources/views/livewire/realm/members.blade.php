@@ -94,7 +94,7 @@
         </div>
     @endif
 
-    <div class="block"></div>
+    <div class="block h-[1px]"></div>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
