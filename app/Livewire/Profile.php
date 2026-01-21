@@ -71,6 +71,6 @@ class Profile extends Component
         $user->setAttribute('l', $this->city);
         $user->setAttribute('telephoneNumber', $this->phone);
         $user->save();
-        return redirect()->route('profile')->with('message', __('Saved'));
+        return redirect()->route('profile', ['username' => $this->uid])->with('message', __('Saved'));
     }
 }
