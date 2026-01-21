@@ -34,8 +34,13 @@ body {
     hyphens: auto;
 }
 
+main {
+    @apply flex;
+}
+
 main > div {
-    @apply w-full;
+    @apply w-full max-w-6xl;
+    margin: 0 auto;
 }
 
 /* Flux */
@@ -88,10 +93,6 @@ ui-modal .modal-header {
 
 ui-modal button {
     @apply -mt-2 -mr-2;
-}
-
-nav a {
-    @apply text-base!;
 }
 
 ui-dropdown nav a svg {
