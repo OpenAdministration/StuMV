@@ -21,7 +21,7 @@
         <flux:input icon="search" wire:model.live.debounce="search" />
     </flux:field>
 
-    <flux:table>
+    <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
             <flux:table.column>{{ __('Short Name') }}</flux:table.column>
             <flux:table.column>{{ __('Full Name') }}</flux:table.column>
