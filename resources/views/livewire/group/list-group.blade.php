@@ -30,13 +30,21 @@
         <flux:table.rows>
         @forelse($groupSlice->items() as $group)
             <flux:table.row>
-                <flux:table.cell>{{ $group->getFirstAttribute('cn') }}</x-table.cell>
+                <flux:table.cell>
+                    <flux:link
+                        wire:navigate
+                        href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                    >
+                        {{ $group->getFirstAttribute('cn') }}
+                    </flux:link>
+                </x-table.cell>
                 <flux:table.cell>{{ $group->getFirstAttribute('description') }}</x-table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
                     <flux:button
                         size="sm"
                         variant="primary"
                         icon="users"
+                        wire:navigate
                         href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
                     >
                         {{ __('groups.manage_roles') }}
