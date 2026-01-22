@@ -1,5 +1,5 @@
 <div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_3rem)]! sm:w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-m-8!">
-    <div class="pt-6 sm:pt-8 px-6 sm:px-6 pb-3">
+    <div class="pt-6 sm:pt-8 px-6 sm:px-8 pb-3">
         <flux:heading size="xl">{{ $givenName }} {{ $sn }}</flux:heading>
     </div>
 
