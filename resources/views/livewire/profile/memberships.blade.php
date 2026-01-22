@@ -12,7 +12,7 @@
                     <flux:switch wire:model.change="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
                 </div>
                 <div class="flex justify-end">
-                    <flux:button variant="primary" wire:click="exportPdf">{{ __('profile.exportAsPdf') }}</flux:button>
+                    <flux:button variant="primary" icon="file-text" wire:click="exportPdf">{{ __('profile.exportAsPdf') }}</flux:button>
                 </div>
             </div>
             <flux:table>
