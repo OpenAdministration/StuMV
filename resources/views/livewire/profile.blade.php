@@ -1,4 +1,8 @@
 <div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_3rem)]! sm:w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-m-8!">
+    <div class="p-6 sm:p-8">
+        <flux:heading size="xl">{{ $givenName }} {{ $sn }}</flux:heading>
+    </div>
+
     <x-navbar-profile :username="$currentUsername" />
 
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
