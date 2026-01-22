@@ -14,10 +14,12 @@
         </div>
     </div>
 
+    {{--
     <flux:field>
         <flux:label>{{ __('groups.roles.search') }}</flux:label>
         <flux:input wire:model.live.debounce="search" />
     </flux:field>
+    --}}
 
     <flux:table>
         <flux:table.columns>
