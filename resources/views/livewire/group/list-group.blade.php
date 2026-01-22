@@ -16,10 +16,12 @@
         </div>
     </div>
 
+    {{--
     <flux:field>
         <flux:label>{{ __('groups.search') }}</flux:label>
         <flux:input icon="search" wire:model.live.debounce="search" />
     </flux:field>
+    --}}
 
     <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
