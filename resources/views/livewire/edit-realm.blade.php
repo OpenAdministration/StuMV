@@ -1,4 +1,4 @@
-<x-livewire-form>
+<x-livewire-form class="w-full">
     <div class="mb-6">
         <flux:heading size="xl" class="mb-4">{{ __('realms.edit_headline', ['name' => $name]) }}</flux:heading>
         <flux:text class="text-base">{{ __('realms.edit_explanation', ['name' => $name]) }}</flux:text>
