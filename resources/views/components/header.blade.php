@@ -1,7 +1,7 @@
 <flux:navbar class="flex h-[4rem] shrink-0 items-center gap-x-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-4 sm:gap-x-6 sm:px-6 lg:px-8 z-10 print:hidden">
     <flux:sidebar.toggle class="lg:hidden" icon="menu" />
     <div class="hidden md:inline">
-        {{ Breadcrumbs::render(Route::current()->getName(), $routeParams)}}
+        {{-- {{ Breadcrumbs::render(Route::current()->getName(), $routeParams)}} --}}
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
