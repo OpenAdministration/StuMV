@@ -94,7 +94,7 @@
 
             .w-date {
                 width: 1.5cm;
-                white-space: nowrap;
+                white-space: nowrap !important;
             }
         </style>
     </head>
