@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -39,13 +40,14 @@ class NewAdmin extends Component
     public function save()
     {
         $this->validate();
-        try{
+        try {
             $user = User::findOrFail($this->dn);
             $realm = Community::findOrFailByUid($this->realm_uid);
             $realm->adminsGroup()->members()->attach($user);
-            return redirect()->route('realms.admins', ['uid' => $this->realm_uid])
-                ->with('message', __('Added new Admin'));
-        } catch (LdapRecordException $exception){
+
+            Flux::toast(variant: 'success', text: __('Added new Admin'));
+            return redirect()->route('realms.admins', ['uid' => $this->realm_uid]);
+        } catch (LdapRecordException $exception) {
             $this->addError('dn', $exception->getMessage());
             return false;
         }

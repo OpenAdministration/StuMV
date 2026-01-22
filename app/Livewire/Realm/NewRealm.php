@@ -3,6 +3,7 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Rule;
@@ -26,7 +27,7 @@ class NewRealm extends Component
     public function save()
     {
         $this->validate();
-        try{
+        try {
             $realm = new Community([
                 'ou' => $this->uid,
                 'description' => $this->name,
@@ -34,8 +35,9 @@ class NewRealm extends Component
             $realm->setDn("ou=$this->uid,ou=Communities,{$realm->getBaseDn()}");
             $realm->generateSkeleton();
 
-            return redirect()->route('realms.pick')->with('message', 'Neuer Realm angelegt');
-        } catch (LdapRecordException $exception){
+            Flux::toast(variant: 'success', text: 'Neuer Realm angelegt');
+            return redirect()->route('realms.pick');
+        } catch (LdapRecordException $exception) {
             $this->addError('uid', $exception->getMessage());
             return false;
         }

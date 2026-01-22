@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Title;
@@ -42,17 +43,16 @@ class NewModerator extends Component
     public function save()
     {
         $this->validate();
-        try{
+        try {
             $user = User::findOrFail($this->dn);
             $realm = Community::findOrFailByUid($this->realm_uid);
             $realm->moderatorsGroup()->members()->attach($user);
-            return redirect()->route('realms.mods', ['uid' => $this->realm_uid])
-                ->with('message', __('Added new Moderator'));
-        } catch (LdapRecordException $exception){
+
+            Flux::toast(variant: 'success', text: __('Added new Moderator'));
+            return redirect()->route('realms.mods', ['uid' => $this->realm_uid]);
+        } catch (LdapRecordException $exception) {
             $this->addError('dn', $exception->getMessage());
             return false;
         }
     }
-
-
 }

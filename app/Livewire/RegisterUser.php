@@ -94,12 +94,8 @@ class RegisterUser extends Component
             ;
     }
 
-    public function mount() : void
+    public function save()
     {
-    }
-
-    public function save(){
-
         $this->validateDomain();
         $this->validate();
         $domain = Domain::findByOrFail('dc', $this->domain);
@@ -121,7 +117,7 @@ class RegisterUser extends Component
             Auth::attempt([$this->username, $this->password]);
             return redirect()->route('verification.notice')->with('message', __('Successfully Registered'));
 
-        }  catch (LdapRecordException $ldapRecordException){
+        } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
         }
     }

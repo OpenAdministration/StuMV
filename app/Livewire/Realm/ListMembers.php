@@ -33,11 +33,12 @@ class ListMembers extends Component {
         $this->community_name = $uid->getFirstAttribute('ou');
     }
 
-    public function sortBy($field){
-        if($this->sortField === $field){
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -48,7 +49,8 @@ class ListMembers extends Component {
         $this->resetPage();
     }
 
-    public function render() {
+    public function render()
+    {
         $community = Community::findOrFailByUid($this->community_name);
 
         // Get users from database

@@ -27,6 +27,7 @@ class ListDomains extends Component
     public function mount(Community $uid){
         $this->uid = $uid->getFirstAttribute('ou');
     }
+    
     public function render()
     {
         $domainSlice = Domain::fromCommunity($this->uid)
@@ -57,8 +58,4 @@ class ListDomains extends Component
         $this->showDeleteModal = false;
         unset($this->deleteDomain);
     }
-
-
-
-
 }

@@ -57,7 +57,7 @@ class ListRealms extends Component
             ->get();
 
         $ldapUser = Auth::user()->ldap();
-        if($ldapUser->isSuperAdmin()) {
+        if ($ldapUser->isSuperAdmin()) {
             $canEnter = true;
         } else {
             $memberships = $ldapUser->memberOf;
@@ -70,7 +70,7 @@ class ListRealms extends Component
                 return [$uid => true];
             });
 
-            if(count($canEnter) === 1){
+            if (count($canEnter) === 1) {
                 $this->redirectRoute('realms.dashboard', ['uid' => \Arr::first(array_keys($canEnter))], navigate: true);
             }
         }
@@ -108,7 +108,8 @@ class ListRealms extends Component
      * @param $realm_uid string the selected realm_uid
      * @return void
      */
-    public function enter(string $realm_uid){
+    public function enter(string $realm_uid)
+    {
         $c = Community::findOrFailByUid($realm_uid);
         $this->authorize('enter', $c);
         $this->redirectRoute('realms.dashboard', ['uid' => $realm_uid]);

@@ -3,6 +3,7 @@
 namespace App\Livewire\Group;
 
 use App\Ldap\Community;
+use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Rule;
@@ -31,7 +32,7 @@ class NewGroup extends Component
     public function save()
     {
         $this->validate();
-        try{
+        try {
             $group = new Group([
                 'cn' => $this->cn,
                 'description' => $this->name,
@@ -39,9 +40,10 @@ class NewGroup extends Component
             ]);
             $group->setDn("cn=$this->cn,ou=Groups,ou=$this->realm_uid,ou=Communities,{$group->getBaseDn()}");
             $group->save();
-            return redirect()->route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn])
-                ->with('message', __('Added new Group'));
-        } catch (LdapRecordException $exception){
+
+            Flux::toast(variant: 'success', text: __('Added new Group'));
+            return redirect()->route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn]);
+        } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
             return false;
         }

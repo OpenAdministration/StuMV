@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Query\Builder;
 use Livewire\Attributes\Rule;
@@ -49,7 +50,8 @@ class NewMember extends Component
                 return false;
             }
         }
-        return redirect()->route('realms.members', ['uid' => $this->realm_uid])
-                    ->with('message', __('Added new Member'));
+
+        Flux::toast(variant: 'success', text: __('Added new Member'));
+        return redirect()->route('realms.members', ['uid' => $this->realm_uid]);
     }
 }

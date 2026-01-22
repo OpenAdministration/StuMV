@@ -19,10 +19,13 @@ class NewDomain extends Component
     #[Validate(as: 'Domain')]
     public string $dc;
 
-    public function mount(Community $uid){
+    public function mount(Community $uid)
+    {
         $this->uid = $uid->getFirstAttribute('ou');
     }
-    public function rules(){
+
+    public function rules()
+    {
         return [
             'dc' => [
                 new DomainValidator(),
@@ -31,12 +34,14 @@ class NewDomain extends Component
 
         ];
     }
+    
     public function render()
     {
         return view('livewire.realm.new-domain')->title(__('realms.new_domain_title', ['realm' => $this->uid]));
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
 
         $d = Domain::make([
