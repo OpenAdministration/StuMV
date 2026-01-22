@@ -29,6 +29,7 @@
         <flux:switch wire:model.change="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
     </div>
 
+    {{--
     <flux:field>
         <flux:label>{{ __('roles.members.search') }}</flux:label>
         <flux:input
@@ -37,6 +38,7 @@
             wire:model.live.debounce="search"
         />
     </flux:field>
+    --}}
 
     <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
