@@ -155,4 +155,6 @@ return [
 
     'render_on_redirect' => false,
 
+    /* Use CSP build of Alpine */
+    'csp_safe' => true,
 ];
