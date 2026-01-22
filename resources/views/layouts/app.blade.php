@@ -29,7 +29,10 @@
         @fluxScripts
 
         @persist('toast')
-            <flux:toast position="top right" />
+            <flux:toast.group position="top end">
+                <flux:toast />
+            </flux:toast.group>
         @endpersist
+
     </body>
 </html>
