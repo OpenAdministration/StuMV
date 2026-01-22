@@ -42,8 +42,14 @@ class ChangePassword extends Component
     }
     public function render()
     {
-        return view('livewire.change-password')
-            ->title(__('Change Password'));
+        $user = User::findOrFailByUsername($this->currentUsername);
+        $givenName = $user->getFirstAttribute('givenName');
+        $sn = $user->getFirstAttribute('sn');
+
+        return view('livewire.change-password', [
+            'givenName' => $givenName,
+            'sn' => $sn,
+        ])->title(__('Change Password'));
     }
 
     public function save(){

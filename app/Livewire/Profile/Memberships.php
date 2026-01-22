@@ -51,9 +51,14 @@ class Memberships extends Component
     public function render()
     {
         $memberships = $this->getMemberships($this->currentUsername, $this->showOnlyActive);
+        $user = User::findOrFailByUsername($this->currentUsername);
+        $givenName = $user->getFirstAttribute('givenName');
+        $sn = $user->getFirstAttribute('sn');
 
         return view('livewire.profile.memberships', [
             'memberships' => $memberships,
+            'givenName' => $givenName,
+            'sn' => $sn,
         ])->title(__('Profile'));
     }
 
