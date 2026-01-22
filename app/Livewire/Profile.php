@@ -74,6 +74,6 @@ class Profile extends Component
         $user->save();
 
         Flux::toast(variant: 'success', text: __('Saved'));
-        return redirect()->route('profile', ['username' => $this->uid]);
+        $this->redirect('/profile/' . $this->uid, navigate: true);
     }
 }
