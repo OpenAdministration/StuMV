@@ -25,4 +25,4 @@ Header always set X-Content-Type-Options "nosniff"
 Header set X-XSS-Protection "1; mode=block"
 Header set X-Frame-Options "DENY"
 
-Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'nonce-[random]' 'strict-dynamic'; style-src 'self' 'unsafe-inline';"
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
