@@ -42,9 +42,9 @@
                     </flux:table.row>
                 @empty
                     <flux:table.row>
-                        <flux:table.cell colspan="4">
-                            <div class="flex justify-center item-center">
-                                <span class="text-gray-400 text-xl py-2 font-medium">{{ __('groups.no_roles_found') }}</span>
+                        <flux:table.cell colspan="6">
+                            <div class="flex item-center py-2">
+                                <flux:separator text="{{ __('groups.no_roles_found') }}" />
                             </div>
                         </flux:table.cell>
                     </flux:table.row>
