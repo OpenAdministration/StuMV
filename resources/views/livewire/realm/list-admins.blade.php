@@ -43,7 +43,7 @@
                     <flux:link
                         wire:navigate
                         :disabled="auth()->user()->cannot('admin', [$community])"
-                        href="{{ route('profile', ['username' => $realm_member->uid[0]]) }}"
+                        href="{{ route('profile', ['username' => $realm_admin->uid[0]]) }}"
                     >
                         {{ $realm_admin->cn[0] }}
                     </flux:link>
