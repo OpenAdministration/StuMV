@@ -31,7 +31,15 @@
         <flux:table.rows>
         @forelse($realm_members as $realm_member)
             <flux:table.row>
-                <flux:table.cell>{{ $realm_member->cn[0] }}</flux:table.cell>
+                <flux:table.cell>
+                    <flux:link
+                        wire:navigate
+                        :disabled="auth()->user()->cannot('admin', [$community])"
+                        href="{{ route('profile', ['username' => $realm_member->uid[0]]) }}"
+                    >
+                        {{ $realm_member->cn[0] }}
+                    </flux:link>
+                </flux:table.cell>
                 <flux:table.cell>{{ $realm_member->uid[0] }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
                     <flux:dropdown>
