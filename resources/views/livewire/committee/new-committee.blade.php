@@ -1,4 +1,4 @@
-<x-livewire-form>
+<x-livewire-form class="w-full">
     <flux:heading size="xl" class="mb-6">{{ __('New Committee') }}</flux:heading>
     <flux:field class="mb-6">
         <flux:label>{{ __('Parent Committee') }}</flux:label>
