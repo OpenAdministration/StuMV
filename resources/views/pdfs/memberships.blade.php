@@ -56,6 +56,8 @@
             .table td {
                 border-top: 1px solid #ddd;
                 padding: .5rem .75rem;
+                hyphens: auto;
+                word-break: break-word;
             }
 
             .table tr th:first-of-type,
