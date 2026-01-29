@@ -43,8 +43,8 @@ class LdapSyncRoles extends Command
         }else{
             $date = Carbon::createFromFormat('Y-m-d', $this->option('date'));
         }
-        $realms = Community::query()
-            ->list() // only first level
+        $query = Community::query();
+        $realms = $query->list() // only first level
             ->setDn(Community::$rootDn)
             ->search('ou', $this->argument('community'))
             ->get();
@@ -68,7 +68,7 @@ class LdapSyncRoles extends Command
                         ->get();
                     $this->comment("  |-> " . $role->getDn());
                     // delete all members so far
-                    $role->deleteAttributes($role->getDn(), ['uniqueMember' => []]);
+                    $query->deleteAttributes($role->getDn(), ['uniqueMember' => []]);
                     $ldapMembers = $role->members();
                     foreach ($activeMemberships as $membership){
                         /** @var RoleMembership $membership */
@@ -91,7 +91,7 @@ class LdapSyncRoles extends Command
                 $this->comment("> " . $group->getDn());
 
                 // delete all members so far
-                $group->deleteAttributes($group->getDn(), ['uniqueMember' => []]);
+                $query->deleteAttributes($group->getDn(), ['uniqueMember' => []]);
 
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
                 
