@@ -43,11 +43,14 @@ class LdapSyncRoles extends Command
         }else{
             $date = Carbon::createFromFormat('Y-m-d', $this->option('date'));
         }
-        $query = Community::query();
-        $realms = $query->list() // only first level
+        
+        $realms = Community::query()
+            ->list() // only first level
             ->setDn(Community::$rootDn)
             ->search('ou', $this->argument('community'))
             ->get();
+
+        $query = $realms->query();
 
         $this->comment("Committees:");
 
