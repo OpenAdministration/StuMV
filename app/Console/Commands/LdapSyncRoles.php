@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
 use Illuminate\Support\Facades\DB;
+use LdapRecord\Container;
 
 class LdapSyncRoles extends Command
 {
@@ -43,14 +44,14 @@ class LdapSyncRoles extends Command
         }else{
             $date = Carbon::createFromFormat('Y-m-d', $this->option('date'));
         }
+
+        $query = Container::getConnection('default')->query();
         
         $realms = Community::query()
             ->list() // only first level
             ->setDn(Community::$rootDn)
             ->search('ou', $this->argument('community'))
             ->get();
-
-        $query = $realms->query();
 
         $this->comment("Committees:");
 
