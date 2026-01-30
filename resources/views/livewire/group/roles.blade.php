@@ -1,12 +1,14 @@
 <div class="flex-col space-y-8">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex-1">
             <flux:heading size="xl" class="mb-4">{{ __('groups.roles_headline', ['name' => $group_cn]) }}</flux:heading>
             <flux:text class="text-base">{{  __('groups.roles_explanation', ['name' => $group_cn]) }}</flux:text>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <div>
             <flux:button
                 variant="primary"
+                icon="plus"
+                wire:navigate
                 :href="route('realms.groups.roles.add', ['uid' => $realm_uid, 'cn' => $group_cn])"
             >
                 {{ __('Add Role') }}
