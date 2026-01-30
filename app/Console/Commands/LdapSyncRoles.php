@@ -98,15 +98,22 @@ class LdapSyncRoles extends Command
         $this->comment("\nGroups:");
 
         foreach ($realms as $realm) {
-            $groups = Group::query()->in(Group::dnRoot($realm->getDn()));
+            $groups = Group::query()->in(Group::dnRoot($realm->getFirstAttribute('ou')));
             foreach ($groups as $group) {
                 $this->comment("> " . $group->getDn());
 
                 // delete all members so far
-                $query->remove($group->getDn(), ['uniqueMember' => ['']]);
+                $currentMembers = $group->getAttribute('uniqueMember');
+                if (!in_array('', $currentMembers)) {
+                    $query->add($group->getDn(), ['uniqueMember' => '']);
+                }
+                for ($i = 0; $i < count($currentMembers); $i++) {
+                    if ($currentMembers[$i] !== '') {
+                        $query->remove($group->getDn(), ['uniqueMember' => [ $currentMembers[$i] ]]);
+                    }
+                }
 
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
-                
                 foreach ($roles as $role) {
                     $roleCn = str_replace('cn=', '', substr($role->role_dn, 0, strpos($role->role_dn, ',')));
                     $committeeDn = strstr($role->role_dn, "ou=");
