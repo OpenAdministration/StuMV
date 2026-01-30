@@ -46,13 +46,13 @@ class ListGroups extends Component
     public function mount(Community $uid){
         $this->realm_uid = $uid->getShortCode();
     }
+
     public function render()
     {
         $groups = Group::query()->in(Group::dnRoot($this->realm_uid))
-            ->search('cn', $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->slice(1, 10)
-        ;
+            ->orderBy('cn')
+            ->slice($page = 1, $perPage = 10);
+
         return view('livewire.group.list-group', [
             'groupSlice' => $groups,
         ])->title(__('groups.list_title' ));
