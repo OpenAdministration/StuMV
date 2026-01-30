@@ -1,8 +1,10 @@
-@can('moderator')
-    <flux:button
-        variant="ghost"
-        icon="folder-sync"
-        wire:click="sync"
-        title="__('sync.ldap_title')"
-    />
-@endcan
+<div>
+    @can('superadmin')
+        <flux:button
+            variant="ghost"
+            icon="folder-sync"
+            wire:click="sync"
+            title="__('sync.ldap_title')"
+        />
+    @endcan
+</div>
