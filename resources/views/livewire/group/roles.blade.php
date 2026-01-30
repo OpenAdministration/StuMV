@@ -21,7 +21,7 @@
     </flux:field>
     --}}
 
-    <flux:table>
+    <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
             <flux:table.column>{{ __('groups.committee_name') }}</flux:table.column>
             <flux:table.column>{{ __('groups.role_name') }}</flux:table.column>
