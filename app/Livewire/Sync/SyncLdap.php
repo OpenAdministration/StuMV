@@ -10,9 +10,9 @@ class SyncLdap extends Component
 {
     public string $uid;
 
-    public function mount(?Community $uid)
+    public function mount($uid)
     {
-        $this->uid = $uid?->getShortCode();
+        $this->uid = $uid;
     }
 
     public function render()
