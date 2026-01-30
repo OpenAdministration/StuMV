@@ -5,6 +5,7 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Rules\UniqueCommittee;
+use Flux\Flux;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -25,7 +26,8 @@ class EditCommittee extends Component
     #[Validate('required|min:3')]
     public string $description = "";
 
-    public function mount(Community $uid, string $ou){
+    public function mount(Community $uid, string $ou)
+    {
         $this->realm_uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
         $c = Committee::findByName($this->realm_uid, $ou);
@@ -48,15 +50,15 @@ class EditCommittee extends Component
         ])->title(__('committees.edit_title', ['committee' => $this->ou]));
     }
 
-    public function save(){
-
+    public function save()
+    {
         $this->validate();
 
         $c = Committee::findByName($this->realm_uid, $this->ou);
         $c->setAttribute('description', $this->description);
         $c->save();
-        return response()
-            ->redirectToRoute('committees.list', ['uid' => $this->realm_uid])
-            ->with('message', __('Saved'));
+
+        Flux::toast(variant: 'success', text: __('Saved'));
+        return response()->redirectToRoute('committees.list', ['uid' => $this->realm_uid]);
     }
 }

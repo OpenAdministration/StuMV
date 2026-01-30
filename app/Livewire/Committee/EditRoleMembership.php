@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use Carbon\Carbon;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -70,12 +71,14 @@ class EditRoleMembership extends Component
             'decided' => !empty($this->decision_date) ? $this->decision_date : null,
             'comment' => !empty($this->comment) ? $this->comment : null,
         ]);
+
+        Flux::toast(variant: 'success', text: __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
         return redirect()->route('committees.roles.members', [
             'uid' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
             'id' => $this->id,
-        ])->with('message', __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
+        ]);
     }
 
 }

@@ -52,6 +52,4 @@ class NewDomain extends Component
         $d->save();
         $this->redirectRoute('realms.domains', ['uid' => $this->uid]);
     }
-
-
 }

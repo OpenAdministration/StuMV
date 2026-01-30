@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use Carbon\Carbon;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -50,11 +51,13 @@ class EditRole extends Component
         $role->save([
            'description' => $this->description
         ]);
+
+        Flux::toast(variant: 'success', text: __('roles.edit_success', ['role' => $this->cn]));
         return redirect()->route('committees.roles', [
             'uid' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
-        ])->with('message', __('roles.edit_success', ['role' => $this->cn]));
+        ]);
     }
 
 }

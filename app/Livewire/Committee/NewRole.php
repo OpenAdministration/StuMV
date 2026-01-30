@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueRole;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -52,7 +53,7 @@ class NewRole extends Component
         $r->inside($c);
         $r->save();
 
-        return redirect()->route('committees.roles', ['ou' => $this->ou, 'uid' => $this->uid])
-            ->with('message', __('New Role created'));
+        Flux::toast(variant: 'success', text: __('New Role created'));
+        return redirect()->route('committees.roles', ['ou' => $this->ou, 'uid' => $this->uid]);
     }
 }
