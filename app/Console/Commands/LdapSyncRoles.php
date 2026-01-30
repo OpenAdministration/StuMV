@@ -72,8 +72,10 @@ class LdapSyncRoles extends Command
                         ->where('role_cn', $role->getFirstAttribute('cn'))
                         ->get();
                     $this->comment("  |-> " . $role->getDn());
+
                     // delete all members so far
-                    $query->remove($role->getDn(), ['uniqueMember' => ['']]);
+                    $query->replace($role->getDn(), ['uniqueMember' => []]);
+                    
                     $ldapMembers = $role->members();
                     foreach ($activeMemberships as $membership){
                         /** @var RoleMembership $membership */
@@ -96,7 +98,7 @@ class LdapSyncRoles extends Command
                 $this->comment("> " . $group->getDn());
 
                 // delete all members so far
-                $query->remove($group->getDn(), ['uniqueMember' => ['']]);
+                $query->replace($group->getDn(), ['uniqueMember' => ['']]);
 
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
                 
