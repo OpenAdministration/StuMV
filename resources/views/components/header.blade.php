@@ -5,7 +5,9 @@
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
-        <livewire:sync.sync-ldap />
+        @canany(['moderator', 'admin'])
+            <livewire:sync.sync-ldap />
+        @endcanany
 
         <x-info />
         
