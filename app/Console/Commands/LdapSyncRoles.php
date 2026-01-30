@@ -75,7 +75,7 @@ class LdapSyncRoles extends Command
 
                     // delete all members so far
                     $currentMembers = $role->getAttribute('uniqueMember');
-                    $query->add($role->getDn(), ['']);
+                    $query->add($role->getDn(), ['uniqueMember' => '']);
                     for ($i = 0; $i < count($currentMembers); $i++) {
                         if ($currentMembers[$i] !== '') {
                             $query->remove($role->getDn(), ['uniqueMember' => [ $currentMembers[$i] ]]);
