@@ -39,13 +39,14 @@ class LdapSyncRoles extends Command
      */
     public function handle()
     {
-        if($this->option('date') === 'today()'){
+        if ($this->option('date') === 'today()') {
             $date = today();
-        }else{
+        } else {
             $date = Carbon::createFromFormat('Y-m-d', $this->option('date'));
         }
 
-        $query = Container::getConnection('default')->query();
+        $connection = Container::getDefaultConnection();
+        $query = $connection->query();
         
         $realms = Community::query()
             ->list() // only first level
@@ -55,16 +56,16 @@ class LdapSyncRoles extends Command
 
         $this->comment("Committees:");
 
-        foreach ($realms as $realm){
+        foreach ($realms as $realm) {
             $committees = Committee::fromCommunity($realm->getFirstAttribute('ou'))
                 ->search('ou', $this->argument('committee'))
                 ->get();
-            foreach ($committees as $committee){
+            foreach ($committees as $committee) {
                 $this->comment("> " . $committee->getDn());
                 $roles = $committee->roles()
                     ->search('cn', $this->argument('role'))
                     ->get();
-                foreach ($roles as $role){
+                foreach ($roles as $role) {
                     /** @var Role $role */
                     $activeMemberships = RoleMembership::active($date)
                         ->where('committee_dn', $committee->getDn())
@@ -72,7 +73,7 @@ class LdapSyncRoles extends Command
                         ->get();
                     $this->comment("  |-> " . $role->getDn());
                     // delete all members so far
-                    $query->deleteAttributes($role->getDn(), ['uniqueMember' => []]);
+                    $query->remove($role->getDn(), ['uniqueMember' => []]);
                     $ldapMembers = $role->members();
                     foreach ($activeMemberships as $membership){
                         /** @var RoleMembership $membership */
@@ -95,7 +96,7 @@ class LdapSyncRoles extends Command
                 $this->comment("> " . $group->getDn());
 
                 // delete all members so far
-                $query->deleteAttributes($group->getDn(), ['uniqueMember' => []]);
+                $query->remove($group->getDn(), ['uniqueMember' => []]);
 
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
                 
