@@ -5,6 +5,8 @@
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
+        <livewire:sync.sync-ldap />
+
         <x-info />
         
         <flux:dropdown align="end">
