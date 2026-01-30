@@ -4,7 +4,7 @@
             variant="ghost"
             icon="folder-sync"
             wire:click="sync"
-            title="__('sync.ldap_title')"
+            title="{{ __('sync.ldap_title') }}"
         />
     @endcan
 </div>
