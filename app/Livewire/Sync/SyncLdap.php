@@ -14,6 +14,6 @@ class SyncLdap extends Component
 
     public function sync()
     {
-        Artisan::call('ldap:sync');
+        Artisan::call('ldap:sync-roles');
     }
 }
