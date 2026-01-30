@@ -1,6 +1,5 @@
 <flux:button
-    size="sm"
-    variant="primary"
+    variant="ghost"
     icon="folder-sync"
     wire:click="sync"
 />
