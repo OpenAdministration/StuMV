@@ -10,9 +10,7 @@ class SyncLdap extends Component
 {
     public function render()
     {
-        return view('livewire.sync.sync-ldap', [
-            'community' => $community,
-        ]);
+        return view('livewire.sync.sync-ldap');
     }
 
     public function sync()
