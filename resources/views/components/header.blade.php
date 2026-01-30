@@ -5,9 +5,13 @@
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
-        @canany(['moderator', 'admin'])
+        @can('moderator', [auth()->user(), $community])
             <livewire:sync.sync-ldap />
-        @endcanany
+        @elsecan('admin', [auth()->user(), $community])
+            <livewire:sync.sync-ldap />
+        @elsecan('superadmin', auth()->user())
+            <livewire:sync.sync-ldap />
+        @endcan
 
         <x-info />
         
