@@ -8,16 +8,8 @@ use Livewire\Component;
 
 class SyncLdap extends Component
 {
-    public string $uid;
-
-    public function mount($uid)
-    {
-        $this->uid = $uid;
-    }
-
     public function render()
     {
-        $community = Community::findOrFailByUid($this->uid);
         return view('livewire.sync.sync-ldap', [
             'community' => $community,
         ]);

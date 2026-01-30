@@ -1,5 +1,5 @@
 <div>
-    @if(auth()->user()->can('moderator', [$community]) || auth()->user()->can('admin', [$community]) || auth()->user()->can('superadmin'))
+    @if(auth()->user()->can('superadmin'))
         <flux:button
             variant="ghost"
             icon="folder-sync"
