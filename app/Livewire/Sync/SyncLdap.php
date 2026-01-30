@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Sync;
 
+use App\Ldap\Community;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Component;
 
