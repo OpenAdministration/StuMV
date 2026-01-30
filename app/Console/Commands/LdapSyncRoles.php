@@ -98,7 +98,7 @@ class LdapSyncRoles extends Command
         $this->comment("\nGroups:");
 
         foreach ($realms as $realm) {
-            $groups = Group::query()->in(Group::dnRoot($realm->getFirstAttribute('ou')));
+            $groups = Group::query()->in(Group::dnRoot($realm->getFirstAttribute('ou')))->get();
             foreach ($groups as $group) {
                 $this->comment("> " . $group->getDn());
 
