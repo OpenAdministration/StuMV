@@ -18,6 +18,7 @@
                 </div>
                 <flux:navmenu.separator />
                 <flux:navmenu.item
+                    wire:navigate
                     :href="route('profile', auth()->user()->username)"
                     icon="circle-user"
                 >
