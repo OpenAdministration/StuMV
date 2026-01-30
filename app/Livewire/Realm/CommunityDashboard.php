@@ -10,9 +10,11 @@ class CommunityDashboard extends Component
 {
     public string $uid;
 
-    public function mount(?Community $uid){
+    public function mount(?Community $uid)
+    {
         $this->uid = $uid?->getShortCode();
     }
+
     public function render()
     {
         $community = Community::findOrFailByUid($this->uid);
