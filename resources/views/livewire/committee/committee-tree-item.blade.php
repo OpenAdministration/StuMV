@@ -103,7 +103,10 @@
                 <flux:text class="mt-2">{{ __('committees.delete_warning', ['name' => $committee->getFirstAttribute('description')]) }}</flux:text>
                 <flux:text class="mt-2">{{ __('committees.delete.confirm') }}<strong>{{ $committee->getFirstAttribute('ou') }}</strong></flux:text>
                 <div class="mt-2">
-                    <flux:input wire:model="deleteConfirmText" :placeholder="$deleteCommitteeOu" />
+                    <flux:input
+                        wire:model="deleteConfirmText"
+                        :placeholder="$committee->getFirstAttribute('ou')"
+                    />
                 </div>
             </div>
             <div class="flex">
