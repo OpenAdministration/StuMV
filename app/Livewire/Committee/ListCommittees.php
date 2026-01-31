@@ -22,15 +22,7 @@ class ListCommittees extends Component
     #[Url]
     public string $sortDirection = 'asc';
 
-    public bool $showDeleteModal = false;
-
     public string $realm_uid;
-
-    public string $deleteCommitteeDn;
-    public string $deleteCommitteeName;
-    public string $deleteCommitteeOu;
-
-    public string $deleteConfirmText;
 
     public function mount(Community $uid): void
     {

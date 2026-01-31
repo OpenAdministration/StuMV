@@ -14,6 +14,8 @@ class CommitteeTreeItem extends Component
     public bool $unfolded = false;
     public bool $isLastItem = false;
 
+    public string $deleteConfirmText = "";
+
     public function render()
     {
         $community = Community::findByUid($this->realm_uid);
@@ -37,6 +39,12 @@ class CommitteeTreeItem extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $c = Committee::findOrFail($dn);
+
+        if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')){
+            $this->addError('deleteConfirmText', __('Does not equal :text', $c->getFirstAttribute('ou')));
+            return;
+        }
+
         $this->authorize('delete', [$c, $community]);
         $c->delete(recursive: true);
 
