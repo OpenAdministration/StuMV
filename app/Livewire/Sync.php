@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Livewire\Sync;
+namespace App\Livewire;
 
 use App\Ldap\Community;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Component;
 
-class SyncLdap extends Component
+class Sync extends Component
 {
     public function render()
     {
         return view('livewire.sync.sync-ldap');
     }
 
-    public function sync()
+    public function syncLdap()
     {
         Artisan::call('ldap:sync-roles');
     }
