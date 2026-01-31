@@ -41,7 +41,7 @@ class CommitteeTreeItem extends Component
         $c = Committee::findOrFail($dn);
 
         if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')){
-            $this->addError('deleteConfirmText', __('Does not equal :text', [ $c->getFirstAttribute('ou') ]));
+            $this->addError('deleteConfirmText', __('Does not equal :text', [ 'text' => $c->getFirstAttribute('ou') ]));
             return;
         }
 
