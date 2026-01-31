@@ -2,7 +2,6 @@
     <flux:button
         variant="ghost"
         icon="refresh-ccw"
-        icon:trailing="chevron-down"
     />
     <flux:menu>
         <flux:menu.item
