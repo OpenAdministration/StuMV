@@ -120,7 +120,7 @@
                 <flux:button
                     variant="primary"
                     icon="trash-2"
-                    wire:click="deleteCommittee({{ $committee->getDn() }}, {{ $committee->getFirstAttribute('ou') }})"
+                    wire:click="deleteCommittee('{{ $committee->getDn() }}', '{{ $committee->getFirstAttribute('ou') }}')"
                 >
                     {{ __('Delete') }}
                 </flux:button>
