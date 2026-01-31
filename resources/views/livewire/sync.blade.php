@@ -8,7 +8,9 @@
             icon="folder-tree"
             wire:click="sync"
             title="{{ __('sync.ldap_title') }}"
-            :disabled="auth()->user()->cannot('superadmin')"
+            @cannot('superadmin', \App\Models\User::class)
+                disabled
+            @endcannot
         >
             LDAP
         </flux:menu.item>
