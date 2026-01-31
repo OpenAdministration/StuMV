@@ -1,5 +1,9 @@
 <flux:dropdown>
-    <flux:button icon="refresh-ccw" icon:trailing="chevron-down" />
+    <flux:button
+        variant="ghost"
+        icon="refresh-ccw"
+        icon:trailing="chevron-down"
+    />
     <flux:menu>
         <flux:menu.item
             icon="folder-tree"
