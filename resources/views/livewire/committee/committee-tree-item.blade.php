@@ -73,7 +73,7 @@
                     <flux:menu.item
                         variant="danger"
                         icon="trash-2"
-                        wire:click="deletePrepare('{{ $committee->getDn() }}','{{ $committee->getFirstAttribute('description') }}')"
+                        x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').show()"
                         :disabled="auth()->user()->cannot('edit', [$committee, $community])"
                     >
                         {{ __('Delete') }}
@@ -95,4 +95,19 @@
             </div>
         @endforeach
     @endif
+
+    <flux:modal name="delete-committee-{{ $committee->getFirstAttribute('ou') }}" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('committees.delete_title', ['name' => $deleteCommitteeName]) }}</flux:heading>
+                <flux:text class="mt-2">{{ __('committees.delete_warning', ['name' => $deleteCommitteeName]) }}</flux:text>
+                <flux:text class="mt-2">{{ __('committees.delete.confirm') }}<strong>{{ $deleteCommitteeOu }}</strong></flux:text>
+            </div>
+            <div class="flex">
+                <flux:spacer />
+                <flux:button x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').close()">{{ __('Cancel') }}</flux:button>
+                <flux:button variant="primary" wire:click="deleteCommittee({{ $committee->getDn() }}, {{ $committee->getFirstAttribute('ou') }})">{{ __('Delete') }}</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

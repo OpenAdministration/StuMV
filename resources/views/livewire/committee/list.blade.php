@@ -31,23 +31,4 @@
             @endforelse
         </div>
     </div>
-
-    <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('committees.delete_title', ['name' => $deleteCommitteeName]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <div class="y">
-                    <span>{{ __('committees.delete_warning', ['name' => $deleteCommitteeName]) }}</span>
-                    <span>{{ __('committees.delete.confirm') }}<strong>{{ $deleteCommitteeOu }}</strong></span>
-                </div>
-                <x-input.group wire:model="deleteConfirmText" :placeholder="$deleteCommitteeOu"/>
-            </x-slot:content>
-            <x-slot:footer>
-                <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-            </x-slot:footer>
-        </x-modal.confirmation>
-    </form>
 </div>
