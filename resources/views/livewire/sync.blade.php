@@ -7,7 +7,7 @@
         <flux:menu>
             <flux:menu.item
                 icon="folder-tree"
-                wire:click="sync"
+                wire:click="syncLdap"
                 title="{{ __('sync.ldap_title') }}"
             >
                 LDAP
