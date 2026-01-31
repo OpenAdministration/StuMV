@@ -101,7 +101,7 @@
             <div>
                 <flux:heading size="lg">{{ __('committees.delete_title', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
                 <flux:text class="mt-2">{{ __('committees.delete_warning', ['name' => $committee->getFirstAttribute('description')]) }}</flux:text>
-                <flux:text class="mt-2">{{ __('committees.delete.confirm') }}<strong>{{ {{ $committee->getFirstAttribute('ou') }} }}</strong></flux:text>
+                <flux:text class="mt-2">{{ __('committees.delete.confirm') }}<strong>{{ $committee->getFirstAttribute('ou') }}</strong></flux:text>
             </div>
             <div class="flex">
                 <flux:spacer />
