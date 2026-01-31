@@ -8,7 +8,7 @@
             placeholder="{{ __('committees.select_committee') }}"
             wire:model="parent_dn"
         >
-            <flux:select.option>{{ __('none') }}</flux:select.option>
+            <flux:select.option value="">{{ __('none') }}</flux:select.option>
             @foreach($select_parents as $select_parent)
                 <flux:select.option value="{{ $select_parent->getDn() }}">{{ $select_parent->getFirstAttribute('description') }}</flux:select.option>
             @endforeach
