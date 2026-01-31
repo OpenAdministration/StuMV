@@ -31,4 +31,30 @@ class CommitteeTreeItem extends Component
     {
         $this->unfolded = true;
     }
+
+    public function deletePrepare(string $dn): void
+    {
+        $community = Community::findByUid($this->realm_uid);
+        $c = Committee::findOrFail($dn);
+        $this->authorize('delete', [$c, $community]);
+        $this->deleteCommitteeDn = $dn;
+        $this->deleteCommitteeName = $c->getFirstAttribute('description');
+        $this->deleteCommitteeOu = $c->getFirstAttribute('ou');
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteCommit(): void
+    {
+        $community = Community::findByUid($this->realm_uid);
+        $c = Committee::findOrFail($this->deleteCommitteeDn);
+        $this->authorize('delete', [$c, $community]);
+
+        if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')){
+            $this->addError('deleteConfirmText', __('Does not equal :text', $c->getFirstAttribute('ou')));
+            return;
+        }
+        $c->delete(recursive: true);
+
+        $this->close();
+    }
 }
