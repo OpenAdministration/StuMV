@@ -6,11 +6,11 @@ use App\Ldap\Community;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Component;
 
-class Sync extends Component
+class SyncLdap extends Component
 {
     public function render()
     {
-        return view('livewire.sync');
+        return view('livewire.sync-ldap');
     }
 
     public function syncLdap()

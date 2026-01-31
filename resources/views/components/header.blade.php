@@ -5,7 +5,7 @@
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
-        <livewire:sync />
+        <livewire:sync-ldap />
 
         <x-info />
         
