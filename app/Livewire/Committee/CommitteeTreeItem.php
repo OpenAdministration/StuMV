@@ -49,5 +49,6 @@ class CommitteeTreeItem extends Component
         $c->delete(recursive: true);
 
         Flux::modal('delete-committee-' . $cn)->close();
+        return redirect()->back();
     }
 }
