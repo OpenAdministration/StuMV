@@ -72,9 +72,15 @@ class RegisterUser extends Component
     {
         $split = explode('@', $this->email);
         $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? $this->username ?? '');
-        $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
-        $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
-        $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
+        if (str_contains($split[0], '.')) {
+            $nameParts = explode('.', $split[0], 2);
+            $this->first_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[0] ?? ''));
+            $this->last_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[1] ?? ''));
+        } else {
+            $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])), 2);
+            $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
+            $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
+        }
         $this->validateOnly('username');
     }
 
