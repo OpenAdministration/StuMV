@@ -1,4 +1,4 @@
-<x-livewire-form>
+<x-livewire-form class="max-w-6xl mx-auto w-full">
     <div class="mb-6">
         <flux:heading size="xl" class="mb-4">{{  __('roles.membership-edit_headline', ['name' => $cn]) }}</flux:heading>
         <flux:text class="text-base">
