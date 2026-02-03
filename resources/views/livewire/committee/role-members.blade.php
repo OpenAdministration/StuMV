@@ -107,7 +107,7 @@
                         :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
                         href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}"
                     >
-                        {{ _('Edit') }}
+                        {{ __('roles.link_edit') }}
                     </flux:button>
                     <flux:dropdown>
                         <flux:button size="sm" icon="ellipsis-vertical" />
