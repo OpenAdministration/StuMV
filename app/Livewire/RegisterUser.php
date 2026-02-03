@@ -75,7 +75,7 @@ class RegisterUser extends Component
         if (str_contains($split[0], '.')) {
             $nameParts = explode('.', $split[0], 2);
             $this->first_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[0] ?? ''));
-            $this->last_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[1] ?? ''));
+            $this->last_name = ucwords(str_replace('_', ' ', $nameParts[1] ?? ''));
         } else {
             $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])), 2);
             $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
