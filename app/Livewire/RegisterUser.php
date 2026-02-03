@@ -71,7 +71,7 @@ class RegisterUser extends Component
     public function preFillFromMail()
     {
         $split = explode('@', $this->email);
-        $this->username = $split[0] ?? $this->username ?? '';
+        $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? $this->username ?? '');
         $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])),2);
         $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
         $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
