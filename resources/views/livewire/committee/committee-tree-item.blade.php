@@ -110,8 +110,7 @@
                     <flux:error name="deleteConfirmText" />
                 </flux:field>
             </div>
-            <div class="flex">
-                <flux:spacer />
+            <div class="flex flex-wrap justify-end gap-4">
                 <flux:button
                     icon="ban"
                     x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').close()"
