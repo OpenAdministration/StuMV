@@ -5,7 +5,9 @@
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
-        <livewire:sync-ldap />
+        @can('superadmin', \App\Models\User::class)
+            <livewire:sync-ldap />
+        @endcan
 
         <x-info />
         
