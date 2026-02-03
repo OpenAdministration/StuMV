@@ -99,7 +99,7 @@
     <flux:modal name="delete-committee-{{ $committee->getFirstAttribute('ou') }}" class="md:w-96">
         <div class="space-y-6">
             <div>
-                <flux:heading size="lg">{{ __('committees.delete_title', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
+                <flux:heading size="lg" class="modal-header">{{ __('committees.delete_title', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
                 <flux:text class="mt-2">{{ __('committees.delete_warning', ['name' => $committee->getFirstAttribute('description')]) }}</flux:text>
                 <flux:text class="mt-2">{{ __('committees.delete.confirm') }}<strong>{{ $committee->getFirstAttribute('ou') }}</strong></flux:text>
                 <flux:field class="mt-4">
