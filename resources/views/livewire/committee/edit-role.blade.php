@@ -1,4 +1,4 @@
-<x-livewire-form class="w-full space-y-8">
+<x-livewire-form class="max-w-6xl mx-auto w-full space-y-8">
     <div>
         <flux:heading size="xl">{{  __('roles.edit_heading', ['name' => $cn]) }}</flux:heading>
     </div>
