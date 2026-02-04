@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Group;
 
+use App\Ldap\Community;
 use Flux\Flux;
 use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Rule;
