@@ -12,14 +12,11 @@ use Livewire\Component;
 
 class NewModerator extends Component
 {
-    #public string $search = "";
-
-    #[Rule('required|string')]
-    public string $dn = "";
+    #[Rule('required')]
+    public array $dn = [];
 
     #[Rule('required|string')]
     public string $realm_uid = "";
-
 
     public function mount(Community $uid) : void
     {
@@ -43,16 +40,18 @@ class NewModerator extends Component
     public function save()
     {
         $this->validate();
-        try {
-            $user = User::findOrFail($this->dn);
-            $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->moderatorsGroup()->members()->attach($user);
+        foreach ($this->dn as $dn) {
+            try {
+                $user = User::findOrFail($this->dn);
+                $realm = Community::findOrFailByUid($this->realm_uid);
+                $realm->moderatorsGroup()->members()->attach($user);
 
-            Flux::toast(variant: 'success', text: __('Added new Moderator'));
-            return redirect()->route('realms.mods', ['uid' => $this->realm_uid]);
-        } catch (LdapRecordException $exception) {
-            $this->addError('dn', $exception->getMessage());
-            return false;
+                Flux::toast(variant: 'success', text: __('Added new Moderator'));
+            } catch (LdapRecordException $exception) {
+                $this->addError('dn', $exception->getMessage());
+                return false;
+            }
         }
+        return redirect()->route('realms.mods', ['uid' => $this->realm_uid]);
     }
 }

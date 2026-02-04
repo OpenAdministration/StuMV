@@ -7,16 +7,16 @@
 
         <flux:field>
             <flux:label>{{ __('realms.new_admin_label') }}</flux:label>
-            <flux:select
-                variant="listbox"
+            <flux:pillbox
+                multiple
                 searchable
                 placeholder="{{ __('realms.select_user') }}"
                 wire:model="dn"
             >
                 @foreach($selectable_users as $user)
-                    <flux:select.option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</flux:select.option>
+                    <flux:pillbox.option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</flux:pillbox.option>
                 @endforeach
-            </flux:select>
+            </flux:pillbox>
         </flux:field>
         <x-slot:abort_route>
             {{ route('realms.mods', ['uid' => $realm_uid]) }}
