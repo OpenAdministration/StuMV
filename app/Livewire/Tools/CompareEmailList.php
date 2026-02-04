@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tools;
 
+use App\Ldap\Community;
 use App\Ldap\User;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
