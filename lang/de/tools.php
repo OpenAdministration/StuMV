@@ -6,5 +6,6 @@ return [
     'compareEmailList_explanation' => 'Füge in das Textfeld eine Liste von E-Mail-Adressen ein (getrennt durch Zeilenumbrüche) und überprüfe, ob Benutzer:innen mit dieser E-Mail-Adresse existieren.',
     'emailAddresses' => 'E-Mail-Adressen',
     'matches' => 'Treffer',
+    'noMatchesFound' => 'Der Abgleich ergab keine Treffer.',
     'tools' => 'Hilfsmittel',
 ];
