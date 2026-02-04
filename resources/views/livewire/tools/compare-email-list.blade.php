@@ -15,17 +15,18 @@
         <div>
             <flux:fieldset>
                 <flux:legend>{{ __('tools.matches') }}</flux:legend>
-
-                @foreach($matches as $user)
-                    <div class="w-full px-4 py-2 border-b border-zinc-200 dark:border-zinc-700">
-                        <flux:link
-                            wire:navigate
-                            href="{{ route('profile', ['username' => $user['uid']]) }}"
-                        >
-                            {{ $user['cn'] }}
-                        </flux:link>
-                    </div>
-                @endforeach
+                <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
+                    @foreach($matches as $user)
+                        <div class="py-3">
+                            <flux:link
+                                wire:navigate
+                                href="{{ route('profile', ['username' => $user['uid']]) }}"
+                            >
+                                {{ $user['cn'] }}
+                            </flux:link>
+                        </div>
+                    @endforeach
+                </div>
             </flux:fieldset>
         </div>
     </div>
