@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8 pb-6 sm:pb-8">
+<div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</flux:heading>
@@ -72,6 +72,8 @@
         @endforelse
         </flux:table.rows>
     </flux:table>
+
+    <div class="block pb-6 sm:pb-8"></div>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
