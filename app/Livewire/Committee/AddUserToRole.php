@@ -44,7 +44,8 @@ class AddUserToRole extends Component
         $this->start_date = today()->format('Y-m-d');
     }
 
-    public function rules(){
+    public function rules()
+    {
         return [
             'usernames.*' => [
                 'required',
@@ -67,7 +68,7 @@ class AddUserToRole extends Component
 
         $committee = Committee::findByName($this->uid, $this->ou);
 
-        foreach ($usernames as $username) {
+        foreach ($this->usernames as $username) {
             RoleMembership::create([
                 'role_cn' => $this->cn,
                 'committee_dn' => $committee->getDn(),
