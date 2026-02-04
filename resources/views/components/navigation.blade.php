@@ -61,6 +61,7 @@
                     icon="hammer"
                     wire:navigate
                     :href="route('tools.dashboard', ['uid' => $uid])"
+                    :current="request()->is('*/tools') || request()->is('*/tools/*')"
                 >
                     {{ __('tools.tools') }}
                 </flux:sidebar.item>
