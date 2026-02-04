@@ -26,7 +26,7 @@ class EditGroup extends Component
     {
         $this->uid = $uid->getFirstAttribute('ou');
         $this->cn = $cn;
-        $this->dn = Group::dnFrom($this->realm_uid, $cn);
+        $this->dn = Group::dnFrom($this->uid, $cn);
         $group = Group::findOrFail($this->dn);
         $this->name = $group->getFirstAttribute('description');
     }
