@@ -36,6 +36,11 @@ class User extends \LdapRecord\Models\OpenLDAP\User
         return self::findByUsername($username) ?? abort(404);
     }
 
+    public static function findByEmail(string $email) : ?static
+    {
+        return self::query()->where('mail', '=', $email)->first();
+    }
+
     public function groups(): HasMany
     {
         return $this->hasMany(Group::class, 'uniqueMember');
