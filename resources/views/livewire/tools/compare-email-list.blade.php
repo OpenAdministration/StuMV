@@ -1,7 +1,10 @@
 <div class="max-w-6xl mx-auto w-full">
     <div class="grid md:grid-cols-2 gap-6">
         <div class="space-y-4">
-            <flux:textarea label="{{ __('tools.emailAddresses') }}" />
+            <flux:textarea
+                label="{{ __('tools.emailAddresses') }}"
+                wire:model.blur="emailAddressesInput"
+            />
             <flux:button
                 variant="primary"
                 wire:click="compareEmailAddressesWithLdap"
