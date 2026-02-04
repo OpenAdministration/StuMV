@@ -16,6 +16,8 @@ class CompareEmailList extends Component
 
     public array $matches = [];
 
+    public bool $noMatches = false;
+
     public function mount(Community $uid)
     {
         $this->uid = $uid->getFirstAttribute('ou');
@@ -41,6 +43,10 @@ class CompareEmailList extends Component
                     'email' => $user->getFirstAttribute('mail'),
                 ];
             }
+        }
+
+        if (count($this->matches) < 1) {
+            $this->noMatches = true;
         }
     }
 }

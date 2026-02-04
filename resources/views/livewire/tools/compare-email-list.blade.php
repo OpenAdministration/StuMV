@@ -21,18 +21,26 @@
         <div>
             <flux:fieldset>
                 <flux:legend>{{ __('tools.matches') }}</flux:legend>
-                <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
-                    @foreach($matches as $user)
-                        <div class="py-3">
-                            <flux:link
-                                wire:navigate
-                                href="{{ route('profile', ['username' => $user['uid']]) }}"
-                            >
-                                {{ $user['cn'] }}
-                            </flux:link>
-                        </div>
-                    @endforeach
-                </div>
+                @if($noMatches)
+                    <flux:callout
+                        variant="danger"
+                        icon="circle-x"
+                        heading="{{ __('tools.noMatchesFound') }}"
+                    />
+                @else
+                    <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
+                        @foreach($matches as $user)
+                            <div class="py-3">
+                                <flux:link
+                                    wire:navigate
+                                    href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                >
+                                    {{ $user['cn'] }}
+                                </flux:link>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </flux:fieldset>
         </div>
     </div>
