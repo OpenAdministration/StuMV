@@ -5,9 +5,9 @@
 
     <flux:field>
         <flux:label>{{ __('Short Groupname') }}</flux:label>
-        <flux:input wire:model="cn" />
+        <flux:input wire:model="cn" disabled />
     </flux:field>
-    
+
     <flux:field>
         <flux:label>{{ __('Full Groupname') }}</flux:label>
         <flux:input wire:model="name" />
