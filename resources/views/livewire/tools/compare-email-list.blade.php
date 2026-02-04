@@ -26,6 +26,7 @@
                         variant="danger"
                         icon="circle-x"
                         heading="{{ __('tools.noMatchesFound') }}"
+                        class="mt-[.35rem]"
                     />
                 @else
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
