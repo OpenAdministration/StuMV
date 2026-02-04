@@ -4,7 +4,7 @@
             <flux:textarea label="{{ __('tools.emailAddresses') }}" />
             <flux:button
                 variant="primary"
-                wire:click=""
+                wire:click="compareEmailAddressesWithLdap"
             >
                 {{ __('tools.checkForMatches') }}
             </flux:button>
