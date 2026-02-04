@@ -1,7 +1,7 @@
 <div class="max-w-6xl mx-auto w-full">
     <div class="space-y-4 mb-8">
-        <flux:heading size="xl">{{ __('tools.checkEmailList_headline') }}</flux:heading>
-        <flux:text class="text-base">{{  __('tools.checkEmailList_explanation') }}</flux:text>
+        <flux:heading size="xl">{{ __('tools.compareEmailList_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('tools.compareEmailList_explanation') }}</flux:text>
     </div>
     <div class="grid md:grid-cols-2 gap-6">
         <div class="space-y-4">
