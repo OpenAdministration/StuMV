@@ -46,7 +46,7 @@ class AddUserToRole extends Component
 
     public function rules(){
         return [
-            'username' => [
+            'usernames.*' => [
                 'required',
                 new UserIsMember($this->uid)
             ]
@@ -79,7 +79,7 @@ class AddUserToRole extends Component
             ]);
             Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]));
         }
-        
+
         return redirect()->route('committees.roles.members', [
             'uid' => $this->uid,
             'ou' => $this->ou,
