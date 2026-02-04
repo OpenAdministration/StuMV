@@ -3,7 +3,7 @@
         <flux:heading size="xl">{{ __('tools.compareEmailList_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.compareEmailList_explanation') }}</flux:text>
     </div>
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid md:grid-cols-2 gap-6 mb-6 sm:mb-8">
         <div class="space-y-4">
             <flux:textarea
                 label="{{ __('tools.emailAddresses') }}"
