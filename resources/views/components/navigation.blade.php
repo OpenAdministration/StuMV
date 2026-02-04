@@ -64,7 +64,7 @@
                 >
                     {{ __('tools.tools') }}
                 </flux:sidebar.item>
-            @endcan
+            @endcanany
         @endcan
         @can('superadmin', \App\Models\User::class)
             @can('picked', \App\Ldap\Community::class)
