@@ -12,7 +12,7 @@ class CompareEmailList extends Component
     #[Locked]
     public string $uid;
 
-    public string $emailAddressesInput;
+    public string $emailAddressesInput = "";
 
     public array $matches = [];
 
