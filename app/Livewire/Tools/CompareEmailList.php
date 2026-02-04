@@ -16,6 +16,8 @@ class CompareEmailList extends Component
 
     public array $matches = [];
 
+    public bool $comparisonCompleted = false;
+
     public bool $noMatches = false;
 
     public function mount(Community $uid)
@@ -48,5 +50,7 @@ class CompareEmailList extends Component
         if (count($this->matches) < 1) {
             $this->noMatches = true;
         }
+
+        $this->comparisonCompleted = true;
     }
 }

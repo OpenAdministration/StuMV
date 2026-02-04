@@ -19,30 +19,32 @@
             </flux:button>
         </div>
         <div>
-            <flux:fieldset>
-                <flux:legend>{{ __('tools.matches') }}</flux:legend>
-                @if($noMatches)
-                    <flux:callout
-                        variant="danger"
-                        icon="circle-x"
-                        heading="{{ __('tools.noMatchesFound') }}"
-                        class="mt-[.35rem]"
-                    />
-                @else
-                    <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
-                        @foreach($matches as $user)
-                            <div class="py-3">
-                                <flux:link
-                                    wire:navigate
-                                    href="{{ route('profile', ['username' => $user['uid']]) }}"
-                                >
-                                    {{ $user['cn'] }}
-                                </flux:link>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </flux:fieldset>
+            @if($comparisonCompleted)
+                <flux:fieldset>
+                    <flux:legend>{{ __('tools.matches') }}</flux:legend>
+                    @if($noMatches)
+                        <flux:callout
+                            variant="danger"
+                            icon="circle-x"
+                            heading="{{ __('tools.noMatchesFound') }}"
+                            class="mt-[.35rem]"
+                        />
+                    @else
+                        <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
+                            @foreach($matches as $user)
+                                <div class="py-3">
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                    >
+                                        {{ $user['cn'] }}
+                                    </flux:link>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </flux:fieldset>
+            @endif
         </div>
     </div>
 </div>
