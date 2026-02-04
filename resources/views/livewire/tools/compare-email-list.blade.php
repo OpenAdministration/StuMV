@@ -4,9 +4,11 @@
             <flux:textarea
                 label="{{ __('tools.emailAddresses') }}"
                 wire:model.blur="emailAddressesInput"
+                class="h-[15rem]"
             />
             <flux:button
                 variant="primary"
+                icon="search"
                 wire:click="compareEmailAddressesWithLdap"
             >
                 {{ __('tools.checkForMatches') }}
