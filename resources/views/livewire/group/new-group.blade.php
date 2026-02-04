@@ -3,11 +3,7 @@
         <flux:heading size="xl" class="mb-4">{{ __('realms.groups_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('realms.groups_explanation') }}</flux:text>
     </div>
-
-    <flux:field>
-        <flux:label>{{ __('Realm Name') }}</flux:label>
-        <flux:input wire:model="realm_uid" disabled />
-    </flux:field>
+    
     <flux:field>
         <flux:label>{{ __('Short Groupname') }}</flux:label>
         <flux:input wire:model="cn" />
