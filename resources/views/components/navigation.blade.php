@@ -55,7 +55,7 @@
             >
                 {{ __('realms.dashboard.groups_headline') }}
             </flux:sidebar.item>
-            @can('moderator', \App\Ldap\Community::class)
+            @can('moderator', [\App\Models\User::class, \App\Ldap\Community::class])
                 <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="hammer"
