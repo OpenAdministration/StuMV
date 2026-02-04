@@ -42,7 +42,7 @@ class NewModerator extends Component
         $this->validate();
         foreach ($this->dn as $dn) {
             try {
-                $user = User::findOrFail($this->dn);
+                $user = User::findOrFail($dn);
                 $realm = Community::findOrFailByUid($this->realm_uid);
                 $realm->moderatorsGroup()->members()->attach($user);
 
