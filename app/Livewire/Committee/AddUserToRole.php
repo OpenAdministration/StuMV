@@ -6,13 +6,13 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class AddUserToRole extends Component
 {
-
     #[Locked]
     public string $uid;
 
@@ -23,12 +23,14 @@ class AddUserToRole extends Component
     public string $cn;
 
     #[Validate]
-    public string $username = '';
+    public array $usernames = [];
 
     #[Validate('date:Y-m-d')]
     public $start_date;
+
     #[Validate('date:Y-m-d')]
     public $end_date = '';
+
     #[Validate('date:Y-m-d')]
     public $decision_date = '';
 
@@ -64,20 +66,25 @@ class AddUserToRole extends Component
         $this->validate();
 
         $committee = Committee::findByName($this->uid, $this->ou);
-        RoleMembership::create([
-            'role_cn' => $this->cn,
-            'committee_dn' => $committee->getDn(),
-            'username' => $this->username,
-            'from' => $this->start_date,
-            'until' => !empty($this->end_date) ? $this->end_date : null,
-            'decided' => !empty($this->decision_date) ? $this->decision_date : null,
-            'comment' => !empty($this->comment) ? $this->comment : null,
-        ]);
+
+        foreach ($usernames as $username) {
+            RoleMembership::create([
+                'role_cn' => $this->cn,
+                'committee_dn' => $committee->getDn(),
+                'username' => $this->username,
+                'from' => $this->start_date,
+                'until' => !empty($this->end_date) ? $this->end_date : null,
+                'decided' => !empty($this->decision_date) ? $this->decision_date : null,
+                'comment' => !empty($this->comment) ? $this->comment : null,
+            ]);
+            Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]));
+        }
+        
         return redirect()->route('committees.roles.members', [
             'uid' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
-        ])->with('message', __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]));
+        ]);
     }
 
 }

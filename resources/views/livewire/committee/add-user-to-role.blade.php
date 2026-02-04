@@ -9,16 +9,16 @@
         </flux:field>
         <flux:field class="col-span-full">
             <flux:label>{{ __('Add new User') }}</flux:label>
-            <flux:select
-                variant="listbox"
+            <flux:pillbox
+                multiple
                 searchable
                 placeholder="{{ __('committees.select_user') }}"
-                wire:model="username"
+                wire:model="usernames"
             >
                 @foreach($users as $user)
-                    <flux:select.option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</flux:select.option>
+                    <flux:pillbox.option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</flux:pillbox.option>
                 @endforeach
-            </flux:select>
+            </flux:pillbox>
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Starting') }}</flux:label>
