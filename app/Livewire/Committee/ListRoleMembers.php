@@ -7,6 +7,7 @@ use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Ldap\User;
 use App\Models\RoleMembership;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -94,8 +95,9 @@ class ListRoleMembers extends Component
         $membership->until = $this->terminateDate;
         $membership->save();
         $this->close();
-        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn])
-            ->with('message', __('roles.message_terminate_member_success'));
+
+        Flux::toast(variant: 'success', text: __('roles.message_terminate_member_success'));
+        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }
 
     public function prepareDeletion($id)
@@ -118,8 +120,9 @@ class ListRoleMembers extends Component
 
         $membership->delete();
         $this->close();
-        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn])
-            ->with('message', __('roles.message_delete_member_success'));
+
+        Flux::toast(variant: 'success', text: __('roles.message_delete_member_success'));
+        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }
 
     public function close()
@@ -130,7 +133,4 @@ class ListRoleMembers extends Component
         $this->showDeleteModal = false;
         unset($this->deleteUsername, $this->deleteId);
     }
-
-
-
 }
