@@ -72,13 +72,13 @@ class AddUserToRole extends Component
             RoleMembership::create([
                 'role_cn' => $this->cn,
                 'committee_dn' => $committee->getDn(),
-                'username' => $this->username,
+                'username' => $username,
                 'from' => $this->start_date,
                 'until' => !empty($this->end_date) ? $this->end_date : null,
                 'decided' => !empty($this->decision_date) ? $this->decision_date : null,
                 'comment' => !empty($this->comment) ? $this->comment : null,
             ]);
-            Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $this->username, 'role' => $this->cn]));
+            Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $username, 'role' => $this->cn]));
         }
 
         return redirect()->route('committees.roles.members', [
