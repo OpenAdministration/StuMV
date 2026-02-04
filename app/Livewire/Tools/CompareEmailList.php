@@ -32,6 +32,8 @@ class CompareEmailList extends Component
 
     public function compareEmailAddressesWithLdap()
     {
+        $this->comparisonCompleted = false;
+        $this->noMatches = false;
         $this->matches = [];
 
         $emailAddresses = preg_split("/\r\n|\n|\r/", $this->emailAddressesInput);
