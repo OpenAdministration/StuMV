@@ -109,7 +109,6 @@ class ImportUsersFromUniLdap extends Component
             $user->save();
             $community->membersGroup()->members()->attach($user);
             event(new Registered($user));
-            Auth::attempt([$this->username, $this->password]);
             Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
 
             $this->searchCompleted = false;
