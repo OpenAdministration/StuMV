@@ -23,7 +23,7 @@
             @endif
         </div>
         <div>
-            @if($comparisonCompleted && count($results) > 1)
+            @if($comparisonCompleted && count($results) > 0)
                 <flux:fieldset>
                     <flux:legend class="py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
                         {{ __('tools.matches') }} <flux:badge>{{ count($results) }}</flux:badge>
@@ -41,7 +41,7 @@
                         @endforeach
                     </div>
                 </flux:fieldset>
-            @elseif(count($results) < 1)
+            @elseif($comparisonCompleted && count($results) < 1)
                 <flux:callout
                     variant="danger"
                     icon="circle-x"
