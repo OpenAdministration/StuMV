@@ -27,7 +27,7 @@
         </div>
         @if($searchCompleted && !$userNotFound)
             <div class="space-y-4">
-                <flux:input label="{{ __('tools.emailAddress')" wire:model="email" />
+                <flux:input label="{{ __('tools.emailAddress') }}" wire:model="email" />
                 <flux:input label="{{ __('tools.username') }}" wire:model="username" />
                 <flux:input label="{{ __('tools.firstname') }}" wire:model="firstname" />
                 <flux:input label="{{ __('tools.lastname') }}" wire:model="lastname" />
