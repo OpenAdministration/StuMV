@@ -43,7 +43,7 @@ class UsersNotInUniLdap extends Component
 
         $domains = [];
         $domainEntries = Domain::fromCommunity($this->uid)->get();
-        foreach ($domainEntries->items as $item) {
+        foreach ($domainEntries['items'] as $item) {
             $domains[] = $item->dc;
         }
 
