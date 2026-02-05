@@ -57,7 +57,7 @@ class UsersNotInUniLdap extends Component
                     $filter = "(|(mail=$member->email))";
                     $result = ldap_search($ds, $unildap->members_base, $filter);
                     $info = ldap_get_entries($ds, $result);
-                    if (!$info['count'] == 1) {
+                    if ($info['count'] !== 1) {
                         $entry = $info[0];
                         if (is_array($entry) && isset($entry['mail']) && !is_array($entry['mail'])) {
                             $entry['mail'] = [$entry['mail']];
