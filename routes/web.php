@@ -47,8 +47,9 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::livewire('{uid}/committees/{ou}/role/{cn}/edit', \App\Livewire\Committee\EditRole::class)->name('committees.roles.edit');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/membership/{id}', \App\Livewire\Committee\EditRoleMembership::class)->name('committees.roles.members.edit');
-        Route::livewire('{uid}/tools/compare-email-list', \App\Livewire\Tools\CompareEmailList::class)->name('tools.compare-email-list');
         Route::livewire('{uid}/tools', \App\Livewire\Tools\ToolsDashboard::class)->name('tools.dashboard');
+        Route::livewire('{uid}/tools/compare-email-list', \App\Livewire\Tools\CompareEmailList::class)->name('tools.compare-email-list');
+        Route::livewire('{uid}/tools/users-not-in-uni-ldap', \App\Livewire\Tools\UsersNotInUniLdap::class)->name('tools.users-not-in-uni-ldap');
         // end mod
     });
 
