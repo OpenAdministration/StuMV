@@ -41,13 +41,17 @@ class UsersNotInUniLdap extends Component
 
         $members = \App\Models\User::select('email')->where('realm', $this->uid)->orderBy('full_name')->get();
 
-        $domains = Domain::fromCommunity($this->uid)->get();
+        $domains = [];
+        $domainEntries = Domain::fromCommunity($this->uid)->get();
+        foreach ($domainEntries->items as $item) {
+            $domains[] = $item->dc;
+        }
 
         $unildap = UniLdap::where('realm', $this->uid)->first();
 
         foreach ($members as $member) {
             $memberEmailParts = explode('@', $member->email);
-            if (in_array($memberEmailParts[1], $domains->items())) {
+            if (in_array($memberEmailParts[1], $domains)) {
                 $ds = ldap_connect($unildap->host);
                 if ($ds) {
                     $filter = "(|(mail=$member->email))";
