@@ -22,8 +22,10 @@ class RegisterUser extends Component
     //public User $user;
 
     public string $email = '';
+
     #[Validate('required|string|alpha|max:255')]
     public string $first_name = '';
+    
     #[Validate('required|string|alpha|max:255')]
     public string $last_name = '';
 

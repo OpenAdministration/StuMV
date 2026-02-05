@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class ImportUsersFromUniLdap extends Component
@@ -26,8 +27,14 @@ class ImportUsersFromUniLdap extends Component
     public bool $userNotFound = false;
 
     public string $email = "";
+
+    #[Validate('required|string|min:3|max:255|regex:/^[0-9a-zA-Z_\-\.]*$/')]
     public string $username = "";
+
+    #[Validate('required|string|alpha|max:255')]
     public string $firstname = "";
+
+    #[Validate('required|string|alpha|max:255')]
     public string $lastname = "";
 
     protected function rules()
