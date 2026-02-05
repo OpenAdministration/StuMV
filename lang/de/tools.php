@@ -9,6 +9,6 @@ return [
     'noMatchesFound' => 'Der Abgleich ergab keine Treffer.',
     'startSearch' => 'Starte die Suche',
     'tools' => 'Hilfsmittel',
-    'tools.usersNotInUniLdap_headline' => 'Uni-Account-Abgleich',
-    'tools.usersNotInUniLdap_explanation' => 'Suche nach Accounts, die in der Mitgliederverwaltung der Studierendenschaft existieren, aber nicht mehr in der Mitgliederverwaltung der Universität.',
+    'usersNotInUniLdap_headline' => 'Uni-Account-Abgleich',
+    'usersNotInUniLdap_explanation' => 'Suche nach Accounts, die in der Mitgliederverwaltung der Studierendenschaft existieren, aber nicht mehr in der Mitgliederverwaltung der Universität.',
 ];
