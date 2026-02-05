@@ -23,36 +23,31 @@
             @endif
         </div>
         <div>
-            @if($comparisonCompleted)
+            @if($comparisonCompleted && count($results) > 1)
                 <flux:fieldset>
-                    <flux:legend>
-                        {{ __('tools.matches') }}
-                        @if(count($results) > 0)
-                            ({{ count($results) }})
-                        @endif
+                    <flux:legend class="py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
+                        {{ __('tools.matches') }} <flux:badge>{{ count($results) }}</flux:badge>
                     </flux:legend>
-                    @if(count($results) < 1)
-                        <flux:callout
-                            variant="danger"
-                            icon="circle-x"
-                            heading="{{ __('tools.noMatchesFound') }}"
-                            class="mt-[.35rem]"
-                        />
-                    @else
-                        <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
-                            @foreach($results as $user)
-                                <div class="py-3">
-                                    <flux:link
-                                        wire:navigate
-                                        href="{{ route('profile', ['username' => $user['uid']]) }}"
-                                    >
-                                        {{ $user['cn'] }}
-                                    </flux:link>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+                    <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
+                        @foreach($results as $user)
+                            <div class="py-3">
+                                <flux:link
+                                    wire:navigate
+                                    href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                >
+                                    {{ $user['cn'] }}
+                                </flux:link>
+                            </div>
+                        @endforeach
+                    </div>
                 </flux:fieldset>
+            @elseif(count($results) < 1)
+                <flux:callout
+                    variant="danger"
+                    icon="circle-x"
+                    heading="{{ __('tools.noMatchesFound') }}"
+                    class="mt-[.35rem]"
+                />
             @endif
         </div>
     </div>
