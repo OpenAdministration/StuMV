@@ -109,6 +109,17 @@ class ImportUsersFromUniLdap extends Component
             $user->save();
             $community->membersGroup()->members()->attach($user);
             event(new Registered($user));
+
+            // Make user a member of the current realm
+            try {
+                $ldapUser = User::findOrFailByUsername($this->username);
+                $community->membersGroup()->members()->attach($ldapUser);
+                \App\Models\User::where('username', $this->username)->update(['realm' => $this->uid]);
+            } catch (LdapRecordException $exception) {
+                $this->addError('dn', $exception->getMessage());
+                return false;
+            }
+
             Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
 
             $this->searchCompleted = false;
@@ -118,16 +129,6 @@ class ImportUsersFromUniLdap extends Component
             $this->lastname = "";
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
-        }
-
-        // Make user a member of the current realm
-        try {
-            $ldapUser = User::findOrFailByUsername($this->username);
-            $community->membersGroup()->members()->attach($ldapUser);
-            \App\Models\User::where('username', $this->username)->update(['realm' => $this->uid]);
-        } catch (LdapRecordException $exception) {
-            $this->addError('dn', $exception->getMessage());
-            return false;
         }
     }
 }
