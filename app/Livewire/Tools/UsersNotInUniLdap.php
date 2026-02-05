@@ -44,7 +44,7 @@ class UsersNotInUniLdap extends Component
         $domains = [];
         $domainEntries = Domain::fromCommunity($this->uid)->get();
         foreach ($domainEntries as $item) {
-            $domains[] = $item->dc[0];
+            $domains[] = [$item->dc];
         }
 
         $unildap = UniLdap::where('realm', $this->uid)->first();
