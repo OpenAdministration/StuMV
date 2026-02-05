@@ -64,8 +64,6 @@ class ImportUsersFromUniLdap extends Component
 
     public function getUserData()
     {
-        $this->validate('email');
-
         $this->searchCompleted = false;
         $this->results = [];
 

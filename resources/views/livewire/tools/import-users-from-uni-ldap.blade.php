@@ -7,7 +7,7 @@
         <div class="space-y-4">
             @if($unildapDataExists)
                 @if(!$searchCompleted)
-                    <flux:input label="{{ __('tools.emailAddress') }}" wire:model="email" />
+                    <flux:input label="{{ __('tools.emailAddress') }}" wire:model.live.blur="email" />
                     <flux:button
                         variant="primary"
                         icon="search"
