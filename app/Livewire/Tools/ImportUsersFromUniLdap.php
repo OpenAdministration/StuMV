@@ -93,6 +93,8 @@ class ImportUsersFromUniLdap extends Component
         $this->validate();
 
         $community = Community::findByOrFail('ou', $this->uid);
+
+        // Add user to LDAP
         $user = new User([
             'uid' => $this->username,
             'cn' => trim($this->firstname  . ' ' . $this->lastname),
@@ -117,6 +119,16 @@ class ImportUsersFromUniLdap extends Component
             $this->lastname = "";
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
+        }
+
+        // Make user a member of the current realm
+        try {
+            $ldapUser = User::findOrFailByUsername($this->username);
+            $community->membersGroup()->members()->attach($ldapUser);
+            \App\Models\User::where('username', $this->username)->update(['realm' => $this->uid]);
+        } catch (LdapRecordException $exception) {
+            $this->addError('dn', $exception->getMessage());
+            return false;
         }
     }
 }
