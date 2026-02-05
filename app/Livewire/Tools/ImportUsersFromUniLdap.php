@@ -52,7 +52,7 @@ class ImportUsersFromUniLdap extends Component
 
     public function render()
     {
-        return view('livewire.tools.users-not-in-uni-ldap');
+        return view('livewire.tools.import-users-from-uni-ldap');
     }
 
     public function getUserData()
