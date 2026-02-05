@@ -25,8 +25,8 @@
                 />
             @endif
         </div>
-        <div class="space-y-4">
-            @if($serchCompleted && !$userNotFound)
+        @if($serchCompleted && !$userNotFound)
+            <div class="space-y-4">
                 <flux:input label="{{ __('tools.emailAddress')" wire:model="email" />
                 <flux:input label="{{ __('tools.username') }}" wire:model="username" />
                 <flux:input label="{{ __('tools.firstname') }}" wire:model="firstname" />
@@ -38,14 +38,14 @@
                 >
                     {{ __('tools.createUser') }}
                 </flux:button>
-            @elseif($searchCompleted && $userNotFound)
-                <flux:callout
-                    variant="danger"
-                    icon="circle-x"
-                    heading="{{ __('tools.userNotFoundInUniLdap') }}"
-                    class="mt-[.35rem]"
-                />
-            @endif
-        </div>
+            </div>
+        @elseif($searchCompleted && $userNotFound)
+            <flux:callout
+                variant="danger"
+                icon="circle-x"
+                heading="{{ __('tools.userNotFoundInUniLdap') }}"
+                class="mt-[.35rem]"
+            />
+        @endif
     </div>
 </div>
