@@ -115,18 +115,18 @@ class ImportUsersFromUniLdap extends Component
                 $ldapUser = User::findOrFailByUsername($this->username);
                 $community->membersGroup()->members()->attach($ldapUser);
                 \App\Models\User::where('username', $this->username)->update(['realm' => $this->uid]);
+
+                Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
+
+                $this->searchCompleted = false;
+                $this->email = "";
+                $this->username = "";
+                $this->firstname = "";
+                $this->lastname = "";
             } catch (LdapRecordException $exception) {
                 $this->addError('dn', $exception->getMessage());
                 return false;
             }
-
-            Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
-
-            $this->searchCompleted = false;
-            $this->email = "";
-            $this->username = "";
-            $this->firstname = "";
-            $this->lastname = "";
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
         }
