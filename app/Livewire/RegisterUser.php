@@ -23,10 +23,10 @@ class RegisterUser extends Component
 
     public string $email = '';
 
-    #[Validate('required|string|alpha|max:255')]
+    #[Validate('required|string|max:255')]
     public string $first_name = '';
-    
-    #[Validate('required|string|alpha|max:255')]
+
+    #[Validate('required|string|max:255')]
     public string $last_name = '';
 
     #[Validate('required|string|min:3|max:255|regex:/^[0-9a-zA-Z_\-\.]*$/')]

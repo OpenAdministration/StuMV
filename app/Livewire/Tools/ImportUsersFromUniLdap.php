@@ -31,10 +31,10 @@ class ImportUsersFromUniLdap extends Component
     #[Validate('required|string|min:3|max:255|regex:/^[0-9a-zA-Z_\-\.]*$/')]
     public string $username = "";
 
-    #[Validate('required|string|alpha|max:255')]
+    #[Validate('required|string|max:255')]
     public string $firstname = "";
 
-    #[Validate('required|string|alpha|max:255')]
+    #[Validate('required|string|max:255')]
     public string $lastname = "";
 
     protected function rules()
