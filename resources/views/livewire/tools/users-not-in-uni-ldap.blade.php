@@ -5,14 +5,16 @@
     </div>
     <div class="pb-6 sm:pb-8 space-y-6">
         <div>
-            @if($unildapDataExists && !$comparisonCompleted)
-                <flux:button
-                    variant="primary"
-                    icon="search"
-                    wire:click="searchForUsersNotInUniLdap"
-                >
-                    {{ __('tools.startSearch') }}
-                </flux:button>
+            @if($unildapDataExists)
+                @if(!$comparisonCompleted)
+                    <flux:button
+                        variant="primary"
+                        icon="search"
+                        wire:click="searchForUsersNotInUniLdap"
+                    >
+                        {{ __('tools.startSearch') }}
+                    </flux:button>
+                @endif
             @else
                 <flux:callout
                     variant="danger"
