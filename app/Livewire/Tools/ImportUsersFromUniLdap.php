@@ -65,7 +65,7 @@ class ImportUsersFromUniLdap extends Component
     public function getUserData()
     {
         $this->validate('email');
-        
+
         $this->searchCompleted = false;
         $this->results = [];
 
@@ -77,8 +77,8 @@ class ImportUsersFromUniLdap extends Component
             $result = ldap_search($ds, $unildap->members_base, $filter);
             $info = ldap_get_entries($ds, $result);
             if ($info['count'] === 1) {
-                $this->firstname = $info[0]['givenName'];
-                $this->lastname = $info[0]['sn'];
+                $this->firstname = $info[0]['givenname'][0];
+                $this->lastname = $info[0]['sn'][0];
 
                 $split = explode('@', $this->email);
                 $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? '');
