@@ -5,7 +5,7 @@
     </div>
     <div class="pb-6 sm:pb-8 space-y-6">
         <div>
-            @if($unildapDataExists)
+            @if($unildapDataExists && !$comparisonCompleted)
                 <flux:button
                     variant="primary"
                     icon="search"
