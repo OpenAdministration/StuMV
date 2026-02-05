@@ -25,7 +25,12 @@
         <div>
             @if($comparisonCompleted)
                 <flux:fieldset>
-                    <flux:legend>{{ __('tools.matches') }}</flux:legend>
+                    <flux:legend>
+                        {{ __('tools.matches') }}
+                        @if(count($results) < 1)
+                            ({{ count($results) }})
+                        @endif
+                    </flux:legend>
                     @if(count($results) < 1)
                         <flux:callout
                             variant="danger"
