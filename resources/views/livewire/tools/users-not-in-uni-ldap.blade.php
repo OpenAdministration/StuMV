@@ -27,7 +27,7 @@
                 <flux:fieldset>
                     <flux:legend>
                         {{ __('tools.matches') }}
-                        @if(count($results) < 1)
+                        @if(count($results) > 0)
                             ({{ count($results) }})
                         @endif
                     </flux:legend>
