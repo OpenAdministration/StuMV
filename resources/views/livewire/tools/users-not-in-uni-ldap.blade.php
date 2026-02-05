@@ -25,8 +25,8 @@
         <div>
             @if($comparisonCompleted && count($results) > 0)
                 <flux:fieldset>
-                    <flux:legend class="w-full py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
-                        {{ __('tools.matches') }} <flux:badge class="ml-2">{{ count($results) }}</flux:badge>
+                    <flux:legend class="w-full flex py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
+                        {{ __('tools.matches') }} <flux:badge class="ml-auto">{{ count($results) }}</flux:badge>
                     </flux:legend>
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
                         @foreach($results as $user)
