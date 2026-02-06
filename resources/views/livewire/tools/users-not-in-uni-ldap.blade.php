@@ -32,7 +32,7 @@
                     </flux:legend>
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
                         @foreach($results as $user)
-                            <div class="flex py-3">
+                            <div class="flex items-center py-3">
                                 <div class="flex-1">
                                     <flux:link
                                         wire:navigate
@@ -43,6 +43,7 @@
                                 </div>
                                 <div>
                                     <flux:button
+                                        size="sm"
                                         variant="danger"
                                         icon="trash-2"
                                         wire:click="confirmDeleteUser('{{ $user['uid'] }}')"
