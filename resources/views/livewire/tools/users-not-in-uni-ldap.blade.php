@@ -32,13 +32,24 @@
                     </flux:legend>
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
                         @foreach($results as $user)
-                            <div class="py-3">
-                                <flux:link
-                                    wire:navigate
-                                    href="{{ route('profile', ['username' => $user['uid']]) }}"
-                                >
-                                    {{ $user['cn'] }}
-                                </flux:link>
+                            <div class="flex py-3">
+                                <div class="flex-1">
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                    >
+                                        {{ $user['cn'] }}
+                                    </flux:link>
+                                </div>
+                                <div>
+                                    <flux:button
+                                        variant="danger"
+                                        icon="trash-2"
+                                        wire:click="confirmDeleteUser('{{ $user['uid'] }}')"
+                                    >
+                                        {{ __('tools.delete') }}
+                                    </flux:button>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -53,4 +64,16 @@
             @endif
         </div>
     </div>
+    <flux:modal name="confirm-delete-user" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('tools.deleteUser') }}</flux:heading>
+                <flux:text class="mt-2">{{ __('tools.deleteUserText') }}</flux:text>
+            </div>
+            <div class="flex justify-end">
+                <flux:button icon="ban" x-on:click="$flux.modal('confirm-delete-user').close()">{{ __('tools.cancel') }}</flux:button>
+                <flux:button variant="primary" wire:click="deleteUser">{{ __('tools.deleteUser') }}</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>
