@@ -108,25 +108,26 @@ class ImportUsersFromUniLdap extends Component
         try {
             $user->save();
             $community->membersGroup()->members()->attach($user);
-            event(new Registered($user));
 
-            // Make user a member of the current realm
-            try {
-                $ldapUser = User::findOrFailByUsername($this->username);
-                $community->membersGroup()->members()->attach($ldapUser);
-                \App\Models\User::where('username', $this->username)->update(['realm' => $this->uid]);
+            $ldapUser = User::findOrFailByUsername($this->username);
+            $community->membersGroup()->members()->attach($ldapUser);
 
-                Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
+            \App\Models\User::create([
+                'username' => $this->username,
+                'full_name' => trim($this->firstname  . ' ' . $this->lastname),
+                'email' => $this->email,
+                'email_verified_at' => now(),
+                'password' => Hash::make(Str::uuid()),
+                'realm' => $this->uid,
+            ]);
 
-                $this->searchCompleted = false;
-                $this->email = "";
-                $this->username = "";
-                $this->firstname = "";
-                $this->lastname = "";
-            } catch (LdapRecordException $exception) {
-                $this->addError('dn', $exception->getMessage());
-                return false;
-            }
+            Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
+
+            $this->searchCompleted = false;
+            $this->email = "";
+            $this->username = "";
+            $this->firstname = "";
+            $this->lastname = "";
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
         }
