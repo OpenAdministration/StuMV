@@ -109,9 +109,6 @@ class ImportUsersFromUniLdap extends Component
             $user->save();
             $community->membersGroup()->members()->attach($user);
 
-            $ldapUser = User::findOrFailByUsername($this->username);
-            $community->membersGroup()->members()->attach($ldapUser);
-
             \App\Models\User::create([
                 'username' => $this->username,
                 'full_name' => trim($this->firstname  . ' ' . $this->lastname),
