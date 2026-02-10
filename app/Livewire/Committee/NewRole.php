@@ -29,7 +29,10 @@ class NewRole extends Component
 
     public function rules(){
         return [
-            'cn' => new UniqueRole($this->uid, $this->ou),
+            'cn' => [
+                'regex:/^[a-z0-9-]*$/',
+                new UniqueRole($this->uid, $this->ou),
+            ]
         ];
     }
 
