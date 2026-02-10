@@ -5,14 +5,16 @@
             <flux:text class="text-base">{{ __('realms.members_explanation') }}</flux:text>
         </div>
         <div>
-            <flux:button
-                variant="primary"
-                icon="user-plus"
-                wire:navigate
-                href="{{ route('realms.members.new', ['uid' => $community_name]) }}"
-                :disabled="auth()->user()->cannot('add_member', $community)">
-                {{ __('Add Member') }}
-            </flux:button>
+            @can('add_member', $community)
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    wire:navigate
+                    href="{{ route('realms.members.new', ['uid' => $community_name]) }}"
+                >
+                    {{ __('Add Member') }}
+                </flux:button>
+            @endcan
         </div>
     </div>
 
