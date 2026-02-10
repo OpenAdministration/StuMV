@@ -18,11 +18,13 @@
         <flux:label>{{ __('Short Committee Name') }}</flux:label>
         <flux:description>{{ __('committees.new_hint_shortname') }}</flux:description>
         <flux:input type="text" wire:model.live="ou" required />
+        <flux:error name="ou" />
     </flux:field>
     <flux:field>
         <flux:label>{{ __('Full Committee Name') }}</flux:label>
         <flux:description>{{ __('committees.new_hint_longname') }}</flux:description>
         <flux:input type="text" wire:model.live="description" required />
+        <flux:error name="description" />
     </flux:field>
     <x-slot:abort_route>
         {{ route('committees.list', ['uid' => $realm_uid]) }}
