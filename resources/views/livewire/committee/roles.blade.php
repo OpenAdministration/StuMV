@@ -23,7 +23,7 @@
     </flux:field>
     --}}
 
-    <flux:table class="mb-6 sm:mb-8">
+    <flux:table>
         <flux:table.columns>
             <flux:table.column>{{ __('Full Name') }}</flux:table.column>
             <flux:table.column>{{ __('Members') }}</flux:table.column>
@@ -84,6 +84,8 @@
         @endforelse
         </flux:table.rows>
     </flux:table>
+
+    <div class="block clear-both"></div>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
