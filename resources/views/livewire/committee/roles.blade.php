@@ -85,7 +85,7 @@
         </flux:table.rows>
     </flux:table>
 
-    <div class="block clear-both"></div>
+    <div class="block h-[1px]"></div>
 
     <form wire:submit="deleteCommit">
         <x-modal.confirmation wire:model="showDeleteModal">
