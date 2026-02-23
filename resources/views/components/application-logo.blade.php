@@ -50,11 +50,11 @@
    gradientTransform="matrix(1,0,0,-1,-0.02,533.4795)">
                 <stop
    offset="0"
-   stop-color="#FFFFFF"
+   stop-color="#27272a"
    id="stop3" />
                 <stop
    offset="1"
-   stop-color="#E6E6E6"
+   stop-color="#18181b"
    id="stop4" />
             </linearGradient>
             <path
