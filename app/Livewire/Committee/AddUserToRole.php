@@ -26,13 +26,13 @@ class AddUserToRole extends Component
     public array $usernames = [];
 
     #[Validate('date:Y-m-d')]
-    public $start_date;
+    public ?string $start_date;
 
     #[Validate('date:Y-m-d')]
-    public $end_date = '';
+    public ?string $end_date;
 
     #[Validate('date:Y-m-d')]
-    public $decision_date = '';
+    public ?string $decision_date;
 
     #[Validate('string')]
     public string $comment = '';
@@ -42,6 +42,7 @@ class AddUserToRole extends Component
         $this->ou = $ou;
         $this->cn = $cn;
         $this->start_date = today()->format('Y-m-d');
+        $this->decision_date = today()->format('Y-m-d');
     }
 
     public function rules()
@@ -63,7 +64,8 @@ class AddUserToRole extends Component
             ->title(__('realms.add_members_to_role_title', ['role' => $this->cn]));
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
 
         $committee = Committee::findByName($this->uid, $this->ou);
@@ -88,4 +90,10 @@ class AddUserToRole extends Component
         ]);
     }
 
+    public function updateDecisionDate()
+    {
+        if ($this->start_date) {
+            $this->decision_date = $this->start_date;
+        }
+    }
 }

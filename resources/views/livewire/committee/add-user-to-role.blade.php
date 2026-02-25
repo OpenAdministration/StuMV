@@ -22,15 +22,15 @@
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Starting') }}</flux:label>
-            <flux:date-picker start-day="1" wire:model="start_date" />
+            <flux:input type="date" wire:model="start_date" wire:change="updateDecisionDate" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Ending') }}</flux:label>
-            <flux:date-picker start-day="1" wire:model="end_date" />
+            <flux:input type="date" wire:model="end_date" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Decided') }}</flux:label>
-            <flux:date-picker start-day="1" wire:model="decision_date" />
+            <flux:input type="date" wire:model="decision_date" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Comment') }}</flux:label>
