@@ -22,7 +22,7 @@
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Starting') }}</flux:label>
-            <flux:input type="date" wire:model="start_date" wire:change="updateDecisionDate" />
+            <flux:input type="date" wire:model.live="start_date" wire:change="updateDecisionDate" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Ending') }}</flux:label>
