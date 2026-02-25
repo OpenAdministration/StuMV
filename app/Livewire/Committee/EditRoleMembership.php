@@ -33,14 +33,16 @@ class EditRoleMembership extends Component
     #[Locked]
     public string $username = '';
 
-    #[Validate('required|date:Y-m-d', as: 'Starting Date')]
-    public $start_date;
-    #[Validate('nullable|date:Y-m-d', as: 'Ending Date')]
-    public $end_date = '';
-    #[Validate('nullable|date:Y-m-d', as: 'Decision Date')]
-    public $decision_date = '';
+    #[Validate('date:Y-m-d')]
+    public ?string $start_date;
 
-    #[Validate('string')]
+    #[Validate('date:Y-m-d|nullable')]
+    public ?string $end_date;
+
+    #[Validate('date:Y-m-d|nullable')]
+    public ?string $decision_date;
+
+    #[Validate('string|nullable')]
     public string $comment = '';
 
     public function mount(Community $uid, $ou, $cn, $id){
