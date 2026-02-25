@@ -23,18 +23,22 @@
         <flux:field>
             <flux:label>{{ __('Starting') }}</flux:label>
             <flux:input type="date" wire:model="start_date" wire:change="updateDecisionDate" />
+            <flux:error name="start_date" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Ending') }}</flux:label>
             <flux:input type="date" wire:model="end_date" />
+            <flux:error name="end_date" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Decided') }}</flux:label>
             <flux:input type="date" wire:model="decision_date" />
+            <flux:error name="decision_date" />
         </flux:field>
         <flux:field>
             <flux:label>{{ __('Comment') }}</flux:label>
             <flux:input wire:model="comment" />
+            <flux:error name="comment" />
         </flux:field>
     </div>
 </x-livewire-form>
