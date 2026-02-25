@@ -56,11 +56,10 @@
                         <flux:input wire:model="phone" />
                     </flux:field>
                 </div>
-                <div>
-                    <flux:field variant="inline">
-                        <flux:switch wire:model="userIsActive" />
-                        <flux:label>{{ __('profile.userIsActive') }}</flux:label>
-                    </flux:field>
+                <div class="mt-6 space-y-4">
+                    <flux:separator variant="subtle" />
+                    <flux:switch wire:model="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />
+                    <flux:separator variant="subtle" />
                 </div>
                 <x-slot:abort_route>
                     {{ url()->previous() }}
