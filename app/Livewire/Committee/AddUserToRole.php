@@ -28,13 +28,13 @@ class AddUserToRole extends Component
     #[Validate('date:Y-m-d')]
     public ?string $start_date;
 
-    #[Validate('date:Y-m-d')]
+    #[Validate('date:Y-m-d|nullable')]
     public ?string $end_date;
 
-    #[Validate('date:Y-m-d')]
+    #[Validate('date:Y-m-d|nullable')]
     public ?string $decision_date;
 
-    #[Validate('string')]
+    #[Validate('string|nullable')]
     public string $comment = '';
 
     public function mount(Community $uid, $ou, $cn){
