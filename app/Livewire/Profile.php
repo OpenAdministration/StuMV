@@ -32,6 +32,8 @@ class Profile extends Component
 
     public $currentUsername;
 
+    public $userIsActive = false;
+
     public function mount($username)
     {
         if ($username == auth()->user()->username || auth()->user()->can('superadmin', User::class)) {
@@ -51,6 +53,12 @@ class Profile extends Component
         $this->postalCode = $user->getFirstAttribute('postalCode');
         $this->city = $user->getFirstAttribute('l');
         $this->phone = $user->getFirstAttribute('telephoneNumber');
+
+        if ($user->getFirstAttribute('pwdAccountLockedTime') === "00000101000000Z") {
+            $this->userIsActive = false;
+        } else {
+            $this->userIsActive = true;
+        }
     }
 
     public function render()
@@ -71,6 +79,13 @@ class Profile extends Component
         $user->setAttribute('postalCode', $this->postalCode);
         $user->setAttribute('l', $this->city);
         $user->setAttribute('telephoneNumber', $this->phone);
+
+        if ($this->userIsActive) {
+            $user->deleteAttribute('pwdAccountLockedTime');
+        } else {
+            $user->setAttribute('pwdAccountLockedTime', "00000101000000Z");
+        }
+
         $user->save();
 
         Flux::toast(variant: 'success', text: __('Saved'));

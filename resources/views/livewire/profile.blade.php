@@ -56,6 +56,14 @@
                         <flux:input wire:model="phone" />
                     </flux:field>
                 </div>
+                @can('superadmin')
+                    <div>
+                        <flux:field variant="inline">
+                            <flux:switch wire:model="userIsActive" />
+                            <flux:label>{{ __('profile.userIsActive') }}</flux:label>
+                        </flux:field>
+                    </div>
+                @endcan
                 <x-slot:abort_route>
                     {{ url()->previous() }}
                 </x-slot:abort_route>
