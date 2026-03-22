@@ -55,7 +55,7 @@
             </flux:button>
 
             <flux:dropdown>
-                <flux:button size="sm" icon="ellipsis-vertical" />
+                <flux:button size="sm" icon="ellipsis-vertical" title="{{ __('common.options') }}" />
                 <flux:menu>
                     <flux:menu.item
                         icon="users"

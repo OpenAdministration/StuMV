@@ -2,4 +2,5 @@
 
 return [
     'about' => 'About',
+    'options' => 'Options',
 ];
