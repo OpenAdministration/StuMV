@@ -21,16 +21,14 @@
             <flux:input wire:model.live.debounce="search" />
         </flux:field>-->
 
-        <div>
+        <ul>
             @forelse($committees as $committee)
-                <ul>
-                    <livewire:committee.committee-tree-item :dn="$committee->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" />
-                </ul>
+                <livewire:committee.committee-tree-item :dn="$committee->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" />
             @empty
                 <div class="flex justify-center item-center">
                     <span class="text-gray-400 text-xl py-2 font-medium">{{ __('committees.no_committees_found') }}</span>
                 </div>
             @endforelse
-        </div>
+        </ul>
     </div>
 </div>
