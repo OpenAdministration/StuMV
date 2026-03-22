@@ -2,6 +2,7 @@
     <flux:button
         variant="ghost"
         icon="info"
+        title="{{ __('common.about') }} {{ config('app.name') }} &hellip;"
     />
 </flux:modal.trigger>
 
