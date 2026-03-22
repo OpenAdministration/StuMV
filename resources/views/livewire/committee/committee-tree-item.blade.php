@@ -86,16 +86,18 @@
     </div>
 
     @if(count($children) > 0 && $unfolded)
-        @foreach($children as $child)
-            <div class="grid grid-cols-[3rem_1fr]">
-                <div class="flex pl-4 items-center">
-                    @if(!$isLastItem)
-                        <flux:separator vertical class="w-[2px]!" />
-                    @endif
+        <ul>
+            @foreach($children as $child)
+                <div class="grid grid-cols-[3rem_1fr]">
+                    <div class="flex pl-4 items-center">
+                        @if(!$isLastItem)
+                            <flux:separator vertical class="w-[2px]!" />
+                        @endif
+                    </div>
+                    <livewire:committee.committee-tree-item :dn="$child->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" />
                 </div>
-                <livewire:committee.committee-tree-item :dn="$child->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" />
-            </div>
-        @endforeach
+            @endforeach
+        </ul>
     @endif
 
     <flux:modal name="delete-committee-{{ $committee->getFirstAttribute('ou') }}" class="md:w-96">
