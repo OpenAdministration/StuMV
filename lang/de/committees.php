@@ -27,4 +27,6 @@ return [
     'new_role_title' => 'Neue Rolle erstellen',
     'select_committee' => 'Wähle ein Gremium aus',
     'select_user' => 'Wähle eine:n Benutzer:in',
+    'foldSubItems' => 'Untergeordnete Gremien von :committee einklappen',
+    'unfoldSubItems' => 'Untergeordnete Gremien von :committee ausklappen',
 ];

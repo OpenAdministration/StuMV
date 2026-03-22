@@ -8,6 +8,7 @@
                         icon="chevron-down"
                         wire:click="$set('unfolded', false)"
                         class="cursor-pointer"
+                        title="{{ __('committees.foldSubItems', ['committee' => $committee->getFirstAttribute('description')]) }}"
                     />
                 @else
                     <flux:button
@@ -15,6 +16,7 @@
                         icon="chevron-right"
                         wire:click="getChildren('{{ $committee->getDn() }}')"
                         class="cursor-pointer"
+                        title="{{ __('committees.unfoldSubItems', ['committee' => $committee->getFirstAttribute('description')]) }}"
                     />
                 @endif
             </div>
