@@ -2,15 +2,15 @@
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @theme {
-    --color-accent: var(--color-indigo-600);
-    --color-accent-content: var(--color-indigo-700);
+    --color-accent: var(--color-sky-700);
+    --color-accent-content: var(--color-sky-700);
     --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-indigo-600) !important;
-        --color-accent-content: var(--color-indigo-300) !important;
-        --color-accent-foreground: var(--color-white) !important;
+        --color-accent: var(--color-yellow-400);
+        --color-accent-content: var(--color-yellow-300);
+        --color-accent-foreground: var(--color-yellow-950);
     }
 }

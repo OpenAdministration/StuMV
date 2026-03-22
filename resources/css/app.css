@@ -11,20 +11,6 @@
 }
 
 :root {
-    --color-accent: var(--color-indigo-600);
-    --color-accent-content: var(--color-indigo-700);
-    --color-accent-foreground: var(--color-white);
-}
-
-:root {
-    .dark {
-        --color-accent: var(--color-indigo-600);
-        --color-accent-content: var(--color-indigo-300);
-        --color-accent-foreground: var(--color-white);
-    }
-}
-
-:root {
     --livewire-progress-bar-color: var(--color-accent-content) !important;
 }
 
