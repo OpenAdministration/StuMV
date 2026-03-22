@@ -1,4 +1,4 @@
-<div>
+<li>
     <div class="grid grid-cols-[3rem_1fr_auto]">
         @if($hasChildren)
             <div class="flex justify-start items-center">
@@ -129,4 +129,4 @@
             </div>
         </div>
     </flux:modal>
-</div>
+</li>
