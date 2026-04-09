@@ -28,7 +28,7 @@ class RegisterUser extends Component
     #[Validate('required|string|max:255')]
     public string $last_name = '';
 
-    #[Validate('required|string|min:3|max:255|regex:/^[0-9a-zA-Z_\-\.]*$/')]
+    #[Validate('required|string|min:3|max:255|regex:/^[0-9a-z_\-\.]*$/')]
     public string $username = '';
 
     #[Validate]
