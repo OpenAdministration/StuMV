@@ -5,36 +5,36 @@
             <div class="flex flex-col gap-6">
                 <flux:field>
                     <flux:label>{{ __('Email') }}</flux:label>
-                    <flux:input wire:model.blur="email" type="email" autofocus />
+                    <flux:input wire:model.live="email" type="email" autofocus />
                     <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
                     <flux:error name="email" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Username') }}</flux:label>
-                    <flux:input wire:model.blur="username" type="text" />
+                    <flux:input wire:model.live="username" type="text" />
                     <flux:description>{{ __('validation.username', ['attribute' => __('Username')]) }}</flux:description>
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('First name') }}</flux:label>
-                    <flux:input wire:model.blur="first_name" type="text" />
+                    <flux:input wire:model.live="first_name" type="text" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Last name') }}</flux:label>
-                    <flux:input wire:model.blur="last_name" type="text" />
+                    <flux:input wire:model.live="last_name" type="text" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Password') }}</flux:label>
-                    <flux:input wire:model.blur="password" type="password" />
+                    <flux:input wire:model.live="password" type="password" />
                     <flux:description>{{ __('user.help.password') }}</flux:description>
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Confirm Password') }}</flux:label>
-                    <flux:input wire:model.blur="password_confirmation" type="password" />
+                    <flux:input wire:model.live="password_confirmation" type="password" />
                     <flux:description></flux:description>
                 </flux:field>
             </div>
