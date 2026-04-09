@@ -6,36 +6,40 @@
                 <flux:field>
                     <flux:label>{{ __('Email') }}</flux:label>
                     <flux:input wire:model.live="email" type="email" autofocus />
-                    <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
                     <flux:error name="email" />
+                    <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Username') }}</flux:label>
                     <flux:input wire:model.live="username" type="text" />
+                    <flux:error name="username" />
                     <flux:description>{{ __('validation.username', ['attribute' => __('Username')]) }}</flux:description>
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('First name') }}</flux:label>
                     <flux:input wire:model.live="first_name" type="text" />
+                    <flux:error name="first_name" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Last name') }}</flux:label>
                     <flux:input wire:model.live="last_name" type="text" />
+                    <flux:error name="last_name" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Password') }}</flux:label>
                     <flux:input wire:model.live="password" type="password" />
+                    <flux:error name="password" />
                     <flux:description>{{ __('user.help.password') }}</flux:description>
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Confirm Password') }}</flux:label>
                     <flux:input wire:model.live="password_confirmation" type="password" />
-                    <flux:description></flux:description>
+                    <flux:error name="password_confirmation" />
                 </flux:field>
             </div>
 
