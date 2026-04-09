@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Ldap\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -47,11 +46,10 @@ class NewPasswordController extends Controller
             $request->only('mail', 'uid', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
                 $user->forceFill([
-                //    'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
                 $ldapUser = User::findOrFailByUsername($user->username);
-                $ldapUser->setAttribute('userPassword', "{ARGON2}" . Hash::make($request->password));
+                $ldapUser->setAttribute('userPassword', "{ARGON2}" . password_hash($request->password, PASSWORD_ARGON2ID));
                 $ldapUser->save();
 
                 event(new PasswordReset($user));

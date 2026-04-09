@@ -10,7 +10,6 @@ use App\Rules\UniqueDomain;
 use App\Rules\UniqueEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
@@ -114,7 +113,7 @@ class RegisterUser extends Component
             'sn'  => $this->last_name,
             'givenName' => $this->first_name,
             'mail' => $this->email,
-            'userPassword'  => "{ARGON2}" . Hash::make($this->password),
+            'userPassword'  => "{ARGON2}" . password_hash($this->password, PASSWORD_ARGON2ID),
             // usually ldap SHOULD hash it itself - did not work
         ]);
         $user->setDn("uid=$this->username,ou=People,{base}");

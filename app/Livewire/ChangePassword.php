@@ -7,7 +7,6 @@ use App\Providers\RouteServiceProvider;
 use Flux\Flux;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
@@ -56,7 +55,7 @@ class ChangePassword extends Component
         $this->validate();
         $username = Auth::user()->username;
         $ldapUser = User::findOrFailByUsername($username);
-        $ldapUser->setAttribute('userPassword', "{ARGON2}" . Hash::make($this->password));
+        $ldapUser->setAttribute('userPassword', "{ARGON2}" . password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
 
         Flux::toast(variant: 'success', text: __('Password has been changed'));
