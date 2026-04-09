@@ -12,16 +12,13 @@
             <div class="flex flex-wrap gap-2 items-center justify-between">
                 <form method="POST" action="{{ route('verification.send') }}">
                     @csrf
-                    <div>
-                        <flux:button variant="primary" type="submit">
-                            {{ __('Resend verification Email') }}
-                        </flux:button>
-                    </div>
+                    <flux:button variant="primary" type="submit">
+                        {{ __('Resend verification Email') }}
+                    </flux:button>
                 </form>
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
                     <flux:button type="submit">
                         {{ __('Log out') }}
                     </flux:button>
