@@ -23,7 +23,7 @@ return [
     'after_or_equal' => 'Das :attribute muss ein Datum nach oder gleich dem :date sein.',
     'alpha' => 'Das :attribute darf nur Buchstaben enthalten.',
     'alpha_dash' => 'Das :attribute darf nur Buchstaben, Zahlen, Bindestriche, Unterstriche enthalten.',
-    'username' => 'Darf nur Buchstaben, Zahlen, Bindestriche, Unterstriche und Punkte enthalten.',
+    'username' => 'Darf nur Kleinbuchstaben, Zahlen, Bindestriche, Unterstriche und Punkte enthalten.',
     'alpha_num' => 'Das :attribute darf nur Buchstaben und Zahlen enthalten.',
     'array' => 'Das :attribute muss ein Array sein.',
     'before' => 'Das :attribute muss ein Datum vor :date sein.',
