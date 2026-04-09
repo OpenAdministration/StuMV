@@ -6,14 +6,14 @@
                 <flux:field>
                     <flux:label>{{ __('Email') }}</flux:label>
                     <flux:input wire:model.live="email" type="email" autofocus />
-                    <flux:error name="email" />
+                    <flux:error name="email" class="mb-2" />
                     <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Username') }}</flux:label>
                     <flux:input wire:model.live="username" type="text" />
-                    <flux:error name="username" />
+                    <flux:error name="username" class="mb-2" />
                     <flux:description>{{ __('validation.username', ['attribute' => __('Username')]) }}</flux:description>
                 </flux:field>
 
@@ -32,7 +32,7 @@
                 <flux:field>
                     <flux:label>{{ __('Password') }}</flux:label>
                     <flux:input wire:model.live="password" type="password" />
-                    <flux:error name="password" />
+                    <flux:error name="password" class="mb-2" />
                     <flux:description>{{ __('user.help.password') }}</flux:description>
                 </flux:field>
 
