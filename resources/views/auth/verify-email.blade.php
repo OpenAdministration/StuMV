@@ -1,33 +1,32 @@
 <x-guest-layout>
     <x-auth-card>
-
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('auth.verification_text') }}
-        </div>
-
-        @if (session('status') == 'verification-link-sent')
-            <div class="mb-4 font-medium text-sm text-green-600">
-                {{ __('auth.verification_link_sent_text') }}
+        @if(session('status') == 'verification-link-sent')
+            <div class="w-full max-w-[28rem]!">
+                <flux:callout variant="success" icon="circle-check" heading="{{ __('auth.verification_link_sent_text') }}" />
             </div>
         @endif
 
-        <div class="mt-4 flex items-center justify-between">
-            <form method="POST" action="{{ route('verification.send') }}">
-                @csrf
-                <div>
-                    <x-button type="submit">
-                        {{ __('Resend verification Email') }}
-                    </x-button>
-                </div>
-            </form>
+        <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-xs">
+            <div>{{ __('auth.verification_text') }}</div>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
+            <div class="flex flex-wrap gap-2 items-center justify-between">
+                <form method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <div>
+                        <flux:button variant="primary" type="submit">
+                            {{ __('Resend verification Email') }}
+                        </flux:button>
+                    </div>
+                </form>
 
-                <button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900">
-                    {{ __('Log out') }}
-                </button>
-            </form>
-        </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+
+                    <flux:button type="submit" class="underline text-sm text-gray-600 hover:text-gray-900">
+                        {{ __('Log out') }}
+                    </flux:button>
+                </form>
+            </div>
+        </flux:card>
     </x-auth-card>
 </x-guest-layout>
