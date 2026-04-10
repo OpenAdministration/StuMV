@@ -41,7 +41,7 @@
             >
                 {{ __('realms.dashboard.mods_headline') }}
             </flux:sidebar.item>
-            @can('moderator', \App\Ldap\Community::class)
+            @can('moderator', \App\Models\User::class, \App\Ldap\Community::class)
                 <flux:sidebar.item
                     icon="shield-user"
                     wire:navigate
@@ -50,7 +50,7 @@
                     {{ __('realms.dashboard.admin_headline') }}
                 </flux:sidebar.item>
             @endcan
-            @can('admin', \App\Ldap\Community::class)
+            @can('admin', \App\Models\User::class, \App\Ldap\Community::class)
                 <flux:sidebar.item
                     icon="key-round"
                     wire:navigate
@@ -59,7 +59,7 @@
                     {{ __('realms.dashboard.groups_headline') }}
                 </flux:sidebar.item>
             @endcan
-            @can('moderator', \App\Ldap\Community::class)
+            @can('moderator', \App\Models\User::class, \App\Ldap\Community::class)
                 <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="hammer"
@@ -75,7 +75,7 @@
             @can('picked', \App\Ldap\Community::class)
                 <flux:separator class="my-2" />
             @endcan
-            @can('admin', \App\Ldap\Community::class)
+            @can('admin', \App\Models\User::class, \App\Ldap\Community::class)
                 <flux:sidebar.item
                     icon="squirrel"
                     wire:navigate
