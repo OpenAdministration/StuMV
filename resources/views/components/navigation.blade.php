@@ -41,15 +41,13 @@
             >
                 {{ __('realms.dashboard.mods_headline') }}
             </flux:sidebar.item>
-            @can('moderator', $community)
-                <flux:sidebar.item
-                    icon="shield-user"
-                    wire:navigate
-                    :href="route('realms.admins', ['uid' => $uid])"
-                >
-                    {{ __('realms.dashboard.admin_headline') }}
-                </flux:sidebar.item>
-            @endcan
+            <flux:sidebar.item
+                icon="shield-user"
+                wire:navigate
+                :href="route('realms.admins', ['uid' => $uid])"
+            >
+                {{ __('realms.dashboard.admin_headline') }}
+            </flux:sidebar.item>
             <flux:sidebar.item
                 icon="key-round"
                 wire:navigate
