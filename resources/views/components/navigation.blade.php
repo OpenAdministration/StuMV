@@ -41,21 +41,25 @@
             >
                 {{ __('realms.dashboard.mods_headline') }}
             </flux:sidebar.item>
-            <flux:sidebar.item
-                icon="shield-user"
-                wire:navigate
-                :href="route('realms.admins', ['uid' => $uid])"
-            >
-                {{ __('realms.dashboard.admin_headline') }}
-            </flux:sidebar.item>
-            <flux:sidebar.item
-                icon="key-round"
-                wire:navigate
-                :href="route('realms.groups', ['uid' => $uid])"
-            >
-                {{ __('realms.dashboard.groups_headline') }}
-            </flux:sidebar.item>
-            @canany(['superadmin', 'admin', 'moderator'], [\App\Models\User::class, \App\Ldap\Community::class])
+            @can('moderator', $community)
+                <flux:sidebar.item
+                    icon="shield-user"
+                    wire:navigate
+                    :href="route('realms.admins', ['uid' => $uid])"
+                >
+                    {{ __('realms.dashboard.admin_headline') }}
+                </flux:sidebar.item>
+            @endcan
+            @can('admin', $community)
+                <flux:sidebar.item
+                    icon="key-round"
+                    wire:navigate
+                    :href="route('realms.groups', ['uid' => $uid])"
+                >
+                    {{ __('realms.dashboard.groups_headline') }}
+                </flux:sidebar.item>
+            @endcan
+            @can('moderator', $community)
                 <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="hammer"
@@ -65,19 +69,21 @@
                 >
                     {{ __('tools.tools') }}
                 </flux:sidebar.item>
-            @endcanany
+            @endcan
         @endcan
         @can('superadmin', \App\Models\User::class)
             @can('picked', \App\Ldap\Community::class)
                 <flux:separator class="my-2" />
             @endcan
-            <flux:sidebar.item
-                icon="squirrel"
-                wire:navigate
-                :href="route('superadmins.list')"
-            >
-                {{ __('Superadmins') }}
-            </flux:sidebar.item>
+            @can('admin', $community)
+                <flux:sidebar.item
+                    icon="squirrel"
+                    wire:navigate
+                    :href="route('superadmins.list')"
+                >
+                    {{ __('Superadmins') }}
+                </flux:sidebar.item>
+            @endcan
             <flux:sidebar.item
                 icon="log-in"
                 wire:navigate
