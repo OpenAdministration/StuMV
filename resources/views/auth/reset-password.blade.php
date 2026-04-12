@@ -21,8 +21,18 @@
                 <flux:input id="mail" name="mail" :label="__('E-Mail')" :value="old('mail', $request->mail)" required disabled/>
 
                 <!-- Password -->
-                <flux:input id="password" name="password" :label="__('Password')" type="password" required autofocus/>
-                <flux:input id="password_confirmation" name="password_confirmation" :label="__('Confirm Password')" type="password" required/>
+                <flux:field>
+                    <flux:label>{{ __('Password') }}</flux:label>
+                    <flux:input id="password" name="password" type="password" required autofocus />
+                    <flux:error name="password" class="mb-2" />
+                    <flux:description>{{ __('user.help.password') }}</flux:description>
+                </flux:field>
+
+                <flux:field>
+                    <flux:label>{{ __('Confirm Password') }}</flux:label>
+                    <flux:input id="password_confirmation" name="password_confirmation" type="password" required />
+                    <flux:error name="password_confirmation" />
+                </flux:field>
 
                 <div class="flex items-center justify-end">
                     <flux:button variant="primary" icon="rotate-ccw-key" type="submit">
