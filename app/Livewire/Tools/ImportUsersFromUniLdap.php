@@ -9,7 +9,6 @@ use App\Rules\UniqueEmail;
 use Flux\Flux;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -101,7 +100,7 @@ class ImportUsersFromUniLdap extends Component
             'sn'  => $this->lastname,
             'givenName' => $this->firstname,
             'mail' => $this->email,
-            'userPassword'  => "{ARGON2}" . Hash::make(Str::uuid()),
+            'userPassword'  => "{ARGON2}" . password_hash(Str::uuid(), PASSWORD_ARGON2ID),
             // usually ldap SHOULD hash it itself - did not work
         ]);
         $user->setDn("uid=$this->username,ou=People,{base}");
