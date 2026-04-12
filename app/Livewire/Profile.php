@@ -81,7 +81,7 @@ class Profile extends Component
         $user->setAttribute('telephoneNumber', $this->phone);
 
         if ($this->userIsActive) {
-            $user->deleteAttribute('pwdAccountLockedTime');
+            $user->removeAttribute('pwdAccountLockedTime');
         } else {
             $user->setAttribute('pwdAccountLockedTime', "00000101000000Z");
         }
