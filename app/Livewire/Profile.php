@@ -32,7 +32,7 @@ class Profile extends Component
 
     public $currentUsername;
 
-    public $userIsActive = false;
+    public $userIsActive = true;
 
     public function mount($username)
     {
