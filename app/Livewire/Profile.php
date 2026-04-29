@@ -54,7 +54,7 @@ class Profile extends Component
         $this->city = $user->getFirstAttribute('l');
         $this->phone = $user->getFirstAttribute('telephoneNumber');
 
-        if ($user->getFirstAttribute('pwdAccountLockedTime') === "00000101000000Z") {
+        if ($user->hasAttribute('pwdAccountLockedTime') && $user->getFirstAttribute('pwdAccountLockedTime') === "00000101000000Z") {
             $this->userIsActive = false;
         } else {
             $this->userIsActive = true;

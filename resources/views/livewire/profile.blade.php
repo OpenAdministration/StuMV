@@ -58,7 +58,7 @@
                 </div>
                 <div class="mt-6 space-y-4">
                     <flux:separator variant="subtle" />
-                    <flux:switch wire:model="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />
+                    <flux:switch wire:model.live="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />
                     <flux:separator variant="subtle" />
                 </div>
                 <x-slot:abort_route>
