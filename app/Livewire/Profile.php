@@ -82,7 +82,7 @@ class Profile extends Component
 
         if ($this->userIsActive && $user->hasAttribute('pwdAccountLockedTime')) {
             $user->removeAttribute('pwdAccountLockedTime');
-        } else {
+        } elseif (!$this->userIsActive) {
             $user->setAttribute('pwdAccountLockedTime', "00000101000000Z");
         }
 
