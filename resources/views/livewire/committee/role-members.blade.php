@@ -163,7 +163,7 @@
                 </div>
                 <flux:field>
                     <flux:label>{{ __('Termination Date') }}</flux:label>
-                    <flux:date-picker wire:model="terminateDate" />
+                    <flux:input type="date" wire:model="terminateDate" />
                 </flux:field>
                 <div class="flex justify-end gap-2">
                     <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
