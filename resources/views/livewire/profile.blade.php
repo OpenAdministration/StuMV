@@ -56,11 +56,13 @@
                         <flux:input wire:model="phone" />
                     </flux:field>
                 </div>
-                <div class="mt-6 space-y-4">
-                    <flux:separator variant="subtle" />
-                    <flux:switch wire:model.live="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />
-                    <flux:separator variant="subtle" />
-                </div>
+                @can('superadmin')
+                    <div class="mt-6 space-y-4">
+                        <flux:separator variant="subtle" />
+                        <flux:switch wire:model.live="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />
+                        <flux:separator variant="subtle" />
+                    </div>
+                @endcan
                 <x-slot:abort_route>
                     {{ url()->previous() }}
                 </x-slot:abort_route>
