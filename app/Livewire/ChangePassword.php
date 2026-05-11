@@ -51,10 +51,10 @@ class ChangePassword extends Component
         ])->title(__('Change Password'));
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
-        $username = Auth::user()->username;
-        $ldapUser = User::findOrFailByUsername($username);
+        $ldapUser = User::findOrFailByUsername($currentUsername);
         $ldapUser->setAttribute('userPassword', "{ARGON2}" . password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
 
