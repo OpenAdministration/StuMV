@@ -9,14 +9,16 @@
         <div class="max-w-6xl mx-auto space-y-6">
             <x-livewire-form class="space-y-6">
                 <flux:field>
-                    <flux:label>{{ __('Password') }}</flux:label>
-                    <flux:description>{{ __('user.help.password') }}</flux:description>
+                    <flux:label class="block">{{ __('Password') }}</flux:label>
+                    <flux:description class="block">{{ __('user.help.password') }}</flux:description>
                     <flux:input type="password" wire:model="password" />
+                    <flux:error name="password" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Password confirm') }}</flux:label>
                     <flux:input type="password" wire:model="password_confirmation" />
+                    <flux:error name="password_confirmation" />
                 </flux:field>
 
                 <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
