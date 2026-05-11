@@ -54,7 +54,7 @@ class ChangePassword extends Component
     public function save()
     {
         $this->validate();
-        $ldapUser = User::findOrFailByUsername($currentUsername);
+        $ldapUser = User::findOrFailByUsername($this->currentUsername);
         $ldapUser->setAttribute('userPassword', "{ARGON2}" . password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
 
