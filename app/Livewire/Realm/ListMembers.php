@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Models\RoleMembership;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
@@ -88,8 +89,11 @@ class ListMembers extends Component {
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_member', $community);
+
         $user = User::findOrFailByUsername($this->deleteMemberUsername);
         $community->membersGroup()->members()->detach($user);
+        RoleMembership::where('username', $this->deleteMemberUsername)->delete();
+        
         $this->showDeleteModal = false;
     }
 
