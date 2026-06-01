@@ -5,6 +5,7 @@ namespace App\Livewire\Tools;
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Ldap\User;
+use App\Models\RoleMembership;
 use App\Models\UniLdap;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
