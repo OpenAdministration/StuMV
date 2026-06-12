@@ -26,7 +26,7 @@
     </div>
 
     <div class="flex items-center">
-        <flux:switch wire:model.change="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
+        <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
     </div>
 
     {{--

@@ -9,7 +9,7 @@
         <div class="max-w-6xl mx-auto space-y-6">
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="flex items-center">
-                    <flux:switch wire:model.change="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
+                    <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
                 </div>
                 <div class="flex justify-end">
                     <flux:button variant="primary" icon="file-text" wire:click="exportPdf">{{ __('profile.exportAsPdf') }}</flux:button>
