@@ -55,7 +55,7 @@ class LdapSyncRoles extends Command
 
         foreach ($realms as $realm) {
             $this->comment("> " . $realm->getFirstAttribute('ou'));
-            
+
             $committees = Committee::fromCommunity($realm->getFirstAttribute('ou'))
                 ->search('ou', $this->argument('committee'))
                 ->get();
@@ -65,30 +65,36 @@ class LdapSyncRoles extends Command
                     ->search('cn', $this->argument('role'))
                     ->get();
                 foreach ($roles as $role) {
-                    /** @var Role $role */
+                    $this->comment("  |  |-> " . $role->getDn());
+
+                    $currentMembers = $role->getAttribute('uniqueMember');
+                    $newMembers = [];
+
                     $activeMemberships = RoleMembership::active($date)
                         ->where('committee_dn', $committee->getDn())
                         ->where('role_cn', $role->getFirstAttribute('cn'))
                         ->get();
-                    $this->comment("  |  |-> " . $role->getDn());
-
-                    // delete all members so far
-                    $currentMembers = $role->getAttribute('uniqueMember');
-                    if (!in_array('', $currentMembers)) {
-                        $query->add($role->getDn(), ['uniqueMember' => '']);
+                    
+                    foreach ($activeMemberships as $membership) {
+                        $newMembers[] = $membership->user->ldap();
                     }
-                    for ($i = 0; $i < count($currentMembers); $i++) {
-                        if ($currentMembers[$i] !== '') {
-                            $query->remove($role->getDn(), ['uniqueMember' => [ $currentMembers[$i] ]]);
+
+                    $membersToRemove = array_diff($currentMembers, $newMembers);
+                    $membersToAdd = array_diff($newMembers, $currentMembers);
+
+                    $membersToRemove = array_diff($currentMembers, $newMembers);
+                    foreach ($membersToRemove as $memberToRemove) {
+                        if ($memberToRemove !== '') {
+                            $this->comment("  |  |  |-> Remove: $memberToRemove");
+                            $query->remove($role->getDn(), ['uniqueMember' => [ $memberToRemove ]]);
                         }
                     }
-                    
+
+                    $membersToAdd = array_diff($newMembers, $currentMembers);
                     $ldapMembers = $role->members();
-                    foreach ($activeMemberships as $membership){
-                        /** @var RoleMembership $membership */
-                        // add only active members back
-                        $this->comment("  |  |  |-> $membership->username");
-                        $ldapMembers->attach($membership->user->ldap());
+                    foreach ($membersToAdd as $memberToAdd) {
+                        $this->comment("  |  |  |-> Add: $memberToAdd");
+                        $ldapMembers->attach($memberToAdd);
                     }
                 }
             }
