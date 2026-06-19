@@ -120,8 +120,10 @@ class LdapSyncRoles extends Command
 
                 $membersToRemove = array_diff($currentMembers, $newMembers);
                 foreach ($membersToRemove as $memberToRemove) {
-                    $this->comment("  |-> Remove: $memberToRemove");
-                    $query->remove($group->getDn(), ['uniqueMember' => [ $memberToRemove ]]);
+                    if ($memberToRemove !== '') {
+                        $this->comment("  |-> Remove: $memberToRemove");
+                        $query->remove($group->getDn(), ['uniqueMember' => [ $memberToRemove ]]);
+                    }
                 }
 
                 $membersToAdd = array_diff($newMembers, $currentMembers);
