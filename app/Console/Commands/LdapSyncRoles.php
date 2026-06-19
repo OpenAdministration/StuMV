@@ -102,17 +102,8 @@ class LdapSyncRoles extends Command
             foreach ($groups as $group) {
                 $this->comment("> " . $group->getDn());
 
-                // delete all members so far
                 $currentMembers = $group->getAttribute('uniqueMember');
-                if (!in_array('', $currentMembers)) {
-                    $query->add($group->getDn(), ['uniqueMember' => '']);
-                }
-                for ($i = 0; $i < count($currentMembers); $i++) {
-                    if ($currentMembers[$i] !== '') {
-                        $query->remove($group->getDn(), ['uniqueMember' => [ $currentMembers[$i] ]]);
-                    }
-                }
-
+                $newMembers = [];
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
                 foreach ($roles as $role) {
                     $roleCn = str_replace('cn=', '', substr($role->role_dn, 0, strpos($role->role_dn, ',')));
@@ -121,13 +112,23 @@ class LdapSyncRoles extends Command
                         ->where('committee_dn', $committeeDn)
                         ->where('role_cn', $roleCn)
                         ->get();
-
-                    $ldapMembers = $group->users();
                     foreach ($activeMemberships as $membership) {
-                        // add only active members back
-                        $this->comment("  |-> $membership->username");
-                        $ldapMembers->attach($membership->user->ldap());
+                        $newMembers[] = $membership->user->ldap();
                     }
+                }
+                $newMembers = array_unique($newMembers);
+
+                $membersToRemove = array_diff($currentMembers, $newMembers);
+                foreach ($membersToRemove as $memberToRemove) {
+                    $this->comment("  |-> Remove: $memberToRemove");
+                    $query->remove($group->getDn(), ['uniqueMember' => [ $memberToRemove ]]);
+                }
+
+                $membersToAdd = array_diff($newMembers, $currentMembers);
+                $ldapMembers = $group->users();
+                foreach ($membersToAdd as $memberToAdd) {
+                    $this->comment("  |-> Add: $memberToAdd");
+                    $ldapMembers->attach($memberToAdd);
                 }
             }
         }
