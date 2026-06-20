@@ -9,14 +9,22 @@ use Livewire\Component;
 class UnusedRoles extends Component
 {
     public string $realm_uid;
+    public string $tab = 'roles';
+    public bool $ready = false;
+    public array $unusedCommittees = [];
+    public array $unusedRoles = [];
 
     public function mount(Community $uid)
     {
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    public function render()
+    public function loadData(): void
     {
+        if ($this->ready) {
+            return;
+        }
+
         $committees = Committee::fromCommunity($this->realm_uid)
             ->orderBy('cn')
             ->get();
@@ -46,9 +54,13 @@ class UnusedRoles extends Component
             }
         }
 
-        return view('livewire.tools.unused-roles', [
-            'unusedCommittees' => $unusedCommittees,
-            'unusedRoles' => $unusedRoles,
-        ]);
+        $this->unusedCommittees = $unusedCommittees;
+        $this->unusedRoles = $unusedRoles;
+        $this->ready = true;
+    }
+
+    public function render()
+    {
+        return view('livewire.tools.unused-roles');
     }
 }
