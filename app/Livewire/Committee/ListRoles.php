@@ -34,22 +34,26 @@ class ListRoles extends Component {
     public string $deleteRoleCn;
     public string $deleteRoleName;
 
+    public bool $showOnlyActive = true;
+
     /*
      * TODOs:
      *   - Keep member overview in this controller
      *     - Remove dupes from member overview
      */
 
-    public function mount(Community $uid, $ou) {
+    public function mount(Community $uid, $ou)
+    {
        $this->uid = $uid->getFirstAttribute('ou');
        $this->ou = $ou;
     }
 
-    public function sortBy($field){
-        if($this->sortField === $field){
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -60,7 +64,8 @@ class ListRoles extends Component {
         $this->resetPage();
     }
 
-    public function render() {
+    public function render()
+    {
         $community = Community::findByUid($this->uid);
         $committee = Committee::findByNameOrFail($this->uid, $this->ou);
         $rolesSlice = $committee->roles()
@@ -79,7 +84,7 @@ class ListRoles extends Component {
         )->title(__('committees.roles_title', ['name' => $this->ou]));
     }
 
-    public function getMembersString(Role $role) : string
+    public function getMembersString(Role $role): string
     {
         $usernames = $role->dbMemberships()
             ->active(today())
@@ -88,17 +93,32 @@ class ListRoles extends Component {
             ->pluck('username');
 
         $members = [];
-        foreach($usernames as $user) {
-            array_push($members, User::findOrFailByUsername($user)->getFirstAttribute('cn'));
+        foreach ($usernames as $user) {
+            $members[] = User::findOrFailByUsername($user)->getFirstAttribute('cn');
         }
         
         if (count($members) === 4) {
             // replace last one with dots
             array_pop($members);
-            array_push($members, '…');
+            $members[] = '…';
         }
 
         return implode(', ', $members);
+    }
+
+    public function getHasMembers(Role $role): string
+    {
+        $members = $role->dbMemberships()
+            ->active(today())
+            ->distinct()
+            ->limit(2)
+            ->pluck('username');
+        
+        if (count($members) > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     #[Computed]
