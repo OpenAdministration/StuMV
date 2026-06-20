@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::livewire('{uid}/tools/compare-email-list', \App\Livewire\Tools\CompareEmailList::class)->name('tools.compare-email-list');
         Route::livewire('{uid}/tools/import-user-uni-ldap', \App\Livewire\Tools\ImportUsersFromUniLdap::class)->name('tools.import-user-uni-ldap');
         Route::livewire('{uid}/tools/users-not-in-uni-ldap', \App\Livewire\Tools\UsersNotInUniLdap::class)->name('tools.users-not-in-uni-ldap');
+        Route::livewire('{uid}/tools/unused-roles', \App\Livewire\Tools\UnusedRoles::class)->name('tools.unused-roles');
         // end mod
     });
 

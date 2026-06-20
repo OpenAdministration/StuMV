@@ -2,6 +2,8 @@
 
 return [
     'checkForMatches' => 'Prüfe auf Treffer',
+    'committee' => 'Gremium',
+    'committees' => 'Gremien',
     'compareEmailList_headline' => 'E-Mail-Listen-Abgleich',
     'compareEmailList_explanation' => 'Füge in das Textfeld eine Liste von E-Mail-Adressen ein (getrennt durch Zeilenumbrüche) und überprüfe, ob Benutzer:innen mit dieser E-Mail-Adresse existieren.',
     'createUser' => 'Person anlegen',
@@ -15,6 +17,8 @@ return [
     'lastname' => 'Nachname',
     'matches' => 'Treffer',
     'noMatchesFound' => 'Der Abgleich ergab keine Treffer.',
+    'role' => 'Rolle',
+    'roles' => 'Rollen',
     'startSearch' => 'Starte die Suche',
     'tools' => 'Hilfsmittel',
     'username' => 'Anmeldename',
