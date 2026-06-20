@@ -4,13 +4,13 @@ namespace App\Livewire\Tools;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
 class UnusedRoles extends Component
 {
     public string $realm_uid;
     public string $tab = 'roles';
-    public bool $ready = false;
     public array $unusedCommittees = [];
     public array $unusedRoles = [];
 
@@ -19,12 +19,9 @@ class UnusedRoles extends Component
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    public function loadData(): void
+    #[Lazy]
+    public function loadData()
     {
-        if ($this->ready) {
-            return;
-        }
-
         $committees = Committee::fromCommunity($this->realm_uid)
             ->orderBy('cn')
             ->get();
@@ -56,7 +53,6 @@ class UnusedRoles extends Component
 
         $this->unusedCommittees = $unusedCommittees;
         $this->unusedRoles = $unusedRoles;
-        $this->ready = true;
     }
 
     public function render()

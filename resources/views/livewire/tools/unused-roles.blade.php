@@ -1,16 +1,16 @@
-<div class="max-w-6xl mx-auto w-full" wire:init="loadData">
+<div class="max-w-6xl mx-auto w-full">
     <div class="space-y-4 mb-8">
         <flux:heading size="xl">{{ __('tools.unusedRoles_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.unusedRoles_explanation') }}</flux:text>
     </div>
-    <div>
+    <div wire:loading.class="hidden">
         <flux:tab.group>
             <flux:tabs wire:model="tab">
                 <flux:tab name="roles">{{ __('tools.roles') }}</flux:tab>
                 <flux:tab name="committees">{{ __('tools.committees') }}</flux:tab>
             </flux:tabs>
             <flux:tab.panel name="roles">
-                <div wire:loading.remove>
+                <div>
                     <flux:table>
                         <flux:table.columns>
                             <flux:table.column>{{ __('tools.role') }}</flux:table.column>
@@ -35,16 +35,9 @@
                         </flux:table.rows>
                     </flux:table>
                 </div>
-                <div wire:loading.delay class="space-y-3">
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                </div>
             </flux:tab.panel>
             <flux:tab.panel name="committees">
-                <div wire:loading.remove>
+                <div>
                     <flux:table>
                         <flux:table.columns>
                             <flux:table.column>{{ __('tools.committee') }}</flux:table.column>
@@ -65,14 +58,14 @@
                         </flux:table.rows>
                     </flux:table>
                 </div>
-                <div wire:loading.delay class="space-y-3">
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                    <flux:skeleton class="h-10 w-full" />
-                </div>
             </flux:tab.panel>
         </flux:tab.group>
+    </div>
+    <div wire:loading.delay class="space-y-3">
+        <flux:skeleton class="h-10 w-full" />
+        <flux:skeleton class="h-10 w-full" />
+        <flux:skeleton class="h-10 w-full" />
+        <flux:skeleton class="h-10 w-full" />
+        <flux:skeleton class="h-10 w-full" />
     </div>
 </div>
