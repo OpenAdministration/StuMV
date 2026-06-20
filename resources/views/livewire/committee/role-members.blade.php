@@ -40,7 +40,7 @@
     </flux:field>
     --}}
 
-    <div class="mb-6 sm:mb-8">
+    <div class="pb-6 sm:pb-8">
         <flux:table>
             <flux:table.columns>
                 <flux:table.column></flux:table.column>
