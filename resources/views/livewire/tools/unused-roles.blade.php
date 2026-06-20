@@ -3,13 +3,13 @@
         <flux:heading size="xl">{{ __('tools.unusedRoles_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.unusedRoles_explanation') }}</flux:text>
     </div>
-    <div>
+    <div class="pb-8">
         <flux:tab.group>
             <flux:tabs>
                 <flux:tab name="roles">{{ __('tools.roles') }}</flux:tab>
                 <flux:tab name="committees">{{ __('tools.committees') }}</flux:tab>
             </flux:tabs>
-            <flux:tab.panel name="roles">
+            <flux:tab.panel name="roles" class="pt-4">
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column>{{ __('tools.role') }}</flux:table.column>
@@ -34,7 +34,7 @@
                     </flux:table.rows>
                 </flux:table>
             </flux:tab.panel>
-            <flux:tab.panel name="committees">
+            <flux:tab.panel name="committees" class="pt-4">
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column>{{ __('tools.committee') }}</flux:table.column>
