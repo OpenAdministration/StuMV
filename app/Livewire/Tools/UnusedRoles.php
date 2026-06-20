@@ -26,6 +26,10 @@ class UnusedRoles extends Component
 
         foreach ($committees as $committee) {
             $committeeUnused = true;
+            $children = $committee->descendants()->get();
+            if (count($children) > 0) {
+                $committeeUnused = false;
+            }
 
             $roles = $committee->roles()->get();
             foreach ($roles as $role) {
