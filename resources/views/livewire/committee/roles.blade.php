@@ -49,17 +49,15 @@
                         {{ $this->getMembersString($role) }}
                     </flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
-                        <flux:button
-                            size="sm"
-                            variant="primary"
-                            icon="users"
-                            :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                        >
-                            {{ __('roles.link_members') }}
-                        </flux:button>
                         <flux:dropdown>
                             <flux:button size="sm" icon="ellipsis-vertical" />
                             <flux:menu>
+                                <flux:menu.item
+                                    icon="users"
+                                    :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                >
+                                    {{ __('roles.link_members') }}
+                                </flux:menu.item>
                                 <flux:menu.item
                                     icon="pencil"
                                     :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
