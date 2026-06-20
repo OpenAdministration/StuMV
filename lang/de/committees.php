@@ -29,4 +29,5 @@ return [
     'select_user' => 'Wähle eine:n Benutzer:in',
     'foldSubItems' => 'Untergeordnete Gremien von :committee einklappen',
     'unfoldSubItems' => 'Untergeordnete Gremien von :committee ausklappen',
+    'showOnlyActiveRoles' => 'Zeige nur Rollen mit aktiven Mitgliedschaften',
 ];
