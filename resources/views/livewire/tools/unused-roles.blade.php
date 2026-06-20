@@ -38,7 +38,7 @@
                         @foreach($unusedCommittees as $unusedCommittee)
                             <flux:table.row>
                                 <flux:table.cell>
-                                    {{ $unusedCommittee()->getFirstAttribute('description') }}
+                                    {{ $unusedCommittee->getFirstAttribute('description') }}
                                 </flux:table.cell>
                             </flux:table.row>
                         @endforeach
