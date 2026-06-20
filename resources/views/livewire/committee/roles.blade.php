@@ -54,12 +54,14 @@
                             <flux:menu>
                                 <flux:menu.item
                                     icon="users"
+                                    wire:navigate
                                     :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
                                 >
                                     {{ __('roles.link_members') }}
                                 </flux:menu.item>
                                 <flux:menu.item
                                     icon="pencil"
+                                    wire:navigate
                                     :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
                                     :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
                                 >
