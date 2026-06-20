@@ -16,13 +16,18 @@
                         <flux:table.column>{{ __('tools.committee') }}</flux:table.column>
                     </flux:table.columns>
                     <flux:table.rows>
-                        @foreach($unusedRoles as $unusedRole)
+                        @foreach($unusedRoles as $role)
                             <flux:table.row>
                                 <flux:table.cell>
-                                    {{ $unusedRole->getFirstAttribute('description') }}
+                                    {{ $role->getFirstAttribute('description') }}
                                 </flux:table.cell>
                                 <flux:table.cell>
-                                    {{ $unusedRole->committee()->getFirstAttribute('description') }}
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou')]) }}"
+                                    >
+                                        {{ $role->committee()->getFirstAttribute('description') }}
+                                    </flux:link>
                                 </flux:table.cell>
                             </flux:table.row>
                         @endforeach
@@ -35,10 +40,15 @@
                         <flux:table.column>{{ __('tools.committee') }}</flux:table.column>
                     </flux:table.columns>
                     <flux:table.rows>
-                        @foreach($unusedCommittees as $unusedCommittee)
+                        @foreach($unusedCommittees as $committee)
                             <flux:table.row>
                                 <flux:table.cell>
-                                    {{ $unusedCommittee->getFirstAttribute('description') }}
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                                    >
+                                        {{ $committee->getFirstAttribute('description') }}
+                                    </flux:link>
                                 </flux:table.cell>
                             </flux:table.row>
                         @endforeach
