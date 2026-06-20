@@ -21,6 +21,8 @@ return [
     'roles' => 'Rollen',
     'startSearch' => 'Starte die Suche',
     'tools' => 'Hilfsmittel',
+    'unusedRoles_headline' => 'Nicht verwendete Gremien und Rollen',
+    'unusedRoles_explanation' => 'Finde Gremien und Rollen, in denen es keine aktuellen oder ehemaligen Mitgliedschaften mehr gibt.',
     'username' => 'Anmeldename',
     'userNotFoundInUniLdap' => 'Diese Person konnte leider nicht gefunden werden.',
     'usersNotInUniLdap_headline' => 'Uni-Account-Abgleich',
