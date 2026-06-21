@@ -53,7 +53,7 @@ class ListGroups extends Component
     public function render()
     {
         $groupsQuery = Group::query()->in(Group::dnRoot($this->realm_uid));
-        if ($sortDirection === 'desc') {
+        if ($this->sortDirection === 'desc') {
             $groupsQuery->orderByDesc($this->sortField);
         } else {
             $groupsQuery->orderBy($this->sortField);
