@@ -25,21 +25,11 @@
 
     <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
-            <flux:table.column>
-                <button wire:click="sortBy('cn')" class="hover:text-blue-600">
-                    {{ __('Short Name') }}
-                    @if($sortField === 'cn')
-                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                    @endif
-                </button>
+            <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">
+                {{ __('Short Name') }}
             </flux:table.column>
-            <flux:table.column>
-                <button wire:click="sortBy('description')" class="hover:text-blue-600">
-                    {{ __('Full Name') }}
-                    @if($sortField === 'description')
-                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                    @endif
-                </button>
+            <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
+                {{ __('Full Name') }}
             </flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
