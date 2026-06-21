@@ -46,18 +46,16 @@
                 </x-table.cell>
                 <flux:table.cell>{{ $group->getFirstAttribute('description') }}</x-table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
-                    <flux:button
-                        size="sm"
-                        variant="primary"
-                        icon="users"
-                        wire:navigate
-                        href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                    >
-                        {{ __('groups.manage_roles') }}
-                    </flux:button>
                     <flux:dropdown>
                         <flux:button size="sm" icon="ellipsis-vertical" />
                         <flux:menu>
+                            <flux:menu.item
+                                icon="users"
+                                wire:navigate
+                                href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                            >
+                                {{ __('groups.manage_roles') }}
+                            </flux:menu.item>
                             <flux:menu.item
                                 icon="pencil"
                                 href="{{ route('realms.groups.edit', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
