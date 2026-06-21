@@ -17,7 +17,7 @@ class ListGroups extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'name';
+    public string $sortField = 'cn';
     
     #[Url]
     public string $sortDirection = 'asc';
@@ -52,9 +52,13 @@ class ListGroups extends Component
 
     public function render()
     {
-        $groups = Group::query()->in(Group::dnRoot($this->realm_uid))
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->slice($page = 1, $perPage = 10);
+        $groupsQuery = Group::query()->in(Group::dnRoot($this->realm_uid));
+        if ($sortDirection === 'desc') {
+            $groupsQuery->orderByDesc($this->sortField);
+        } else {
+            $groupsQuery->orderBy($this->sortField);
+        }
+        $groups = $groupsQuery->slice($page = 1, $perPage = 10);
 
         return view('livewire.group.list-group', [
             'groupSlice' => $groups,
