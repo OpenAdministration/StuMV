@@ -25,8 +25,22 @@
 
     <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
-            <flux:table.column>{{ __('Short Name') }}</flux:table.column>
-            <flux:table.column>{{ __('Full Name') }}</flux:table.column>
+            <flux:table.column>
+                <button wire:click="sortBy('cn')" class="hover:text-blue-600">
+                    {{ __('Short Name') }}
+                    @if($sortField === 'cn')
+                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    @endif
+                </button>
+            </flux:table.column>
+            <flux:table.column>
+                <button wire:click="sortBy('description')" class="hover:text-blue-600">
+                    {{ __('Full Name') }}
+                    @if($sortField === 'description')
+                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                    @endif
+                </button>
+            </flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
@@ -89,18 +103,27 @@
         </div>
     @endif
 
-    <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('groups.delete_title', ['name' => $deleteGroupName]) }}
-            </x-slot:title>
-            <x-slot:content>
-                {{ __('groups.delete_warning', ['name' => $deleteGroupName]) }}
-            </x-slot:content>
-            <x-slot:footer>
-                <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-            </x-slot:footer>
-        </x-modal.confirmation>
-    </form>
+    <flux:modal name="delete" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg" class="modal-header">{{ __('groups.delete_title', ['name' => $deleteGroupName]) }}</flux:heading>
+                <flux:text class="mt-2">{{ __('groups.delete_warning', ['name' => $deleteGroupName]) }}</flux:text>
+            </div>
+            <div class="flex flex-wrap justify-end gap-4">
+                <flux:button
+                    icon="ban"
+                    x-on:click="$flux.modal('delete').close()"
+                >
+                    {{ __('Cancel') }}
+                </flux:button>
+                <flux:button
+                    variant="primary"
+                    icon="trash-2"
+                    wire:click="deleteCommit()"
+                >
+                    {{ __('Delete') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>
