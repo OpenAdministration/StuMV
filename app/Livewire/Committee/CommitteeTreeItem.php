@@ -20,7 +20,7 @@ class CommitteeTreeItem extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $committee = Committee::findOrFail($this->dn);
-        $children = $committee->descendants()->orderBy('cn')->get();
+        $children = $committee->descendants()->orderBy('description')->get();
 
         return view('livewire.committee.committee-tree-item', [
             'community' => $community,

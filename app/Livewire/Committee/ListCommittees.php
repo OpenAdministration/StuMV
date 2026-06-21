@@ -49,7 +49,7 @@ class ListCommittees extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy('cn')
+            ->orderBy('description')
             ->list()
             ->get();
 
