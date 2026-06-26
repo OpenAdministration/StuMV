@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Ldap\User;
+use Flux\Flux;
 use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -145,9 +146,9 @@ class ListRoles extends Component {
         $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
         $this->authorize('delete', [$role, $this->committee(), $this->community()]);
         $role->delete();
-        return redirect()->route('committees.roles', ['uid' => $this->uid, 'ou' => $this->ou])
-            ->with('status', 'success')
-            ->with('message', __('Role was deleted'));
+
+        Flux::toast(variant: 'success', text: __('Role was deleted'));
+        return redirect()->route('committees.roles', ['uid' => $this->uid, 'ou' => $this->ou]);
     }
 
     public function close(): void
