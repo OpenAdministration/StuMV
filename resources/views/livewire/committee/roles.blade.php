@@ -36,12 +36,16 @@
         <flux:table.rows>
         @php
             $hasHiddenRolesWithMembers = false;
+            $committeesShown = 0;
         @endphp
         @forelse($roles as $role)
             @php
                 $hasMembers = $this->getHasMembers($role);
                 if (!$hasMembers && $this->showOnlyActive) {
                     $hasHiddenRolesWithMembers = true;
+                }
+                if ($hasMembers) {
+                    $committeesShown = $committeesShown + 1;
                 }
             @endphp
             @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
@@ -97,7 +101,7 @@
                 </flux:table.cell>
             </flux:table.row>
         @endforelse
-        @if($hasHiddenRolesWithMembers)
+        @if($hasHiddenRolesWithMembers && $committeesShown < 1)
             <flux:table.row>
                 <flux:table.cell colspan="3">
                     <div class="flex item-center py-2">
