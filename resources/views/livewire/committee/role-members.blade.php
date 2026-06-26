@@ -13,14 +13,7 @@
             </flux:heading>
             <flux:text class="text-base">{{ __('roles.membership_explanation') }}</flux:text>
         </div>
-        <div class="flex gap-2">
-            <flux:button
-                icon="calendar-x"
-                :href="route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
-            >
-                {{ __('roles.members.terminate_memberships') }}
-            </flux:button>
+        <div class="flex flex-col gap-2">
             <flux:button
                 variant="primary"
                 icon="user-plus"
@@ -28,6 +21,13 @@
                 :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
             >
                 {{ __('Add Member') }}
+            </flux:button>
+            <flux:button
+                icon="calendar-x"
+                :href="route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+            >
+                {{ __('roles.members.terminate_memberships') }}
             </flux:button>
         </div>
     </div>
