@@ -98,6 +98,9 @@ class NewCommittee extends Component
             $r->save();
         }
 
-        return response()->redirectToRoute('committees.list', ['uid' => $this->realm_uid]);
+        return response()->redirectToRoute('committees.roles', [
+            'uid' => $this->realm_uid,
+            'ou' => $this->ou
+        ]);
     }
 }
