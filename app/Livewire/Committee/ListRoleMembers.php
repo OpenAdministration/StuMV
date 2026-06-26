@@ -17,30 +17,28 @@ class ListRoleMembers extends Component
 {
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'name';
+
     #[Url]
     public string $sortDirection = 'asc';
 
-
-
     #[Locked]
     public string $uid;
+
     #[Locked]
     public string $ou;
+
     #[Locked]
     public string $cn;
 
     public string $deleteUsername;
     public int $deleteId;
 
-    public string $terminateUsername;
-    public int $terminateId;
-    public string $terminateDate;
-
     public bool $showOnlyActive = true;
 
-    public function mount(Community $uid, string $ou, string $cn) : void
+    public function mount(Community $uid, string $ou, string $cn)
     {
         $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
@@ -72,34 +70,6 @@ class ListRoleMembers extends Component
         ])->title(__('roles.members-title', ['name' => $this->cn]));
     }
 
-    public function prepareTermination(int $id): void
-    {
-        $membership = RoleMembership::findOrFail($id);
-        $committee = Committee::findByName($this->uid, $this->ou);
-        $community = Community::findOrFailByUid($this->uid);
-        $this->authorize('terminate', [$membership, $committee, $community]);
-
-        $this->terminateDate = today()->format('Y-m-d');
-        $this->terminateUsername = User::findOrFailByUsername($membership->username)->getFirstAttribute('cn');
-        $this->terminateId = $membership->id;
-    }
-
-    public function commitTermination()
-    {
-        $membership = RoleMembership::findOrFail($this->terminateId);
-        $committee = Committee::findByName($this->uid, $this->ou);
-        $community = Community::findOrFailByUid($this->uid);
-        $this->authorize('terminate', [$membership, $committee, $community]);
-        $this->validate(['terminateDate' => 'date:Y-m-d|after_or_equal:' . $membership->from->format('Y-m-d')]);
-
-        $membership->until = $this->terminateDate;
-        $membership->save();
-        $this->close();
-
-        Flux::toast(variant: 'success', text: __('roles.message_terminate_member_success'));
-        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
-    }
-
     public function prepareDeletion($id)
     {
         $membership = RoleMembership::findOrFail($id);
@@ -127,9 +97,6 @@ class ListRoleMembers extends Component
 
     public function close()
     {
-        $this->showTerminateModal = false;
-        unset($this->terminateUsername, $this->terminateId, $this->terminateDate);
-        $this->resetErrorBag('terminateDate');
         $this->showDeleteModal = false;
         unset($this->deleteUsername, $this->deleteId);
     }
