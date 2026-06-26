@@ -45,13 +45,13 @@ class TerminateRoleMemberships extends Component
             'committee' => $committee,
             'role' => $role,
             'memberships' => $memberships,
-        ])->title(__('roles.terminate_role_memberships_title', ['role' => $this->cn]));
+        ])->title(__('roles.terminate_role_memberships_title', ['role' => $role->getFirstAttribute('description')]));
     }
 
     public function save()
     {
-        foreach ($this->usernames as $u) {
-            $membership = RoleMembership::findOrFail($this->terminateId);
+        foreach ($this->membershipsToTerminate as $m) {
+            $membership = RoleMembership::findOrFail($m);
             $committee = Committee::findByName($this->uid, $this->ou);
             $community = Community::findOrFailByUid($this->uid);
             $this->authorize('terminate', [$membership, $committee, $community]);

@@ -1,8 +1,8 @@
 <x-livewire-form class="max-w-6xl mx-auto w-full">
     <div class="mb-6">
-        <flux:heading size="xl">{{ __('roles.terminate_role_memberships_title') }}</flux:heading>
+        <flux:heading size="xl">{{ __('roles.terminate_role_memberships_title', ['role' => $role->getFirstAttribute('description')]) }}</flux:heading>
     </div>
-    <div class="grid sm:grid-cols-2 gap-6 mb-6">
+    <div class="grid gap-6 mb-6">
         <flux:field class="col-span-full">
             <flux:label>{{ __('Users') }}</flux:label>
             <flux:pillbox
