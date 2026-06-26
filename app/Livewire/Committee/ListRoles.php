@@ -141,7 +141,7 @@ class ListRoles extends Component {
         Flux::modal('delete')->show();
     }
 
-    public function deleteCommit(): \Livewire\Features\SupportRedirects\Redirector
+    public function deleteCommit()
     {
         $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
         $this->authorize('delete', [$role, $this->committee(), $this->community()]);
@@ -151,7 +151,7 @@ class ListRoles extends Component {
         return redirect()->back();
     }
 
-    public function close(): void
+    public function close()
     {
         Flux::modal('delete')->close();
         unset($this->deleteRoleCn, $this->deleteRoleName);
