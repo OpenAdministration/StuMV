@@ -24,14 +24,14 @@ class TerminateRoleMemberships extends Component
 
     public array $membershipsToTerminate = [];
 
-    public ?string $terminateDate = null;
+    public ?string $terminationDate = null;
 
     public function mount(Community $uid, string $ou, string $cn)
     {
         $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
-        $this->terminateDate = today()->format('Y-m-d');
+        $this->terminationDate = today()->format('Y-m-d');
     }
 
     public function render()
@@ -55,9 +55,9 @@ class TerminateRoleMemberships extends Component
             $committee = Committee::findByName($this->uid, $this->ou);
             $community = Community::findOrFailByUid($this->uid);
             $this->authorize('terminate', [$membership, $committee, $community]);
-            $this->validate(['terminateDate' => 'date:Y-m-d|after_or_equal:' . $membership->from->format('Y-m-d')]);
+            $this->validate(['terminationDate' => 'date:Y-m-d|after_or_equal:' . $membership->from->format('Y-m-d')]);
 
-            $membership->until = $this->terminateDate;
+            $membership->until = $this->terminationDate;
             $membership->save();
         }
 
