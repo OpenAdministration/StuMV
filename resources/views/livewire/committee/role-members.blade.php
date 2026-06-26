@@ -13,7 +13,14 @@
             </flux:heading>
             <flux:text class="text-base">{{ __('roles.membership_explanation') }}</flux:text>
         </div>
-        <div>
+        <div class="flex gap-2">
+            <flux:button
+                icon="calendar-x"
+                :href="route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+            >
+                {{ __('roles.members.terminate_memberships') }}
+            </flux:button>
             <flux:button
                 variant="primary"
                 icon="user-plus"
@@ -73,14 +80,7 @@
                     <flux:table.cell>{{ \Carbon\Carbon::parse($member->from)->format('Y-m-d') }}</flux:table.cell>
                     <flux:table.cell>
                         @empty($member->until)
-                            <flux:modal.trigger name="termination">
-                                <flux:button
-                                    size="sm"
-                                    icon="calendar-x"
-                                    :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
-                                    wire:click="prepareTermination({{ $member->id }})"
-                                />
-                            </flux:modal.trigger>
+                            <flux:separator />
                         @else
                             {{ \Carbon\Carbon::parse($member->until)->format('Y-m-d') }}
                         @endempty
@@ -148,26 +148,6 @@
                 <div class="flex justify-end gap-2">
                     <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
                     <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
-                </div>
-            </div>
-        </flux:modal>
-    </form>
-
-
-    <form wire:submit="commitTermination">
-        <flux:modal name="termination">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg" class="modal-header">{{ __('roles.members.terminate_title', ['name' => $terminateUsername]) }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('roles.members.terminate_text', ['name' => $terminateUsername]) }}</flux:text>
-                </div>
-                <flux:field>
-                    <flux:label>{{ __('Termination Date') }}</flux:label>
-                    <flux:input type="date" wire:model="terminateDate" />
-                </flux:field>
-                <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Terminate') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

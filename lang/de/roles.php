@@ -25,6 +25,8 @@ return [
     'members.terminate_title' => 'Mitgliedschaft beenden',
     'members.terminate_text' => 'Gib an, zu welchem Datum die Mitgliedschaft von :name beendet werden soll.',
     'message_terminate_member_success' => 'Das Enddatum der Mitgliedschaft wurde erfolgreich gesetzt.',
+    'terminate_role_memberships_title' => 'Mitgliedschaften in der Rolle :role beenden',
+    'members.terminate_memberships' => 'Mitgliedschaften beenden',
     'members-title' => 'Rolle :name',
     'link_members' => 'Alle Mitglieder',
     'link_edit' => 'Bearbeiten',

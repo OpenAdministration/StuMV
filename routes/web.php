@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::livewire('{uid}/committees/{ou}/edit', \App\Livewire\Committee\EditCommittee::class)->name('committees.edit');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/edit', \App\Livewire\Committee\EditRole::class)->name('committees.roles.edit');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
+        Route::livewire('{uid}/committees/{ou}/role/{cn}/terminate-memberships', \App\Livewire\Committee\TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/membership/{id}', \App\Livewire\Committee\EditRoleMembership::class)->name('committees.roles.members.edit');
         Route::livewire('{uid}/tools', \App\Livewire\Tools\ToolsDashboard::class)->name('tools.dashboard');
         Route::livewire('{uid}/tools/compare-email-list', \App\Livewire\Tools\CompareEmailList::class)->name('tools.compare-email-list');
