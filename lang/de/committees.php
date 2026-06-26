@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'add_roles' => 'Rollen hinzufügen',
     'no_committees_found' => 'Keine Gremien gefunden',
     'search' => 'Durchsuche Gremien',
     'new' => 'Neues Gremium anlegen',

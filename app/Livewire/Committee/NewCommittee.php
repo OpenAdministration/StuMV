@@ -4,6 +4,7 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Role;
 use App\Rules\UniqueCommittee;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -23,6 +24,31 @@ class NewCommittee extends Component
     #[Validate('required|min:3')]
     public string $description = "";
 
+    public array $roles = ['member'];
+
+    private array $defaultRoles = [
+        'head' => [
+            'cn' => 'leitung',
+            'description' => 'Leitung',
+        ],
+        'deputy-head' => [
+            'cn' => 'leitung-stelli',
+            'description' => 'Stellvertretende Leitung',
+        ],
+        'member' => [
+            'cn' => 'mitglied',
+            'description' => 'Mitglied',
+        ],
+        'active' => [
+            'cn' => 'aktiv',
+            'description' => 'Aktiv',
+        ],
+        'student-member' => [
+            'cn' => 'mitglied-stud',
+            'description' => 'Studentisches Mitglied',
+        ],
+    ];
+
     public function mount(Community $uid){
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
@@ -41,10 +67,11 @@ class NewCommittee extends Component
     {
         $parents = Committee::fromCommunity($this->realm_uid)
             ->whereNotEquals('ou', 'Committees') // remove parent Folder from Results;
-            ->get()
-        ;
+            ->get();
+
         return view('livewire.committee.new-committee', [
             'select_parents' => $parents,
+            'defaultRoles' => $this->defaultRoles,
         ])->title(__('committees.new_title'));
     }
 
@@ -59,6 +86,18 @@ class NewCommittee extends Component
         ]);
         $c->setDn($dn);
         $c->save();
+
+        foreach ($this->roles as $role) {
+            $roleConfig = $this->defaultRoles[$role];
+            $r = new Role([
+                'cn' => $roleConfig['cn'],
+                'description' => $roleConfig['description'],
+                'uniqueMember' => '',
+            ]);
+            $r->inside($c);
+            $r->save();
+        }
+
         return response()->redirectToRoute('committees.list', ['uid' => $this->realm_uid]);
     }
 }

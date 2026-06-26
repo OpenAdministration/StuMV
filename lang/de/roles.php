@@ -38,4 +38,5 @@ return [
     'edit_success' => 'Rolle erfolgreich bearbeitet',
     'membership-edit_headline' => 'Rollenzuordnung anpassen',
     'membership-edit_explanation' => 'Hier kannst du die Zuordnung des:der Nutzers:Nutzerin bearbeiten. Das Start- und Enddatum begrenzt die Rollenzuordnung. Liegen die Daten in der Zukunft, wird die Zuordnung dann erst begonnen oder beendet. Beschlussdatum und Kommentar sind optionale Informationen, die lediglich der Beschreibung dienen.',
+    'there_are_inactive_roles' => 'In diesem Gremium gibt es Rollen ohne aktive Mitgliedschaften. Um diese Rollen angezeigt zu bekommen, lege oben den Schalter um.'
 ];

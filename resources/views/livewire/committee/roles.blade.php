@@ -34,7 +34,16 @@
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
+        @php
+            $hasHiddenRolesWithMembers = false;
+        @endphp
         @forelse($roles as $role)
+            @php
+                $hasMembers = $this->getHasMembers($role);
+                if (!$hasMembers && $this->showOnlyActive) {
+                    $hasHiddenRolesWithMembers = true;
+                }
+            @endphp
             @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
                 <flux:table.row>
                     <flux:table.cell>
@@ -88,6 +97,15 @@
                 </flux:table.cell>
             </flux:table.row>
         @endforelse
+        @if($hasHiddenRolesWithMembers)
+            <flux:table.row>
+                <flux:table.cell colspan="3">
+                    <div class="flex item-center py-2">
+                        <flux:separator text="{{ __('roles.there_are_inactive_roles') }}" />
+                    </div>
+                </flux:table.cell>
+            </flux:table.row>
+        @endif
         </flux:table.rows>
     </flux:table>
 

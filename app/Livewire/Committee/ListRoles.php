@@ -111,7 +111,7 @@ class ListRoles extends Component {
         $members = $role->dbMemberships()
             ->active(today())
             ->distinct()
-            ->limit(2)
+            ->limit(1)
             ->pluck('username');
         
         if (count($members) > 0) {

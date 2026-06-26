@@ -26,6 +26,16 @@
         <flux:input type="text" wire:model.live="description" required />
         <flux:error name="description" />
     </flux:field>
+    <flux:field>
+        <flux:label>{{ __('committees.add_roles') }}</flux:label>
+        <flux:description>{{ __('committees.new_hint_longname') }}</flux:description>
+        <flux:pillbox wire:model="roles">
+            @foreach($defaultRoles as $key => $r)
+                <flux:pillbox.option value="{{ $key }}">{{ $r->description }}</flux:pillbox.option>
+            @endforeach
+        </flux:pillbox>
+        <flux:error name="roles" />
+    </flux:field>
     <x-slot:abort_route>
         {{ route('committees.list', ['uid' => $realm_uid]) }}
     </x-slot:abort_route>
