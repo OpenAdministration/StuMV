@@ -148,7 +148,7 @@ class ListRoles extends Component {
         $role->delete();
 
         Flux::toast(variant: 'success', text: __('Role was deleted'));
-        return redirect()->back();
+        return redirect()->route('committees.roles', ['uid' => $this->uid, 'ou' => $this->ou]);
     }
 
     public function close()
