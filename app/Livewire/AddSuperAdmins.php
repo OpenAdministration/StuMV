@@ -24,7 +24,7 @@ class AddSuperAdmins extends Component
     {
         foreach ($this->usersToAdd as $u) {
             try {
-                $user = User::findOrFail($u->get);
+                $user = User::findOrFail($u);
                 SuperUserGroup::attach($user);
                 Flux::toast(variant: 'success', text: __('Added new Superadmin'));
                 return redirect()->route('superadmins.list');
