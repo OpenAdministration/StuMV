@@ -77,7 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function (){
     Route::middleware([SuperAdminMiddleware::class])->group(function (){
         Route::livewire('{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
         Route::livewire('superadmins', \App\Livewire\ListSuperUsers::class)->name('superadmins.list');
-        Route::livewire('add-superadmin', \App\Livewire\AddSuperUser::class)->name('superadmins.add');
+        Route::livewire('add-superadmins', \App\Livewire\AddSuperAdmins::class)->name('superadmins.add');
         Route::livewire('new-realm', \App\Livewire\Realm\NewRealm::class)->name('realms.new');
     });
     // end auth verified
