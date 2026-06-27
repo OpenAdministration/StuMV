@@ -31,10 +31,10 @@ class ListSuperUsers extends Component {
 
     public function sortBy($field): void
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -78,9 +78,8 @@ class ListSuperUsers extends Component {
 
     public function deleteCommit(): void
     {
-        $admins = Community::findByUid($this->community_name)?->adminsGroup()->members();
         $user = User::findByUsername($this->deleteAdminName);
-        $admins->detach($user);
+        SuperUserGroup::group()->members()->detach($user);
 
         // reset everything to prevent a 404 modal
         $this->close();
