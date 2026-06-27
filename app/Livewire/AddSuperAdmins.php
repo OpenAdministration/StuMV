@@ -22,7 +22,7 @@ class AddSuperAdmins extends Component
 
     public function save()
     {
-        foreach ($usersToAdd as $u) {
+        foreach ($this->usersToAdd as $u) {
             try {
                 $user = User::findOrFail($u->get);
                 SuperUserGroup::attach($user);
