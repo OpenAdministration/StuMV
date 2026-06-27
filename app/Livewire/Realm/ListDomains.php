@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
+use Flux\Flux;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -18,13 +19,12 @@ class ListDomains extends Component
     #[Url]
     public string $sortDirection = 'asc';
 
-    public bool $showDeleteModal = false;
     public string $deleteDomain = '';
 
     public string $uid;
 
-
-    public function mount(Community $uid){
+    public function mount(Community $uid)
+    {
         $this->uid = $uid->getFirstAttribute('ou');
     }
     
@@ -40,22 +40,24 @@ class ListDomains extends Component
     public function deletePrepare($dc): void
     {
         $results = Domain::fromCommunity($this->uid)->where('dc', $dc)->get();
-        if($results->count() === 1){
+        if ($results->count() === 1) {
             $this->deleteDomain = $results->first()->getFirstAttribute('dc');
-            $this->showDeleteModal = true;
+            Flux::modal('delete')->show();
         }
     }
 
-    public function deleteCommit(){
+    public function deleteCommit()
+    {
         $results = Domain::fromCommunity($this->uid)->where('dc', $this->deleteDomain)->get();
-        if($results->count() === 1){
+        if ($results->count() === 1) {
             $results->first()->delete();
             $this->close();
         }
     }
 
-    public function close(){
-        $this->showDeleteModal = false;
+    public function close()
+    {
+        Flux::modal('delete')->close();
         unset($this->deleteDomain);
     }
 }

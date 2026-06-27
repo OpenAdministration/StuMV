@@ -5,6 +5,7 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Flux\Flux;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,8 +21,6 @@ class ListMembers extends Component {
     public string $sortField = 'full_name';
     #[Url]
     public string $sortDirection = 'asc';
-
-    public bool $showDeleteModal = false;
 
     public string $deleteMemberName = '';
     public string $deleteMemberUsername = '';
@@ -54,7 +53,7 @@ class ListMembers extends Component {
         $community = Community::findOrFailByUid($this->community_name);
 
         // Get users from database
-        $membersQuery = \App\Models\User::where('realm', $this->community_name)->orderBy('full_name');
+        $membersQuery = \App\Models\User::where('realm', $this->community_name)->orderBy($this->sortField, $this->sortDirection);
         if ($this->search != '') {
             $membersQuery->where('full_name', 'like', '%' . $this->search . '%');
             $membersQuery->orWhere('username', 'like', '%' . $this->search . '%');
@@ -69,7 +68,7 @@ class ListMembers extends Component {
         )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
     }
 
-    public function deletePrepare($uid): void
+    public function removePrepare($uid): void
     {
         $community = Community::findOrFailByUid($this->community_name);
         $user = User::findOrFailByUsername($uid);
@@ -81,21 +80,21 @@ class ListMembers extends Component {
         }
         $this->deleteMemberName = $user->getFirstAttribute('cn');
         $this->deleteMemberUsername = $uid;
-        $this->showDeleteModal = true;
+        Flux::modal('remove')->show();
     }
 
-    public function deleteCommit(): void
+    public function removeCommit(): void
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_member', $community);
         $user = User::findOrFailByUsername($this->deleteMemberUsername);
         $community->membersGroup()->members()->detach($user);
-        $this->showDeleteModal = false;
+        Flux::modal('remove')->close();
     }
 
     public function close(): void
     {
-        $this->showDeleteModal = false;
+        Flux::modals()->close();
         unset($this->deleteMemberName, $this->deleteMemberUsername);
     }
 

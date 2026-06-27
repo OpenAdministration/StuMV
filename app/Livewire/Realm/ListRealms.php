@@ -3,6 +3,7 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,9 +27,7 @@ class ListRealms extends Component
     #[Url]
     public string $sortDirection = 'asc';
 
-    public bool $showDeleteModal = false;
     public string $deleteRealmName = '';
-
 
     public function sortBy($field): void
     {
@@ -86,7 +85,7 @@ class ListRealms extends Component
         $c = Community::findOrFailByUid($uid);
         $this->authorize('delete', $c);
         $this->deleteRealmName = $uid;
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
@@ -96,12 +95,12 @@ class ListRealms extends Component
         $community->delete(recursive: true);
         // reset everything to prevent a 404 modal
         unset($this->deleteRealmName);
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
     }
 
     public function close(): void
     {
-        $this->showDeleteModal = false;
+        Flux::modals()->close();
     }
 
     /**

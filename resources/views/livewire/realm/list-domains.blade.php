@@ -57,19 +57,17 @@
     </flux:table>
 
     <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('domain.delete_title', ['name' => $deleteDomain]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <div class="y">
-                    <span>{{ __('domain.delete_warning', ['name' => $deleteDomain]) }}</span>
+        <flux:modal name="delete">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('domain.delete_title', ['name' => $deleteDomain]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('domain.delete_warning', ['name' => $deleteDomain]) }}</flux:text>
                 </div>
-            </x-slot:content>
-            <x-slot:footer>
-                <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-            </x-slot:footer>
-        </x-modal.confirmation>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
     </form>
 </div>

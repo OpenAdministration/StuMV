@@ -76,17 +76,17 @@
     <div class="block pb-6 sm:pb-8"></div>
 
     <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('realms.delete_mod_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
-            </x-slot:title>
-            <x-slot:content>
-                {{ __('realms.delete_mod_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
-            </x-slot:content>
-            <x-slot:footer>
-                <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-            </x-slot:footer>
-        </x-modal.confirmation>
+        <flux:modal name="delete">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('realms.delete_mod_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.delete_mod_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}</flux:text>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
     </form>
 </div>

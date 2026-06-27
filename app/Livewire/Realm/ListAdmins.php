@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -16,20 +17,21 @@ class ListAdmins extends Component {
 
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'full_name';
+
     #[Url]
     public string $sortDirection = 'asc';
 
     #[Locked]
     public string $community_name;
 
-    public bool $showDeleteModal = false;
-
     public string $deleteAdminName = '';
 
 
-    public function mount(Community $uid) {
+    public function mount(Community $uid)
+    {
         $this->community_name = $uid->getFirstAttribute('ou');
     }
 
@@ -55,7 +57,8 @@ class ListAdmins extends Component {
         return Community::findByUid($this->community_name);
     }
 
-    public function render() {
+    public function render()
+    {
         $admins = $this->community()?->adminsGroup()->members()->get();
         return view(
             'livewire.realm.list-admins', [
@@ -84,7 +87,7 @@ class ListAdmins extends Component {
             return;
         }
         $this->deleteAdminName = $user->getFirstAttribute('cn');
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
@@ -102,6 +105,6 @@ class ListAdmins extends Component {
     public function close(): void
     {
         unset($this->deleteAdminName);
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
     }
 }

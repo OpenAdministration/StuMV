@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Ldap\Community;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User;
+use Flux\Flux;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -16,8 +17,10 @@ class ListSuperUsers extends Component {
 
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'cn';
+
     #[Url]
     public string $sortDirection = 'asc';
 
@@ -25,7 +28,6 @@ class ListSuperUsers extends Component {
 
     public string $deleteAdminName = '';
     public string $deleteAdminDn = '';
-
 
     public function sortBy($field): void
     {
@@ -43,8 +45,8 @@ class ListSuperUsers extends Component {
         $this->resetPage();
     }
 
-
-    public function render() {
+    public function render()
+    {
         $superGroup = SuperUserGroup::group();
         $listSuperadmins = $superGroup->members()
             //->search('cn', $this->search)
@@ -71,7 +73,7 @@ class ListSuperUsers extends Component {
             return;
         }
         $this->deleteAdminName = $username;
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
@@ -87,6 +89,6 @@ class ListSuperUsers extends Component {
     public function close(): void
     {
         unset($this->deleteAdminName);
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
     }
 }

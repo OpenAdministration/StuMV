@@ -17,8 +17,10 @@ class ListCommittees extends Component
 
     #[Url]
     public string $search = '';
+
     #[Url]
-    public string $sortField = 'ou';
+    public string $sortField = 'description';
+
     #[Url]
     public string $sortDirection = 'asc';
 
@@ -31,10 +33,10 @@ class ListCommittees extends Component
 
     public function sortBy($field): void
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -49,7 +51,7 @@ class ListCommittees extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy('description')
+            ->orderBy($this->sortField)
             ->list()
             ->get();
 
@@ -58,11 +60,4 @@ class ListCommittees extends Component
             'community' => $community,
         ])->title(__('committees.list_title'));
     }
-
-    public function close(): void
-    {
-        unset($this->deleteCommitteeDn, $this->deleteCommitteeOu, $this->deleteCommitteeName, $this->deleteConfirmText);
-        $this->showDeleteModal = false;
-    }
-
 }
