@@ -50,17 +50,11 @@ class ListSuperUsers extends Component {
         $superGroup = SuperUserGroup::group();
         $listSuperadmins = $superGroup->members()
             //->search('cn', $this->search)
-            ->get()
-        ;
-        return view(
-            'livewire.list-super-admins', [
-                'superadmins' => $listSuperadmins,
-                //->orderBy($this->sortField, $this->sortDirection)
-                //->paginate(10),
-                // all users that aren't admins on this realm
-                //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
-            ]
-        )->title(__('list_superusers_title'));
+            ->get();
+        
+        return view('livewire.list-super-admins', [
+            'superadmins' => $listSuperadmins,
+        ])->title(__('superadmins.list_title'));
     }
 
     public function deletePrepare($username): void
