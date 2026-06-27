@@ -27,7 +27,6 @@ class ListSuperUsers extends Component {
     public bool $showDeleteModal = false;
 
     public string $deleteAdminName = '';
-    public string $deleteAdminDn = '';
 
     public function sortBy($field): void
     {
@@ -47,25 +46,15 @@ class ListSuperUsers extends Component {
 
     public function render()
     {
-        $superGroup = SuperUserGroup::group();
-        $listSuperadmins = $superGroup->members()
-            //->search('cn', $this->search)
-            ->get();
+        $superadmins = SuperUserGroup::group()->members()->get();
         
         return view('livewire.list-super-admins', [
-            'superadmins' => $listSuperadmins,
+            'superadmins' => $superadmins,
         ])->title(__('superadmins.list_title'));
     }
 
     public function deletePrepare($username): void
     {
-        $user = User::findByUsername($username);
-        $userBelongsToRealm = Community::findByUid($this->community_name)?->adminsGroup()->members()->get()->contains($user);
-        if(!$userBelongsToRealm) {
-            // check if the user to delete is an admin in this realm
-            unset($this->deleteAdminName);
-            return;
-        }
         $this->deleteAdminName = $username;
         Flux::modal('delete')->show();
     }
