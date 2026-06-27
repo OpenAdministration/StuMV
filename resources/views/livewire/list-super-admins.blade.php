@@ -1,8 +1,19 @@
 <div class="flex-col space-y-8">
-    <flux:field>
-        <flux:label>{{ __('superadmins.search_placeholder') }}</flux:label>
-        <flux:input wire:model.live.debounce="search" />
-    </flux:field>
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex-1 space-y-4">
+            <flux:heading size="xl">{{ __('superadmins.list_title') }}</flux:heading>
+        </div>
+        <div>
+            <flux:button
+                variant="primary"
+                icon="user-plus"
+                wire:navigate
+                :href="route('superadmins.add')"
+            >
+                {{ __('superadmins.new_title') }}
+            </flux:button>
+        </div>
+    </div>
 
     <flux:table>
         <flux:table.columns>
