@@ -7,6 +7,7 @@ return [
     'compareEmailList_headline' => 'E-Mail-Listen-Abgleich',
     'compareEmailList_explanation' => 'Füge in das Textfeld eine Liste von E-Mail-Adressen ein (getrennt durch Zeilenumbrüche) und überprüfe, ob Benutzer:innen mit dieser E-Mail-Adresse existieren.',
     'createUser' => 'Person anlegen',
+    'dashboard_explanation' => 'Hier findest du kleine Helferlein, die dir hoffentlich gelegentlich die Arbeit erleichtern.',
     'delete' => 'Löschen',
     'emailAddress' => 'E-Mail-Adresse',
     'emailAddresses' => 'E-Mail-Adressen',
