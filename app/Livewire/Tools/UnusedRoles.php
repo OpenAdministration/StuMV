@@ -49,6 +49,6 @@ class UnusedRoles extends Component
         return view('livewire.tools.unused-roles', [
             'unusedCommittees' => $unusedCommittees,
             'unusedRoles' => $unusedRoles,
-        ]);
+        ])->title('tools.unusedRoles_headline');
     }
 }

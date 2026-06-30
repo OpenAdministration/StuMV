@@ -17,7 +17,6 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class EditRoleMembership extends Component
 {
-
     #[Locked]
     public string $uid;
 
@@ -61,10 +60,11 @@ class EditRoleMembership extends Component
     public function render()
     {
         return view('livewire.committee.edit-role-membership')
-            ->title(__('committees.edit_role_membership_title', ['role' => $this->cn]));
+            ->title(__('roles.membership-edit_headline'));
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
         $membership = RoleMembership::findOrFail($this->id);
         $membership->update([
