@@ -52,7 +52,7 @@ class UsersNotInUniLdap extends Component
             $domains[] = $item->dc[0];
         }
 
-        $membersUniQuery = App\Ldap\Uni\User::query();
+        $membersUniQuery = \App\Ldap\Uni\User::query();
         foreach ($members as $member) {
             $memberEmailParts = explode('@', $member->getFirstAttribute('mail'));
             if (in_array($memberEmailParts[1], $domains)) {
