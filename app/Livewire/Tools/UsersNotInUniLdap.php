@@ -43,35 +43,27 @@ class UsersNotInUniLdap extends Component
         $this->comparisonCompleted = false;
         $this->results = [];
 
-        $members = \App\Models\User::select('email')->where('realm', $this->uid)->orderBy('full_name')->get();
+        $community = Community::findOrFailByUid($this->uid);
+        $members = $community->membersGroup()->members()->get();
 
         $domains = [];
         $domainEntries = Domain::fromCommunity($this->uid)->get();
         foreach ($domainEntries as $item) {
             $domains[] = $item->dc[0];
         }
-
-        $unildap = UniLdap::where('realm', $this->uid)->first();
-
+        
+        $membersUniQuery = App\Ldap\Uni\User::query();
         foreach ($members as $member) {
             $memberEmailParts = explode('@', $member->email);
             if (in_array($memberEmailParts[1], $domains)) {
-                $ds = ldap_connect($unildap->host);
-                if ($ds) {
-                    $filter = "(|(mail=$member->email))";
-                    $result = ldap_search($ds, $unildap->members_base, $filter);
-                    $info = ldap_get_entries($ds, $result);
-                    if ($info['count'] === 0) {
-                        $user = User::findByEmail($member->email);
-                        if ($user !== null) {
-                            $this->results[] = [
-                                'uid' => $user->getFirstAttribute('uid'),
-                                'cn' => $user->getFirstAttribute('cn'),
-                                'email' => $user->getFirstAttribute('mail'),
-                            ];
-                        }
-                    }
-                }
+                $membersUniQuery->orWhere('mail', '=', $member->email);
+            }
+        }
+        $membersUni = $membersUniQuery->get();
+
+        foreach ($members as $member) {
+            if (!$membersUni->contains(fn ($uniMember) => $uniMember->getFirstAttribute('mail') === $member->email)) {
+                $this->results[] = $member;
             }
         }
 
@@ -91,7 +83,7 @@ class UsersNotInUniLdap extends Component
         
         // LDAP
         $user = User::findOrFailByUsername($this->userToDelete);
-        $community->membersGroup()->members()->attach($user);
+        $community->membersGroup()->members()->detach($user);
         $user->delete();
 
         // Database
