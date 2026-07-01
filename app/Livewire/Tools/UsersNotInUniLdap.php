@@ -51,18 +51,18 @@ class UsersNotInUniLdap extends Component
         foreach ($domainEntries as $item) {
             $domains[] = $item->dc[0];
         }
-        
+
         $membersUniQuery = App\Ldap\Uni\User::query();
         foreach ($members as $member) {
-            $memberEmailParts = explode('@', $member->email);
+            $memberEmailParts = explode('@', $member->getFirstAttribute('mail'));
             if (in_array($memberEmailParts[1], $domains)) {
-                $membersUniQuery->orWhere('mail', '=', $member->email);
+                $membersUniQuery->orWhere('mail', '=', $member->getFirstAttribute('mail'));
             }
         }
         $membersUni = $membersUniQuery->get();
 
         foreach ($members as $member) {
-            if (!$membersUni->contains(fn ($uniMember) => $uniMember->getFirstAttribute('mail') === $member->email)) {
+            if (!$membersUni->contains(fn ($uniMember) => $uniMember->getFirstAttribute('mail') === $member->getFirstAttribute('mail'))) {
                 $this->results[] = $member;
             }
         }
