@@ -36,9 +36,9 @@
                                 <div class="flex-1">
                                     <flux:link
                                         wire:navigate
-                                        href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                        href="{{ route('profile', ['username' => $user->getFirstAttribute('uid')]) }}"
                                     >
-                                        {{ $user['cn'] }}
+                                        {{ $user->getFirstAttribute('cn') }}
                                     </flux:link>
                                 </div>
                                 <div>
@@ -46,7 +46,7 @@
                                         size="sm"
                                         variant="danger"
                                         icon="trash-2"
-                                        wire:click="confirmDeleteUser('{{ $user['uid'] }}')"
+                                        wire:click="confirmDeleteUser('{{ $user->getFirstAttribute('uid') }}')"
                                     >
                                         {{ __('tools.delete') }}
                                     </flux:button>
