@@ -42,6 +42,21 @@ return [
                 LDAP_OPT_PROTOCOL_VERSION => 3,
             ],
         ],
+        'uni' => [
+            'hosts' => [env('UNI_LDAP_HOST', '127.0.0.1')],
+            'username' => env('UNI_LDAP_USERNAME'),
+            'password' => env('UNI_LDAP_PASSWORD'),
+            'port' => env('UNI_LDAP_PORT', 389),
+            'base_dn' => env('UNI_LDAP_BASE_DN'),
+            'timeout' => env('UNI_LDAP_TIMEOUT', 5),
+            'use_ssl' => env('UNI_LDAP_SSL', false),
+            'use_tls' => env('UNI_LDAP_TLS', false),
+            'options' => [
+                // See: http://php.net/ldap_set_option
+                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
+                LDAP_OPT_PROTOCOL_VERSION => 3,
+            ],
+        ],
     ],
 
     /*
