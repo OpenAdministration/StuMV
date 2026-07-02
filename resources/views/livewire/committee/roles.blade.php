@@ -42,14 +42,15 @@
             }
         @endphp
         @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
-            <a
-                wire:navigate
-                href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
-                class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
+            <flux:card>
                 <div class="flex gap-4">
                     <div class="flex-1">
-                        <flux:heading size="lg">{{ $role->getFirstAttribute('description') }}</flux:heading>
+                        <flux:link
+                            wire:navigate
+                            href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
+                        >
+                            {{ $role->getFirstAttribute('description') }}
+                        </flux:link>
                     </div>
                     <div>
                         <flux:dropdown>
@@ -96,7 +97,7 @@
                         />
                     @endforeach
                 </div>
-            </a>
+            </flux:card>
         @endif
     @empty
         <flux:callout variant="warning" icon="info" heading="{{ __('roles.no_roles_found') }}" />
