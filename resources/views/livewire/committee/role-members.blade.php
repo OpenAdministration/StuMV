@@ -63,11 +63,23 @@
                 <flux:table.row>
                     <flux:table.cell>
                         @if($member->isActive() && !$member->isPending())
-                            <flux:avatar badge badge:color="green" name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}" />
+                            <flux:avatar
+                                badge badge:color="green"
+                                src="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
+                            />
                         @elseif($member->isPending())
-                            <flux:avatar badge badge:color="yellow" name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}" />
+                            <flux:avatar
+                                badge badge:color="yellow"
+                                src="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
+                            />
                         @else
-                            <flux:avatar badge badge:color="gray" name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}" />
+                            <flux:avatar
+                                badge badge:color="gray"
+                                src="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
+                            />
                         @endif
                     </flux:table.cell>
                     <flux:table.cell>
