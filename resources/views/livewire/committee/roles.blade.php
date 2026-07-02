@@ -46,7 +46,7 @@
                 wire:navigate
                 href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
             >
-                <flux:card>
+                <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                     <div class="flex gap-4">
                         <div class="flex-1">
                             <flux:heading size="lg">{{ $role->getFirstAttribute('description') }}</flux:heading>
@@ -96,7 +96,7 @@
                             />
                         @endforeach
                     </div>
-                </flux:card>
+                </div>
             </a>
         @endif
     @empty
