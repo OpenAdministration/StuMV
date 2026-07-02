@@ -43,7 +43,7 @@
         @endphp
         @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
             <flux:card>
-                <div class="flex gap-4">
+                <div class="flex gap-4 items-center">
                     <div class="flex-1">
                         <flux:link
                             wire:navigate
