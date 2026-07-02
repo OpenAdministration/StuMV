@@ -71,7 +71,7 @@
                         @elseif($member->isPending())
                             <flux:avatar
                                 badge badge:color="yellow"
-                                src="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                src="data:image/jpeg;base64,{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
                                 name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
                             />
                         @else
