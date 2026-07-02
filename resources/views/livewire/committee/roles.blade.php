@@ -59,7 +59,7 @@
                         </flux:link>
                     </flux:table.cell>
                     <flux:table.cell>
-                        <div class="flex flex-wrap gap-2">
+                        <flux:avatar.group>
                             @foreach($this->getMembers($role) as $member)
                                 @php
                                     $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
@@ -72,7 +72,7 @@
                                     name="{{ $member->getFirstAttribute('cn') }}"
                                 />
                             @endforeach
-                        </div>
+                        </flux:avatar.group>
                     </flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
                         <flux:dropdown>
