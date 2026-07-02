@@ -59,7 +59,19 @@
                         </flux:link>
                     </flux:table.cell>
                     <flux:table.cell>
-                        {{ $this->getMembersString($role) }}
+                        @foreach($this->getMembers($role) as $member)
+                            @php
+                                $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
+                                if ($jpegPhoto) {
+                                    $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                                }
+                            @endphp
+                            <flux:avatar
+                                badge badge:color="green"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $member->getFirstAttribute('cn') }}"
+                            />
+                        @endforeach
                     </flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
                         <flux:dropdown>

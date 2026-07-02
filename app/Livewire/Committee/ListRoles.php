@@ -85,6 +85,21 @@ class ListRoles extends Component {
         )->title(__('committees.roles_title', ['name' => $this->ou]));
     }
 
+    public function getMembers(Role $role): array
+    {
+        $usernames = $role->dbMemberships()
+            ->active(today())
+            ->distinct()
+            ->pluck('username');
+
+        $members = [];
+        foreach ($usernames as $user) {
+            $members[] = User::findOrFailByUsername($user);
+        }
+        
+        return $members;
+    }
+
     public function getMembersString(Role $role): string
     {
         $usernames = $role->dbMemberships()
