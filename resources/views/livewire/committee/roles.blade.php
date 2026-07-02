@@ -91,7 +91,7 @@
                             }
                         @endphp
                         <flux:avatar
-                            size="xl"
+                            size="lg"
                             src="{{ $jpegPhoto }}"
                             name="{{ $member->getFirstAttribute('cn') }}"
                             title="{{ $member->getFirstAttribute('cn') }}"
