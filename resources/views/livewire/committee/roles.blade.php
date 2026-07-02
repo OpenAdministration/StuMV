@@ -83,7 +83,7 @@
                     </div>
                 </div>
                 @if($this->getHasMembers($role))
-                    <div class="flex flex-wrap gap-2 mt-4">
+                    <div class="flex flex-wrap gap-2 mt-6">
                         @foreach($this->getMembers($role) as $member)
                             @php
                                 $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
