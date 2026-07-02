@@ -58,7 +58,7 @@
                             {{ $role->getFirstAttribute('description') }}
                         </flux:link>
                     </flux:table.cell>
-                    <flux:table.cell class="flex gap-2">
+                    <flux:table.cell class="flex flex-wrap gap-2">
                         @foreach($this->getMembers($role) as $member)
                             @php
                                 $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
