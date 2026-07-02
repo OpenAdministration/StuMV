@@ -65,7 +65,7 @@
                         @if($member->isActive() && !$member->isPending())
                             <flux:avatar
                                 badge badge:color="green"
-                                src="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                src="data:image/jpeg;base64,{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
                                 name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
                             />
                         @elseif($member->isPending())
