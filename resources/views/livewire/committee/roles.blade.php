@@ -94,6 +94,7 @@
                             size="xl"
                             src="{{ $jpegPhoto }}"
                             name="{{ $member->getFirstAttribute('cn') }}"
+                            title="{{ $member->getFirstAttribute('cn') }}"
                         />
                     @endforeach
                 </div>
