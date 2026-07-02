@@ -27,84 +27,82 @@
     </flux:field>
     --}}
 
+    @php
+        $hasHiddenRolesWithMembers = false;
+        $committeesShown = 0;
+    @endphp
+    @forelse($roles as $role)
         @php
-            $hasHiddenRolesWithMembers = false;
-            $committeesShown = 0;
+            $hasMembers = $this->getHasMembers($role);
+            if (!$hasMembers && $this->showOnlyActive) {
+                $hasHiddenRolesWithMembers = true;
+            }
+            if ($hasMembers) {
+                $committeesShown = $committeesShown + 1;
+            }
         @endphp
-        @forelse($roles as $role)
-            @php
-                $hasMembers = $this->getHasMembers($role);
-                if (!$hasMembers && $this->showOnlyActive) {
-                    $hasHiddenRolesWithMembers = true;
-                }
-                if ($hasMembers) {
-                    $committeesShown = $committeesShown + 1;
-                }
-            @endphp
-            @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
-                <a
-                    wire:navigate
-                    href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
-                >
-                    <flux:card>
-                        <div class="flex gap-4">
-                            <div class="flex-1">
-                                <flux:heading size="lg">{{ $role->getFirstAttribute('description') }}</flux:heading>
-                            </div>
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        icon="users"
-                                        wire:navigate
-                                        :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                                    >
-                                        {{ __('roles.link_members') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        icon="pencil"
-                                        wire:navigate
-                                        :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                                        :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
-                                    >
-                                        {{ __('roles.link_edit') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="trash-2"
-                                        :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
-                                        wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
-                                        {{ __('Delete') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
+        @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
+            <a
+                wire:navigate
+                href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
+            >
+                <flux:card>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <flux:heading size="lg">{{ $role->getFirstAttribute('description') }}</flux:heading>
                         </div>
-                        <div class="flex flex-wrap gap-2 mt-4">
-                            @foreach($this->getMembers($role) as $member)
-                                @php
-                                    $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
-                                    if ($jpegPhoto) {
-                                        $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
-                                    }
-                                @endphp
-                                <flux:avatar
-                                    size="xl"
-                                    src="{{ $jpegPhoto }}"
-                                    name="{{ $member->getFirstAttribute('cn') }}"
-                                />
-                            @endforeach
-                        </div>
-                    </flux:card>
-                </a>
-            @endif
-        @empty
-            <flux:callout variant="warning" icon="info" heading="{{ __('roles.no_roles_found') }}" />
-        @endforelse
-        @if($hasHiddenRolesWithMembers && $committeesShown < 1)
-            <flux:callout variant="warning" icon="info" heading="{{ __('roles.there_are_inactive_roles') }}" />
+                        <flux:dropdown>
+                            <flux:button size="sm" icon="ellipsis-vertical" />
+                            <flux:menu>
+                                <flux:menu.item
+                                    icon="users"
+                                    wire:navigate
+                                    :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                >
+                                    {{ __('roles.link_members') }}
+                                </flux:menu.item>
+                                <flux:menu.item
+                                    icon="pencil"
+                                    wire:navigate
+                                    :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                    :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
+                                >
+                                    {{ __('roles.link_edit') }}
+                                </flux:menu.item>
+                                <flux:menu.item
+                                    variant="danger"
+                                    icon="trash-2"
+                                    :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
+                                    wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
+                                    {{ __('Delete') }}
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        @foreach($this->getMembers($role) as $member)
+                            @php
+                                $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
+                                if ($jpegPhoto) {
+                                    $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                                }
+                            @endphp
+                            <flux:avatar
+                                size="xl"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $member->getFirstAttribute('cn') }}"
+                            />
+                        @endforeach
+                    </div>
+                </flux:card>
+            </a>
         @endif
-        </flux:table.rows>
-    </flux:table>
+    @empty
+        <flux:callout variant="warning" icon="info" heading="{{ __('roles.no_roles_found') }}" />
+    @endforelse
+    @if($hasHiddenRolesWithMembers && $committeesShown < 1)
+        <flux:callout variant="warning" icon="info" heading="{{ __('roles.there_are_inactive_roles') }}" />
+    @endif
 
     <div class="block h-[1px]"></div>
 
