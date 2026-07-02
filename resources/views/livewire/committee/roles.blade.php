@@ -82,22 +82,24 @@
                         </flux:dropdown>
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-2 mt-4">
-                    @foreach($this->getMembers($role) as $member)
-                        @php
-                            $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
-                            if ($jpegPhoto) {
-                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
-                            }
-                        @endphp
-                        <flux:avatar
-                            size="lg"
-                            src="{{ $jpegPhoto }}"
-                            name="{{ $member->getFirstAttribute('cn') }}"
-                            title="{{ $member->getFirstAttribute('cn') }}"
-                        />
-                    @endforeach
-                </div>
+                @if($this->getHasMembers($role))
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        @foreach($this->getMembers($role) as $member)
+                            @php
+                                $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
+                                if ($jpegPhoto) {
+                                    $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                                }
+                            @endphp
+                            <flux:avatar
+                                size="lg"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $member->getFirstAttribute('cn') }}"
+                                title="{{ $member->getFirstAttribute('cn') }}"
+                            />
+                        @endforeach
+                    </div>
+                @endif
             </flux:card>
         @endif
     @empty
