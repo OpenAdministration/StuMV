@@ -61,12 +61,14 @@
             <flux:table.rows>
             @forelse($members as $member)
                 <flux:table.row>
-                    <flux:table.cell class="pl-3!">
-                        <span @class(["inline-block", "size-3", "shrink-0", "rounded-full",
-                            "bg-green-400" => $member->isActive() && !$member->isPending(),
-                            "bg-yellow-400" => $member->isPending(),
-                            "bg-zinc-200 dark:bg-zinc-700" => !$member->isActive(),
-                        ]) aria-hidden="true"></span>
+                    <flux:table.cell>
+                        @if($member->isActive() && !$member->isPending())
+                            <flux:avatar badge badge:color="green" name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}" />
+                        @elseif($member->isPending())
+                            <flux:avatar badge badge:color="yellow" name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}" />
+                        @else
+                            <flux:avatar badge badge:color="gray" name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}" />
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell>
                         <flux:link
