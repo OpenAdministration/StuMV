@@ -51,33 +51,35 @@
                         <div class="flex-1">
                             <flux:heading size="lg">{{ $role->getFirstAttribute('description') }}</flux:heading>
                         </div>
-                        <flux:dropdown>
-                            <flux:button size="sm" icon="ellipsis-vertical" />
-                            <flux:menu>
-                                <flux:menu.item
-                                    icon="users"
-                                    wire:navigate
-                                    :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                                >
-                                    {{ __('roles.link_members') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    icon="pencil"
-                                    wire:navigate
-                                    :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                                    :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
-                                >
-                                    {{ __('roles.link_edit') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    variant="danger"
-                                    icon="trash-2"
-                                    :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
-                                    wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
-                                    {{ __('Delete') }}
-                                </flux:menu.item>
-                            </flux:menu>
-                        </flux:dropdown>
+                        <div>
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        icon="users"
+                                        wire:navigate
+                                        :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                    >
+                                        {{ __('roles.link_members') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        icon="pencil"
+                                        wire:navigate
+                                        :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                        :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
+                                    >
+                                        {{ __('roles.link_edit') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="trash-2"
+                                        :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
+                                        wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
+                                        {{ __('Delete') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
                     </div>
                     <div class="flex flex-wrap gap-2 mt-4">
                         @foreach($this->getMembers($role) as $member)
