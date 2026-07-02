@@ -62,22 +62,28 @@
             @forelse($members as $member)
                 <flux:table.row>
                     <flux:table.cell>
+                        @php
+                            $jpegPhoto = \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto');
+                            if ($jpegPhoto) {
+                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                            }
+                        @endphp
                         @if($member->isActive() && !$member->isPending())
                             <flux:avatar
                                 badge badge:color="green"
-                                src="data:image/jpeg;base64,{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                src="{{ $jpegPhoto }}"
                                 name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
                             />
                         @elseif($member->isPending())
                             <flux:avatar
                                 badge badge:color="yellow"
-                                src="data:image/jpeg;base64,{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                src="{{ $jpegPhoto }}"
                                 name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
                             />
                         @else
                             <flux:avatar
                                 badge badge:color="gray"
-                                src="data:image/jpeg;base64,{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                src="{{ $jpegPhoto }}"
                                 name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
                             />
                         @endif
