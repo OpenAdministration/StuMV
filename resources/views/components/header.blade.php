@@ -12,7 +12,13 @@
         <x-info />
         
         <flux:dropdown align="end">
-            <flux:profile :chevron="false" size="xl" avatar:name="{{ auth()->user()->full_name }}" />
+            @php
+                $jpegPhoto = \App\Ldap\User::findOrFailByUsername(auth()->user()->username)->getFirstAttribute('jpegPhoto');
+                if ($jpegPhoto) {
+                    $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                }
+            @endphp
+            <flux:profile :chevron="false" size="xl" avatar="{{ $jpegPhoto }}" name="{{ auth()->user()->full_name }}" />
             <flux:navmenu class="max-w-[20rem]">
                 <div class="px-2 py-1.5">
                     <flux:heading size="lg" class="truncate">{{ auth()->user()->full_name }}</flux:heading>
