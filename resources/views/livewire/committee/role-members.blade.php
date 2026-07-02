@@ -77,7 +77,7 @@
                         @else
                             <flux:avatar
                                 badge badge:color="gray"
-                                src="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
+                                src="data:image/jpeg;base64,{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto') }}"
                                 name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
                             />
                         @endif
