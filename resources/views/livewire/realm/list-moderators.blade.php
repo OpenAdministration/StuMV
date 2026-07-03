@@ -56,20 +56,22 @@
                         {{ $realm_member->cn[0] }}
                     @endcan
                 </flux:table.cell>
-                <flux:table.cell class="flex justify-end items-center gap-2">
-                    <flux:dropdown>
-                        <flux:button size="sm" icon="ellipsis-vertical" />
-                        <flux:menu>
-                            <flux:menu.item
-                                variant="danger"
-                                icon="user-minus"
-                                :disabled="auth()->user()->cannot('remove_moderator', $community)"
-                                wire:click="deletePrepare('{{ $realm_member->uid[0] }}')"
-                            >
-                                {{ __('Remove Moderator') }}
-                            </flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
+                <flux:table.cell>
+                    <div class="flex justify-end items-center gap-2">
+                        <flux:dropdown>
+                            <flux:button size="sm" icon="ellipsis-vertical" />
+                            <flux:menu>
+                                <flux:menu.item
+                                    variant="danger"
+                                    icon="user-minus"
+                                    :disabled="auth()->user()->cannot('remove_moderator', $community)"
+                                    wire:click="deletePrepare('{{ $realm_member->uid[0] }}')"
+                                >
+                                    {{ __('Remove Moderator') }}
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
                 </flux:table.cell>
             </flux:table.row>
         @empty
