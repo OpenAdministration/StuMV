@@ -32,13 +32,25 @@
 
     <flux:table>
         <flux:table.columns>
+            <flux:table.column class="w-[55px]"></flux:table.column>
             <flux:table.column>{{ __('Name') }}</flux:table.column>
-            <flux:table.column>{{ __('Username') }}</flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
         @forelse($realm_admins as $realm_admin)
             <flux:table.row>
+                <flux:table.cell>
+                    @php
+                        $jpegPhoto = $realm_admin->jpegPhoto[0] ?? null;
+                        if ($jpegPhoto) {
+                            $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                        }
+                    @endphp
+                    <flux:avatar
+                        src="{{ $jpegPhoto }}"
+                        name="{{ $realm_admin->cn[0] }}"
+                    />
+                </flux:table.cell>
                 <flux:table.cell>
                     @can('admin', $community)
                         <flux:link
@@ -52,7 +64,6 @@
                         {{ $realm_admin->cn[0] }}
                     @endcan
                 </flux:table.cell>
-                <flux:table.cell>{{ $realm_admin->uid[0] }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
                     <flux:dropdown>
                         <flux:button size="sm" icon="ellipsis-vertical" />
