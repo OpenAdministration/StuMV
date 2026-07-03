@@ -56,7 +56,7 @@
                         {{ $realm_member->cn[0] }}
                     @endcan
                 </flux:table.cell>
-                <flux:table.cell class="flex justify-end gap-2">
+                <flux:table.cell class="flex justify-end items-center gap-2">
                     <flux:dropdown>
                         <flux:button size="sm" icon="ellipsis-vertical" />
                         <flux:menu>
