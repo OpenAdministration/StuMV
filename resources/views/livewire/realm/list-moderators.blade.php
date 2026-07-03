@@ -24,7 +24,7 @@
 
     <flux:table>
         <flux:table.columns>
-            <flux:table.column></flux:table.column>
+            <flux:table.column class="w-[55px]"></flux:table.column>
             <flux:table.column>{{ __('Name') }}</flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
