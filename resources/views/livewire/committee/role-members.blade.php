@@ -119,30 +119,32 @@
                             {{ $member->comment }}
                         @endempty
                     </flux:table.cell>
-                    <flux:table.cell class="flex justify-end gap-2">
-                        <flux:dropdown>
-                            <flux:button size="sm" icon="ellipsis-vertical" />
-                            <flux:menu>
-                                <flux:menu.item
-                                    icon="pencil"
-                                    wire:navigate
-                                    :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
-                                    href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}"
-                                >
-                                    {{ __('roles.link_edit') }}
-                                </flux:menu.item>
-                                <flux:modal.trigger name="deletion">
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
                                     <flux:menu.item
-                                        variant="danger"
-                                        icon="trash-2"
-                                        wire:click="prepareDeletion({{ $member->id }})"
-                                        :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])"
+                                        icon="pencil"
+                                        wire:navigate
+                                        :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
+                                        href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}"
                                     >
-                                        {{ __('Delete') }}
+                                        {{ __('roles.link_edit') }}
                                     </flux:menu.item>
-                                </flux:modal.trigger>
-                            </flux:menu>
-                        </flux:dropdown>
+                                    <flux:modal.trigger name="deletion">
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="prepareDeletion({{ $member->id }})"
+                                            :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])"
+                                        >
+                                            {{ __('Delete') }}
+                                        </flux:menu.item>
+                                    </flux:modal.trigger>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
                     </flux:table.cell>
                 </flux:table.row>
             @empty
