@@ -18,12 +18,12 @@
                             id="imageInput"
                             type="file"
                             accept="image/*"
-                            class="w-full h-[15rem] px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
+                            class="w-full h-[15rem] xl:h-[25rem] px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
                             :value="imageCropped"
                             x-show="!imageIsSelected"
                             x-on:change="loadImage"
                         >
-                        <img id="image" class="h-[15rem]" x-show="imageIsSelected">
+                        <img id="image" class="h-[15rem] xl:h-[25rem]" x-show="imageIsSelected">
                     @endif
                 </div>
                 <div class="mt-6 flex items-center justify-end gap-x-6">
