@@ -42,18 +42,7 @@
                 {{ $committee->getFirstAttribute('description') }}
             </flux:link>
         </div>
-        <div class="flex justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700 py-2">
-            <flux:button
-                size="sm"
-                variant="primary"
-                icon="users"
-                wire:navigate
-                href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
-                class="hidden! md:flex!"
-            >
-                {{ __('committees.link_roles') }}
-            </flux:button>
-
+        <div class="flex justify-end gap-2 border-b border-zinc-200 dark:border-zinc-700 py-2 pl-4">
             <flux:dropdown>
                 <flux:button size="sm" icon="ellipsis-vertical" title="{{ __('common.options') }}" />
                 <flux:menu>
