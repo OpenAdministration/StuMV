@@ -89,8 +89,10 @@ class Picture extends Component
     {
         // Remove image URL from LDAP
         $user = User::findOrFailByUsername($this->uid);
-        $user->removeAttribute('jpegPhoto');
-        $user->save();
+        if ($user->hasAttribute('jpegPhoto')) {
+            $user->removeAttribute('jpegPhoto');
+            $user->save();
+        }
 
         // Get user image relation from database
         $pictureDB = ProfilePicture::where('user', $this->currentUsername)->first();
