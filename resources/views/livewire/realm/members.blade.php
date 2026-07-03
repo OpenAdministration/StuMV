@@ -57,38 +57,40 @@
                         {{ $realm_member->full_name }}
                     @endcan
                 </flux:table.cell>
-                <flux:table.cell class="flex justify-end gap-2">
-                    @can('moderator', $community)
-                        <flux:button
-                            size="sm"
-                            variant="primary"
-                            icon="file-text"
-                            wire:click="exportPdf('{{ $realm_member->username }}')"
-                        >
-                            {{ __('profile.membershipsAsPdf') }}
-                        </flux:button>
-                    @endcan
-                    <flux:dropdown>
-                        <flux:button size="sm" icon="ellipsis-vertical" />
-                        <flux:menu>
-                            <flux:menu.item
-                                icon="pencil"
-                                :disabled="auth()->user()->cannot('admin', $community)"
-                                wire:navigate
-                                href="{{ route('profile', ['username' => $realm_member->username]) }}"
+                <flux:table.cell>
+                    <div class="flex justify-end items-center gap-2">
+                        @can('moderator', $community)
+                            <flux:button
+                                size="sm"
+                                variant="primary"
+                                icon="file-text"
+                                wire:click="exportPdf('{{ $realm_member->username }}')"
                             >
-                                {{ __('Edit') }}
-                            </flux:menu.item>
-                            <flux:menu.item
-                                variant="danger"
-                                icon="user-minus"
-                                :disabled="auth()->user()->cannot('remove_member', $community)"
-                                wire:click="deletePrepare('{{ $realm_member->username }}')"
-                            >
-                                {{ __('Remove Member') }}
-                            </flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
+                                {{ __('profile.membershipsAsPdf') }}
+                            </flux:button>
+                        @endcan
+                        <flux:dropdown>
+                            <flux:button size="sm" icon="ellipsis-vertical" />
+                            <flux:menu>
+                                <flux:menu.item
+                                    icon="pencil"
+                                    :disabled="auth()->user()->cannot('admin', $community)"
+                                    wire:navigate
+                                    href="{{ route('profile', ['username' => $realm_member->username]) }}"
+                                >
+                                    {{ __('Edit') }}
+                                </flux:menu.item>
+                                <flux:menu.item
+                                    variant="danger"
+                                    icon="user-minus"
+                                    :disabled="auth()->user()->cannot('remove_member', $community)"
+                                    wire:click="deletePrepare('{{ $realm_member->username }}')"
+                                >
+                                    {{ __('Remove Member') }}
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
                 </flux:table.cell>
             </flux:table.row>
         @empty
