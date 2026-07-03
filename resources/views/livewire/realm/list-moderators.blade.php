@@ -86,8 +86,6 @@
         </flux:table.rows>
     </flux:table>
 
-    <div class="block pb-6 sm:pb-8"></div>
-
     <form wire:submit="deleteCommit">
         <flux:modal name="delete">
             <div class="space-y-6">
