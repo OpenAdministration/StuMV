@@ -25,13 +25,25 @@
 
     <flux:table>
         <flux:table.columns>
+            <flux:table.column class="w-[55px]"></flux:table.column>
             <flux:table.column>{{ __('Name') }}</flux:table.column>
-            <flux:table.column>{{ __('Username') }}</flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
         @forelse($realm_members as $realm_member)
             <flux:table.row>
+                <flux:table.cell>
+                    @php
+                        $jpegPhoto = \App\Ldap\User::findOrFailByUsername($realm_member->username)->getFirstAttribute('jpegPhoto') ?? null;
+                        if ($jpegPhoto) {
+                            $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                        }
+                    @endphp
+                    <flux:avatar
+                        src="{{ $jpegPhoto }}"
+                        name="{{ $realm_member->full_name }}"
+                    />
+                </flux:table.cell>
                 <flux:table.cell>
                     @can('admin', $community)
                         <flux:link
@@ -45,7 +57,6 @@
                         {{ $realm_member->full_name }}
                     @endcan
                 </flux:table.cell>
-                <flux:table.cell>{{ $realm_member->username }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
                     @can('moderator', $community)
                         <flux:button
