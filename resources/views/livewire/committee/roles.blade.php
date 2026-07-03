@@ -91,12 +91,13 @@
                                     $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                                 }
                             @endphp
-                            <flux:avatar
-                                size="lg"
-                                src="{{ $jpegPhoto }}"
-                                name="{{ $member->getFirstAttribute('cn') }}"
-                                title="{{ $member->getFirstAttribute('cn') }}"
-                            />
+                            <flux:tooltip content="{{ $member->getFirstAttribute('cn') }}">
+                                <flux:avatar
+                                    size="lg"
+                                    src="{{ $jpegPhoto }}"
+                                    name="{{ $member->getFirstAttribute('cn') }}"
+                                />
+                            </flux:tooltip>
                         @endforeach
                     </div>
                 @endif
