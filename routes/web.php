@@ -5,6 +5,11 @@ use App\Http\Middleware\SuperAdminMiddleware;
 use App\Models\Committee;
 use Illuminate\Support\Facades\Route;
 
+// Set language based on the user's preferences
+$availableLanguages = ['de', 'en'];
+$lang = Request::getPreferredLanguage($availableLanguages);
+if ($lang) Config::set('app.locale', $lang);
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
