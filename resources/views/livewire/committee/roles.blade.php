@@ -31,6 +31,9 @@
         $hasHiddenRolesWithMembers = false;
         $committeesShown = 0;
     @endphp
+    @if($committeesShown > 0)
+        <div class="grid lg:grid-cols-2 gap-6">
+    @endif
     @forelse($roles as $role)
         @php
             $hasMembers = $this->getHasMembers($role);
@@ -104,8 +107,11 @@
             </flux:card>
         @endif
     @empty
-        <flux:callout variant="warning" icon="info" heading="{{ __('roles.no_roles_found') }}" />
+        <flux:callout variant="warning" icon="info" heading="{{ __('roles.no_roles_found') }}" class="col-span-full" />
     @endforelse
+    @if($committeesShown > 0)
+        </div>
+    @endif
     @if($hasHiddenRolesWithMembers && $committeesShown < 1)
         <flux:callout variant="warning" icon="info" heading="{{ __('roles.there_are_inactive_roles') }}" />
     @endif
