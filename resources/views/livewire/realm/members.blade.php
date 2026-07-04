@@ -20,7 +20,7 @@
 
     <flux:field>
         <flux:label>{{ __('realms.search_members') }}</flux:label>
-        <flux:input icon="search" wire:model.live.debounce="search" />
+        <flux:input icon="search" wire:model.live="search" />
     </flux:field>
 
     <flux:table>
