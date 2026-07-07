@@ -18,30 +18,25 @@ class ListRoles extends Component {
 
     use WithPagination;
 
-    #[Url]
-    public string $search = '';
-    #[Url]
-    public string $sortField = 'name';
-    #[Url]
-    public string $sortDirection = 'asc';
-
-    public bool $showDeleteModal = false;
-
     #[Locked]
     public string $uid;
+    
     #[Locked]
     public string $ou;
+
+    #[Url]
+    public string $search = '';
+
+    #[Url]
+    public string $sortField = 'cn';
+
+    #[Url]
+    public string $sortDirection = 'asc';
 
     public string $deleteRoleCn;
     public string $deleteRoleName;
 
     public bool $showOnlyActive = true;
-
-    /*
-     * TODOs:
-     *   - Keep member overview in this controller
-     *     - Remove dupes from member overview
-     */
 
     public function mount(Community $uid, $ou)
     {
@@ -70,9 +65,9 @@ class ListRoles extends Component {
         $community = Community::findByUid($this->uid);
         $committee = Committee::findByNameOrFail($this->uid, $this->ou);
         $rolesSlice = $committee->roles()
-            ->search('cn', $this->search)
-            ->search('description', $this->search)
-            ->orderBy('cn')
+            ->where('cn', 'contains', $this->search)
+            ->where('description', 'contains', $this->search)
+            ->orderBy('description', 'asc')
             ->list()
             ->get();
 
@@ -160,10 +155,23 @@ class ListRoles extends Component {
     {
         $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
         $this->authorize('delete', [$role, $this->committee(), $this->community()]);
+
+        // Delete role memberships
+        RoleMembership::where('role_cn', $role->getFirstAttribute('cn'))
+            ->where('committee_dn', $this->committee()->getDn())
+            ->delete();
+
+        // Delete role group relationships
+        GroupMembership::where('role_dn', $role->getDn())->delete();
+
+        // Delete role
         $role->delete();
 
         Flux::toast(variant: 'success', text: __('Role was deleted'));
-        return redirect()->route('committees.roles', ['uid' => $this->uid, 'ou' => $this->ou]);
+        return redirect()->route('committees.roles', [
+            'uid' => $this->uid,
+            'ou' => $this->ou
+        ]);
     }
 
     public function close()

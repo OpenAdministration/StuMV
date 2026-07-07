@@ -20,12 +20,10 @@
         <flux:switch wire:model.live="showOnlyActive" label="{{ __('committees.showOnlyActiveRoles') }}" align="left" />
     </div>
 
-    {{--
     <flux:field>
         <flux:label>{{ __('roles.search') }}</flux:label>
-        <flux:input icon="search" clearable wire:model.live.debounce="search" />
+        <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
-    --}}
 
     @php
         $hasHiddenRolesWithMembers = false;
