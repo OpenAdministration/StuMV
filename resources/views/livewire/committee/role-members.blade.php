@@ -48,7 +48,7 @@
     --}}
 
     <div class="pb-6 sm:pb-8">
-        <div wire:loading.delay wire:loading.flex wire:target="showOnlyActive" class="flex justify-center py-4">
+        <div wire:loading.flex wire:target="showOnlyActive" class="flex justify-center py-4">
             <flux:icon.loading />
         </div>
         <div wire:loading.remove wire:target="showOnlyActive">
