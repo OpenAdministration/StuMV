@@ -16,10 +16,10 @@
             </div>
         </div>
 
-        <!--<flux:field>
+        <flux:field>
             <flux:label>{{ __('committees.search') }}</flux:label>
-            <flux:input wire:model.live.debounce="search" />
-        </flux:field>-->
+            <flux:input wire:model.live.debounce.500ms="search" />
+        </flux:field>
 
         <ul>
             @forelse($committees as $committee)

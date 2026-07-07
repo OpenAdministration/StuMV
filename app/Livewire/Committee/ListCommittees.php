@@ -55,9 +55,46 @@ class ListCommittees extends Component
             ->list()
             ->get();
 
+        $search = trim($this->search);
+        if ($search !== '') {
+            $search = mb_strtolower($search);
+            $committees = $committees->filter(function (Committee $committee) use ($search): bool {
+                return $this->committeeMatchesSearch($committee, $search);
+            })->values();
+        }
+
         return view('livewire.committee.list', [
             'committees' => $committees,
             'community' => $community,
         ])->title(__('committees.list_title'));
+    }
+
+    protected function committeeMatchesSearch(Committee $committee, string $search): bool
+    {
+        $values = array_filter([
+            $committee->getFirstAttribute('ou'),
+            $committee->getFirstAttribute('description'),
+        ]);
+
+        foreach ($values as $value) {
+            if (mb_stripos(mb_strtolower($value), $search) !== false) {
+                return true;
+            }
+        }
+
+        foreach ($committee->descendants()->get() as $descendant) {
+            $descendantValues = array_filter([
+                $descendant->getFirstAttribute('ou'),
+                $descendant->getFirstAttribute('description'),
+            ]);
+
+            foreach ($descendantValues as $value) {
+                if (mb_stripos(mb_strtolower($value), $search) !== false) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
