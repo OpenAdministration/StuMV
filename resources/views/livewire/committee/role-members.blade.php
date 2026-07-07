@@ -32,8 +32,11 @@
         </div>
     </div>
 
-    <div class="flex items-center">
+    <div class="flex items-center gap-3">
         <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
+        <div wire:loading.delay wire:target="showOnlyActive">
+            <flux:spinner size="sm" />
+        </div>
     </div>
 
     {{--
@@ -47,7 +50,10 @@
     </flux:field>
     --}}
 
-    <div class="pb-6 sm:pb-8">
+    <div class="pb-6 sm:pb-8" wire:loading.class="opacity-60" wire:target="showOnlyActive">
+        <div wire:loading.delay wire:target="showOnlyActive" class="flex justify-center py-4">
+            <flux:icon.loading />
+        </div>
         <flux:table>
             <flux:table.columns>
                 <flux:table.column class="w-[55px]"></flux:table.column>
