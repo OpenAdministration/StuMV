@@ -37,6 +37,7 @@ class ListRoleMembers extends Component
     public int $deleteId;
 
     public bool $showOnlyActive = true;
+    public bool $ready = false;
 
     public function mount(Community $uid, string $ou, string $cn)
     {
@@ -45,11 +46,27 @@ class ListRoleMembers extends Component
         $this->cn = $cn;
     }
 
+    public function loadMembers(): void
+    {
+        $this->ready = true;
+    }
+
     public function render()
     {
         $community = Community::findOrFailByUid($this->uid);
         $committee = Committee::findByName($this->uid, $this->ou);
         $role = $committee?->roles()->where('cn', $this->cn)->first();
+
+        if (! $this->ready) {
+            return view('livewire.committee.role-members', [
+                'members' => collect(),
+                'committee' => $committee,
+                'community' => $community,
+                'role' => $role,
+                'userCache' => [],
+            ])->title(__('roles.members-title', ['name' => $this->cn]));
+        }
+
         $membersQuery = $role->dbMemberships();
         
         if ($this->showOnlyActive) {

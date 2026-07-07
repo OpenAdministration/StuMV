@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8">
+<div class="flex-col space-y-8" wire:init="loadMembers">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl" class="flex gap-4">
@@ -48,21 +48,26 @@
     --}}
 
     <div class="pb-6 sm:pb-8">
-        <div wire:loading.flex wire:target="showOnlyActive" class="flex justify-center py-4">
-            <flux:icon.loading />
-        </div>
-        <div wire:loading.remove wire:target="showOnlyActive">
-            <flux:table>
-                <flux:table.columns>
-                    <flux:table.column class="w-[55px]"></flux:table.column>
-                    <flux:table.column>{{ __('User') }}</flux:table.column>
-                    <flux:table.column>{{ __('From') }}</flux:table.column>
-                    <flux:table.column>{{ __('Until') }}</flux:table.column>
-                    <flux:table.column>{{ __('Decided') }}</flux:table.column>
-                    <flux:table.column>{{ __('Comment') }}</flux:table.column>
-                    <flux:table.column></flux:table.column>
-                </flux:table.columns>
-                <flux:table.rows>
+        @if (! $ready)
+            <div class="flex justify-center py-16">
+                <flux:icon.loading />
+            </div>
+        @else
+            <div wire:loading.flex wire:target="showOnlyActive" class="flex justify-center py-4">
+                <flux:icon.loading />
+            </div>
+            <div wire:loading.remove wire:target="showOnlyActive">
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column class="w-[55px]"></flux:table.column>
+                        <flux:table.column>{{ __('User') }}</flux:table.column>
+                        <flux:table.column>{{ __('From') }}</flux:table.column>
+                        <flux:table.column>{{ __('Until') }}</flux:table.column>
+                        <flux:table.column>{{ __('Decided') }}</flux:table.column>
+                        <flux:table.column>{{ __('Comment') }}</flux:table.column>
+                        <flux:table.column></flux:table.column>
+                    </flux:table.columns>
+                    <flux:table.rows>
             @forelse($members as $member)
                 <flux:table.row>
                     <flux:table.cell>
