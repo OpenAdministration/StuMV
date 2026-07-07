@@ -24,12 +24,18 @@ class ListMembers extends Component {
 
     public string $deleteMemberName = '';
     public string $deleteMemberUsername = '';
+    public bool $ready = false;
 
     public string $community_name;
 
     public function mount(Community $uid): void
     {
         $this->community_name = $uid->getFirstAttribute('ou');
+    }
+
+    public function loadMembers(): void
+    {
+        $this->ready = true;
     }
 
     public function sortBy($field)
@@ -52,18 +58,37 @@ class ListMembers extends Component {
     {
         $community = Community::findOrFailByUid($this->community_name);
 
-        // Get users from database
-        $membersQuery = \App\Models\User::where('realm', $this->community_name)->orderBy($this->sortField, $this->sortDirection);
+        if (! $this->ready) {
+            return view(
+                'livewire.realm.members', [
+                    'realm_members' => collect(),
+                    'community' => $community,
+                    'ldap_users' => collect(),
+                ]
+            )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
+        }
+
+        $membersQuery = \App\Models\User::where('realm', $this->community_name)
+            ->orderBy($this->sortField, $this->sortDirection);
+
         if ($this->search != '') {
             $membersQuery->where('full_name', 'like', '%' . $this->search . '%');
             $membersQuery->orWhere('username', 'like', '%' . $this->search . '%');
         }
+
         $members = $membersQuery->paginate(10);
-        
+        $ldapUsers = collect();
+        $usernames = $members->pluck('username')->filter()->values()->all();
+
+        if (! empty($usernames)) {
+            $ldapUsers = User::query()->whereIn('uid', $usernames)->get()->keyBy('uid');
+        }
+
         return view(
             'livewire.realm.members', [
                 'realm_members' => $members,
-                'community' => $community
+                'community' => $community,
+                'ldap_users' => $ldapUsers,
             ]
         )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
     }

@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8 pb-6 sm:pb-8">
+<div class="flex-col space-y-8 pb-6 sm:pb-8" wire:init="loadMembers">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.members_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</flux:text>
@@ -23,18 +23,24 @@
         <flux:input icon="search" wire:model.live.debounce.500ms="search" />
     </flux:field>
 
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column class="w-[55px]"></flux:table.column>
-            <flux:table.column>{{ __('Name') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
-        <flux:table.rows>
+    <div wire:loading.flex wire:target="loadMembers" class="flex justify-center py-16">
+        <flux:icon.loading />
+    </div>
+
+    <div wire:loading.remove wire:target="loadMembers">
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column class="w-[55px]"></flux:table.column>
+                <flux:table.column>{{ __('Name') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
+            <flux:table.rows>
         @forelse($realm_members as $realm_member)
             <flux:table.row>
                 <flux:table.cell>
                     @php
-                        $jpegPhoto = \App\Ldap\User::findOrFailByUsername($realm_member->username)->getFirstAttribute('jpegPhoto') ?? null;
+                        $ldapUser = $ldap_users[$realm_member->username] ?? null;
+                        $jpegPhoto = $ldapUser ? $ldapUser->getFirstAttribute('jpegPhoto') : null;
                         if ($jpegPhoto) {
                             $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                         }
