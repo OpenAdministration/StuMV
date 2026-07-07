@@ -1,3 +1,4 @@
+@if($showNode)
 <li>
     <div class="grid grid-cols-[3rem_1fr_auto]">
         @if($hasChildren)
@@ -83,7 +84,7 @@
                             <flux:separator vertical class="w-[2px]!" />
                         @endif
                     </div>
-                    <livewire:committee.committee-tree-item :dn="$child->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" />
+                    <livewire:committee.committee-tree-item :dn="$child->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" :search="$search" />
                 </div>
             @endforeach
         </ul>
@@ -121,3 +122,4 @@
         </div>
     </flux:modal>
 </li>
+@endif

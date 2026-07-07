@@ -15,6 +15,7 @@ class CommitteeTreeItem extends Component
     public string $dn;
     public bool $unfolded = false;
     public bool $isLastItem = false;
+    public string $search = '';
 
     public string $deleteConfirmText = "";
 
@@ -24,12 +25,49 @@ class CommitteeTreeItem extends Component
         $committee = Committee::findOrFail($this->dn);
         $children = $committee->descendants()->orderBy('description')->get();
 
+        $search = trim($this->search);
+        $showNode = $search === '' || $this->committeeMatchesSearch($committee, $search);
+
+        if ($search !== '') {
+            $children = $children->filter(function (Committee $child) use ($search): bool {
+                return $this->committeeMatchesSearch($child, $search);
+            })->values();
+        }
+
         return view('livewire.committee.committee-tree-item', [
             'community' => $community,
             'committee' => $committee,
             'children' => $children ?? [],
             'hasChildren' => count($children) > 0 ? true : false,
+            'showNode' => $showNode,
         ]);
+    }
+
+    protected function committeeMatchesSearch(Committee $committee, string $search): bool
+    {
+        $values = array_filter([
+            $committee->getFirstAttribute('ou'),
+            $committee->getFirstAttribute('description'),
+        ]);
+
+        foreach ($values as $value) {
+            if (mb_stripos(mb_strtolower($value), mb_strtolower($search)) !== false) {
+                return true;
+            }
+        }
+
+        foreach ($committee->descendants()->get() as $descendant) {
+            foreach (array_filter([
+                $descendant->getFirstAttribute('ou'),
+                $descendant->getFirstAttribute('description'),
+            ]) as $value) {
+                if (mb_stripos(mb_strtolower($value), mb_strtolower($search)) !== false) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function getChildren()
