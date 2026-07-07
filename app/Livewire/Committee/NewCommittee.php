@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueCommittee;
+use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -65,9 +66,23 @@ class NewCommittee extends Component
 
     public function render()
     {
-        $parents = Committee::fromCommunity($this->realm_uid)
+        $parentsLdap = Committee::fromCommunity($this->realm_uid)
             ->whereNotEquals('ou', 'Committees') // remove parent Folder from Results;
             ->get();
+
+        $parents = [];
+        foreach ($parentsLdap as $parent) {
+            $dn = DistinguishedName::make($parent->getDn());
+            $pathFromDn = $dn->assoc();
+            $pathDescription = '';
+            foreach (array_reverse($pathFromDn['ou']) as $ou) {
+                $pathDescription .= $ou . ' → ';
+            }
+
+            $parents[$dn] = [
+                'description' => $pathDescription,
+            ];
+        }
 
         return view('livewire.committee.new-committee', [
             'select_parents' => $parents,

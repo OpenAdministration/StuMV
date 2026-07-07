@@ -9,8 +9,8 @@
             wire:model="parent_dn"
         >
             <flux:select.option value="">{{ __('none') }}</flux:select.option>
-            @foreach($select_parents as $select_parent)
-                <flux:select.option value="{{ $select_parent->getDn() }}">{{ $select_parent->getFirstAttribute('description') }}</flux:select.option>
+            @foreach($select_parents as $key => $select_parent)
+                <flux:select.option value="{{ $key }}">{{ $select_parent['description'] }}</flux:select.option>
             @endforeach
         </flux:select>
     </flux:field>
