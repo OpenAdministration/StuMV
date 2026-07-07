@@ -63,8 +63,12 @@ class ListRolesInGroup extends Component {
         }
 
         usort($roles, function (Role $a, Role $b): int {
-            $committeeA = $a->committee()?->getFirstAttribute('cn') ?? '';
-            $committeeB = $b->committee()?->getFirstAttribute('cn') ?? '';
+            $committeeA = $a->committee()?->getFirstAttribute('ou')
+                ?? $a->committee()?->getFirstAttribute('ou')
+                ?? '';
+            $committeeB = $b->committee()?->getFirstAttribute('ou')
+                ?? $b->committee()?->getFirstAttribute('ou')
+                ?? '';
 
             $comparison = strcmp($committeeA, $committeeB);
             if ($comparison !== 0) {
