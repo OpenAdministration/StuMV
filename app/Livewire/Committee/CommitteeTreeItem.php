@@ -57,13 +57,8 @@ class CommitteeTreeItem extends Component
         }
 
         foreach ($committee->descendants()->get() as $descendant) {
-            foreach (array_filter([
-                $descendant->getFirstAttribute('ou'),
-                $descendant->getFirstAttribute('description'),
-            ]) as $value) {
-                if (mb_stripos(mb_strtolower($value), mb_strtolower($search)) !== false) {
-                    return true;
-                }
+            if ($this->committeeMatchesSearch($descendant, $search)) {
+                return true;
             }
         }
 
