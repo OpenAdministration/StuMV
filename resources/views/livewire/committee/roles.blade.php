@@ -22,7 +22,7 @@
 
     <flux:field>
         <flux:label>{{ __('roles.search') }}</flux:label>
-        <flux:input icon="search" clearable wire:model.live="search" />
+        <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
     </flux:field>
 
     @php
