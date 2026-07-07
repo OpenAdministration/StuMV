@@ -39,11 +39,17 @@ class ListRoles extends Component {
     public string $deleteRoleName;
 
     public bool $showOnlyActive = true;
+    public bool $ready = false;
 
     public function mount(Community $uid, $ou)
     {
        $this->uid = $uid->getFirstAttribute('ou');
        $this->ou = $ou;
+    }
+
+    public function loadRoles(): void
+    {
+        $this->ready = true;
     }
 
     public function sortBy($field)
@@ -66,6 +72,18 @@ class ListRoles extends Component {
     {
         $community = Community::findByUid($this->uid);
         $committee = Committee::findByNameOrFail($this->uid, $this->ou);
+
+        if (! $this->ready) {
+            return view(
+                'livewire.committee.roles', [
+                    'community' => $community,
+                    'committee' => $committee,
+                    'roles' => collect(),
+                    'roleData' => [],
+                ]
+            )->title(__('committees.roles_title', ['name' => $this->ou]));
+        }
+
         $rolesQuery = $committee->roles();
 
         if ($this->search) {

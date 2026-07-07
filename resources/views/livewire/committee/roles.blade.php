@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8">
+<div class="flex-col space-y-8" wire:init="loadRoles">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
@@ -25,12 +25,17 @@
         <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
     </flux:field>
 
-    @php
-        $hasHiddenRolesWithMembers = false;
-        $committeesShown = 0;
-    @endphp
-    <div class="grid lg:grid-cols-2 gap-6">
-        @forelse($roles as $role)
+    @if (empty($roles) && ! $ready)
+        <div class="flex justify-center py-16">
+            <flux:icon.loading />
+        </div>
+    @else
+        @php
+            $hasHiddenRolesWithMembers = false;
+            $committeesShown = 0;
+        @endphp
+        <div class="grid lg:grid-cols-2 gap-6">
+            @forelse($roles as $role)
             @php
                 $roleInfo = $roleData[$role->getDn()] ?? ['hasMembers' => false, 'members' => []];
                 $hasMembers = $roleInfo['hasMembers'];
@@ -109,6 +114,7 @@
     </div>
     @if($hasHiddenRolesWithMembers && $committeesShown < 1)
         <flux:callout variant="warning" icon="info" heading="{{ __('roles.there_are_inactive_roles') }}" />
+    @endif
     @endif
 
     <div class="block h-[1px]"></div>
