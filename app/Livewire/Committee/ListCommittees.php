@@ -83,15 +83,8 @@ class ListCommittees extends Component
         }
 
         foreach ($committee->descendants()->get() as $descendant) {
-            $descendantValues = array_filter([
-                $descendant->getFirstAttribute('ou'),
-                $descendant->getFirstAttribute('description'),
-            ]);
-
-            foreach ($descendantValues as $value) {
-                if (mb_stripos(mb_strtolower($value), $search) !== false) {
-                    return true;
-                }
+            if ($this->committeeMatchesSearch($descendant, $search)) {
+                return true;
             }
         }
 
