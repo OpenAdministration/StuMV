@@ -18,7 +18,7 @@
 
         <flux:field>
             <flux:label>{{ __('committees.search') }}</flux:label>
-            <flux:input wire:model.live.debounce.500ms="search" />
+            <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
         </flux:field>
 
         <ul>
