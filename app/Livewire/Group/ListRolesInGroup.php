@@ -62,22 +62,6 @@ class ListRolesInGroup extends Component {
             $roles[] = Role::findOrFail($row->role_dn);
         }
 
-        usort($roles, function (Role $a, Role $b): int {
-            $committeeA = $a->committee()?->getFirstAttribute('ou')
-                ?? $a->committee()?->getFirstAttribute('ou')
-                ?? '';
-            $committeeB = $b->committee()?->getFirstAttribute('ou')
-                ?? $b->committee()?->getFirstAttribute('ou')
-                ?? '';
-
-            $comparison = strcmp($committeeA, $committeeB);
-            if ($comparison !== 0) {
-                return $comparison;
-            }
-
-            return strcmp($a->getFirstAttribute('cn') ?? '', $b->getFirstAttribute('cn') ?? '');
-        });
-
         return view(
             'livewire.group.roles', [
                 'roles' => $roles,
