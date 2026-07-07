@@ -76,6 +76,8 @@ class CommitteeTreeItem extends Component
         $c->delete(recursive: true);
 
         Flux::modal('delete-committee-' . $cn)->close();
-        return redirect()->back();
+        return redirect()->route('committees.list', [
+            'uid' => $this->realm_uid,
+        ]);
     }
 }
