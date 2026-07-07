@@ -53,14 +53,15 @@ class ListRolesInGroup extends Component {
     }
 
     public function render() {
-        $rolesDB = GroupMembership::select('role_dn')
+        $roleDns = GroupMembership::query()
             ->where('group_dn', $this->group_dn)
-            ->get();
+            ->distinct()
+            ->pluck('role_dn')
+            ->all();
 
-        $roles = [];
-        foreach ($rolesDB as $row) {
-            $roles[] = Role::findOrFail($row->role_dn);
-        }
+        $roles = empty($roleDns)
+            ? collect()
+            : Role::query()->findMany($roleDns);
 
         return view(
             'livewire.group.roles', [
