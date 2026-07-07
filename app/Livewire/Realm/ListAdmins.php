@@ -28,11 +28,16 @@ class ListAdmins extends Component {
     public string $community_name;
 
     public string $deleteAdminName = '';
-
+    public bool $ready = false;
 
     public function mount(Community $uid)
     {
         $this->community_name = $uid->getFirstAttribute('ou');
+    }
+
+    public function loadAdmins(): void
+    {
+        $this->ready = true;
     }
 
     public function sortBy($field): void
@@ -59,10 +64,24 @@ class ListAdmins extends Component {
 
     public function render()
     {
-        $admins = $this->community()?->adminsGroup()->members()->get();
+        $community = $this->community();
+
+        if (! $this->ready) {
+            return view(
+                'livewire.realm.list-admins', [
+                    'community' => $community,
+                    'realm_admins' => collect(),
+                ]
+            )->title(__('realms.admins_heading', [
+                'name' => $community->description[0],
+                'uid' => $community->ou[0]
+            ]));
+        }
+
+        $admins = $community?->adminsGroup()->members()->get();
         return view(
             'livewire.realm.list-admins', [
-                'community' => $this->community(),
+                'community' => $community,
                 'realm_admins' => $admins,
                 //->orderBy($this->sortField, $this->sortDirection)
                 //->paginate(10),
@@ -70,8 +89,8 @@ class ListAdmins extends Component {
                 //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
         )->title(__('realms.admins_heading', [
-            'name' => $this->community()->description[0],
-            'uid' => $this->community()->ou[0]
+            'name' => $community->description[0],
+            'uid' => $community->ou[0]
         ]));
     }
 

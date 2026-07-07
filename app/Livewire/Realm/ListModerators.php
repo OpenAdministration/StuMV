@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
@@ -16,15 +17,16 @@ class ListModerators extends Component {
 
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'full_name';
+
     #[Url]
     public string $sortDirection = 'asc';
 
-    public bool $showDeleteModal = false;
-
     public string $deleteMemberName = '';
     public string $deleteMemberUsername = '';
+    public bool $ready = false;
 
     #[Locked]
     public string $community_name;
@@ -50,9 +52,24 @@ class ListModerators extends Component {
         $this->resetPage();
     }
 
+    public function loadModerators(): void
+    {
+        $this->ready = true;
+    }
+
     public function render()
     {
         $community = Community::findOrFailByUid($this->community_name);
+
+        if (! $this->ready) {
+            return view(
+                'livewire.realm.list-moderators', [
+                    'community' => $community,
+                    'realm_members' => collect(),
+                ]
+            )->title(__('realms.mods_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
+        }
+
         $mods = $community->moderatorsGroup()->members()->get();
         return view(
             'livewire.realm.list-moderators', [
@@ -83,12 +100,12 @@ class ListModerators extends Component {
         $this->authorize('remove_moderator', $community);
         $user = User::findOrFailByUsername($this->deleteMemberUsername);
         $community->moderatorsGroup()->members()->detach($user);
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->show();
     }
 
     public function close(): void
     {
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
         unset($this->deleteMemberUsername, $this->deleteMemberName);
     }
 }

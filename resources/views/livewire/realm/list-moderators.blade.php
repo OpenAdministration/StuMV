@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8">
+<div class="flex-col space-y-8" wire:init="loadModerators">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</flux:heading>
@@ -22,7 +22,12 @@
         <flux:input type="text" icon="magnifying-glass" wire:model.live.debounce="search" />
     </flux:field>-->
 
-    <flux:table>
+    <div wire:loading.flex wire:target="loadModerators" class="flex justify-center py-16">
+        <flux:icon.loading />
+    </div>
+
+    <div wire:loading.remove wire:target="loadModerators">
+        <flux:table>
         <flux:table.columns>
             <flux:table.column class="w-[55px]"></flux:table.column>
             <flux:table.column>{{ __('Name') }}</flux:table.column>
