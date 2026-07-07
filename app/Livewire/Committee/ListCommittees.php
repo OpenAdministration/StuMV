@@ -25,10 +25,16 @@ class ListCommittees extends Component
     public string $sortDirection = 'asc';
 
     public string $realm_uid;
+    public bool $ready = false;
 
     public function mount(Community $uid): void
     {
         $this->realm_uid = $uid->getFirstAttribute('ou');
+    }
+
+    public function loadCommittees(): void
+    {
+        $this->ready = true;
     }
 
     public function sortBy($field): void
@@ -50,6 +56,14 @@ class ListCommittees extends Component
     public function render()
     {
         $community = Community::findByUid($this->realm_uid);
+
+        if (! $this->ready) {
+            return view('livewire.committee.list', [
+                'committees' => collect(),
+                'community' => $community,
+            ])->title(__('committees.list_title'));
+        }
+
         $committees = Committee::fromCommunity($this->realm_uid)
             ->orderBy($this->sortField)
             ->list()
