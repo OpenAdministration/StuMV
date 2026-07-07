@@ -67,8 +67,7 @@ class ListRoles extends Component {
         $rolesQuery = $committee->roles();
 
         if ($this->search) {
-            $rolesQuery = $rolesQuery->whereContains('cn', $this->search)
-                ->orWhereContains('description', $this->search);
+            $rolesQuery = $rolesQuery->whereContains('description', $this->search);
         }
 
         $rolesSlice = $rolesQuery->orderBy('description', 'asc')
