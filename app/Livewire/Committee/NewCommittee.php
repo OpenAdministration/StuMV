@@ -50,7 +50,8 @@ class NewCommittee extends Component
         ],
     ];
 
-    public function mount(Community $uid){
+    public function mount(Community $uid)
+    {
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
@@ -79,8 +80,8 @@ class NewCommittee extends Component
                 if ($key < 3) {
                     continue;
                 }
-                $ouDescription = Committee::findByNameOrFail($this->realm_uid, $this->ou);
-                $pathDescription .= $ouDescription . ' → ';
+                $c = Committee::findByNameOrFail($this->realm_uid, $ou);
+                $pathDescription .= $c->getFirstAttribute('description') . ' → ';
             }
             $pathDescription = rtrim($pathDescription, ' → ');
 
