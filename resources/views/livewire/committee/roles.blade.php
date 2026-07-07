@@ -32,7 +32,8 @@
     <div class="grid lg:grid-cols-2 gap-6">
         @forelse($roles as $role)
             @php
-                $hasMembers = $this->getHasMembers($role);
+                $roleInfo = $roleData[$role->getDn()] ?? ['hasMembers' => false, 'members' => []];
+                $hasMembers = $roleInfo['hasMembers'];
                 if (!$hasMembers && $this->showOnlyActive) {
                     $hasHiddenRolesWithMembers = true;
                 }
@@ -40,7 +41,7 @@
                     $committeesShown = $committeesShown + 1;
                 }
             @endphp
-            @if($this->showOnlyActive && $this->getHasMembers($role) || !$this->showOnlyActive)
+            @if($this->showOnlyActive && $hasMembers || !$this->showOnlyActive)
                 <flux:card>
                     <div class="flex gap-4 items-center">
                         <div class="flex-1">
@@ -81,9 +82,9 @@
                             </flux:dropdown>
                         </div>
                     </div>
-                    @if($this->getHasMembers($role))
+                    @if($hasMembers)
                         <div class="flex flex-wrap gap-2 mt-6">
-                            @foreach($this->getMembers($role) as $member)
+                            @foreach($roleInfo['members'] as $member)
                                 @php
                                     $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
                                     if ($jpegPhoto) {

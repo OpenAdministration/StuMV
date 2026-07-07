@@ -76,11 +76,30 @@ class ListRoles extends Component {
             ->list()
             ->get();
 
+        $roleData = [];
+        foreach ($rolesSlice as $role) {
+            $usernames = $role->dbMemberships()
+                ->active(today())
+                ->distinct()
+                ->pluck('username');
+
+            $members = [];
+            foreach ($usernames as $user) {
+                $members[] = User::findOrFailByUsername($user);
+            }
+
+            $roleData[$role->getDn()] = [
+                'hasMembers' => count($members) > 0,
+                'members' => $members,
+            ];
+        }
+
         return view(
             'livewire.committee.roles', [
                 'community' => $community,
                 'committee' => $committee,
                 'roles' => $rolesSlice,
+                'roleData' => $roleData,
             ]
         )->title(__('committees.roles_title', ['name' => $this->ou]));
     }
