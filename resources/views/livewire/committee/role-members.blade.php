@@ -63,28 +63,30 @@
                 <flux:table.row>
                     <flux:table.cell>
                         @php
-                            $jpegPhoto = \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('jpegPhoto');
+                            $user = $userCache[$member->username] ?? null;
+                            $jpegPhoto = $user?->getFirstAttribute('jpegPhoto');
                             if ($jpegPhoto) {
                                 $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                             }
+                            $displayName = $user?->getFirstAttribute('cn') ?? $member->username;
                         @endphp
                         @if($member->isActive() && !$member->isPending())
                             <flux:avatar
                                 badge badge:color="green"
                                 src="{{ $jpegPhoto }}"
-                                name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
+                                name="{{ $displayName }}"
                             />
                         @elseif($member->isPending())
                             <flux:avatar
                                 badge badge:color="yellow"
                                 src="{{ $jpegPhoto }}"
-                                name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
+                                name="{{ $displayName }}"
                             />
                         @else
                             <flux:avatar
                                 badge badge:color="gray"
                                 src="{{ $jpegPhoto }}"
-                                name="{{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}"
+                                name="{{ $displayName }}"
                             />
                         @endif
                     </flux:table.cell>
@@ -94,7 +96,7 @@
                             :disabled="auth()->user()->cannot('admin', [$community])"
                             href="{{ route('profile', ['username' => $member->username]) }}"
                         >
-                            {{ \App\Ldap\User::findOrFailByUsername($member->username)->getFirstAttribute('cn') }}
+                            {{ $displayName }}
                         </flux:link>
                     </flux:table.cell>
                     <flux:table.cell>{{ \Carbon\Carbon::parse($member->from)->format('Y-m-d') }}</flux:table.cell>
