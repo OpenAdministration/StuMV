@@ -39,10 +39,10 @@ class CommitteeTreeItem extends Component
 
     public function deleteCommittee(string $dn, string $cn)
     {
-        $this->authorize('delete', [$c, $community]);
-
         $community = Community::findByUid($this->realm_uid);
         $c = Committee::findOrFail($dn);
+
+        $this->authorize('delete', [$c, $community]);
 
         if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')){
             $this->addError('deleteConfirmText', __('Does not equal :text', [ 'text' => $c->getFirstAttribute('ou') ]));
