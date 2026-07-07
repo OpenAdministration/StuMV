@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Models\GroupMembership;
+use Flux\Flux;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -16,8 +17,10 @@ class ListRolesInGroup extends Component {
 
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'name';
+
     #[Url]
     public string $sortDirection = 'asc';
 
@@ -25,8 +28,6 @@ class ListRolesInGroup extends Component {
     public string $group_cn;
     public string $realm_uid;
 
-
-    public bool $showDeleteModal = false;
     public string $deleteRoleDN = "";
     public array $deleteRoleName = [];
 
@@ -52,12 +53,27 @@ class ListRolesInGroup extends Component {
     }
 
     public function render() {
-        $rolesDB = GroupMembership::select('role_dn')->where('group_dn', $this->group_dn)->get();
+        $rolesDB = GroupMembership::select('role_dn')
+            ->where('group_dn', $this->group_dn)
+            ->get();
+
         $roles = [];
         foreach ($rolesDB as $row) {
-            $role = Role::findOrFail($row->role_dn);
-            array_push($roles, $role);
+            $roles[] = Role::findOrFail($row->role_dn);
         }
+
+        usort($roles, function (Role $a, Role $b): int {
+            $committeeA = $a->committee()?->getFirstAttribute('cn') ?? '';
+            $committeeB = $b->committee()?->getFirstAttribute('cn') ?? '';
+
+            $comparison = strcmp($committeeA, $committeeB);
+            if ($comparison !== 0) {
+                return $comparison;
+            }
+
+            return strcmp($a->getFirstAttribute('cn') ?? '', $b->getFirstAttribute('cn') ?? '');
+        });
+
         return view(
             'livewire.group.roles', [
                 'roles' => $roles,
@@ -77,7 +93,7 @@ class ListRolesInGroup extends Component {
         $this->deleteRoleDN = $role_dn;
         $this->deleteRoleName = [ $role->getFirstAttribute('cn') ];
 
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
@@ -85,7 +101,9 @@ class ListRolesInGroup extends Component {
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
 
-        GroupMembership::where('group_dn', $this->group_dn)->where('role_dn', $this->deleteRoleDN)->delete();
+        GroupMembership::where('group_dn', $this->group_dn)
+            ->where('role_dn', $this->deleteRoleDN)
+            ->delete();
 
         $this->close();
     }
@@ -93,6 +111,6 @@ class ListRolesInGroup extends Component {
     public function close(): void
     {
         unset($this->deleteRoleDN, $this->deleteRoleName);
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
     }
 }
