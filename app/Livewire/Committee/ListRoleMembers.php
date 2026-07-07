@@ -62,10 +62,10 @@ class ListRoleMembers extends Component
         
         $members = $membersQuery->get();
 
-        $userCache = [];
-        foreach ($members as $member) {
-            $userCache[$member->username] = User::findOrFailByUsername($member->username);
-        }
+        $usernames = $members->pluck('username')->unique()->filter()->all();
+        $userCache = empty($usernames)
+            ? []
+            : User::query()->whereIn('uid', $usernames)->get()->keyBy('uid')->all();
 
         return view('livewire.committee.role-members', [
             'members' => $members,
