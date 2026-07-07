@@ -79,7 +79,7 @@ class NewCommittee extends Component
                 $pathDescription .= $ou . ' → ';
             }
 
-            $parents[$dn] = [
+            $parents[$parent->getDn()] = [
                 'description' => $pathDescription,
             ];
         }
