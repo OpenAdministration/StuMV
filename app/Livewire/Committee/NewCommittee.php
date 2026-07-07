@@ -75,9 +75,14 @@ class NewCommittee extends Component
             $dn = DistinguishedName::make($parent->getDn());
             $pathFromDn = $dn->assoc();
             $pathDescription = '';
-            foreach (array_reverse($pathFromDn['ou']) as $ou) {
-                $pathDescription .= $ou . ' → ';
+            foreach (array_reverse($pathFromDn['ou']) as $key => $ou) {
+                if ($key < 3) {
+                    continue;
+                }
+                $ouDescription = Committee::findByNameOrFail($this->realm_uid, $this->ou);
+                $pathDescription .= $ouDescription . ' → ';
             }
+            $pathDescription = rtrim($pathDescription, ' → ');
 
             $parents[$parent->getDn()] = [
                 'description' => $pathDescription,
