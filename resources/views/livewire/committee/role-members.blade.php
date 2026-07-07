@@ -50,7 +50,7 @@
     <div class="pb-6 sm:pb-8">
         <flux:table>
             <flux:table.columns>
-                <flux:table.column></flux:table.column>
+                <flux:table.column class="w-[55px]"></flux:table.column>
                 <flux:table.column>{{ __('User') }}</flux:table.column>
                 <flux:table.column>{{ __('From') }}</flux:table.column>
                 <flux:table.column>{{ __('Until') }}</flux:table.column>
