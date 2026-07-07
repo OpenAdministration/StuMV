@@ -6,6 +6,8 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Ldap\User;
+use App\Models\GroupMembership;
+use App\Models\RoleMembership;
 use Flux\Flux;
 use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Computed;
