@@ -64,10 +64,14 @@ class ListRoles extends Component {
     {
         $community = Community::findByUid($this->uid);
         $committee = Committee::findByNameOrFail($this->uid, $this->ou);
-        $rolesSlice = $committee->roles()
-            ->where('cn', 'contains', $this->search)
-            ->where('description', 'contains', $this->search)
-            ->orderBy('description', 'asc')
+        $rolesQuery = $committee->roles();
+
+        if ($this->search) {
+            $rolesQuery = $rolesQuery->where('cn', 'contains', $this->search)
+                ->where('description', 'contains', $this->search);
+        }
+
+        $rolesSlice = $rolesQuery->orderBy('description', 'asc')
             ->list()
             ->get();
 
