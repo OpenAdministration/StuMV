@@ -4,6 +4,7 @@ namespace App\Livewire\Group;
 
 use App\Ldap\Community;
 use App\Ldap\Group;
+use App\Models\GroupMembership;
 use Flux\Flux;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -24,12 +25,8 @@ class ListGroups extends Component
 
     public string $realm_uid;
 
-    public bool $showDeleteModal = false;
-
     public string $deleteGroupDn;
-
     public string $deleteGroupName = '';
-
 
     public function sortBy($field){
         if($this->sortField === $field){
@@ -58,6 +55,10 @@ class ListGroups extends Component
         } else {
             $groupsQuery->orderBy($this->sortField);
         }
+        if ($this->search) {
+            $groupsQuery->whereContains('cn', $this->search)
+                ->orWhereContains('description', $this->search);
+        }
         $groups = $groupsQuery->slice($page = 1, $perPage = 10);
 
         return view('livewire.group.list-group', [
@@ -74,15 +75,16 @@ class ListGroups extends Component
 
     public function deleteCommit(): void
     {
+        $this->authorize('delete', [Group::class, $community]);
+
+        // Delete role group relationships
+        GroupMembership::where('group_dn', $this->deleteGroupDn)->delete();
+
+        // Delete group
         Group::query()->delete($this->deleteGroupDn);
+
         // reset everything to prevent a 404 modal
         unset($this->deleteGroupDn);
         Flux::modal('delete')->close();
     }
-
-    public function close(): void
-    {
-        $this->showDeleteModal = false;
-    }
-
 }
