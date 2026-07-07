@@ -25,11 +25,11 @@
         <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
     </flux:field>
 
-    @if (empty($roles) && !$ready)
-        <div class="flex justify-center py-16">
-            <flux:icon.loading />
-        </div>
-    @else
+    <div wire:loading.flex wire:target="loadRoles" class="flex justify-center py-16">
+        <flux:icon.loading />
+    </div>
+
+    <div wire:loading.remove wire:target="loadRoles">
         @php
             $hasHiddenRolesWithMembers = false;
             $committeesShown = 0;
@@ -111,11 +111,11 @@
         @empty
             <flux:callout variant="warning" icon="info" heading="{{ __('roles.no_roles_found') }}" class="col-span-full" />
         @endforelse
+        </div>
+        @if($hasHiddenRolesWithMembers && $committeesShown < 1)
+            <flux:callout variant="warning" icon="info" heading="{{ __('roles.there_are_inactive_roles') }}" />
+        @endif
     </div>
-    @if($hasHiddenRolesWithMembers && $committeesShown < 1)
-        <flux:callout variant="warning" icon="info" heading="{{ __('roles.there_are_inactive_roles') }}" />
-    @endif
-    @endif
 
     <div class="block h-[1px]"></div>
 
