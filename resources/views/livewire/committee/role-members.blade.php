@@ -170,6 +170,7 @@
             </flux:table.rows>
         </flux:table>
     </div>
+    @endif
 
     <form wire:submit="commitDeletion">
         <flux:modal name="deletion">
