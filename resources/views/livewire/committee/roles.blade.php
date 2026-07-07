@@ -25,7 +25,7 @@
         <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
     </flux:field>
 
-    @if (empty($roles) && ! $ready)
+    @if (empty($roles) && !$ready)
         <div class="flex justify-center py-16">
             <flux:icon.loading />
         </div>
