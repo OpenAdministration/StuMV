@@ -31,9 +31,7 @@
                     wire:key="committee-tree-root-{{ $committee->getDn() }}-{{ $search }}"
                 />
             @empty
-                <div class="flex justify-center item-center">
-                    <span class="text-gray-400 text-xl py-2 font-medium">{{ __('committees.no_committees_found') }}</span>
-                </div>
+                <flux:callout variant="warning" icon="info" heading="{{ __('committees.no_committees_found') }}" />
             @endforelse
         </ul>
     </div>
