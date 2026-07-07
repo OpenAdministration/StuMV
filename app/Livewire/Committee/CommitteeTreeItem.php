@@ -65,9 +65,9 @@ class CommitteeTreeItem extends Component
         return false;
     }
 
-    public function getChildren()
+    public function toggleChildren(): void
     {
-        $this->unfolded = true;
+        $this->unfolded = !$this->unfolded;
     }
 
     public function deleteCommittee(string $dn, string $cn)
