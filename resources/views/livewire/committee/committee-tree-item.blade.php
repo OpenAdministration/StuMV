@@ -84,7 +84,13 @@
                             <flux:separator vertical class="w-[2px]!" />
                         @endif
                     </div>
-                    <livewire:committee.committee-tree-item :dn="$child->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" :search="$search" />
+                    <livewire:committee.committee-tree-item
+                        :dn="$child->getDn()"
+                        :realm_uid="$realm_uid"
+                        :isLastItem="$loop->last"
+                        :search="$search"
+                        wire:key="committee-tree-child-{{ $child->getDn() }}-{{ $search }}"
+                    />
                 </div>
             @endforeach
         </ul>

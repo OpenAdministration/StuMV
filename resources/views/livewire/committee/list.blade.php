@@ -23,7 +23,13 @@
 
         <ul>
             @forelse($committees as $committee)
-                <livewire:committee.committee-tree-item :dn="$committee->getDn()" :realm_uid="$realm_uid" :isLastItem="$loop->last" :search="$search" />
+                <livewire:committee.committee-tree-item
+                    :dn="$committee->getDn()"
+                    :realm_uid="$realm_uid"
+                    :isLastItem="$loop->last"
+                    :search="$search"
+                    wire:key="committee-tree-root-{{ $committee->getDn() }}-{{ $search }}"
+                />
             @empty
                 <div class="flex justify-center item-center">
                     <span class="text-gray-400 text-xl py-2 font-medium">{{ __('committees.no_committees_found') }}</span>
