@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "32fcb29c651bbbbbee49cf2906554b7a",
+    "content-hash": "73ada22c757863d10954ef70210261d5",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -476,16 +476,16 @@
         },
         {
             "name": "directorytree/ldaprecord",
-            "version": "v3.8.6",
+            "version": "v4.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord.git",
-                "reference": "a1cab9f078eb4756fc6fad58caea1e3d11cad0ec"
+                "reference": "75f25c84f8ffc4b10029be8a310c72fc0d46bf71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/a1cab9f078eb4756fc6fad58caea1e3d11cad0ec",
-                "reference": "a1cab9f078eb4756fc6fad58caea1e3d11cad0ec",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord/zipball/75f25c84f8ffc4b10029be8a310c72fc0d46bf71",
+                "reference": "75f25c84f8ffc4b10029be8a310c72fc0d46bf71",
                 "shasum": ""
             },
             "require": {
@@ -548,24 +548,24 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-19T20:55:30+00:00"
+            "time": "2026-05-28T13:39:48+00:00"
         },
         {
             "name": "directorytree/ldaprecord-laravel",
-            "version": "v3.4.3",
+            "version": "v4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/DirectoryTree/LdapRecord-Laravel.git",
-                "reference": "86925b558655e1595aabccbb8c530eb747e87ef5"
+                "reference": "6f02904ba8705c2b0b2fa8a96f33592c77df92a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord-Laravel/zipball/86925b558655e1595aabccbb8c530eb747e87ef5",
-                "reference": "86925b558655e1595aabccbb8c530eb747e87ef5",
+                "url": "https://api.github.com/repos/DirectoryTree/LdapRecord-Laravel/zipball/6f02904ba8705c2b0b2fa8a96f33592c77df92a3",
+                "reference": "6f02904ba8705c2b0b2fa8a96f33592c77df92a3",
                 "shasum": ""
             },
             "require": {
-                "directorytree/ldaprecord": "^v3.3",
+                "directorytree/ldaprecord": "^4.0",
                 "ext-json": "*",
                 "ext-ldap": "*",
                 "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
@@ -607,7 +607,7 @@
             ],
             "support": {
                 "issues": "https://github.com/DirectoryTree/LdapRecord-Laravel/issues",
-                "source": "https://github.com/DirectoryTree/LdapRecord-Laravel/tree/v3.4.3"
+                "source": "https://github.com/DirectoryTree/LdapRecord-Laravel/tree/v4.0.4"
             },
             "funding": [
                 {
@@ -615,7 +615,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-03-19T21:11:17+00:00"
+            "time": "2026-06-08T17:20:00+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -9099,12 +9099,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "0d7c863abe9c47c4737948a9a6a4720254ee9206"
+                "reference": "f3cd286075d77e060417bf42edcc29917deab05e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/0d7c863abe9c47c4737948a9a6a4720254ee9206",
-                "reference": "0d7c863abe9c47c4737948a9a6a4720254ee9206",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f3cd286075d77e060417bf42edcc29917deab05e",
+                "reference": "f3cd286075d77e060417bf42edcc29917deab05e",
                 "shasum": ""
             },
             "conflict": {
@@ -10077,7 +10077,7 @@
                 "wanglelecc/laracms": "<=1.0.3",
                 "wapplersystems/a21glossary": "<=0.4.10",
                 "web-auth/webauthn-framework": ">=3.3,<3.3.4|>=4.5,<4.9|>=5.2,<5.2.4|>=5.3,<5.3.1",
-                "web-auth/webauthn-lib": ">=4.5,<4.9|>=5.2,<5.2.4",
+                "web-auth/webauthn-lib": ">=4.5,<5.3.5",
                 "web-auth/webauthn-symfony-bundle": "<5.3.4",
                 "web-feet/coastercms": "==5.5",
                 "web-token/jwt-bundle": "<3.4.10|>=4,<4.0.7|>=4.1,<4.1.7",
@@ -10209,7 +10209,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-07T13:20:37+00:00"
+            "time": "2026-07-08T02:37:08+00:00"
         },
         {
             "name": "sebastian/cli-parser",

@@ -34,7 +34,6 @@ return [
             'port' => env('LDAP_PORT', 389),
             'base_dn' => env('LDAP_BASE_DN'),
             'timeout' => env('LDAP_TIMEOUT', 5),
-            'use_ssl' => env('LDAP_SSL', false),
             'use_tls' => env('LDAP_TLS', false),
             'options' => [
                 // See: http://php.net/ldap_set_option
@@ -49,7 +48,6 @@ return [
             'port' => env('UNI_LDAP_PORT', 389),
             'base_dn' => env('UNI_LDAP_BASE_DN'),
             'timeout' => env('UNI_LDAP_TIMEOUT', 5),
-            'use_ssl' => env('UNI_LDAP_SSL', false),
             'use_tls' => env('UNI_LDAP_TLS', false),
             'options' => [
                 // See: http://php.net/ldap_set_option
