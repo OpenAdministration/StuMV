@@ -10,7 +10,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListCommittees extends Component
+class ListCommitteesList extends Component
 {
     use AuthorizesRequests;
     use WithPagination;
@@ -57,51 +57,13 @@ class ListCommittees extends Component
     {
         $community = Community::findByUid($this->realm_uid);
 
-        if (! $this->ready) {
-            return view('livewire.committee.list', [
-                'committees' => collect(),
-                'community' => $community,
-            ])->title(__('committees.list_title'));
-        }
-
         $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy($this->sortField)
-            ->list()
+            ->orderBy($this->sortField, $this->sortDirection)
             ->get();
 
-        $search = trim($this->search);
-        if ($search !== '') {
-            $search = mb_strtolower($search);
-            $committees = $committees->filter(function (Committee $committee) use ($search): bool {
-                return $this->committeeMatchesSearch($committee, $search);
-            })->values();
-        }
-
-        return view('livewire.committee.list', [
+        return view('livewire.committee.list-committees-list', [
             'committees' => $committees,
             'community' => $community,
         ])->title(__('committees.list_title'));
-    }
-
-    protected function committeeMatchesSearch(Committee $committee, string $search): bool
-    {
-        $values = array_filter([
-            $committee->getFirstAttribute('ou'),
-            $committee->getFirstAttribute('description'),
-        ]);
-
-        foreach ($values as $value) {
-            if (mb_stripos(mb_strtolower($value), $search) !== false) {
-                return true;
-            }
-        }
-
-        foreach ($committee->descendants()->get() as $descendant) {
-            if ($this->committeeMatchesSearch($descendant, $search)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

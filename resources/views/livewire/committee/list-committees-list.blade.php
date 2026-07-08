@@ -1,0 +1,56 @@
+<div wire:init="loadCommittees">
+    <div class="flex-col space-y-8 pb-6 sm:pb-8">
+        <x-list-committees-header :community="$community" :realm_uid="$realm_uid" />
+
+        <flux:field>
+            <flux:label>{{ __('committees.search') }}</flux:label>
+            <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+        </flux:field>
+
+        <x-list-committees-navbar :realm_uid="$realm_uid" :search="$search" />
+        
+        <div wire:loading.flex wire:target="loadCommittees" class="flex justify-center py-16">
+            <flux:icon.loading />
+        </div>
+        
+        <div wire:loading.remove wire:target="loadCommittees">
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column>{{ __('committees.name') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                    @forelse($committees as $committee)
+                        <flux:table.row>
+                            <flux:table.cell>
+                                <flux:link
+                                    wire:navigate
+                                    :disabled="auth()->user()->cannot('view', [$committee])"
+                                    href="{{ route('committees.show', ['uid' => $realm_uid, 'dn' => $committee->getDn()]) }}"
+                                >
+                                    {{ $committee->getFirstAttribute('description') }}
+                                </flux:link>
+                            </flux:table.cell>
+                            <flux:table.cell>
+                                @can('moderator', $community)
+                                    <flux:link
+                                        wire:navigate
+                                        :disabled="auth()->user()->cannot('admin', [$community])"
+                                        href="{{ route('committees.edit', ['uid' => $realm_uid, 'dn' => $committee->getDn()]) }}"
+                                    >
+                                        {{ __('Edit') }}
+                                    </flux:link>
+                                @endcan
+                            </flux:table.cell>
+                    @empty
+                        <tr>
+                            <td colspan="3">
+                                <flux:callout variant="warning" icon="info" heading="{{ __('committees.no_committees_found') }}" />
+                            </td>
+                        </tr>
+                    @endforelse
+                </flux:table.rows>
+            </flux:table>
+        </div>
+    </div>
+</div>
