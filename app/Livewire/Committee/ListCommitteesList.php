@@ -57,6 +57,13 @@ class ListCommitteesList extends Component
     {
         $community = Community::findByUid($this->realm_uid);
 
+        if (!$this->ready) {
+            return view('livewire.committee.list-committees-list', [
+                'committees' => collect(),
+                'community' => $community,
+            ])->title(__('committees.list_title'));
+        }
+
         $committeesQuery = Committee::fromCommunity($this->realm_uid);
         if ($this->search) {
             $committeesQuery->whereContains('description', $this->search);
