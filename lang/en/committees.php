@@ -12,4 +12,6 @@ return [
     'roles_heading' => 'Roles of the committee :name',
     'unfoldSubItems' => 'Unfold subordinate committees of :committee',
     'manage_roles' => 'Manage roles',
+    'treeView' => 'Tree',
+    'listView' => 'List',
 ];

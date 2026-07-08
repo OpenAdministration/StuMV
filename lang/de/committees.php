@@ -32,4 +32,6 @@ return [
     'foldSubItems' => 'Untergeordnete Gremien von :committee einklappen',
     'unfoldSubItems' => 'Untergeordnete Gremien von :committee ausklappen',
     'showOnlyActiveRoles' => 'Zeige nur Rollen mit aktiven Mitgliedschaften',
+    'treeView' => 'Baum',
+    'listView' => 'Liste',
 ];
