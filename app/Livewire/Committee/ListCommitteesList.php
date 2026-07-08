@@ -57,9 +57,11 @@ class ListCommitteesList extends Component
     {
         $community = Community::findByUid($this->realm_uid);
 
-        $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->get();
+        $committeesQuery = Committee::fromCommunity($this->realm_uid);
+        if ($this->search) {
+            $committeesQuery->whereContains('description', $this->search);
+        }
+        $committees = $committeesQuery->orderBy($this->sortField, $this->sortDirection)->get();
 
         return view('livewire.committee.list-committees-list', [
             'committees' => $committees,
