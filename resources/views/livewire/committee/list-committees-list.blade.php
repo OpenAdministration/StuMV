@@ -32,15 +32,34 @@
                                 </flux:link>
                             </flux:table.cell>
                             <flux:table.cell>
-                                @can('moderator', $community)
-                                    <flux:link
-                                        wire:navigate
-                                        :disabled="auth()->user()->cannot('admin', [$community])"
-                                        href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
-                                    >
-                                        {{ __('Edit') }}
-                                    </flux:link>
-                                @endcan
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" title="{{ __('common.options') }}" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            icon="users"
+                                            wire:navigate
+                                            href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                                            class="md:hidden"
+                                        >
+                                            {{ __('committees.link_roles') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            icon="pencil"
+                                            href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                                            :disabled="auth()->user()->cannot('edit', [$committee, $community])"
+                                        >
+                                            {{ __('committees.link_edit') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').show()"
+                                            :disabled="auth()->user()->cannot('edit', [$committee, $community])"
+                                        >
+                                            {{ __('Delete') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
                             </flux:table.cell>
                         </flux:table.row>
                     @empty
