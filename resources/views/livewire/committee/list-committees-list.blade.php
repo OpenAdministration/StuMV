@@ -1,13 +1,13 @@
 <div wire:init="loadCommittees">
     <div class="flex-col space-y-8 pb-6 sm:pb-8">
-        <x-list-committees-header :community="$community" :realm_uid="$realm_uid" />
+        <x-list-committees-header :community="$community" :realm="$realm_uid" />
 
         <flux:field>
             <flux:label>{{ __('committees.search') }}</flux:label>
             <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
         </flux:field>
 
-        <x-list-committees-navbar :realm_uid="$realm_uid" :search="$search" />
+        <x-list-committees-navbar :realm="$realm_uid" :search="$search" />
         
         <div wire:loading.flex wire:target="loadCommittees" class="flex justify-center py-16">
             <flux:icon.loading />
@@ -26,7 +26,7 @@
                                 <flux:link
                                     wire:navigate
                                     :disabled="auth()->user()->cannot('view', [$committee])"
-                                    href="{{ route('committees.show', ['uid' => $realm_uid, 'dn' => $committee->getDn()]) }}"
+                                    href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
                                 >
                                     {{ $committee->getFirstAttribute('description') }}
                                 </flux:link>
@@ -36,12 +36,13 @@
                                     <flux:link
                                         wire:navigate
                                         :disabled="auth()->user()->cannot('admin', [$community])"
-                                        href="{{ route('committees.edit', ['uid' => $realm_uid, 'dn' => $committee->getDn()]) }}"
+                                        href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
                                     >
                                         {{ __('Edit') }}
                                     </flux:link>
                                 @endcan
                             </flux:table.cell>
+                        </flux:table.row>
                     @empty
                         <tr>
                             <td colspan="3">
