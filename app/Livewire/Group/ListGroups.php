@@ -28,7 +28,8 @@ class ListGroups extends Component
     public string $deleteGroupDn;
     public string $deleteGroupName = '';
 
-    public function sortBy($field){
+    public function sortBy($field)
+    {
         if($this->sortField === $field){
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -51,13 +52,12 @@ class ListGroups extends Component
     {
         $groupsQuery = Group::query()->in(Group::dnRoot($this->realm_uid));
         if ($this->sortDirection === 'desc') {
-            $groupsQuery->orderByDesc($this->sortField);
+            $groupsQuery->orderBy($this->sortField, 'desc');
         } else {
-            $groupsQuery->orderBy($this->sortField);
+            $groupsQuery->orderBy($this->sortField, 'asc');
         }
         if ($this->search) {
-            $groupsQuery->whereContains('cn', $this->search)
-                ->orWhereContains('description', $this->search);
+            $groupsQuery->whereContains('cn', trim($this->search));
         }
         $groups = $groupsQuery->slice($page = 1, $perPage = 10);
 
