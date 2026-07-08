@@ -51,13 +51,13 @@ class ListGroups extends Component
     public function render()
     {
         $groupsQuery = Group::query()->in(Group::dnRoot($this->realm_uid));
+        if ($this->search) {
+            $groupsQuery->whereContains('cn', trim($this->search));
+        }
         if ($this->sortDirection === 'desc') {
             $groupsQuery->orderBy($this->sortField, 'desc');
         } else {
             $groupsQuery->orderBy($this->sortField, 'asc');
-        }
-        if ($this->search) {
-            $groupsQuery->whereContains('cn', trim($this->search));
         }
         $groups = $groupsQuery->slice($page = 1, $perPage = 10);
 
