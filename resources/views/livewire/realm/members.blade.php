@@ -27,7 +27,7 @@
         <flux:icon.loading />
     </div>
 
-    <div wire:loading.remove wire:target="loadMembers">
+    <div wire:loading.remove wire:target="loadMembers" class="pb-8">
         <flux:table>
             <flux:table.columns>
                 <flux:table.column class="w-[55px]"></flux:table.column>
@@ -112,7 +112,7 @@
     </flux:table>
 
     @if(count($realm_members) > 0)
-        <div class="pagination -mt-8">
+        <div class="pagination">
             <flux:pagination :paginator="$realm_members" />
         </div>
     @endif
