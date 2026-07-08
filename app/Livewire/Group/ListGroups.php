@@ -54,12 +54,7 @@ class ListGroups extends Component
         if ($this->search) {
             $groupsQuery->whereContains('cn', trim($this->search));
         }
-        if ($this->sortDirection === 'desc') {
-            $groupsQuery->orderBy($this->sortField, 'desc');
-        } else {
-            $groupsQuery->orderBy($this->sortField, 'asc');
-        }
-        $groups = $groupsQuery->slice($page = 1, $perPage = 10);
+        $groups = $groupsQuery->orderBy('cn')->slice($page = 1, $perPage = 10);
 
         return view('livewire.group.list-group', [
             'groupSlice' => $groups,
