@@ -18,12 +18,6 @@ class ListCommitteesTree extends Component
     #[Url]
     public string $search = '';
 
-    #[Url]
-    public string $sortField = 'description';
-
-    #[Url]
-    public string $sortDirection = 'asc';
-
     public string $realm_uid;
     public bool $ready = false;
 
@@ -35,17 +29,6 @@ class ListCommitteesTree extends Component
     public function loadCommittees(): void
     {
         $this->ready = true;
-    }
-
-    public function sortBy($field): void
-    {
-        if ($this->sortField === $field) {
-            // toggle direction
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortDirection = 'asc';
-            $this->sortField = $field;
-        }
     }
 
     public function updatedSearch(): void
@@ -65,7 +48,7 @@ class ListCommitteesTree extends Component
         }
 
         $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy($this->sortField)
+            ->orderBy('description')
             ->list()
             ->get();
 
