@@ -15,7 +15,7 @@
         
         <div wire:loading.remove wire:target="loadCommittees">
             <flux:table>
-                <flux:table.columns>
+                <flux:table.columns class="sr-only">
                     <flux:table.column>{{ __('committees.name') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
