@@ -51,14 +51,6 @@
                                             >
                                                 {{ __('committees.link_edit') }}
                                             </flux:menu.item>
-                                            <flux:menu.item
-                                                variant="danger"
-                                                icon="trash-2"
-                                                x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').show()"
-                                                :disabled="auth()->user()->cannot('edit', [$committee, $community])"
-                                            >
-                                                {{ __('Delete') }}
-                                            </flux:menu.item>
                                         </flux:menu>
                                     </flux:dropdown>
                                 </div>
