@@ -37,7 +37,8 @@ Route::middleware(['auth', 'verified'])->group(function (){
         Route::livewire('{uid}/members/', \App\Livewire\Realm\ListMembers::class)->name('realms.members');
         Route::livewire('{uid}/mods/', \App\Livewire\Realm\ListModerators::class)->name('realms.mods');
         Route::livewire('{uid}/admins/', \App\Livewire\Realm\ListAdmins::class)->name('realms.admins');
-        Route::livewire('{uid}/committees', \App\Livewire\Committee\ListCommittees::class)->name('committees.list');
+        Route::livewire('{uid}/committees', \App\Livewire\Committee\ListCommitteesTree::class)->name('committees.list');
+        Route::livewire('{uid}/committees/list', \App\Livewire\Committee\ListCommitteesList::class)->name('committees.list.list');
         Route::livewire('{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
         Route::livewire('{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\ListRoleMembers::class)->name('committees.roles.members');
         // end member
