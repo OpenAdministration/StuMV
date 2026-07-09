@@ -18,7 +18,6 @@ class NewAdmin extends Component
     #[Rule('required|string')]
     public string $realm_uid = "";
 
-
     public function mount(Community $uid)
     {
         $this->realm_uid = $uid->getFirstAttribute('ou');
