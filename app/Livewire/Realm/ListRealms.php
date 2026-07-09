@@ -51,7 +51,6 @@ class ListRealms extends Component
             ->setDn(Community::$rootDn)
             ->search('ou', $this->search)
             ->search('description', $this->search)
-            ->orderBy('ou')
             ->list()
             ->get();
 

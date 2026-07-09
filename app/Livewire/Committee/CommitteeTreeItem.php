@@ -23,7 +23,7 @@ class CommitteeTreeItem extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $committee = Committee::findOrFail($this->dn);
-        $children = $committee->descendants()->orderBy('description')->get();
+        $children = $committee->descendants()->get();
 
         $search = trim($this->search);
         $showNode = $search === '' || $this->committeeMatchesSearch($committee, $search);

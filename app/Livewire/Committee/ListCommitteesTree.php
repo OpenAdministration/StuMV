@@ -47,10 +47,7 @@ class ListCommitteesTree extends Component
             ])->title(__('committees.list_title'));
         }
 
-        $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy('description')
-            ->list()
-            ->get();
+        $committees = Committee::fromCommunity($this->realm_uid)->list()->get();
 
         $search = trim($this->search);
         if ($search !== '') {

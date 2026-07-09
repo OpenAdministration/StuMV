@@ -68,7 +68,7 @@ class ListCommitteesList extends Component
         if ($this->search) {
             $committeesQuery->whereContains('description', $this->search);
         }
-        $committees = $committeesQuery->orderBy($this->sortField, $this->sortDirection)->get();
+        $committees = $committeesQuery->get();
 
         return view('livewire.committee.list-committees-list', [
             'committees' => $committees,

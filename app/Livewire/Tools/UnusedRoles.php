@@ -17,9 +17,7 @@ class UnusedRoles extends Component
 
     public function render()
     {
-        $committees = Committee::fromCommunity($this->realm_uid)
-            ->orderBy('cn')
-            ->get();
+        $committees = Committee::fromCommunity($this->realm_uid)->get();
 
         $unusedCommittees = [];
         $unusedRoles = [];

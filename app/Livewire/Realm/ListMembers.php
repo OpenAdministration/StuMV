@@ -68,8 +68,7 @@ class ListMembers extends Component {
             )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
         }
 
-        $membersQuery = \App\Models\User::where('realm', $this->community_name)
-            ->orderBy($this->sortField, $this->sortDirection);
+        $membersQuery = \App\Models\User::where('realm', $this->community_name);
 
         if ($this->search != '') {
             $membersQuery->where('full_name', 'like', '%' . $this->search . '%');

@@ -49,7 +49,6 @@ class LdapSyncRoles extends Command
         $realms = Community::query()
             ->setDn(Community::$rootDn)
             ->search('ou', $this->argument('community'))
-            ->orderBy('ou')
             ->list()
             ->get(); 
 

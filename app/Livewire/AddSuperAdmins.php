@@ -13,7 +13,7 @@ class AddSuperAdmins extends Component
 
     public function render()
     {
-        $users = User::orderBy('cn')->get();
+        $users = User::get();
 
         return view('livewire.add-super-admins', [
             'users' => $users,

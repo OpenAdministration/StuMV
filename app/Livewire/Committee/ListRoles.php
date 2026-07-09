@@ -90,9 +90,7 @@ class ListRoles extends Component {
             $rolesQuery = $rolesQuery->whereContains('description', $this->search);
         }
 
-        $rolesSlice = $rolesQuery->orderBy('description', 'asc')
-            ->list()
-            ->get();
+        $rolesSlice = $rolesQuery->list()->get();
 
         $roleData = [];
         foreach ($rolesSlice as $role) {

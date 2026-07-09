@@ -83,10 +83,6 @@ class ListAdmins extends Component {
             'livewire.realm.list-admins', [
                 'community' => $community,
                 'realm_admins' => $admins,
-                //->orderBy($this->sortField, $this->sortDirection)
-                //->paginate(10),
-                // all users that aren't admins on this realm
-                //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
             ]
         )->title(__('realms.admins_heading', [
             'name' => $community->description[0],
