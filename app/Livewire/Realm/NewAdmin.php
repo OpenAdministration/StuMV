@@ -19,11 +19,12 @@ class NewAdmin extends Component
     public string $realm_uid = "";
 
 
-    public function mount(Community $uid):void{
+    public function mount(Community $uid)
+    {
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render()
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $userList =  $community->membersGroup()->members()->get();
