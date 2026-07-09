@@ -52,5 +52,6 @@ class NewAdmin extends Component
                 return false;
             }
         }
+        return redirect()->route('realms.admins', ['uid' => $this->realm_uid]);
     }
 }
