@@ -12,8 +12,8 @@ use Livewire\Component;
 
 class NewAdmin extends Component
 {
-    #[Rule('required|string')]
-    public string $dn = "";
+    #[Rule('required|array')]
+    public array $dn = [];
 
     #[Rule('required|string')]
     public string $realm_uid = "";
@@ -40,18 +40,17 @@ class NewAdmin extends Component
     public function save()
     {
         $this->validate();
-        try {
-            $user = User::findOrFail($this->dn);
-            $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->adminsGroup()->members()->attach($user);
+        foreach ($this->dn as $dn) {
+            try {
+                $user = User::findOrFail($dn);
+                $realm = Community::findOrFailByUid($this->realm_uid);
+                $realm->adminsGroup()->members()->attach($user);
 
-            Flux::toast(variant: 'success', text: __('Added new Admin'));
-            return redirect()->route('realms.admins', ['uid' => $this->realm_uid]);
-        } catch (LdapRecordException $exception) {
-            $this->addError('dn', $exception->getMessage());
-            return false;
+                Flux::toast(variant: 'success', text: __('Added new Admin'));
+            } catch (LdapRecordException $exception) {
+                Flux::toast(variant: 'danger', text: $exception->getMessage());
+                return false;
+            }
         }
     }
-
-
 }
