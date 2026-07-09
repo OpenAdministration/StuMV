@@ -28,6 +28,7 @@ class ListAdmins extends Component {
     public string $community_name;
 
     public string $deleteAdminName = '';
+    public string $deleteAdminUsername = '';
     public bool $ready = false;
 
     public function mount(Community $uid)
@@ -98,9 +99,10 @@ class ListAdmins extends Component {
         $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
         if(!$userIsAdmin) {
             // check if the user to delete is an admin in this realm
-            unset($this->deleteAdminName);
+            unset($this->deleteAdminUsername, $this->deleteAdminName);
             return;
         }
+        $this->deleteAdminUsername = $username;
         $this->deleteAdminName = $user->getFirstAttribute('cn');
         Flux::modal('delete')->show();
     }
@@ -110,7 +112,7 @@ class ListAdmins extends Component {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
         $admins = $community?->adminsGroup()->members();
-        $user = User::findByUsername($this->deleteAdminName);
+        $user = User::findByUsername($this->deleteAdminUsername);
         $admins->detach($user);
 
         // reset everything to prevent a 404 modal
@@ -119,7 +121,7 @@ class ListAdmins extends Component {
 
     public function close(): void
     {
-        unset($this->deleteAdminName);
+        unset($this->deleteAdminUsername, $this->deleteAdminName);
         Flux::modal('delete')->close();
     }
 }
