@@ -1,0 +1,12 @@
+# 04-overlays.ldif
+
+# dynlist overlay
+# Enables dynamic groups: a group entry contains an LDAP URL,
+# and when queried, slapd resolves that URL on the fly and returns
+# the matching entries as virtual members. No static member attributes
+# are stored — membership is always computed at query time.
+dn: olcOverlay=dynlist,olcDatabase={1}mdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcDynamicList
+olcOverlay: dynlist
+olcDlAttrSet: groupOfURLs memberURL member+memberOf@groupOfNames

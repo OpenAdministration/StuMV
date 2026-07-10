@@ -1,0 +1,9 @@
+# 02-schemas.ldif
+# Run with:
+# ldapadd -Y EXTERNAL -H ldapi:///home/pacs/opa00/users/ldap/ldapi.sock \
+#   -f 02-schemas.ldif
+
+include: file:///home/pacs/opa00/users/ldap/stage-ldapbuild/etc/openldap/schema/core.ldif
+include: file:///home/pacs/opa00/users/ldap/stage-ldapbuild/etc/openldap/schema/cosine.ldif
+include: file:///home/pacs/opa00/users/ldap/stage-ldapbuild/etc/openldap/schema/inetorgperson.ldif
+include: file:///home/pacs/opa00/users/ldap/stage-ldapbuild/etc/openldap/schema/nis.ldif

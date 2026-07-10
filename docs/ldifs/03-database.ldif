@@ -1,0 +1,30 @@
+# 03-database.ldif
+# Frontend database — must come first
+# Holds global default access rules that apply to all databases
+dn: olcDatabase=frontend,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcFrontendConfig
+olcDatabase: frontend
+
+
+# the db we want to use
+dn: olcDatabase=mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: mdb
+olcDbDirectory: $PREFIX/var/openldap-data
+olcSuffix: dc=dev,dc=stumv,dc=de
+olcRootDN: cn=admin,dc=dev,dc=stumv,dc=de
+# pw: super-secret-password
+olcRootPW:{ARGON2}$argon2id$v=19$m=16,t=2,p=1$UU9QUUJNb0ZZZzk3eHladQ$B78VghjwJOkp1EwMdWUbwg
+olcDbMaxSize: 1073741824
+# Indexes — tune to your queries
+olcDbIndex: objectClass eq
+#olcDbIndex: uid eq,pres
+#olcDbIndex: cn eq,pres,sub
+#olcDbIndex: mail eq,pres
+#olcDbIndex: memberOf eq
+#olcDbIndex: entryUUID eq
+#olcDbIndex: entryCSN eq
+
+

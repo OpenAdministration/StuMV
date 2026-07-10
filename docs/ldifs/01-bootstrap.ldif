@@ -1,0 +1,36 @@
+# 01-bootstrap.ldif
+# run via: $PREFIX/sbin/slapadd -n 0 -F $PREFIX/etc?/slapd.d -l 01-bootstra>
+#
+# Configure the cn=config database itself
+dn: cn=config
+objectClass: olcGlobal
+cn: config
+olcArgsFile: $PREFIX/var/run/slapd.args
+olcPidFile: $PREFIX/var/run/slapd.pid
+#olcLogLevel: stats
+#
+# TLS (fill in later when you have certs)
+# olcTLSCACertificateFile: ...
+# olcTLSCertificateFile: ...
+# olcTLSCertificateKeyFile: ...
+
+# Config database (protects cn=config itself)
+dn: olcDatabase=config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: config
+olcRootDN: cn=admin,cn=config
+# pw: super-secret-password
+olcRootPW:{ARGON2}$argon2id$v=19$m=16,t=2,p=1$UU9QUUJNb0ZZZzk3eHladQ$B78VghjwJOkp1EwMdWUbwg
+olcAccess: to * by dn.exact="cn=admin,cn=config" manage by * none
+
+# Load required modules
+dn: cn=module,cn=config
+objectClass: olcModuleList
+cn: module
+#olcModulePath: $PREFIX/libexec/openldap
+#olcModuleLoad: back_mdb.so
+#olcModuleLoad: memberof.so
+#olcModuleLoad: refint.so
+olcModuleLoad: dynlist
+olcModuleLoad: argon2
+# olcModuleLoad: sssvlv.so   # uncomment if needed
