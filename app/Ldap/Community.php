@@ -11,7 +11,7 @@ use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Models\Relations\Relation;
-use LdapRecord\Query\Builder;
+use LdapRecord\Query\Model\Builder;
 
 /***
  * @property $ou

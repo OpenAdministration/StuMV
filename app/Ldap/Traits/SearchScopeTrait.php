@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Ldap\Traits;
-use LdapRecord\Query\Builder;
+use LdapRecord\Query\Model\Builder;
 
 trait SearchScopeTrait{
 

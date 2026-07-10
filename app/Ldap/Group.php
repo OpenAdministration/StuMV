@@ -6,7 +6,7 @@ use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
 use LdapRecord\Models\OpenLDAP\User;
 use LdapRecord\Models\Relations\HasManyIn;
-use LdapRecord\Query\Builder;
+use LdapRecord\Query\Model\Builder;
 
 class Group extends \LdapRecord\Models\OpenLDAP\Group
 {
