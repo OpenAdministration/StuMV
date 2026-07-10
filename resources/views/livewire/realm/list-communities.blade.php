@@ -17,7 +17,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                ref="{{ route('realms.new') }}"
+                :href="route('realms.new')"
                 :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
             >
                 {{ __('New Realm') }}
