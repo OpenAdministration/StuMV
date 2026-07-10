@@ -140,10 +140,15 @@ Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $rout
 
 Breadcrumbs::for('committees.details', function (BreadcrumbTrail $trail, array $routeParams){
     $trail->parent('committees.list', $routeParams);
+    $uid = $routeParams['uid'];
     $c = Committee::findByOrFail('ou', $routeParams['ou']);
     foreach ($c->committeePath() as $committee){
         $routeParams['ou'] = $committee;
-        $trail->push($committee, route('committees.roles', $routeParams));
+        // Display the committee's long name (description), falling back to its
+        // short ou. The `truncate` flag lets the view ellipsis it via CSS
+        // (~20 chars) while keeping the full name available on hover.
+        $fullName = Committee::findByName($uid, $committee)?->getFirstAttribute('description');
+        $trail->push($fullName ?: $committee, route('committees.roles', $routeParams), ['truncate' => true]);
     }
 });
 

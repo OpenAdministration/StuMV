@@ -3,9 +3,13 @@
         @if(count($breadcrumbs) < 5)
             @foreach($breadcrumbs as $breadcrumb)
                 @if($breadcrumb->url && !$loop->last)
-                    <flux:breadcrumbs.item href="{{ $breadcrumb->url }}">{{ $breadcrumb->title }}</flux:breadcrumbs.item>
+                    <flux:breadcrumbs.item href="{{ $breadcrumb->url }}">
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb])
+                    </flux:breadcrumbs.item>
                 @else
-                    <flux:breadcrumbs.item>{{ $breadcrumb->title }}</flux:breadcrumbs.item>
+                    <flux:breadcrumbs.item>
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb])
+                    </flux:breadcrumbs.item>
                 @endif
             @endforeach
         @else
@@ -26,7 +30,9 @@
 
             @foreach($breadcrumbs as $breadcrumb)
                 @if($breadcrumb->url && $loop->last)
-                    <flux:breadcrumbs.item>{{ $breadcrumb->title }}</flux:breadcrumbs.item>
+                    <flux:breadcrumbs.item>
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb])
+                    </flux:breadcrumbs.item>
                 @endif
             @endforeach
         @endif
