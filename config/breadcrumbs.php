@@ -52,10 +52,13 @@ return [
     'unnamed-route-exception' => true,
 
     // When route-bound breadcrumbs are used and the matching breadcrumb doesn't exist (InvalidBreadcrumbException)
-    'missing-route-bound-breadcrumb-exception' => true,
+    // Only surface this in non-production so a missing breadcrumb degrades gracefully
+    // instead of white-screening a whole page in production (cf. StuFis).
+    'missing-route-bound-breadcrumb-exception' => env('APP_ENV') !== 'production',
 
     // When a named breadcrumb is used but doesn't exist (InvalidBreadcrumbException)
-    'invalid-named-breadcrumb-exception' => true,
+    // We render by explicit route name in the header, so this is the operative guard.
+    'invalid-named-breadcrumb-exception' => env('APP_ENV') !== 'production',
 
     /*
     |--------------------------------------------------------------------------

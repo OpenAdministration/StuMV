@@ -128,6 +128,11 @@ Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail, array $rou
     $trail->push(__('Committees'), route('committees.list', $routeParams));
 });
 
+Breadcrumbs::for('committees.list.list', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms',  $routeParams);
+    $trail->push(__('Committees'), route('committees.list.list', $routeParams));
+});
+
 Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('committees.list',  $routeParams);
     $trail->push(__('New Committee'), route('committees.new', $routeParams));
@@ -175,6 +180,36 @@ Breadcrumbs::for('committees.roles.add-member', function (BreadcrumbTrail $trail
 Breadcrumbs::for('committees.roles.members.edit', function (BreadcrumbTrail $trail, array $routeParams) {
     $trail->parent('committees.roles.members', $routeParams);
     $trail->push(__('Edit Membership'), route('committees.roles.members.edit', $routeParams));
+});
+
+Breadcrumbs::for('committees.roles.terminate-memberships', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('committees.roles.members', $routeParams);
+    $trail->push(__('roles.members.terminate_memberships'), route('committees.roles.terminate-memberships', $routeParams));
+});
+
+Breadcrumbs::for('tools.dashboard', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('tools.tools'), route('tools.dashboard', $routeParams));
+});
+
+Breadcrumbs::for('tools.compare-email-list', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('tools.dashboard', $routeParams);
+    $trail->push(__('tools.compareEmailList_headline'), route('tools.compare-email-list', $routeParams));
+});
+
+Breadcrumbs::for('tools.import-user-uni-ldap', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('tools.dashboard', $routeParams);
+    $trail->push(__('tools.importUsersFromUniLdap_headline'), route('tools.import-user-uni-ldap', $routeParams));
+});
+
+Breadcrumbs::for('tools.users-not-in-uni-ldap', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('tools.dashboard', $routeParams);
+    $trail->push(__('tools.usersNotInUniLdap_headline'), route('tools.users-not-in-uni-ldap', $routeParams));
+});
+
+Breadcrumbs::for('tools.unused-roles', function (BreadcrumbTrail $trail, array $routeParams) {
+    $trail->parent('tools.dashboard', $routeParams);
+    $trail->push(__('tools.unusedRoles_headline'), route('tools.unused-roles', $routeParams));
 });
 
 Breadcrumbs::for('superadmins.list', function (BreadcrumbTrail $trail, array $routeParams) {
