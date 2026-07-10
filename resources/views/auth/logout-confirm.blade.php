@@ -8,8 +8,8 @@
             <form method="POST" action="{{ route('logout', ['redirect_uri' => $redirect_uri]) }}">
                 @csrf
                 <div class="flex justify-evenly">
-                    <x-button.link href="/">{{ __('Cancel') }}</x-button.link>
-                    <x-button.primary type="submit">{{ __('Log Out') }}</x-button.primary>
+                    <flux:button icon="ban" href="/">{{ __('Cancel') }}</flux:button>
+                    <flux:button variant="danger" icon="log-out" type="submit">{{ __('Log Out') }}</flux:button>
                 </div>
             </form>
         </x-slot:slot>
