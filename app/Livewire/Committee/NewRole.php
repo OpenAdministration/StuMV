@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Committee;
 
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
@@ -36,7 +39,7 @@ class NewRole extends Component
         ];
     }
 
-    public function render(): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\Factory
+    public function render(): Application|View|\Illuminate\Foundation\Application|Factory
     {
         return view('livewire.committee.new-role')->title(__('committees.new_role_title', ['committee' => $this->ou]));
     }
@@ -57,6 +60,6 @@ class NewRole extends Component
         $r->save();
 
         Flux::toast(variant: 'success', text: __('New Role created'));
-        return redirect()->route('committees.roles', ['ou' => $this->ou, 'uid' => $this->uid]);
+        return to_route('committees.roles', ['ou' => $this->ou, 'uid' => $this->uid]);
     }
 }

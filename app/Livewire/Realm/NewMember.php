@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Realm;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
 use LdapRecord\LdapRecordException;
-use LdapRecord\Query\Builder;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
@@ -25,11 +27,9 @@ class NewMember extends Component
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render(): Factory|View|Application
     {
-        $userList = User::query()
-            ->search('uid', $this->search)
-            ->search('dn', $this->search)
+        $userList = User::query()->search()->search()
             ->get();
         return view('livewire.realm.new-member', ['selectable_users' => $userList])
             ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));
@@ -52,6 +52,6 @@ class NewMember extends Component
         }
 
         Flux::toast(variant: 'success', text: __('Added new Member'));
-        return redirect()->route('realms.members', ['uid' => $this->realm_uid]);
+        return to_route('realms.members', ['uid' => $this->realm_uid]);
     }
 }

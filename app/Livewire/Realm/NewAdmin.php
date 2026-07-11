@@ -7,7 +7,6 @@ use App\Ldap\User;
 use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class NewAdmin extends Component
@@ -52,6 +51,6 @@ class NewAdmin extends Component
                 return false;
             }
         }
-        return redirect()->route('realms.admins', ['uid' => $this->realm_uid]);
+        return to_route('realms.admins', ['uid' => $this->realm_uid]);
     }
 }

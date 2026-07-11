@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Realm;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class NewModerator extends Component
@@ -23,7 +25,7 @@ class NewModerator extends Component
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render(): Factory|View|Application
     {
         $c = Community::findOrFailByUid($this->realm_uid);
         $userList = $c->membersGroup()->members()->get();
@@ -52,6 +54,6 @@ class NewModerator extends Component
                 return false;
             }
         }
-        return redirect()->route('realms.mods', ['uid' => $this->realm_uid]);
+        return to_route('realms.mods', ['uid' => $this->realm_uid]);
     }
 }

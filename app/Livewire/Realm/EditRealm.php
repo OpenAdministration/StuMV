@@ -4,11 +4,9 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use Flux\Flux;
-use Illuminate\Support\Facades\Request;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -45,6 +43,6 @@ class EditRealm extends Component
         $r->save();
 
         Flux::toast(variant: 'success', text: __('realms.edit_success', ['realm' => $this->uid]));
-        return redirect()->route('realms.dashboard', ['uid' => $this->uid]);
+        return to_route('realms.dashboard', ['uid' => $this->uid]);
     }
 }

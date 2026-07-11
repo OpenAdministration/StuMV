@@ -3,14 +3,8 @@ namespace App\Ldap;
 
 use App\Ldap\Scopes\AddMemberOfAttributeScope;
 use App\Ldap\Traits\SearchScopeTrait;
-use Illuminate\Contracts\Auth\Authenticatable;
-use LdapRecord\Models\Concerns\CanAuthenticate;
-use LdapRecord\Models\Concerns\HasPassword;
-use LdapRecord\Models\Model;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\Relations\HasMany;
-use LdapRecord\Models\Relations\Relation;
-use PhpParser\Node\Expr\AssignOp\Mod;
 
 class User extends \LdapRecord\Models\OpenLDAP\User
 {

@@ -5,7 +5,6 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;

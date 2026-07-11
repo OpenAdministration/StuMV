@@ -1,6 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\SocialiteUser;
+use App\Http\Controllers\Api\Committees;
+use App\Http\Controllers\Api\Groups;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,17 +15,17 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::middleware('auth:api')->group(function (){
-    Route::any('user', \App\Http\Controllers\Api\SocialiteUser::class);
+Route::middleware('auth:api')->group(function (): void{
+    Route::any('user', SocialiteUser::class);
 
-    Route::middleware('scope:committees')->group(function (){
-        Route::any('my/committees', [\App\Http\Controllers\Api\Committees::class, 'all']);
-        Route::any('my/committees/{community_uid}', [\App\Http\Controllers\Api\Committees::class, 'fromCommunity']);
+    Route::middleware('scope:committees')->group(function (): void{
+        Route::any('my/committees', [Committees::class, 'all']);
+        Route::any('my/committees/{community_uid}', [Committees::class, 'fromCommunity']);
     });
 
-    Route::middleware('scope:groups')->group(function (){
-        Route::any('my/groups', [\App\Http\Controllers\Api\Groups::class, 'all']);
-        Route::any('my/groups/{community_uid}', [\App\Http\Controllers\Api\Groups::class, 'fromCommunity']);
+    Route::middleware('scope:groups')->group(function (): void{
+        Route::any('my/groups', [Groups::class, 'all']);
+        Route::any('my/groups/{community_uid}', [Groups::class, 'fromCommunity']);
     });
 
 });

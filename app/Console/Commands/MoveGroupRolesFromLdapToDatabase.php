@@ -32,8 +32,7 @@ class MoveGroupRolesFromLdapToDatabase extends Command
     {
         $realms = Community::query()
             ->list() // only first level
-            ->setDn(Community::$rootDn)
-            ->search('ou', $this->argument('community'))
+            ->setDn(Community::$rootDn)->search()
             ->get();
 
         foreach ($realms as $realm) {

@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Realm;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use Flux\Flux;
 use LdapRecord\LdapRecordException;
-use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
@@ -18,7 +20,7 @@ class NewRealm extends Component
     public string $name = "";
 
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render(): Factory|View|Application
     {
         return view('livewire.realm.new-realm')
             ->title(__('realms.new_realm_title', ['realm' => $this->uid]));
@@ -36,7 +38,7 @@ class NewRealm extends Component
             $realm->generateSkeleton();
 
             Flux::toast(variant: 'success', text: 'Neuer Realm angelegt');
-            return redirect()->route('realms.pick');
+            return to_route('realms.pick');
         } catch (LdapRecordException $exception) {
             $this->addError('uid', $exception->getMessage());
             return false;

@@ -2,14 +2,11 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Facades\Date;
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\Role;
 use App\Models\RoleMembership;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\Isolatable;
-use Illuminate\Support\Facades\DB;
 use LdapRecord\Container;
 
 class LdapSyncRoles extends Command
@@ -40,15 +37,14 @@ class LdapSyncRoles extends Command
         if ($this->option('date') === 'today()') {
             $date = today();
         } else {
-            $date = Carbon::createFromFormat('Y-m-d', $this->option('date'));
+            $date = Date::createFromFormat('Y-m-d', $this->option('date'));
         }
 
         $connection = Container::getDefaultConnection();
         $query = $connection->query();
         
         $realms = Community::query()
-            ->setDn(Community::$rootDn)
-            ->search('ou', $this->argument('community'))
+            ->setDn(Community::$rootDn)->search()
             ->list()
             ->get(); 
 

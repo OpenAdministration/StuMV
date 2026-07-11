@@ -60,7 +60,7 @@ class Role extends Model
 
     public function addMember(User $user, Carbon $start, Carbon $end = null)
     {
-        $this->members()->save($user, ['from' => $start, 'until' => $end]);
+        $this->members()->save($user);
         $this->refresh();
     }
 }

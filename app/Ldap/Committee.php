@@ -2,14 +2,11 @@
 
 namespace App\Ldap;
 
-use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
 use Illuminate\Support\Arr;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\Attributes\DistinguishedNameBuilder;
-use LdapRecord\Models\Model;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
-use LdapRecord\Query\Collection;
 use LdapRecord\Query\Model\Builder;
 
 class Committee extends OrganizationalUnit
@@ -50,7 +47,7 @@ class Committee extends OrganizationalUnit
     {
         $dn = DistinguishedName::make($this->getDn());
         $parentDn = $dn->parent();
-        if(!str_contains($parentDn, ',ou=Committees,')){
+        if(!str_contains((string) $parentDn, ',ou=Committees,')){
             return null;
         }
         return self::findOrFail($parentDn);
@@ -71,9 +68,7 @@ class Committee extends OrganizationalUnit
         $dn = new DistinguishedNameBuilder($this->getDn());
         $ous = $dn->pop(5); // only real parents are left
         $ous =$ous->components();
-        return array_reverse(Arr::map($ous, function ($entry){
-            return $entry[1];
-        }));
+        return array_reverse(Arr::map($ous, fn($entry) => $entry[1]));
     }
 
     /**

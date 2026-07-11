@@ -5,13 +5,10 @@ namespace App\Livewire;
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use Flux\Flux;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Rule;
 use Livewire\Component;
-use Mockery\Generator\StringManipulation\Pass\Pass;
 
 class ChangePassword extends Component
 {

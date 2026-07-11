@@ -3,8 +3,6 @@
 namespace Tests\Feature\Livewire\Committee;
 
 use App\Livewire\Committee\ListRoleMembers;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Livewire\Livewire;
 use Tests\TestCase;
 

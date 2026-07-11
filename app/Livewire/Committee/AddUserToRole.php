@@ -26,13 +26,13 @@ class AddUserToRole extends Component
     public array $usernames = [];
 
     #[Validate('date:Y-m-d')]
-    public ?string $start_date;
+    public ?string $start_date = null;
 
     #[Validate('date:Y-m-d|nullable')]
-    public ?string $end_date;
+    public ?string $end_date = null;
 
     #[Validate('date:Y-m-d|nullable')]
-    public ?string $decision_date;
+    public ?string $decision_date = null;
 
     #[Validate('string|nullable')]
     public string $comment = '';
@@ -83,7 +83,7 @@ class AddUserToRole extends Component
             Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $username, 'role' => $this->cn]));
         }
 
-        return redirect()->route('committees.roles.members', [
+        return to_route('committees.roles.members', [
             'uid' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,

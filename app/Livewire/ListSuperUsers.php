@@ -2,11 +2,9 @@
 
 namespace App\Livewire;
 
-use App\Ldap\Community;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User;
 use Flux\Flux;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;

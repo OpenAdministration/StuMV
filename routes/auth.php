@@ -11,7 +11,7 @@ use App\Livewire\ChangePassword;
 use App\Livewire\RegisterUser;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+Route::middleware('guest')->group(function (): void {
     // livewire
     Route::get('register', RegisterUser::class)->name('register');
 
@@ -32,7 +32,7 @@ Route::middleware('guest')->group(function () {
                 ->name('password.update');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function (): void {
     Route::get('verify-email', [EmailVerificationPromptController::class, '__invoke'])
                 ->name('verification.notice');
 

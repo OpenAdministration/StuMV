@@ -7,8 +7,6 @@ use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use LdapRecord\Ldap;
-use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -48,9 +46,7 @@ class ListRealms extends Component
     public function render(Request $request)
     {
         $communitySlice = Community::query()
-            ->setDn(Community::$rootDn)
-            ->search('ou', $this->search)
-            ->search('description', $this->search)
+            ->setDn(Community::$rootDn)->search()->search()
             ->list()
             ->get();
 
@@ -59,9 +55,7 @@ class ListRealms extends Component
             $canEnter = true;
         } else {
             $memberships = $ldapUser->memberOf;
-            $communityMemberships = \Arr::where($memberships, static function (string $value, int $key){
-                return preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,' . Community::rootDn() . '$/', $value);
-            });
+            $communityMemberships = \Arr::where($memberships, static fn(string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,' . Community::rootDn() . '$/', $value));
 
             $canEnter = \Arr::mapWithKeys($communityMemberships, static function (string $value) {
                 $uid = str($value)->remove(',' . Community::rootDn(), false)->remove('cn=members,ou=')->value();

@@ -9,7 +9,6 @@ use App\Ldap\User;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Flux\Flux;
-use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -208,7 +207,7 @@ class ListRoles extends Component {
         $role->delete();
 
         Flux::toast(variant: 'success', text: __('Role was deleted'));
-        return redirect()->route('committees.roles', [
+        return to_route('committees.roles', [
             'uid' => $this->uid,
             'ou' => $this->ou
         ]);

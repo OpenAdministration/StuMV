@@ -3,8 +3,6 @@
 namespace Tests\Feature\Livewire\Realm;
 
 use App\Livewire\Realm\CommunityDashboard;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Livewire\Livewire;
 use Tests\TestCase;
 

@@ -4,13 +4,10 @@ namespace App\Livewire;
 
 use App\Ldap\Domain;
 use App\Ldap\User;
-use App\Providers\RouteServiceProvider;
 use App\Rules\DomainRegistrationRule;
-use App\Rules\UniqueDomain;
 use App\Rules\UniqueEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Validate;
@@ -122,7 +119,7 @@ class RegisterUser extends Component
             $community->membersGroup()->members()->attach($user);
             event(new Registered($user));
             Auth::attempt([$this->username, $this->password]);
-            return redirect()->route('verification.notice')->with('message', __('Successfully Registered'));
+            return to_route('verification.notice')->with('message', __('Successfully Registered'));
 
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());

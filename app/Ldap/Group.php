@@ -2,7 +2,6 @@
 
 namespace App\Ldap;
 
-use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
 use LdapRecord\Models\OpenLDAP\User;
 use LdapRecord\Models\Relations\HasManyIn;
@@ -34,7 +33,7 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
 
     public function scopeFromCommunity(Builder $query, string $uid): void
     {
-        $query->setBaseDn( "ou=Groups,ou=$uid," . \App\Ldap\Community::$rootDn);
+        $query->setBaseDn( "ou=Groups,ou=$uid," . Community::$rootDn);
     }
 
     public function members(): HasManyIn

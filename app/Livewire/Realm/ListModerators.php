@@ -6,7 +6,6 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;

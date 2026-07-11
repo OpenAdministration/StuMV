@@ -4,7 +4,6 @@ namespace App\Console\Commands\LegacyImport;
 
 use App\Ldap\Community;
 use App\Ldap\User;
-use App\Livewire\Realm\ListMembers;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -41,7 +40,7 @@ class ImportUserFromLegacy extends Command
                 $realms[$user->realm_uid] = Community::findByUid($user->realm_uid);
             }
             $this->comment('Importing User ' . $user->username . ' to Realm ' . $user->realm_uid . ' ...');
-            $name = explode(" ", $user->fullName);
+            $name = explode(" ", (string) $user->fullName);
             $ldapUser = User::findByUsername($user->username);
             if(!$ldapUser?->exists()){
                 $ldapUser = User::make([

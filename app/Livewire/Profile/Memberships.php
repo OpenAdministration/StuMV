@@ -72,7 +72,7 @@ class Memberships extends Component
             'memberships' => $memberships,
         ]);
 
-        return response()->streamDownload(function () use ($pdf) {
+        return response()->streamDownload(function () use ($pdf): void {
             echo $pdf->stream();
         }, strtolower(trans('profile.memberships')) . '_' . $this->currentUsername . '.pdf');
     }

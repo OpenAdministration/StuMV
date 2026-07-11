@@ -4,12 +4,10 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\Role;
 use App\Ldap\User;
 use App\Models\RoleMembership;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -115,7 +113,7 @@ class ListRoleMembers extends Component
         $this->close();
 
         Flux::toast(variant: 'success', text: __('roles.message_delete_member_success'));
-        return redirect()->route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
+        return to_route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }
 
     public function close()

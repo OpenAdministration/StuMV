@@ -4,7 +4,6 @@ namespace App\Ldap;
 
 use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
-use Illuminate\Support\Arr;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Entry;
 

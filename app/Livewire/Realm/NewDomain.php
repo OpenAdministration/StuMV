@@ -6,7 +6,6 @@ use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Rules\UniqueDomain;
 use dacoto\DomainValidator\Validator\Domain as DomainValidator;
-use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;

@@ -1,8 +1,44 @@
 <?php
 
-use App\Http\Middleware\CommunityMember;
+use App\Livewire\Profile;
+use App\Livewire\Profile\Memberships;
+use App\Livewire\Profile\Picture;
+use App\Livewire\Realm\ListRealms;
+use App\Livewire\Realm\CommunityDashboard;
+use App\Livewire\Realm\ListMembers;
+use App\Livewire\Realm\ListModerators;
+use App\Livewire\Realm\ListAdmins;
+use App\Livewire\Committee\ListCommitteesTree;
+use App\Livewire\Committee\ListCommitteesList;
+use App\Livewire\Committee\ListRoles;
+use App\Livewire\Committee\ListRoleMembers;
+use App\Livewire\Committee\NewCommittee;
+use App\Livewire\Committee\NewRole;
+use App\Livewire\Committee\EditCommittee;
+use App\Livewire\Committee\EditRole;
+use App\Livewire\Committee\AddUserToRole;
+use App\Livewire\Committee\TerminateRoleMemberships;
+use App\Livewire\Committee\EditRoleMembership;
+use App\Livewire\Tools\ToolsDashboard;
+use App\Livewire\Tools\CompareEmailList;
+use App\Livewire\Tools\ImportUsersFromUniLdap;
+use App\Livewire\Tools\UsersNotInUniLdap;
+use App\Livewire\Tools\UnusedRoles;
+use App\Livewire\Realm\NewAdmin;
+use App\Livewire\Group\ListGroups;
+use App\Livewire\Group\EditGroup;
+use App\Livewire\Group\NewGroup;
+use App\Livewire\Group\ListRolesInGroup;
+use App\Livewire\Group\AddRoleToGroup;
+use App\Livewire\Realm\ListDomains;
+use App\Livewire\Realm\NewDomain;
+use App\Livewire\Realm\EditRealm;
+use App\Livewire\Realm\NewModerator;
+use App\Livewire\Realm\NewMember;
+use App\Livewire\ListSuperUsers;
+use App\Livewire\AddSuperAdmins;
+use App\Livewire\Realm\NewRealm;
 use App\Http\Middleware\SuperAdminMiddleware;
-use App\Models\Committee;
 use Illuminate\Support\Facades\Route;
 
 // Set language based on the user's preferences
@@ -21,90 +57,80 @@ if ($lang) Config::set('app.locale', $lang);
 |
 */
 
-Route::middleware(['auth', 'verified'])->group(function (){
+Route::middleware(['auth', 'verified'])->group(function (): void{
 
-    Route::get('/', static function (){
-        return redirect()->route('realms.pick');
-    });
-    Route::livewire('/profile/{username}', \App\Livewire\Profile::class)->name('profile');
-    Route::livewire('/profile/{username}/memberships', \App\Livewire\Profile\Memberships::class)->name('profile.memberships');
-    Route::livewire('/profile/{username}/picture', \App\Livewire\Profile\Picture::class)->name('profile.picture');
-    Route::livewire('/pick-realm', \App\Livewire\Realm\ListRealms::class)->name('realms.pick');
+    Route::get('/', static fn() => to_route('realms.pick'));
+    Route::livewire('/profile/{username}', Profile::class)->name('profile');
+    Route::livewire('/profile/{username}/memberships', Memberships::class)->name('profile.memberships');
+    Route::livewire('/profile/{username}/picture', Picture::class)->name('profile.picture');
+    Route::livewire('/pick-realm', ListRealms::class)->name('realms.pick');
 
-    Route::middleware(['communityMember'])->group(function (){
+    Route::middleware(['communityMember'])->group(function (): void{
         // member
-        Route::livewire('{uid}/dashboard', \App\Livewire\Realm\CommunityDashboard::class)->name('realms.dashboard');
-        Route::livewire('{uid}/members/', \App\Livewire\Realm\ListMembers::class)->name('realms.members');
-        Route::livewire('{uid}/mods/', \App\Livewire\Realm\ListModerators::class)->name('realms.mods');
-        Route::livewire('{uid}/admins/', \App\Livewire\Realm\ListAdmins::class)->name('realms.admins');
-        Route::livewire('{uid}/committees', \App\Livewire\Committee\ListCommitteesTree::class)->name('committees.list');
-        Route::livewire('{uid}/committees/list', \App\Livewire\Committee\ListCommitteesList::class)->name('committees.list.list');
-        Route::livewire('{uid}/committees/{ou}', \App\Livewire\Committee\ListRoles::class)->name('committees.roles');
-        Route::livewire('{uid}/committees/{ou}/role/{cn}', \App\Livewire\Committee\ListRoleMembers::class)->name('committees.roles.members');
+        Route::livewire('{uid}/dashboard', CommunityDashboard::class)->name('realms.dashboard');
+        Route::livewire('{uid}/members/', ListMembers::class)->name('realms.members');
+        Route::livewire('{uid}/mods/', ListModerators::class)->name('realms.mods');
+        Route::livewire('{uid}/admins/', ListAdmins::class)->name('realms.admins');
+        Route::livewire('{uid}/committees', ListCommitteesTree::class)->name('committees.list');
+        Route::livewire('{uid}/committees/list', ListCommitteesList::class)->name('committees.list.list');
+        Route::livewire('{uid}/committees/{ou}', ListRoles::class)->name('committees.roles');
+        Route::livewire('{uid}/committees/{ou}/role/{cn}', ListRoleMembers::class)->name('committees.roles.members');
         // end member
     });
 
     // mods only
-    Route::middleware(['communityMod'])->group(function (){
+    Route::middleware(['communityMod'])->group(function (): void{
         // mod
-        Route::livewire('{uid}/new-committee', \App\Livewire\Committee\NewCommittee::class)->name('committees.new');
-        Route::livewire('{uid}/committees/{ou}/new-role', \App\Livewire\Committee\NewRole::class)->name('committees.roles.new');
-        Route::livewire('{uid}/committees/{ou}/edit', \App\Livewire\Committee\EditCommittee::class)->name('committees.edit');
-        Route::livewire('{uid}/committees/{ou}/role/{cn}/edit', \App\Livewire\Committee\EditRole::class)->name('committees.roles.edit');
-        Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', \App\Livewire\Committee\AddUserToRole::class)->name('committees.roles.add-member');
-        Route::livewire('{uid}/committees/{ou}/role/{cn}/terminate-memberships', \App\Livewire\Committee\TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
-        Route::livewire('{uid}/committees/{ou}/role/{cn}/membership/{id}', \App\Livewire\Committee\EditRoleMembership::class)->name('committees.roles.members.edit');
-        Route::livewire('{uid}/tools', \App\Livewire\Tools\ToolsDashboard::class)->name('tools.dashboard');
-        Route::livewire('{uid}/tools/compare-email-list', \App\Livewire\Tools\CompareEmailList::class)->name('tools.compare-email-list');
-        Route::livewire('{uid}/tools/import-user-uni-ldap', \App\Livewire\Tools\ImportUsersFromUniLdap::class)->name('tools.import-user-uni-ldap');
-        Route::livewire('{uid}/tools/users-not-in-uni-ldap', \App\Livewire\Tools\UsersNotInUniLdap::class)->name('tools.users-not-in-uni-ldap');
-        Route::livewire('{uid}/tools/unused-roles', \App\Livewire\Tools\UnusedRoles::class)->name('tools.unused-roles');
+        Route::livewire('{uid}/new-committee', NewCommittee::class)->name('committees.new');
+        Route::livewire('{uid}/committees/{ou}/new-role', NewRole::class)->name('committees.roles.new');
+        Route::livewire('{uid}/committees/{ou}/edit', EditCommittee::class)->name('committees.edit');
+        Route::livewire('{uid}/committees/{ou}/role/{cn}/edit', EditRole::class)->name('committees.roles.edit');
+        Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
+        Route::livewire('{uid}/committees/{ou}/role/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
+        Route::livewire('{uid}/committees/{ou}/role/{cn}/membership/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
+        Route::livewire('{uid}/tools', ToolsDashboard::class)->name('tools.dashboard');
+        Route::livewire('{uid}/tools/compare-email-list', CompareEmailList::class)->name('tools.compare-email-list');
+        Route::livewire('{uid}/tools/import-user-uni-ldap', ImportUsersFromUniLdap::class)->name('tools.import-user-uni-ldap');
+        Route::livewire('{uid}/tools/users-not-in-uni-ldap', UsersNotInUniLdap::class)->name('tools.users-not-in-uni-ldap');
+        Route::livewire('{uid}/tools/unused-roles', UnusedRoles::class)->name('tools.unused-roles');
         // end mod
     });
 
-    Route::middleware(['communityAdmin'])->group(function (){
+    Route::middleware(['communityAdmin'])->group(function (): void{
         // admin
-        Route::livewire('{uid}/new-admin', \App\Livewire\Realm\NewAdmin::class)->name('realms.admins.new');
-        Route::livewire('{uid}/groups', \App\Livewire\Group\ListGroups::class)->name('realms.groups');
-        Route::livewire('{uid}/groups/{cn}/edit', \App\Livewire\Group\EditGroup::class)->name('realms.groups.edit');
-        Route::livewire('{uid}/new-group', \App\Livewire\Group\NewGroup::class)->name('realms.groups.new');
-        Route::livewire('{uid}/group/{cn}/roles', \App\Livewire\Group\ListRolesInGroup::class)->name('realms.groups.roles');
-        Route::livewire('{uid}/group/{cn}/add-role', \App\Livewire\Group\AddRoleToGroup::class)->name('realms.groups.roles.add');
-        Route::livewire('{uid}/domains', \App\Livewire\Realm\ListDomains::class)->name('realms.domains');
-        Route::livewire('{uid}/new-domain', \App\Livewire\Realm\NewDomain::class)->name('realms.domains.new');
-        Route::livewire('{uid}/edit', \App\Livewire\Realm\EditRealm::class)->name('realms.edit');
+        Route::livewire('{uid}/new-admin', NewAdmin::class)->name('realms.admins.new');
+        Route::livewire('{uid}/groups', ListGroups::class)->name('realms.groups');
+        Route::livewire('{uid}/groups/{cn}/edit', EditGroup::class)->name('realms.groups.edit');
+        Route::livewire('{uid}/new-group', NewGroup::class)->name('realms.groups.new');
+        Route::livewire('{uid}/group/{cn}/roles', ListRolesInGroup::class)->name('realms.groups.roles');
+        Route::livewire('{uid}/group/{cn}/add-role', AddRoleToGroup::class)->name('realms.groups.roles.add');
+        Route::livewire('{uid}/domains', ListDomains::class)->name('realms.domains');
+        Route::livewire('{uid}/new-domain', NewDomain::class)->name('realms.domains.new');
+        Route::livewire('{uid}/edit', EditRealm::class)->name('realms.edit');
         // end admin
     });
 
     // fine grained permissions
-    Route::livewire('{uid}/new-mod', \App\Livewire\Realm\NewModerator::class)->name('realms.mods.new')
+    Route::livewire('{uid}/new-mod', NewModerator::class)->name('realms.mods.new')
         ->can('add_moderator', 'uid');
 
-    Route::middleware([SuperAdminMiddleware::class])->group(function (){
-        Route::livewire('{uid}/new-member', \App\Livewire\Realm\NewMember::class)->name('realms.members.new');
-        Route::livewire('superadmins', \App\Livewire\ListSuperUsers::class)->name('superadmins.list');
-        Route::livewire('add-superadmins', \App\Livewire\AddSuperAdmins::class)->name('superadmins.add');
-        Route::livewire('new-realm', \App\Livewire\Realm\NewRealm::class)->name('realms.new');
+    Route::middleware([SuperAdminMiddleware::class])->group(function (): void{
+        Route::livewire('{uid}/new-member', NewMember::class)->name('realms.members.new');
+        Route::livewire('superadmins', ListSuperUsers::class)->name('superadmins.list');
+        Route::livewire('add-superadmins', AddSuperAdmins::class)->name('superadmins.add');
+        Route::livewire('new-realm', NewRealm::class)->name('realms.new');
     });
     // end auth verified
 });
 
 
 // guest routes
-Route::get('about', function (){
-    return redirect(config('app.about_url'));
-})->name('about');
+Route::get('about', fn() => redirect(config('app.about_url')))->name('about');
 
-Route::get('privacy', function (){
-    return redirect(config('app.privacy_url'));
-})->name('privacy');
+Route::get('privacy', fn() => redirect(config('app.privacy_url')))->name('privacy');
 
-Route::get('terms', function (){
-    return redirect(config('app.terms_url'));
-})->name('terms');
+Route::get('terms', fn() => redirect(config('app.terms_url')))->name('terms');
 
-Route::get('source-code', function (){
-    return redirect("https://github.com/openadministration/stumv");
-})->name('source-code');
+Route::get('source-code', fn() => redirect("https://github.com/openadministration/stumv"))->name('source-code');
 
 require __DIR__.'/auth.php';

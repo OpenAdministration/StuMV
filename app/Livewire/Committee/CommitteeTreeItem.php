@@ -29,9 +29,7 @@ class CommitteeTreeItem extends Component
         $showNode = $search === '' || $this->committeeMatchesSearch($committee, $search);
 
         if ($search !== '') {
-            $children = $children->filter(function (Committee $child) use ($search): bool {
-                return $this->committeeMatchesSearch($child, $search);
-            })->values();
+            $children = $children->filter(fn(Committee $child): bool => $this->committeeMatchesSearch($child, $search))->values();
         }
 
         return view('livewire.committee.committee-tree-item', [
@@ -51,7 +49,7 @@ class CommitteeTreeItem extends Component
         ]);
 
         foreach ($values as $value) {
-            if (mb_stripos(mb_strtolower($value), mb_strtolower($search)) !== false) {
+            if (mb_stripos(mb_strtolower((string) $value), mb_strtolower($search)) !== false) {
                 return true;
             }
         }
@@ -109,7 +107,7 @@ class CommitteeTreeItem extends Component
         $c->delete(recursive: true);
 
         Flux::modal('delete-committee-' . $cn)->close();
-        return redirect()->route('committees.list', [
+        return to_route('committees.list', [
             'uid' => $this->realm_uid,
         ]);
     }

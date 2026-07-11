@@ -7,8 +7,6 @@ use App\Ldap\User;
 use App\Models\UniLdap;
 use App\Rules\UniqueEmail;
 use Flux\Flux;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;

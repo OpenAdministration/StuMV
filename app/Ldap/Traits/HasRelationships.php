@@ -1,11 +1,9 @@
 <?php
 
 namespace App\Ldap\Traits;
-use App\Ldap\AdminGroup;
 use App\Ldap\Relations\HasManyThroughChild;
 use App\Ldap\Relations\HasOneChild;
 use App\Ldap\Relations\HasOneParent;
-use App\Ldap\User;
 
 trait HasRelationships{
 

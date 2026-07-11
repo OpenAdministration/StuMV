@@ -4,7 +4,6 @@ namespace Tests\Feature\Auth;
 
 use App\Models\Domain;
 use App\Models\Realm;
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;

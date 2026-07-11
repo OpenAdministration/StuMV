@@ -4,16 +4,10 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\User;
-use App\Models\Role;
-use App\Models\RoleMembership;
-use App\Rules\UserIsMember;
-use Carbon\Carbon;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class EditRole extends Component
 {
@@ -53,7 +47,7 @@ class EditRole extends Component
         ]);
 
         Flux::toast(variant: 'success', text: __('roles.edit_success', ['role' => $this->cn]));
-        return redirect()->route('committees.roles', [
+        return to_route('committees.roles', [
             'uid' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,

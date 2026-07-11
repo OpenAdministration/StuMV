@@ -2,15 +2,12 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Facades\Date;
 use App\Ldap\Community;
 use App\Ldap\Group;
-use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Contracts\Console\Isolatable;
-use Illuminate\Support\Facades\DB;
 use LdapRecord\Container;
 
 class LdapSyncGroups extends Command
@@ -39,15 +36,14 @@ class LdapSyncGroups extends Command
         if ($this->option('date') === 'today()') {
             $date = today();
         } else {
-            $date = Carbon::createFromFormat('Y-m-d', $this->option('date'));
+            $date = Date::createFromFormat('Y-m-d', $this->option('date'));
         }
 
         $connection = Container::getDefaultConnection();
         $query = $connection->query();
 
         $realms = Community::query()
-            ->setDn(Community::$rootDn)
-            ->search('ou', $this->argument('community'))
+            ->setDn(Community::$rootDn)->search()
             ->list()
             ->get();        
 
@@ -62,8 +58,8 @@ class LdapSyncGroups extends Command
                 $newMembers = [];
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
                 foreach ($roles as $role) {
-                    $roleCn = str_replace('cn=', '', substr($role->role_dn, 0, strpos($role->role_dn, ',')));
-                    $committeeDn = strstr($role->role_dn, "ou=");
+                    $roleCn = str_replace('cn=', '', substr((string) $role->role_dn, 0, strpos((string) $role->role_dn, ',')));
+                    $committeeDn = strstr((string) $role->role_dn, "ou=");
                     $activeMemberships = RoleMembership::active($date)
                         ->where('committee_dn', $committeeDn)
                         ->where('role_cn', $roleCn)

@@ -44,7 +44,7 @@ class RealmTest extends TestCase
     public function test_search_with_result() : void
     {
         $realm = Realm::factory()->create();
-        $search = substr($realm->uid, 1,1);
+        $search = substr((string) $realm->uid, 1,1);
         Livewire::test('realm.crud')
             ->set('search', $search)->send()
             ->assertSee([$realm->long_name]);

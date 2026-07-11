@@ -53,7 +53,7 @@ class UsersNotInUniLdap extends Component
         }
 
         foreach ($members as $member) {
-            $memberEmailParts = explode('@', $member->getFirstAttribute('mail'));
+            $memberEmailParts = explode('@', (string) $member->getFirstAttribute('mail'));
             if (in_array($memberEmailParts[1], $domains)) {
                 $uniMember = \App\Ldap\Uni\User::where('mail', '=', $member->getFirstAttribute('mail'))->first();
                 if ($uniMember === null) {

@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
-use App\Models\RoleMembership;
 use App\Models\User;
 
 class RolePolicy

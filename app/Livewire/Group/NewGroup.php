@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Group;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use Flux\Flux;
 use LdapRecord\LdapRecordException;
@@ -24,7 +27,7 @@ class NewGroup extends Component
         $this->realm_uid = $uid->getShortCode();
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render(): Factory|View|Application
     {
         return view('livewire.group.new-group')->title(__('groups.new_title'));
     }
@@ -42,7 +45,7 @@ class NewGroup extends Component
             $group->save();
 
             Flux::toast(variant: 'success', text: __('Added new Group'));
-            return redirect()->route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn]);
+            return to_route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn]);
         } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
             return false;

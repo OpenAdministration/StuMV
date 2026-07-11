@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Ldap\User;
 use Flux\Flux;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;

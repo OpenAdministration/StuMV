@@ -2,15 +2,12 @@
 
 namespace App\Ldap;
 
-use App\Ldap\Relations\HasOneChild;
 use App\Ldap\Traits\HasRelationships;
 use App\Ldap\Traits\SearchScopeTrait;
 use LdapRecord\Laravel\ImportableFromLdap;
 use LdapRecord\Laravel\LdapImportable;
-use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
-use LdapRecord\Models\Relations\Relation;
 use LdapRecord\Query\Builder;
 
 /***
@@ -55,7 +52,7 @@ class Community extends OrganizationalUnit implements LdapImportable
     {
         parent::boot();
 
-        static::addGlobalScope('limitResults', static function (Builder $builder){
+        static::addGlobalScope('limitResults', static function (Builder $builder): void{
             $builder->in(self::$rootDn)
                 ->where('ou', '!=', 'Communities');
         });

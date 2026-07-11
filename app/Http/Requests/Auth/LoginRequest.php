@@ -41,7 +41,7 @@ class LoginRequest extends FormRequest
      *
      * @return void
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function authenticate()
     {
@@ -52,7 +52,7 @@ class LoginRequest extends FormRequest
         ];
 
         $validator = Validator::make(['email' => $this->get('uid')], [
-            'email' => 'required|email'
+            'email' => ['required', 'email']
         ]);
         if($validator->passes()){
             $credentials['mail'] = $this->get('uid');
@@ -61,7 +61,7 @@ class LoginRequest extends FormRequest
         }
         try {
             $auth = Auth::attempt($credentials, $this->boolean('remember'));
-        } catch (LdapRecordException $ldapRecordException){
+        } catch (LdapRecordException){
             // this should not be needed, but it is for bad credentials right now -> TLS Error :/
             $auth = false;
         }
@@ -81,7 +81,7 @@ class LoginRequest extends FormRequest
      *
      * @return void
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function ensureIsNotRateLimited()
     {

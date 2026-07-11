@@ -4,7 +4,6 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Rules\UniqueCommittee;
 use Flux\Flux;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Locked;
@@ -33,7 +32,7 @@ class EditCommittee extends Component
         $c = Committee::findByName($this->realm_uid, $ou);
         $this->description = $c->getFirstAttribute('description');
         $parentRdn = DistinguishedName::explode($c->getParentDn())[0];
-        $this->parent_ou = explode("=",$parentRdn, 2)[1];
+        $this->parent_ou = explode("=",(string) $parentRdn, 2)[1];
         if($this->parent_ou === 'Committees'){
             $this->parent_ou = '';
         }

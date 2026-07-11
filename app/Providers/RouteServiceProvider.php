@@ -21,12 +21,10 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
 
-        Route::bind('uid', function (string $value) {
-            return Community::findByOrFail('ou', $value);
-        });
+        Route::bind('uid', fn(string $value) => Community::findByOrFail('ou', $value));
         //$this->model('uid', Community::class);
 
-        $this->routes(function () {
+        $this->routes(function (): void {
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
@@ -43,9 +41,7 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting()
     {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
+        RateLimiter::for('api', fn(Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
     }
 
     public static function home($uid = null) {

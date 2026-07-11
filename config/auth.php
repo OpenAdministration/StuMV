@@ -1,5 +1,7 @@
 <?php
 
+use App\Ldap\User;
+
 return [
 
     /*
@@ -66,7 +68,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'ldap',
-            'model' => App\Ldap\User::class,
+            'model' => User::class,
             'rules' => [],
             'database' => [
                 'model' => App\Models\User::class,

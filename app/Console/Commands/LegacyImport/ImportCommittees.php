@@ -4,7 +4,6 @@ namespace App\Console\Commands\LegacyImport;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\Domain;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 

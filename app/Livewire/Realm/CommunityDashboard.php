@@ -3,7 +3,6 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class CommunityDashboard extends Component

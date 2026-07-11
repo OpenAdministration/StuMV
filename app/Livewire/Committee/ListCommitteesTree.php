@@ -5,7 +5,6 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -52,9 +51,7 @@ class ListCommitteesTree extends Component
         $search = trim($this->search);
         if ($search !== '') {
             $search = mb_strtolower($search);
-            $committees = $committees->filter(function (Committee $committee) use ($search): bool {
-                return $this->committeeMatchesSearch($committee, $search);
-            })->values();
+            $committees = $committees->filter(fn(Committee $committee): bool => $this->committeeMatchesSearch($committee, $search))->values();
         }
 
         return view('livewire.committee.list-committees-tree', [
@@ -71,7 +68,7 @@ class ListCommitteesTree extends Component
         ]);
 
         foreach ($values as $value) {
-            if (mb_stripos(mb_strtolower($value), $search) !== false) {
+            if (mb_stripos(mb_strtolower((string) $value), $search) !== false) {
                 return true;
             }
         }

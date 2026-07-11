@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Date;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -38,12 +40,6 @@ class RoleMembership extends Model
         'comment',
     ];
 
-    protected $casts = [
-        'from' => 'date',
-        'until' => 'date',
-        'decided' => 'date',
-    ];
-
     /**
      * @return BelongsTo
      */
@@ -67,7 +63,7 @@ class RoleMembership extends Model
 
     public function isActive() : bool {
         if ($this->until) {
-            return Carbon::today()->betweenIncluded(
+            return Date::today()->betweenIncluded(
                 $this->from->format('Y-m-d'),
                 $this->until?->format('Y-m-d')
             );
@@ -84,15 +80,24 @@ class RoleMembership extends Model
         return false;
     }
 
-    public function scopeActive(Builder $query, Carbon $date = null)
+    #[Scope]
+    protected function active(Builder $query, Carbon $date = null)
     {
         if(is_null($date)){
             $date = today();
         }
         $query->whereDate('from', '<=', $date)
-            ->where(function ($query) use ($date){
+            ->where(function ($query) use ($date): void{
                 $query->whereDate('until', '>=', $date)
                     ->orWhereNull('until');
             });
+    }
+    protected function casts(): array
+    {
+        return [
+            'from' => 'date',
+            'until' => 'date',
+            'decided' => 'date',
+        ];
     }
 }

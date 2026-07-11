@@ -2,11 +2,11 @@
 
 namespace App\Ldap;
 
-use LdapRecord\Models\Model;
+use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\User;
 use LdapRecord\Models\Relations\HasManyIn;
 
-class SuperUserGroup extends \LdapRecord\Models\OpenLDAP\Group
+class SuperUserGroup extends Group
 {
     public static function group() : self
     {

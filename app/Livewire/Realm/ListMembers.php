@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Realm;
 
+use App\Livewire\Profile\Memberships;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Flux\Flux;
-use Livewire\Attributes\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -124,7 +124,7 @@ class ListMembers extends Component {
 
     public function exportPdf($username)
     {
-        $memberships = app('App\Livewire\Profile\Memberships')->getMemberships($username, false);
+        $memberships = resolve(Memberships::class)->getMemberships($username, false);
         $user = User::findOrFailByUsername($username);
         $community = Community::findOrFailByUid($this->community_name);
         $pdf = Pdf::loadView('pdfs.memberships', [
@@ -133,7 +133,7 @@ class ListMembers extends Component {
             'memberships' => $memberships,
         ]);
 
-        return response()->streamDownload(function () use ($pdf) {
+        return response()->streamDownload(function () use ($pdf): void {
             echo $pdf->stream();
         }, 'memberships-' . $username . '.pdf');;
     }

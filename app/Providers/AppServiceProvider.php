@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -42,18 +41,14 @@ class AppServiceProvider extends ServiceProvider
         // AuthorizationViewResponse by default, so register our own consent view.
         Passport::authorizationView('auth.oauth.authorize');
 
-        Password::defaults(static function () {
-            return Password::min(12)
-                ->letters()
-                ->mixedCase()
-                ->numbers()
-                ->symbols()
-                ->uncompromised();
-        });
+        Password::defaults(static fn() => Password::min(12)
+            ->letters()
+            ->mixedCase()
+            ->numbers()
+            ->symbols()
+            ->uncompromised());
 
-        Builder::macro('search', function ($field, $string){
-            return $string ? $this->orWhere($field, 'like', '%' . $string . '%') : $this;
-        });
+        Builder::macro('search', fn($field, $string) => $string ? $this->orWhere($field, 'like', '%' . $string . '%') : $this);
 
         if($this->app->hasDebugModeEnabled()){
             Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {

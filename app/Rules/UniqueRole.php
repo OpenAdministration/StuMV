@@ -2,19 +2,20 @@
 
 namespace App\Rules;
 
+use Illuminate\Translation\PotentiallyTranslatedString;
 use App\Ldap\Committee;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class UniqueRole implements ValidationRule
 {
-    public function __construct(private string $uid,private string $committee_ou){
+    public function __construct(private readonly string $uid,private readonly string $committee_ou){
     }
 
     /**
      * Run the validation rule.
      *
-     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
+     * @param \Closure(string):PotentiallyTranslatedString $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

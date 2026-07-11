@@ -5,7 +5,6 @@ namespace App\Livewire\Group;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Group;
-use App\Ldap\Role;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -52,6 +51,6 @@ class AddRoleToGroup extends Component
         ]);
 
         Flux::toast(variant: 'success', text: __('groups.success_role_add'));
-        return redirect()->route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->group_cn]);
+        return to_route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->group_cn]);
     }
 }
