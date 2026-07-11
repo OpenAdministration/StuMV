@@ -41,7 +41,7 @@ Nun müssen in der Datei `.env` noch ein paar Einstellungen wie App-Einstellunge
 ### Local development with Docker
 
 A ready-to-run stack (OpenLDAP matching production + MariaDB + php-fpm + nginx +
-phpLDAPadmin + a node/vite workspace) is defined in `docker-compose.dev.yaml`.
+phpLDAPadmin + phpMyAdmin + a node/vite workspace) is defined in `docker-compose.dev.yaml`.
 Configuration lives in `.env.docker` (throwaway development credentials; the app talks
 to the in-network `ldap`/`mariadb` services). It works with Docker too — the
 `userns_mode: keep-id` lines are only needed for rootless podman.
@@ -87,6 +87,7 @@ Once up, these are exposed on the host:
 | ---------------------------- | ----------------------- | -------------------------------------------------------- |
 | App (nginx → php-fpm)        | http://localhost:8080   |                                                          |
 | phpLDAPadmin (LDAP web UI)   | http://localhost:8081   | Log in with the service account — user id `stumv` / `stumv-not-production` |
+| phpMyAdmin (DB web UI)       | http://localhost:8082   | Server `mariadb`, user `stumv` / `local_stumv_password`  |
 | Vite dev server (workspace)  | http://localhost:5173   | run `npm run dev` inside the workspace container         |
 | OpenLDAP                     | `ldap://localhost:13389`| bind `uid=stumv,ou=Services,dc=stumv,dc=de` / `stumv-not-production` |
 | MariaDB                      | `localhost:13306`       | database `stumv`, user `stumv` / `local_stumv_password`  |
