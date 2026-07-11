@@ -1,0 +1,64 @@
+# Structural bootstrap for the StuMV directory (development / CI).
+# Baked into the image; every container start begins from this clean state.
+
+dn: dc=stumv,dc=de
+objectClass: dcObject
+objectClass: organization
+dc: stumv
+o: Studentische Mitgliederverwaltung
+
+dn: ou=People,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: People
+
+dn: ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Communities
+
+dn: ou=Policies,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Policies
+
+dn: ou=Services,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Services
+
+# --- service/bind account used by the application ------------------------
+# Password is a throwaway development credential (see .env.docker).
+dn: uid=stumv,ou=Services,dc=stumv,dc=de
+objectClass: account
+objectClass: simpleSecurityObject
+objectClass: top
+uid: stumv
+description: StuMV application service/bind account (development/CI only)
+userPassword: stumv-not-production
+
+# --- permission groups referenced by the ACLs ---------------------------
+# The service account must be a member of cn=write to be able to write.
+dn: ou=Permissions,ou=Services,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Permissions
+
+dn: cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: write
+uniqueMember: uid=stumv,ou=Services,dc=stumv,dc=de
+
+dn: cn=read,ou=Permissions,ou=Services,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: read
+uniqueMember: uid=stumv,ou=Services,dc=stumv,dc=de
+
+# --- super-admins group -------------------------------------------------
+dn: cn=super-admins,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: super-admins
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de

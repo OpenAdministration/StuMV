@@ -4,23 +4,17 @@
 
 services:
     ldap:
-        image:  symas/openldap:latest
+        # Prod-faithful OpenLDAP: same Symas build as production, with the
+        # server config and seed data baked in (see docker/openldap/). The
+        # container listens on 1389; data is intentionally ephemeral so every
+        # run starts from a clean, reproducible directory.
+        build:
+            context: ./docker/openldap
+            dockerfile: Dockerfile
         ports:
             - "${LDAP_PORT:-10389}:1389"
-        volumes:
-            - openldap-data:/openldap
-            - ./docker/openldap/ldif:/ldif
         networks:
             - stumv
-        env_file:
-            - .env
-        environment:
-            LDAP_ADMIN_USERNAME: "admin"
-            LDAP_ADMIN_DN: "cn=admin,${LDAP_BASE_DN}"
-            LDAP_ADMIN_PASSWORD: "not-production"
-            LDAP_ROOT: "${LDAP_BASE_DN}"
-            #LDAP_EXTRA_SCHEMAS: "core, cosine, dyngroup, inetorgperson, namedobject, nis"
-            LDAP_CUSTOM_LDIF_DIR: "/ldif"
     nginx:
         image: nginx:latest
         ports:
@@ -93,7 +87,6 @@ services:
         networks:
             - stumv
 volumes:
-    openldap-data:
     mysql-data:
 networks:
     stumv:

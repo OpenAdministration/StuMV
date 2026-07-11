@@ -1,0 +1,52 @@
+# Sample directory contents for local development and manual testing, so the
+# app has a community to show and memberOf (via dynlist) can be exercised.
+# Automated tests create their own fixtures and do not rely on this data.
+
+dn: uid=admin,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: admin
+cn: Admin User
+sn: User
+givenName: Admin
+mail: admin@stumv.de
+userPassword: admin-not-production
+
+dn: uid=alice,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: alice
+cn: Alice Example
+sn: Example
+givenName: Alice
+mail: alice@stumv.de
+userPassword: alice-not-production
+
+# --- a community with the standard sub-structure ------------------------
+dn: ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: testcom
+description: Test Community
+
+dn: ou=Groups,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+dn: ou=Committees,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Committees
+
+dn: ou=Domains,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Domains
+
+dn: cn=members,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: members
+uniqueMember: uid=alice,ou=People,dc=stumv,dc=de
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
