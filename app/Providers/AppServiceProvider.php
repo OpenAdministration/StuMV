@@ -38,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
 
         Passport::setDefaultScope(['profile']);
 
+        // Passport 13 ships no authorization/consent screen and does not bind
+        // AuthorizationViewResponse by default, so register our own consent view.
+        Passport::authorizationView('auth.oauth.authorize');
+
         Password::defaults(static function () {
             return Password::min(12)
                 ->letters()

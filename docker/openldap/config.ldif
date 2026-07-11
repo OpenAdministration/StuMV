@@ -1,0 +1,99 @@
+# StuMV OpenLDAP configuration (development / CI), cn=config format.
+#
+# Loaded with `slapadd -n0` to build a slapd.d directory, matching the way
+# production is configured (cn=config, not slapd.conf). Ported from a sanitised
+# production `slapcat -n0` dump: prod-specific paths, TLS and secrets stripped,
+# suffix pinned to dc=stumv,dc=de. Stock schema is pulled from the image via
+# include: directives so only the genuinely custom config lives here.
+
+dn: cn=config
+objectClass: olcGlobal
+cn: config
+olcArgsFile: /opt/symas/var/run/slapd.args
+olcPidFile: /opt/symas/var/run/slapd.pid
+olcLogLevel: stats
+
+# Backends and overlays are loadable modules in the Symas image.
+dn: cn=module,cn=config
+objectClass: olcModuleList
+cn: module
+olcModulepath: /opt/symas/lib/openldap
+olcModuleload: back_mdb.la
+olcModuleload: ppolicy.la
+olcModuleload: argon2.la
+olcModuleload: dynlist.la
+
+# System schema, included from the files shipped in the image.
+dn: cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: schema
+
+include: file:///opt/symas/etc/openldap/schema/core.ldif
+include: file:///opt/symas/etc/openldap/schema/cosine.ldif
+include: file:///opt/symas/etc/openldap/schema/nis.ldif
+include: file:///opt/symas/etc/openldap/schema/inetorgperson.ldif
+include: file:///opt/symas/etc/openldap/schema/dyngroup.ldif
+
+# Frontend: hash new cleartext passwords with argon2 (matches production).
+dn: olcDatabase=frontend,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcFrontendConfig
+olcDatabase: frontend
+olcPasswordHash: {ARGON2}
+
+# cn=config database, reachable only by its own root DN.
+dn: olcDatabase=config,cn=config
+objectClass: olcDatabaseConfig
+olcDatabase: config
+olcRootDN: cn=config
+olcRootPW: config-not-production
+olcAccess: {0}to * by * none
+
+# Main mdb database.
+dn: olcDatabase=mdb,cn=config
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: mdb
+olcSuffix: dc=stumv,dc=de
+olcRootDN: cn=Administration,dc=stumv,dc=de
+olcRootPW: admin-not-production
+olcDbDirectory: /opt/symas/var/openldap-data
+olcDbMaxSize: 1073741824
+olcDbIndex: objectClass eq
+olcAccess: {0}to dn.one="ou=Services,dc=stumv,dc=de"
+  by anonymous auth
+olcAccess: {1}to dn.one="ou=People,dc=stumv,dc=de" attrs=userPassword
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by self write
+  by anonymous auth
+  by * none
+olcAccess: {2}to dn.exact="ou=People,dc=stumv,dc=de"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by users read
+olcAccess: {3}to dn.sub="ou=People,dc=stumv,dc=de"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by group/groupOfUniqueNames/uniqueMember="cn=read,ou=Permissions,ou=Services,dc=stumv,dc=de" read
+  by anonymous none
+olcAccess: {4}to dn.exact="cn=super-admins,dc=stumv,dc=de"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by group/groupOfUniqueNames/uniqueMember="cn=read,ou=Permissions,ou=Services,dc=stumv,dc=de" read
+olcAccess: {5}to dn.exact="ou=Communities,dc=stumv,dc=de"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by users read
+olcAccess: {6}to dn.sub="ou=Communities,dc=stumv,dc=de"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by group/groupOfUniqueNames/uniqueMember="cn=read,ou=Permissions,ou=Services,dc=stumv,dc=de" read
+  by anonymous none
+olcAccess: {7}to dn.exact="dc=stumv,dc=de"
+  by users read
+olcAccess: {8}to *
+  by users read
+  by anonymous none
+
+# dynlist overlay: synthesises memberOf from uniqueMember, exactly as in prod.
+# The app's AddMemberOfAttributeScope depends on this.
+dn: olcOverlay=dynlist,olcDatabase={1}mdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcDynListConfig
+olcOverlay: dynlist
+olcDynListAttrSet: groupOfURLs memberURL uniqueMember+memberOf@groupOfUniqueNames
