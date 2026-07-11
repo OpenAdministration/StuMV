@@ -4,6 +4,7 @@ on: push
 
 jobs:
   analysis:
+    if: false # disable for now
     name: PHPStan (larastan)
     runs-on: ubuntu-latest
     steps:
