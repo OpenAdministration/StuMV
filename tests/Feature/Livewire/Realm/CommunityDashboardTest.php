@@ -1,22 +1,11 @@
 <?php
 
-namespace Tests\Feature\Livewire\Realm;
-
 use App\Livewire\Realm\CommunityDashboard;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class CommunityDashboardTest extends TestCase
-{
-    /** @test */
-    public function renders_successfully()
-    {
-        // Quarantined: auto-generated stub that mounts the component without
-        // its required mount parameters (e.g. $ou/$cn), so it errors on render.
-        // TODO: write a real test that mounts with valid params.
-        $this->markTestSkipped('Auto-generated stub: component needs mount parameters.');
-
-        Livewire::test(CommunityDashboard::class)
-            ->assertStatus(200);
-    }
-}
+// Skeleton: this Livewire component mounts with community-scoped route parameters
+// (e.g. uid / ou / cn) and expects an authenticated LDAP member, which this stub
+// does not yet provide. Flesh it out once a community-scoped test fixture exists.
+test('renders successfully', function () {
+    Livewire::test(CommunityDashboard::class)->assertStatus(200);
+})->skip('Needs community-scoped mount parameters and an authenticated LDAP member.');

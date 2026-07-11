@@ -128,24 +128,28 @@ Composer scripts wrap the tooling. Run **`composer fix` before committing.**
 
 ### Tests
 
-The suite runs against a **real dockerized OpenLDAP** (see `docker/openldap/`) and a
-MariaDB test database, configured in `.env.testing` (LDAP on `:13389`, database
-`stumv_testing` on `:13306`). Bring up the Docker stack above (it publishes both on those
-ports; create the `stumv_testing` database once), then:
+The suite is written with [Pest](https://pestphp.com/) and runs against a **real
+dockerized OpenLDAP** (see `docker/openldap/`) and a MariaDB test database, configured in
+`.env.testing` (LDAP on `:13389`, database `stumv_testing` on `:13306`). Bring up the
+Docker stack above (it publishes both on those ports; create the `stumv_testing` database
+once), then:
 
 ```bash
-./vendor/bin/phpunit
+./vendor/bin/pest        # or: composer test
 ```
 
 The LDAP registration/login flow is covered end-to-end by
-`tests/Feature/Auth/LdapAuthenticationTest`. Some older tests are quarantined
-(`markTestSkipped`, grep `Quarantined:`) pending a rewrite for the current UI.
+`tests/Feature/Auth/LdapAuthenticationTest`, and the LDAP-backed validation rules and
+community structure by `tests/Feature/Rules` and `tests/Feature/Ldap`. The six
+Livewire component tests under `tests/Feature/Livewire` are still skeletons
+(`->skip(...)`): the components need community-scoped mount parameters and an
+authenticated LDAP member, which those stubs do not yet set up.
 
 ### Continuous Integration
 
 Every push and pull request runs four workflows in `.github/workflows/` (PHP 8.4):
 
-- **testing** — PHPUnit against a dockerized OpenLDAP + MariaDB service
+- **testing** — Pest against a dockerized OpenLDAP + MariaDB service
 - **lint** — Pint (`--test`)
 - **analysis** — PHPStan / Larastan
 - **rector** — Rector dry-run

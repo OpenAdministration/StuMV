@@ -31,7 +31,8 @@
         "laravel/sail": "^1.0.1",
         "laravel/tinker": "^2.7",
         "mockery/mockery": "^1.4.4",
-        "phpunit/phpunit": "^9.5.10",
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
         "rector/rector": "^2.5",
         "roave/security-advisories": "dev-latest"
     },
@@ -63,6 +64,7 @@
         ],
         "rector": "@php vendor/bin/rector process",
         "rector-dry": "@php vendor/bin/rector process --dry-run",
+        "test": "@php vendor/bin/pest",
         "lint": "@php vendor/bin/phpstan",
         "pint": "@php vendor/bin/pint",
         "fix": [
@@ -80,7 +82,8 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "pestphp/pest-plugin": true
         }
     },
     "minimum-stability": "dev",

@@ -1,103 +1,53 @@
 <?php
 
-namespace Tests\Feature\Auth;
-
-use App\Models\Domain;
-use App\Models\Realm;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class RegistrationTest extends TestCase
-{
-    use RefreshDatabase;
-    use WithFaker;
+/**
+ * Registration is LDAP-backed: the RegisterUser Livewire component validates the
+ * email domain against the registerable domains in LDAP and, on success, creates
+ * the account in the directory. The full happy path (create + login) lives in
+ * LdapAuthenticationTest; here we cover the screen and the validation guards,
+ * none of which persist a user.
+ */
+test('registration screen can be rendered and livewire is there', function () {
+    $response = $this->get('/register');
 
-    public function test_registration_screen_can_be_rendered_and_livewire_is_there(): void
-    {
-        $response = $this->get('/register');
+    $response->assertStatus(200);
+    $response->assertSeeLivewire('register-user');
+});
 
-        $response->assertStatus(200);
-        $response->assertSeeLivewire('register-user');
-    }
+test('registration is refused for a domain that is not registerable', function () {
+    Livewire::test('register-user')
+        ->set('first_name', 'Jon')
+        ->set('last_name', 'Doe')
+        ->set('username', 'jondoe')
+        ->set('email', 'jon.doe@not-a-registerable-domain.invalid')
+        ->set('password', 'Abcdef1$')
+        ->set('password_confirmation', 'Abcdef1$')
+        ->call('save')
+        ->assertHasErrors('domain');
+});
 
-    public function test_new_users_can_register(): void
-    {
-        // Quarantined: stale. Predates the current RegisterUser component, which
-        // exposes flat `email`/`username` fields and a save() method and reads
-        // the domain from LDAP — not the `user.email`/store() + DB Realm/Domain
-        // factories used here. The current register->login path is covered by
-        // LdapAuthenticationTest. TODO: rewrite these against the LDAP flow.
-        $this->markTestSkipped('Stale pre-Flux registration test; LDAP registration covered by LdapAuthenticationTest.');
+test('the username may only contain lowercase url-safe characters', function () {
+    Livewire::test('register-user')
+        ->set('username', 'Not Allowed!')
+        ->call('save')
+        ->assertHasErrors('username');
+});
 
-        $realm = Realm::factory(1)->has(Domain::factory())->create()->first();
-        $dom = $realm->domains()->first();
+test('registration enforces the password policy', function () {
+    $short = 'Ab1$';        // too short
+    $noUpper = 'abcdefg1$';  // no uppercase
+    $noNumber = 'Abcdefg$';  // no number
+    $noSymbol = 'Abcdefg1';  // no symbol
+    $valid = 'Abcdef1$';     // satisfies Password::default()
 
-        $response = Livewire::test('register-user')
-            ->set('user.email', 'john.doe@'.$dom->name)
-            ->set('user.username', 'j.doe')
-            ->set('password', '123$abcD')
-            ->set('password_confirmation', '123$abcD')
-            ->call('store')
-            ->assertHasNoErrors();
-
-        $this->assertAuthenticated();
-        $this->assertEquals('John Doe', auth()->user()->full_name);
-        $response->assertRedirect(RouteServiceProvider::home());
-    }
-
-    public function test_domain_is_not_for_registration(): void
-    {
-        $this->markTestSkipped('Stale pre-Flux registration test; the LDAP DomainRegistrationRule no longer checks a for_registration flag.');
-
-        $realm = Realm::factory(1)->has(Domain::factory()->noRegistration())->create()->first();
-        $dom = $realm->domains()->first();
-
-        Livewire::test('register-user')
-            ->set('user.email', 'john.doe@'.$dom->name)->send()
-            ->assertHasErrors(['domain']);
-    }
-
-    public function test_domain_does_not_exist_registration_not_possible(): void
-    {
-        $this->markTestSkipped('Stale pre-Flux registration test; uses removed `user.email` field.');
-
-        Livewire::test('register-user')
-            ->set('user.email', $this->faker->companyEmail())->send()
-            ->assertHasErrors(['domain']);
-    }
-
-    public function test_unfinished_email_for_registration(): void
-    {
-        $this->markTestSkipped('Stale pre-Flux registration test; uses removed `user.email` field.');
-
-        Livewire::test('register-user')
-            ->set('user.email', 'jon.')->send()
-            ->assertHasErrors(['user.email']);
-    }
-
-    public function test_passwords_for_registration(): void
-    {
-        $short = $this->faker->password(1, 7); // to short
-        $small = 'abcdefgh'; // no uppercase
-        $cased = 'Abcdefgh'; // no number
-        $number = 'Abcdefg1'; // no symbol
-        $symbol = 'Abcdef1$'; // ok
-
-        Livewire::test('register-user')
-            ->set('password', $short)->send()
-            ->assertHasErrors(['password'])
-            ->set('password', $small)->send()
-            ->assertHasErrors(['password'])
-            ->set('password', $cased)->send()
-            ->assertHasErrors(['password'])
-            ->set('password', $number)->send()
-            ->assertHasErrors(['password'])
-            ->set('password', $symbol)->send()
-            ->assertHasErrors(['password'])
-            ->set('password_confirmation', $symbol)->send()
-            ->assertHasNoErrors(['password']);
-    }
-}
+    Livewire::test('register-user')
+        ->set('password', $short)->call('save')->assertHasErrors('password')
+        ->set('password', $noUpper)->call('save')->assertHasErrors('password')
+        ->set('password', $noNumber)->call('save')->assertHasErrors('password')
+        ->set('password', $noSymbol)->call('save')->assertHasErrors('password')
+        ->set('password', $valid)
+        ->set('password_confirmation', $valid)
+        ->call('save')->assertHasNoErrors('password');
+});

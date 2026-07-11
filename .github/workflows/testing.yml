@@ -4,7 +4,7 @@ on: push
 
 jobs:
   tests:
-    name: PHPUnit (PHP ${{ matrix.php }})
+    name: Pest (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -97,7 +97,7 @@ jobs:
           echo "LDAP did not come up"; docker logs ldap; exit 1
 
       - name: Run tests
-        run: ./vendor/bin/phpunit --no-coverage
+        run: ./vendor/bin/pest --no-coverage
 
       - name: LDAP logs on failure
         if: failure()
