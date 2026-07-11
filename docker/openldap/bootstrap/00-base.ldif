@@ -29,11 +29,20 @@ ou: Services
 
 # --- service/bind account used by the application ------------------------
 # Password is a throwaway development credential (see .env.docker).
+# posixAccount is added so this is the *only* entry that satisfies
+# phpLDAPadmin's default login objectClass (posixAccount) — i.e. the service
+# account is the only account that can sign in to the phpLDAPadmin web UI.
 dn: uid=stumv,ou=Services,dc=stumv,dc=de
 objectClass: account
 objectClass: simpleSecurityObject
+objectClass: posixAccount
 objectClass: top
 uid: stumv
+cn: StuMV Service Account
+uidNumber: 1000
+gidNumber: 1000
+homeDirectory: /nonexistent
+loginShell: /usr/sbin/nologin
 description: StuMV application service/bind account (development/CI only)
 userPassword: stumv-not-production
 

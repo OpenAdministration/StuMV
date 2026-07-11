@@ -86,7 +86,7 @@ Once up, these are exposed on the host:
 | Service                      | URL / port              | Notes                                                    |
 | ---------------------------- | ----------------------- | -------------------------------------------------------- |
 | App (nginx → php-fpm)        | http://localhost:8080   |                                                          |
-| phpLDAPadmin (LDAP web UI)   | http://localhost:8081   | Login DN `cn=Administration,dc=stumv,dc=de` / `admin-not-production` |
+| phpLDAPadmin (LDAP web UI)   | http://localhost:8081   | Log in with the service account — user id `stumv` / `stumv-not-production` |
 | Vite dev server (workspace)  | http://localhost:5173   | run `npm run dev` inside the workspace container         |
 | OpenLDAP                     | `ldap://localhost:13389`| bind `uid=stumv,ou=Services,dc=stumv,dc=de` / `stumv-not-production` |
 | MariaDB                      | `localhost:13306`       | database `stumv`, user `stumv` / `local_stumv_password`  |
