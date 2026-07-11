@@ -75,8 +75,12 @@ class ListMembers extends Component
         $membersQuery = \App\Models\User::where('realm', $this->community_name);
 
         if ($this->search != '') {
-            $membersQuery->where('full_name', 'like', '%'.$this->search.'%');
-            $membersQuery->orWhere('username', 'like', '%'.$this->search.'%');
+            // Group the OR so it stays scoped to the realm; an ungrouped orWhere
+            // would leak users from other realms whose username matches.
+            $membersQuery->where(function ($query): void {
+                $query->where('full_name', 'like', '%'.$this->search.'%')
+                    ->orWhere('username', 'like', '%'.$this->search.'%');
+            });
         }
 
         $members = $membersQuery->paginate(10);

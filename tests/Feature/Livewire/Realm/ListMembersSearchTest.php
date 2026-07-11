@@ -33,3 +33,26 @@ test('the member list filters by name', function (): void {
         ->assertSee('Alice Wonder')
         ->assertDontSee('Bob Builder');
 });
+
+test('search stays scoped to the community and does not leak other realms', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsMember($community);
+
+    // A member of THIS realm whose name does not match the search term.
+    realmMember($uid, 'Alice Mine');
+
+    // A user in a DIFFERENT realm whose username contains the search term.
+    $leakUid = 'zzleak'.bin2hex(random_bytes(3));
+    TestLdap::makeUser($leakUid);
+    User::factory()->create([
+        'username' => $leakUid,
+        'realm' => 'some-other-realm',
+        'full_name' => 'Leaker Person',
+    ]);
+
+    Livewire::test(ListMembers::class, ['uid' => $community])
+        ->call('loadMembers')
+        ->set('search', 'zzleak')
+        ->assertDontSee('Leaker Person');
+});
