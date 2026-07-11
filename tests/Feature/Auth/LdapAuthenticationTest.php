@@ -46,7 +46,7 @@ function purgeLdapUser(string $username): void
     $ldapUser->delete();
 }
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Unique per run so repeated local runs don't collide; removed in afterEach.
     $this->username = 'phptest'.bin2hex(random_bytes(4));
     // Random per run: satisfies Password::defaults() and is not a leaked password.
@@ -54,11 +54,11 @@ beforeEach(function () {
     purgeLdapUser($this->username);
 });
 
-afterEach(function () {
+afterEach(function (): void {
     purgeLdapUser($this->username);
 });
 
-test('a user can register into ldap', function () {
+test('a user can register into ldap', function (): void {
     registerLdapUser($this->username, $this->password);
 
     $ldapUser = LdapUser::findByUsername($this->username);
@@ -66,7 +66,7 @@ test('a user can register into ldap', function () {
         ->and($ldapUser->getFirstAttribute('mail'))->toBe($this->username.'@'.DOMAIN);
 });
 
-test('a registered user becomes a member of the community', function () {
+test('a registered user becomes a member of the community', function (): void {
     registerLdapUser($this->username, $this->password);
 
     $community = Community::findByUid('testcom');
@@ -77,7 +77,7 @@ test('a registered user becomes a member of the community', function () {
     expect($isMember)->toBeTrue();
 });
 
-test('a registered user can log in', function () {
+test('a registered user can log in', function (): void {
     registerLdapUser($this->username, $this->password);
     auth()->logout();
     $this->assertGuest();
@@ -90,7 +90,7 @@ test('a registered user can log in', function () {
     expect(auth()->user())->toBeInstanceOf(User::class);
 });
 
-test('a registered user can log in with their email address', function () {
+test('a registered user can log in with their email address', function (): void {
     registerLdapUser($this->username, $this->password);
     auth()->logout();
 
@@ -102,7 +102,7 @@ test('a registered user can log in with their email address', function () {
     $this->assertAuthenticated();
 });
 
-test('login is rejected with a wrong password', function () {
+test('login is rejected with a wrong password', function (): void {
     registerLdapUser($this->username, $this->password);
     auth()->logout();
 

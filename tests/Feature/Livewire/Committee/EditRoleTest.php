@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('renders the edit form for a seeded role', function () {
+test('renders the edit form for a seeded role', function (): void {
     actingAsModerator('demo');
 
     Livewire::test(EditRole::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])

@@ -8,7 +8,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('renders the edit form for an existing membership', function () {
+test('renders the edit form for an existing membership', function (): void {
     $moderator = actingAsModerator('demo');
 
     $membership = RoleMembership::create([

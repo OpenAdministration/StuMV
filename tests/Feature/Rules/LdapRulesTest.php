@@ -17,42 +17,42 @@ function passesRule(string $attribute, mixed $value, object $rule): bool
     return Validator::make([$attribute => $value], [$attribute => [$rule]])->passes();
 }
 
-describe('DomainRegistrationRule', function () {
-    test('accepts a domain that exists in LDAP', function () {
+describe('DomainRegistrationRule', function (): void {
+    test('accepts a domain that exists in LDAP', function (): void {
         expect(passesRule('domain', 'example.test', new DomainRegistrationRule))->toBeTrue();
     });
 
-    test('rejects a domain that is not registerable', function () {
+    test('rejects a domain that is not registerable', function (): void {
         expect(passesRule('domain', 'no-such-domain.invalid', new DomainRegistrationRule))->toBeFalse();
     });
 });
 
-describe('UniqueDomain', function () {
-    test('rejects a domain that already exists', function () {
+describe('UniqueDomain', function (): void {
+    test('rejects a domain that already exists', function (): void {
         expect(passesRule('dc', 'example.test', new UniqueDomain))->toBeFalse();
     });
 
-    test('accepts a brand new domain', function () {
+    test('accepts a brand new domain', function (): void {
         expect(passesRule('dc', 'brand-new-'.uniqid().'.test', new UniqueDomain))->toBeTrue();
     });
 });
 
-describe('UniqueEmail', function () {
-    test('rejects an address already in the directory', function () {
+describe('UniqueEmail', function (): void {
+    test('rejects an address already in the directory', function (): void {
         expect(passesRule('email', 'alice@stumv.de', new UniqueEmail))->toBeFalse();
     });
 
-    test('accepts an unused address', function () {
+    test('accepts an unused address', function (): void {
         expect(passesRule('email', 'nobody-'.uniqid().'@stumv.de', new UniqueEmail))->toBeTrue();
     });
 });
 
-describe('UserIsMember', function () {
-    test('accepts a member of the community', function () {
+describe('UserIsMember', function (): void {
+    test('accepts a member of the community', function (): void {
         expect(passesRule('user', 'alice', new UserIsMember('testcom')))->toBeTrue();
     });
 
-    test('rejects a user who is not a member of the community', function () {
+    test('rejects a user who is not a member of the community', function (): void {
         // demo-hhv belongs to the "demo" community, not "testcom".
         expect(passesRule('user', 'demo-hhv', new UserIsMember('testcom')))->toBeFalse();
     });

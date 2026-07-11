@@ -9,14 +9,14 @@ use Livewire\Livewire;
  * LdapAuthenticationTest; here we cover the screen and the validation guards,
  * none of which persist a user.
  */
-test('registration screen can be rendered and livewire is there', function () {
+test('registration screen can be rendered and livewire is there', function (): void {
     $response = $this->get('/register');
 
     $response->assertStatus(200);
     $response->assertSeeLivewire('register-user');
 });
 
-test('registration is refused for a domain that is not registerable', function () {
+test('registration is refused for a domain that is not registerable', function (): void {
     Livewire::test('register-user')
         ->set('first_name', 'Jon')
         ->set('last_name', 'Doe')
@@ -28,14 +28,14 @@ test('registration is refused for a domain that is not registerable', function (
         ->assertHasErrors('domain');
 });
 
-test('the username may only contain lowercase url-safe characters', function () {
+test('the username may only contain lowercase url-safe characters', function (): void {
     Livewire::test('register-user')
         ->set('username', 'Not Allowed!')
         ->call('save')
         ->assertHasErrors('username');
 });
 
-test('registration enforces the password policy', function () {
+test('registration enforces the password policy', function (): void {
     $short = 'Ab1$';        // too short
     $noUpper = 'abcdefg1$';  // no uppercase
     $noNumber = 'Abcdefg$';  // no number

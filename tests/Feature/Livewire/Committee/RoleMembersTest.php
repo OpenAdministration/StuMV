@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('renders the member list for a seeded role', function () {
+test('renders the member list for a seeded role', function (): void {
     actingAsModerator('demo');
 
     Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
@@ -15,7 +15,7 @@ test('renders the member list for a seeded role', function () {
         ->assertSet('cn', 'mitglied');
 });
 
-test('the member list can be lazily loaded', function () {
+test('the member list can be lazily loaded', function (): void {
     actingAsModerator('demo');
 
     Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])

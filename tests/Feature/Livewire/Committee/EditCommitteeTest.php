@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('renders the edit form for a seeded committee', function () {
+test('renders the edit form for a seeded committee', function (): void {
     actingAsModerator('demo');
 
     Livewire::test(EditCommittee::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR'])

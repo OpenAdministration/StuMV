@@ -16,11 +16,11 @@ dataset('guarded routes', [
     'new realm' => '/new-realm',
 ]);
 
-test('guests are redirected to login', function (string $route) {
+test('guests are redirected to login', function (string $route): void {
     $this->get($route)->assertRedirect('/login');
 })->with('guarded routes');
 
-test('guest-only routes are reachable without authentication', function (string $route) {
+test('guest-only routes are reachable without authentication', function (string $route): void {
     $this->get($route)->assertStatus(200);
 })->with([
     'login' => '/login',

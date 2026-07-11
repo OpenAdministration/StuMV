@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('renders the dashboard for a community member', function () {
+test('renders the dashboard for a community member', function (): void {
     actingAsMember('demo');
 
     Livewire::test(CommunityDashboard::class, ['uid' => Community::findByUid('demo')])

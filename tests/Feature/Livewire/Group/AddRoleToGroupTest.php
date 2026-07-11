@@ -7,7 +7,7 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-test('renders the add-role-to-group screen for an admin', function () {
+test('renders the add-role-to-group screen for an admin', function (): void {
     actingAsAdmin('demo');
 
     Livewire::test(AddRoleToGroup::class, ['uid' => Community::findByUid('demo'), 'cn' => 'some-group'])
