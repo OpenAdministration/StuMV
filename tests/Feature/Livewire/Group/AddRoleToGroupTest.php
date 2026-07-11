@@ -1,11 +1,16 @@
 <?php
 
+use App\Ldap\Community;
 use App\Livewire\Group\AddRoleToGroup;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
-// Skeleton: this Livewire component mounts with community-scoped route parameters
-// (e.g. uid / ou / cn) and expects an authenticated LDAP member, which this stub
-// does not yet provide. Flesh it out once a community-scoped test fixture exists.
-test('renders successfully', function () {
-    Livewire::test(AddRoleToGroup::class)->assertStatus(200);
-})->skip('Needs community-scoped mount parameters and an authenticated LDAP member.');
+uses(RefreshDatabase::class);
+
+test('renders the add-role-to-group screen for an admin', function () {
+    actingAsAdmin('demo');
+
+    Livewire::test(AddRoleToGroup::class, ['uid' => Community::findByUid('demo'), 'cn' => 'some-group'])
+        ->assertStatus(200)
+        ->assertSet('group_cn', 'some-group');
+});

@@ -1,11 +1,15 @@
 <?php
 
+use App\Ldap\Community;
 use App\Livewire\Realm\CommunityDashboard;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
-// Skeleton: this Livewire component mounts with community-scoped route parameters
-// (e.g. uid / ou / cn) and expects an authenticated LDAP member, which this stub
-// does not yet provide. Flesh it out once a community-scoped test fixture exists.
-test('renders successfully', function () {
-    Livewire::test(CommunityDashboard::class)->assertStatus(200);
-})->skip('Needs community-scoped mount parameters and an authenticated LDAP member.');
+uses(RefreshDatabase::class);
+
+test('renders the dashboard for a community member', function () {
+    actingAsMember('demo');
+
+    Livewire::test(CommunityDashboard::class, ['uid' => Community::findByUid('demo')])
+        ->assertStatus(200);
+});

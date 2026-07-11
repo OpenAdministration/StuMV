@@ -1,11 +1,16 @@
 <?php
 
+use App\Ldap\Community;
 use App\Livewire\Committee\EditRole;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
-// Skeleton: this Livewire component mounts with community-scoped route parameters
-// (e.g. uid / ou / cn) and expects an authenticated LDAP member, which this stub
-// does not yet provide. Flesh it out once a community-scoped test fixture exists.
-test('renders successfully', function () {
-    Livewire::test(EditRole::class)->assertStatus(200);
-})->skip('Needs community-scoped mount parameters and an authenticated LDAP member.');
+uses(RefreshDatabase::class);
+
+test('renders the edit form for a seeded role', function () {
+    actingAsModerator('demo');
+
+    Livewire::test(EditRole::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+        ->assertStatus(200)
+        ->assertSet('cn', 'mitglied');
+});
