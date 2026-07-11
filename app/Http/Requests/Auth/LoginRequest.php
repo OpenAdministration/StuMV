@@ -48,16 +48,16 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         $credentials = [
-            'password' => $this->get('password'),
+            'password' => $this->input('password'),
         ];
 
-        $validator = Validator::make(['email' => $this->get('uid')], [
+        $validator = Validator::make(['email' => $this->input('uid')], [
             'email' => ['required', 'email'],
         ]);
         if ($validator->passes()) {
-            $credentials['mail'] = $this->get('uid');
+            $credentials['mail'] = $this->input('uid');
         } else {
-            $credentials['uid'] = $this->get('uid');
+            $credentials['uid'] = $this->input('uid');
         }
         try {
             $auth = Auth::attempt($credentials, $this->boolean('remember'));

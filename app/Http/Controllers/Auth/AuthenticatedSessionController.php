@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -17,7 +15,7 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      *
-     * @return Application|RedirectResponse|Redirector
+     * @return Redirector|RedirectResponse
      */
     public function create()
     {
@@ -25,7 +23,7 @@ class AuthenticatedSessionController extends Controller
             return redirect(RouteServiceProvider::home());
         }
 
-        return view(Login::class);
+        return view('auth.login');
     }
 
     /**

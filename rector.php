@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Rector\Caching\ValueObject\Storage\FileCacheStorage;
 use Rector\CodeQuality\Rector\FuncCall\CompactToVariablesRector;
 use Rector\Config\RectorConfig;
-use Rector\TypeDeclaration\Rector\StmtsAwareInterface\SafeDeclareStrictTypesRector;
 use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
@@ -18,7 +17,9 @@ return RectorConfig::configure()
         cacheClass: FileCacheStorage::class
     )
     ->withSets([
-        LaravelLevelSetList::UP_TO_LARAVEL_120,
+        // bug in AuthenticateSessionController.php -> replaces view('auth.login') with view(\Illuminate\Events\Login:class)'
+        // @see https://github.com/driftingly/rector-laravel/issues/317
+        // LaravelLevelSetList::UP_TO_LARAVEL_120,
         LaravelSetList::LARAVEL_CODE_QUALITY,
         LaravelSetList::LARAVEL_COLLECTION,
     ])
@@ -38,8 +39,6 @@ return RectorConfig::configure()
     ->withSkip([
         // compact() is idiomatic in Laravel controllers; the explicit-array rewrite is
         // style-only and has an undefined-variable edge case. Keep compact().
-        CompactToVariablesRector::class,
-        // declare(strict_types=1) is a behavioral change (scalar coercion -> TypeError);
-        // adopt deliberately with a green test suite, not via a blanket Rector run.
-        SafeDeclareStrictTypesRector::class,
+        // CompactToVariablesRector::class,
+
     ]);
