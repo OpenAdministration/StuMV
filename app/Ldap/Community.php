@@ -50,6 +50,7 @@ class Community extends OrganizationalUnit implements LdapImportable
         return $this->description[0] ?? '';
     }
 
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();

@@ -11,6 +11,7 @@ class PassportClient extends Client
      * Determine if the client should skip the authorization prompt.
      * Here no App needs a confirmation dialog after login
      */
+    #[\Override]
     public function skipsAuthorization(Authenticatable $user, array $scopes): bool
     {
         return true;

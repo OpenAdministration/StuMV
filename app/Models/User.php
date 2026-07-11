@@ -62,6 +62,7 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
      *
      * @return array<string, string>
      */
+    #[\Override]
     protected function casts(): array
     {
         return [

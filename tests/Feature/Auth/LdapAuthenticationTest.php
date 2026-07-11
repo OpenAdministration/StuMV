@@ -17,7 +17,7 @@ use Tests\TestCase;
  */
 class LdapAuthenticationTest extends TestCase
 {
-    private const DOMAIN = 'example.test';
+    private const string DOMAIN = 'example.test';
 
     private string $username;
 

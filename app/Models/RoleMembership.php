@@ -97,6 +97,7 @@ class RoleMembership extends Model
             });
     }
 
+    #[\Override]
     protected function casts(): array
     {
         return [

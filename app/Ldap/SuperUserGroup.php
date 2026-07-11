@@ -13,6 +13,7 @@ class SuperUserGroup extends Group
         return self::query()->findOrFail('cn=super-admins,{base}');
     }
 
+    #[\Override]
     public function members(): HasManyIn
     {
         return $this->hasManyIn([User::class], 'uniquemember')->using($this, 'uniquemember');

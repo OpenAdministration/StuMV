@@ -14,6 +14,7 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     /**
      * The "booting" method of the model.
      */
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
@@ -36,6 +37,7 @@ class User extends \LdapRecord\Models\OpenLDAP\User
         return self::query()->where('mail', '=', $email)->first();
     }
 
+    #[\Override]
     public function groups(): HasMany
     {
         return $this->hasMany(Group::class, 'uniqueMember');
