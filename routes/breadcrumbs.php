@@ -1,13 +1,14 @@
-<?php // routes/breadcrumbs.php
+<?php
+
+// routes/breadcrumbs.php
 // Note: Laravel will automatically resolve `Breadcrumbs::` without
 // this import. This is nice for IDE syntax and refactoring.
-use Illuminate\Support\Facades\Route;
 use App\Ldap\Committee;
 use Diglactic\Breadcrumbs\Breadcrumbs;
-
+use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 // This import is also not required, and you could replace `BreadcrumbTrail $trail`
 //  with `$trail`. This is nice for IDE type checking and completion.
-use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
+use Illuminate\Support\Facades\Route;
 
 Breadcrumbs::for('realms.pick', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->push(__('Enter a Realm'));
@@ -54,7 +55,6 @@ Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routePa
     $trail->parent('realms', $routeParams);
     $trail->push('Editieren', route('realms.edit', $routeParams));
 });
-
 
 Breadcrumbs::for('realms.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
@@ -114,34 +114,34 @@ Breadcrumbs::for('realms.groups.edit', function (BreadcrumbTrail $trail, array $
 Breadcrumbs::for('realms.groups.roles', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms.groups', $routeParams);
     $name = $routeParams['cn'];
-    $trail->push( $name, route('realms.groups.roles', $routeParams));
+    $trail->push($name, route('realms.groups.roles', $routeParams));
 });
 
 Breadcrumbs::for('realms.groups.roles.add', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms.groups.roles', $routeParams);
-    $trail->push( __('Add'), route('realms.groups.roles.add', $routeParams));
+    $trail->push(__('Add'), route('realms.groups.roles.add', $routeParams));
 });
 
 Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms',  $routeParams);
+    $trail->parent('realms', $routeParams);
     $trail->push(__('Committees'), route('committees.list', $routeParams));
 });
 
 Breadcrumbs::for('committees.list.list', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms',  $routeParams);
+    $trail->parent('realms', $routeParams);
     $trail->push(__('Committees'), route('committees.list.list', $routeParams));
 });
 
 Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('committees.list',  $routeParams);
+    $trail->parent('committees.list', $routeParams);
     $trail->push(__('New Committee'), route('committees.new', $routeParams));
 });
 
-Breadcrumbs::for('committees.details', function (BreadcrumbTrail $trail, array $routeParams): void{
+Breadcrumbs::for('committees.details', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.list', $routeParams);
     $uid = $routeParams['uid'];
     $c = Committee::findByOrFail('ou', $routeParams['ou']);
-    foreach ($c->committeePath() as $committee){
+    foreach ($c->committeePath() as $committee) {
         $routeParams['ou'] = $committee;
         // Display the committee's long name (description), falling back to its
         // short ou. The `truncate` flag lets the view ellipsis it via CSS

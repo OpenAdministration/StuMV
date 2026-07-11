@@ -2,30 +2,32 @@
 
 namespace App\Rules;
 
-use Illuminate\Translation\PotentiallyTranslatedString;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UserIsMember implements ValidationRule
 {
     private readonly Community $community;
-    public function __construct(string $community_name){
+
+    public function __construct(string $community_name)
+    {
         $this->community = Community::findByUid($community_name);
     }
 
     /**
      * Run the validation rule.
      *
-     * @param \Closure(string):PotentiallyTranslatedString $fail
+     * @param  Closure(string):PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if(!($value instanceof User)){
+        if (! ($value instanceof User)) {
             $value = User::findByUsername($value);
         }
-        if(!empty($value) && $this->community->membersGroup()->members()->exists($value) !== true){
+        if (! empty($value) && $this->community->membersGroup()->members()->exists($value) !== true) {
             $fail('realms.user_is_no_member');
         }
     }

@@ -19,21 +19,22 @@ class ListGroups extends Component
 
     #[Url]
     public string $sortField = 'cn';
-    
+
     #[Url]
     public string $sortDirection = 'asc';
 
     public string $realm_uid;
 
     public string $deleteGroupDn;
+
     public string $deleteGroupName = '';
 
     public function sortBy($field)
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -44,7 +45,8 @@ class ListGroups extends Component
         $this->resetPage();
     }
 
-    public function mount(Community $uid){
+    public function mount(Community $uid)
+    {
         $this->realm_uid = $uid->getShortCode();
     }
 
@@ -58,7 +60,7 @@ class ListGroups extends Component
 
         return view('livewire.group.list-group', [
             'groupSlice' => $groups,
-        ])->title(__('groups.list_title' ));
+        ])->title(__('groups.list_title'));
     }
 
     public function deletePrepare($uid, $cn): void

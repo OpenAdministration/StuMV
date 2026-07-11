@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Realm;
 
-use App\Models\User;
 use App\Models\Realm;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Livewire\Livewire;
@@ -27,30 +27,30 @@ class RealmTest extends TestCase
         $this->assertAuthenticated();
     }
 
-    public function test_is_route_accessible_and_livewire_there() : void
+    public function test_is_route_accessible_and_livewire_there(): void
     {
         $response = $this->get('/realms');
         $response->assertStatus(200);
         $response->assertSeeLivewire('realm.crud');
     }
 
-    public function test_shows_realm() : void
+    public function test_shows_realm(): void
     {
         $realm = Realm::factory()->create();
         Livewire::test('realm.crud')
             ->assertSee([$realm->uid, $realm->long_name]);
     }
 
-    public function test_search_with_result() : void
+    public function test_search_with_result(): void
     {
         $realm = Realm::factory()->create();
-        $search = substr((string) $realm->uid, 1,1);
+        $search = substr((string) $realm->uid, 1, 1);
         Livewire::test('realm.crud')
             ->set('search', $search)->send()
             ->assertSee([$realm->long_name]);
     }
 
-    public function test_search_without_result() : void
+    public function test_search_without_result(): void
     {
         $realm = Realm::factory()->create();
         $search = 'aaaaa';
@@ -59,7 +59,7 @@ class RealmTest extends TestCase
             ->assertDontSee([$realm->long_name]);
     }
 
-    public function test_open_edit_modal() : void
+    public function test_open_edit_modal(): void
     {
         $realm = Realm::factory()->create();
         Livewire::test('realm.crud')
@@ -68,7 +68,7 @@ class RealmTest extends TestCase
             ->assertSet('editRealm.uid', $realm->uid);
     }
 
-    public function test_edit_longName_and_save() : void
+    public function test_edit_long_name_and_save(): void
     {
         $realm = Realm::factory()->create();
         $newName = $this->faker->company();
@@ -81,10 +81,10 @@ class RealmTest extends TestCase
         $this->assertEquals($newName, $realm->long_name);
     }
 
-    public function test_uid_not_editable() : void
+    public function test_uid_not_editable(): void
     {
         $realm = Realm::factory()->create();
-        $newName = $realm->uid . 'a';
+        $newName = $realm->uid.'a';
         Livewire::test('realm.crud')
             ->call('edit', $realm->uid)
             ->set('editRealm.uid', $newName)->send()
@@ -93,6 +93,4 @@ class RealmTest extends TestCase
         $realm->refresh();
         $this->assertNotEquals($newName, $realm->uid);
     }
-
-
 }

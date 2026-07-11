@@ -1,7 +1,7 @@
 <?php
 
-use Diglactic\Breadcrumbs\Manager;
 use Diglactic\Breadcrumbs\Generator;
+use Diglactic\Breadcrumbs\Manager;
 
 return [
 

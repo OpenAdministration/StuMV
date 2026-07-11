@@ -15,5 +15,4 @@ class PassportClient extends Client
     {
         return true;
     }
-
 }

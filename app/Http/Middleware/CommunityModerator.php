@@ -12,14 +12,15 @@ class CommunityModerator
     /**
      * Handle an incoming request.
      *
-     * @param \Closure(Request):Response $next
+     * @param  Closure(Request):Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $community = Route::current()->parameter('uid');
-        if($request->user()->cannot('moderator', $community)){
+        if ($request->user()->cannot('moderator', $community)) {
             abort(403);
         }
+
         return $next($request);
     }
 }

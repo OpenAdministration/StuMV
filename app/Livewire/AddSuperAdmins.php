@@ -27,9 +27,11 @@ class AddSuperAdmins extends Component
                 $user = User::findOrFail($u);
                 SuperUserGroup::group()->members()->attach($user);
                 Flux::toast(variant: 'success', text: __('Added new Superadmin'));
+
                 return to_route('superadmins.list');
             } catch (LdapRecordException $exception) {
                 $this->addError('dn', $exception->getMessage());
+
                 return false;
             }
         }

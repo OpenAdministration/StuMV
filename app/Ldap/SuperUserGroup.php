@@ -8,7 +8,7 @@ use LdapRecord\Models\Relations\HasManyIn;
 
 class SuperUserGroup extends Group
 {
-    public static function group() : self
+    public static function group(): self
     {
         return self::query()->findOrFail('cn=super-admins,{base}');
     }

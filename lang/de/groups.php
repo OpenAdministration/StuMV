@@ -27,5 +27,5 @@ return [
     'success_role_add' => 'Die Rolle wurde erfolgreich hinzugefügt.',
     'roles_add_headline' => 'Einer Rolle mit dem Recht :name verknüpfen',
     'roles_add_explanation' => 'Wähle ein Gremium und dann die Rolle aus, die die Rechte erhalten soll.',
-    'list_title' => 'Rechtegruppen'
+    'list_title' => 'Rechtegruppen',
 ];

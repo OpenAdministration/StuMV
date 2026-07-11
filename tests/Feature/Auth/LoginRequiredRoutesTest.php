@@ -10,7 +10,7 @@ class LoginRequiredRoutesTest extends TestCase
     use RefreshDatabase;
 
     private array $routesWithLogin = [
-        '/realms'
+        '/realms',
     ];
 
     public function test_route()
@@ -20,7 +20,7 @@ class LoginRequiredRoutesTest extends TestCase
         // route list to current protected routes.
         $this->markTestSkipped('Stale pre-Flux test: /realms route was removed.');
 
-        foreach ($this->routesWithLogin as $route){
+        foreach ($this->routesWithLogin as $route) {
             $response = $this->get($route);
             $response->assertStatus(302);
         }

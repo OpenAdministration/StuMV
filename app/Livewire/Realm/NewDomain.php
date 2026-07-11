@@ -27,13 +27,13 @@ class NewDomain extends Component
     {
         return [
             'dc' => [
-                new DomainValidator(),
-                new UniqueDomain(),
+                new DomainValidator,
+                new UniqueDomain,
             ],
 
         ];
     }
-    
+
     public function render()
     {
         return view('livewire.realm.new-domain')->title(__('realms.new_domain_title', ['realm' => $this->uid]));
@@ -47,7 +47,7 @@ class NewDomain extends Component
             'dc' => $this->dc,
         ]);
 
-        $d->setDn("dc=$this->dc," . Domain::dnRoot($this->uid));
+        $d->setDn("dc=$this->dc,".Domain::dnRoot($this->uid));
         $d->save();
         $this->redirectRoute('realms.domains', ['uid' => $this->uid]);
     }

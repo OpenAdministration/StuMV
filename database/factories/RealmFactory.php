@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Realm;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Realm>
+ * @extends Factory<Realm>
  */
 class RealmFactory extends Factory
 {
@@ -17,8 +18,8 @@ class RealmFactory extends Factory
     public function definition()
     {
         return [
-            'uid' => $this->faker->randomLetter() . $this->faker->randomLetter() . $this->faker->randomLetter(),
-            'long_name' => $this->faker->unique()->company()
+            'uid' => $this->faker->randomLetter().$this->faker->randomLetter().$this->faker->randomLetter(),
+            'long_name' => $this->faker->unique()->company(),
         ];
     }
 }

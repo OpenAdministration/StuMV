@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Ldap;
 
 use App\Ldap\Scopes\AddMemberOfAttributeScope;
@@ -17,20 +18,20 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     {
         parent::boot();
 
-        static::addGlobalScope(new AddMemberOfAttributeScope());
+        static::addGlobalScope(new AddMemberOfAttributeScope);
     }
 
-    public static function findByUsername(string $username) : ?static
+    public static function findByUsername(string $username): ?static
     {
         return self::query()->where('uid', '=', $username)->first();
     }
 
-    public static function findOrFailByUsername(string $username) : static
+    public static function findOrFailByUsername(string $username): static
     {
         return self::findByUsername($username) ?? abort(404);
     }
 
-    public static function findByEmail(string $email) : ?static
+    public static function findByEmail(string $email): ?static
     {
         return self::query()->where('mail', '=', $email)->first();
     }
@@ -40,30 +41,32 @@ class User extends \LdapRecord\Models\OpenLDAP\User
         return $this->hasMany(Group::class, 'uniqueMember');
     }
 
-    public function isSuperAdmin() : bool{
+    public function isSuperAdmin(): bool
+    {
         return SuperUserGroup::group()->members()->exists($this);
     }
 
     public function adminOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn','=', 'members');
+        $hm->getQuery()->where('cn', '=', 'members');
+
         return $hm;
     }
 
     public function moderatorOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn','=', 'members');
+        $hm->getQuery()->where('cn', '=', 'members');
+
         return $hm;
     }
 
     public function memberOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn','=', 'members');
+        $hm->getQuery()->where('cn', '=', 'members');
+
         return $hm;
     }
-
-
 }

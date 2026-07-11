@@ -38,7 +38,8 @@ class EditRoleMembership extends Component
     #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $uid, $ou, $cn, $id){
+    public function mount(Community $uid, $ou, $cn, $id)
+    {
         $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
@@ -63,12 +64,13 @@ class EditRoleMembership extends Component
         $membership = RoleMembership::findOrFail($this->id);
         $membership->update([
             'from' => $this->start_date,
-            'until' => !empty($this->end_date) ? $this->end_date : null,
-            'decided' => !empty($this->decision_date) ? $this->decision_date : null,
-            'comment' => !empty($this->comment) ? $this->comment : null,
+            'until' => ! empty($this->end_date) ? $this->end_date : null,
+            'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
+            'comment' => ! empty($this->comment) ? $this->comment : null,
         ]);
 
         Flux::toast(variant: 'success', text: __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
+
         return to_route('committees.roles.members', [
             'uid' => $this->uid,
             'ou' => $this->ou,
@@ -76,5 +78,4 @@ class EditRoleMembership extends Component
             'id' => $this->id,
         ]);
     }
-
 }

@@ -24,11 +24,12 @@ class EditRealm extends Component
     {
         $this->uid = $uid->getFirstAttribute('ou');
         // here is an implicit search for the realm and return 404 if not existent
-        $this->name = $this->realm->description[0] ?? "";
+        $this->name = $this->realm->description[0] ?? '';
     }
 
     #[Computed(persist: true)]
-    public function realm() : Community{
+    public function realm(): Community
+    {
         return Community::findOrFailByUid($this->uid);
     }
 
@@ -37,12 +38,14 @@ class EditRealm extends Component
         return view('livewire.edit-realm')->title(__('realms.dashboard.title', ['realm' => $this->uid]));
     }
 
-    public function save(){
+    public function save()
+    {
         $r = Community::findOrFailByUid($this->uid);
-        $r->description =  [$this->name];
+        $r->description = [$this->name];
         $r->save();
 
         Flux::toast(variant: 'success', text: __('realms.edit_success', ['realm' => $this->uid]));
+
         return to_route('realms.dashboard', ['uid' => $this->uid]);
     }
 }

@@ -9,20 +9,24 @@ use App\Models\User;
 
 class RolePolicy
 {
-    public function create(User $user, Committee $committee, Community $community) : bool {
+    public function create(User $user, Committee $committee, Community $community): bool
+    {
         return // add committee mods
             $user->can('moderator', $community);
     }
 
-    public function edit(User $user, Role $role, Committee $committee, Community $community) : bool {
+    public function edit(User $user, Role $role, Committee $committee, Community $community): bool
+    {
         return $user->can('moderator', $community);
     }
 
-    public function delete(User $user, Role $role, Committee $committee, Community $community) : bool {
+    public function delete(User $user, Role $role, Committee $committee, Community $community): bool
+    {
         return $user->can('moderator', $community);
     }
 
-    public function view(User $user, Role $role, Committee $committee, Community $community) : bool {
+    public function view(User $user, Role $role, Committee $committee, Community $community): bool
+    {
         return $user->can('member', $community)
             || $user->can('superadmin');
     }

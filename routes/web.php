@@ -1,50 +1,52 @@
 <?php
 
+use App\Http\Middleware\SuperAdminMiddleware;
+use App\Livewire\AddSuperAdmins;
+use App\Livewire\Committee\AddUserToRole;
+use App\Livewire\Committee\EditCommittee;
+use App\Livewire\Committee\EditRole;
+use App\Livewire\Committee\EditRoleMembership;
+use App\Livewire\Committee\ListCommitteesList;
+use App\Livewire\Committee\ListCommitteesTree;
+use App\Livewire\Committee\ListRoleMembers;
+use App\Livewire\Committee\ListRoles;
+use App\Livewire\Committee\NewCommittee;
+use App\Livewire\Committee\NewRole;
+use App\Livewire\Committee\TerminateRoleMemberships;
+use App\Livewire\Group\AddRoleToGroup;
+use App\Livewire\Group\EditGroup;
+use App\Livewire\Group\ListGroups;
+use App\Livewire\Group\ListRolesInGroup;
+use App\Livewire\Group\NewGroup;
+use App\Livewire\ListSuperUsers;
 use App\Livewire\Profile;
 use App\Livewire\Profile\Memberships;
 use App\Livewire\Profile\Picture;
-use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\CommunityDashboard;
+use App\Livewire\Realm\EditRealm;
+use App\Livewire\Realm\ListAdmins;
+use App\Livewire\Realm\ListDomains;
 use App\Livewire\Realm\ListMembers;
 use App\Livewire\Realm\ListModerators;
-use App\Livewire\Realm\ListAdmins;
-use App\Livewire\Committee\ListCommitteesTree;
-use App\Livewire\Committee\ListCommitteesList;
-use App\Livewire\Committee\ListRoles;
-use App\Livewire\Committee\ListRoleMembers;
-use App\Livewire\Committee\NewCommittee;
-use App\Livewire\Committee\NewRole;
-use App\Livewire\Committee\EditCommittee;
-use App\Livewire\Committee\EditRole;
-use App\Livewire\Committee\AddUserToRole;
-use App\Livewire\Committee\TerminateRoleMemberships;
-use App\Livewire\Committee\EditRoleMembership;
-use App\Livewire\Tools\ToolsDashboard;
+use App\Livewire\Realm\ListRealms;
+use App\Livewire\Realm\NewAdmin;
+use App\Livewire\Realm\NewDomain;
+use App\Livewire\Realm\NewMember;
+use App\Livewire\Realm\NewModerator;
+use App\Livewire\Realm\NewRealm;
 use App\Livewire\Tools\CompareEmailList;
 use App\Livewire\Tools\ImportUsersFromUniLdap;
-use App\Livewire\Tools\UsersNotInUniLdap;
+use App\Livewire\Tools\ToolsDashboard;
 use App\Livewire\Tools\UnusedRoles;
-use App\Livewire\Realm\NewAdmin;
-use App\Livewire\Group\ListGroups;
-use App\Livewire\Group\EditGroup;
-use App\Livewire\Group\NewGroup;
-use App\Livewire\Group\ListRolesInGroup;
-use App\Livewire\Group\AddRoleToGroup;
-use App\Livewire\Realm\ListDomains;
-use App\Livewire\Realm\NewDomain;
-use App\Livewire\Realm\EditRealm;
-use App\Livewire\Realm\NewModerator;
-use App\Livewire\Realm\NewMember;
-use App\Livewire\ListSuperUsers;
-use App\Livewire\AddSuperAdmins;
-use App\Livewire\Realm\NewRealm;
-use App\Http\Middleware\SuperAdminMiddleware;
+use App\Livewire\Tools\UsersNotInUniLdap;
 use Illuminate\Support\Facades\Route;
 
 // Set language based on the user's preferences
 $availableLanguages = ['de', 'en'];
 $lang = Request::getPreferredLanguage($availableLanguages);
-if ($lang) Config::set('app.locale', $lang);
+if ($lang) {
+    Config::set('app.locale', $lang);
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -57,15 +59,15 @@ if ($lang) Config::set('app.locale', $lang);
 |
 */
 
-Route::middleware(['auth', 'verified'])->group(function (): void{
+Route::middleware(['auth', 'verified'])->group(function (): void {
 
-    Route::get('/', static fn() => to_route('realms.pick'));
+    Route::get('/', static fn () => to_route('realms.pick'));
     Route::livewire('/profile/{username}', Profile::class)->name('profile');
     Route::livewire('/profile/{username}/memberships', Memberships::class)->name('profile.memberships');
     Route::livewire('/profile/{username}/picture', Picture::class)->name('profile.picture');
     Route::livewire('/pick-realm', ListRealms::class)->name('realms.pick');
 
-    Route::middleware(['communityMember'])->group(function (): void{
+    Route::middleware(['communityMember'])->group(function (): void {
         // member
         Route::livewire('{uid}/dashboard', CommunityDashboard::class)->name('realms.dashboard');
         Route::livewire('{uid}/members/', ListMembers::class)->name('realms.members');
@@ -79,7 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void{
     });
 
     // mods only
-    Route::middleware(['communityMod'])->group(function (): void{
+    Route::middleware(['communityMod'])->group(function (): void {
         // mod
         Route::livewire('{uid}/new-committee', NewCommittee::class)->name('committees.new');
         Route::livewire('{uid}/committees/{ou}/new-role', NewRole::class)->name('committees.roles.new');
@@ -96,7 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void{
         // end mod
     });
 
-    Route::middleware(['communityAdmin'])->group(function (): void{
+    Route::middleware(['communityAdmin'])->group(function (): void {
         // admin
         Route::livewire('{uid}/new-admin', NewAdmin::class)->name('realms.admins.new');
         Route::livewire('{uid}/groups', ListGroups::class)->name('realms.groups');
@@ -114,7 +116,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void{
     Route::livewire('{uid}/new-mod', NewModerator::class)->name('realms.mods.new')
         ->can('add_moderator', 'uid');
 
-    Route::middleware([SuperAdminMiddleware::class])->group(function (): void{
+    Route::middleware([SuperAdminMiddleware::class])->group(function (): void {
         Route::livewire('{uid}/new-member', NewMember::class)->name('realms.members.new');
         Route::livewire('superadmins', ListSuperUsers::class)->name('superadmins.list');
         Route::livewire('add-superadmins', AddSuperAdmins::class)->name('superadmins.add');
@@ -123,14 +125,13 @@ Route::middleware(['auth', 'verified'])->group(function (): void{
     // end auth verified
 });
 
-
 // guest routes
-Route::get('about', fn() => redirect(config('app.about_url')))->name('about');
+Route::get('about', fn () => redirect(config('app.about_url')))->name('about');
 
-Route::get('privacy', fn() => redirect(config('app.privacy_url')))->name('privacy');
+Route::get('privacy', fn () => redirect(config('app.privacy_url')))->name('privacy');
 
-Route::get('terms', fn() => redirect(config('app.terms_url')))->name('terms');
+Route::get('terms', fn () => redirect(config('app.terms_url')))->name('terms');
 
-Route::get('source-code', fn() => redirect("https://github.com/openadministration/stumv"))->name('source-code');
+Route::get('source-code', fn () => redirect('https://github.com/openadministration/stumv'))->name('source-code');
 
 require __DIR__.'/auth.php';

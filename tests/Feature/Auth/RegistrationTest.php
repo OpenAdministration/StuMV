@@ -36,7 +36,7 @@ class RegistrationTest extends TestCase
         $dom = $realm->domains()->first();
 
         $response = Livewire::test('register-user')
-            ->set('user.email', 'john.doe@' . $dom->name)
+            ->set('user.email', 'john.doe@'.$dom->name)
             ->set('user.username', 'j.doe')
             ->set('password', '123$abcD')
             ->set('password_confirmation', '123$abcD')
@@ -48,18 +48,20 @@ class RegistrationTest extends TestCase
         $response->assertRedirect(RouteServiceProvider::home());
     }
 
-    public function test_domain_is_not_for_registration():void {
+    public function test_domain_is_not_for_registration(): void
+    {
         $this->markTestSkipped('Stale pre-Flux registration test; the LDAP DomainRegistrationRule no longer checks a for_registration flag.');
 
         $realm = Realm::factory(1)->has(Domain::factory()->noRegistration())->create()->first();
         $dom = $realm->domains()->first();
 
         Livewire::test('register-user')
-            ->set('user.email', 'john.doe@' . $dom->name)->send()
+            ->set('user.email', 'john.doe@'.$dom->name)->send()
             ->assertHasErrors(['domain']);
     }
 
-    public function test_domain_does_not_exist_registration_not_possible() : void {
+    public function test_domain_does_not_exist_registration_not_possible(): void
+    {
         $this->markTestSkipped('Stale pre-Flux registration test; uses removed `user.email` field.');
 
         Livewire::test('register-user')
@@ -67,7 +69,7 @@ class RegistrationTest extends TestCase
             ->assertHasErrors(['domain']);
     }
 
-    public function test_unfinished_email_for_registration() : void
+    public function test_unfinished_email_for_registration(): void
     {
         $this->markTestSkipped('Stale pre-Flux registration test; uses removed `user.email` field.');
 
@@ -76,9 +78,9 @@ class RegistrationTest extends TestCase
             ->assertHasErrors(['user.email']);
     }
 
-    public function test_passwords_for_registration() : void
+    public function test_passwords_for_registration(): void
     {
-        $short = $this->faker->password(1,7); // to short
+        $short = $this->faker->password(1, 7); // to short
         $small = 'abcdefgh'; // no uppercase
         $cased = 'Abcdefgh'; // no number
         $number = 'Abcdefg1'; // no symbol

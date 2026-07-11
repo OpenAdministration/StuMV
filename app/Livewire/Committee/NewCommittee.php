@@ -13,17 +13,16 @@ use Livewire\Component;
 
 class NewCommittee extends Component
 {
-
     #[Locked]
     public string $realm_uid;
 
-    public string $parent_dn = "";
+    public string $parent_dn = '';
 
     #[Validate]
-    public string $ou = "";
+    public string $ou = '';
 
     #[Validate('required|min:3')]
-    public string $description = "";
+    public string $description = '';
 
     public array $roles = ['member'];
 
@@ -60,8 +59,8 @@ class NewCommittee extends Component
         return [
             'ou' => [
                 'regex:/^[a-z0-9-]*$/',
-                new UniqueCommittee($this->realm_uid)
-            ]
+                new UniqueCommittee($this->realm_uid),
+            ],
         ];
     }
 
@@ -81,7 +80,7 @@ class NewCommittee extends Component
                     continue;
                 }
                 $c = Committee::findByNameOrFail($this->realm_uid, $ou);
-                $pathDescription .= $c->getFirstAttribute('description') . ' → ';
+                $pathDescription .= $c->getFirstAttribute('description').' → ';
             }
             $pathDescription = rtrim($pathDescription, ' → ');
 
@@ -96,14 +95,15 @@ class NewCommittee extends Component
         ])->title(__('committees.new_title'));
     }
 
-    public function save(){
+    public function save()
+    {
 
         $this->validate();
 
         $dn = Committee::dnFrom($this->realm_uid, $this->ou, parentDn: $this->parent_dn);
         $c = new Committee([
             'ou' => $this->ou,
-            'description' => $this->description
+            'description' => $this->description,
         ]);
         $c->setDn($dn);
         $c->save();
@@ -121,7 +121,7 @@ class NewCommittee extends Component
 
         return response()->redirectToRoute('committees.roles', [
             'uid' => $this->realm_uid,
-            'ou' => $this->ou
+            'ou' => $this->ou,
         ]);
     }
 }

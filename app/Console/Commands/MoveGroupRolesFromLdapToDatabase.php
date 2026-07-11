@@ -41,7 +41,7 @@ class MoveGroupRolesFromLdapToDatabase extends Command
                 ->get();
 
             foreach ($groups as $group) {
-                $this->comment("> " . $group->getDn());
+                $this->comment('> '.$group->getDn());
 
                 // get roles
                 $roles = $group->members()->get();

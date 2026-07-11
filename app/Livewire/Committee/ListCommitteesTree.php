@@ -18,6 +18,7 @@ class ListCommitteesTree extends Component
     public string $search = '';
 
     public string $realm_uid;
+
     public bool $ready = false;
 
     public function mount(Community $uid): void
@@ -51,7 +52,7 @@ class ListCommitteesTree extends Component
         $search = trim($this->search);
         if ($search !== '') {
             $search = mb_strtolower($search);
-            $committees = $committees->filter(fn(Committee $committee): bool => $this->committeeMatchesSearch($committee, $search))->values();
+            $committees = $committees->filter(fn (Committee $committee): bool => $this->committeeMatchesSearch($committee, $search))->values();
         }
 
         return view('livewire.committee.list-committees-tree', [

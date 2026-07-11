@@ -74,17 +74,16 @@ return [
                 'model' => App\Models\User::class,
                 'sync_passwords' => false,
                 'sync_existing' => [
-                    'email' => 'mail'
+                    'email' => 'mail',
                 ],
                 'sync_attributes' => [
                     'full_name' => 'cn',
                     'email' => 'mail',
                     'username' => 'uid',
-                    'password'  => 'userPassword'
+                    'password' => 'userPassword',
                 ],
             ],
         ],
-
 
         // 'users' => [
         //     'driver' => 'database',

@@ -52,20 +52,20 @@ class LoginRequest extends FormRequest
         ];
 
         $validator = Validator::make(['email' => $this->get('uid')], [
-            'email' => ['required', 'email']
+            'email' => ['required', 'email'],
         ]);
-        if($validator->passes()){
+        if ($validator->passes()) {
             $credentials['mail'] = $this->get('uid');
-        }else{
+        } else {
             $credentials['uid'] = $this->get('uid');
         }
         try {
             $auth = Auth::attempt($credentials, $this->boolean('remember'));
-        } catch (LdapRecordException){
+        } catch (LdapRecordException) {
             // this should not be needed, but it is for bad credentials right now -> TLS Error :/
             $auth = false;
         }
-        if (!$auth) {
+        if (! $auth) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

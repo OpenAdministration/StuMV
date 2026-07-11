@@ -35,14 +35,14 @@ class ImportUserFromLegacy extends Command
 
         $realms = [];
 
-        foreach ($users as $user){
-            if(!isset($realms[$user->realm_uid])){
+        foreach ($users as $user) {
+            if (! isset($realms[$user->realm_uid])) {
                 $realms[$user->realm_uid] = Community::findByUid($user->realm_uid);
             }
-            $this->comment('Importing User ' . $user->username . ' to Realm ' . $user->realm_uid . ' ...');
-            $name = explode(" ", (string) $user->fullName);
+            $this->comment('Importing User '.$user->username.' to Realm '.$user->realm_uid.' ...');
+            $name = explode(' ', (string) $user->fullName);
             $ldapUser = User::findByUsername($user->username);
-            if(!$ldapUser?->exists()){
+            if (! $ldapUser?->exists()) {
                 $ldapUser = User::make([
                     'uid' => $user->username,
                     'sn' => $name[1] ?? $user->fullName,
@@ -51,10 +51,10 @@ class ImportUserFromLegacy extends Command
                     'mail' => $user->email,
                     'userPassword' => $user->authKey, // something more or less random
                 ]);
-                $ldapUser->setDn('uid=' . $user->username . ',ou=People,dc=open-administration,dc=de');
+                $ldapUser->setDn('uid='.$user->username.',ou=People,dc=open-administration,dc=de');
                 $ldapUser->save();
             }
-            if(!$realms[$user->realm_uid]->membersGroup()->members()->exists($ldapUser)){
+            if (! $realms[$user->realm_uid]->membersGroup()->members()->exists($ldapUser)) {
                 $realms[$user->realm_uid]->membersGroup()->members()->attach($ldapUser);
             }
         }

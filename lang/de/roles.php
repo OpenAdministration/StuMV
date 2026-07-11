@@ -1,6 +1,5 @@
 <?php
 
-
 return [
     'members' => 'Mitglieder',
     'members.search' => 'Durchsuche Mitglieder',

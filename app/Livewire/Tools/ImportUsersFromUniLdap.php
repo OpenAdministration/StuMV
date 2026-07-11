@@ -21,18 +21,19 @@ class ImportUsersFromUniLdap extends Component
     public bool $unildapDataExists = false;
 
     public bool $searchCompleted = false;
+
     public bool $userNotFound = false;
 
-    public string $email = "";
+    public string $email = '';
 
     #[Validate('required|string|min:3|max:255|regex:/^[0-9a-zA-Z_\-\.]*$/')]
-    public string $username = "";
+    public string $username = '';
 
     #[Validate('required|string|max:255')]
-    public string $firstname = "";
+    public string $firstname = '';
 
     #[Validate('required|string|max:255')]
-    public string $lastname = "";
+    public string $lastname = '';
 
     protected function rules()
     {
@@ -40,7 +41,7 @@ class ImportUsersFromUniLdap extends Component
             'email' => [
                 'required',
                 'email',
-                new UniqueEmail(),
+                new UniqueEmail,
             ],
         ];
     }
@@ -94,11 +95,11 @@ class ImportUsersFromUniLdap extends Component
         // Add user to LDAP
         $user = new User([
             'uid' => $this->username,
-            'cn' => trim($this->firstname  . ' ' . $this->lastname),
-            'sn'  => $this->lastname,
+            'cn' => trim($this->firstname.' '.$this->lastname),
+            'sn' => $this->lastname,
             'givenName' => $this->firstname,
             'mail' => $this->email,
-            'userPassword'  => "{ARGON2}" . password_hash(Str::uuid(), PASSWORD_ARGON2ID),
+            'userPassword' => '{ARGON2}'.password_hash(Str::uuid(), PASSWORD_ARGON2ID),
             // usually ldap SHOULD hash it itself - did not work
         ]);
         $user->setDn("uid=$this->username,ou=People,{base}");
@@ -108,7 +109,7 @@ class ImportUsersFromUniLdap extends Component
 
             \App\Models\User::create([
                 'username' => $this->username,
-                'full_name' => trim($this->firstname  . ' ' . $this->lastname),
+                'full_name' => trim($this->firstname.' '.$this->lastname),
                 'email' => $this->email,
                 'email_verified_at' => now(),
                 'password' => Hash::make(Str::uuid()),
@@ -118,10 +119,10 @@ class ImportUsersFromUniLdap extends Component
             Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
 
             $this->searchCompleted = false;
-            $this->email = "";
-            $this->username = "";
-            $this->firstname = "";
-            $this->lastname = "";
+            $this->email = '';
+            $this->username = '';
+            $this->firstname = '';
+            $this->lastname = '';
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
         }

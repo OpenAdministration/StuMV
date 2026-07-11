@@ -15,13 +15,13 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListRoles extends Component {
-
+class ListRoles extends Component
+{
     use WithPagination;
 
     #[Locked]
     public string $uid;
-    
+
     #[Locked]
     public string $ou;
 
@@ -35,15 +35,17 @@ class ListRoles extends Component {
     public string $sortDirection = 'asc';
 
     public string $deleteRoleCn;
+
     public string $deleteRoleName;
 
     public bool $showOnlyActive = true;
+
     public bool $ready = false;
 
     public function mount(Community $uid, $ou)
     {
-       $this->uid = $uid->getFirstAttribute('ou');
-       $this->ou = $ou;
+        $this->uid = $uid->getFirstAttribute('ou');
+        $this->ou = $ou;
     }
 
     public function loadRoles(): void
@@ -130,7 +132,7 @@ class ListRoles extends Component {
         foreach ($usernames as $user) {
             $members[] = User::findOrFailByUsername($user);
         }
-        
+
         return $members;
     }
 
@@ -146,7 +148,7 @@ class ListRoles extends Component {
         foreach ($usernames as $user) {
             $members[] = User::findOrFailByUsername($user)->getFirstAttribute('cn');
         }
-        
+
         if (count($members) === 4) {
             // replace last one with dots
             array_pop($members);
@@ -163,7 +165,7 @@ class ListRoles extends Component {
             ->distinct()
             ->limit(1)
             ->pluck('username');
-        
+
         if (count($members) > 0) {
             return true;
         }
@@ -172,12 +174,14 @@ class ListRoles extends Component {
     }
 
     #[Computed]
-    public function committee() : Committee {
+    public function committee(): Committee
+    {
         return Committee::findByName($this->uid, $this->ou);
     }
 
     #[Computed]
-    public function community() : Community {
+    public function community(): Community
+    {
         return Community::findByUid($this->uid);
     }
 
@@ -207,9 +211,10 @@ class ListRoles extends Component {
         $role->delete();
 
         Flux::toast(variant: 'success', text: __('Role was deleted'));
+
         return to_route('committees.roles', [
             'uid' => $this->uid,
-            'ou' => $this->ou
+            'ou' => $this->ou,
         ]);
     }
 

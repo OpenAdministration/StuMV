@@ -32,9 +32,11 @@ class ListRoleMembers extends Component
     public string $cn;
 
     public string $deleteUsername;
+
     public int $deleteId;
 
     public bool $showOnlyActive = true;
+
     public bool $ready = false;
 
     public function mount(Community $uid, string $ou, string $cn)
@@ -66,15 +68,15 @@ class ListRoleMembers extends Component
         }
 
         $membersQuery = $role->dbMemberships();
-        
+
         if ($this->showOnlyActive) {
             $membersQuery->active(today());
         }
 
-        if ($this->search !== "") {
+        if ($this->search !== '') {
             $membersQuery->where('cn', $this->search);
         }
-        
+
         $members = $membersQuery->get();
 
         $usernames = $members->pluck('username')->unique()->filter()->all();
@@ -113,6 +115,7 @@ class ListRoleMembers extends Component
         $this->close();
 
         Flux::toast(variant: 'success', text: __('roles.message_delete_member_success'));
+
         return to_route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }
 

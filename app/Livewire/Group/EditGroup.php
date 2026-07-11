@@ -46,9 +46,11 @@ class EditGroup extends Component
             ]);
 
             Flux::toast(variant: 'success', text: __('groups.edit_success'));
+
             return to_route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->cn]);
         } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
+
             return false;
         }
     }

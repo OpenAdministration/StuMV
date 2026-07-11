@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Group;
 
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use Flux\Flux;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Rule;
@@ -15,15 +15,16 @@ use Livewire\Component;
 class NewGroup extends Component
 {
     #[Rule('required|string|min:2|alpha_dash')]
-    public string $cn = "";
+    public string $cn = '';
 
     #[Rule('required|string|min:2|alpha_dash')]
-    public string $realm_uid = "";
+    public string $realm_uid = '';
 
     #[Rule('required|min:6')]
-    public string $name = "";
+    public string $name = '';
 
-    public function mount(Community $uid){
+    public function mount(Community $uid)
+    {
         $this->realm_uid = $uid->getShortCode();
     }
 
@@ -45,12 +46,12 @@ class NewGroup extends Component
             $group->save();
 
             Flux::toast(variant: 'success', text: __('Added new Group'));
+
             return to_route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn]);
         } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
+
             return false;
         }
     }
-
-
 }

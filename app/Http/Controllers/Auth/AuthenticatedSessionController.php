@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Auth\Events\Login;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Redirector;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedSessionController extends Controller
@@ -21,16 +21,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
-        if(!Auth::guest()){
+        if (! Auth::guest()) {
             return redirect(RouteServiceProvider::home());
         }
+
         return view(Login::class);
     }
 
     /**
      * Handle an incoming authentication request.
      *
-     * @param LoginRequest $request
      * @return RedirectResponse
      */
     public function store(LoginRequest $request)
@@ -45,7 +45,6 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      *
-     * @param Request $request
      * @return RedirectResponse
      */
     public function destroy(Request $request)
@@ -62,9 +61,10 @@ class AuthenticatedSessionController extends Controller
     public function confirmLogout(Request $request)
     {
         $user = Auth::user();
+
         return view('auth.logout-confirm', [
             'redirect_uri' => $request->input('redirect_uri', '/'),
-            'shown_username' => "$user?->full_name ($user?->username)"
+            'shown_username' => "$user?->full_name ($user?->username)",
         ]);
     }
 }

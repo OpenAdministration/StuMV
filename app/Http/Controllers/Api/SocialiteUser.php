@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Ldap\User;
 use App\Http\Controllers\Controller;
+use App\Ldap\User;
 use Illuminate\Http\Request;
 
 class SocialiteUser extends Controller
@@ -12,6 +12,7 @@ class SocialiteUser extends Controller
     {
         $user = $request->user();
         $ldapUser = User::findOrFailByUsername($user->username);
+
         return response()->json([
             'id' => $user->uid, // not ldap uid, but uuid
             'nickname' => $user->username, // socialite expected claim

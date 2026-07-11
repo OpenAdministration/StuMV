@@ -25,5 +25,5 @@ return [
     'verification_mail_subject' => 'E-Mail-Adresse bestätigen',
     'verification_mail_line_between_greeting_and_action' => 'Bitte klicke den Button, um deine E-Mail-Adresse zu bestätigen und deinen Account im StuMV freizuschalten.',
     'verification_mail_button_action' => 'E-Mail-Adresse bestätigen',
-    'verification_mail_line_after_action' => 'Falls du im StuMV keinen Account erstellt hast, musst du nichts weiter tun.'
+    'verification_mail_line_after_action' => 'Falls du im StuMV keinen Account erstellt hast, musst du nichts weiter tun.',
 ];

@@ -11,8 +11,8 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListRolesInGroup extends Component {
-
+class ListRolesInGroup extends Component
+{
     use WithPagination;
 
     #[Url]
@@ -25,23 +25,28 @@ class ListRolesInGroup extends Component {
     public string $sortDirection = 'asc';
 
     public string $group_dn;
+
     public string $group_cn;
+
     public string $realm_uid;
 
-    public string $deleteRoleDN = "";
+    public string $deleteRoleDN = '';
+
     public array $deleteRoleName = [];
 
-    public function mount(Community $uid, $cn) {
+    public function mount(Community $uid, $cn)
+    {
         $this->realm_uid = $uid->getFirstAttribute('ou');
         $this->group_cn = $cn;
         $this->group_dn = Group::dnFrom($this->realm_uid, $cn);
     }
 
-    public function sortBy($field){
-        if($this->sortField === $field){
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -52,7 +57,8 @@ class ListRolesInGroup extends Component {
         $this->resetPage();
     }
 
-    public function render() {
+    public function render()
+    {
         $roleDns = GroupMembership::query()
             ->where('group_dn', $this->group_dn)
             ->distinct()
@@ -80,7 +86,7 @@ class ListRolesInGroup extends Component {
         $committee = $role->committee();
 
         $this->deleteRoleDN = $role_dn;
-        $this->deleteRoleName = [ $role->getFirstAttribute('cn') ];
+        $this->deleteRoleName = [$role->getFirstAttribute('cn')];
 
         Flux::modal('delete')->show();
     }

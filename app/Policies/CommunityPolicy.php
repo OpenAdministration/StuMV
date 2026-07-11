@@ -2,36 +2,37 @@
 
 namespace App\Policies;
 
-
 use App\Ldap\Community;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 class CommunityPolicy
 {
-
-    public function create(User $user){
+    public function create(User $user)
+    {
         return $user->can('superadmin', User::class);
     }
 
-
-    public function picked() : bool
+    public function picked(): bool
     {
         return Route::current()?->hasParameter('uid');
-        //return session()->exists('realm_uid');
+        // return session()->exists('realm_uid');
     }
 
-    public function enter(User $user, Community $community) : bool{
+    public function enter(User $user, Community $community): bool
+    {
         return $user->can('superadmin', User::class)
             || $this->member($user, $community);
     }
 
-    public function edit(User $user, Community $community) : bool{
+    public function edit(User $user, Community $community): bool
+    {
         return $user->can('superadmin', User::class)
             || $this->admin($user, $community);
     }
 
-    public function delete(User $user, Community $community) : bool{
+    public function delete(User $user, Community $community): bool
+    {
         return $user->can('superadmin', User::class);
     }
 
@@ -85,5 +86,4 @@ class CommunityPolicy
         return $user->can('superadmin', User::class)
             || $this->admin($user, $community);
     }
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 return [
     'members' => 'Members',
     'no_members' => 'None',

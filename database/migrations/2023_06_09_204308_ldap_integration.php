@@ -6,18 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
     private static array $items = ['user', 'domain'];
 
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up() : void
+    public function up(): void
     {
-        foreach (self::$items as $item){
-            Schema::table($item, static function (Blueprint $table){
+        foreach (self::$items as $item) {
+            Schema::table($item, static function (Blueprint $table) {
                 $table->string('uid')->unique()->nullable();
                 $table->string('domain')->nullable();
             });
@@ -26,13 +23,11 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down() : void
+    public function down(): void
     {
-        foreach (self::$items as $item){
-            Schema::table($item, static function(Blueprint $table){
+        foreach (self::$items as $item) {
+            Schema::table($item, static function (Blueprint $table) {
                 $table->dropColumn('uid');
                 $table->dropColumn('domain');
             });

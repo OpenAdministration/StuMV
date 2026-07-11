@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Facades\Date;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 use LdapRecord\Container;
 
 class LdapSyncGroups extends Command
@@ -45,21 +45,21 @@ class LdapSyncGroups extends Command
         $realms = Community::query()
             ->setDn(Community::$rootDn)->search()
             ->list()
-            ->get();        
+            ->get();
 
         foreach ($realms as $realm) {
-            $this->comment("> " . $realm->getFirstAttribute('ou'));
-            
+            $this->comment('> '.$realm->getFirstAttribute('ou'));
+
             $groups = Group::query()->in(Group::dnRoot($realm->getFirstAttribute('ou')))->get();
             foreach ($groups as $group) {
-                $this->comment("  |-> " . $group->getDn());
+                $this->comment('  |-> '.$group->getDn());
 
                 $currentMembers = $group->getAttribute('uniqueMember');
                 $newMembers = [];
                 $roles = GroupMembership::where('group_dn', $group->getDn())->get();
                 foreach ($roles as $role) {
                     $roleCn = str_replace('cn=', '', substr((string) $role->role_dn, 0, strpos((string) $role->role_dn, ',')));
-                    $committeeDn = strstr((string) $role->role_dn, "ou=");
+                    $committeeDn = strstr((string) $role->role_dn, 'ou=');
                     $activeMemberships = RoleMembership::active($date)
                         ->where('committee_dn', $committeeDn)
                         ->where('role_cn', $roleCn)
@@ -74,7 +74,7 @@ class LdapSyncGroups extends Command
                 foreach ($membersToRemove as $memberToRemove) {
                     if ($memberToRemove !== '') {
                         $this->comment("  |  |-> Remove: $memberToRemove");
-                        $query->remove($group->getDn(), ['uniqueMember' => [ $memberToRemove ]]);
+                        $query->remove($group->getDn(), ['uniqueMember' => [$memberToRemove]]);
                     }
                 }
 

@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $realm_uid
- * @property integer $parent_committee_id
+ * @property int $parent_committee_id
  * @property string $name
  * @property Committee $parentCommittee
  * @property Realm $realm
@@ -41,7 +41,7 @@ class Committee extends Model
         return $this->belongsTo(self::class, 'parent_committee_id');
     }
 
-    public function childCommittee() : Relation
+    public function childCommittee(): Relation
     {
         return $this->hasMany(self::class, 'parent_committee_id', 'id');
     }
@@ -49,7 +49,7 @@ class Committee extends Model
     /**
      * @return BelongsTo
      */
-    public function realm() : Relation
+    public function realm(): Relation
     {
         return $this->belongsTo(Realm::class);
     }

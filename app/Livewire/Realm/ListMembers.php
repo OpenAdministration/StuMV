@@ -2,28 +2,32 @@
 
 namespace App\Livewire\Realm;
 
-use App\Livewire\Profile\Memberships;
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Livewire\Profile\Memberships;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Flux\Flux;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListMembers extends Component {
-
+class ListMembers extends Component
+{
     use WithPagination;
 
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'full_name';
+
     #[Url]
     public string $sortDirection = 'asc';
 
     public string $deleteMemberName = '';
+
     public string $deleteMemberUsername = '';
+
     public bool $ready = false;
 
     public string $community_name;
@@ -71,8 +75,8 @@ class ListMembers extends Component {
         $membersQuery = \App\Models\User::where('realm', $this->community_name);
 
         if ($this->search != '') {
-            $membersQuery->where('full_name', 'like', '%' . $this->search . '%');
-            $membersQuery->orWhere('username', 'like', '%' . $this->search . '%');
+            $membersQuery->where('full_name', 'like', '%'.$this->search.'%');
+            $membersQuery->orWhere('username', 'like', '%'.$this->search.'%');
         }
 
         $members = $membersQuery->paginate(10);
@@ -98,7 +102,7 @@ class ListMembers extends Component {
         $user = User::findOrFailByUsername($uid);
         $this->authorize('remove_member', $community);
         $userBelongsToRealm = $community->membersGroup()->members()->whereEquals('uid', $uid)->get();
-        if(!$userBelongsToRealm) {
+        if (! $userBelongsToRealm) {
             // only allow deletes from the same realm
             return;
         }
@@ -135,6 +139,6 @@ class ListMembers extends Component {
 
         return response()->streamDownload(function () use ($pdf): void {
             echo $pdf->stream();
-        }, 'memberships-' . $username . '.pdf');;
+        }, 'memberships-'.$username.'.pdf');
     }
 }

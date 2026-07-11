@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Realm;
 
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use Flux\Flux;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -14,11 +14,10 @@ use Livewire\Component;
 class NewRealm extends Component
 {
     #[Rule('required|alpha_dash:ascii')]
-    public string $uid = "";
+    public string $uid = '';
 
     #[Rule('required|min:6|ascii')]
-    public string $name = "";
-
+    public string $name = '';
 
     public function render(): Factory|View|Application
     {
@@ -38,9 +37,11 @@ class NewRealm extends Component
             $realm->generateSkeleton();
 
             Flux::toast(variant: 'success', text: 'Neuer Realm angelegt');
+
             return to_route('realms.pick');
         } catch (LdapRecordException $exception) {
             $this->addError('uid', $exception->getMessage());
+
             return false;
         }
     }

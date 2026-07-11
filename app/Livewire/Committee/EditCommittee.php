@@ -12,18 +12,17 @@ use Livewire\Component;
 
 class EditCommittee extends Component
 {
-
     #[Locked]
     public string $realm_uid;
 
     #[Locked]
-    public string $ou = "";
+    public string $ou = '';
 
     #[Locked]
-    public string $parent_ou = "";
+    public string $parent_ou = '';
 
     #[Validate('required|min:3')]
-    public string $description = "";
+    public string $description = '';
 
     public function mount(Community $uid, string $ou)
     {
@@ -32,8 +31,8 @@ class EditCommittee extends Component
         $c = Committee::findByName($this->realm_uid, $ou);
         $this->description = $c->getFirstAttribute('description');
         $parentRdn = DistinguishedName::explode($c->getParentDn())[0];
-        $this->parent_ou = explode("=",(string) $parentRdn, 2)[1];
-        if($this->parent_ou === 'Committees'){
+        $this->parent_ou = explode('=', (string) $parentRdn, 2)[1];
+        if ($this->parent_ou === 'Committees') {
             $this->parent_ou = '';
         }
     }
@@ -42,8 +41,8 @@ class EditCommittee extends Component
     {
         $parents = Committee::fromCommunity($this->realm_uid)
             ->whereNotEquals('ou', 'Committees') // remove parent Folder from Results;
-            ->get()
-        ;
+            ->get();
+
         return view('livewire.committee.edit-committee', [
             'select_parents' => $parents,
         ])->title(__('committees.edit_title', ['committee' => $this->ou]));
@@ -58,6 +57,7 @@ class EditCommittee extends Component
         $c->save();
 
         Flux::toast(variant: 'success', text: __('Saved'));
+
         return response()->redirectToRoute('committees.list', ['uid' => $this->realm_uid]);
     }
 }

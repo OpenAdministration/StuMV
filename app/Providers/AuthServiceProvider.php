@@ -52,7 +52,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         Passport::useClientModel(PassportClient::class);
 
-        VerifyEmail::toMailUsing(static fn(object $notifiable, string $url) => (new MailMessage)
+        VerifyEmail::toMailUsing(static fn (object $notifiable, string $url) => (new MailMessage)
             ->subject(Lang::get('auth.verification_mail_subject'))
             ->line(Lang::get('auth.verification_mail_line_between_greeting_and_action'))
             ->action(Lang::get('auth.verification_mail_button_action'), $url)
@@ -63,6 +63,7 @@ class AuthServiceProvider extends ServiceProvider
                 'token' => $token,
                 'mail' => $notifiable->getEmailForPasswordReset(),
             ], false));
+
             return (new MailMessage)
                 ->subject(Lang::get('passwords.reset_mail_subject'))
                 ->line(Lang::get('passwords.reset_mail_line_between_greeting_and_action'))

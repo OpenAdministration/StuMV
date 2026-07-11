@@ -5,11 +5,10 @@ namespace App\Livewire\Group;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Group;
+use App\Models\GroupMembership;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-
-use App\Models\GroupMembership;
 
 class AddRoleToGroup extends Component
 {
@@ -20,6 +19,7 @@ class AddRoleToGroup extends Component
     public string $group_cn;
 
     public string $selected_committee_dn;
+
     public string $selected_role_dn;
 
     public function mount(Community $uid, $cn)
@@ -32,10 +32,11 @@ class AddRoleToGroup extends Component
     {
         $committees = Committee::fromCommunity($this->uid)->recursive()->get();
         $roles = collect();
-        if(!empty($this->selected_committee_dn)){
+        if (! empty($this->selected_committee_dn)) {
             $committee = Committee::findOrFail($this->selected_committee_dn);
             $roles = $committee->roles()->get();
         }
+
         return view('livewire.group.add-role-to-group', [
             'committees' => $committees,
             'roles' => $roles,
@@ -51,6 +52,7 @@ class AddRoleToGroup extends Component
         ]);
 
         Flux::toast(variant: 'success', text: __('groups.success_role_add'));
+
         return to_route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->group_cn]);
     }
 }

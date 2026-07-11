@@ -37,7 +37,8 @@ class AddUserToRole extends Component
     #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $uid, $ou, $cn){
+    public function mount(Community $uid, $ou, $cn)
+    {
         $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
@@ -50,8 +51,8 @@ class AddUserToRole extends Component
         return [
             'usernames.*' => [
                 'required',
-                new UserIsMember($this->uid)
-            ]
+                new UserIsMember($this->uid),
+            ],
         ];
     }
 
@@ -76,9 +77,9 @@ class AddUserToRole extends Component
                 'committee_dn' => $committee->getDn(),
                 'username' => $username,
                 'from' => $this->start_date,
-                'until' => !empty($this->end_date) ? $this->end_date : null,
-                'decided' => !empty($this->decision_date) ? $this->decision_date : null,
-                'comment' => !empty($this->comment) ? $this->comment : null,
+                'until' => ! empty($this->end_date) ? $this->end_date : null,
+                'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
+                'comment' => ! empty($this->comment) ? $this->comment : null,
             ]);
             Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $username, 'role' => $this->cn]));
         }

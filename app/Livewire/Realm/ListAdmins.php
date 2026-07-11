@@ -11,8 +11,8 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListAdmins extends Component {
-
+class ListAdmins extends Component
+{
     use WithPagination;
 
     #[Url]
@@ -28,7 +28,9 @@ class ListAdmins extends Component {
     public string $community_name;
 
     public string $deleteAdminName = '';
+
     public string $deleteAdminUsername = '';
+
     public bool $ready = false;
 
     public function mount(Community $uid)
@@ -43,10 +45,10 @@ class ListAdmins extends Component {
 
     public function sortBy($field): void
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -75,11 +77,12 @@ class ListAdmins extends Component {
                 ]
             )->title(__('realms.admins_heading', [
                 'name' => $community->description[0],
-                'uid' => $community->ou[0]
+                'uid' => $community->ou[0],
             ]));
         }
 
         $admins = $community?->adminsGroup()->members()->get();
+
         return view(
             'livewire.realm.list-admins', [
                 'community' => $community,
@@ -87,7 +90,7 @@ class ListAdmins extends Component {
             ]
         )->title(__('realms.admins_heading', [
             'name' => $community->description[0],
-            'uid' => $community->ou[0]
+            'uid' => $community->ou[0],
         ]));
     }
 
@@ -97,9 +100,10 @@ class ListAdmins extends Component {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
         $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
-        if(!$userIsAdmin) {
+        if (! $userIsAdmin) {
             // check if the user to delete is an admin in this realm
             unset($this->deleteAdminUsername, $this->deleteAdminName);
+
             return;
         }
         $this->deleteAdminUsername = $username;

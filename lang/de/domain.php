@@ -16,7 +16,6 @@ return [
     'domain_unknown_for_registration' => 'Diese Domain ist nicht freigeschalten. Bitte nutze die E-Mail Adresse deiner Hochschule.',
     'delete_title' => 'Möchtest du die Domain :name wirklich löschen?',
     'delete_warning' => 'Wenn du die Domain löschst, können u.a. neue Nutzer:innen mit einer E-Mail-Adresse dieser Domain nicht automatisch deiner Studierendenschaft zugeordnet werden.',
-    'nothing_found' => 'Keine Domains gefunden'
-
+    'nothing_found' => 'Keine Domains gefunden',
 
 ];

@@ -13,8 +13,8 @@ use Livewire\WithPagination;
 
 class ListRealms extends Component
 {
-    use WithPagination;
     use AuthorizesRequests;
+    use WithPagination;
 
     #[Url]
     public string $search = '';
@@ -29,10 +29,10 @@ class ListRealms extends Component
 
     public function sortBy($field): void
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -55,10 +55,11 @@ class ListRealms extends Component
             $canEnter = true;
         } else {
             $memberships = $ldapUser->memberOf;
-            $communityMemberships = \Arr::where($memberships, static fn(string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,' . Community::rootDn() . '$/', $value));
+            $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.Community::rootDn().'$/', $value));
 
             $canEnter = \Arr::mapWithKeys($communityMemberships, static function (string $value) {
-                $uid = str($value)->remove(',' . Community::rootDn(), false)->remove('cn=members,ou=')->value();
+                $uid = str($value)->remove(','.Community::rootDn(), false)->remove('cn=members,ou=')->value();
+
                 return [$uid => true];
             });
 
@@ -97,7 +98,7 @@ class ListRealms extends Component
     }
 
     /**
-     * @param $realm_uid string the selected realm_uid
+     * @param  $realm_uid  string the selected realm_uid
      * @return void
      */
     public function enter(string $realm_uid)
@@ -106,5 +107,4 @@ class ListRealms extends Component
         $this->authorize('enter', $c);
         $this->redirectRoute('realms.dashboard', ['uid' => $realm_uid]);
     }
-
 }

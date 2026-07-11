@@ -11,11 +11,12 @@ class AppLayout extends Component
 {
     public array $routeParams;
 
-    public function __construct(){
+    public function __construct()
+    {
         // Maybe there is a more Laravel way to make this work ...
         $params = Route::current()?->parameters();
-        foreach ($params as $name => $entry){
-            if($entry instanceof Entry){
+        foreach ($params as $name => $entry) {
+            if ($entry instanceof Entry) {
                 $params[$name] = $entry->getFirstAttribute($entry->getRouteKeyName());
             }
         }
@@ -24,8 +25,6 @@ class AppLayout extends Component
 
     /**
      * Get the view / contents that represents the component.
-     *
-     * @return View
      */
     public function render(): View
     {
@@ -34,7 +33,4 @@ class AppLayout extends Component
             'routeParams' => $this->routeParams,
         ]);
     }
-
-
-
 }

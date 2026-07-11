@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Profile;
 
-use App\Ldap\User;
 use App\Ldap\Role;
+use App\Ldap\User;
 use App\Models\RoleMembership;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Livewire\Attributes\Locked;
@@ -36,7 +36,7 @@ class Memberships extends Component
         $roleMemberships = $query->get();
         $memberships = [];
         foreach ($roleMemberships as $row) {
-            $role = Role::findOrFail('cn=' . $row->role_cn . ',' . $row->committee_dn);
+            $role = Role::findOrFail('cn='.$row->role_cn.','.$row->committee_dn);
             $memberships[] = [
                 'role' => $role,
                 'from' => $row->from,
@@ -45,6 +45,7 @@ class Memberships extends Component
                 'comment' => $row->comment,
             ];
         }
+
         return $memberships;
     }
 
@@ -74,6 +75,6 @@ class Memberships extends Component
 
         return response()->streamDownload(function () use ($pdf): void {
             echo $pdf->stream();
-        }, strtolower(trans('profile.memberships')) . '_' . $this->currentUsername . '.pdf');
+        }, strtolower(trans('profile.memberships')).'_'.$this->currentUsername.'.pdf');
     }
 }

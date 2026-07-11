@@ -12,12 +12,16 @@ use Livewire\Component;
 class CommitteeTreeItem extends Component
 {
     public string $realm_uid;
+
     public string $dn;
+
     public bool $unfolded = false;
+
     public bool $isLastItem = false;
+
     public string $search = '';
 
-    public string $deleteConfirmText = "";
+    public string $deleteConfirmText = '';
 
     public function render()
     {
@@ -29,7 +33,7 @@ class CommitteeTreeItem extends Component
         $showNode = $search === '' || $this->committeeMatchesSearch($committee, $search);
 
         if ($search !== '') {
-            $children = $children->filter(fn(Committee $child): bool => $this->committeeMatchesSearch($child, $search))->values();
+            $children = $children->filter(fn (Committee $child): bool => $this->committeeMatchesSearch($child, $search))->values();
         }
 
         return view('livewire.committee.committee-tree-item', [
@@ -65,7 +69,7 @@ class CommitteeTreeItem extends Component
 
     public function toggleChildren(): void
     {
-        $this->unfolded = !$this->unfolded;
+        $this->unfolded = ! $this->unfolded;
     }
 
     public function deleteCommittee(string $dn, string $cn)
@@ -75,8 +79,9 @@ class CommitteeTreeItem extends Component
 
         $this->authorize('delete', [$c, $community]);
 
-        if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')){
-            $this->addError('deleteConfirmText', __('Does not equal :text', [ 'text' => $c->getFirstAttribute('ou') ]));
+        if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')) {
+            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $c->getFirstAttribute('ou')]));
+
             return;
         }
 
@@ -106,7 +111,8 @@ class CommitteeTreeItem extends Component
         // Delete the committee and its descendants recursively
         $c->delete(recursive: true);
 
-        Flux::modal('delete-committee-' . $cn)->close();
+        Flux::modal('delete-committee-'.$cn)->close();
+
         return to_route('committees.list', [
             'uid' => $this->realm_uid,
         ]);

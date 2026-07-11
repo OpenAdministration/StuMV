@@ -33,7 +33,7 @@ class DemoUsersSeeder extends Seeder
             User::firstOrNew(['username' => $u['username']])
                 ->forceFill([
                     'full_name' => $u['full_name'],
-                    'email' => $u['username'] . '@demo.stumv.de',
+                    'email' => $u['username'].'@demo.stumv.de',
                     'email_verified_at' => now(),
                     'password' => Hash::make('Demo-password1'),
                     'realm' => 'demo',

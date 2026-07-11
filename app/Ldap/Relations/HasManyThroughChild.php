@@ -7,33 +7,34 @@ use LdapRecord\Models\Model;
 use LdapRecord\Models\Relations\OneToMany;
 use LdapRecord\Query\Model\Builder;
 
-class HasManyThroughChild extends OneToMany {
-
+class HasManyThroughChild extends OneToMany
+{
     protected Model $child;
 
-    public function getChildModel() : Model{
-        if(!isset($this->child)){
+    public function getChildModel(): Model
+    {
+        if (! isset($this->child)) {
 
         }
+
         return $this->child;
     }
 
     /**
-     * @param Builder $query
-     * @param Model $parent the parent Model the child is searched for
-     * @param array|string $related the Classname where results should be in
-     * @param string $childDnPrefix the DN Prefix for the parent DN
-     * @param string $relationKey the key attribute at the child model
-     * @param string $foreignKey the foreign key attribute at the related class
+     * @param  Model  $parent  the parent Model the child is searched for
+     * @param  array|string  $related  the Classname where results should be in
+     * @param  string  $childDnPrefix  the DN Prefix for the parent DN
+     * @param  string  $relationKey  the key attribute at the child model
+     * @param  string  $foreignKey  the foreign key attribute at the related class
      */
-    public function __construct(Builder $query, Model $parent, array|string $related, protected string $childDnPrefix, string $relationKey, string $foreignKey){
+    public function __construct(Builder $query, Model $parent, array|string $related, protected string $childDnPrefix, string $relationKey, string $foreignKey)
+    {
         parent::__construct($query, $parent, $related, $relationKey, $foreignKey, null);
 
-        $dn = $this->childDnPrefix . ',' . $this->parent->getDn();
+        $dn = $this->childDnPrefix.','.$this->parent->getDn();
         $childModel = $this->getQuery()->setDn($dn)->first();
         $this->using($childModel, $relationKey);
     }
-
 
     public function getRelationResults(): Collection
     {
@@ -47,6 +48,4 @@ class HasManyThroughChild extends OneToMany {
 
         return $this->transformResults($results);
     }
-
-
 }

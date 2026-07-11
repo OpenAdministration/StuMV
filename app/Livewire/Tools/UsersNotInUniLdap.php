@@ -22,7 +22,7 @@ class UsersNotInUniLdap extends Component
 
     public bool $comparisonCompleted = false;
 
-    public string $userToDelete = "";
+    public string $userToDelete = '';
 
     public function mount(Community $uid)
     {
@@ -75,7 +75,7 @@ class UsersNotInUniLdap extends Component
     {
         $community = Community::findByOrFail('ou', $this->uid);
         $this->authorize('remove_member', $community);
-        
+
         // LDAP
         $user = User::findOrFailByUsername($this->userToDelete);
         $community->membersGroup()->members()->detach($user);

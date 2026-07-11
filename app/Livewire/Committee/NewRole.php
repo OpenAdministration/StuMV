@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Committee;
 
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\View\Factory;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueRole;
 use Flux\Flux;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -25,17 +25,19 @@ class NewRole extends Component
 
     public string $description;
 
-    public function mount(Community $uid, $ou){
+    public function mount(Community $uid, $ou)
+    {
         $this->uid = $uid->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 
-    public function rules(){
+    public function rules()
+    {
         return [
             'cn' => [
                 'regex:/^[a-z0-9-]*$/',
                 new UniqueRole($this->uid, $this->ou),
-            ]
+            ],
         ];
     }
 
@@ -48,7 +50,9 @@ class NewRole extends Component
     {
         $this->validate();
     }
-    public function save(){
+
+    public function save()
+    {
         $this->validate();
         $c = Committee::fromCommunity($this->uid)->findByOrFail('ou', $this->ou);
         $r = new Role([
@@ -60,6 +64,7 @@ class NewRole extends Component
         $r->save();
 
         Flux::toast(variant: 'success', text: __('New Role created'));
+
         return to_route('committees.roles', ['ou' => $this->ou, 'uid' => $this->uid]);
     }
 }

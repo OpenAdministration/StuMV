@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
             'committees' => 'Grant Committee Access',
             'groups' => 'Grant Group Access',
             'iban' => 'Grant IBAN Access',
-            'address' => 'Grant Address Access'
+            'address' => 'Grant Address Access',
         ]);
 
         Passport::setDefaultScope(['profile']);
@@ -41,21 +41,21 @@ class AppServiceProvider extends ServiceProvider
         // AuthorizationViewResponse by default, so register our own consent view.
         Passport::authorizationView('auth.oauth.authorize');
 
-        Password::defaults(static fn() => Password::min(12)
+        Password::defaults(static fn () => Password::min(12)
             ->letters()
             ->mixedCase()
             ->numbers()
             ->symbols()
             ->uncompromised());
 
-        Builder::macro('search', fn($field, $string) => $string ? $this->orWhere($field, 'like', '%' . $string . '%') : $this);
+        Builder::macro('search', fn ($field, $string) => $string ? $this->orWhere($field, 'like', '%'.$string.'%') : $this);
 
-        if($this->app->hasDebugModeEnabled()){
+        if ($this->app->hasDebugModeEnabled()) {
             Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
                 info("Missing translation key [$key] detected.");
+
                 return $key;
             });
         }
     }
 }
-

@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Ldap\User;
 use Flux\Flux;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -24,9 +23,13 @@ class Profile extends Component
     public string $sn;
 
     public $course;
+
     public $street;
+
     public $postalCode;
+
     public $city;
+
     public $phone;
 
     public $currentUsername;
@@ -53,7 +56,7 @@ class Profile extends Component
         $this->city = $user->getFirstAttribute('l');
         $this->phone = $user->getFirstAttribute('telephoneNumber');
 
-        if ($user->hasAttribute('pwdAccountLockedTime') && $user->getFirstAttribute('pwdAccountLockedTime') === "00000101000000Z") {
+        if ($user->hasAttribute('pwdAccountLockedTime') && $user->getFirstAttribute('pwdAccountLockedTime') === '00000101000000Z') {
             $this->userIsActive = false;
         } else {
             $this->userIsActive = true;
@@ -72,7 +75,7 @@ class Profile extends Component
         $user->setAttribute('mail', $this->email);
         $user->setAttribute('givenName', $this->givenName);
         $user->setAttribute('sn', $this->sn);
-        $user->setAttribute('cn', $this->givenName . ' ' . $this->sn);
+        $user->setAttribute('cn', $this->givenName.' '.$this->sn);
         $user->setAttribute('description', $this->course);
         $user->setAttribute('street', $this->street);
         $user->setAttribute('postalCode', $this->postalCode);
@@ -81,13 +84,13 @@ class Profile extends Component
 
         if ($this->userIsActive && $user->hasAttribute('pwdAccountLockedTime')) {
             $user->removeAttribute('pwdAccountLockedTime');
-        } elseif (!$this->userIsActive) {
-            $user->setAttribute('pwdAccountLockedTime', "00000101000000Z");
+        } elseif (! $this->userIsActive) {
+            $user->setAttribute('pwdAccountLockedTime', '00000101000000Z');
         }
 
         $user->save();
 
         Flux::toast(variant: 'success', text: __('Saved'));
-        $this->redirect('/profile/' . $this->uid, navigate: true);
+        $this->redirect('/profile/'.$this->uid, navigate: true);
     }
 }

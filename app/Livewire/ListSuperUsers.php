@@ -9,8 +9,8 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListSuperUsers extends Component {
-
+class ListSuperUsers extends Component
+{
     use WithPagination;
 
     #[Url]
@@ -45,7 +45,7 @@ class ListSuperUsers extends Component {
     public function render()
     {
         $superadmins = SuperUserGroup::group()->members()->get();
-        
+
         return view('livewire.list-super-admins', [
             'superadmins' => $superadmins,
         ])->title(__('superadmins.list_title'));

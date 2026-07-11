@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $realm_uid
- * @property boolean $active_mail
- * @property boolean $for_registration
+ * @property bool $active_mail
+ * @property bool $for_registration
  * @property string $name
  * @property Realm $realm
  */
 class Domain extends Model
 {
     use HasFactory;
+
     /**
      * The table associated with the model.
      *

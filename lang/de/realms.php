@@ -28,7 +28,7 @@ return [
     'search_moderators' => 'Durchsuche Moderator:innen',
     'manage_admins' => 'Administrator:innen verwalten',
     'manage_moderators' => 'Moderator:innen verwalten',
-    'mods_heading'=> 'Moderator:innen in :name (:uid)',
+    'mods_heading' => 'Moderator:innen in :name (:uid)',
     'mods_explanation' => 'Moderator:innen verwalten Gremien und Rollen, können diese anlegen, löschen und bearbeiten. Außerdem sind Moderator:innen die einzigen, die dich zu Rollen zuordnen können. Neue Moderator:innen können durch bestehende Moderator:innen und Administrator:innen hinzugefügt werden.',
     'new_mod_headline' => 'Neue:n Moderator:in in :name (:uid) hinzufügen',
     'new_mod_explanation' => 'Wähle eine:n Nutzer:in aus, der:die Moderator:in werden soll.',

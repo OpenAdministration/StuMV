@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property integer $group_id
+ * @property int $group_id
  * @property Group $group
  * @property Role $role
  */
-
 class GroupMembership extends Model
 {
     /**

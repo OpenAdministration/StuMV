@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $realm_uid
  * @property string $name
  * @property Realm $realm

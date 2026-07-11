@@ -17,17 +17,19 @@ class Domain extends Entry
      */
     public static array $objectClasses = [
         'domain',
-        'top'
+        'top',
     ];
 
-    public static function dnRoot(string $uid){
+    public static function dnRoot(string $uid)
+    {
         return "ou=Domains,ou=$uid,ou=Communities,{base}";
     }
 
-    public function community() : Community
+    public function community(): Community
     {
         $dn = DistinguishedName::explode($this->getDn());
         $communityDn = implode(',', array_slice($dn, 2));
+
         return Community::find($communityDn);
     }
 }

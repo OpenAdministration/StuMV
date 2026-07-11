@@ -17,23 +17,26 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
 
     }
 
-    public static function dnFrom(string $uid, string $cn){
-        return "cn=$cn," . self::dnRoot($uid);
+    public static function dnFrom(string $uid, string $cn)
+    {
+        return "cn=$cn,".self::dnRoot($uid);
     }
 
-    public static function dnRoot(string $uid){
-        return "ou=Groups,ou=$uid,ou=Communities," . config('ldap.connections.default.base_dn');
+    public static function dnRoot(string $uid)
+    {
+        return "ou=Groups,ou=$uid,ou=Communities,".config('ldap.connections.default.base_dn');
     }
 
     public function setDnFrom(string $uid, string $cn): static
     {
         $dn = self::dnFrom($uid, $cn);
+
         return parent::setDn($dn);
     }
 
     public function scopeFromCommunity(Builder $query, string $uid): void
     {
-        $query->setBaseDn( "ou=Groups,ou=$uid," . Community::$rootDn);
+        $query->setBaseDn("ou=Groups,ou=$uid,".Community::$rootDn);
     }
 
     public function members(): HasManyIn
@@ -50,5 +53,4 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
     {
         return $this->hasManyIn([User::class], 'uniquemember')->using($this, 'uniquemember')->recursive();
     }
-
 }

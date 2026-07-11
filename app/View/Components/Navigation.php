@@ -12,7 +12,7 @@ class Navigation extends Component
     public function __construct()
     {
         $community = Route::current()?->parameter('uid');
-        if($community){
+        if ($community) {
             $this->uid = $community->getFirstAttribute('ou');
         }
     }

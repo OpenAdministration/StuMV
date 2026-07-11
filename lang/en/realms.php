@@ -25,4 +25,3 @@ return [
     'delete_admin_title' => 'Remove :name as an admin',
     'delete_admin_warning' => 'Should :name really be removed as an admin?',
 ];
-

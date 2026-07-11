@@ -30,7 +30,7 @@ class Picture extends Component
             abort('403');
         }
     }
-    
+
     public function render()
     {
         $user = User::findOrFailByUsername($this->currentUsername);
@@ -59,7 +59,7 @@ class Picture extends Component
         $thumb = imagecreatetruecolor($imgSize, $imgSize);
         imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
         ob_start();
-        imagejpeg($thumb, NULL);
+        imagejpeg($thumb, null);
         $imgResized = ob_get_clean();
         $imgBase64 = base64_encode($imgResized);
 
@@ -72,7 +72,7 @@ class Picture extends Component
         $imgID = Str::uuid();
 
         // Save image to storage
-        Storage::disk('public')->put('avatars/' . $imgID . '.jpg', $imgResized);
+        Storage::disk('public')->put('avatars/'.$imgID.'.jpg', $imgResized);
 
         // Save user image relation
         $pictureDB = ProfilePicture::create([
@@ -98,7 +98,7 @@ class Picture extends Component
         $pictureDB = ProfilePicture::where('user', $this->currentUsername)->first();
 
         // Remove image from storage
-        Storage::disk('public')->delete('avatars/' . $pictureDB->file_id . '.jpg');
+        Storage::disk('public')->delete('avatars/'.$pictureDB->file_id.'.jpg');
 
         // Delete database entry
         $pictureDB->delete();

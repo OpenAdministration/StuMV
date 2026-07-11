@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Date;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Date;
 
 /**
- * @property integer $role_id
- * @property integer $user_id
+ * @property int $role_id
+ * @property int $user_id
  * @property string $from
  * @property string $until
  * @property Role $role
@@ -61,7 +61,8 @@ class RoleMembership extends Model
         return \App\Ldap\Role::find("cn=$this->role_cn,$this->committee_dn");
     }
 
-    public function isActive() : bool {
+    public function isActive(): bool
+    {
         if ($this->until) {
             return Date::today()->betweenIncluded(
                 $this->from->format('Y-m-d'),
@@ -72,26 +73,30 @@ class RoleMembership extends Model
         }
     }
 
-    public function isPending() : bool {
-        if($this->isActive()){
+    public function isPending(): bool
+    {
+        if ($this->isActive()) {
             $userGroups = $this->user->ldap()->groups();
-            return !$userGroups->exists($this->ldapRole());
+
+            return ! $userGroups->exists($this->ldapRole());
         }
+
         return false;
     }
 
     #[Scope]
-    protected function active(Builder $query, Carbon $date = null)
+    protected function active(Builder $query, ?Carbon $date = null)
     {
-        if(is_null($date)){
+        if (is_null($date)) {
             $date = today();
         }
         $query->whereDate('from', '<=', $date)
-            ->where(function ($query) use ($date): void{
+            ->where(function ($query) use ($date): void {
                 $query->whereDate('until', '>=', $date)
                     ->orWhereNull('until');
             });
     }
+
     protected function casts(): array
     {
         return [

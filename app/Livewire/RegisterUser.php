@@ -15,7 +15,7 @@ use Livewire\Component;
 
 class RegisterUser extends Component
 {
-    //public User $user;
+    // public User $user;
 
     public string $email = '';
 
@@ -30,18 +30,19 @@ class RegisterUser extends Component
 
     #[Validate]
     public string $password = '';
+
     #[Validate]
     public string $password_confirmation = '';
 
     public string $domain = '';
 
-    protected function rules() : array
+    protected function rules(): array
     {
         return [
             'email' => [
                 'required',
                 'email',
-                new UniqueEmail(),
+                new UniqueEmail,
             ],
             'password' => [
                 'required',
@@ -50,15 +51,14 @@ class RegisterUser extends Component
             ],
             'domain' => [
                 'required',
-                //new \dacoto\DomainValidator\Validator\Domain(),
-                new DomainRegistrationRule()
+                // new \dacoto\DomainValidator\Validator\Domain(),
+                new DomainRegistrationRule,
             ],
         ];
     }
 
     /**
      * Do some stuff if email was changed
-     * @return void
      */
     public function updatedEmail(): void
     {
@@ -75,9 +75,9 @@ class RegisterUser extends Component
             $this->first_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[0] ?? ''));
             $this->last_name = str_replace(' ', '-', ucwords(str_replace(['-', '_'], ' ', $nameParts[1] ?? '')));
         } else {
-            $guessedName = explode(" ", ucwords(str_replace(['-', '_', '.'], ' ', $split[0])), 2);
-            $this->first_name = $guessedName[0] ?? $this->first_name ?? "";
-            $this->last_name = $guessedName[1] ?? $this->last_name ?? "";
+            $guessedName = explode(' ', ucwords(str_replace(['-', '_', '.'], ' ', $split[0])), 2);
+            $this->first_name = $guessedName[0] ?? $this->first_name ?? '';
+            $this->last_name = $guessedName[1] ?? $this->last_name ?? '';
         }
         $this->validateOnly('username');
     }
@@ -94,8 +94,7 @@ class RegisterUser extends Component
     {
         return view('livewire.register-user')
             ->layout('layouts.guest')
-            ->title(__('user.register_title'))
-            ;
+            ->title(__('user.register_title'));
     }
 
     public function save()
@@ -106,11 +105,11 @@ class RegisterUser extends Component
         $community = $domain->community();
         $user = new User([
             'uid' => $this->username,
-            'cn' => $this->first_name  . ' ' . $this->last_name,
-            'sn'  => $this->last_name,
+            'cn' => $this->first_name.' '.$this->last_name,
+            'sn' => $this->last_name,
             'givenName' => $this->first_name,
             'mail' => $this->email,
-            'userPassword'  => "{ARGON2}" . password_hash($this->password, PASSWORD_ARGON2ID),
+            'userPassword' => '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID),
             // usually ldap SHOULD hash it itself - did not work
         ]);
         $user->setDn("uid=$this->username,ou=People,{base}");
@@ -119,6 +118,7 @@ class RegisterUser extends Component
             $community->membersGroup()->members()->attach($user);
             event(new Registered($user));
             Auth::attempt([$this->username, $this->password]);
+
             return to_route('verification.notice')->with('message', __('Successfully Registered'));
 
         } catch (LdapRecordException $ldapRecordException) {

@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use Flux\Flux;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -33,9 +32,10 @@ class ChangePassword extends Component
     public function rules(): array
     {
         return [
-            'password' => [Password::default(), 'confirmed']
+            'password' => [Password::default(), 'confirmed'],
         ];
     }
+
     public function render()
     {
         $user = User::findOrFailByUsername($this->currentUsername);
@@ -52,10 +52,11 @@ class ChangePassword extends Component
     {
         $this->validate();
         $ldapUser = User::findOrFailByUsername($this->currentUsername);
-        $ldapUser->setAttribute('userPassword', "{ARGON2}" . password_hash($this->password, PASSWORD_ARGON2ID));
+        $ldapUser->setAttribute('userPassword', '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
 
         Flux::toast(variant: 'success', text: __('Password has been changed'));
+
         return redirect(RouteServiceProvider::home());
     }
 }

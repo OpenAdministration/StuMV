@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Realm;
 
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Contracts\Foundation\Application;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -18,9 +18,9 @@ class NewModerator extends Component
     public array $dn = [];
 
     #[Rule('required|string')]
-    public string $realm_uid = "";
+    public string $realm_uid = '';
 
-    public function mount(Community $uid) : void
+    public function mount(Community $uid): void
     {
         $this->realm_uid = $uid->getFirstAttribute('ou');
     }
@@ -33,6 +33,7 @@ class NewModerator extends Component
         // baseCollection does like strings in contains, ldapCollection does not...
         $moderatorDns = $moderators->modelDns()->toBase();
         $selectable_users = $userList->filter(fn ($user) => $moderatorDns->doesntContain($user->getDn()));
+
         return view('livewire.realm.new-moderator', [
             'community' => $c,
             'selectable_users' => $selectable_users,
@@ -51,9 +52,11 @@ class NewModerator extends Component
                 Flux::toast(variant: 'success', text: __('Added new Moderator'));
             } catch (LdapRecordException $exception) {
                 $this->addError('dn', $exception->getMessage());
+
                 return false;
             }
         }
+
         return to_route('realms.mods', ['uid' => $this->realm_uid]);
     }
 }

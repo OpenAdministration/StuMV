@@ -17,4 +17,3 @@ return [
     'delete_role_warning' => 'Should the relation to the role :name really be deleted?',
     'committee_name' => 'Committee name',
 ];
-

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Ldap\User as LdapUser;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -27,8 +28,8 @@ class LdapAuthenticationTest extends TestCase
     {
         parent::setUp();
         // Unique per run so repeated local runs don't collide; removed in tearDown.
-        $this->username = 'phptest' . bin2hex(random_bytes(4));
-        $this->password = 'Aa1!' . bin2hex(random_bytes(8));
+        $this->username = 'phptest'.bin2hex(random_bytes(4));
+        $this->password = 'Aa1!'.bin2hex(random_bytes(8));
         $this->deleteLdapUser();
     }
 
@@ -49,7 +50,7 @@ class LdapAuthenticationTest extends TestCase
             ->set('first_name', 'Test')
             ->set('last_name', 'User')
             ->set('username', $this->username)
-            ->set('email', $this->username . '@' . self::DOMAIN)
+            ->set('email', $this->username.'@'.self::DOMAIN)
             ->set('password', $this->password)
             ->set('password_confirmation', $this->password)
             ->call('save')
@@ -63,7 +64,7 @@ class LdapAuthenticationTest extends TestCase
         $ldapUser = LdapUser::findByUsername($this->username);
         $this->assertNotNull($ldapUser, 'registered user should exist in LDAP');
         $this->assertSame(
-            $this->username . '@' . self::DOMAIN,
+            $this->username.'@'.self::DOMAIN,
             $ldapUser->getFirstAttribute('mail')
         );
     }
@@ -79,7 +80,7 @@ class LdapAuthenticationTest extends TestCase
             ->assertRedirect(RouteServiceProvider::home());
 
         $this->assertAuthenticated();
-        $this->assertInstanceOf(\App\Models\User::class, auth()->user());
+        $this->assertInstanceOf(User::class, auth()->user());
     }
 
     public function test_login_is_rejected_with_a_wrong_password(): void

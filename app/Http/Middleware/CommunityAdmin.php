@@ -11,13 +11,13 @@ class CommunityAdmin
     /**
      * Handle an incoming request.
      *
-     * @param \Closure(Request):Response $next
+     * @param  Closure(Request):Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $community = $request->route()?->parameter('uid');
         $user = $request->user();
-        if($user?->can('admin', $community) || $user?->ldap()->isSuperAdmin()){
+        if ($user?->can('admin', $community) || $user?->ldap()->isSuperAdmin()) {
             return $next($request);
         }
         abort(403);

@@ -15,7 +15,7 @@ class NewAdmin extends Component
     public array $dn = [];
 
     #[Rule('required|string')]
-    public string $realm_uid = "";
+    public string $realm_uid = '';
 
     public function mount(Community $uid)
     {
@@ -25,7 +25,7 @@ class NewAdmin extends Component
     public function render()
     {
         $community = Community::findOrFailByUid($this->realm_uid);
-        $userList =  $community->membersGroup()->members()->get();
+        $userList = $community->membersGroup()->members()->get();
         $admins = $community->adminsGroup()->members()->get();
         $adminDns = $admins->modelDns()->toBase();
         $selectable_users = $userList->filter(fn ($user) => $adminDns->doesntContain($user->getDn()));
@@ -48,9 +48,11 @@ class NewAdmin extends Component
                 Flux::toast(variant: 'success', text: __('Added new Admin'));
             } catch (LdapRecordException $exception) {
                 Flux::toast(variant: 'danger', text: $exception->getMessage());
+
                 return false;
             }
         }
+
         return to_route('realms.admins', ['uid' => $this->realm_uid]);
     }
 }

@@ -21,6 +21,6 @@ class ProfilePicture extends Model
      */
     protected $fillable = [
         'user',
-        'file_id'
+        'file_id',
     ];
 }

@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Facades\Date;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\RoleMembership;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 use LdapRecord\Container;
 
 class LdapSyncRoles extends Command
@@ -42,20 +42,20 @@ class LdapSyncRoles extends Command
 
         $connection = Container::getDefaultConnection();
         $query = $connection->query();
-        
+
         $realms = Community::query()
             ->setDn(Community::$rootDn)->search()
             ->list()
-            ->get(); 
+            ->get();
 
         foreach ($realms as $realm) {
-            $this->comment("> " . $realm->getFirstAttribute('ou'));
-            
+            $this->comment('> '.$realm->getFirstAttribute('ou'));
+
             $committees = Committee::fromCommunity($realm->getFirstAttribute('ou'))
                 ->search('ou', $this->argument('committee'))
                 ->get();
             foreach ($committees as $committee) {
-                $this->comment("  |-> " . $committee->getDn());
+                $this->comment('  |-> '.$committee->getDn());
                 $roles = $committee->roles()
                     ->search('cn', $this->argument('role'))
                     ->get();
@@ -64,21 +64,21 @@ class LdapSyncRoles extends Command
                         ->where('committee_dn', $committee->getDn())
                         ->where('role_cn', $role->getFirstAttribute('cn'))
                         ->get();
-                    $this->comment("  |  |-> " . $role->getDn());
+                    $this->comment('  |  |-> '.$role->getDn());
 
                     // delete all members so far
                     $currentMembers = $role->getAttribute('uniqueMember');
-                    if (!in_array('', $currentMembers)) {
+                    if (! in_array('', $currentMembers)) {
                         $query->add($role->getDn(), ['uniqueMember' => '']);
                     }
                     for ($i = 0; $i < count($currentMembers); $i++) {
                         if ($currentMembers[$i] !== '') {
-                            $query->remove($role->getDn(), ['uniqueMember' => [ $currentMembers[$i] ]]);
+                            $query->remove($role->getDn(), ['uniqueMember' => [$currentMembers[$i]]]);
                         }
                     }
-                    
+
                     $ldapMembers = $role->members();
-                    foreach ($activeMemberships as $membership){
+                    foreach ($activeMemberships as $membership) {
                         /** @var RoleMembership $membership */
                         // add only active members back
                         $this->comment("  |  |  |-> $membership->username");

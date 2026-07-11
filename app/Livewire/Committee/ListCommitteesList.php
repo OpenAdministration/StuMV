@@ -24,6 +24,7 @@ class ListCommitteesList extends Component
     public string $sortDirection = 'asc';
 
     public string $realm_uid;
+
     public bool $ready = false;
 
     public function mount(Community $uid): void
@@ -56,7 +57,7 @@ class ListCommitteesList extends Component
     {
         $community = Community::findByUid($this->realm_uid);
 
-        if (!$this->ready) {
+        if (! $this->ready) {
             return view('livewire.committee.list-committees-list', [
                 'committees' => collect(),
                 'community' => $community,

@@ -53,17 +53,18 @@ class TerminateRoleMemberships extends Component
             $committee = Committee::findByName($this->uid, $this->ou);
             $community = Community::findOrFailByUid($this->uid);
             $this->authorize('terminate', [$membership, $committee, $community]);
-            $this->validate(['terminationDate' => 'date:Y-m-d|after_or_equal:' . $membership->from->format('Y-m-d')]);
+            $this->validate(['terminationDate' => 'date:Y-m-d|after_or_equal:'.$membership->from->format('Y-m-d')]);
 
             $membership->until = $this->terminationDate;
             $membership->save();
         }
 
         Flux::toast(variant: 'success', text: __('roles.message_terminate_member_success'));
+
         return to_route('committees.roles.members', [
             'uid' => $this->uid,
             'ou' => $this->ou,
-            'cn' => $this->cn
+            'cn' => $this->cn,
         ]);
     }
 }

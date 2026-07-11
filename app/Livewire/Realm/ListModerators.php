@@ -10,8 +10,8 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListModerators extends Component {
-
+class ListModerators extends Component
+{
     use WithPagination;
 
     #[Url]
@@ -24,7 +24,9 @@ class ListModerators extends Component {
     public string $sortDirection = 'asc';
 
     public string $deleteMemberName = '';
+
     public string $deleteMemberUsername = '';
+
     public bool $ready = false;
 
     #[Locked]
@@ -70,6 +72,7 @@ class ListModerators extends Component {
         }
 
         $mods = $community->moderatorsGroup()->members()->get();
+
         return view(
             'livewire.realm.list-moderators', [
                 'community' => $community,
@@ -84,7 +87,7 @@ class ListModerators extends Component {
         $this->authorize('remove_moderator', $community);
         $user = User::findOrFailByUsername($uid);
         $userBelongsToRealm = $community->moderatorsGroup()->members()->contains($user);
-        if (!$userBelongsToRealm) {
+        if (! $userBelongsToRealm) {
             // only allow deletes from the same realm
             return;
         }
