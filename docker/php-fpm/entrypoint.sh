@@ -14,8 +14,16 @@ GROUP_ID=${GID:-1000}
 echo "Fixing file permissions with UID=${USER_ID} and GID=${GROUP_ID}..."
 chown -R ${USER_ID}:${GROUP_ID} /var/www || echo "Some files could not be changed"
 
+# The image bakes a vendor/ directory, but the bind mount of the project source
+# shadows it. Install dependencies against the mounted tree if they are missing
+# (e.g. a fresh checkout) so the app can boot.
+if [ ! -f /var/www/vendor/autoload.php ]; then
+    echo "vendor/ missing on the mounted volume — running composer install..."
+    composer install --no-interaction --prefer-dist --no-progress
+fi
+
 # Run database migrations
-php artisan migrate
+php artisan migrate --force
 
 # Clear configurations to avoid caching issues in development
 echo "Clearing configurations..."

@@ -2,28 +2,40 @@
 # (c) 2024 Sergei Shitikov
 # License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
 
-# Use the official PHP CLI image as the base
-FROM php:8.3-cli
+# Use the official PHP CLI image as the base.
+# PHP 8.4: composer.lock resolves to symfony ^8.1 which requires php >= 8.4.1.
+FROM php:8.4-cli
 
 # Set environment variables for user and group ID
 ARG UID=1000
 ARG GID=1000
 ARG NODE_VERSION=22.0.0
 
-# Install system dependencies and build libraries
+# Install system dependencies and build libraries. gd + zip are needed so
+# `composer install` satisfies the project's platform requirements.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libonig-dev \
     libssl-dev \
+    libzip-dev \
     libxml2-dev \
     libcurl4-openssl-dev \
     libicu-dev \
     libldap2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
+    gd \
     ldap \
     pdo_mysql \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    zip \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Composer, pulled from the official image rather than curled (Debian's composer
+# package lags upstream).
+COPY --from=docker.io/composer:2 /usr/bin/composer /usr/local/bin/composer
 
 # If the group already exists, use it; otherwise, create the 'www' group
 RUN if getent group ${GID}; then \

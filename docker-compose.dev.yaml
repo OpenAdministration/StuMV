@@ -12,9 +12,19 @@ services:
             context: ./docker/openldap
             dockerfile: Dockerfile
         ports:
-            - "${LDAP_PORT:-10389}:1389"
+            # host:container — the app reaches it in-network as ldap:1389
+            - "${LDAP_HOST_PORT:-13389}:1389"
         networks:
             - stumv
+        healthcheck:
+            test: ["CMD", "/opt/symas/bin/ldapwhoami", "-x",
+                   "-H", "ldap://127.0.0.1:1389",
+                   "-D", "uid=stumv,ou=Services,dc=stumv,dc=de",
+                   "-w", "stumv-not-production"]
+            start_period: 5s
+            interval: 10s
+            timeout: 5s
+            retries: 5
     nginx:
         image: nginx:latest
         ports:
@@ -41,10 +51,15 @@ services:
         networks:
             - stumv
         env_file:
-            - .env
+            - .env.docker
         user: "${UID:-1000}:${GID:-1000}"
+        # Rootless podman: map the host user to the same UID/GID inside the
+        # container so the bind-mounted project stays writable (storage/, etc.).
+        userns_mode: "keep-id"
         depends_on:
             mariadb:
+                condition: service_healthy
+            ldap:
                 condition: service_healthy
     mariadb:
         image: mariadb:latest
@@ -58,9 +73,9 @@ services:
         volumes:
             - mysql-data:/var/lib/mysql
         ports:
-            - "${DB_PORT:-3306}:3306"
+            - "${DB_HOST_PORT:-13306}:3306"
         env_file:
-            - .env
+            - .env.docker
         networks:
             - stumv
         healthcheck:
@@ -81,7 +96,10 @@ services:
         tty: true  # Enables an interactive terminal
         stdin_open: true  # Keeps standard input open for "docker exec"
         env_file:
-            - .env
+            - .env.docker
+        user: "${UID:-1000}:${GID:-1000}"
+        # Rootless podman: keep the host UID/GID inside the container (see php-fpm).
+        userns_mode: "keep-id"
         volumes:
             - ./:/var/www:z
         networks:

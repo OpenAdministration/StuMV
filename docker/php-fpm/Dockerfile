@@ -2,7 +2,8 @@
 # (c) 2024 Sergei Shitikov
 # License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
 
-FROM php:8.3-fpm AS builder
+# PHP 8.4: composer.lock resolves to symfony ^8.1 which requires php >= 8.4.1.
+FROM php:8.4-fpm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
@@ -14,7 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libicu-dev \
     libldap2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
+    gd \
     ldap \
     pdo_mysql \
     zip \
@@ -24,9 +30,13 @@ WORKDIR /var/www
 
 COPY . /var/www
 
-# Install Composer and dependencies
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
-    && composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
+# Composer, pulled from the official image rather than curled (Debian's composer
+# package lags upstream). Dependencies are NOT baked into this dev image: the
+# project is always bind-mounted (docker-compose.dev.yaml), and the entrypoint
+# runs `composer install` if the mounted vendor/ is missing. That avoids needing
+# the Flux Pro (livewire/flux-pro) credentials at image-build time; provide them
+# at runtime via COMPOSER_AUTH in the environment when a fresh install is needed.
+COPY --from=docker.io/composer:2 /usr/bin/composer /usr/local/bin/composer
 
 USER root
 

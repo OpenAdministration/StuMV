@@ -1,0 +1,16 @@
+# Keep the build context small. vendor/ is reinstalled by the php-fpm build and
+# node_modules/ is not needed in the image; both are provided at runtime via the
+# bind mount (and the entrypoint reinstalls vendor if the mount lacks it).
+.git
+node_modules
+vendor
+public/build
+public/hot
+storage/framework/cache/data
+storage/framework/sessions
+storage/framework/views
+storage/logs
+*.log
+.phpunit.result.cache
+.idea
+.vscode
