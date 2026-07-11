@@ -52,12 +52,12 @@ class LdapSyncRoles extends Command
             $this->comment('> '.$realm->getFirstAttribute('ou'));
 
             $committees = Committee::fromCommunity($realm->getFirstAttribute('ou'))
-                ->search('ou', $this->argument('committee'))
+                ->searchFor('ou', $this->argument('committee'))
                 ->get();
             foreach ($committees as $committee) {
                 $this->comment('  |-> '.$committee->getDn());
                 $roles = $committee->roles()
-                    ->search('cn', $this->argument('role'))
+                    ->searchFor('cn', $this->argument('role'))
                     ->get();
                 foreach ($roles as $role) {
                     $activeMemberships = RoleMembership::active($date)

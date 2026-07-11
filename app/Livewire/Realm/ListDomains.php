@@ -31,7 +31,7 @@ class ListDomains extends Component
     public function render()
     {
         $domainSlice = Domain::fromCommunity($this->uid)
-            ->search('ou', $this->search)
+            ->searchFor('ou', $this->search)
             ->slice(1, 10, $this->sortField, $this->sortDirection);
 
         return view('livewire.realm.list-domains', ['domainSlice' => $domainSlice])

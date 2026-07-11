@@ -46,7 +46,7 @@ class ListRealms extends Component
     public function render(Request $request)
     {
         $communitySlice = Community::query()
-            ->setDn(Community::$rootDn)->search()->search()
+            ->setDn(Community::$rootDn)->search()
             ->list()
             ->get();
 

@@ -29,7 +29,7 @@ class NewMember extends Component
 
     public function render(): Factory|View|Application
     {
-        $userList = User::query()->search()->search()
+        $userList = User::query()->search()
             ->get();
 
         return view('livewire.realm.new-member', ['selectable_users' => $userList])

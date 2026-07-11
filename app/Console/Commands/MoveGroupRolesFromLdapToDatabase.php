@@ -37,7 +37,7 @@ class MoveGroupRolesFromLdapToDatabase extends Command
 
         foreach ($realms as $realm) {
             $groups = Group::fromCommunity($realm->getFirstAttribute('ou'))
-                ->search('ou', $this->argument('group'))
+                ->searchFor('ou', $this->argument('group'))
                 ->get();
 
             foreach ($groups as $group) {
