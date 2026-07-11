@@ -44,6 +44,13 @@ objectClass: organizationalUnit
 objectClass: top
 ou: Domains
 
+# A registerable domain: users with an @example.test address can self-register
+# into this community (used by the LDAP registration/login test).
+dn: dc=example.test,ou=Domains,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: domain
+objectClass: top
+dc: example.test
+
 dn: cn=members,ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
