@@ -45,6 +45,9 @@ class DatabaseSeeder extends Seeder
             'uid' => '61616161-6161-6161-6164-61646d696e',
             'domain' => 'default'
         ])->create();
+
+        // DB-side records for the LDAP demo logins (20-demo.ldif), emails verified.
+        $this->call(DemoUsersSeeder::class);
         //\App\Models\User::factory(5)->create();
 
         // \App\Models\User::factory()->create([

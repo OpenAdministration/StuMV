@@ -71,6 +71,25 @@ Once up, these are exposed on the host:
 The LDAP directory is seeded from `docker/openldap/bootstrap/` and is ephemeral — every
 `up` starts from the same clean, production-like state.
 
+#### Demo logins
+
+`docker/openldap/bootstrap/20-demo.ldif` seeds a **`demo` community** mirroring the public
+[StuFiS demo](https://stufis.de/demo-login) — six accounts covering the ThürStudFVO
+separation of financial responsibilities. All share the password **`Demo-password1`**:
+
+| Username        | Role                                        |
+| --------------- | ------------------------------------------- |
+| `demo-hhv`      | Haushaltsverantwortliche (Budget Manager)   |
+| `demo-kv`       | Kassenverantwortliche (Cashier)             |
+| `demo-revision` | Revision (Internal Auditor)                 |
+| `demo-stura`    | Studierendenrat (Student Council Member)    |
+| `demo-fsr`      | Fachschaftsrat (Department Council Member)  |
+| `demo-studi`    | Studentin (Guest/Student)                   |
+
+For a **super-admin** login (member of `cn=super-admins`, full access across all
+communities), use the seeded `admin` account — username `admin`, password
+`admin-not-production` (from `10-sample.ldif`).
+
 ### Code quality
 
 Composer scripts wrap the tooling. Run **`composer fix` before committing.**

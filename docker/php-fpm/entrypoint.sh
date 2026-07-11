@@ -25,6 +25,10 @@ fi
 # Run database migrations
 php artisan migrate --force
 
+# Seed the DB records for the LDAP demo logins (20-demo.ldif) with verified
+# emails. Idempotent (keyed on username), so it is safe on every start.
+php artisan db:seed --class=DemoUsersSeeder --force
+
 # Clear configurations to avoid caching issues in development
 echo "Clearing configurations..."
 php artisan config:clear

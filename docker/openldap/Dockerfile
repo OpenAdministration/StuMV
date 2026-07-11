@@ -23,7 +23,7 @@ RUN set -eux; \
     export PATH="/opt/symas/bin:/opt/symas/sbin:$PATH"; \
     mkdir -p /opt/symas/etc/openldap/slapd.d /opt/symas/var/openldap-data /opt/symas/var/run; \
     slapadd -n0 -F /opt/symas/etc/openldap/slapd.d -l /bootstrap/config.ldif; \
-    cat /bootstrap/00-base.ldif /bootstrap/10-sample.ldif > /tmp/seed.ldif; \
+    cat /bootstrap/00-base.ldif /bootstrap/10-sample.ldif /bootstrap/20-demo.ldif > /tmp/seed.ldif; \
     slapadd -q -F /opt/symas/etc/openldap/slapd.d -l /tmp/seed.ldif; \
     rm -f /tmp/seed.ldif; \
     chown -R openldap:openldap /opt/symas/var /opt/symas/etc/openldap
