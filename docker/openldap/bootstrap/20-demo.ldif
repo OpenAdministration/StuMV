@@ -135,47 +135,63 @@ uniqueMember: uid=demo-fsr,ou=People,dc=stumv,dc=de
 uniqueMember: uid=demo-studi,ou=People,dc=stumv,dc=de
 
 # --- committees and their roles -----------------------------------------
-# StuRa (Studierendenrat) holds the financial-oversight roles that the
-# ThürStudFVO keeps separate.
+# StuRa (Studierendenrat) is the top-level student council. The financial-
+# oversight roles the ThürStudFVO keeps separate live in a nested
+# "Referat Finanzen" sub-committee (Gremium) below StuRa.
 dn: ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: organizationalUnit
 objectClass: top
 ou: StuRa
 description: Studierendenrat (Demo)
 
-dn: cn=Mitglied,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+# cn is a URL-safe slug (matches the app's NewRole rule ^[a-z0-9-]*$); the
+# human-readable name shown in the UI is the description attribute.
+dn: cn=mitglied,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
-cn: Mitglied
+cn: mitglied
+description: Mitglied
 uniqueMember: uid=demo-stura,ou=People,dc=stumv,dc=de
 
-dn: cn=Haushaltsverantwortliche,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+# Referat Finanzen — finance body nested below StuRa, holding the three
+# separated financial-responsibility roles.
+dn: ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Referat Finanzen
+description: Referat Finanzen (Demo)
+
+dn: cn=haushaltsverantwortliche,ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
-cn: Haushaltsverantwortliche
+cn: haushaltsverantwortliche
+description: Haushaltsverantwortliche:r
 uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
 
-dn: cn=Kassenverantwortliche,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+dn: cn=kassenverantwortliche,ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
-cn: Kassenverantwortliche
+cn: kassenverantwortliche
+description: Kassenverantwortliche:r
 uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
 
-dn: cn=Revision,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+dn: cn=revision,ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
-cn: Revision
+cn: revision
+description: Revision
 uniqueMember: uid=demo-revision,ou=People,dc=stumv,dc=de
 
-# FSR (Fachschaftsrat) — department-level council.
+# FSR (Fachschaftsrat) — department-level council, with a member role.
 dn: ou=FSR,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: organizationalUnit
 objectClass: top
 ou: FSR
 description: Fachschaftsrat (Demo)
 
-dn: cn=Mitglied,ou=FSR,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+dn: cn=mitglied,ou=FSR,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
-cn: Mitglied
+cn: mitglied
+description: Mitglied
 uniqueMember: uid=demo-fsr,ou=People,dc=stumv,dc=de

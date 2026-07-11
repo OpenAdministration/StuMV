@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ])->create();
 
-        // DB-side records for the LDAP demo logins (20-demo.ldif), emails verified.
+        // DB-side records for the LDAP demo community (20-demo.ldif): demo login
+        // rows (emails verified) plus their committee role memberships.
         $this->call(DemoUsersSeeder::class);
         // \App\Models\User::factory(5)->create();
 
