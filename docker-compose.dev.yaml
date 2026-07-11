@@ -25,6 +25,28 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
+    phpldapadmin:
+        # phpLDAPadmin 2.x web UI at http://localhost:${LDAP_ADMIN_PORT:-8081}
+        # (itself a Laravel/ldaprecord app). Log in with DN
+        # "cn=Administration,dc=stumv,dc=de" / "admin-not-production".
+        image: docker.io/phpldapadmin/phpldapadmin:2.3
+        environment:
+            # Throwaway app key for this viewer (its own Laravel instance).
+            APP_KEY: "base64:AVZk1ACUBXwgt9MaMPsikC796jlc0ShhoQMJ6o+8PGg="
+            # Connect to the in-network ldap server on its non-TLS port 1389.
+            LDAP_HOST: ldap
+            LDAP_PORT: "1389"
+            LDAP_USERNAME: "cn=Administration,dc=stumv,dc=de"
+            LDAP_PASSWORD: admin-not-production
+            LDAP_SSL: "false"
+            LDAP_TLS: "false"
+        ports:
+            - "${LDAP_ADMIN_PORT:-8081}:8080"
+        networks:
+            - stumv
+        depends_on:
+            ldap:
+                condition: service_healthy
     nginx:
         image: nginx:latest
         ports:

@@ -40,17 +40,36 @@ Nun müssen in der Datei `.env` noch ein paar Einstellungen wie App-Einstellunge
 
 ### Local development with Docker
 
-A ready-to-run stack (OpenLDAP matching production + MariaDB + php-fpm + nginx + a
-node/vite workspace) is defined in `docker-compose.dev.yaml`:
+A ready-to-run stack (OpenLDAP matching production + MariaDB + php-fpm + nginx +
+phpLDAPadmin + a node/vite workspace) is defined in `docker-compose.dev.yaml`.
+Configuration lives in `.env.docker` (throwaway development credentials; the app talks
+to the in-network `ldap`/`mariadb` services). It works with Docker too — the
+`userns_mode: keep-id` lines are only needed for rootless podman.
 
 ```bash
+# start everything in the background
 podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d
+
+# follow logs / stop / remove
+podman compose --env-file .env.docker -f docker-compose.dev.yaml logs -f
+podman compose --env-file .env.docker -f docker-compose.dev.yaml down
+
+# run artisan/composer/npm inside the toolbox container
+podman compose --env-file .env.docker -f docker-compose.dev.yaml exec workspace bash
 ```
 
-The app is then served at http://localhost:8080. Configuration lives in `.env.docker`
-(throwaway development credentials; the app talks to the in-network `ldap`/`mariadb`
-services). It also works with Docker (`docker compose …`) — the `userns_mode: keep-id`
-lines are only needed for rootless podman.
+Once up, these are exposed on the host:
+
+| Service                      | URL / port              | Notes                                                    |
+| ---------------------------- | ----------------------- | -------------------------------------------------------- |
+| App (nginx → php-fpm)        | http://localhost:8080   |                                                          |
+| phpLDAPadmin (LDAP web UI)   | http://localhost:8081   | Login DN `cn=Administration,dc=stumv,dc=de` / `admin-not-production` |
+| Vite dev server (workspace)  | http://localhost:5173   | run `npm run dev` inside the workspace container         |
+| OpenLDAP                     | `ldap://localhost:13389`| bind `uid=stumv,ou=Services,dc=stumv,dc=de` / `stumv-not-production` |
+| MariaDB                      | `localhost:13306`       | database `stumv`, user `stumv` / `local_stumv_password`  |
+
+The LDAP directory is seeded from `docker/openldap/bootstrap/` and is ephemeral — every
+`up` starts from the same clean, production-like state.
 
 ### Code quality
 
