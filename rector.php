@@ -40,5 +40,4 @@ return RectorConfig::configure()
         // compact() is idiomatic in Laravel controllers; the explicit-array rewrite is
         // style-only and has an undefined-variable edge case. Keep compact().
         // CompactToVariablesRector::class,
-
     ]);
