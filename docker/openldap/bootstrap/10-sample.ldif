@@ -51,9 +51,24 @@ objectClass: domain
 objectClass: top
 dc: example.test
 
+# A community always carries the full members/moderators/admins skeleton (this
+# is what Community::generateSkeleton() produces); keep the sample complete so
+# it matches production shape.
 dn: cn=members,ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
 cn: members
 uniqueMember: uid=alice,ou=People,dc=stumv,dc=de
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+
+dn: cn=moderators,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: moderators
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+
+dn: cn=admins,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: admins
 uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
