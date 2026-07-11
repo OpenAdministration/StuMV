@@ -22,28 +22,14 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
-        Realm::factory(5)
-            ->has(Domain::factory(4)->sequence(
-                ['for_registration' => true],
-                ['for_registration' => false],
-            ))
-            ->has(Committee::factory(1)->has(
-                Committee::factory(2)->state(function (array $attributes, Committee $committee){
-                    return ['realm_uid' => $committee->realm_uid];
-                })->has(Role::factory(1)->default_names()),
-                'childCommittee')
-                ->has(Role::factory(1)->default_names())
-            )
-            ->create();
 
         User::factory()->state([
             'id' => 1,
             'username' =>  'admin',
-            'full_name' => 'admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('admin'),
+            'full_name' => 'Axel Admin',
+            'email' => 'admin@stumv.de',
             'uid' => '61616161-6161-6161-6164-61646d696e',
-            'domain' => 'default'
+            'email_verified_at' => now(),
         ])->create();
 
         // DB-side records for the LDAP demo logins (20-demo.ldif), emails verified.

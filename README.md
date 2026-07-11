@@ -46,6 +46,29 @@ Configuration lives in `.env.docker` (throwaway development credentials; the app
 to the in-network `ldap`/`mariadb` services). It works with Docker too — the
 `userns_mode: keep-id` lines are only needed for rootless podman.
 
+All commands below use `podman`; swap in `docker` if that's what you run.
+
+#### Spinning the stack up
+
+```bash
+# start everything in the background (builds images the first time)
+podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d
+
+# force a rebuild of the images (e.g. after editing a Dockerfile)
+podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d --build
+
+# start only some services (dependencies are started automatically)
+podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d nginx
+podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d ldap phpldapadmin
+
+# follow logs (all services, or a single one)
+podman compose --env-file .env.docker -f docker-compose.dev.yaml logs -f
+podman compose --env-file .env.docker -f docker-compose.dev.yaml logs -f php-fpm
+
+# run artisan/composer/npm inside the toolbox container
+podman compose --env-file .env.docker -f docker-compose.dev.yaml exec workspace bash
+``` 
+
 ```bash
 # start everything in the background
 podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d
