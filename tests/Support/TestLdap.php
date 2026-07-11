@@ -2,14 +2,17 @@
 
 namespace Tests\Support;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Role;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User as LdapUser;
 use App\Models\User;
 use LdapRecord\Models\Model as LdapModel;
+use LdapRecord\Models\OpenLDAP\Group;
 
 /**
- * Builds throwaway, fully wired test users on the fly.
+ * Builds throwaway, fully wired LDAP fixtures on the fly.
  *
  * Authorization in this app is decided against LDAP group membership (see
  * CommunityPolicy / UserPolicy), so a usable acting-as user needs three things
@@ -17,11 +20,12 @@ use LdapRecord\Models\Model as LdapModel;
  * group(s), and a database User whose `username` matches the LDAP `uid` (that is
  * what App\Models\User::ldap() resolves on).
  *
+ * On top of users this also builds directory *structure* — whole community
+ * skeletons, committees, roles and groups — so tests can create exactly the
+ * shape they need instead of coupling to the hand-seeded demo/testcom data.
+ *
  * Everything created here is registered for teardown and removed by the global
- * afterEach hook in tests/Pest.php, so tests never leak directory state. The
- * seeded "demo" community (docker/openldap/bootstrap/20-demo.ldif) is used as
- * the default home community because it already ships the full group + committee
- * + role skeleton the feature tests exercise.
+ * afterEach hook in tests/Pest.php, so tests never leak directory state.
  */
 class TestLdap
 {
@@ -30,6 +34,9 @@ class TestLdap
 
     /** @var list<array{group: LdapModel, user: LdapUser}> memberships to detach on teardown. */
     private static array $memberships = [];
+
+    /** @var list<LdapModel> structural entries (communities/committees/roles/groups) to delete on teardown. */
+    private static array $entries = [];
 
     /** Create a fresh LDAP person with a unique uid. */
     public static function makeUser(?string $uid = null): LdapUser
@@ -70,28 +77,31 @@ class TestLdap
         ]);
     }
 
-    public static function member(string $community): User
+    public static function member(string|Community $community): User
     {
+        $community = self::resolveCommunity($community);
         $ldap = self::makeUser();
-        self::attach(Community::findByUid($community)->membersGroup(), $ldap);
+        self::attach($community->membersGroup(), $ldap);
 
         return self::databaseUser($ldap);
     }
 
-    public static function moderator(string $community): User
+    public static function moderator(string|Community $community): User
     {
+        $community = self::resolveCommunity($community);
         $ldap = self::makeUser();
-        self::attach(Community::findByUid($community)->membersGroup(), $ldap);
-        self::attach(Community::findByUid($community)->moderatorsGroup(), $ldap);
+        self::attach($community->membersGroup(), $ldap);
+        self::attach($community->moderatorsGroup(), $ldap);
 
         return self::databaseUser($ldap);
     }
 
-    public static function admin(string $community): User
+    public static function admin(string|Community $community): User
     {
+        $community = self::resolveCommunity($community);
         $ldap = self::makeUser();
-        self::attach(Community::findByUid($community)->membersGroup(), $ldap);
-        self::attach(Community::findByUid($community)->adminsGroup(), $ldap);
+        self::attach($community->membersGroup(), $ldap);
+        self::attach($community->adminsGroup(), $ldap);
 
         return self::databaseUser($ldap);
     }
@@ -104,7 +114,84 @@ class TestLdap
         return self::databaseUser($ldap);
     }
 
-    /** Detach every membership and delete every user created during the test. */
+    /**
+     * Create a full community skeleton (Groups/Committees/Domains OUs plus the
+     * admins/moderators/members groups), just like NewRealm does.
+     */
+    public static function makeCommunity(?string $uid = null): Community
+    {
+        $uid ??= 'tcom'.bin2hex(random_bytes(4));
+
+        $community = new Community([
+            'ou' => $uid,
+            'description' => 'Test Community '.$uid,
+        ]);
+        $community->setDn("ou=$uid,ou=Communities,".$community->getBaseDn());
+        $community->generateSkeleton();
+
+        // Delete last (shortest DN) so its children are already gone; recursive
+        // delete mops up the skeleton OUs/groups regardless.
+        self::$entries[] = $community;
+
+        return $community;
+    }
+
+    /** Create a committee under the community (optionally nested under $parentDn). */
+    public static function makeCommittee(Community $community, ?string $ou = null, string $parentDn = ''): Committee
+    {
+        $ou ??= 'com'.bin2hex(random_bytes(3));
+        $uid = $community->getFirstAttribute('ou');
+
+        $committee = new Committee([
+            'ou' => $ou,
+            'description' => 'Committee '.$ou,
+        ]);
+        $committee->setDn(Committee::dnFrom($uid, $ou, parentDn: $parentDn));
+        $committee->save();
+
+        array_unshift(self::$entries, $committee);
+
+        return $committee;
+    }
+
+    /** Create a role inside a committee. */
+    public static function makeRole(Committee $committee, ?string $cn = null): Role
+    {
+        $cn ??= 'role'.bin2hex(random_bytes(3));
+
+        $role = new Role([
+            'cn' => $cn,
+            'description' => 'Role '.$cn,
+            'uniqueMember' => '',
+        ]);
+        $role->inside($committee);
+        $role->save();
+
+        array_unshift(self::$entries, $role);
+
+        return $role;
+    }
+
+    /** Create a realm-level group under ou=Groups. */
+    public static function makeGroup(Community $community, ?string $cn = null): Group
+    {
+        $cn ??= 'grp'.bin2hex(random_bytes(3));
+        $uid = $community->getFirstAttribute('ou');
+
+        $group = new Group([
+            'cn' => $cn,
+            'description' => 'Group '.$cn,
+            'uniqueMember' => '',
+        ]);
+        $group->setDn("cn=$cn,ou=Groups,ou=$uid,ou=Communities,".$group->getBaseDn());
+        $group->save();
+
+        array_unshift(self::$entries, $group);
+
+        return $group;
+    }
+
+    /** Detach every membership and delete every entry created during the test. */
     public static function cleanup(): void
     {
         foreach (self::$memberships as $membership) {
@@ -115,13 +202,29 @@ class TestLdap
             }
         }
         foreach (self::$users as $user) {
-            try {
-                $user->delete();
-            } catch (\Throwable) {
-                // already deleted; ignore.
-            }
+            self::forget($user);
         }
+        // Deepest entries first; recursive delete removes any remaining children.
+        foreach (self::$entries as $entry) {
+            self::forget($entry, recursive: true);
+        }
+
         self::$memberships = [];
         self::$users = [];
+        self::$entries = [];
+    }
+
+    private static function resolveCommunity(string|Community $community): Community
+    {
+        return $community instanceof Community ? $community : Community::findByUid($community);
+    }
+
+    private static function forget(LdapModel $entry, bool $recursive = false): void
+    {
+        try {
+            $entry->delete(recursive: $recursive);
+        } catch (\Throwable) {
+            // already deleted; ignore.
+        }
     }
 }

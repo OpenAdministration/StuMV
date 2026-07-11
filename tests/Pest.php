@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\Community;
 use App\Models\User;
 use Tests\Support\TestLdap;
 use Tests\TestCase;
@@ -31,22 +32,23 @@ pest()->extend(TestCase::class)
 | Each helper creates a real, self-cleaning LDAP-backed user at the requested
 | authorization level, logs it in, and returns the App\Models\User so it can be
 | reused (e.g. `$this->actingAs(actingAsAdmin())->get(...)`). "member",
-| "moderator" and "admin" are scoped to a community (default: the seeded "demo"
-| community); "superAdmin" is global. See Tests\Support\TestLdap.
+| "moderator" and "admin" are scoped to a community — pass a uid string (default:
+| the seeded "demo" community) or a Community instance (e.g. one from
+| newCommunity()); "superAdmin" is global. See Tests\Support\TestLdap.
 |
 */
 
-function actingAsMember(string $community = 'demo'): User
+function actingAsMember(string|Community $community = 'demo'): User
 {
     return tap(TestLdap::member($community), fn (User $user) => test()->actingAs($user));
 }
 
-function actingAsModerator(string $community = 'demo'): User
+function actingAsModerator(string|Community $community = 'demo'): User
 {
     return tap(TestLdap::moderator($community), fn (User $user) => test()->actingAs($user));
 }
 
-function actingAsAdmin(string $community = 'demo'): User
+function actingAsAdmin(string|Community $community = 'demo'): User
 {
     return tap(TestLdap::admin($community), fn (User $user) => test()->actingAs($user));
 }
@@ -54,6 +56,21 @@ function actingAsAdmin(string $community = 'demo'): User
 function actingAsSuperAdmin(): User
 {
     return tap(TestLdap::superAdmin(), fn (User $user) => test()->actingAs($user));
+}
+
+/*
+|--------------------------------------------------------------------------
+| LDAP structure helpers
+|--------------------------------------------------------------------------
+|
+| Build a self-cleaning directory structure for a test instead of relying on
+| the hand-seeded communities. All entries are removed after the test.
+|
+*/
+
+function newCommunity(?string $uid = null): Community
+{
+    return TestLdap::makeCommunity($uid);
 }
 
 /*
