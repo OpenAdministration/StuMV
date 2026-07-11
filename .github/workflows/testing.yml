@@ -1,0 +1,104 @@
+name: Testing
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: PHPUnit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # composer.lock resolves to symfony ^8.1 which requires php >= 8.4.1.
+        php: ['8.4']
+
+    services:
+      # MariaDB for the Eloquent side (RefreshDatabase migrates stumv_testing).
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+          MARIADB_DATABASE: stumv_testing
+          MARIADB_USER: stumv
+          MARIADB_PASSWORD: local_stumv_password
+        ports:
+          - 13306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Prod-faithful OpenLDAP (same Symas build as production). Built and run
+      # here rather than as a `services:` entry because it is a local image.
+      # Tests hit it on 127.0.0.1:13389 (matches .env.testing).
+      - name: Build & start LDAP
+        run: |
+          docker build -t stumv-openldap ./docker/openldap
+          docker run -d --name ldap -p 13389:1389 stumv-openldap
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: ldap, gd, pdo_mysql, zip, mbstring, intl, bcmath, curl
+          coverage: none
+
+      - name: Prepare environment file
+        run: cp .env.testing .env
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        # COMPOSER_AUTH carries the credentials for the commercial livewire/flux-pro
+        # package. Add a repository secret named COMPOSER_AUTH containing JSON, e.g.
+        # {"http-basic":{"composer.fluxui.dev":{"username":"<email>","password":"<license-key>"}}}
+        env:
+          COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
+        run: composer install --no-ansi --no-interaction --no-scripts --prefer-dist --no-progress
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build front-end assets
+        # Produces public/build/manifest.json so @vite resolves in full-page
+        # (HTTP) tests. public/hot is gitignored and absent in CI.
+        run: |
+          npm ci
+          npm run build
+
+      - name: Wait for LDAP to accept binds
+        run: |
+          for i in $(seq 1 30); do
+            if docker exec ldap /opt/symas/bin/ldapwhoami -x \
+                 -H ldap://127.0.0.1:1389 \
+                 -D "uid=stumv,ou=Services,dc=stumv,dc=de" \
+                 -w stumv-not-production >/dev/null 2>&1; then
+              echo "LDAP is up"; exit 0
+            fi
+            echo "waiting for LDAP ($i)..."; sleep 2
+          done
+          echo "LDAP did not come up"; docker logs ldap; exit 1
+
+      - name: Run tests
+        run: ./vendor/bin/phpunit --no-coverage
+
+      - name: LDAP logs on failure
+        if: failure()
+        run: docker logs ldap || true
