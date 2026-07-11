@@ -4,12 +4,12 @@ namespace Tests\Support;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User as LdapUser;
 use App\Models\User;
 use LdapRecord\Models\Model as LdapModel;
-use LdapRecord\Models\OpenLDAP\Group;
 
 /**
  * Builds throwaway, fully wired LDAP fixtures on the fly.
