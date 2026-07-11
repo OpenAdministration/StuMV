@@ -56,4 +56,8 @@ describe('UserIsMember', function (): void {
         // demo-hhv belongs to the "demo" community, not "testcom".
         expect(passesRule('user', 'demo-hhv', new UserIsMember('testcom')))->toBeFalse();
     });
+
+    test('rejects a username that does not exist at all', function (): void {
+        expect(passesRule('user', 'ghost-'.uniqid(), new UserIsMember('testcom')))->toBeFalse();
+    });
 });

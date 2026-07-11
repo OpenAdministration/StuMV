@@ -75,3 +75,20 @@ test('a user who is not a member of the community cannot be added to a role', fu
 
     expect(RoleMembership::count())->toBe(0);
 });
+
+test('an unknown username is rejected with a validation error, not a crash', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    actingAsModerator($community);
+
+    // Regression: previously UserIsMember let unknown usernames through and the
+    // RoleMembership insert then hit the username foreign key (500).
+    Livewire::test(AddUserToRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+        ->set('usernames', ['ghost-'.uniqid()])
+        ->set('start_date', today()->format('Y-m-d'))
+        ->call('save')
+        ->assertHasErrors('usernames.0');
+
+    expect(RoleMembership::count())->toBe(0);
+});

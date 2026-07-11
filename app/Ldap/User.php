@@ -51,7 +51,7 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     public function adminOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn', '=', 'members');
+        $hm->getQuery()->where('cn', '=', 'admins');
 
         return $hm;
     }
@@ -59,7 +59,7 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     public function moderatorOf(): HasMany
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn', '=', 'members');
+        $hm->getQuery()->where('cn', '=', 'moderators');
 
         return $hm;
     }
