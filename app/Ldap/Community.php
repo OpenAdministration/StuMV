@@ -8,7 +8,8 @@ use LdapRecord\Laravel\ImportableFromLdap;
 use LdapRecord\Laravel\LdapImportable;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
-use LdapRecord\Query\Builder;
+use LdapRecord\Models\Relations\Relation;
+use LdapRecord\Query\Model\Builder;
 
 /***
  * @property $ou

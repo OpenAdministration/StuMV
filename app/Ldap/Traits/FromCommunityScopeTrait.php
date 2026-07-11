@@ -3,7 +3,7 @@
 namespace App\Ldap\Traits;
 
 use App\Ldap\Community;
-use LdapRecord\Query\Builder;
+use LdapRecord\Query\Model\Builder;
 
 trait FromCommunityScopeTrait
 {
