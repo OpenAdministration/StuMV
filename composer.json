@@ -6,7 +6,7 @@
     "keywords": ["ldap", "laravel", "memership-management", "student-body"],
     "license": "AGPL",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "ext-gd": "*",
         "ext-ldap": "*",
         "ext-pdo": "*",
@@ -33,8 +33,7 @@
         "mockery/mockery": "^1.4.4",
         "phpunit/phpunit": "^9.5.10",
         "rector/rector": "^2.5",
-        "roave/security-advisories": "dev-latest",
-        "spatie/laravel-ignition": "^2.0"
+        "roave/security-advisories": "dev-latest"
     },
     "autoload": {
         "psr-4": {
