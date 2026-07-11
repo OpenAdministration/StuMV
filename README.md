@@ -16,7 +16,7 @@ Zunächst müssen [OpenLDAP](https://www.openldap.org/) und eine [MariaDB](https
 git clone https://github.com/OpenAdministration/StuMV
 composer install
 npm install
-npm run production
+npm run build
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
@@ -29,6 +29,71 @@ php artisan flux:activate
 ```
 
 Nun müssen in der Datei `.env` noch ein paar Einstellungen wie App-Einstellungen, die Zugangsdaten für die Datenbank und E-Mail-Versand gesetzt werden.
+
+## Contributing
+
+### Requirements
+
+- **PHP 8.4** 
+- **Node 22**
+- Access to **[Flux Pro](https://fluxui.dev/)** (`livewire/flux-pro`) — a licensed package
+
+### Local development with Docker
+
+A ready-to-run stack (OpenLDAP matching production + MariaDB + php-fpm + nginx + a
+node/vite workspace) is defined in `docker-compose.dev.yaml`:
+
+```bash
+podman compose --env-file .env.docker -f docker-compose.dev.yaml up -d
+```
+
+The app is then served at http://localhost:8080. Configuration lives in `.env.docker`
+(throwaway development credentials; the app talks to the in-network `ldap`/`mariadb`
+services). It also works with Docker (`docker compose …`) — the `userns_mode: keep-id`
+lines are only needed for rootless podman.
+
+### Code quality
+
+Composer scripts wrap the tooling. Run **`composer fix` before committing.**
+
+| Command               | What it does                                            |
+| --------------------- | ------------------------------------------------------- |
+| `composer pint`       | Fix code style (Laravel Pint)                           |
+| `composer lint`       | Static analysis (PHPStan / Larastan)                    |
+| `composer rector`     | Apply Rector refactorings                               |
+| `composer rector-dry` | Preview Rector changes without writing                  |
+| `composer fix`        | Run Rector, then Pint (the pre-commit shortcut)         |
+
+### Tests
+
+The suite runs against a **real dockerized OpenLDAP** (see `docker/openldap/`) and a
+MariaDB test database, configured in `.env.testing` (LDAP on `:13389`, database
+`stumv_testing` on `:13306`). Bring up the Docker stack above (it publishes both on those
+ports; create the `stumv_testing` database once), then:
+
+```bash
+./vendor/bin/phpunit
+```
+
+The LDAP registration/login flow is covered end-to-end by
+`tests/Feature/Auth/LdapAuthenticationTest`. Some older tests are quarantined
+(`markTestSkipped`, grep `Quarantined:`) pending a rewrite for the current UI.
+
+### Continuous Integration
+
+Every push and pull request runs four workflows in `.github/workflows/` (PHP 8.4):
+
+- **testing** — PHPUnit against a dockerized OpenLDAP + MariaDB service
+- **lint** — Pint (`--test`)
+- **analysis** — PHPStan / Larastan
+- **rector** — Rector dry-run
+
+CI requires a repository secret **`COMPOSER_AUTH`** holding the Flux Pro credentials so
+`composer install` can fetch `livewire/flux-pro`:
+
+```json
+{"http-basic":{"composer.fluxui.dev":{"username":"<email>","password":"<license-key>"}}}
+```
 
 ## Security
 
