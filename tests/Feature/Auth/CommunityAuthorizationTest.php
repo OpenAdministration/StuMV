@@ -23,6 +23,18 @@ test('a plain member is forbidden from admin and superadmin routes', function ()
     $this->actingAs($member)->get('/new-realm')->assertStatus(403);        // SuperAdmin
 });
 
+test('a moderator can open a moderator-only route', function (): void {
+    $moderator = actingAsModerator('demo');
+
+    $this->actingAs($moderator)->get('/demo/new-committee')->assertStatus(200);
+});
+
+test('a plain member is forbidden from moderator-only routes', function (): void {
+    $member = actingAsMember('demo');
+
+    $this->actingAs($member)->get('/demo/new-committee')->assertStatus(403);
+});
+
 test('a community admin can open the community edit screen', function (): void {
     $admin = actingAsAdmin('demo');
 

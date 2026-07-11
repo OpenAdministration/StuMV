@@ -172,6 +172,15 @@ class TestLdap
         return $role;
     }
 
+    /**
+     * Register an entry created outside the factory (e.g. by the component under
+     * test) so it is torn down with the rest.
+     */
+    public static function track(LdapModel $entry): void
+    {
+        array_unshift(self::$entries, $entry);
+    }
+
     /** Create a realm-level group under ou=Groups. */
     public static function makeGroup(Community $community, ?string $cn = null): Group
     {
