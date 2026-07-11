@@ -41,15 +41,17 @@ test('registration screen can be rendered and livewire is there', function (): v
     $response->assertSeeLivewire('register-user');
 });
 
-test('a valid registration creates the account and prompts email verification', function (): void {
+test('a valid registration persists every submitted field, joins the community and logs in', function (): void {
     // Fake only Registered so the email-verification listener stays quiet, while
-    // any other listeners still fire.
+    // the LDAP auth events that Auth::attempt() relies on still fire.
     Event::fake([Registered::class]);
+
+    $email = $this->username.'@example.test';
 
     // Set email first: the component's updatedEmail() hook pre-fills the name
     // fields from the address, so our explicit values must be set afterwards.
     Livewire::test('register-user')
-        ->set('email', $this->username.'@example.test')
+        ->set('email', $email)
         ->set('first_name', 'Happy')
         ->set('last_name', 'Path')
         ->set('username', $this->username)
@@ -59,20 +61,25 @@ test('a valid registration creates the account and prompts email verification', 
         ->assertHasNoErrors()
         ->assertRedirect(route('verification.notice'));
 
-    // Account exists in the directory with the details we submitted.
+    // Every attribute the component writes must round-trip to the directory.
     $ldapUser = LdapUser::findByUsername($this->username);
     expect($ldapUser)->not->toBeNull()
-        ->and($ldapUser->getFirstAttribute('mail'))->toBe($this->username.'@example.test')
-        ->and($ldapUser->getFirstAttribute('givenName'))->toBe('Happy');
+        ->and($ldapUser->getFirstAttribute('uid'))->toBe($this->username)
+        ->and($ldapUser->getFirstAttribute('givenName'))->toBe('Happy')
+        ->and($ldapUser->getFirstAttribute('sn'))->toBe('Path')
+        ->and($ldapUser->getFirstAttribute('cn'))->toBe('Happy Path')
+        ->and($ldapUser->getFirstAttribute('mail'))->toBe($email);
 
-    // The registration flow was kicked off. NOTE: the component tries to log the
-    // user straight in, but Auth::attempt() there is passed a positional array
-    // ([$username, $password]) instead of keyed credentials (['uid' => ...]), so
-    // it does not actually authenticate — the user reaches verification.notice as
-    // a guest. Logging in via /login (keyed) works and is covered by
-    // LdapAuthenticationTest. Asserting the created account + event keeps this
-    // test honest without pinning that broken auto-login.
+    // The account joined the community that owns the registration domain...
+    $members = Community::findByUid('testcom')->membersGroup()->members()->get()
+        ->map(fn ($member) => $member->getFirstAttribute('uid'));
+    expect($members)->toContain($this->username);
+
+    // ...the Registered event fired, and the user is logged straight in (which
+    // also proves the password was stored in a form LDAP can bind against).
     Event::assertDispatched(Registered::class);
+    $this->assertAuthenticated();
+    expect(auth()->user()->username)->toBe($this->username);
 });
 
 test('registration is refused for a domain that is not registerable', function (): void {
