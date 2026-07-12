@@ -2,16 +2,19 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\SyncsUniqueMembers;
 use App\Ldap\Community;
 use App\Ldap\Group;
+use App\Ldap\User as LdapUser;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
-use LdapRecord\Container;
 
 class LdapSyncGroups extends Command
 {
+    use SyncsUniqueMembers;
+
     /**
      * The name and signature of the console command.
      *
@@ -39,8 +42,19 @@ class LdapSyncGroups extends Command
             $date = Date::createFromFormat('Y-m-d', $this->option('date'));
         }
 
-        $connection = Container::getDefaultConnection();
-        $query = $connection->query();
+        // Fetch every active membership, every LDAP user they refer to, and
+        // every group/role mapping in one query each - instead of one query
+        // per group/role mapping encountered while walking the realm/group
+        // tree below.
+        $memberships = RoleMembership::active($date)->get();
+        $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
+
+        $ldapUsersByUsername = LdapUser::query()
+            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
+            ->get()
+            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
+
+        $groupRolesByGroup = GroupMembership::all()->groupBy('group_dn');
 
         $realms = Community::query()
             ->setDn(Community::$rootDn)->search()
@@ -54,36 +68,27 @@ class LdapSyncGroups extends Command
             foreach ($groups as $group) {
                 $this->comment('  |-> '.$group->getDn());
 
-                $currentMembers = $group->getAttribute('uniqueMember');
-                $newMembers = [];
-                $roles = GroupMembership::where('group_dn', $group->getDn())->get();
-                foreach ($roles as $role) {
-                    $roleCn = str_replace('cn=', '', substr((string) $role->role_dn, 0, strpos((string) $role->role_dn, ',')));
-                    $committeeDn = strstr((string) $role->role_dn, 'ou=');
-                    $activeMemberships = RoleMembership::active($date)
-                        ->where('committee_dn', $committeeDn)
-                        ->where('role_cn', $roleCn)
-                        ->get();
-                    foreach ($activeMemberships as $membership) {
-                        $newMembers[] = $membership->user->ldap();
-                    }
-                }
-                $newMembers = array_unique($newMembers);
+                $groupRoles = $groupRolesByGroup->get($group->getDn(), collect());
 
-                $membersToRemove = array_diff($currentMembers, $newMembers);
-                foreach ($membersToRemove as $memberToRemove) {
-                    if ($memberToRemove !== '') {
-                        $this->comment("  |  |-> Remove: $memberToRemove");
-                        $query->remove($group->getDn(), ['uniqueMember' => [$memberToRemove]]);
+                $desiredDns = collect();
+                foreach ($groupRoles as $groupRole) {
+                    $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
+                    $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
+                    $key = $committeeDn.'|'.$roleCn;
+
+                    $roleMemberships = $membershipsByRole->get($key, collect());
+                    foreach ($roleMemberships as $membership) {
+                        $user = $ldapUsersByUsername->get($membership->username);
+                        if ($user === null) {
+                            $this->warn("  |  |-> Unknown LDAP user: $membership->username");
+
+                            continue;
+                        }
+                        $desiredDns->push($user->getDn());
                     }
                 }
 
-                $membersToAdd = array_diff($newMembers, $currentMembers);
-                $ldapMembers = $group->users();
-                foreach ($membersToAdd as $memberToAdd) {
-                    $this->comment("  |  |-> Add: $memberToAdd");
-                    $ldapMembers->attach($memberToAdd);
-                }
+                $this->syncUniqueMembers($group, $desiredDns->unique()->values()->all());
             }
         }
     }

@@ -2,15 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Commands\Concerns\SyncsUniqueMembers;
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\User as LdapUser;
 use App\Models\RoleMembership;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
-use LdapRecord\Container;
 
 class LdapSyncRoles extends Command
 {
+    use SyncsUniqueMembers;
+
     /**
      * The name and signature of the console command.
      *
@@ -40,8 +43,16 @@ class LdapSyncRoles extends Command
             $date = Date::createFromFormat('Y-m-d', $this->option('date'));
         }
 
-        $connection = Container::getDefaultConnection();
-        $query = $connection->query();
+        // Fetch every active membership, and every LDAP user they refer to,
+        // in one query each - instead of one query per role/user encountered
+        // while walking the realm/committee/role tree below.
+        $memberships = RoleMembership::active($date)->get();
+        $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
+
+        $ldapUsersByUsername = LdapUser::query()
+            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
+            ->get()
+            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
 
         $realms = Community::query()
             ->setDn(Community::$rootDn)->search()
@@ -62,33 +73,24 @@ class LdapSyncRoles extends Command
                 foreach ($roles as $role) {
                     $this->comment('  |  |-> '.$role->getDn());
 
-                    $currentMembers = $role->getAttribute('uniqueMember');
+                    $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
+                    $roleMemberships = $membershipsByRole->get($key, collect());
 
-                    $activeMemberships = RoleMembership::active($date)
-                        ->where('committee_dn', $committee->getDn())
-                        ->where('role_cn', $role->getFirstAttribute('cn'))
-                        ->get();
-                    $newMembers = [];
-                    foreach ($activeMemberships as $membership) {
-                        /** @var RoleMembership $membership */
-                        $newMembers[] = $membership->user->ldap();
-                    }
-                    $newMembers = array_unique($newMembers);
+                    $desiredDns = $roleMemberships
+                        ->map(function (RoleMembership $membership) use ($ldapUsersByUsername) {
+                            $user = $ldapUsersByUsername->get($membership->username);
+                            if ($user === null) {
+                                $this->warn("  |  |  |-> Unknown LDAP user: $membership->username");
+                            }
 
-                    $membersToRemove = array_diff($currentMembers, $newMembers);
-                    foreach ($membersToRemove as $memberToRemove) {
-                        if ($memberToRemove !== '') {
-                            $this->comment("  |  |  |-> Remove: $memberToRemove");
-                            $query->remove($role->getDn(), ['uniqueMember' => [$memberToRemove]]);
-                        }
-                    }
+                            return $user?->getDn();
+                        })
+                        ->filter()
+                        ->unique()
+                        ->values()
+                        ->all();
 
-                    $membersToAdd = array_diff($newMembers, $currentMembers);
-                    $ldapMembers = $role->members();
-                    foreach ($membersToAdd as $memberToAdd) {
-                        $this->comment("  |  |  |-> Add: $memberToAdd");
-                        $ldapMembers->attach($memberToAdd);
-                    }
+                    $this->syncUniqueMembers($role, $desiredDns);
                 }
             }
         }

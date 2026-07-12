@@ -4,6 +4,7 @@ use App\Ldap\Group;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\TestLdap;
 
 /**
@@ -84,6 +85,71 @@ test('ldap:sync-roles leaves already-correct members untouched instead of cleari
     $members = \App\Ldap\Role::find($role->getDn())->members()->get()
         ->map(fn ($m) => $m->getFirstAttribute('uid'));
     expect($members)->not->toContain($stale->getFirstAttribute('uid'));
+});
+
+test('ldap:sync-roles fetches active memberships once, not once per role', function (): void {
+    $community = newCommunity();
+    $committee1 = TestLdap::makeCommittee($community, 'com1'.bin2hex(random_bytes(3)));
+    $committee2 = TestLdap::makeCommittee($community, 'com2'.bin2hex(random_bytes(3)));
+    TestLdap::makeRole($committee1, 'mitglied');
+    TestLdap::makeRole($committee2, 'mitglied');
+    $memberA = TestLdap::member($community);
+    $memberB = TestLdap::member($community);
+
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee1->getDn(),
+        'username' => $memberA->username,
+        'from' => today()->subMonth(),
+    ]);
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee2->getDn(),
+        'username' => $memberB->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $queries = [];
+    DB::listen(function ($query) use (&$queries): void {
+        $queries[] = $query->sql;
+    });
+
+    $this->artisan('ldap:sync-roles')->assertExitCode(0);
+
+    $membershipQueries = array_filter($queries, fn (string $sql): bool => str_contains($sql, 'role_user_relation'));
+
+    expect($membershipQueries)->toHaveCount(1);
+});
+
+test('ldap:sync-groups fetches active memberships and group mappings once, not once per group', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr'.bin2hex(random_bytes(3)));
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group1 = TestLdap::makeGroup($community, 'grp1'.bin2hex(random_bytes(3)));
+    $group2 = TestLdap::makeGroup($community, 'grp2'.bin2hex(random_bytes(3)));
+    $member = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $group1->getDn(), 'role_dn' => $role->getDn()]);
+    GroupMembership::create(['group_dn' => $group2->getDn(), 'role_dn' => $role->getDn()]);
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $queries = [];
+    DB::listen(function ($query) use (&$queries): void {
+        $queries[] = $query->sql;
+    });
+
+    $this->artisan('ldap:sync-groups')->assertExitCode(0);
+
+    $membershipQueries = array_filter($queries, fn (string $sql): bool => str_contains($sql, 'role_user_relation'));
+    $groupMappingQueries = array_filter($queries, fn (string $sql): bool => str_contains($sql, 'role_group_relation'));
+
+    expect($membershipQueries)->toHaveCount(1)
+        ->and($groupMappingQueries)->toHaveCount(1);
 });
 
 test('ldap:sync-groups projects role memberships onto the LDAP group', function (): void {
