@@ -2,6 +2,7 @@
 
 use App\Ldap\User as LdapUser;
 use App\Livewire\Profile;
+use App\Models\User as DbUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
@@ -26,6 +27,19 @@ test('a user can edit their own profile', function (): void {
         ->and($ldap->getFirstAttribute('cn'))->toBe('Neu Name')
         ->and($ldap->getFirstAttribute('telephoneNumber'))->toBe('+49 30 1234')
         ->and($ldap->getFirstAttribute('l'))->toBe('Berlin');
+});
+
+test('saving the profile updates the full name in the database too', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+
+    Livewire::test(Profile::class, ['username' => $user->username])
+        ->set('givenName', 'Neu')
+        ->set('sn', 'Name')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(DbUser::where('username', $user->username)->value('full_name'))->toBe('Neu Name');
 });
 
 test('first and last name are required', function (): void {

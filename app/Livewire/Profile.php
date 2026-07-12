@@ -90,6 +90,10 @@ class Profile extends Component
 
         $user->save();
 
+        \App\Models\User::where('username', $this->uid)->update([
+            'full_name' => $this->givenName.' '.$this->sn,
+        ]);
+
         Flux::toast(variant: 'success', text: __('Saved'));
         $this->redirect('/profile/'.$this->uid, navigate: true);
     }
