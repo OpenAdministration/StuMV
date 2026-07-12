@@ -20,8 +20,6 @@
                     <flux:input type="password" wire:model="password_confirmation" />
                     <flux:error name="password_confirmation" />
                 </flux:field>
-
-                <x-slot:abort_route>{{ back() }}</x-slot:abort_route>
             </x-livewire-form>
         </div>
     </div>
