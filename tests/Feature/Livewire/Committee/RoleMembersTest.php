@@ -1,22 +1,25 @@
 <?php
 
-namespace Tests\Feature\Livewire\Committee;
-
+use App\Ldap\Community;
 use App\Livewire\Committee\ListRoleMembers;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class RoleMembersTest extends TestCase
-{
-    /** @test */
-    public function renders_successfully()
-    {
-        // Quarantined: auto-generated stub that mounts the component without
-        // its required mount parameters (e.g. $ou/$cn), so it errors on render.
-        // TODO: write a real test that mounts with valid params.
-        $this->markTestSkipped('Auto-generated stub: component needs mount parameters.');
+uses(RefreshDatabase::class);
 
-        Livewire::test(ListRoleMembers::class)
-            ->assertStatus(200);
-    }
-}
+test('renders the member list for a seeded role', function (): void {
+    actingAsModerator('demo');
+
+    Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+        ->assertStatus(200)
+        ->assertSet('cn', 'mitglied');
+});
+
+test('the member list can be lazily loaded', function (): void {
+    actingAsModerator('demo');
+
+    Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+        ->assertSet('ready', false)
+        ->call('loadMembers')
+        ->assertSet('ready', true);
+});

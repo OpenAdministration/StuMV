@@ -1,22 +1,16 @@
 <?php
 
-namespace Tests\Feature\Livewire\Group;
-
+use App\Ldap\Community;
 use App\Livewire\Group\AddRoleToGroup;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class AddRoleToGroupTest extends TestCase
-{
-    /** @test */
-    public function renders_successfully()
-    {
-        // Quarantined: auto-generated stub that mounts the component without
-        // its required mount parameters (e.g. $ou/$cn), so it errors on render.
-        // TODO: write a real test that mounts with valid params.
-        $this->markTestSkipped('Auto-generated stub: component needs mount parameters.');
+uses(RefreshDatabase::class);
 
-        Livewire::test(AddRoleToGroup::class)
-            ->assertStatus(200);
-    }
-}
+test('renders the add-role-to-group screen for an admin', function (): void {
+    actingAsAdmin('demo');
+
+    Livewire::test(AddRoleToGroup::class, ['uid' => Community::findByUid('demo'), 'cn' => 'some-group'])
+        ->assertStatus(200)
+        ->assertSet('group_cn', 'some-group');
+});

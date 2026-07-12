@@ -1,22 +1,30 @@
 <?php
 
-namespace Tests\Feature\Livewire\Committee;
-
+use App\Ldap\Community;
 use App\Livewire\Committee\EditRoleMembership;
+use App\Models\RoleMembership;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class EditRoleMembershipTest extends TestCase
-{
-    /** @test */
-    public function renders_successfully()
-    {
-        // Quarantined: auto-generated stub that mounts the component without
-        // its required mount parameters (e.g. $ou/$cn), so it errors on render.
-        // TODO: write a real test that mounts with valid params.
-        $this->markTestSkipped('Auto-generated stub: component needs mount parameters.');
+uses(RefreshDatabase::class);
 
-        Livewire::test(EditRoleMembership::class)
-            ->assertStatus(200);
-    }
-}
+test('renders the edit form for an existing membership', function (): void {
+    $moderator = actingAsModerator('demo');
+
+    $membership = RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => 'ou=FSR,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de',
+        // FK: role_user_relation.username references user.username.
+        'username' => $moderator->username,
+        'from' => today(),
+    ]);
+
+    Livewire::test(EditRoleMembership::class, [
+        'uid' => Community::findByUid('demo'),
+        'ou' => 'FSR',
+        'cn' => 'mitglied',
+        'id' => $membership->id,
+    ])
+        ->assertStatus(200)
+        ->assertSet('username', $moderator->username);
+});

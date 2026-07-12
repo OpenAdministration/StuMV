@@ -1,22 +1,15 @@
 <?php
 
-namespace Tests\Feature\Livewire\Realm;
-
+use App\Ldap\Community;
 use App\Livewire\Realm\CommunityDashboard;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class CommunityDashboardTest extends TestCase
-{
-    /** @test */
-    public function renders_successfully()
-    {
-        // Quarantined: auto-generated stub that mounts the component without
-        // its required mount parameters (e.g. $ou/$cn), so it errors on render.
-        // TODO: write a real test that mounts with valid params.
-        $this->markTestSkipped('Auto-generated stub: component needs mount parameters.');
+uses(RefreshDatabase::class);
 
-        Livewire::test(CommunityDashboard::class)
-            ->assertStatus(200);
-    }
-}
+test('renders the dashboard for a community member', function (): void {
+    actingAsMember('demo');
+
+    Livewire::test(CommunityDashboard::class, ['uid' => Community::findByUid('demo')])
+        ->assertStatus(200);
+});

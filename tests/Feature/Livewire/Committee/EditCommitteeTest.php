@@ -1,22 +1,16 @@
 <?php
 
-namespace Tests\Feature\Livewire\Committee;
-
+use App\Ldap\Community;
 use App\Livewire\Committee\EditCommittee;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\TestCase;
 
-class EditCommitteeTest extends TestCase
-{
-    /** @test */
-    public function renders_successfully()
-    {
-        // Quarantined: auto-generated stub that mounts the component without
-        // its required mount parameters (e.g. $ou/$cn), so it errors on render.
-        // TODO: write a real test that mounts with valid params.
-        $this->markTestSkipped('Auto-generated stub: component needs mount parameters.');
+uses(RefreshDatabase::class);
 
-        Livewire::test(EditCommittee::class)
-            ->assertStatus(200);
-    }
-}
+test('renders the edit form for a seeded committee', function (): void {
+    actingAsModerator('demo');
+
+    Livewire::test(EditCommittee::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR'])
+        ->assertStatus(200)
+        ->assertSet('ou', 'FSR');
+});

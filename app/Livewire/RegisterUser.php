@@ -117,7 +117,9 @@ class RegisterUser extends Component
             $user->save();
             $community->membersGroup()->members()->attach($user);
             event(new Registered($user));
-            Auth::attempt([$this->username, $this->password]);
+            // Credentials must be keyed for the LDAP guard (see LoginRequest);
+            // a positional array does not authenticate.
+            Auth::attempt(['uid' => $this->username, 'password' => $this->password]);
 
             return to_route('verification.notice')->with('message', __('Successfully Registered'));
 

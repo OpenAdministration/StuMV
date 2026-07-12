@@ -1,0 +1,57 @@
+<?php
+
+use App\Ldap\Community;
+use App\Ldap\Domain;
+use App\Livewire\Realm\EditRealm;
+use App\Livewire\Realm\NewDomain;
+use App\Livewire\Realm\NewRealm;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\Support\TestLdap;
+
+uses(RefreshDatabase::class);
+
+test('a super admin can create a realm with the full skeleton', function (): void {
+    actingAsSuperAdmin();
+    $uid = 'trealm'.bin2hex(random_bytes(3));
+
+    Livewire::test(NewRealm::class)
+        ->set('uid', $uid)
+        ->set('name', 'Test Realm '.$uid)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $community = Community::findByUid($uid);
+    TestLdap::track($community); // hand the component-created community to teardown
+
+    expect($community)->not->toBeNull()
+        ->and($community->membersGroup())->not->toBeNull()
+        ->and($community->adminsGroup())->not->toBeNull();
+});
+
+test('an admin can rename their realm', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsAdmin($community);
+
+    Livewire::test(EditRealm::class, ['uid' => $community])
+        ->set('name', 'Renamed Realm')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Community::findByUid($uid)->getFirstAttribute('description'))->toBe('Renamed Realm');
+});
+
+test('an admin can add a domain to their realm', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsAdmin($community);
+    $dc = 'dom'.bin2hex(random_bytes(3)).'.de';
+
+    Livewire::test(NewDomain::class, ['uid' => $community])
+        ->set('dc', $dc)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Domain::findBy('dc', $dc))->not->toBeNull();
+});

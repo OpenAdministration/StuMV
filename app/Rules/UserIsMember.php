@@ -27,7 +27,9 @@ class UserIsMember implements ValidationRule
         if (! ($value instanceof User)) {
             $value = User::findByUsername($value);
         }
-        if (! empty($value) && $this->community->membersGroup()->members()->exists($value) !== true) {
+        // Reject unknown users (findByUsername returned null) as well as real
+        // users who are not members of the community.
+        if (empty($value) || $this->community->membersGroup()->members()->exists($value) !== true) {
             $fail('realms.user_is_no_member');
         }
     }
