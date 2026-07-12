@@ -82,7 +82,7 @@ class ListRoles extends Component
                     'roles' => collect(),
                     'roleData' => [],
                 ]
-            )->title(__('committees.roles_title', ['name' => $this->ou]));
+            )->title(__('committees.roles_title', ['name' => $committee->getFirstAttribute('description')]));
         }
 
         $rolesQuery = $committee->roles();
