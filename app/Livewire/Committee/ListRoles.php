@@ -91,7 +91,9 @@ class ListRoles extends Component
             $rolesQuery = $rolesQuery->whereContains('description', $this->search);
         }
 
-        $rolesSlice = $rolesQuery->list()->get();
+        $rolesSlice = $rolesQuery->list()->get()
+            ->sortBy(fn (Role $role): string => mb_strtolower((string) $role->getFirstAttribute('description')), SORT_NATURAL)
+            ->values();
 
         $roleData = [];
         foreach ($rolesSlice as $role) {
