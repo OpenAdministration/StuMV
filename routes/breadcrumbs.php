@@ -163,7 +163,10 @@ Breadcrumbs::for('committees.roles.new', function (BreadcrumbTrail $trail, array
 
 Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.roles', $routeParams);
-    $trail->push($routeParams['cn'], route('committees.roles.members', $routeParams));
+    $committee = Committee::findByName($routeParams['uid'], $routeParams['ou']);
+    $role = $committee?->roles()->where('cn', $routeParams['cn'])->first();
+    $name = $role?->getFirstAttribute('description') ?: $routeParams['cn'];
+    $trail->push($name, route('committees.roles.members', $routeParams));
 });
 
 Breadcrumbs::for('committees.roles.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
