@@ -13,12 +13,6 @@ class ListDomains extends Component
     #[Url]
     public string $search = '';
 
-    #[Url]
-    public string $sortField = '';
-
-    #[Url]
-    public string $sortDirection = 'asc';
-
     public string $deleteDomain = '';
 
     public string $uid;
@@ -30,11 +24,11 @@ class ListDomains extends Component
 
     public function render()
     {
-        $domainSlice = Domain::fromCommunity($this->uid)
+        $domains = Domain::fromCommunity($this->uid)
             ->searchFor('ou', $this->search)
-            ->slice(1, 10, $this->sortField, $this->sortDirection);
+            ->get();
 
-        return view('livewire.realm.list-domains', ['domainSlice' => $domainSlice])
+        return view('livewire.realm.list-domains', ['domains' => $domains])
             ->title(__('realms.domains.list_title'));
     }
 

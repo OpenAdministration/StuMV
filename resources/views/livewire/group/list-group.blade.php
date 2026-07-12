@@ -32,7 +32,7 @@
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
-        @forelse($groupSlice->items() as $group)
+        @forelse($groups as $group)
             <flux:table.row>
                 <flux:table.cell>
                     <flux:link
@@ -82,12 +82,6 @@
         @endforelse
         </flux:table.rows>
     </flux:table>
-
-    @if($groupSlice->hasPages())
-        <div class="-mt-8">
-            <flux:pagination :paginator="$groupSlice" />
-        </div>
-    @endif
 
     <flux:modal name="delete" class="md:w-96">
         <div class="space-y-6">

@@ -29,7 +29,7 @@
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
-        @forelse($domainSlice->items() as $domain)
+        @forelse($domains as $domain)
             <flux:table.row>
                 <flux:table.cell>{{ $domain->getFirstAttribute('dc') }}</x-table.cell>
                 <flux:table.cell>{{ $domain->getFirstAttribute('description') }}</x-table.cell>

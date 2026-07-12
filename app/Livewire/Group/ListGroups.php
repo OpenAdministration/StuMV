@@ -56,10 +56,10 @@ class ListGroups extends Component
         if ($this->search) {
             $groupsQuery->whereContains('cn', trim($this->search));
         }
-        $groups = $groupsQuery->slice($page = 1, $perPage = 10);
+        $groups = $groupsQuery->get();
 
         return view('livewire.group.list-group', [
-            'groupSlice' => $groups,
+            'groups' => $groups,
         ])->title(__('groups.list_title'));
     }
 
