@@ -24,8 +24,8 @@
                     <flux:legend>{{ __('tools.matches') }}</flux:legend>
                     @if($noMatches)
                         <flux:callout
-                            variant="danger"
-                            icon="circle-x"
+                            variant="warning"
+                            icon="circle-alert"
                             heading="{{ __('tools.noMatchesFound') }}"
                             class="mt-[.35rem]"
                         />
