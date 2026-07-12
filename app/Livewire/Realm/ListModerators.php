@@ -69,7 +69,7 @@ class ListModerators extends Component
                     'community' => $community,
                     'realm_members' => collect(),
                 ]
-            )->title(__('realms.mods_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
+            )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
         }
 
         $mods = $this->sortByName($community->moderatorsGroup()->members()->get());
@@ -79,7 +79,7 @@ class ListModerators extends Component
                 'community' => $community,
                 'realm_members' => $mods,
             ]
-        )->title(__('realms.mods_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
+        )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
     }
 
     public function deletePrepare($uid): void

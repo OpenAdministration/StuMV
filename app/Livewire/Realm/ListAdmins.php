@@ -76,7 +76,7 @@ class ListAdmins extends Component
                     'community' => $community,
                     'realm_admins' => collect(),
                 ]
-            )->title(__('realms.admins_heading', [
+            )->title(__('realms.admins_headline', [
                 'name' => $community->description[0],
                 'uid' => $community->ou[0],
             ]));
@@ -89,7 +89,7 @@ class ListAdmins extends Component
                 'community' => $community,
                 'realm_admins' => $admins,
             ]
-        )->title(__('realms.admins_heading', [
+        )->title(__('realms.admins_headline', [
             'name' => $community->description[0],
             'uid' => $community->ou[0],
         ]));
