@@ -55,15 +55,17 @@
             >
                 {{ __('realms.dashboard.groups_headline') }}
             </flux:sidebar.item>
-            <flux:separator class="my-2" />
-            <flux:sidebar.item
-                icon="hammer"
-                wire:navigate
-                :href="route('tools.dashboard', ['uid' => $uid])"
-                :current="request()->is('*/tools') || request()->is('*/tools/*')"
-            >
-                {{ __('tools.tools') }}
-            </flux:sidebar.item>
+            @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('uid'))
+                <flux:separator class="my-2" />
+                <flux:sidebar.item
+                    icon="hammer"
+                    wire:navigate
+                    :href="route('tools.dashboard', ['uid' => $uid])"
+                    :current="request()->is('*/tools') || request()->is('*/tools/*')"
+                >
+                    {{ __('tools.tools') }}
+                </flux:sidebar.item>
+            @endcan
         @endcan
         @can('superadmin', \App\Models\User::class)
             @can('picked', \App\Ldap\Community::class)

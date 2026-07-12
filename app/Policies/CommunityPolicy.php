@@ -56,6 +56,13 @@ class CommunityPolicy
         return $community->moderatorsGroup()->members()->exists($user->ldap());
     }
 
+    public function tools(User $user, Community $community): bool
+    {
+        return $user->can('superadmin', User::class)
+            || $this->admin($user, $community)
+            || $this->moderator($user, $community);
+    }
+
     public function add_moderator(User $user, Community $community): bool
     {
         return $user->can('superadmin', User::class)

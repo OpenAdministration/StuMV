@@ -90,12 +90,16 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/membership/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
+        // end mod
+    });
+
+    // mods, admins and superadmins
+    Route::middleware(['can:tools,uid'])->group(function (): void {
         Route::livewire('{uid}/tools', ToolsDashboard::class)->name('tools.dashboard');
         Route::livewire('{uid}/tools/compare-email-list', CompareEmailList::class)->name('tools.compare-email-list');
         Route::livewire('{uid}/tools/import-user-uni-ldap', ImportUsersFromUniLdap::class)->name('tools.import-user-uni-ldap');
         Route::livewire('{uid}/tools/users-not-in-uni-ldap', UsersNotInUniLdap::class)->name('tools.users-not-in-uni-ldap');
         Route::livewire('{uid}/tools/unused-roles', UnusedRoles::class)->name('tools.unused-roles');
-        // end mod
     });
 
     Route::middleware(['communityAdmin'])->group(function (): void {
