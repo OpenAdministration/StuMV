@@ -141,7 +141,7 @@
         <flux:modal name="delete">
             <div class="space-y-6">
                 <div>
-                    <flux:heading size="lg" class="modal-header">{{ __('roles.delete_title', ['name' => $deleteRoleCn]) }}</flux:heading>
+                    <flux:heading size="lg" class="modal-header">{{ __('roles.delete_title', ['name' => $deleteRoleName]) }}</flux:heading>
                     <flux:text class="mt-2">{{ __('roles.delete_warning', ['name' => $deleteRoleName]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
