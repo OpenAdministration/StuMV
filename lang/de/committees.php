@@ -10,6 +10,7 @@ return [
     'delete.confirm' => 'Wenn du dir sicher bist tippe in das nachfolgende Textfeld: ',
     'edit' => 'Gremium :name bearbeiten',
     'parent_committee' => 'Übergeordnetes Gremium',
+    'no_parent_committee' => 'Kein übergeordnetes Gremium',
     'roles_title' => 'Rollen in :name',
     'roles_heading' => 'Rollen des Gremiums :name',
     'roles_explanation' => 'Hier findest du alle Rollen des Gremiums. Einem Gremium können Nutzer:innen durch eine:n Moderator:in über Rollen zugeordnet werden. Das Löschen und Bearbeiten von Rollen ist nur Moderator:innen möglich.',

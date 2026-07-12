@@ -10,6 +10,7 @@ return [
     'delete.confirm' => 'If you are sure, type the following into the text field below: ',
     'edit' => 'Edit committee :name',
     'parent_committee' => 'Parent committee',
+    'no_parent_committee' => 'No parent committee',
     'roles_title' => 'Roles in :name',
     'roles_heading' => 'Roles of the committee :name',
     'roles_explanation' => 'Here you will find all roles of the committee. Users can be assigned to a committee via roles by a moderator. Only moderators can delete or edit roles.',
