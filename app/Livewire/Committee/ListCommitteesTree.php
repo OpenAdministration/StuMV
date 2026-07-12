@@ -8,6 +8,7 @@ use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -130,7 +131,7 @@ class ListCommitteesTree extends Component
             ])->title(__('committees.list_title'));
         }
 
-        $committees = Committee::fromCommunity($this->realm_uid)->list()->get();
+        $committees = $this->sortByName(Committee::fromCommunity($this->realm_uid)->list()->get());
 
         $search = trim($this->search);
         if ($search !== '') {
@@ -155,7 +156,7 @@ class ListCommitteesTree extends Component
      */
     protected function buildNode(Committee $committee, string $search): array
     {
-        $children = $committee->descendants()->get();
+        $children = $this->sortByName($committee->descendants()->get());
 
         if ($search !== '') {
             $children = $children->filter(fn (Committee $child): bool => $this->committeeMatchesSearch($child, $search))->values();
@@ -175,6 +176,17 @@ class ListCommitteesTree extends Component
                 ? $children->map(fn (Committee $child): array => $this->buildNode($child, $search))->all()
                 : [],
         ];
+    }
+
+    /**
+     * Sorted client-side (rather than via an LDAP orderBy) because the
+     * production directory doesn't support the sssvlv sort control.
+     */
+    protected function sortByName(Collection $committees): Collection
+    {
+        return $committees
+            ->sortBy(fn (Committee $committee): string => mb_strtolower((string) $committee->getFirstAttribute('description')), SORT_NATURAL)
+            ->values();
     }
 
     protected function committeeMatchesSearch(Committee $committee, string $search): bool
