@@ -72,6 +72,7 @@ class ListGroups extends Component
 
     public function deleteCommit(): void
     {
+        $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
 
         // Delete role group relationships
