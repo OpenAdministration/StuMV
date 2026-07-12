@@ -16,7 +16,14 @@
         </div>
     </div>
 
-    <div class="flex items-center">
+    <div
+        class="flex items-center"
+        x-data="{ showOnlyActive: $persist(false).as('committees.showOnlyActive') }"
+        x-init="
+            $wire.showOnlyActive = showOnlyActive;
+            $watch('$wire.showOnlyActive', value => showOnlyActive = value);
+        "
+    >
         <flux:switch wire:model.live="showOnlyActive" label="{{ __('committees.showOnlyActiveRoles') }}" align="left" />
     </div>
 
