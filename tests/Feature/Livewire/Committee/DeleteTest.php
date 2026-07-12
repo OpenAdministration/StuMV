@@ -1,7 +1,7 @@
 <?php
 
 use App\Ldap\Committee;
-use App\Livewire\Committee\CommitteeTreeItem;
+use App\Livewire\Committee\ListCommitteesTree;
 use App\Livewire\Committee\ListRoles;
 use App\Livewire\Committee\TerminateRoleMemberships;
 use App\Models\RoleMembership;
@@ -17,9 +17,10 @@ test('a moderator can delete a committee once the name is confirmed', function (
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    Livewire::test(CommitteeTreeItem::class, ['realm_uid' => $uid, 'dn' => $committee->getDn()])
+    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+        ->call('confirmDeleteCommittee', $committee->getDn())
         ->set('deleteConfirmText', 'fsr')
-        ->call('deleteCommittee', $committee->getDn(), 'fsr');
+        ->call('deleteCommittee');
 
     expect(Committee::findByName($uid, 'fsr'))->toBeNull();
 });
@@ -30,9 +31,8 @@ test('a plain member cannot delete a committee', function (): void {
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsMember($community);
 
-    Livewire::test(CommitteeTreeItem::class, ['realm_uid' => $uid, 'dn' => $committee->getDn()])
-        ->set('deleteConfirmText', 'fsr')
-        ->call('deleteCommittee', $committee->getDn(), 'fsr')
+    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+        ->call('confirmDeleteCommittee', $committee->getDn())
         ->assertForbidden();
 
     expect(Committee::findByName($uid, 'fsr'))->not->toBeNull();

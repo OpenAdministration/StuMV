@@ -1,13 +1,13 @@
-@if($showNode)
+@php($committee = $node['committee'])
 <li>
     <div class="grid grid-cols-[3rem_1fr_auto]">
-        @if($hasChildren)
+        @if($node['hasChildren'])
             <div class="flex justify-start items-center">
-                @if($unfolded)
+                @if($node['unfolded'])
                     <flux:button
                         size="sm"
                         icon="chevron-down"
-                        wire:click="toggleChildren"
+                        wire:click="toggleChildren('{{ $committee->getDn() }}')"
                         class="cursor-pointer"
                         title="{{ __('committees.foldSubItems', ['committee' => $committee->getFirstAttribute('description')]) }}"
                     />
@@ -15,7 +15,7 @@
                     <flux:button
                         size="sm"
                         icon="chevron-right"
-                        wire:click="toggleChildren"
+                        wire:click="toggleChildren('{{ $committee->getDn() }}')"
                         class="cursor-pointer"
                         title="{{ __('committees.unfoldSubItems', ['committee' => $committee->getFirstAttribute('description')]) }}"
                     />
@@ -65,7 +65,7 @@
                     <flux:menu.item
                         variant="danger"
                         icon="trash-2"
-                        x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').show()"
+                        wire:click="confirmDeleteCommittee('{{ $committee->getDn() }}')"
                         :disabled="auth()->user()->cannot('edit', [$committee, $community])"
                     >
                         {{ __('Delete') }}
@@ -75,57 +75,23 @@
         </div>
     </div>
 
-    @if(count($children) > 0 && $unfolded)
+    @if(count($node['children']) > 0 && $node['unfolded'])
         <ul>
-            @foreach($children as $child)
+            @foreach($node['children'] as $child)
                 <div class="grid grid-cols-[3rem_1fr]">
                     <div class="flex pl-4 items-center">
                         @if(!$isLastItem)
                             <flux:separator vertical class="w-[2px]!" />
                         @endif
                     </div>
-                    <livewire:committee.committee-tree-item
-                        :dn="$child->getDn()"
-                        :realm_uid="$realm_uid"
-                        :isLastItem="$loop->last"
-                        :search="$search"
-                        wire:key="committee-tree-child-{{ $child->getDn() }}-{{ $search }}"
-                    />
+                    @include('livewire.committee.committee-tree-node', [
+                        'node' => $child,
+                        'community' => $community,
+                        'realm_uid' => $realm_uid,
+                        'isLastItem' => $loop->last,
+                    ])
                 </div>
             @endforeach
         </ul>
     @endif
-
-    <flux:modal name="delete-committee-{{ $committee->getFirstAttribute('ou') }}" class="md:w-96">
-        <div class="space-y-6">
-            <div>
-                <flux:heading size="lg" class="modal-header">{{ __('committees.delete_title', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
-                <flux:text class="mt-2">{{ __('committees.delete_warning', ['name' => $committee->getFirstAttribute('description')]) }}</flux:text>
-                <flux:text class="mt-2">{{ __('committees.delete.confirm') }}<strong>{{ $committee->getFirstAttribute('ou') }}</strong></flux:text>
-                <flux:field class="mt-4">
-                    <flux:input
-                        wire:model="deleteConfirmText"
-                        :placeholder="$committee->getFirstAttribute('ou')"
-                    />
-                    <flux:error name="deleteConfirmText" />
-                </flux:field>
-            </div>
-            <div class="flex flex-wrap justify-end gap-4">
-                <flux:button
-                    icon="ban"
-                    x-on:click="$flux.modal('delete-committee-{{ $committee->getFirstAttribute('ou') }}').close()"
-                >
-                    {{ __('Cancel') }}
-                </flux:button>
-                <flux:button
-                    variant="primary"
-                    icon="trash-2"
-                    wire:click="deleteCommittee('{{ $committee->getDn() }}', '{{ $committee->getFirstAttribute('ou') }}')"
-                >
-                    {{ __('Delete') }}
-                </flux:button>
-            </div>
-        </div>
-    </flux:modal>
 </li>
-@endif
