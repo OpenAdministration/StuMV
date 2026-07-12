@@ -20,7 +20,8 @@ Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routePar
 
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams): void {
     $community = Route::current()->parameter('uid');
-    $trail->push($community->getFirstAttribute('ou'), route('realms.dashboard', $community->getFirstAttribute('ou')));
+    $name = $community->getFirstAttribute('description') ?: $community->getFirstAttribute('ou');
+    $trail->push($name, route('realms.dashboard', $community->getFirstAttribute('ou')));
 });
 
 Breadcrumbs::for('realms.dashboard', function (BreadcrumbTrail $trail, array $routeParams): void {
