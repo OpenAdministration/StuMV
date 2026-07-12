@@ -64,7 +64,7 @@ class ListRoleMembers extends Component
                 'community' => $community,
                 'role' => $role,
                 'userCache' => [],
-            ])->title(__('roles.members-title', ['name' => $this->cn]));
+            ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
         }
 
         $membersQuery = $role->dbMemberships();
@@ -90,7 +90,7 @@ class ListRoleMembers extends Component
             'community' => $community,
             'role' => $role,
             'userCache' => $userCache,
-        ])->title(__('roles.members-title', ['name' => $this->cn]));
+        ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
     }
 
     public function prepareDeletion($id)

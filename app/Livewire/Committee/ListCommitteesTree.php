@@ -128,7 +128,7 @@ class ListCommitteesTree extends Component
             return view('livewire.committee.list-committees-tree', [
                 'nodes' => [],
                 'community' => $community,
-            ])->title(__('committees.list_title'));
+            ])->title(__('committees.list.headline', ['name' => $community->getFirstAttribute('description')]));
         }
 
         $committees = $this->sortByName(Committee::fromCommunity($this->realm_uid)->list()->get());
@@ -144,7 +144,7 @@ class ListCommitteesTree extends Component
         return view('livewire.committee.list-committees-tree', [
             'nodes' => $nodes,
             'community' => $community,
-        ])->title(__('committees.list_title'));
+        ])->title(__('committees.list.headline', ['name' => $community->getFirstAttribute('description')]));
     }
 
     /**

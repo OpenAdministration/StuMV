@@ -17,7 +17,6 @@ return [
     'manage_roles' => 'Rollen verwalten',
     'link_roles' => 'Rollen',
     'link_edit' => 'Bearbeiten',
-    'list_title' => 'Liste der Gremien',
     'list.headline' => 'Gremien von :name',
     'list.explain_text' => 'Das ist die Liste der Gremien, Organisationen und Gliederungen (kurz: Gremien). Gremien können nur von Moderator:innen bearbeitet oder gelöscht werden.',
     'edit_title' => 'Gremium bearbeiten',
