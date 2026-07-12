@@ -42,6 +42,50 @@ test('ldap:sync-roles projects active DB memberships onto the LDAP role', functi
         ->not->toContain($stale->getFirstAttribute('uid'));
 });
 
+test('ldap:sync-roles leaves already-correct members untouched instead of clearing and re-adding everyone', function (): void {
+    $community = newCommunity();
+    $committeeName = 'sync'.bin2hex(random_bytes(3));
+    $committee = TestLdap::makeCommittee($community, $committeeName);
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $memberB = TestLdap::member($community);
+    $memberA = TestLdap::member($community);
+    $stale = TestLdap::makeUser();
+
+    // Attach in a specific order (B, then A) directly, bypassing the sync.
+    // A wipe-then-readd sync would rebuild uniqueMember from the DB query
+    // order below (A, then B) instead, scrambling this original order.
+    $role->members()->attach($memberB->ldap());
+    $role->members()->attach($memberA->ldap());
+    $role->members()->attach($stale);
+
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $memberA->username,
+        'from' => today()->subMonth(),
+    ]);
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $memberB->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $this->artisan('ldap:sync-roles', ['committee' => $committeeName])->assertExitCode(0);
+
+    $uniqueMember = \App\Ldap\Role::find($role->getDn())->getAttribute('uniqueMember');
+    $posB = array_search($memberB->ldap()->getDn(), $uniqueMember);
+    $posA = array_search($memberA->ldap()->getDn(), $uniqueMember);
+
+    expect($posB)->not->toBeFalse()
+        ->and($posA)->not->toBeFalse()
+        ->and($posB)->toBeLessThan($posA);
+
+    $members = \App\Ldap\Role::find($role->getDn())->members()->get()
+        ->map(fn ($m) => $m->getFirstAttribute('uid'));
+    expect($members)->not->toContain($stale->getFirstAttribute('uid'));
+});
+
 test('ldap:sync-groups projects role memberships onto the LDAP group', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');
