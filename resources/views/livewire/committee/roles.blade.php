@@ -64,6 +64,7 @@
                                 {{ $role->getFirstAttribute('description') }}
                             </flux:link>
                         </div>
+                        <flux:badge size="lg" icon="users">{{ count($roleInfo['members']) }}</flux:badge>
                         <div>
                             <flux:dropdown>
                                 <flux:button size="sm" icon="ellipsis-vertical" />
