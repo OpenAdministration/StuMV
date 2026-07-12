@@ -7,16 +7,30 @@ use App\Providers\RouteServiceProvider;
 use Flux\Flux;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class ChangePassword extends Component
 {
+    #[Validate]
     public string $password;
 
+    #[Validate]
     public string $password_confirmation;
 
     #[Locked]
     public $currentUsername;
+
+    protected function rules(): array
+    {
+        return [
+            'password' => [
+                'required',
+                Password::default(),
+                'confirmed',
+            ],
+        ];
+    }
 
     public function mount($username)
     {
@@ -27,13 +41,6 @@ class ChangePassword extends Component
         } else {
             abort('403');
         }
-    }
-
-    public function rules(): array
-    {
-        return [
-            'password' => [Password::default(), 'confirmed'],
-        ];
     }
 
     public function render()
