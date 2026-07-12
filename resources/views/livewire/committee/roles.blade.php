@@ -104,7 +104,6 @@
                             </flux:tooltip>
                         @endforeach
                         <flux:button
-                            variant="filled"
                             icon="plus"
                             href="{{ route('committees.roles.add-member', [
                                 'uid' => $uid,
