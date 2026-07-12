@@ -7,6 +7,7 @@ use App\Http\Middleware\CommunityAdmin;
 use App\Http\Middleware\CommunityMember;
 use App\Http\Middleware\CommunityModerator;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnsureAccountIsNotLocked;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SuperAdminMiddleware;
@@ -64,6 +65,7 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+            EnsureAccountIsNotLocked::class,
         ],
 
         'api' => [

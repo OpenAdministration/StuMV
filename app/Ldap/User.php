@@ -37,6 +37,22 @@ class User extends \LdapRecord\Models\OpenLDAP\User
         return self::query()->where('mail', '=', $email)->first();
     }
 
+    /**
+     * pwdAccountLockedTime is an operational attribute: the LDAP server only
+     * returns it when explicitly named in a select (never via a plain "*"
+     * fetch, and not even via a base-scoped find() by DN), so it must always
+     * be checked through a fresh, explicit where()-based query like this one.
+     */
+    public static function isLockedByUsername(string $username): bool
+    {
+        $fresh = self::query()
+            ->select(['*', 'pwdAccountLockedTime'])
+            ->where('uid', '=', $username)
+            ->first();
+
+        return (bool) $fresh?->hasAttribute('pwdAccountLockedTime');
+    }
+
     #[\Override]
     public function groups(): HasMany
     {

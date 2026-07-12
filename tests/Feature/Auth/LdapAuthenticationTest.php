@@ -111,3 +111,17 @@ test('login is rejected with a wrong password', function (): void {
 
     $this->assertGuest();
 });
+
+test('a locked user cannot log in even with the correct password', function (): void {
+    registerLdapUser($this->username, $this->password);
+    auth()->logout();
+
+    $ldapUser = LdapUser::findByUsername($this->username);
+    $ldapUser->setAttribute('pwdAccountLockedTime', '00000101000000Z');
+    $ldapUser->save();
+
+    $this->post('/login', ['uid' => $this->username, 'password' => $this->password])
+        ->assertSessionHasErrors('uid');
+
+    $this->assertGuest();
+});

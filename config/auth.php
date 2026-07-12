@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\Rules\DenyLockedUsers;
 use App\Ldap\User;
 
 return [
@@ -69,7 +70,9 @@ return [
         'users' => [
             'driver' => 'ldap',
             'model' => User::class,
-            'rules' => [],
+            'rules' => [
+                DenyLockedUsers::class,
+            ],
             'database' => [
                 'model' => App\Models\User::class,
                 'sync_passwords' => false,
