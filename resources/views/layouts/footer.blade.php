@@ -7,7 +7,7 @@
                 <span>{{ __('by') }}</span>
                 <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration</flux:link>
             @else
-            <span>{{ Config::get('app.name') }} is based on <flux:link href="https://www.stufis.de/stumv" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</span>
+            <span>{{ __('common.based_on', ['name' => Config::get('app.name')]) }} <flux:link href="https://www.stufis.de/stumv" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</span>
             @endif
         </span>
     </div>

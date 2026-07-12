@@ -13,7 +13,7 @@
             <div class="text-center mt-6">
                 @if (config('app.name') !== 'StuMV')
                 <div class="mt-2">
-                    <span>{{ config('app.name') }} {{ __('is based on') }} <flux:link href="https://github.com/OpenAdministration/StuMV" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</span>
+                    <span>{{ __('common.based_on', ['name' => config('app.name')]) }} <flux:link href="https://github.com/OpenAdministration/StuMV" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</span>
                 </div>
                 @endif
                 <div class="mt-2 mb-6 flex space-x-1 items-center justify-center">
