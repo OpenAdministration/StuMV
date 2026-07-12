@@ -20,6 +20,26 @@ function realmMember(string $realmUid, string $fullName): string
     return $member->username;
 }
 
+test('members are listed sorted by name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    realmMember($uid, 'Zebra Person');
+    realmMember($uid, 'Apple Person');
+    realmMember($uid, 'Mango Person');
+    actingAsMember($community);
+
+    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+        ->call('loadMembers')
+        ->html();
+
+    $posApple = strpos($html, 'Apple Person');
+    $posMango = strpos($html, 'Mango Person');
+    $posZebra = strpos($html, 'Zebra Person');
+
+    expect($posApple)->toBeLessThan($posMango)
+        ->and($posMango)->toBeLessThan($posZebra);
+});
+
 test('the member list filters by name', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

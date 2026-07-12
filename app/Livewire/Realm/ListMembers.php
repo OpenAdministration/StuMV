@@ -83,7 +83,7 @@ class ListMembers extends Component
             });
         }
 
-        $members = $membersQuery->paginate(10);
+        $members = $membersQuery->orderBy('full_name')->paginate(10);
         $ldapUsers = collect();
         $usernames = $members->pluck('username')->filter()->values()->all();
 
