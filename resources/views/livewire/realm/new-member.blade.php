@@ -10,7 +10,7 @@
             <flux:pillbox
                 multiple
                 searchable
-                placeholder="{{ __('realms.select_users') }}"
+                placeholder="{{ __('realms.select_user') }}"
                 wire:model="selectedUsers"
             >
                 @foreach($selectable_users as $user)
