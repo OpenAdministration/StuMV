@@ -110,7 +110,7 @@
                                 'ou' => $ou,
                                 'cn' => $role->getFirstAttribute('cn')
                             ]) }}"
-                            title="{{ __('roles.add_member') }}"
+                            title="{{ __('Add Member') }}"
                             class="size-[3rem]!"
                         />
                     </div>
