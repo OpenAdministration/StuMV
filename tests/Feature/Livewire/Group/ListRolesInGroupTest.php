@@ -8,6 +8,23 @@ use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
+test('deletePrepare shows the confirmation modal with the translated role name', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    $membership = GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+
+    Livewire::test(ListRolesInGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+        ->call('deletePrepare', $membership->id)
+        ->assertDispatched('modal-show', name: 'delete')
+        ->assertDontSee('groups.delete_role_title')
+        ->assertDontSee('groups.delete_role_warning')
+        ->assertSee('Role mitglied');
+});
+
 test('deleting a role from a group removes only that specific row, even with duplicates', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');
@@ -21,7 +38,8 @@ test('deleting a role from a group removes only that specific row, even with dup
 
     Livewire::test(ListRolesInGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
         ->call('deletePrepare', $first->id)
-        ->call('deleteCommit');
+        ->call('deleteCommit')
+        ->assertDispatched('modal-close', name: 'delete');
 
     expect(GroupMembership::find($first->id))->toBeNull()
         ->and(GroupMembership::find($second->id))->not->toBeNull();

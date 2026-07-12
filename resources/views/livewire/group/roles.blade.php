@@ -76,18 +76,16 @@
         </flux:table.rows>
     </flux:table>
 
-    <form wire:submit="deleteCommit()">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('groups.delete_role_title', $deleteRoleName) }}
-            </x-slot:title>
-            <x-slot:content>
-                {{ __('groups.delete_role_warning', $deleteRoleName) }}
-            </x-slot:content>
-            <x-slot:footer>
+    <flux:modal name="delete">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg" class="modal-header">{{ __('groups.delete_role_title', $deleteRoleName) }}</flux:heading>
+                <flux:text class="mt-2">{{ __('groups.delete_role_warning', $deleteRoleName) }}</flux:text>
+            </div>
+            <div class="flex justify-end gap-2">
                 <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger" type="submit">{{ __('Delete') }}</flux:button>
-            </x-slot:footer>
-        </x-modal.confirmation>
-    </form>
+                <flux:button variant="danger" wire:click="deleteCommit">{{ __('Delete') }}</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

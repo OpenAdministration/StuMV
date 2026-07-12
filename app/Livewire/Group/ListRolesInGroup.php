@@ -92,7 +92,7 @@ class ListRolesInGroup extends Component
         $role = Role::findOrFail($groupRole->role_dn);
 
         $this->deleteGroupRoleId = $groupRoleId;
-        $this->deleteRoleName = [$role->getFirstAttribute('cn')];
+        $this->deleteRoleName = ['name' => $role->getFirstAttribute('cn')];
 
         Flux::modal('delete')->show();
     }
