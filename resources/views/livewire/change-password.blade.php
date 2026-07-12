@@ -11,13 +11,13 @@
                 <flux:field>
                     <flux:label class="block">{{ __('Password') }}</flux:label>
                     <flux:description class="block">{{ __('user.help.password') }}</flux:description>
-                    <flux:input type="password" wire:model="password" />
+                    <flux:input type="password" wire:model.live="password" />
                     <flux:error name="password" />
                 </flux:field>
 
                 <flux:field>
                     <flux:label>{{ __('Password confirm') }}</flux:label>
-                    <flux:input type="password" wire:model="password_confirmation" />
+                    <flux:input type="password" wire:model.live="password_confirmation" />
                     <flux:error name="password_confirmation" />
                 </flux:field>
 
