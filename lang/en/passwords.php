@@ -19,4 +19,10 @@ return [
     'token' => 'This password reset token is invalid.',
     'user' => "We can't find a user with that email address.",
 
+    'reset_mail_subject' => 'Reset password',
+    'reset_mail_line_between_greeting_and_action' => 'You are receiving this email because a password reset was requested for your account in the StuMV.',
+    'reset_mail_action' => 'Reset password',
+    'reset_mail_expire_notice' => 'This link is valid for :count minutes.',
+    'reset_mail_was_not_you_question' => 'If you do not want to change your password in the StuMV, you can ignore this email.',
+
 ];

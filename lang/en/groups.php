@@ -2,7 +2,8 @@
 
 return [
     'no_groups_found' => 'No groups found!',
-    'search' => 'Search groups',
+    'search' => 'Search rights',
+    'new_title' => 'Create new rights group',
     'new' => 'Create new group',
     'delete_title' => 'Delete group :name',
     'delete_warning' => 'Should the group :name really be deleted?',
@@ -16,4 +17,15 @@ return [
     'delete_role_title' => 'Delete relation to role of :name',
     'delete_role_warning' => 'Should the relation to the role :name really be deleted?',
     'committee_name' => 'Committee name',
+    'link_edit' => 'Edit',
+    'role_name' => 'Assigned role',
+    'roles.search' => 'Search table',
+    'roles_list_title' => 'Roles in rights group :name',
+    'roles_add_title' => 'Add role to rights',
+    'roles_headline' => 'Roles assigned to group :name',
+    'roles_explanation' => 'The table below lists all roles that use the currently selected rights group.',
+    'success_role_add' => 'The role was added successfully.',
+    'roles_add_headline' => 'Link to a role with the right :name',
+    'roles_add_explanation' => 'Select a committee and then the role that should receive the rights.',
+    'list_title' => 'Rights groups',
 ];

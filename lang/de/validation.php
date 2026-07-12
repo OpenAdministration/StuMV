@@ -112,6 +112,7 @@ return [
         'symbols' => 'Das :attribute muss mindestens ein Symbol enthalten.',
         'uncompromised' => 'Das angegebene :attribute ist in einem Datenleck aufgetaucht. Bitte wählen Sie ein anderes :attribute .',
     ],
+    'present' => 'Das Feld :attribute muss vorhanden sein.',
     'prohibited' => 'Das :attribute feld ist verboten.',
     'prohibited_if' => 'Das :attribute Feld ist verboten, wenn :other :value ist.',
     'prohibited_unless' => 'Das Feld :attribute ist verboten, wenn :other nicht in :values steht.',
