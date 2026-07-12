@@ -103,7 +103,17 @@
                                 />
                             </flux:tooltip>
                         @endforeach
-                        <flux:button variant="filled" icon="plus" href="{{ route('committees.roles.add-member', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}" title="{{ __('roles.add_member') }}" />
+                        <flux:button
+                            variant="filled"
+                            icon="plus"
+                            href="{{ route('committees.roles.add-member', [
+                                'uid' => $uid,
+                                'ou' => $ou,
+                                'cn' => $role->getFirstAttribute('cn')
+                            ]) }}"
+                            title="{{ __('roles.add_member') }}"
+                            class="size-12"
+                        />
                     </div>
                 </flux:card>
             @endif
