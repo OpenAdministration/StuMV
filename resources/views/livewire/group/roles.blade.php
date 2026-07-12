@@ -30,7 +30,8 @@
             <flux:table.column></flux:table.colum>
         </flux:table-columns>
         <flux:table.rows>
-        @forelse($roles as $role)
+        @forelse($rows as $row)
+            @php($role = $row['role'])
             <flux:table.row>
                 <flux:table.cell>
                     <flux:link
@@ -55,7 +56,7 @@
                             <flux:menu.item
                                 variant="danger"
                                 icon="trash"
-                                wire:click="deletePrepare('{{ $role->getDn() }}')"
+                                wire:click="deletePrepare({{ $row['groupRole']->id }})"
                             >
                                 {{ __('Delete') }}
                             </flux:menu.item>

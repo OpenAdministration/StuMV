@@ -30,7 +30,7 @@ class ListRolesInGroup extends Component
 
     public string $realm_uid;
 
-    public string $deleteRoleDN = '';
+    public ?int $deleteGroupRoleId = null;
 
     public array $deleteRoleName = [];
 
@@ -59,33 +59,39 @@ class ListRolesInGroup extends Component
 
     public function render()
     {
-        $roleDns = GroupMembership::query()
+        $groupRoles = GroupMembership::query()
             ->where('group_dn', $this->group_dn)
-            ->distinct()
-            ->pluck('role_dn')
-            ->all();
+            ->get();
 
-        $roles = empty($roleDns)
+        $rolesByDn = $groupRoles->isEmpty()
             ? collect()
-            : Role::query()->findMany($roleDns);
+            : Role::query()->findMany($groupRoles->pluck('role_dn')->unique()->all())
+                ->keyBy(fn (Role $role) => $role->getDn());
+
+        $rows = $groupRoles
+            ->map(fn (GroupMembership $groupRole): array => [
+                'groupRole' => $groupRole,
+                'role' => $rolesByDn->get($groupRole->role_dn),
+            ])
+            ->filter(fn (array $row): bool => $row['role'] !== null)
+            ->values();
 
         return view(
             'livewire.group.roles', [
-                'roles' => $roles,
+                'rows' => $rows,
             ]
         )->title(__('groups.roles_list_title', ['name' => $this->group_cn]));
     }
 
-    public function deletePrepare(string $role_dn): void
+    public function deletePrepare(int $groupRoleId): void
     {
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
 
-        $group = Group::findOrFail($this->group_dn);
-        $role = Role::findOrFail($role_dn);
-        $committee = $role->committee();
+        $groupRole = GroupMembership::findOrFail($groupRoleId);
+        $role = Role::findOrFail($groupRole->role_dn);
 
-        $this->deleteRoleDN = $role_dn;
+        $this->deleteGroupRoleId = $groupRoleId;
         $this->deleteRoleName = [$role->getFirstAttribute('cn')];
 
         Flux::modal('delete')->show();
@@ -96,16 +102,14 @@ class ListRolesInGroup extends Component
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
 
-        GroupMembership::where('group_dn', $this->group_dn)
-            ->where('role_dn', $this->deleteRoleDN)
-            ->delete();
+        GroupMembership::whereKey($this->deleteGroupRoleId)->delete();
 
         $this->close();
     }
 
     public function close(): void
     {
-        unset($this->deleteRoleDN, $this->deleteRoleName);
+        unset($this->deleteGroupRoleId, $this->deleteRoleName);
         Flux::modal('delete')->close();
     }
 }
