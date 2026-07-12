@@ -143,7 +143,7 @@
                                     >
                                         {{ __('roles.link_edit') }}
                                     </flux:menu.item>
-                                    <flux:modal.trigger name="deletion">
+                                    <flux:modal.trigger name="delete">
                                         <flux:menu.item
                                             variant="danger"
                                             icon="trash-2"
@@ -173,7 +173,7 @@
     @endif
 
     <form wire:submit="commitDeletion">
-        <flux:modal name="deletion">
+        <flux:modal name="delete">
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg" class="modal-header">{{ __('roles.members.delete_title', ['name' => $deleteUsername]) }}</flux:heading>

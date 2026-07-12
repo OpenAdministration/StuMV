@@ -121,7 +121,7 @@ class ListRoleMembers extends Component
 
     public function close()
     {
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
         unset($this->deleteUsername, $this->deleteId);
     }
 }
