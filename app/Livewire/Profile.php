@@ -45,7 +45,7 @@ class Profile extends Component
         } else {
             abort('403');
         }
-        $user = User::findOrFailByUsername($this->currentUsername);
+        $user = $this->findUserWithLockStatus($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
         $this->givenName = $user->getFirstAttribute('givenName');
         $this->sn = $user->getFirstAttribute('sn');
@@ -71,7 +71,7 @@ class Profile extends Component
     public function save()
     {
         $this->validate();
-        $user = User::findOrFailByUsername($this->uid);
+        $user = $this->findUserWithLockStatus($this->uid);
         $user->setAttribute('mail', $this->email);
         $user->setAttribute('givenName', $this->givenName);
         $user->setAttribute('sn', $this->sn);
@@ -82,7 +82,13 @@ class Profile extends Component
         $user->setAttribute('l', $this->city);
         $user->setAttribute('telephoneNumber', $this->phone);
 
-        if ($this->userIsActive && $user->hasAttribute('pwdAccountLockedTime')) {
+        $isCurrentlyLocked = $user->hasAttribute('pwdAccountLockedTime');
+
+        if ($this->userIsActive === $isCurrentlyLocked) {
+            abort_unless(auth()->user()->can('superadmin', \App\Models\User::class), 403);
+        }
+
+        if ($this->userIsActive && $isCurrentlyLocked) {
             $user->removeAttribute('pwdAccountLockedTime');
         } elseif (! $this->userIsActive) {
             $user->setAttribute('pwdAccountLockedTime', '00000101000000Z');
@@ -96,5 +102,18 @@ class Profile extends Component
 
         Flux::toast(variant: 'success', text: __('Saved'));
         $this->redirect('/profile/'.$this->uid, navigate: true);
+    }
+
+    /**
+     * pwdAccountLockedTime is an operational attribute: the LDAP server only
+     * returns it when explicitly named in the select, never via a plain "*"
+     * fetch. Without this, the account-active status can never be read back.
+     */
+    protected function findUserWithLockStatus(string $username): User
+    {
+        return User::query()
+            ->select(['*', 'pwdAccountLockedTime'])
+            ->where('uid', '=', $username)
+            ->first() ?? abort(404);
     }
 }

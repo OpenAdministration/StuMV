@@ -20,4 +20,6 @@ return [
     'showOnlyActiveMemberships' => 'Show only active memberships',
     'today' => 'today',
     'until' => 'until',
+    'userIsActive' => 'Account active',
+    'userIsActiveDescription' => 'Disable to lock this account and prevent the user from logging in.',
 ];

@@ -56,7 +56,7 @@
                         <flux:input wire:model="phone" />
                     </flux:field>
                 </div>
-                @can('superadmin')
+                @can('superadmin', \App\Models\User::class)
                     <div class="mt-6 space-y-4">
                         <flux:separator variant="subtle" />
                         <flux:switch wire:model.live="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />

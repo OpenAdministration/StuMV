@@ -20,4 +20,6 @@ return [
     'showOnlyActiveMemberships' => 'Zeige nur aktive Mitgliedschaften',
     'today' => 'heute',
     'until' => 'bis',
+    'userIsActive' => 'Konto aktiv',
+    'userIsActiveDescription' => 'Deaktivieren, um dieses Konto zu sperren und die Anmeldung zu verhindern.',
 ];
