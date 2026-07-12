@@ -161,7 +161,11 @@ class ListCommitteesTree extends Component
             $children = $children->filter(fn (Committee $child): bool => $this->committeeMatchesSearch($child, $search))->values();
         }
 
-        $unfolded = in_array($committee->getDn(), $this->unfolded, true);
+        // While searching, auto-unfold every branch that survived the filter so
+        // matches are visible without having to toggle down to them manually.
+        $unfolded = $search !== ''
+            ? $children->isNotEmpty()
+            : in_array($committee->getDn(), $this->unfolded, true);
 
         return [
             'committee' => $committee,
