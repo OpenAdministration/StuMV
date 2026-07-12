@@ -1,5 +1,5 @@
 <div class="border-b border-zinc-200 dark:border-zinc-700 mb-4">
-    <flux:navbar>
+    <flux:navbar class="-mb-[1px]">
         <flux:navbar.item
             href="{{ route('committees.list', ['uid' => $realm, 'search' => $search]) }}"
             icon="list-tree"
