@@ -65,7 +65,7 @@ class Profile extends Component
 
     public function render()
     {
-        return view('livewire.profile')->title(__('Profile'));
+        return view('livewire.profile')->title(__('profile.title', ['name' => $this->givenName.' '.$this->sn]));
     }
 
     public function save()

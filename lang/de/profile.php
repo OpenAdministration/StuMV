@@ -18,6 +18,7 @@ return [
     'pictureRemoved' => 'Das Bild wurde entfernt.',
     'role' => 'Rolle',
     'showOnlyActiveMemberships' => 'Zeige nur aktive Mitgliedschaften',
+    'title' => 'Profil von :name',
     'today' => 'heute',
     'until' => 'bis',
     'userIsActive' => 'Konto aktiv',

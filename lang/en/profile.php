@@ -18,6 +18,7 @@ return [
     'pictureRemoved' => 'The picture has been removed successfully.',
     'role' => 'Role',
     'showOnlyActiveMemberships' => 'Show only active memberships',
+    'title' => 'Profile of :name',
     'today' => 'today',
     'until' => 'until',
     'userIsActive' => 'Account active',
