@@ -112,7 +112,7 @@
                                 'cn' => $role->getFirstAttribute('cn')
                             ]) }}"
                             title="{{ __('roles.add_member') }}"
-                            class="size-12"
+                            class="size-[3rem]"
                         />
                     </div>
                 </flux:card>
