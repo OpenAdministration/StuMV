@@ -42,6 +42,8 @@ return [
     'new_admin_explanation' => 'Wähle eine:n Nutzer:in aus, der:die Administrator:in werden soll.',
     'delete_admin_title' => ':name als Administrator:in entfernen',
     'delete_admin_warning' => 'Soll :name wirklich als Administrator:in entfernt werden?',
+    'delete_mod_title' => ':name als Moderator:in entfernen',
+    'delete_mod_warning' => 'Soll :name (:username) wirklich als Moderator:in entfernt werden?',
     'list_headline' => 'Studierendenschaften',
     'list_explanation' => 'Hier findest du alle Studierendenschaften, denen du beitreten kannst. Nur ein:e Administrator:in der Studierendenschaft kann grundlegende Einstellungen, wie das Setzen von Domains und Verwalten von (Rechte-)Gruppen übernehmen. Wer diese Rolle aktuell inne hat können Administrator:innen und Moderator:innen der jeweiligen Studierendenschaft einsehen. Neue Administrator:innen können von aktuellen Administrator:innen oder durch Open Administration hinzugefügt werden.',
     'groups_headline' => 'Rechteverwaltung',

@@ -42,6 +42,8 @@ return [
     'new_admin_explanation' => 'Select a user who should become an admin.',
     'delete_admin_title' => 'Remove :name as an admin',
     'delete_admin_warning' => 'Should :name really be removed as an admin?',
+    'delete_mod_title' => 'Remove :name as a moderator',
+    'delete_mod_warning' => 'Should :name (:username) really be removed as a moderator?',
     'list_headline' => 'Student bodies',
     'list_explanation' => 'Here you will find all student bodies you can join. Only an admin of the student body can make basic settings, such as setting domains and managing (rights) groups. Admins and moderators of the respective student body can see who currently holds this role. New admins can be added by current admins or by Open Administration.',
     'groups_headline' => 'Rights management',

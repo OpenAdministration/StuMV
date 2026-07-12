@@ -16,7 +16,9 @@ test('deletePrepare shows the confirmation modal', function (): void {
         ->call('loadModerators')
         ->call('deletePrepare', $mod->username)
         ->assertDispatched('modal-show', name: 'delete')
-        ->assertSet('deleteMemberUsername', $mod->username);
+        ->assertSet('deleteMemberUsername', $mod->username)
+        ->assertDontSee('realms.delete_mod_title')
+        ->assertDontSee('realms.delete_mod_warning');
 });
 
 test('deleteCommit removes the moderator and closes the modal', function (): void {
