@@ -29,3 +29,16 @@ test('domains are listed without using the LDAP slice/VLV query', function (): v
         ->assertSee('alpha.test')
         ->assertSee('beta.test');
 });
+
+test('the domain search filters the list', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    makeDomain($uid, 'alpha.test');
+    makeDomain($uid, 'beta.test');
+    actingAsModerator($community);
+
+    Livewire::test(ListDomains::class, ['uid' => $community])
+        ->set('search', 'alpha')
+        ->assertSee('alpha.test')
+        ->assertDontSee('beta.test');
+});

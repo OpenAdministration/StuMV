@@ -25,7 +25,7 @@ class ListDomains extends Component
     public function render()
     {
         $domains = Domain::fromCommunity($this->uid)
-            ->searchFor('ou', $this->search)
+            ->searchFor('dc', $this->search)
             ->get();
 
         return view('livewire.realm.list-domains', ['domains' => $domains])
