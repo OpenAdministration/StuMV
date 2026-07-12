@@ -94,7 +94,7 @@ class RegisterUser extends Component
     {
         return view('livewire.register-user')
             ->layout('layouts.guest')
-            ->title(__('user.register_title'));
+            ->title(__('user.register'));
     }
 
     public function save()

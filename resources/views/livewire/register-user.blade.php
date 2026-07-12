@@ -7,6 +7,7 @@
                     <flux:label>{{ __('Email') }}</flux:label>
                     <flux:input wire:model.live="email" type="email" autofocus />
                     <flux:error name="email" class="mb-2" />
+                    <flux:error name="domain" class="mb-2" />
                     <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
                 </flux:field>
 
