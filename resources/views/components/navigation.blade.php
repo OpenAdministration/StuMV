@@ -41,20 +41,25 @@
             >
                 {{ __('realms.dashboard.mods_headline') }}
             </flux:sidebar.item>
-            <flux:sidebar.item
-                icon="shield-user"
-                wire:navigate
-                :href="route('realms.admins', ['uid' => $uid])"
-            >
-                {{ __('realms.dashboard.admin_headline') }}
-            </flux:sidebar.item>
-            <flux:sidebar.item
-                icon="key-round"
-                wire:navigate
-                :href="route('realms.groups', ['uid' => $uid])"
-            >
-                {{ __('realms.dashboard.groups_headline') }}
-            </flux:sidebar.item>
+            @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('uid'))
+            @if(auth()->user()->can('moderator', $currentCommunity) || auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+                <flux:sidebar.item
+                    icon="shield-user"
+                    wire:navigate
+                    :href="route('realms.admins', ['uid' => $uid])"
+                >
+                    {{ __('realms.dashboard.admin_headline') }}
+                </flux:sidebar.item>
+            @endif
+            @if(auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+                <flux:sidebar.item
+                    icon="key-round"
+                    wire:navigate
+                    :href="route('realms.groups', ['uid' => $uid])"
+                >
+                    {{ __('realms.dashboard.groups_headline') }}
+                </flux:sidebar.item>
+            @endif
             @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('uid'))
                 <flux:separator class="my-2" />
                 <flux:sidebar.item

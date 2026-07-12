@@ -60,20 +60,22 @@
                 <flux:text class="mt-2">{{ __('realms.dashboard.mods_explanation', ['name' => $name]) }}</flux:text>
             </flux:card>
         </a>
-        <a
-            wire:navigate
-            href="{{ route('realms.admins', $uid) }}"
-            aria-label="{{ __('realms.dashboard.admin_headline', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-        >
-            <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                <flux:icon.shield-user class="size-5" />
-            </div>
-            <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('realms.dashboard.admin_headline', ['name' => $name]) }}</flux:heading>
-                <flux:text class="mt-2">{{ __('realms.dashboard.admin_explanation', ['name' => $name]) }}</flux:text>
-            </flux:card>
-        </a>
+        @if(auth()->user()->can('moderator', $community) || auth()->user()->can('admin', $community) || auth()->user()->can('superadmin', \App\Models\User::class))
+            <a
+                wire:navigate
+                href="{{ route('realms.admins', $uid) }}"
+                aria-label="{{ __('realms.dashboard.admin_headline', ['name' => $name]) }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.shield-user class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('realms.dashboard.admin_headline', ['name' => $name]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.dashboard.admin_explanation', ['name' => $name]) }}</flux:text>
+                </flux:card>
+            </a>
+        @endif
         @can('edit', $community)
             <a
                 wire:navigate
