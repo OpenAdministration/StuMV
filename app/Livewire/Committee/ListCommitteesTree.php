@@ -133,13 +133,13 @@ class ListCommitteesTree extends Component
 
         $committees = $this->sortByName(Committee::fromCommunity($this->realm_uid)->list()->get());
 
-        $search = trim($this->search);
-        if ($search !== '') {
-            $search = mb_strtolower($search);
-            $committees = $committees->filter(fn (Committee $committee): bool => $this->committeeMatchesSearch($committee, $search))->values();
-        }
+        $search = mb_strtolower(trim($this->search));
 
-        $nodes = $committees->map(fn (Committee $committee): array => $this->buildNode($committee, $search))->all();
+        $nodes = $committees
+            ->map(fn (Committee $committee): ?array => $this->buildNode($committee, $search))
+            ->filter()
+            ->values()
+            ->all();
 
         return view('livewire.committee.list-committees-tree', [
             'nodes' => $nodes,
@@ -148,33 +148,55 @@ class ListCommitteesTree extends Component
     }
 
     /**
-     * Builds the tree node data for a committee, recursing into its children
-     * only while they are unfolded (mirrors what was previously fetched lazily
-     * by each nested Livewire component instance).
+     * Builds the tree node data for a committee, recursing into children only
+     * while they're unfolded (or, while searching, while a match might still
+     * be found further down). A collapsed, non-matching branch never has its
+     * children's full attributes fetched from LDAP - only a cheap existence
+     * check to decide whether to show an expand arrow.
      *
-     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array}
+     * Returns null while searching if neither this committee nor any of its
+     * descendants match, so the branch is dropped entirely.
+     *
+     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array}|null
      */
-    protected function buildNode(Committee $committee, string $search): array
+    protected function buildNode(Committee $committee, string $search): ?array
     {
-        $children = $this->sortByName($committee->descendants()->get());
+        $isUnfoldedByUser = $search === '' && in_array($committee->getDn(), $this->unfolded, true);
 
-        if ($search !== '') {
-            $children = $children->filter(fn (Committee $child): bool => $this->committeeMatchesSearch($child, $search))->values();
+        // Collapsed and not searching: we only need to know whether an expand
+        // arrow should be shown, not the full (possibly large) child list.
+        if (! $isUnfoldedByUser && $search === '') {
+            return [
+                'committee' => $committee,
+                'hasChildren' => $committee->descendants()->select(['ou'])->exists(),
+                'unfolded' => false,
+                'children' => [],
+            ];
         }
 
-        // While searching, auto-unfold every branch that survived the filter so
+        $children = $this->sortByName($committee->descendants()->get());
+
+        $childNodes = $children
+            ->map(fn (Committee $child): ?array => $this->buildNode($child, $search))
+            ->filter()
+            ->values()
+            ->all();
+
+        $ownMatches = $search !== '' && $this->committeeOwnMatches($committee, $search);
+
+        if ($search !== '' && ! $ownMatches && empty($childNodes)) {
+            return null;
+        }
+
+        // While searching, auto-unfold every branch that survived filtering so
         // matches are visible without having to toggle down to them manually.
-        $unfolded = $search !== ''
-            ? $children->isNotEmpty()
-            : in_array($committee->getDn(), $this->unfolded, true);
+        $unfolded = $search !== '' ? true : $isUnfoldedByUser;
 
         return [
             'committee' => $committee,
-            'hasChildren' => $children->isNotEmpty(),
+            'hasChildren' => $search !== '' ? ! empty($childNodes) : $children->isNotEmpty(),
             'unfolded' => $unfolded,
-            'children' => $unfolded
-                ? $children->map(fn (Committee $child): array => $this->buildNode($child, $search))->all()
-                : [],
+            'children' => $childNodes,
         ];
     }
 
@@ -189,7 +211,7 @@ class ListCommitteesTree extends Component
             ->values();
     }
 
-    protected function committeeMatchesSearch(Committee $committee, string $search): bool
+    protected function committeeOwnMatches(Committee $committee, string $search): bool
     {
         $values = array_filter([
             $committee->getFirstAttribute('ou'),
@@ -198,12 +220,6 @@ class ListCommitteesTree extends Component
 
         foreach ($values as $value) {
             if (mb_stripos(mb_strtolower((string) $value), $search) !== false) {
-                return true;
-            }
-        }
-
-        foreach ($committee->descendants()->get() as $descendant) {
-            if ($this->committeeMatchesSearch($descendant, $search)) {
                 return true;
             }
         }
