@@ -38,7 +38,7 @@ class ListRoles extends Component
 
     public string $deleteRoleName;
 
-    public bool $showOnlyActive = true;
+    public bool $showOnlyActive = false;
 
     public bool $ready = false;
 
