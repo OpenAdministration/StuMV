@@ -61,8 +61,12 @@ class AddUserToRole extends Component
         $c = Community::findByOrFail('ou', $this->uid);
         $users = $c->membersGroup()->members()->get();
 
-        return view('livewire.committee.add-user-to-role', ['users' => $users])
-            ->title(__('realms.add_members_to_role_title', ['role' => $this->cn]));
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $role = $committee?->roles()->where('cn', $this->cn)->first();
+        $roleName = $role?->getFirstAttribute('description') ?: $this->cn;
+
+        return view('livewire.committee.add-user-to-role', ['users' => $users, 'roleName' => $roleName])
+            ->title(__('realms.add_members_to_role_title', ['role' => $roleName]));
     }
 
     public function save()

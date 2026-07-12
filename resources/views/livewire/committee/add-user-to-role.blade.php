@@ -1,12 +1,8 @@
 <x-livewire-form class="w-full">
     <div class="mb-6">
-        <flux:heading size="xl">{{ __('realms.add_members_to_role_heading') }}</flux:heading>
+        <flux:heading size="xl">{{ __('realms.add_members_to_role_heading', ['role' => $roleName]) }}</flux:heading>
     </div>
     <div class="grid sm:grid-cols-2 gap-6 mb-6">
-        <flux:field class="col-span-full">
-            <flux:label>{{ __('Short Rolename') }}</flux:label>
-            <flux:input wire:model="cn" disabled />
-        </flux:field>
         <flux:field class="col-span-full">
             <flux:label>{{ __('Add new User') }}</flux:label>
             <flux:pillbox
