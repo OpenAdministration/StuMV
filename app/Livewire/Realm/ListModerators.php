@@ -5,6 +5,7 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -71,7 +72,7 @@ class ListModerators extends Component
             )->title(__('realms.mods_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
         }
 
-        $mods = $community->moderatorsGroup()->members()->get();
+        $mods = $this->sortByName($community->moderatorsGroup()->members()->get());
 
         return view(
             'livewire.realm.list-moderators', [
@@ -109,5 +110,16 @@ class ListModerators extends Component
     {
         Flux::modal('delete')->close();
         unset($this->deleteMemberUsername, $this->deleteMemberName);
+    }
+
+    /**
+     * Sorted client-side (rather than via an LDAP orderBy) because the
+     * production directory doesn't support the sssvlv sort control.
+     */
+    protected function sortByName(Collection $users): Collection
+    {
+        return $users
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
     }
 }
