@@ -25,6 +25,7 @@ return [
     'new_title' => 'Create new committee',
     'new_hint_shortname' => 'Enter a short name for the committee here. It should be unique and written as one word.',
     'new_hint_longname' => 'Enter a long name for the committee here.',
+    'new_ou_regex_error' => 'Only lowercase letters, numbers and hyphens are allowed.',
     'new_hint_roles' => 'Select roles here that should be created directly in the committee.',
     'new_role_title' => 'Create new role',
     'select_committee' => 'Select a committee',

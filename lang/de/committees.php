@@ -25,6 +25,7 @@ return [
     'new_title' => 'Neues Gremium erstellen',
     'new_hint_shortname' => 'Gib hier eine Kurzbezeichnung für das Gremium ein. Sie sollte eineindeutig und zusammen geschrieben sein.',
     'new_hint_longname' => 'Gib hier eine lange Bezeichnung für das Gremium ein.',
+    'new_ou_regex_error' => 'Nur Kleinbuchstaben, Zahlen und Bindestriche sind erlaubt.',
     'new_hint_roles' => 'Wähle hier Rollen aus, die direkt in dem Gremium angelegt werden sollen.',
     'new_role_title' => 'Neue Rolle erstellen',
     'select_committee' => 'Wähle ein Gremium aus',

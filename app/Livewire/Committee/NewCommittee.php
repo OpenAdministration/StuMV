@@ -58,9 +58,25 @@ class NewCommittee extends Component
     {
         return [
             'ou' => [
+                'required',
                 'regex:/^[a-z0-9-]*$/',
                 new UniqueCommittee($this->realm_uid),
             ],
+        ];
+    }
+
+    protected function validationAttributes(): array
+    {
+        return [
+            'ou' => __('Short Committee Name'),
+            'description' => __('Full Committee Name'),
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'ou.regex' => __('committees.new_ou_regex_error'),
         ];
     }
 
