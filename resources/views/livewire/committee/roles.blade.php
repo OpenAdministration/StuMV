@@ -87,25 +87,24 @@
                             </flux:dropdown>
                         </div>
                     </div>
-                    @if($hasMembers)
-                        <div class="flex flex-wrap gap-2 mt-6">
-                            @foreach($roleInfo['members'] as $member)
-                                @php
-                                    $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
-                                    if ($jpegPhoto) {
-                                        $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
-                                    }
-                                @endphp
-                                <flux:tooltip content="{{ $member->getFirstAttribute('cn') }}">
-                                    <flux:avatar
-                                        size="lg"
-                                        src="{{ $jpegPhoto }}"
-                                        name="{{ $member->getFirstAttribute('cn') }}"
-                                    />
-                                </flux:tooltip>
-                            @endforeach
-                        </div>
-                    @endif
+                    <div class="flex flex-wrap gap-2 mt-6">
+                        @foreach($roleInfo['members'] as $member)
+                            @php
+                                $jpegPhoto = $member->getFirstAttribute('jpegPhoto');
+                                if ($jpegPhoto) {
+                                    $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                                }
+                            @endphp
+                            <flux:tooltip content="{{ $member->getFirstAttribute('cn') }}">
+                                <flux:avatar
+                                    size="lg"
+                                    src="{{ $jpegPhoto }}"
+                                    name="{{ $member->getFirstAttribute('cn') }}"
+                                />
+                            </flux:tooltip>
+                        @endforeach
+                        <flux:button variant="filled" icon="plus" href="{{ route('committees.roles.add-member', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}" title="{{ __('roles.add_member') }}" />
+                    </div>
                 </flux:card>
             @endif
         @empty
