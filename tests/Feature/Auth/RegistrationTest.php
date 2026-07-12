@@ -2,6 +2,7 @@
 
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
+use App\Models\User as DbUser;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
@@ -74,6 +75,9 @@ test('a valid registration persists every submitted field, joins the community a
     $members = Community::findByUid('testcom')->membersGroup()->members()->get()
         ->map(fn ($member) => $member->getFirstAttribute('uid'));
     expect($members)->toContain($this->username);
+
+    // ...and the database entry records that community as its realm.
+    expect(DbUser::where('username', $this->username)->value('realm'))->toBe('testcom');
 
     // ...the Registered event fired, and the user is logged straight in (which
     // also proves the password was stored in a form LDAP can bind against).

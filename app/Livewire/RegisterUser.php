@@ -51,7 +51,6 @@ class RegisterUser extends Component
             ],
             'domain' => [
                 'required',
-                // new \dacoto\DomainValidator\Validator\Domain(),
                 new DomainRegistrationRule,
             ],
         ];
@@ -120,6 +119,10 @@ class RegisterUser extends Component
             // Credentials must be keyed for the LDAP guard (see LoginRequest);
             // a positional array does not authenticate.
             Auth::attempt(['uid' => $this->username, 'password' => $this->password]);
+
+            \App\Models\User::where('username', $this->username)->update([
+                'realm' => $community->getFirstAttribute('ou'),
+            ]);
 
             return to_route('verification.notice')->with('message', __('Successfully Registered'));
 
