@@ -21,6 +21,18 @@ test('an admin can delete a group', function (): void {
     expect(Group::find(Group::dnFrom($uid, 'newsletter')))->toBeNull();
 });
 
+test('deletePrepare fills in the group name for the confirmation modal', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroups::class, ['uid' => $community])
+        ->call('deletePrepare', $uid, 'newsletter')
+        ->assertSet('deleteGroupName', 'newsletter')
+        ->assertSee('newsletter');
+});
+
 test('groups are listed without using the LDAP slice/VLV query', function (): void {
     $community = newCommunity();
     TestLdap::makeGroup($community, 'grp1');

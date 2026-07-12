@@ -65,8 +65,8 @@ class ListGroups extends Component
 
     public function deletePrepare($uid, $cn): void
     {
-        $dn = Group::dnFrom($uid, $cn);
-        $this->deleteGroupDn = $dn;
+        $this->deleteGroupDn = Group::dnFrom($uid, $cn);
+        $this->deleteGroupName = $cn;
         Flux::modal('delete')->show();
     }
 
