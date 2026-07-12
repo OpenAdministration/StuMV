@@ -6,7 +6,6 @@ use App\Livewire\Committee\AddUserToRole;
 use App\Livewire\Committee\EditCommittee;
 use App\Livewire\Committee\EditRole;
 use App\Livewire\Committee\EditRoleMembership;
-use App\Livewire\Committee\ListCommitteesList;
 use App\Livewire\Committee\ListCommitteesTree;
 use App\Livewire\Committee\ListRoleMembers;
 use App\Livewire\Committee\ListRoles;
@@ -74,7 +73,6 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{uid}/mods/', ListModerators::class)->name('realms.mods');
         Route::livewire('{uid}/admins/', ListAdmins::class)->name('realms.admins');
         Route::livewire('{uid}/committees', ListCommitteesTree::class)->name('committees.list');
-        Route::livewire('{uid}/committees/list', ListCommitteesList::class)->name('committees.list.list');
         Route::livewire('{uid}/committees/{ou}', ListRoles::class)->name('committees.roles');
         Route::livewire('{uid}/committees/{ou}/role/{cn}', ListRoleMembers::class)->name('committees.roles.members');
         // end member

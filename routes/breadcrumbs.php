@@ -127,11 +127,6 @@ Breadcrumbs::for('committees.list', function (BreadcrumbTrail $trail, array $rou
     $trail->push(__('Committees'), route('committees.list', $routeParams));
 });
 
-Breadcrumbs::for('committees.list.list', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
-    $trail->push(__('Committees'), route('committees.list.list', $routeParams));
-});
-
 Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.list', $routeParams);
     $trail->push(__('New Committee'), route('committees.new', $routeParams));

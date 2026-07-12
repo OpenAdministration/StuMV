@@ -7,8 +7,6 @@
             <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
         </flux:field>
 
-        <x-list-committees-navbar :realm="$realm_uid" :search="$search" current="tree" />
-
         <div wire:loading.flex wire:target="loadCommittees" class="flex justify-center py-16">
             <flux:icon.loading />
         </div>

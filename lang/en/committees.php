@@ -33,6 +33,4 @@ return [
     'foldSubItems' => 'Fold subordinate committees of :committee',
     'unfoldSubItems' => 'Unfold subordinate committees of :committee',
     'showOnlyActiveRoles' => 'Show only roles with active memberships',
-    'treeView' => 'Tree',
-    'listView' => 'List',
 ];
