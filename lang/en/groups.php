@@ -25,6 +25,7 @@ return [
     'roles_headline' => 'Roles assigned to group :name',
     'roles_explanation' => 'The table below lists all roles that use the currently selected rights group.',
     'success_role_add' => 'The role was added successfully.',
+    'role_already_added' => 'This role has already been added to this group.',
     'roles_add_headline' => 'Link to a role with the right :name',
     'roles_add_explanation' => 'Select a committee and then the role that should receive the rights.',
     'list_title' => 'Rights groups',

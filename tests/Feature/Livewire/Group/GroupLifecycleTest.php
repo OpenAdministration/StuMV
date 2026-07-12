@@ -28,6 +28,27 @@ test('an admin can map a role to a group', function (): void {
     ]);
 });
 
+test('adding the same role to a group twice is rejected', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(AddRoleToGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('save');
+
+    Livewire::test(AddRoleToGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('save')
+        ->assertHasErrors('selected_role_dn');
+
+    $this->assertDatabaseCount('role_group_relation', 1);
+});
+
 test('an admin can create a group', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

@@ -31,6 +31,7 @@
                     <flux:select.option value="{{ $role->getDn() }}">{{ $role->getFirstAttribute('description') }} ({{ $role->getFirstAttribute('cn') }})</flux:select.option>
                 @endforeach
             </flux:select>
+            <flux:error name="selected_role_dn" />
         </flux:field>
     </x-livewire-form>
 </div>

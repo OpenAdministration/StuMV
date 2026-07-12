@@ -25,6 +25,7 @@ return [
     'roles_headline' => 'Zur Gruppe :name zugeordnete Rollen',
     'roles_explanation' => 'In der unten stehenden Tabelle sind alle Rollen aufgeführt, die die aktuell ausgewählte Rechtegruppe verwenden.',
     'success_role_add' => 'Die Rolle wurde erfolgreich hinzugefügt.',
+    'role_already_added' => 'Diese Rolle wurde dieser Gruppe bereits hinzugefügt.',
     'roles_add_headline' => 'Einer Rolle mit dem Recht :name verknüpfen',
     'roles_add_explanation' => 'Wähle ein Gremium und dann die Rolle aus, die die Rechte erhalten soll.',
     'list_title' => 'Rechtegruppen',

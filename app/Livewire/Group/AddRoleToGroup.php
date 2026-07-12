@@ -45,9 +45,20 @@ class AddRoleToGroup extends Component
 
     public function save()
     {
-        $group_dn = Group::findOrFail(Group::dnFrom($this->uid, $this->group_cn));
+        $group = Group::findOrFail(Group::dnFrom($this->uid, $this->group_cn));
+
+        $alreadyAdded = GroupMembership::where('group_dn', $group->getDn())
+            ->where('role_dn', $this->selected_role_dn)
+            ->exists();
+
+        if ($alreadyAdded) {
+            $this->addError('selected_role_dn', __('groups.role_already_added'));
+
+            return;
+        }
+
         GroupMembership::create([
-            'group_dn' => $group_dn,
+            'group_dn' => $group->getDn(),
             'role_dn' => $this->selected_role_dn,
         ]);
 
