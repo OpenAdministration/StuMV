@@ -93,7 +93,7 @@ class ListModerators extends Component
         }
         $this->deleteMemberUsername = $uid;
         $this->deleteMemberName = $user->getFirstAttribute('cn');
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
@@ -102,7 +102,7 @@ class ListModerators extends Component
         $this->authorize('remove_moderator', $community);
         $user = User::findOrFailByUsername($this->deleteMemberUsername);
         $community->moderatorsGroup()->members()->detach($user);
-        Flux::modal('delete')->show();
+        $this->close();
     }
 
     public function close(): void
