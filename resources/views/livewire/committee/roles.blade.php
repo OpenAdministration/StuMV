@@ -113,16 +113,18 @@
                                 />
                             </flux:tooltip>
                         @endforeach
-                        <flux:button
-                            icon="plus"
-                            href="{{ route('committees.roles.add-member', [
-                                'uid' => $uid,
-                                'ou' => $ou,
-                                'cn' => $role->getFirstAttribute('cn')
-                            ]) }}"
-                            title="{{ __('Add Member') }}"
-                            class="size-[3rem]!"
-                        />
+                        @if(auth()->user()->can('moderator', $community) || auth()->user()->can('superadmin', \App\Models\User::class))
+                            <flux:button
+                                icon="plus"
+                                href="{{ route('committees.roles.add-member', [
+                                    'uid' => $uid,
+                                    'ou' => $ou,
+                                    'cn' => $role->getFirstAttribute('cn')
+                                ]) }}"
+                                title="{{ __('Add Member') }}"
+                                class="size-[3rem]!"
+                            />
+                        @endif
                     </div>
                 </flux:card>
             @endif
