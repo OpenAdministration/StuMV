@@ -74,17 +74,25 @@ class UsersNotInUniLdap extends Component
             ->map(fn (UniLdapUser $user) => $user->getFirstAttribute('mail'))
             ->all();
 
+        $results = [];
         foreach ($candidates as $member) {
             if (! in_array($member->getFirstAttribute('mail'), $mailsFoundInUniLdap, true)) {
                 // Livewire can't serialize a raw LdapRecord model as a
                 // public property value, so keep only the plain fields
                 // the view actually needs.
-                $this->results[] = [
+                $results[] = [
                     'uid' => $member->getFirstAttribute('uid'),
                     'cn' => $member->getFirstAttribute('cn'),
                 ];
             }
         }
+
+        // Sorted client-side (rather than via an LDAP orderBy) because the
+        // production directory doesn't support the sssvlv sort control.
+        $this->results = collect($results)
+            ->sortBy(fn (array $result): string => mb_strtolower((string) $result['cn']), SORT_NATURAL)
+            ->values()
+            ->all();
 
         $this->comparisonCompleted = true;
     }

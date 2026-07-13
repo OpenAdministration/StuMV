@@ -137,6 +137,40 @@ test('the uni LDAP batch size is configurable via ldap.uni_batch_size', function
     }
 });
 
+test('results are sorted by name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $domain = new Domain(['dc' => 'example.test']);
+    $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
+    $domain->save();
+
+    $zebra = TestLdap::makeUser();
+    $zebra->fill(['cn' => 'Zebra'])->save();
+    TestLdap::attach($community->membersGroup(), $zebra);
+
+    $apple = TestLdap::makeUser();
+    $apple->fill(['cn' => 'Apple'])->save();
+    TestLdap::attach($community->membersGroup(), $apple);
+
+    $mango = TestLdap::makeUser();
+    $mango->fill(['cn' => 'Mango'])->save();
+    TestLdap::attach($community->membersGroup(), $mango);
+
+    actingAsModerator($community);
+
+    $html = Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+        ->call('searchForUsersNotInUniLdap')
+        ->html();
+
+    $posApple = strpos($html, 'Apple');
+    $posMango = strpos($html, 'Mango');
+    $posZebra = strpos($html, 'Zebra');
+
+    expect($posApple)->toBeLessThan($posMango)
+        ->and($posMango)->toBeLessThan($posZebra);
+});
+
 test('deleting a user removes the LDAP entry, database rows, and profile picture', function (): void {
     Storage::fake('public');
 
