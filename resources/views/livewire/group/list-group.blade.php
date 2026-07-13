@@ -1,5 +1,5 @@
-<div class="flex-col space-y-8">
-    <div class="flex flex-col sm:flex-row gap-6">
+<div class="flex-col">
+    <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1">
             <flux:heading size="xl" class="mb-4">{{ __('realms.groups_headline') }}</flux:heading>
             <flux:text class="text-base">{{  __('realms.groups_explanation') }}</flux:text>
@@ -16,12 +16,12 @@
         </div>
     </div>
 
-    <flux:field>
+    <flux:field class="mb-8">
         <flux:label>{{ __('groups.search') }}</flux:label>
         <flux:input icon="search" wire:model.live.debounce.500ms="search" />
     </flux:field>
 
-    <flux:table class="mb-6 sm:mb-8">
+    <flux:table>
         <flux:table.columns>
             <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">
                 {{ __('Short Name') }}
