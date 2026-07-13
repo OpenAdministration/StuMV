@@ -76,7 +76,7 @@ return [
     'new_domain_title' => 'Domain hinzufügen',
     'domains_edit_heading' => 'Domain hinzufügen',
     'domains_edit_explanation' => 'Füge hier eine Domain im Format "meine-domain.de" im Feld FQDN ein. Alle E-Mail-Adressen, die zu dieser Domain gehören werden dann automatisch deiner Studierendenschaft zugeordnet.',
-    'members_title' => 'Mitglieder',
+    'members_title' => 'Mitglieder in :name',
     'new_member_title' => 'Neues Mitglied hinzufügen',
     'mods_title' => 'Moderator:innen',
     'new_realm_title' => 'Neue Studischaft hinzufügen',

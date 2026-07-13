@@ -76,7 +76,7 @@ return [
     'new_domain_title' => 'Add domain',
     'domains_edit_heading' => 'Add domain',
     'domains_edit_explanation' => 'Enter a domain here in the format "my-domain.com" in the FQDN field. All email addresses belonging to this domain will then be automatically assigned to your student body.',
-    'members_title' => 'Members',
+    'members_title' => 'Members of :name',
     'new_member_title' => 'Add new member',
     'mods_title' => 'Moderators',
     'new_realm_title' => 'Add new student body',

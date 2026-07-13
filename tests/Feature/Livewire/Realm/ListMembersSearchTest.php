@@ -54,6 +54,16 @@ test('the member list filters by name', function (): void {
         ->assertDontSee('Bob Builder');
 });
 
+test('the browser tab title includes the community name', function (): void {
+    app()->setLocale('en');
+    $community = newCommunity();
+    actingAsMember($community);
+
+    $this->get(route('realms.members', ['uid' => $community->getShortCode()]))
+        ->assertOk()
+        ->assertSee('<title>Members of '.$community->getLongName().' | ', false);
+});
+
 test('search stays scoped to the community and does not leak other realms', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
