@@ -30,9 +30,9 @@
                             class="mt-[.35rem]"
                         />
                     @else
-                        <div class="space-y-4 mt-4">
+                        <div class="space-y-4 mt-2">
                             @foreach($matches as $user)
-                                <flux:card>
+                                <flux:card class="p-4">
                                     <div class="flex flex-col">
                                         <flux:link
                                             wire:navigate
