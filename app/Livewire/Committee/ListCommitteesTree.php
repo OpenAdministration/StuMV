@@ -135,8 +135,16 @@ class ListCommitteesTree extends Component
 
         $search = mb_strtolower(trim($this->search));
 
+        // Community moderators (or an ancestor a top-level committee's
+        // moderator) already carry "is a moderator" down to every committee -
+        // computed once here and threaded through buildNode() so each node
+        // only ever has to check its OWN moderators group, not walk back up
+        // through every ancestor (Committee::hasModerator() would otherwise
+        // redo that walk from scratch for every single node in the tree).
+        $isCommunityModerator = auth()->user()->can('moderator', $community);
+
         $nodes = $committees
-            ->map(fn (Committee $committee): ?array => $this->buildNode($committee, $search))
+            ->map(fn (Committee $committee): ?array => $this->buildNode($committee, $search, $isCommunityModerator))
             ->filter()
             ->values()
             ->all();
@@ -157,10 +165,11 @@ class ListCommitteesTree extends Component
      * Returns null while searching if neither this committee nor any of its
      * descendants match, so the branch is dropped entirely.
      *
-     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array}|null
+     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array, isModerator: bool}|null
      */
-    protected function buildNode(Committee $committee, string $search): ?array
+    protected function buildNode(Committee $committee, string $search, bool $ancestorIsModerator): ?array
     {
+        $isModerator = $ancestorIsModerator || $committee->isDirectModerator(auth()->user());
         $isUnfoldedByUser = $search === '' && in_array($committee->getDn(), $this->unfolded, true);
 
         // Collapsed and not searching: we only need to know whether an expand
@@ -171,13 +180,14 @@ class ListCommitteesTree extends Component
                 'hasChildren' => $committee->descendants()->select(['ou'])->exists(),
                 'unfolded' => false,
                 'children' => [],
+                'isModerator' => $isModerator,
             ];
         }
 
         $children = $this->sortByName($committee->descendants()->get());
 
         $childNodes = $children
-            ->map(fn (Committee $child): ?array => $this->buildNode($child, $search))
+            ->map(fn (Committee $child): ?array => $this->buildNode($child, $search, $isModerator))
             ->filter()
             ->values()
             ->all();
@@ -197,6 +207,7 @@ class ListCommitteesTree extends Component
             'hasChildren' => $search !== '' ? ! empty($childNodes) : $children->isNotEmpty(),
             'unfolded' => $unfolded,
             'children' => $childNodes,
+            'isModerator' => $isModerator,
         ];
     }
 

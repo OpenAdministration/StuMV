@@ -58,7 +58,7 @@
                     <flux:menu.item
                         icon="pencil"
                         href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
-                        :disabled="auth()->user()->cannot('edit', [$committee, $community])"
+                        :disabled="!$node['isModerator']"
                     >
                         {{ __('committees.link_edit') }}
                     </flux:menu.item>
@@ -66,7 +66,7 @@
                         variant="danger"
                         icon="trash-2"
                         wire:click="confirmDeleteCommittee('{{ $committee->getDn() }}')"
-                        :disabled="auth()->user()->cannot('edit', [$committee, $community])"
+                        :disabled="!$node['isModerator']"
                     >
                         {{ __('Delete') }}
                     </flux:menu.item>

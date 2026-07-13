@@ -5,7 +5,7 @@
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
         <div class="flex gap-2">
-            @can('moderator', [$committee, $community])
+            @if($isModerator)
                 <flux:button
                     icon="shield-user"
                     wire:navigate
@@ -13,12 +13,12 @@
                 >
                     {{ __('committees.link_moderators') }}
                 </flux:button>
-            @endcan
+            @endif
             <flux:button
                 variant="primary"
                 icon="plus"
                 :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])"
-                :disabled="auth()->user()->cannot('create', [\App\Ldap\Role::class, $committee, $community])"
+                :disabled="!$isModerator"
             >
                 {{ __('New Role') }}
             </flux:button>
@@ -90,14 +90,14 @@
                                             icon="pencil"
                                             wire:navigate
                                             :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
-                                            :disabled="auth()->user()->cannot('edit', [$role, $committee, $community])"
+                                            :disabled="!$isModerator"
                                         >
                                             {{ __('roles.link_edit') }}
                                         </flux:menu.item>
                                         <flux:menu.item
                                             variant="danger"
                                             icon="trash-2"
-                                            :disabled="auth()->user()->cannot('delete', [$role, $committee, $community])"
+                                            :disabled="!$isModerator"
                                             wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
                                             {{ __('Delete') }}
                                         </flux:menu.item>
@@ -122,7 +122,7 @@
                                 />
                             </flux:tooltip>
                         @endforeach
-                        @if(auth()->user()->can('moderator', [$committee, $community]) || auth()->user()->can('superadmin', \App\Models\User::class))
+                        @if($isModerator || auth()->user()->can('superadmin', \App\Models\User::class))
                             <flux:button
                                 icon="plus"
                                 href="{{ route('committees.roles.add-member', [

@@ -129,6 +129,18 @@ class Committee extends OrganizationalUnit
     }
 
     /**
+     * Whether $user is a direct member of this committee's own moderators
+     * group - unlike hasModerator(), this does not walk ancestors. Callers
+     * that already know an ancestor's status (e.g. while walking a tree
+     * top-down) should use this to check just the one additional level
+     * instead of re-walking the whole chain via hasModerator().
+     */
+    public function isDirectModerator(User $user): bool
+    {
+        return $this->moderatorsGroup()->members()->exists($user->ldap());
+    }
+
+    /**
      * Whether $user moderates this committee - either directly (member of
      * this committee's own moderators group) or by moderating an ancestor
      * committee, since a committee-moderator's authority extends to the
@@ -139,7 +151,7 @@ class Committee extends OrganizationalUnit
         $current = $this;
 
         while ($current !== null) {
-            if ($current->moderatorsGroup()->members()->exists($user->ldap())) {
+            if ($current->isDirectModerator($user)) {
                 return true;
             }
 

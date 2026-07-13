@@ -73,6 +73,12 @@ class ListRoles extends Component
     {
         $community = Community::findByUid($this->uid);
         $committee = Committee::findByNameOrFail($this->uid, $this->ou);
+        // Edit/delete/add-member on any role in this committee, and creating
+        // a new one, all resolve to this exact same committee-scoped check
+        // regardless of which role - computed once here (an ancestor walk
+        // hitting LDAP per level) rather than once per role card, which
+        // would otherwise multiply that walk by the number of roles shown.
+        $isModerator = auth()->user()->can('moderator', [$committee, $community]);
 
         if (! $this->ready) {
             return view(
@@ -81,6 +87,7 @@ class ListRoles extends Component
                     'committee' => $committee,
                     'roles' => collect(),
                     'roleData' => [],
+                    'isModerator' => $isModerator,
                 ]
             )->title(__('committees.roles_title', ['name' => $committee->getFirstAttribute('description')]));
         }
@@ -119,6 +126,7 @@ class ListRoles extends Component
                 'committee' => $committee,
                 'roles' => $rolesSlice,
                 'roleData' => $roleData,
+                'isModerator' => $isModerator,
             ]
         )->title(__('committees.roles_title', ['name' => $this->ou]));
     }
