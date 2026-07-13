@@ -102,16 +102,31 @@ class ListRoles extends Component
             ->sortBy(fn (Role $role): string => mb_strtolower((string) $role->getFirstAttribute('description')), SORT_NATURAL)
             ->values();
 
-        $roleData = [];
+        // Collect every role's active-membership usernames first, then
+        // resolve all of them from LDAP in a single batched query - doing it
+        // per member per role (as before) multiplies an LDAP round trip by
+        // the total number of memberships shown across every role.
+        $roleUsernames = [];
         foreach ($rolesSlice as $role) {
-            $usernames = $role->dbMemberships()
+            $roleUsernames[$role->getDn()] = $role->dbMemberships()
                 ->active(today())
                 ->distinct()
-                ->pluck('username');
+                ->pluck('username')
+                ->all();
+        }
 
+        $allUsernames = collect($roleUsernames)->flatten()->unique()->values()->all();
+        $userCache = empty($allUsernames)
+            ? []
+            : User::query()->whereIn('uid', $allUsernames)->get()->keyBy('uid')->all();
+
+        $roleData = [];
+        foreach ($rolesSlice as $role) {
             $members = [];
-            foreach ($usernames as $user) {
-                $members[] = User::findOrFailByUsername($user);
+            foreach ($roleUsernames[$role->getDn()] as $username) {
+                if (isset($userCache[$username])) {
+                    $members[] = $userCache[$username];
+                }
             }
 
             $roleData[$role->getDn()] = [
@@ -129,58 +144,6 @@ class ListRoles extends Component
                 'isModerator' => $isModerator,
             ]
         )->title(__('committees.roles_title', ['name' => $this->ou]));
-    }
-
-    public function getMembers(Role $role): array
-    {
-        $usernames = $role->dbMemberships()
-            ->active(today())
-            ->distinct()
-            ->pluck('username');
-
-        $members = [];
-        foreach ($usernames as $user) {
-            $members[] = User::findOrFailByUsername($user);
-        }
-
-        return $members;
-    }
-
-    public function getMembersString(Role $role): string
-    {
-        $usernames = $role->dbMemberships()
-            ->active(today())
-            ->distinct()
-            ->limit(4)
-            ->pluck('username');
-
-        $members = [];
-        foreach ($usernames as $user) {
-            $members[] = User::findOrFailByUsername($user)->getFirstAttribute('cn');
-        }
-
-        if (count($members) === 4) {
-            // replace last one with dots
-            array_pop($members);
-            $members[] = '…';
-        }
-
-        return implode(', ', $members);
-    }
-
-    public function getHasMembers(Role $role): string
-    {
-        $members = $role->dbMemberships()
-            ->active(today())
-            ->distinct()
-            ->limit(1)
-            ->pluck('username');
-
-        if (count($members) > 0) {
-            return true;
-        }
-
-        return false;
     }
 
     #[Computed]
