@@ -102,6 +102,16 @@ Breadcrumbs::for('realms.groups', function (BreadcrumbTrail $trail, array $route
     $trail->push(__('Groups'), route('realms.groups', $routeParams));
 });
 
+Breadcrumbs::for('realms.api-clients', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('api_clients.list_title'), route('realms.api-clients', $routeParams));
+});
+
+Breadcrumbs::for('realms.api-clients.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.api-clients', $routeParams);
+    $trail->push(__('api_clients.new'), route('realms.api-clients.new', $routeParams));
+});
+
 Breadcrumbs::for('realms.groups.new', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms.groups', $routeParams);
     $trail->push(__('New Group'), route('realms.groups.new', $routeParams));

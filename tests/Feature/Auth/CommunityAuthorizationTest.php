@@ -20,6 +20,7 @@ test('a plain member is forbidden from admin and superadmin routes', function ()
     $member = actingAsMember('demo');
 
     $this->actingAs($member)->get('/demo/edit')->assertStatus(403);       // communityAdmin
+    $this->actingAs($member)->get('/demo/api-clients')->assertStatus(403); // communityAdmin
     $this->actingAs($member)->get('/new-realm')->assertStatus(403);        // SuperAdmin
 });
 
@@ -39,6 +40,7 @@ test('a community admin can open the community edit screen', function (): void {
     $admin = actingAsAdmin('demo');
 
     $this->actingAs($admin)->get('/demo/edit')->assertStatus(200);
+    $this->actingAs($admin)->get('/demo/api-clients')->assertStatus(200);
 });
 
 test('a super admin can open the new-realm screen', function (): void {

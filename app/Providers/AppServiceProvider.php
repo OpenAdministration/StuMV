@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
             'profile' => 'Grant Profile Info Access',
             'committees' => 'Grant Committee Access',
             'groups' => 'Grant Group Access',
+            'users' => 'Grant Directory User Info Access',
             'iban' => 'Grant IBAN Access',
             'address' => 'Grant Address Access',
         ]);

@@ -59,6 +59,13 @@
                 >
                     {{ __('realms.dashboard.groups_headline') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item
+                    icon="external-link"
+                    wire:navigate
+                    :href="route('realms.api-clients', ['uid' => $uid])"
+                >
+                    {{ __('api_clients.list_title') }}
+                </flux:sidebar.item>
             @endif
             @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('uid'))
                 <flux:separator class="my-2" />

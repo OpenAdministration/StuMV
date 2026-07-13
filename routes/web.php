@@ -24,11 +24,13 @@ use App\Livewire\Profile\Picture;
 use App\Livewire\Realm\CommunityDashboard;
 use App\Livewire\Realm\EditRealm;
 use App\Livewire\Realm\ListAdmins;
+use App\Livewire\Realm\ListApiClients;
 use App\Livewire\Realm\ListDomains;
 use App\Livewire\Realm\ListMembers;
 use App\Livewire\Realm\ListModerators;
 use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\NewAdmin;
+use App\Livewire\Realm\NewApiClient;
 use App\Livewire\Realm\NewDomain;
 use App\Livewire\Realm\NewMember;
 use App\Livewire\Realm\NewModerator;
@@ -110,6 +112,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{uid}/group/{cn}/add-role', AddRoleToGroup::class)->name('realms.groups.roles.add');
         Route::livewire('{uid}/domains', ListDomains::class)->name('realms.domains');
         Route::livewire('{uid}/new-domain', NewDomain::class)->name('realms.domains.new');
+        Route::livewire('{uid}/api-clients', ListApiClients::class)->name('realms.api-clients');
+        Route::livewire('{uid}/new-api-client', NewApiClient::class)->name('realms.api-clients.new');
         Route::livewire('{uid}/edit', EditRealm::class)->name('realms.edit');
         // end admin
     });

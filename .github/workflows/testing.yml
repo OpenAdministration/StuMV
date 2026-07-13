@@ -70,6 +70,9 @@ jobs:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
         run: composer install --no-ansi --no-interaction --no-scripts --prefer-dist --no-progress
 
+      - name: Generate Passport encryption keys
+        run: php artisan passport:keys
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

@@ -1,31 +1,28 @@
 <?php
 
-use App\Http\Controllers\Api\Committees;
-use App\Http\Controllers\Api\Groups;
-use App\Http\Controllers\Api\SocialiteUser;
+use App\Http\Controllers\Api\Directory\Committees;
+use App\Http\Controllers\Api\Directory\Groups;
+use App\Http\Controllers\Api\Directory\Users;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
 */
-Route::middleware('auth:api')->group(function (): void {
-    Route::any('user', SocialiteUser::class);
-
+Route::middleware('client')->group(function (): void {
     Route::middleware('scope:committees')->group(function (): void {
-        Route::any('my/committees', [Committees::class, 'all']);
-        Route::any('my/committees/{community_uid}', [Committees::class, 'fromCommunity']);
+        Route::get('{uid}/committees', [Committees::class, 'index']);
+        Route::get('{uid}/committees/{ou}/roles', [Committees::class, 'roles']);
+        Route::get('{uid}/committees/{ou}/roles/{cn}/members', [Committees::class, 'roleMembers']);
     });
 
     Route::middleware('scope:groups')->group(function (): void {
-        Route::any('my/groups', [Groups::class, 'all']);
-        Route::any('my/groups/{community_uid}', [Groups::class, 'fromCommunity']);
+        Route::get('{uid}/groups', [Groups::class, 'index']);
+        Route::get('{uid}/groups/{cn}/members', [Groups::class, 'members']);
     });
 
+    Route::middleware('scope:users')->group(function (): void {
+        Route::get('{uid}/users/{username}', [Users::class, 'show']);
+    });
 });

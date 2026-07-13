@@ -1,7 +1,10 @@
 <?php
 
 use App\Ldap\Community;
+use App\Models\PassportClient;
 use App\Models\User;
+use Laravel\Passport\ClientRepository;
+use Laravel\Passport\Passport;
 use Tests\Support\TestLdap;
 use Tests\TestCase;
 
@@ -56,6 +59,29 @@ function actingAsAdmin(string|Community $community = 'demo'): User
 function actingAsSuperAdmin(): User
 {
     return tap(TestLdap::superAdmin(), fn (User $user) => test()->actingAs($user));
+}
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated third-party application helper
+|--------------------------------------------------------------------------
+|
+| The directory API (routes/api.php) authenticates third-party applications
+| via the OAuth2 client-credentials grant instead of a delegated user login -
+| there is no human behind the token, only a client bound to one community.
+| This registers a real client-credentials PassportClient for that community
+| and simulates a valid client-credentials token with the given scopes.
+|
+*/
+
+function actingAsDirectoryClient(Community $community, array $scopes = []): PassportClient
+{
+    $client = app(ClientRepository::class)->createClientCredentialsGrantClient('Test Client');
+    $client->forceFill(['community_uid' => $community->getShortCode()])->save();
+
+    Passport::actingAsClient($client, $scopes);
+
+    return $client;
 }
 
 /*

@@ -30,8 +30,9 @@ use Illuminate\Routing\Middleware\ValidateSignature;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Laravel\Passport\Http\Middleware\CheckForAnyScope;
-use Laravel\Passport\Http\Middleware\CheckScopes;
+use Laravel\Passport\Http\Middleware\CheckToken;
+use Laravel\Passport\Http\Middleware\CheckTokenForAnyScope;
+use Laravel\Passport\Http\Middleware\EnsureClientIsResourceOwner;
 
 class Kernel extends HttpKernel
 {
@@ -98,7 +99,11 @@ class Kernel extends HttpKernel
         'communityAdmin' => CommunityAdmin::class,
         'communityMod' => CommunityModerator::class,
         'communityMember' => CommunityMember::class,
-        'scopes' => CheckScopes::class,
-        'scope' => CheckForAnyScope::class,
+        'scopes' => CheckToken::class,
+        'scope' => CheckTokenForAnyScope::class,
+        // Rejects any token that has a human resource owner (i.e. a normal
+        // delegated end-user login) - only genuine client-credentials
+        // tokens (the client authenticating as itself) pass through.
+        'client' => EnsureClientIsResourceOwner::class,
     ];
 }

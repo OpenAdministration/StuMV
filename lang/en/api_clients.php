@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'list_title' => 'API clients',
+    'headline' => 'Third-party API clients',
+    'explanation' => 'Applications registered here may query the read-only directory API (committees, roles, groups and users) for this community. Each client authenticates on its own behalf, without a user, and can only ever see this community\'s data.',
+    'new' => 'New client',
+    'new_title' => 'Register a new API client',
+    'name' => 'Name',
+    'name_placeholder' => 'e.g. StuFiS',
+    'scopes' => 'Scopes',
+    'scope_committees' => 'Committees & roles',
+    'scope_groups' => 'Groups',
+    'scope_users' => 'Users',
+    'no_clients_found' => 'No API clients registered yet.',
+    'status' => 'Status',
+    'status_active' => 'Active',
+    'status_revoked' => 'Revoked',
+    'revoke' => 'Revoke',
+    'revoke_title' => 'Revoke client :name',
+    'revoke_warning' => 'Should the client :name really be revoked? It will immediately lose access to the API and this cannot be undone.',
+    'revoked_success' => 'The client was revoked.',
+    'created_success' => 'The client was registered. Copy the secret now - it will not be shown again.',
+    'client_id' => 'Client ID',
+    'client_secret' => 'Client secret',
+    'client_secret_warning' => 'This secret is shown only once. Store it securely - if it is lost, revoke this client and register a new one.',
+    'done' => 'Done',
+];
