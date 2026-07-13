@@ -66,12 +66,12 @@ class LdapSyncRoles extends Command
                 ->searchFor('ou', $this->argument('committee'))
                 ->get();
             foreach ($committees as $committee) {
-                $this->comment('  |-> '.$committee->getDn());
+                $this->comment('   |-> '.$committee->getDn());
                 $roles = $committee->roles()
                     ->searchFor('cn', $this->argument('role'))
                     ->get();
                 foreach ($roles as $role) {
-                    $this->comment('  |  |-> '.$role->getDn());
+                    $this->comment('   |   |-> '.$role->getDn());
 
                     $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
                     $roleMemberships = $membershipsByRole->get($key, collect());
@@ -80,7 +80,7 @@ class LdapSyncRoles extends Command
                         ->map(function (RoleMembership $membership) use ($ldapUsersByUsername) {
                             $user = $ldapUsersByUsername->get($membership->username);
                             if ($user === null) {
-                                $this->warn("  |  |  |-> Unknown LDAP user: $membership->username");
+                                $this->warn("   |   |   |-> Unknown LDAP user: $membership->username");
                             }
 
                             return $user?->getDn();
