@@ -2,8 +2,8 @@
 
 return [
     'list_title' => 'API-Clients',
-    'headline' => 'API-Clients für Drittanbieter',
-    'explanation' => 'Hier registrierte Anwendungen dürfen die schreibgeschützte Verzeichnis-API (Gremien, Rollen, Gruppen und Nutzer:innen) dieser Community abfragen. Jeder Client authentifiziert sich eigenständig, ohne Nutzer:in, und sieht ausschließlich die Daten dieser Community.',
+    'headline' => 'API-Clients',
+    'explanation' => 'Hier registrierte Anwendungen dürfen die schreibgeschützte Verzeichnis-API (Gremien, Rollen, Gruppen und Nutzer:innen) dieser Studierendenschaft abfragen. Jeder Client authentifiziert sich eigenständig, ohne Nutzer:in, und sieht ausschließlich die Daten dieser Studierendenschaft.',
     'new' => 'Neuer Client',
     'new_title' => 'Neuen API-Client registrieren',
     'name' => 'Name',

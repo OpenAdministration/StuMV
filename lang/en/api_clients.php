@@ -2,7 +2,7 @@
 
 return [
     'list_title' => 'API clients',
-    'headline' => 'Third-party API clients',
+    'headline' => 'API clients',
     'explanation' => 'Applications registered here may query the read-only directory API (committees, roles, groups and users) for this community. Each client authenticates on its own behalf, without a user, and can only ever see this community\'s data.',
     'new' => 'New client',
     'new_title' => 'Register a new API client',
