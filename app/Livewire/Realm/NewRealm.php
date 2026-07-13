@@ -16,7 +16,7 @@ class NewRealm extends Component
     #[Rule('required|alpha_dash:ascii')]
     public string $uid = '';
 
-    #[Rule('required|min:6|ascii')]
+    #[Rule('required|min:6')]
     public string $name = '';
 
     public function render(): Factory|View|Application
