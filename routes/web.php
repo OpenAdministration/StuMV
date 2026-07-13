@@ -6,10 +6,12 @@ use App\Livewire\Committee\AddUserToRole;
 use App\Livewire\Committee\EditCommittee;
 use App\Livewire\Committee\EditRole;
 use App\Livewire\Committee\EditRoleMembership;
+use App\Livewire\Committee\ListCommitteeModerators;
 use App\Livewire\Committee\ListCommitteesTree;
 use App\Livewire\Committee\ListRoleMembers;
 use App\Livewire\Committee\ListRoles;
 use App\Livewire\Committee\NewCommittee;
+use App\Livewire\Committee\NewCommitteeModerator;
 use App\Livewire\Committee\NewRole;
 use App\Livewire\Committee\TerminateRoleMemberships;
 use App\Livewire\Group\AddRoleToGroup;
@@ -90,6 +92,8 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/membership/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
+        Route::livewire('{uid}/committees/{ou}/moderators', ListCommitteeModerators::class)->name('committees.moderators');
+        Route::livewire('{uid}/committees/{ou}/new-moderator', NewCommitteeModerator::class)->name('committees.moderators.new');
         // end mod
     });
 

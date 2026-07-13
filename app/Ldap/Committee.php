@@ -3,9 +3,11 @@
 namespace App\Ldap;
 
 use App\Ldap\Traits\SearchScopeTrait;
+use App\Models\User;
 use Illuminate\Support\Arr;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\Attributes\DistinguishedNameBuilder;
+use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Model\Builder;
 
@@ -94,7 +96,57 @@ class Committee extends OrganizationalUnit
     {
         return Role::query()
             ->list()
-            ->setBaseDn($this->getDn());
+            ->setBaseDn($this->getDn())
+            ->whereNotEquals('cn', 'moderators');
+    }
+
+    /**
+     * The hidden LDAP group backing this committee's own moderators, scoped
+     * to this committee and its descendants (see hasModerator()). Unlike
+     * regular roles, membership is direct LDAP group membership - no
+     * RoleMembership/date-range tracking, mirroring Community::moderatorsGroup().
+     * Self-heals (creates the group on first access) so committees that
+     * existed before this feature shipped don't need a manual backfill.
+     */
+    public function moderatorsGroup(): Group
+    {
+        // ->list() restricts this to a direct (one-level) child of this
+        // committee's own DN - without it, the default subtree scope would
+        // also match a *descendant* committee's own "cn=moderators" group,
+        // since committees can be nested arbitrarily deep.
+        $group = Group::query()->in($this->getDn())->list()->where('cn', 'moderators')->first();
+
+        if ($group === null) {
+            $group = new Group([
+                'cn' => 'moderators',
+                'uniqueMember' => '',
+            ]);
+            $group->setDn('cn=moderators,'.$this->getDn());
+            $group->save();
+        }
+
+        return $group;
+    }
+
+    /**
+     * Whether $user moderates this committee - either directly (member of
+     * this committee's own moderators group) or by moderating an ancestor
+     * committee, since a committee-moderator's authority extends to the
+     * committee they were assigned plus all of its descendants.
+     */
+    public function hasModerator(User $user): bool
+    {
+        $current = $this;
+
+        while ($current !== null) {
+            if ($current->moderatorsGroup()->members()->exists($user->ldap())) {
+                return true;
+            }
+
+            $current = $current->parentCommittee();
+        }
+
+        return false;
     }
 
     public static function findByName(string $uid, string $name): ?self

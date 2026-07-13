@@ -33,4 +33,12 @@ return [
     'foldSubItems' => 'Fold subordinate committees of :committee',
     'unfoldSubItems' => 'Unfold subordinate committees of :committee',
     'showOnlyActiveRoles' => 'Show only roles with active memberships',
+    'link_moderators' => 'Moderators',
+    'mods_heading' => 'Moderators of :name',
+    'mods_explanation' => 'Moderators of a committee can manage it and its sub-committees exactly like general moderators - creating, editing and deleting committees and roles, and managing role memberships - but only within this committee and its descendants.',
+    'no_mods_found' => 'No moderators found!',
+    'new_mod_headline' => 'Add new moderator of :name',
+    'new_mod_explanation' => 'Select a user who should become a moderator of this committee and its sub-committees.',
+    'delete_mod_title' => 'Remove :name as a moderator',
+    'delete_mod_warning' => 'Should :name (:username) really be removed as a moderator of this committee?',
 ];

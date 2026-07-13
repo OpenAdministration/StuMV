@@ -4,6 +4,7 @@ namespace App\Ldap;
 
 use App\Ldap\Traits\HasRelationships;
 use App\Ldap\Traits\SearchScopeTrait;
+use App\Models\User;
 use LdapRecord\Laravel\ImportableFromLdap;
 use LdapRecord\Laravel\LdapImportable;
 use LdapRecord\Models\OpenLDAP\Group;
@@ -79,6 +80,22 @@ class Community extends OrganizationalUnit implements LdapImportable
     public function adminsGroup(): Group
     {
         return Group::query()->in($this->getDn())->where('cn', 'admins')->first();
+    }
+
+    /**
+     * Coarse "could this user create/manage something here at all" check,
+     * used only to gate entry to actions that don't yet have a specific
+     * committee to check (e.g. picking a parent for a brand new committee) -
+     * true if $user moderates at least one committee anywhere in this
+     * community. The precise, scoped check for a specific committee is
+     * Committee::hasModerator().
+     */
+    public function hasCommitteeModeratorSomewhere(User $user): bool
+    {
+        return Committee::fromCommunity($this->getShortCode())
+            ->whereNotEquals('ou', 'Committees')
+            ->get()
+            ->contains(fn (Committee $committee): bool => $committee->moderatorsGroup()->members()->exists($user->ldap()));
     }
 
     public function generateSkeleton()

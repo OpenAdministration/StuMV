@@ -24,6 +24,18 @@ test('a moderator can create a role in a committee', function (): void {
     expect($committee->roles()->where('cn', 'kasse')->exists())->toBeTrue();
 });
 
+test('moderators is reserved as a role name since it names the committee\'s hidden moderators group', function (): void {
+    $community = newCommunity();
+    TestLdap::makeCommittee($community, 'fsr');
+    actingAsModerator($community);
+
+    Livewire::test(NewRole::class, ['uid' => $community, 'ou' => 'fsr'])
+        ->set('cn', 'moderators')
+        ->set('description', 'Sneaky Role')
+        ->call('save')
+        ->assertHasErrors('cn');
+});
+
 test('a moderator can rename a role', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');

@@ -33,4 +33,12 @@ return [
     'foldSubItems' => 'Untergeordnete Gremien von :committee einklappen',
     'unfoldSubItems' => 'Untergeordnete Gremien von :committee ausklappen',
     'showOnlyActiveRoles' => 'Zeige nur Rollen mit aktiven Mitgliedschaften',
+    'link_moderators' => 'Moderator:innen',
+    'mods_heading' => 'Moderator:innen von :name',
+    'mods_explanation' => 'Moderator:innen eines Gremiums können dieses und seine untergeordneten Gremien genauso verwalten wie allgemeine Moderator:innen - sie können Gremien und Rollen anlegen, bearbeiten und löschen sowie Rollenmitgliedschaften verwalten - jedoch nur innerhalb dieses Gremiums und seiner untergeordneten Gremien.',
+    'no_mods_found' => 'Keine Moderator:innen gefunden!',
+    'new_mod_headline' => 'Neue:n Moderator:in von :name hinzufügen',
+    'new_mod_explanation' => 'Wähle eine:n Nutzer:in aus, der:die Moderator:in dieses Gremiums und seiner untergeordneten Gremien werden soll.',
+    'delete_mod_title' => ':name als Moderator:in entfernen',
+    'delete_mod_warning' => 'Soll :name (:username) wirklich als Moderator:in dieses Gremiums entfernt werden?',
 ];

@@ -222,7 +222,7 @@ test('ldap:sync-roles logs member additions at the role\'s own tree depth', func
     $lines = explode("\n", Artisan::output());
 
     expect($exitCode)->toBe(0)
-        ->and($lines)->toContain('   |   |   |-> Add: '.$active->ldap()->getDn());
+        ->and($lines)->toContain('  |   |   |-> Add: '.$active->ldap()->getDn());
 });
 
 test('app:move-group-roles-from-ldap-to-database imports LDAP group roles into the DB', function (): void {

@@ -4,7 +4,16 @@
             <flux:heading size="xl">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
-        <div>
+        <div class="flex gap-2">
+            @can('moderator', [$committee, $community])
+                <flux:button
+                    icon="shield-user"
+                    wire:navigate
+                    :href="route('committees.moderators', ['uid' => $uid, 'ou' => $ou])"
+                >
+                    {{ __('committees.link_moderators') }}
+                </flux:button>
+            @endcan
             <flux:button
                 variant="primary"
                 icon="plus"
@@ -113,7 +122,7 @@
                                 />
                             </flux:tooltip>
                         @endforeach
-                        @if(auth()->user()->can('moderator', $community) || auth()->user()->can('superadmin', \App\Models\User::class))
+                        @if(auth()->user()->can('moderator', [$committee, $community]) || auth()->user()->can('superadmin', \App\Models\User::class))
                             <flux:button
                                 icon="plus"
                                 href="{{ route('committees.roles.add-member', [

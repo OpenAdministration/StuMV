@@ -114,6 +114,16 @@ class TestLdap
         return self::databaseUser($ldap);
     }
 
+    /** A member of $community, and a moderator of just $committee (not the community itself). */
+    public static function committeeModerator(Committee $committee, Community $community): User
+    {
+        $ldap = self::makeUser();
+        self::attach($community->membersGroup(), $ldap);
+        self::attach($committee->moderatorsGroup(), $ldap);
+
+        return self::databaseUser($ldap);
+    }
+
     /**
      * Create a full community skeleton (Groups/Committees/Domains OUs plus the
      * admins/moderators/members groups), just like NewRealm does.

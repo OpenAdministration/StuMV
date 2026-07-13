@@ -82,9 +82,18 @@ class NewCommittee extends Component
 
     public function render()
     {
+        $community = Community::findOrFailByUid($this->realm_uid);
+        $isCommunityModerator = auth()->user()->can('moderator', $community);
+
         $parentsLdap = Committee::fromCommunity($this->realm_uid)
             ->whereNotEquals('ou', 'Committees') // remove parent Folder from Results;
-            ->get();
+            ->get()
+            // A committee moderator may only create sub-committees under a
+            // committee they moderate (themselves or one of its ancestors) -
+            // a community moderator may create anywhere, no filtering needed.
+            ->when(! $isCommunityModerator, fn ($committees) => $committees->filter(
+                fn (Committee $candidate): bool => auth()->user()->can('moderator', [$candidate, $community])
+            ));
 
         $parents = [];
         foreach ($parentsLdap as $parent) {
@@ -108,6 +117,10 @@ class NewCommittee extends Component
         return view('livewire.committee.new-committee', [
             'select_parents' => $parents,
             'defaultRoles' => $this->defaultRoles,
+            // A committee moderator's authority never extends beyond their
+            // own committee's subtree, so they can't create a top-level
+            // (parent-less) committee - only a community moderator can.
+            'canCreateTopLevel' => $isCommunityModerator,
         ])->title(__('committees.new_title'));
     }
 
@@ -116,6 +129,24 @@ class NewCommittee extends Component
 
         $this->validate();
 
+        $community = Community::findOrFailByUid($this->realm_uid);
+
+        // The parent dropdown is already filtered to what this user is
+        // allowed to create under, but that's a client-supplied value - the
+        // authorization has to be re-checked here against whatever was
+        // actually submitted. Note this deliberately does NOT reuse
+        // CommitteePolicy::create - that ability is a coarse "could this user
+        // possibly create something" check meant only for page-entry gating,
+        // and would let any committee moderator through. Creating a
+        // *top-level* committee has no existing parent to be a moderator of,
+        // so it's community-moderator-only.
+        if ($this->parent_dn === '') {
+            $this->authorize('moderator', $community);
+        } else {
+            $parent = Committee::find($this->parent_dn) ?? abort(404);
+            $this->authorize('moderator', [$parent, $community]);
+        }
+
         $dn = Committee::dnFrom($this->realm_uid, $this->ou, parentDn: $this->parent_dn);
         $c = new Committee([
             'ou' => $this->ou,
@@ -123,6 +154,7 @@ class NewCommittee extends Component
         ]);
         $c->setDn($dn);
         $c->save();
+        $c->moderatorsGroup();
 
         foreach ($this->roles as $role) {
             $roleConfig = $this->defaultRoles[$role];

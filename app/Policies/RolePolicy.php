@@ -11,18 +11,17 @@ class RolePolicy
 {
     public function create(User $user, Committee $committee, Community $community): bool
     {
-        return // add committee mods
-            $user->can('moderator', $community);
+        return $user->can('moderator', [$committee, $community]);
     }
 
     public function edit(User $user, Role $role, Committee $committee, Community $community): bool
     {
-        return $user->can('moderator', $community);
+        return $user->can('moderator', [$committee, $community]);
     }
 
     public function delete(User $user, Role $role, Committee $committee, Community $community): bool
     {
-        return $user->can('moderator', $community);
+        return $user->can('moderator', [$committee, $community]);
     }
 
     public function view(User $user, Role $role, Committee $committee, Community $community): bool
