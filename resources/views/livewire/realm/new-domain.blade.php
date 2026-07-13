@@ -6,11 +6,6 @@
         </div>
 
         <flux:field>
-            <flux:label>{{ __('Realm Name') }}</flux:label>
-            <flux:input wire:model="uid" disabled />
-        </flux:field>
-
-        <flux:field>
             <flux:label>{{ __('Domain FQDN') }}</flux:label>
             <flux:input wire:model="dc" />
         </flux:field>
