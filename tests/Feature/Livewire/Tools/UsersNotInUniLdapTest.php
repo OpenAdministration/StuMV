@@ -97,3 +97,38 @@ test('checking more than 10 members batches the uni LDAP lookup in groups of 10'
         expect(substr_count($query, 'mail='))->toBeLessThanOrEqual(10);
     }
 });
+
+test('the uni LDAP batch size is configurable via ldap.uni_batch_size', function (): void {
+    config(['ldap.uni_batch_size' => 5]);
+
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $domain = new Domain(['dc' => 'example.test']);
+    $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
+    $domain->save();
+
+    foreach (range(1, 12) as $i) {
+        TestLdap::member($community);
+    }
+    actingAsModerator($community);
+
+    $mailQueries = [];
+    Container::getInstance()->getDispatcher()->listen('LdapRecord\Query\Events\*', function ($eventName, $events) use (&$mailQueries): void {
+        foreach ($events as $event) {
+            $query = $event->getQuery()->getUnescapedQuery();
+            if (str_contains($query, 'mail=')) {
+                $mailQueries[] = $query;
+            }
+        }
+    });
+
+    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+        ->call('searchForUsersNotInUniLdap');
+
+    // 12 candidates at a batch size of 5 -> 3 batches (5, 5, 2).
+    expect($mailQueries)->toHaveCount(3);
+    foreach ($mailQueries as $query) {
+        expect(substr_count($query, 'mail='))->toBeLessThanOrEqual(5);
+    }
+});

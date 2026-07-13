@@ -64,10 +64,10 @@ class UsersNotInUniLdap extends Component
             ->values();
 
         // Batched lookups instead of one uni LDAP query per candidate, but
-        // the uni LDAP server caps each search request at 10 results, so the
-        // batches themselves must stay at 10 emails or fewer.
+        // the uni LDAP server caps each search request's results, so the
+        // batches themselves must stay at or under that configured size.
         $mailsFoundInUniLdap = $mails
-            ->chunk(10)
+            ->chunk(config('ldap.uni_batch_size', 10))
             ->flatMap(fn ($chunk) => UniLdapUser::whereIn('mail', $chunk->all())->get())
             ->map(fn (UniLdapUser $user) => $user->getFirstAttribute('mail'))
             ->all();

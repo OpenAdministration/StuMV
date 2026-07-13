@@ -89,4 +89,19 @@ return [
         'driver' => env('CACHE_DRIVER', 'file'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | University LDAP Search Batch Size
+    |--------------------------------------------------------------------------
+    |
+    | The university LDAP server enforces a maximum number of results per
+    | search request. Lookups against it are chunked into batches of this
+    | size instead of a single unbounded query. This is a plain app-level
+    | setting, not an LdapRecord connection option, so it lives here at the
+    | top level rather than inside "connections.uni".
+    |
+    */
+
+    'uni_batch_size' => env('UNI_LDAP_BATCH_SIZE', 10),
+
 ];
