@@ -80,7 +80,7 @@ class LdapSyncGroups extends Command
                     foreach ($roleMemberships as $membership) {
                         $user = $ldapUsersByUsername->get($membership->username);
                         if ($user === null) {
-                            $this->warn("  |  |-> Unknown LDAP user: $membership->username");
+                            $this->warn("  |   |-> Unknown LDAP user: $membership->username");
 
                             continue;
                         }
@@ -88,7 +88,7 @@ class LdapSyncGroups extends Command
                     }
                 }
 
-                $this->syncUniqueMembers($group, $desiredDns->unique()->values()->all());
+                $this->syncUniqueMembers($group, $desiredDns->unique()->values()->all(), '  |   |-> ');
             }
         }
     }

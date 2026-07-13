@@ -5,6 +5,7 @@ use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\TestLdap;
 
@@ -179,6 +180,49 @@ test('ldap:sync-groups projects role memberships onto the LDAP group', function 
 
     expect($members)->toContain($active->username)
         ->not->toContain($stale->getFirstAttribute('uid'));
+});
+
+test('ldap:sync-groups logs member additions at the group\'s own tree depth, not the deeper role/committee depth', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr'.bin2hex(random_bytes(3)));
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'grp'.bin2hex(random_bytes(3)));
+    $active = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $active->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $exitCode = Artisan::call('ldap:sync-groups');
+    $lines = explode("\n", Artisan::output());
+
+    expect($exitCode)->toBe(0)
+        ->and($lines)->toContain('  |   |-> Add: '.$active->ldap()->getDn());
+});
+
+test('ldap:sync-roles logs member additions at the role\'s own tree depth', function (): void {
+    $community = newCommunity();
+    $committeeName = 'sync'.bin2hex(random_bytes(3));
+    $committee = TestLdap::makeCommittee($community, $committeeName);
+    TestLdap::makeRole($committee, 'mitglied');
+    $active = TestLdap::member($community);
+
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $active->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $exitCode = Artisan::call('ldap:sync-roles', ['committee' => $committeeName]);
+    $lines = explode("\n", Artisan::output());
+
+    expect($exitCode)->toBe(0)
+        ->and($lines)->toContain('   |   |   |-> Add: '.$active->ldap()->getDn());
 });
 
 test('app:move-group-roles-from-ldap-to-database imports LDAP group roles into the DB', function (): void {

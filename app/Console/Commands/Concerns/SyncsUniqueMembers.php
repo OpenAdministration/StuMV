@@ -16,8 +16,11 @@ trait SyncsUniqueMembers
      * empty) is preserved, never treated as a real member.
      *
      * @param  array<int, string>  $desiredDns
+     * @param  string  $prefix  The tree-drawing prefix (e.g. "  |   |-> ") for
+     *                          the Add/Remove lines, matching the caller's
+     *                          nesting depth.
      */
-    protected function syncUniqueMembers(LdapModel $entity, array $desiredDns): void
+    protected function syncUniqueMembers(LdapModel $entity, array $desiredDns, string $prefix): void
     {
         $current = $entity->getAttribute('uniqueMember') ?? [];
         $desiredDns = array_values(array_unique($desiredDns));
@@ -34,10 +37,10 @@ trait SyncsUniqueMembers
         }
 
         foreach ($removals as $removed) {
-            $this->comment("  |  |  |-> Remove: $removed");
+            $this->comment("{$prefix}Remove: $removed");
         }
         foreach ($additions as $added) {
-            $this->comment("  |  |  |-> Add: $added");
+            $this->comment("{$prefix}Add: $added");
         }
 
         $final = [...$survivors, ...$additions];

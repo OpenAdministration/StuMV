@@ -90,7 +90,7 @@ class LdapSyncRoles extends Command
                         ->values()
                         ->all();
 
-                    $this->syncUniqueMembers($role, $desiredDns);
+                    $this->syncUniqueMembers($role, $desiredDns, '   |   |   |-> ');
                 }
             }
         }
