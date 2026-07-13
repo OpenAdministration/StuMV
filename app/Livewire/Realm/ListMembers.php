@@ -62,12 +62,23 @@ class ListMembers extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
 
+        // admin/moderator/remove_member are the same check for every row on
+        // this page (they only depend on $community, never on the row's
+        // member) - computed once here (admin/moderator each hit LDAP)
+        // rather than repeatedly per row and per menu item.
+        $isAdmin = auth()->user()->can('admin', $community);
+        $isModerator = auth()->user()->can('moderator', $community);
+        $canRemoveMember = auth()->user()->can('remove_member', $community);
+
         if (! $this->ready) {
             return view(
                 'livewire.realm.members', [
                     'realm_members' => collect(),
                     'community' => $community,
                     'ldap_users' => collect(),
+                    'isAdmin' => $isAdmin,
+                    'isModerator' => $isModerator,
+                    'canRemoveMember' => $canRemoveMember,
                 ]
             )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
         }
@@ -96,6 +107,9 @@ class ListMembers extends Component
                 'realm_members' => $members,
                 'community' => $community,
                 'ldap_users' => $ldapUsers,
+                'isAdmin' => $isAdmin,
+                'isModerator' => $isModerator,
+                'canRemoveMember' => $canRemoveMember,
             ]
         )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
     }

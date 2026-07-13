@@ -52,21 +52,20 @@
                         />
                     </flux:table.cell>
                     <flux:table.cell>
-                        @can('admin', $community)
+                        @if($isAdmin)
                             <flux:link
                                 wire:navigate
-                                :disabled="auth()->user()->cannot('admin', [$community])"
-                                :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_member->username]) : null"
+                                :href="route('profile', ['username' => $realm_member->username])"
                             >
                                 {{ $realm_member->full_name }}
                             </flux:link>
                         @else
                             {{ $realm_member->full_name }}
-                        @endcan
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell>
                         <div class="flex justify-end items-center gap-2">
-                            @can('moderator', $community)
+                            @if($isModerator)
                                 <flux:button
                                     size="sm"
                                     variant="primary"
@@ -75,22 +74,22 @@
                                 >
                                     {{ __('profile.membershipsAsPdf') }}
                                 </flux:button>
-                            @endcan
+                            @endif
                             <flux:dropdown>
                                 <flux:button size="sm" icon="ellipsis-vertical" />
                                 <flux:menu>
                                     <flux:menu.item
                                         icon="pencil"
-                                        :disabled="auth()->user()->cannot('admin', $community)"
+                                        :disabled="!$isAdmin"
                                         wire:navigate
-                                        :href="auth()->user()->can('admin', $community) ? route('profile', ['username' => $realm_member->username]) : null"
+                                        :href="$isAdmin ? route('profile', ['username' => $realm_member->username]) : null"
                                     >
                                         {{ __('Edit') }}
                                     </flux:menu.item>
                                     <flux:menu.item
                                         variant="danger"
                                         icon="user-minus"
-                                        :disabled="auth()->user()->cannot('remove_member', $community)"
+                                        :disabled="!$canRemoveMember"
                                         wire:click="deletePrepare('{{ $realm_member->username }}')"
                                     >
                                         {{ __('Remove Member') }}
