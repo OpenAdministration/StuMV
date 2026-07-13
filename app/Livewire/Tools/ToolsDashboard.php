@@ -11,9 +11,12 @@ class ToolsDashboard extends Component
     #[Locked]
     public string $uid;
 
+    public bool $unildapDataExists = false;
+
     public function mount(Community $uid)
     {
         $this->uid = $uid->getFirstAttribute('ou');
+        $this->unildapDataExists = filled(config('ldap.connections.uni.base_dn'));
     }
 
     public function render()

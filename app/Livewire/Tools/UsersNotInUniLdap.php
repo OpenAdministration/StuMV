@@ -18,8 +18,6 @@ class UsersNotInUniLdap extends Component
     #[Locked]
     public string $uid;
 
-    public bool $unildapDataExists = false;
-
     public array $results = [];
 
     public bool $comparisonCompleted = false;
@@ -30,8 +28,9 @@ class UsersNotInUniLdap extends Component
 
     public function mount(Community $uid)
     {
+        abort_unless(filled(config('ldap.connections.uni.base_dn')), 404);
+
         $this->uid = $uid->getFirstAttribute('ou');
-        $this->unildapDataExists = filled(config('ldap.connections.uni.base_dn'));
     }
 
     public function render()

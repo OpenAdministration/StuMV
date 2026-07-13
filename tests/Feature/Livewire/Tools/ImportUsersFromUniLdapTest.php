@@ -23,13 +23,13 @@ beforeEach(function (): void {
     ]), 'uni');
 });
 
-test('the feature is hidden when the uni LDAP connection has no base_dn configured', function (): void {
+test('the page 404s when the uni LDAP connection has no base_dn configured', function (): void {
     config(['ldap.connections.uni.base_dn' => null]);
     $community = newCommunity();
     actingAsAdmin($community);
 
     Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
-        ->assertSet('unildapDataExists', false);
+        ->assertStatus(404);
 });
 
 test('the feature is shown when the uni LDAP connection has a base_dn configured', function (): void {
@@ -37,7 +37,7 @@ test('the feature is shown when the uni LDAP connection has a base_dn configured
     actingAsAdmin($community);
 
     Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
-        ->assertSet('unildapDataExists', true);
+        ->assertStatus(200);
 });
 
 test('searching for an email with no match in the university LDAP reports not found', function (): void {

@@ -24,6 +24,15 @@ beforeEach(function (): void {
     ]), 'uni');
 });
 
+test('the page 404s when the uni LDAP connection has no base_dn configured', function (): void {
+    config(['ldap.connections.uni.base_dn' => null]);
+    $community = newCommunity();
+    actingAsModerator($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+        ->assertStatus(404);
+});
+
 test('a member missing from the university LDAP is listed without crashing', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

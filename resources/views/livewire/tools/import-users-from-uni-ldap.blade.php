@@ -5,24 +5,15 @@
     </div>
     <div class="pb-6 sm:pb-8 space-y-6">
         <div class="space-y-4">
-            @if($unildapDataExists)
-                @if(!$searchCompleted)
-                    <flux:input label="{{ __('tools.emailAddress') }}" wire:model.live.blur="email" />
-                    <flux:button
-                        variant="primary"
-                        icon="search"
-                        wire:click="getUserData"
-                    >
-                        {{ __('tools.getUserData') }}
-                    </flux:button>
-                @endif
-            @else
-                <flux:callout
-                    variant="danger"
-                    icon="circle-x"
-                    heading="{{ __('tools.setUniLdapDataFirst') }}"
-                    class="mt-[.35rem]"
-                />
+            @if(!$searchCompleted)
+                <flux:input label="{{ __('tools.emailAddress') }}" wire:model.live.blur="email" />
+                <flux:button
+                    variant="primary"
+                    icon="search"
+                    wire:click="getUserData"
+                >
+                    {{ __('tools.getUserData') }}
+                </flux:button>
             @endif
         </div>
         @if($searchCompleted && !$userNotFound)
