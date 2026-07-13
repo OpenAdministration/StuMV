@@ -17,14 +17,14 @@
             <flux:button
                 variant="primary"
                 icon="user-plus"
-                :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                :href="auth()->user()->can('create', [\App\Models\RoleMembership::class, $committee, $community]) ? route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
                 :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
             >
                 {{ __('Add Member') }}
             </flux:button>
             <flux:button
                 icon="calendar-x"
-                :href="route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                :href="auth()->user()->can('create', [\App\Models\RoleMembership::class, $committee, $community]) ? route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
                 :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
             >
                 {{ __('roles.members.terminate_memberships') }}
@@ -103,7 +103,7 @@
                         <flux:link
                             wire:navigate
                             :disabled="auth()->user()->cannot('admin', [$community])"
-                            href="{{ route('profile', ['username' => $member->username]) }}"
+                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $member->username]) : null"
                         >
                             {{ $displayName }}
                         </flux:link>
@@ -139,7 +139,7 @@
                                         icon="pencil"
                                         wire:navigate
                                         :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
-                                        href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}"
+                                        :href="auth()->user()->can('edit', [$member, $committee, $community]) ? route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
                                     >
                                         {{ __('roles.link_edit') }}
                                     </flux:menu.item>

@@ -17,7 +17,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="route('realms.new')"
+                :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.new') : null"
                 :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
             >
                 {{ __('New Realm') }}
@@ -64,7 +64,7 @@
                             <flux:menu.item
                                 icon="pencil"
                                 :disabled="Auth::user()->cannot('edit', $realm)"
-                                href="{{ route('realms.edit', ['uid' => $realm->getShortCode()]) }}"
+                                :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['uid' => $realm->getShortCode()]) : null"
                                 wire:navigate
                             >
                                 {{ __('Edit') }}

@@ -55,7 +55,7 @@
                         <flux:link
                             wire:navigate
                             :disabled="auth()->user()->cannot('admin', [$community])"
-                            href="{{ route('profile', ['username' => $realm_member->username]) }}"
+                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_member->username]) : null"
                         >
                             {{ $realm_member->full_name }}
                         </flux:link>
@@ -82,7 +82,7 @@
                                     icon="pencil"
                                     :disabled="auth()->user()->cannot('admin', $community)"
                                     wire:navigate
-                                    href="{{ route('profile', ['username' => $realm_member->username]) }}"
+                                    :href="auth()->user()->can('admin', $community) ? route('profile', ['username' => $realm_member->username]) : null"
                                 >
                                     {{ __('Edit') }}
                                 </flux:menu.item>

@@ -57,7 +57,7 @@
                     </flux:menu.item>
                     <flux:menu.item
                         icon="pencil"
-                        href="{{ route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                        :href="$node['isModerator'] ? route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) : null"
                         :disabled="!$node['isModerator']"
                     >
                         {{ __('committees.link_edit') }}

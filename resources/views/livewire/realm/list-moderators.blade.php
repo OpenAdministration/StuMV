@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="user-plus"
                 wire:navigate
-                :href="route('realms.mods.new', ['uid' => $community_name])"
+                :href="auth()->user()->can('add_moderator', $community) ? route('realms.mods.new', ['uid' => $community_name]) : null"
                 :disabled="auth()->user()->cannot('add_moderator', $community)"
             >
                 {{ __('Add Moderators') }}
@@ -53,7 +53,7 @@
                         <flux:link
                             wire:navigate
                             :disabled="auth()->user()->cannot('admin', [$community])"
-                            href="{{ route('profile', ['username' => $realm_member->uid[0]]) }}"
+                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_member->uid[0]]) : null"
                         >
                             {{ $realm_member->cn[0] }}
                         </flux:link>

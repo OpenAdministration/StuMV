@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="user-plus"
                 wire:navigate
-                :href="route('committees.moderators.new', ['uid' => $realm_uid, 'ou' => $ou])"
+                :href="$isModerator ? route('committees.moderators.new', ['uid' => $realm_uid, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
                 {{ __('Add Moderators') }}

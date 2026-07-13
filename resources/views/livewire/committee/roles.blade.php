@@ -8,7 +8,7 @@
             <flux:button
                 variant="primary"
                 icon="plus"
-                :href="route('committees.roles.new', ['uid' => $uid, 'ou' => $ou])"
+                :href="$isModerator ? route('committees.roles.new', ['uid' => $uid, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
                 {{ __('New Role') }}
@@ -87,7 +87,7 @@
                                         <flux:menu.item
                                             icon="pencil"
                                             wire:navigate
-                                            :href="route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                            :href="$isModerator ? route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) : null"
                                             :disabled="!$isModerator"
                                         >
                                             {{ __('roles.link_edit') }}

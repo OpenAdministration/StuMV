@@ -17,7 +17,7 @@
                 variant="primary"
                 icon="user-plus"
                 wire:navigate
-                :href="route('realms.admins.new', ['uid' => $community_name])"
+                :href="auth()->user()->can('add_admin', $community) ? route('realms.admins.new', ['uid' => $community_name]) : null"
                 :disabled="auth()->user()->cannot('add_admin', $community)"
             >
                 {{ __('Add Admin') }}
@@ -61,7 +61,7 @@
                         <flux:link
                             wire:navigate
                             :disabled="auth()->user()->cannot('admin', [$community])"
-                            href="{{ route('profile', ['username' => $realm_admin->uid[0]]) }}"
+                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_admin->uid[0]]) : null"
                         >
                             {{ $realm_admin->cn[0] }}
                         </flux:link>
