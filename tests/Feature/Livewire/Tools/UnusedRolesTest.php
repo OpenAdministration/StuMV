@@ -43,5 +43,6 @@ test('loading is deferred until loadUnusedRoles runs', function (): void {
 
     Livewire::test(UnusedRoles::class, ['uid' => $community])
         ->assertSet('ready', false)
-        ->assertDontSee('Role unused');
+        ->assertDontSee('Role unused')
+        ->assertSeeHtml('wire:target="loadUnusedRoles"');
 });

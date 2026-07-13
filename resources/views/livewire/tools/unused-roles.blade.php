@@ -3,7 +3,11 @@
         <flux:heading size="xl">{{ __('tools.unusedRoles_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.unusedRoles_explanation') }}</flux:text>
     </div>
-    <div class="pb-8">
+    <div wire:loading.flex wire:target="loadUnusedRoles" class="flex justify-center py-16">
+        <flux:icon.loading />
+    </div>
+
+    <div wire:loading.remove wire:target="loadUnusedRoles" class="pb-8">
         <flux:tab.group>
             <flux:tabs>
                 <flux:tab name="roles">{{ __('tools.roles') }}</flux:tab>
