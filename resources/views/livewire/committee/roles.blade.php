@@ -4,14 +4,7 @@
             <flux:heading size="xl">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
-        <div class="flex gap-2">
-            <flux:button
-                icon="user-star"
-                wire:navigate
-                :href="route('committees.moderators', ['uid' => $uid, 'ou' => $ou])"
-            >
-                {{ __('committees.link_moderators') }}
-            </flux:button>
+        <div class="flex flex-col gap-2">
             <flux:button
                 variant="primary"
                 icon="plus"
@@ -19,6 +12,13 @@
                 :disabled="!$isModerator"
             >
                 {{ __('New Role') }}
+            </flux:button>
+            <flux:button
+                icon="user-star"
+                wire:navigate
+                :href="route('committees.moderators', ['uid' => $uid, 'ou' => $ou])"
+            >
+                {{ __('committees.link_moderators') }}
             </flux:button>
         </div>
     </div>
