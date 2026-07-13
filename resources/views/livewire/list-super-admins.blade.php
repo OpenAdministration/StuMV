@@ -66,7 +66,7 @@
             </flux:table.rows>
         </flux:table>
     @else
-        <flux:callout variant="warning" icon="circle-alert" heading="{{ __('realms.no_admins_found') }}" />
+        <flux:callout variant="warning" icon="circle-alert" heading="{{ __('superadmins.no_admins_found') }}" />
     @endif
 
     <form wire:submit="deleteCommit">

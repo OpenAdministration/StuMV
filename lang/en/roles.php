@@ -4,7 +4,7 @@ return [
     'members' => 'Members',
     'members.search' => 'Search members',
     'no_members' => 'None',
-    'no_members_found' => 'No members found',
+    'no_members_found' => 'There are no members for this role',
     'no_roles_found' => 'No roles found',
     'search' => 'Search roles',
     'search_members' => 'Search members',

@@ -36,6 +36,7 @@ return [
     'link_moderators' => 'Moderator:innen',
     'mods_heading' => 'Moderator:innen von :name',
     'mods_explanation' => 'Moderator:innen eines Gremiums können, wie allgemeine Moderator:innen, Gremien und Rollen anlegen, bearbeiten und löschen sowie Rollenmitgliedschaften verwalten. Dabei sind sie allerdings beschränkt auf dieses und seine untergeordneten Gremien.',
+    'no_mods_found' => 'Für dieses Gremium gibt es keine Moderator:innen',
     'new_mod_headline' => 'Neue:n Moderator:in von :name hinzufügen',
     'new_mod_explanation' => 'Wähle eine:n Nutzer:in aus, der:die Moderator:in dieses Gremiums und seiner untergeordneten Gremien werden soll.',
     'delete_mod_title' => ':name als Moderator:in entfernen',

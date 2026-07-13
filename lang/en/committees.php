@@ -36,7 +36,7 @@ return [
     'link_moderators' => 'Moderators',
     'mods_heading' => 'Moderators of :name',
     'mods_explanation' => 'Moderators of a committee can, like general moderators, create, edit and delete committees and roles, and manage role memberships. However, they are limited to this committee and its subordinate committees.',
-    'no_mods_found' => 'No moderators found!',
+    'no_mods_found' => 'There are no moderators for this committee',
     'new_mod_headline' => 'Add new moderator of :name',
     'new_mod_explanation' => 'Select a user who should become a moderator of this committee and its sub-committees.',
     'delete_mod_title' => 'Remove :name as a moderator',
