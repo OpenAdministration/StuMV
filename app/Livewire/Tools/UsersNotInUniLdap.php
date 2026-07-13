@@ -54,7 +54,13 @@ class UsersNotInUniLdap extends Component
             if (in_array($memberEmailParts[1], $domains)) {
                 $uniMember = UniLdapUser::where('mail', '=', $member->getFirstAttribute('mail'))->first();
                 if ($uniMember === null) {
-                    $this->results[] = $member;
+                    // Livewire can't serialize a raw LdapRecord model as a
+                    // public property value, so keep only the plain fields
+                    // the view actually needs.
+                    $this->results[] = [
+                        'uid' => $member->getFirstAttribute('uid'),
+                        'cn' => $member->getFirstAttribute('cn'),
+                    ];
                 }
             }
         }
