@@ -15,12 +15,17 @@
         </div>
     </div>
 
+    <flux:field>
+        <flux:label>{{ __('superadmins.search_placeholder') }}</flux:label>
+        <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+    </flux:field>
+
     @if(count($superadmins) > 0)
         <flux:table>
             <flux:table.columns>
                 <flux:table.column class="w-[55px]"></flux:table.column>
-                <flux:table.column>{{ __('Name') }}</flux:table.column>
-                <flux:table.column>{{ __('Username') }}</flux:table.column>
+                <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
+                <flux:table.column sortable :sorted="$sortField === 'uid'" :direction="$sortDirection" wire:click="sortBy('uid')">{{ __('Username') }}</flux:table.column>
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
@@ -65,6 +70,10 @@
             @endforeach
             </flux:table.rows>
         </flux:table>
+
+        <div class="pagination">
+            <flux:pagination :paginator="$superadmins" />
+        </div>
     @else
         <flux:callout variant="warning" icon="circle-alert" heading="{{ __('superadmins.no_admins_found') }}" />
     @endif

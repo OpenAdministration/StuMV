@@ -5,6 +5,7 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -19,7 +20,7 @@ class ListModerators extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'full_name';
+    public string $sortField = 'cn';
 
     #[Url]
     public string $sortDirection = 'asc';
@@ -72,7 +73,21 @@ class ListModerators extends Component
             )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
         }
 
-        $mods = $this->sortByName($community->moderatorsGroup()->members()->get());
+        $mods = $community->moderatorsGroup()->members()->get();
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $mods = $mods->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
+        }
+        $sorted = $this->sortUsers($mods);
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $mods = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         return view(
             'livewire.realm.list-moderators', [
@@ -116,10 +131,10 @@ class ListModerators extends Component
      * Sorted client-side (rather than via an LDAP orderBy) because the
      * production directory doesn't support the sssvlv sort control.
      */
-    protected function sortByName(Collection $users): Collection
+    protected function sortUsers(Collection $users): Collection
     {
         return $users
-            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
     }
 }

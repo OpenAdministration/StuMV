@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -45,6 +46,23 @@ class ListSuperUsers extends Component
     public function render()
     {
         $superadmins = SuperUserGroup::group()->members()->get();
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $superadmins = $superadmins->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search)
+                || str_contains(mb_strtolower((string) $user->getFirstAttribute('uid')), $search));
+        }
+        $sorted = $superadmins
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $superadmins = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         return view('livewire.list-super-admins', [
             'superadmins' => $superadmins,

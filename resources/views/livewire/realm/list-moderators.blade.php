@@ -17,10 +17,10 @@
         </div>
     </div>
 
-    <!--<flux:field>
+    <flux:field>
         <flux:label>{{ __('realms.search_moderators') }}</flux:label>
-        <flux:input type="text" icon="magnifying-glass" wire:model.live.debounce="search" />
-    </flux:field>-->
+        <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+    </flux:field>
 
     <div wire:loading.flex wire:target="loadModerators" class="flex justify-center py-16">
         <flux:icon.loading />
@@ -31,7 +31,7 @@
             <flux:table>
             <flux:table.columns>
                 <flux:table.column class="w-[55px]"></flux:table.column>
-                <flux:table.column>{{ __('Name') }}</flux:table.column>
+                <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
@@ -83,6 +83,10 @@
             @endforeach
             </flux:table.rows>
         </flux:table>
+
+            <div class="pagination">
+                <flux:pagination :paginator="$realm_members" />
+            </div>
         @else
             <flux:callout variant="warning" icon="circle-alert" heading="{{ __('realms.no_moderators_found') }}" />
         @endif

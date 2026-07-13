@@ -5,6 +5,7 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -20,7 +21,7 @@ class ListAdmins extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'full_name';
+    public string $sortField = 'cn';
 
     #[Url]
     public string $sortDirection = 'asc';
@@ -82,7 +83,21 @@ class ListAdmins extends Component
             ]));
         }
 
-        $admins = $this->sortByName($community?->adminsGroup()->members()->get() ?? collect());
+        $admins = $community?->adminsGroup()->members()->get() ?? collect();
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $admins = $admins->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
+        }
+        $sorted = $this->sortUsers($admins);
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $admins = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         return view(
             'livewire.realm.list-admins', [
@@ -134,10 +149,10 @@ class ListAdmins extends Component
      * Sorted client-side (rather than via an LDAP orderBy) because the
      * production directory doesn't support the sssvlv sort control.
      */
-    protected function sortByName(Collection $users): Collection
+    protected function sortUsers(Collection $users): Collection
     {
         return $users
-            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
     }
 }
