@@ -18,7 +18,7 @@ test('the role-members breadcrumb shows the role description, not its short code
     // Scope the assertion to the breadcrumbs bar only (bounded by the next
     // header element): the page heading also shows the role description, so
     // an unbounded/whole-page assertSee() would pass even without the fix.
-    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', $response->getContent(), $section);
+    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
 
     expect($section[1] ?? '')
         ->toContain('Role mitglied')

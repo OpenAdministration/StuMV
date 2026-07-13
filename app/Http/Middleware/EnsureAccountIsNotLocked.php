@@ -27,7 +27,7 @@ class EnsureAccountIsNotLocked
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login');
+            return to_route('login');
         }
 
         return $next($request);

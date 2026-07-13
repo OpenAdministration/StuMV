@@ -98,7 +98,7 @@ test('checking more than 10 members batches the uni LDAP lookup in groups of 10'
 
     expect($mailQueries)->toHaveCount(2);
     foreach ($mailQueries as $query) {
-        expect(substr_count($query, 'mail='))->toBeLessThanOrEqual(10);
+        expect(substr_count((string) $query, 'mail='))->toBeLessThanOrEqual(10);
     }
 });
 
@@ -133,7 +133,7 @@ test('the uni LDAP batch size is configurable via ldap.uni_batch_size', function
     // 12 candidates at a batch size of 5 -> 3 batches (5, 5, 2).
     expect($mailQueries)->toHaveCount(3);
     foreach ($mailQueries as $query) {
-        expect(substr_count($query, 'mail='))->toBeLessThanOrEqual(5);
+        expect(substr_count((string) $query, 'mail='))->toBeLessThanOrEqual(5);
     }
 });
 
