@@ -5,13 +5,23 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ListDomains extends Component
 {
+    use WithPagination;
+
     #[Url]
     public string $search = '';
+
+    #[Url]
+    public string $sortField = 'dc';
+
+    #[Url]
+    public string $sortDirection = 'asc';
 
     public string $deleteDomain = '';
 
@@ -22,11 +32,38 @@ class ListDomains extends Component
         $this->uid = $uid->getFirstAttribute('ou');
     }
 
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            // toggle direction
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+            $this->sortField = $field;
+        }
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
-        $domains = Domain::fromCommunity($this->uid)
+        $sorted = Domain::fromCommunity($this->uid)
             ->searchFor('dc', $this->search)
-            ->get();
+            ->get()
+            ->sortBy(fn ($domain) => mb_strtolower((string) $domain->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $domains = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         return view('livewire.realm.list-domains', ['domains' => $domains])
             ->title(__('realms.domains.list_title'));

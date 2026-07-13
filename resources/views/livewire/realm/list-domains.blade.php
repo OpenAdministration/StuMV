@@ -24,7 +24,7 @@
 
     <flux:table>
         <flux:table.columns>
-            <flux:table.column>{{ __('Short Name') }}</flux:table.column>
+            <flux:table.column sortable :sorted="$sortField === 'dc'" :direction="$sortDirection" wire:click="sortBy('dc')">{{ __('Short Name') }}</flux:table.column>
             <flux:table.column></flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
@@ -55,6 +55,12 @@
         @endforelse
         </flux:table.rows>
     </flux:table>
+
+    @if(count($domains) > 0)
+        <div class="pagination">
+            <flux:pagination :paginator="$domains" />
+        </div>
+    @endif
 
     <form wire:submit="deleteCommit">
         <flux:modal name="delete">
