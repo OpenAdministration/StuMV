@@ -17,7 +17,12 @@ return new class extends Migration
             // Bridge\ScopeRepository::finalizeScopes()). Null means
             // unrestricted; the directory-API client management UI always
             // sets this to a specific subset (committees/groups/users).
-            $table->text('scopes')->nullable()->after('grant_types');
+            //
+            // No ->after(): some deployments' oauth_clients table predates
+            // the "grant_types" column (it wasn't created by this repo's
+            // own create_oauth_clients_table migration), so positioning
+            // relative to it isn't safe to assume everywhere.
+            $table->text('scopes')->nullable();
         });
     }
 
