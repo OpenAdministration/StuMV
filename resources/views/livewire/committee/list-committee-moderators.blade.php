@@ -10,6 +10,7 @@
                 icon="user-plus"
                 wire:navigate
                 :href="route('committees.moderators.new', ['uid' => $realm_uid, 'ou' => $ou])"
+                :disabled="!$isModerator"
             >
                 {{ __('Add Moderators') }}
             </flux:button>
@@ -53,6 +54,7 @@
                                 <flux:menu.item
                                     variant="danger"
                                     icon="user-minus"
+                                    :disabled="!$isModerator"
                                     wire:click="deletePrepare('{{ $moderator->uid[0] }}')"
                                 >
                                     {{ __('Remove Moderator') }}

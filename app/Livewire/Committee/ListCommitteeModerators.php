@@ -39,13 +39,18 @@ class ListCommitteeModerators extends Component
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
-        $this->authorize('moderator', [$committee, $community]);
+        // Viewing who moderates a committee is open to any community member
+        // (matching Realm\ListModerators at the community level) - only
+        // adding/removing moderators is restricted, see deletePrepare()/
+        // deleteCommit()/NewCommitteeModerator.
+        $isModerator = auth()->user()->can('moderator', [$committee, $community]);
 
         if (! $this->ready) {
             return view(
                 'livewire.committee.list-committee-moderators', [
                     'committee' => $committee,
                     'committee_moderators' => collect(),
+                    'isModerator' => $isModerator,
                 ]
             )->title(__('committees.mods_heading', ['name' => $committee->getFirstAttribute('description')]));
         }
@@ -56,6 +61,7 @@ class ListCommitteeModerators extends Component
             'livewire.committee.list-committee-moderators', [
                 'committee' => $committee,
                 'committee_moderators' => $mods,
+                'isModerator' => $isModerator,
             ]
         )->title(__('committees.mods_heading', ['name' => $committee->getFirstAttribute('description')]));
     }
@@ -76,7 +82,7 @@ class ListCommitteeModerators extends Component
         Flux::modal('delete')->show();
     }
 
-    public function deleteCommit()
+    public function deleteCommit(): void
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
@@ -84,15 +90,6 @@ class ListCommitteeModerators extends Component
 
         $user = User::findOrFailByUsername($this->deleteModeratorUsername);
         $committee->moderatorsGroup()->members()->detach($user);
-
-        // Removing your own last claim to moderate this committee (or an
-        // ancestor) means the render() authorize() check above would 403 on
-        // the very next re-render - redirect away instead of leaving the
-        // page to crash under its own removal.
-        if (auth()->user()->cannot('moderator', [$committee, $community])) {
-            return to_route('committees.roles', ['uid' => $this->realm_uid, 'ou' => $this->ou]);
-        }
-
         $this->close();
     }
 

@@ -5,15 +5,13 @@
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
         <div class="flex gap-2">
-            @if($isModerator)
-                <flux:button
-                    icon="shield-user"
-                    wire:navigate
-                    :href="route('committees.moderators', ['uid' => $uid, 'ou' => $ou])"
-                >
-                    {{ __('committees.link_moderators') }}
-                </flux:button>
-            @endif
+            <flux:button
+                icon="user-star"
+                wire:navigate
+                :href="route('committees.moderators', ['uid' => $uid, 'ou' => $ou])"
+            >
+                {{ __('committees.link_moderators') }}
+            </flux:button>
             <flux:button
                 variant="primary"
                 icon="plus"
