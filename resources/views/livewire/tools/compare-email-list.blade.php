@@ -30,16 +30,19 @@
                             class="mt-[.35rem]"
                         />
                     @else
-                        <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
+                        <div class="space-y-4 mt-4">
                             @foreach($matches as $user)
-                                <div class="py-3">
-                                    <flux:link
-                                        wire:navigate
-                                        href="{{ route('profile', ['username' => $user['uid']]) }}"
-                                    >
-                                        {{ $user['cn'] }}
-                                    </flux:link>
-                                </div>
+                                <flux:card>
+                                    <div class="flex flex-col">
+                                        <flux:link
+                                            wire:navigate
+                                            href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                        >
+                                            {{ $user['cn'] }}
+                                        </flux:link>
+                                        <flux:text class="text-sm">{{ $user['email'] }}</flux:text>
+                                    </div>
+                                </flux:card>
                             @endforeach
                         </div>
                     @endif
