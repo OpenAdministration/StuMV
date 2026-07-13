@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMembership;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -56,9 +57,20 @@ class ListGroups extends Component
         if ($this->search) {
             $groupsQuery->whereContains('cn', trim($this->search));
         }
-        $groups = $groupsQuery->get()
+        $sorted = $groupsQuery->get()
             ->sortBy(fn ($group) => mb_strtolower((string) $group->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
+
+        // LdapRecord collections aren't Eloquent builders, so pagination is
+        // done manually: sort the full result, then slice out the page.
+        $perPage = 10;
+        $page = $this->getPage();
+        $groups = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         return view('livewire.group.list-group', [
             'groups' => $groups,

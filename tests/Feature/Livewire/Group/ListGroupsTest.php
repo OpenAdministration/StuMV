@@ -89,3 +89,28 @@ test('sortBy toggles direction and re-sorts the groups descending', function ():
 
     expect($cns)->toBe(['zeta', 'mike', 'alpha']);
 });
+
+test('the groups list is paginated to 10 per page', function (): void {
+    $community = newCommunity();
+    foreach (range(1, 15) as $i) {
+        TestLdap::makeGroup($community, sprintf('grp%02d', $i));
+    }
+    actingAsModerator($community);
+
+    $component = Livewire::test(ListGroups::class, ['uid' => $community]);
+    $page1Cns = $component->viewData('groups')
+        ->map(fn ($group) => $group->getFirstAttribute('cn'))
+        ->values()
+        ->all();
+
+    expect($page1Cns)->toHaveCount(10);
+
+    $page2Cns = $component->call('gotoPage', 2)
+        ->viewData('groups')
+        ->map(fn ($group) => $group->getFirstAttribute('cn'))
+        ->values()
+        ->all();
+
+    expect($page2Cns)->toHaveCount(5);
+    expect(array_intersect($page1Cns, $page2Cns))->toBeEmpty();
+});

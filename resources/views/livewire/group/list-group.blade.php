@@ -83,6 +83,12 @@
         </flux:table.rows>
     </flux:table>
 
+    @if(count($groups) > 0)
+        <div class="pagination">
+            <flux:pagination :paginator="$groups" />
+        </div>
+    @endif
+
     <flux:modal name="delete" class="md:w-96">
         <div class="space-y-6">
             <div>
