@@ -65,6 +65,9 @@ Alpine.data('cropper', () => {
             this.cropper = new Cropper(this.img, {
                 aspectRatio: 1 / 1,
                 zoomable: false,
+                // Keep the crop box from being dragged/resized past the
+                // image's own edges, into the empty canvas area.
+                viewMode: 1,
             });
 
             this.file = event.target.files[0]
