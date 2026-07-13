@@ -65,7 +65,13 @@ class AddUserToRole extends Component
         $role = $committee?->roles()->where('cn', $this->cn)->first();
         $roleName = $role?->getFirstAttribute('description') ?: $this->cn;
 
-        return view('livewire.committee.add-user-to-role', ['users' => $users, 'roleName' => $roleName])
+        // Exclude users who are already an active member of this role.
+        $existingUsernames = $role
+            ? $role->dbMemberships()->active(today())->pluck('username')
+            : collect();
+        $selectableUsers = $users->filter(fn ($user) => ! $existingUsernames->contains($user->getFirstAttribute('uid')));
+
+        return view('livewire.committee.add-user-to-role', ['users' => $selectableUsers, 'roleName' => $roleName])
             ->title(__('realms.add_members_to_role_title', ['role' => $roleName]));
     }
 

@@ -14,9 +14,11 @@ class AddSuperAdmins extends Component
     public function render()
     {
         $users = User::get();
+        $adminDns = SuperUserGroup::group()->members()->get()->modelDns()->toBase();
+        $selectableUsers = $users->filter(fn ($user) => $adminDns->doesntContain($user->getDn()));
 
         return view('livewire.add-super-admins', [
-            'users' => $users,
+            'users' => $selectableUsers,
         ])->title(__('superadmins.new_title'));
     }
 

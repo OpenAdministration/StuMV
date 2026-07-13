@@ -71,6 +71,28 @@ test('a moderator can add a community member to a role', function (): void {
     ]);
 });
 
+test('the add-user-to-role select excludes members already active in the role', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    $existingMember = TestLdap::member($community);
+    $eligibleMember = TestLdap::member($community);
+    RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $existingMember->username,
+        'from' => today()->subMonth(),
+    ]);
+    actingAsModerator($community);
+
+    $usernames = Livewire::test(AddUserToRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+        ->viewData('users')
+        ->map(fn ($user) => $user->getFirstAttribute('uid'));
+
+    expect($usernames)->toContain($eligibleMember->username)
+        ->not->toContain($existingMember->username);
+});
+
 test('a user who is not a member of the community cannot be added to a role', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');

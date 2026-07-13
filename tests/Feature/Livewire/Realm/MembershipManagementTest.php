@@ -71,3 +71,18 @@ test('a super admin can add a community member', function (): void {
 
     expect(groupHasUid(Community::findByUid($community->getShortCode()), 'membersGroup', $outsider->getFirstAttribute('uid')))->toBeTrue();
 });
+
+test('the new member select excludes users already in the members group', function (): void {
+    $community = newCommunity();
+    $existingMember = TestLdap::member($community);
+    $existingMemberDn = LdapUser::findByUsername($existingMember->username)->getDn();
+    $outsider = TestLdap::makeUser();
+    actingAsSuperAdmin();
+
+    $dns = Livewire::test(NewMember::class, ['uid' => $community])
+        ->viewData('selectable_users')
+        ->map(fn ($user) => $user->getDn());
+
+    expect($dns)->toContain($outsider->getDn())
+        ->not->toContain($existingMemberDn);
+});

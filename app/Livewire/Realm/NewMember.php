@@ -29,10 +29,13 @@ class NewMember extends Component
 
     public function render(): Factory|View|Application
     {
+        $realm = Community::findOrFailByUid($this->realm_uid);
         $userList = User::query()->search()
             ->get();
+        $memberDns = $realm->membersGroup()->members()->get()->modelDns()->toBase();
+        $selectable_users = $userList->filter(fn ($user) => $memberDns->doesntContain($user->getDn()));
 
-        return view('livewire.realm.new-member', ['selectable_users' => $userList])
+        return view('livewire.realm.new-member', ['selectable_users' => $selectable_users])
             ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));
     }
 
