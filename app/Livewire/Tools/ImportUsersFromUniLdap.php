@@ -8,6 +8,7 @@ use App\Models\UniLdap;
 use App\Rules\UniqueEmail;
 use Flux\Flux;
 use Illuminate\Support\Str;
+use LdapRecord\Container;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -63,24 +64,24 @@ class ImportUsersFromUniLdap extends Component
     public function getUserData()
     {
         $this->searchCompleted = false;
-        $this->results = [];
 
-        $unildap = UniLdap::where('realm', $this->uid)->first();
+        try {
+            $entries = Container::getConnection('uni')
+                ->query()
+                ->where('mail', '=', $this->email)
+                ->get();
+        } catch (LdapRecordException) {
+            $entries = [];
+        }
 
-        $ds = ldap_connect($unildap->host);
-        if ($ds) {
-            $filter = "(|(mail=$this->email))";
-            $result = ldap_search($ds, $unildap->members_base, $filter);
-            $info = ldap_get_entries($ds, $result);
-            if ($info['count'] === 1) {
-                $this->firstname = $info[0]['givenname'][0];
-                $this->lastname = $info[0]['sn'][0];
+        if (count($entries) === 1) {
+            $this->firstname = $entries[0]['givenname'][0];
+            $this->lastname = $entries[0]['sn'][0];
 
-                $split = explode('@', $this->email);
-                $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? '');
-            } else {
-                $this->userNotFound = true;
-            }
+            $split = explode('@', $this->email);
+            $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? '');
+        } else {
+            $this->userNotFound = true;
         }
 
         $this->searchCompleted = true;
