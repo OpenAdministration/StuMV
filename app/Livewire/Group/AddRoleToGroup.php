@@ -34,7 +34,10 @@ class AddRoleToGroup extends Component
         $roles = collect();
         if (! empty($this->selected_committee_dn)) {
             $committee = Committee::findOrFail($this->selected_committee_dn);
-            $roles = $committee->roles()->get();
+            $groupDn = Group::dnFrom($this->uid, $this->group_cn);
+            $addedRoleDns = GroupMembership::where('group_dn', $groupDn)->pluck('role_dn');
+            $roles = $committee->roles()->get()
+                ->filter(fn ($role) => ! $addedRoleDns->contains($role->getDn()));
         }
 
         return view('livewire.group.add-role-to-group', [
