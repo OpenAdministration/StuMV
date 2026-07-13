@@ -3,7 +3,7 @@
         <div class="flex-1 space-y-4">
             <flux:heading size="xl" class="flex gap-4">
                 {{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}
-                @can('edit', [$role, $committee, $community])
+                @if($isModerator)
                     <flux:button
                         variant="subtle"
                         icon="pencil"
@@ -11,7 +11,7 @@
                         :href="route('committees.roles.edit', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
                         title="{{ __('Edit') }}"
                     />
-                @endcan
+                @endif
             </flux:heading>
             <flux:text class="text-base">{{ __('roles.membership_explanation') }}</flux:text>
         </div>
@@ -19,15 +19,15 @@
             <flux:button
                 variant="primary"
                 icon="user-plus"
-                :href="auth()->user()->can('create', [\App\Models\RoleMembership::class, $committee, $community]) ? route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
-                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+                :href="$isModerator ? route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
+                :disabled="!$isModerator"
             >
                 {{ __('Add Member') }}
             </flux:button>
             <flux:button
                 icon="calendar-x"
-                :href="auth()->user()->can('create', [\App\Models\RoleMembership::class, $committee, $community]) ? route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
-                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
+                :href="$isModerator ? route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
+                :disabled="!$isModerator"
             >
                 {{ __('roles.members.terminate_memberships') }}
             </flux:button>
@@ -81,14 +81,15 @@
                                 $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                             }
                             $displayName = $user?->getFirstAttribute('cn') ?? $member->username;
+                            $status = $memberStatuses[$member->id];
                         @endphp
-                        @if($member->isActive() && !$member->isPending())
+                        @if($status['isActive'] && !$status['isPending'])
                             <flux:avatar
                                 badge badge:color="green"
                                 src="{{ $jpegPhoto }}"
                                 name="{{ $displayName }}"
                             />
-                        @elseif($member->isPending())
+                        @elseif($status['isPending'])
                             <flux:avatar
                                 badge badge:color="yellow"
                                 src="{{ $jpegPhoto }}"
@@ -105,8 +106,8 @@
                     <flux:table.cell>
                         <flux:link
                             wire:navigate
-                            :disabled="auth()->user()->cannot('admin', [$community])"
-                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $member->username]) : null"
+                            :disabled="!$isAdmin"
+                            :href="$isAdmin ? route('profile', ['username' => $member->username]) : null"
                         >
                             {{ $displayName }}
                         </flux:link>
@@ -141,8 +142,8 @@
                                     <flux:menu.item
                                         icon="pencil"
                                         wire:navigate
-                                        :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
-                                        :href="auth()->user()->can('edit', [$member, $committee, $community]) ? route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
+                                        :disabled="!$isModerator"
+                                        :href="$isModerator ? route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
                                     >
                                         {{ __('roles.link_edit') }}
                                     </flux:menu.item>
@@ -151,7 +152,7 @@
                                             variant="danger"
                                             icon="trash-2"
                                             wire:click="prepareDeletion({{ $member->id }})"
-                                            :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])"
+                                            :disabled="!$isModerator"
                                         >
                                             {{ __('Delete') }}
                                         </flux:menu.item>

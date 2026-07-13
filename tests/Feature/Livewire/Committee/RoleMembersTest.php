@@ -4,9 +4,49 @@ use App\Ldap\Community;
 use App\Livewire\Committee\ListRoleMembers;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use LdapRecord\Container;
 use Livewire\Livewire;
+use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
+
+/**
+ * edit/delete permissions (and the profile-link admin check) don't depend on
+ * which row they're for - they're the same committee/community for every
+ * membership shown - so they must be computed once per page, not once per
+ * row (which would multiply an LDAP-hitting moderator ancestor-walk, i.e. a
+ * "cn=moderators"/"cn=admins" group lookup, by the number of rows shown).
+ * Count only those group lookups - unrelated per-row LDAP traffic (e.g.
+ * hydrating each member's profile attributes) is out of scope here.
+ */
+function countModeratorAndAdminQueries(Closure $callback): int
+{
+    $queries = 0;
+    Container::getInstance()->getDispatcher()->listen('LdapRecord\Query\Events\*', function ($eventName, $events) use (&$queries): void {
+        foreach ($events as $event) {
+            $query = $event->getQuery()->getUnescapedQuery();
+            if (str_contains($query, 'cn=moderators') || str_contains($query, 'cn=admins')) {
+                $queries++;
+            }
+        }
+    });
+
+    $callback();
+
+    return $queries;
+}
+
+function countLdapQueries(Closure $callback): int
+{
+    $queries = 0;
+    Container::getInstance()->getDispatcher()->listen('LdapRecord\Query\Events\*', function ($eventName, $events) use (&$queries): void {
+        $queries += count($events);
+    });
+
+    $callback();
+
+    return $queries;
+}
 
 test('cancelling the delete modal closes it', function (): void {
     $moderator = actingAsModerator('demo');
@@ -39,4 +79,139 @@ test('the member list can be lazily loaded', function (): void {
         ->assertSet('ready', false)
         ->call('loadMembers')
         ->assertSet('ready', true);
+});
+
+test('the edit/delete permission check does not scale with the number of members shown', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    actingAsModerator($community);
+
+    foreach (range(1, 2) as $i) {
+        RoleMembership::create([
+            'role_cn' => 'mitglied',
+            'committee_dn' => $committee->getDn(),
+            'username' => TestLdap::member($community)->username,
+            'from' => today(),
+        ]);
+    }
+
+    $queriesForTwo = countModeratorAndAdminQueries(function () use ($community, $committee, $role): void {
+        Livewire::test(ListRoleMembers::class, [
+            'uid' => $community,
+            'ou' => $committee->getFirstAttribute('ou'),
+            'cn' => $role->getFirstAttribute('cn'),
+        ])->call('loadMembers');
+    });
+
+    foreach (range(1, 6) as $i) {
+        RoleMembership::create([
+            'role_cn' => 'mitglied',
+            'committee_dn' => $committee->getDn(),
+            'username' => TestLdap::member($community)->username,
+            'from' => today(),
+        ]);
+    }
+
+    $queriesForEight = countModeratorAndAdminQueries(function () use ($community, $committee, $role): void {
+        Livewire::test(ListRoleMembers::class, [
+            'uid' => $community,
+            'ou' => $committee->getFirstAttribute('ou'),
+            'cn' => $role->getFirstAttribute('cn'),
+        ])->call('loadMembers');
+    });
+
+    expect($queriesForEight)->toBe($queriesForTwo);
+});
+
+test('a member already synced to the LDAP role group is not pending', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $member = TestLdap::member($community);
+    TestLdap::attach($role, \App\Ldap\User::findByUsername($member->username));
+    $membership = RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today(),
+    ]);
+    actingAsModerator($community);
+
+    $status = Livewire::test(ListRoleMembers::class, [
+        'uid' => $community,
+        'ou' => $committee->getFirstAttribute('ou'),
+        'cn' => $role->getFirstAttribute('cn'),
+    ])
+        ->call('loadMembers')
+        ->viewData('memberStatuses')[$membership->id];
+
+    expect($status)->toBe(['isActive' => true, 'isPending' => false]);
+});
+
+test('an active member not yet synced to the LDAP role group is pending', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $member = TestLdap::member($community);
+    $membership = RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today(),
+    ]);
+    actingAsModerator($community);
+
+    $status = Livewire::test(ListRoleMembers::class, [
+        'uid' => $community,
+        'ou' => $committee->getFirstAttribute('ou'),
+        'cn' => $role->getFirstAttribute('cn'),
+    ])
+        ->call('loadMembers')
+        ->viewData('memberStatuses')[$membership->id];
+
+    expect($status)->toBe(['isActive' => true, 'isPending' => true]);
+});
+
+test('the total LDAP query count does not scale with the number of members shown', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    actingAsModerator($community);
+
+    foreach (range(1, 2) as $i) {
+        RoleMembership::create([
+            'role_cn' => 'mitglied',
+            'committee_dn' => $committee->getDn(),
+            'username' => TestLdap::member($community)->username,
+            'from' => today(),
+        ]);
+    }
+
+    $queriesForTwo = countLdapQueries(function () use ($community, $committee, $role): void {
+        Livewire::test(ListRoleMembers::class, [
+            'uid' => $community,
+            'ou' => $committee->getFirstAttribute('ou'),
+            'cn' => $role->getFirstAttribute('cn'),
+        ])->call('loadMembers');
+    });
+
+    foreach (range(1, 6) as $i) {
+        RoleMembership::create([
+            'role_cn' => 'mitglied',
+            'committee_dn' => $committee->getDn(),
+            'username' => TestLdap::member($community)->username,
+            'from' => today(),
+        ]);
+    }
+
+    $queriesForEight = countLdapQueries(function () use ($community, $committee, $role): void {
+        Livewire::test(ListRoleMembers::class, [
+            'uid' => $community,
+            'ou' => $committee->getFirstAttribute('ou'),
+            'cn' => $role->getFirstAttribute('cn'),
+        ])->call('loadMembers');
+    });
+
+    expect($queriesForEight)->toBe($queriesForTwo);
 });

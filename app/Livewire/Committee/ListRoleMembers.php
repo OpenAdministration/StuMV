@@ -57,6 +57,14 @@ class ListRoleMembers extends Component
         $committee = Committee::findByName($this->uid, $this->ou);
         $role = $committee?->roles()->where('cn', $this->cn)->first();
 
+        // create/edit/delete on any membership of this role, and viewing any
+        // member's profile, all resolve to the exact same checks regardless
+        // of which row - computed once here (each involves an LDAP-hitting
+        // ancestor walk) rather than once per row, which would otherwise
+        // multiply that walk by the number of members shown.
+        $isModerator = auth()->user()->can('moderator', [$committee, $community]);
+        $isAdmin = auth()->user()->can('admin', [$community]);
+
         if (! $this->ready) {
             return view('livewire.committee.role-members', [
                 'members' => collect(),
@@ -64,6 +72,9 @@ class ListRoleMembers extends Component
                 'community' => $community,
                 'role' => $role,
                 'userCache' => [],
+                'isModerator' => $isModerator,
+                'isAdmin' => $isAdmin,
+                'memberStatuses' => [],
             ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
         }
 
@@ -84,12 +95,35 @@ class ListRoleMembers extends Component
             ? []
             : User::query()->whereIn('uid', $usernames)->get()->keyBy('uid')->all();
 
+        // Whether an active membership's user is still actually in the
+        // role's LDAP group ("pending" - approved here but not yet synced
+        // over there) used to be resolved once per row via
+        // RoleMembership::isPending(), which re-fetched the role and the
+        // user fresh from LDAP and queried group membership every time -
+        // fetch the role's group members once instead and check against it.
+        $roleMemberDns = $role
+            ? $role->members()->get()->map(fn ($u) => $u->getDn())->all()
+            : [];
+
+        $memberStatuses = [];
+        foreach ($members as $member) {
+            $ldapUser = $userCache[$member->username] ?? null;
+            $isActive = $member->isActive();
+            $memberStatuses[$member->id] = [
+                'isActive' => $isActive,
+                'isPending' => $isActive && $ldapUser && ! in_array($ldapUser->getDn(), $roleMemberDns, true),
+            ];
+        }
+
         return view('livewire.committee.role-members', [
             'members' => $members,
             'committee' => $committee,
             'community' => $community,
             'role' => $role,
             'userCache' => $userCache,
+            'isModerator' => $isModerator,
+            'isAdmin' => $isAdmin,
+            'memberStatuses' => $memberStatuses,
         ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
     }
 

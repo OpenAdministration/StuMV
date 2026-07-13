@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Date;
  * @property string $from
  * @property string $until
  * @property Role $role
- * @property User $user
  */
 class RoleMembership extends Model
 {
@@ -48,19 +47,6 @@ class RoleMembership extends Model
         return $this->belongsTo(Role::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function user(): Relation
-    {
-        return $this->belongsTo(User::class, 'username', 'username');
-    }
-
-    public function ldapRole()
-    {
-        return \App\Ldap\Role::find("cn=$this->role_cn,$this->committee_dn");
-    }
-
     public function isActive(): bool
     {
         if ($this->until) {
@@ -71,17 +57,6 @@ class RoleMembership extends Model
         } else {
             return true;
         }
-    }
-
-    public function isPending(): bool
-    {
-        if ($this->isActive()) {
-            $userGroups = $this->user->ldap()->groups();
-
-            return ! $userGroups->exists($this->ldapRole());
-        }
-
-        return false;
     }
 
     #[Scope]
