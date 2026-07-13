@@ -1,7 +1,7 @@
 @php($committee = $node['committee'])
 <li>
     <div class="grid grid-cols-[3rem_1fr_auto]">
-        @if($node['hasChildren'])
+        @if($node['hasChildren'] && !$isSearching)
             <div class="flex justify-start items-center">
                 @if($node['unfolded'])
                     <flux:button
@@ -21,6 +21,8 @@
                     />
                 @endif
             </div>
+        @elseif($node['hasChildren'] && $isSearching)
+            <div></div>
         @else
             @if($isLastItem)
                 <div class="flex justify-center items-end px-4 pb-6">
@@ -89,6 +91,7 @@
                         'community' => $community,
                         'realm_uid' => $realm_uid,
                         'isLastItem' => $loop->last,
+                        'isSearching' => $isSearching,
                     ])
                 </div>
             @endforeach

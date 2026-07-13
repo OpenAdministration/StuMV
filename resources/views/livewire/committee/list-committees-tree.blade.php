@@ -19,6 +19,7 @@
                         'community' => $community,
                         'realm_uid' => $realm_uid,
                         'isLastItem' => $loop->last,
+                        'isSearching' => $search !== '',
                     ])
                 @empty
                     <flux:callout variant="warning" icon="info" heading="{{ __('committees.no_committees_found') }}" />
