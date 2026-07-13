@@ -20,6 +20,7 @@ return [
     'noMatchesFound' => 'Der Abgleich ergab keine Treffer.',
     'role' => 'Rolle',
     'roles' => 'Rollen',
+    'search' => 'Durchsuche Nutzer:innen',
     'startSearch' => 'Starte die Suche',
     'tools' => 'Hilfsmittel',
     'unusedRoles_headline' => 'Nicht verwendete Gremien und Rollen',

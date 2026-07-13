@@ -26,6 +26,8 @@ class UsersNotInUniLdap extends Component
 
     public string $userToDelete = '';
 
+    public string $search = '';
+
     public function mount(Community $uid)
     {
         $this->uid = $uid->getFirstAttribute('ou');
@@ -34,7 +36,18 @@ class UsersNotInUniLdap extends Component
 
     public function render()
     {
-        return view('livewire.tools.users-not-in-uni-ldap');
+        $search = mb_strtolower(trim($this->search));
+
+        $filteredResults = $search === ''
+            ? $this->results
+            : array_values(array_filter(
+                $this->results,
+                fn (array $result): bool => mb_stripos((string) $result['cn'], $search) !== false
+            ));
+
+        return view('livewire.tools.users-not-in-uni-ldap', [
+            'filteredResults' => $filteredResults,
+        ]);
     }
 
     public function searchForUsersNotInUniLdap()

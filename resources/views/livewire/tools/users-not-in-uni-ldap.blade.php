@@ -26,12 +26,16 @@
         </div>
         <div>
             @if($comparisonCompleted && count($results) > 0)
+                <flux:field class="mb-4">
+                    <flux:label>{{ __('tools.search') }}</flux:label>
+                    <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+                </flux:field>
                 <flux:fieldset>
                     <flux:legend class="w-full flex py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
-                        {{ __('tools.matches') }} <flux:badge class="ml-auto">{{ count($results) }}</flux:badge>
+                        {{ __('tools.matches') }} <flux:badge class="ml-auto">{{ count($filteredResults) }}</flux:badge>
                     </flux:legend>
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
-                        @foreach($results as $user)
+                        @foreach($filteredResults as $user)
                             <div class="flex items-center py-3">
                                 <div class="flex-1">
                                     <flux:link

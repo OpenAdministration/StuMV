@@ -171,6 +171,33 @@ test('results are sorted by name', function (): void {
         ->and($posMango)->toBeLessThan($posZebra);
 });
 
+test('the search field filters results by name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $domain = new Domain(['dc' => 'example.test']);
+    $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
+    $domain->save();
+
+    $apple = TestLdap::makeUser();
+    $apple->fill(['cn' => 'Apple'])->save();
+    TestLdap::attach($community->membersGroup(), $apple);
+
+    $mango = TestLdap::makeUser();
+    $mango->fill(['cn' => 'Mango'])->save();
+    TestLdap::attach($community->membersGroup(), $mango);
+
+    actingAsModerator($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+        ->call('searchForUsersNotInUniLdap')
+        ->assertSee('Apple')
+        ->assertSee('Mango')
+        ->set('search', 'App')
+        ->assertSee('Apple')
+        ->assertDontSee('Mango');
+});
+
 test('deleting a user removes the LDAP entry, database rows, and profile picture', function (): void {
     Storage::fake('public');
 

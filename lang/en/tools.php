@@ -20,6 +20,7 @@ return [
     'noMatchesFound' => 'The comparison found no matches.',
     'role' => 'Role',
     'roles' => 'Roles',
+    'search' => 'Search users',
     'startSearch' => 'Start the search',
     'tools' => 'Tools',
     'unusedRoles_headline' => 'Unused committees and roles',
