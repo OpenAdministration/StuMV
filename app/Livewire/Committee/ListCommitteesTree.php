@@ -217,6 +217,7 @@ class ListCommitteesTree extends Component
             $committee->getFirstAttribute('ou'),
             $committee->getFirstAttribute('description'),
         ]);
-        return array_any($values, fn($value) => mb_stripos(mb_strtolower((string) $value), $search) !== false);
+
+        return array_any($values, fn ($value) => mb_stripos(mb_strtolower((string) $value), $search) !== false);
     }
 }
