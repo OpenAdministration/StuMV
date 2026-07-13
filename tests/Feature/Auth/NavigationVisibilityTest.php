@@ -24,6 +24,11 @@ function groupsLinkCount(string $html, string $uid): int
     return linkCount($html, $uid, 'groups');
 }
 
+function domainsLinkCount(string $html, string $uid): int
+{
+    return linkCount($html, $uid, 'domains');
+}
+
 test('a plain member does not see the admin nav link', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
@@ -118,4 +123,52 @@ test('a super admin sees the groups nav link', function (): void {
         ->getContent();
 
     expect(groupsLinkCount($html, $uid))->toBe(2);
+});
+
+test('a plain member does not see the domains nav link', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsMember($community);
+
+    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+        ->assertOk()
+        ->getContent();
+
+    expect(domainsLinkCount($html, $uid))->toBe(0);
+});
+
+test('a moderator does not see the domains nav link', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsModerator($community);
+
+    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+        ->assertOk()
+        ->getContent();
+
+    expect(domainsLinkCount($html, $uid))->toBe(0);
+});
+
+test('an admin sees the domains nav link', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsAdmin($community);
+
+    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+        ->assertOk()
+        ->getContent();
+
+    expect(domainsLinkCount($html, $uid))->toBe(2);
+});
+
+test('a super admin sees the domains nav link', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsSuperAdmin();
+
+    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+        ->assertOk()
+        ->getContent();
+
+    expect(domainsLinkCount($html, $uid))->toBe(2);
 });
