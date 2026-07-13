@@ -1,6 +1,5 @@
 <?php
 
-use App\Ldap\User as LdapUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Group;
+use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -74,7 +75,7 @@ test('ldap:sync-roles leaves already-correct members untouched instead of cleari
 
     $this->artisan('ldap:sync-roles', ['committee' => $committeeName])->assertExitCode(0);
 
-    $uniqueMember = \App\Ldap\Role::find($role->getDn())->getAttribute('uniqueMember');
+    $uniqueMember = Role::find($role->getDn())->getAttribute('uniqueMember');
     $posB = array_search($memberB->ldap()->getDn(), $uniqueMember);
     $posA = array_search($memberA->ldap()->getDn(), $uniqueMember);
 
@@ -82,7 +83,7 @@ test('ldap:sync-roles leaves already-correct members untouched instead of cleari
         ->and($posA)->not->toBeFalse()
         ->and($posB)->toBeLessThan($posA);
 
-    $members = \App\Ldap\Role::find($role->getDn())->members()->get()
+    $members = Role::find($role->getDn())->members()->get()
         ->map(fn ($m) => $m->getFirstAttribute('uid'));
     expect($members)->not->toContain($stale->getFirstAttribute('uid'));
 });

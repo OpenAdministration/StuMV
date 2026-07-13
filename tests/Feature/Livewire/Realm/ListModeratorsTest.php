@@ -1,5 +1,7 @@
 <?php
 
+use App\Ldap\Community;
+use App\Ldap\User;
 use App\Livewire\Realm\ListModerators;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -32,7 +34,7 @@ test('deleteCommit removes the moderator and closes the modal', function (): voi
         ->call('deleteCommit')
         ->assertDispatched('modal-close', name: 'delete');
 
-    $ldapCommunity = \App\Ldap\Community::findByUid($community->getShortCode());
-    $ldapUser = \App\Ldap\User::findByUsername($mod->username);
+    $ldapCommunity = Community::findByUid($community->getShortCode());
+    $ldapUser = User::findByUsername($mod->username);
     expect($ldapCommunity->moderatorsGroup()->members()->contains($ldapUser))->toBeFalse();
 });
