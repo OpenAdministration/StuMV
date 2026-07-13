@@ -3,12 +3,11 @@
 namespace App\Livewire\Tools;
 
 use App\Ldap\Community;
+use App\Ldap\Uni\User as UniLdapUser;
 use App\Ldap\User;
-use App\Models\UniLdap;
 use App\Rules\UniqueEmail;
 use Flux\Flux;
 use Illuminate\Support\Str;
-use LdapRecord\Container;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -50,10 +49,7 @@ class ImportUsersFromUniLdap extends Component
     public function mount(Community $uid)
     {
         $this->uid = $uid->getFirstAttribute('ou');
-        $unildap = UniLdap::where('realm', $this->uid)->first();
-        if ($unildap !== null) {
-            $this->unildapDataExists = true;
-        }
+        $this->unildapDataExists = filled(config('ldap.connections.uni.base_dn'));
     }
 
     public function render()
@@ -66,17 +62,15 @@ class ImportUsersFromUniLdap extends Component
         $this->searchCompleted = false;
 
         try {
-            $entries = Container::getConnection('uni')
-                ->query()
-                ->where('mail', '=', $this->email)
-                ->get();
+            $matches = UniLdapUser::where('mail', '=', $this->email)->get();
         } catch (LdapRecordException) {
-            $entries = [];
+            $matches = collect();
         }
 
-        if (count($entries) === 1) {
-            $this->firstname = $entries[0]['givenname'][0];
-            $this->lastname = $entries[0]['sn'][0];
+        if ($matches->count() === 1) {
+            $entry = $matches->first();
+            $this->firstname = $entry->getFirstAttribute('givenname');
+            $this->lastname = $entry->getFirstAttribute('sn');
 
             $split = explode('@', $this->email);
             $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? '');

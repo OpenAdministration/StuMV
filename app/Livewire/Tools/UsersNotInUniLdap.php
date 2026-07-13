@@ -4,9 +4,9 @@ namespace App\Livewire\Tools;
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
+use App\Ldap\Uni\User as UniLdapUser;
 use App\Ldap\User;
 use App\Models\RoleMembership;
-use App\Models\UniLdap;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -27,10 +27,7 @@ class UsersNotInUniLdap extends Component
     public function mount(Community $uid)
     {
         $this->uid = $uid->getFirstAttribute('ou');
-        $unildap = UniLdap::where('realm', $this->uid)->first();
-        if ($unildap !== null) {
-            $this->unildapDataExists = true;
-        }
+        $this->unildapDataExists = filled(config('ldap.connections.uni.base_dn'));
     }
 
     public function render()
@@ -55,7 +52,7 @@ class UsersNotInUniLdap extends Component
         foreach ($members as $member) {
             $memberEmailParts = explode('@', (string) $member->getFirstAttribute('mail'));
             if (in_array($memberEmailParts[1], $domains)) {
-                $uniMember = \App\Ldap\Uni\User::where('mail', '=', $member->getFirstAttribute('mail'))->first();
+                $uniMember = UniLdapUser::where('mail', '=', $member->getFirstAttribute('mail'))->first();
                 if ($uniMember === null) {
                     $this->results[] = $member;
                 }

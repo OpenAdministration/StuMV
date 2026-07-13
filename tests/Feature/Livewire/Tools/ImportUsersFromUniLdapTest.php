@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\Tools\ImportUsersFromUniLdap;
-use App\Models\UniLdap;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LdapRecord\Connection;
 use LdapRecord\Container;
@@ -10,12 +9,13 @@ use Livewire\Livewire;
 uses(RefreshDatabase::class);
 
 /**
- * The component now connects via LdapRecord's pre-configured "uni" connection
- * (config/ldap.php) rather than building one from the UniLdap database row's
- * host/members_base columns - those remain only as a per-realm on/off toggle
- * for the feature (see mount()'s unildapDataExists check).
+ * The component connects via LdapRecord's pre-configured "uni" connection
+ * (config/ldap.php), and gates the feature on that connection's base_dn
+ * being configured - there's no per-realm database row anymore.
  */
 beforeEach(function (): void {
+    config(['ldap.connections.uni.base_dn' => 'ou=People,dc=stumv,dc=de']);
+
     Container::addConnection(new Connection([
         'hosts' => ['127.0.0.1'],
         'port' => 13389,
@@ -23,13 +23,25 @@ beforeEach(function (): void {
     ]), 'uni');
 });
 
+test('the feature is hidden when the uni LDAP connection has no base_dn configured', function (): void {
+    config(['ldap.connections.uni.base_dn' => null]);
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
+        ->assertSet('unildapDataExists', false);
+});
+
+test('the feature is shown when the uni LDAP connection has a base_dn configured', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
+        ->assertSet('unildapDataExists', true);
+});
+
 test('searching for an email with no match in the university LDAP reports not found', function (): void {
     $community = newCommunity();
-    UniLdap::create([
-        'realm' => $community->getShortCode(),
-        'host' => 'unused',
-        'members_base' => 'unused',
-    ]);
     actingAsAdmin($community);
 
     Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
@@ -47,11 +59,6 @@ test('an unreachable university LDAP connection is handled gracefully instead of
     ]), 'uni');
 
     $community = newCommunity();
-    UniLdap::create([
-        'realm' => $community->getShortCode(),
-        'host' => 'unused',
-        'members_base' => 'unused',
-    ]);
     actingAsAdmin($community);
 
     Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
