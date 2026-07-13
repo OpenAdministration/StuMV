@@ -40,7 +40,6 @@
                                         >
                                             {{ $user['cn'] }}
                                         </flux:link>
-                                        <flux:text class="text-sm">{{ $user['email'] }}</flux:text>
                                     </div>
                                 </flux:card>
                             @endforeach
