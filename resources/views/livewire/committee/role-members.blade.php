@@ -57,6 +57,7 @@
                 <flux:icon.loading />
             </div>
             <div wire:loading.remove wire:target="showOnlyActive">
+                @if(count($members) > 0)
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column class="w-[55px]"></flux:table.column>
@@ -68,7 +69,7 @@
                         <flux:table.column></flux:table.column>
                     </flux:table.columns>
                     <flux:table.rows>
-            @forelse($members as $member)
+            @foreach($members as $member)
                 <flux:table.row>
                     <flux:table.cell>
                         @php
@@ -158,17 +159,12 @@
                         </div>
                     </flux:table.cell>
                 </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="7">
-                        <div class="flex item-center py-2">
-                            <flux:separator text="{{ __('roles.no_members_found') }}" />
-                        </div>
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
+            @endforeach
             </flux:table.rows>
         </flux:table>
+                @else
+                    <flux:callout variant="warning" icon="circle-alert" heading="{{ __('roles.no_members_found') }}" />
+                @endif
     </div>
     @endif
 

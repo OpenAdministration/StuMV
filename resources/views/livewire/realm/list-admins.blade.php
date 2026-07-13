@@ -35,67 +35,64 @@
     </div>
 
     <div wire:loading.remove wire:target="loadAdmins">
-        <flux:table>
-            <flux:table.columns>
-                <flux:table.column class="w-[55px]"></flux:table.column>
-                <flux:table.column>{{ __('Name') }}</flux:table.column>
-                <flux:table.column></flux:table.column>
-            </flux:table.columns>
-            <flux:table.rows>
-        @forelse($realm_admins as $realm_admin)
-            <flux:table.row>
-                <flux:table.cell>
-                    @php
-                        $jpegPhoto = $realm_admin->jpegPhoto[0] ?? null;
-                        if ($jpegPhoto) {
-                            $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
-                        }
-                    @endphp
-                    <flux:avatar
-                        src="{{ $jpegPhoto }}"
-                        name="{{ $realm_admin->cn[0] }}"
-                    />
-                </flux:table.cell>
-                <flux:table.cell>
-                    @can('admin', $community)
-                        <flux:link
-                            wire:navigate
-                            :disabled="auth()->user()->cannot('admin', [$community])"
-                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_admin->uid[0]]) : null"
-                        >
-                            {{ $realm_admin->cn[0] }}
-                        </flux:link>
-                    @else
-                        {{ $realm_admin->cn[0] }}
-                    @endcan
-                </flux:table.cell>
-                <flux:table.cell class="flex justify-end gap-2">
-                    <flux:dropdown>
-                        <flux:button size="sm" icon="ellipsis-vertical" />
-                        <flux:menu>
-                            <flux:menu.item
-                                variant="danger"
-                                icon="user-minus"
-                                :disabled="auth()->user()->cannot('remove_admin', $community)"
-                                wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
+        @if(count($realm_admins) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column class="w-[55px]"></flux:table.column>
+                    <flux:table.column>{{ __('Name') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+            @foreach($realm_admins as $realm_admin)
+                <flux:table.row>
+                    <flux:table.cell>
+                        @php
+                            $jpegPhoto = $realm_admin->jpegPhoto[0] ?? null;
+                            if ($jpegPhoto) {
+                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                            }
+                        @endphp
+                        <flux:avatar
+                            src="{{ $jpegPhoto }}"
+                            name="{{ $realm_admin->cn[0] }}"
+                        />
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        @can('admin', $community)
+                            <flux:link
+                                wire:navigate
+                                :disabled="auth()->user()->cannot('admin', [$community])"
+                                :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_admin->uid[0]]) : null"
                             >
-                                {{ __('Delete') }}
-                            </flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
-                </flux:table.cell>
-            </flux:table.row>
-        @empty
-            <flux:table.row>
-                <flux:table.cell colspan="4">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('realms.no_admins_found') }}</span>
-                    </div>
-                </flux:table.cell>
-            </flux:table.row>
-        @endforelse
-        </flux:table.rows>
-    </flux:table>
+                                {{ $realm_admin->cn[0] }}
+                            </flux:link>
+                        @else
+                            {{ $realm_admin->cn[0] }}
+                        @endcan
+                    </flux:table.cell>
+                    <flux:table.cell class="flex justify-end gap-2">
+                        <flux:dropdown>
+                            <flux:button size="sm" icon="ellipsis-vertical" />
+                            <flux:menu>
+                                <flux:menu.item
+                                    variant="danger"
+                                    icon="user-minus"
+                                    :disabled="auth()->user()->cannot('remove_admin', $community)"
+                                    wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
+                                >
+                                    {{ __('Delete') }}
+                                </flux:menu.item>
+                            </flux:menu>
+                        </flux:dropdown>
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforeach
+            </flux:table.rows>
+        </flux:table>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('realms.no_admins_found') }}" />
+        @endif
+    </div>
 
     <div class="block h-[1px]"></div>
 

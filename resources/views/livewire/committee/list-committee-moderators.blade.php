@@ -22,59 +22,55 @@
     </div>
 
     <div wire:loading.remove wire:target="loadModerators">
-        <flux:table>
-        <flux:table.columns>
-            <flux:table.column class="w-[55px]"></flux:table.column>
-            <flux:table.column>{{ __('Name') }}</flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
-        <flux:table.rows>
-        @forelse($committee_moderators as $moderator)
-            <flux:table.row>
-                <flux:table.cell>
-                    @php
-                        $jpegPhoto = $moderator->jpegPhoto[0] ?? null;
-                        if ($jpegPhoto) {
-                            $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
-                        }
-                    @endphp
-                    <flux:avatar
-                        src="{{ $jpegPhoto }}"
-                        name="{{ $moderator->cn[0] }}"
-                    />
-                </flux:table.cell>
-                <flux:table.cell>
-                    {{ $moderator->cn[0] }}
-                </flux:table.cell>
-                <flux:table.cell>
-                    <div class="flex justify-end items-center gap-2">
-                        <flux:dropdown>
-                            <flux:button size="sm" icon="ellipsis-vertical" />
-                            <flux:menu>
-                                <flux:menu.item
-                                    variant="danger"
-                                    icon="user-minus"
-                                    :disabled="!$isModerator"
-                                    wire:click="deletePrepare('{{ $moderator->uid[0] }}')"
-                                >
-                                    {{ __('Remove Moderator') }}
-                                </flux:menu.item>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-                </flux:table.cell>
-            </flux:table.row>
-        @empty
-            <flux:table.row>
-                <flux:table.cell colspan="3">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('committees.no_mods_found') }}</span>
-                    </div>
-                </flux:table.cell>
-            </flux:table.row>
-        @endforelse
-        </flux:table.rows>
-    </flux:table>
+        @if(count($committee_moderators) > 0)
+            <flux:table>
+            <flux:table.columns>
+                <flux:table.column class="w-[55px]"></flux:table.column>
+                <flux:table.column>{{ __('Name') }}</flux:table.column>
+                <flux:table.column></flux:table.column>
+            </flux:table.columns>
+            <flux:table.rows>
+            @foreach($committee_moderators as $moderator)
+                <flux:table.row>
+                    <flux:table.cell>
+                        @php
+                            $jpegPhoto = $moderator->jpegPhoto[0] ?? null;
+                            if ($jpegPhoto) {
+                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                            }
+                        @endphp
+                        <flux:avatar
+                            src="{{ $jpegPhoto }}"
+                            name="{{ $moderator->cn[0] }}"
+                        />
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        {{ $moderator->cn[0] }}
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="user-minus"
+                                        :disabled="!$isModerator"
+                                        wire:click="deletePrepare('{{ $moderator->uid[0] }}')"
+                                    >
+                                        {{ __('Remove Moderator') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforeach
+            </flux:table.rows>
+        </flux:table>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('committees.no_mods_found') }}" />
+        @endif
 
     <div class="block h-[1px]"></div>
 

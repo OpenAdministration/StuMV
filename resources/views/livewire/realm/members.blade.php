@@ -28,94 +28,88 @@
     </div>
 
     <div wire:loading.remove wire:target="loadMembers" class="pb-8">
-        <flux:table>
-            <flux:table.columns>
-                <flux:table.column class="w-[55px]"></flux:table.column>
-                <flux:table.column>{{ __('Name') }}</flux:table.column>
-                <flux:table.column></flux:table.column>
-            </flux:table.columns>
-            <flux:table.rows>
-        @forelse($realm_members as $realm_member)
-            <flux:table.row>
-                <flux:table.cell>
-                    @php
-                        $ldapUser = $ldap_users[$realm_member->username] ?? null;
-                        $jpegPhoto = $ldapUser ? $ldapUser->getFirstAttribute('jpegPhoto') : null;
-                        if ($jpegPhoto) {
-                            $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
-                        }
-                    @endphp
-                    <flux:avatar
-                        src="{{ $jpegPhoto }}"
-                        name="{{ $realm_member->full_name }}"
-                    />
-                </flux:table.cell>
-                <flux:table.cell>
-                    @can('admin', $community)
-                        <flux:link
-                            wire:navigate
-                            :disabled="auth()->user()->cannot('admin', [$community])"
-                            :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_member->username]) : null"
-                        >
-                            {{ $realm_member->full_name }}
-                        </flux:link>
-                    @else
-                        {{ $realm_member->full_name }}
-                    @endcan
-                </flux:table.cell>
-                <flux:table.cell>
-                    <div class="flex justify-end items-center gap-2">
-                        @can('moderator', $community)
-                            <flux:button
-                                size="sm"
-                                variant="primary"
-                                icon="file-text"
-                                wire:click="exportPdf('{{ $realm_member->username }}')"
+        @if(count($realm_members) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column class="w-[55px]"></flux:table.column>
+                    <flux:table.column>{{ __('Name') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+            @foreach($realm_members as $realm_member)
+                <flux:table.row>
+                    <flux:table.cell>
+                        @php
+                            $ldapUser = $ldap_users[$realm_member->username] ?? null;
+                            $jpegPhoto = $ldapUser ? $ldapUser->getFirstAttribute('jpegPhoto') : null;
+                            if ($jpegPhoto) {
+                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                            }
+                        @endphp
+                        <flux:avatar
+                            src="{{ $jpegPhoto }}"
+                            name="{{ $realm_member->full_name }}"
+                        />
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        @can('admin', $community)
+                            <flux:link
+                                wire:navigate
+                                :disabled="auth()->user()->cannot('admin', [$community])"
+                                :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_member->username]) : null"
                             >
-                                {{ __('profile.membershipsAsPdf') }}
-                            </flux:button>
+                                {{ $realm_member->full_name }}
+                            </flux:link>
+                        @else
+                            {{ $realm_member->full_name }}
                         @endcan
-                        <flux:dropdown>
-                            <flux:button size="sm" icon="ellipsis-vertical" />
-                            <flux:menu>
-                                <flux:menu.item
-                                    icon="pencil"
-                                    :disabled="auth()->user()->cannot('admin', $community)"
-                                    wire:navigate
-                                    :href="auth()->user()->can('admin', $community) ? route('profile', ['username' => $realm_member->username]) : null"
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            @can('moderator', $community)
+                                <flux:button
+                                    size="sm"
+                                    variant="primary"
+                                    icon="file-text"
+                                    wire:click="exportPdf('{{ $realm_member->username }}')"
                                 >
-                                    {{ __('Edit') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    variant="danger"
-                                    icon="user-minus"
-                                    :disabled="auth()->user()->cannot('remove_member', $community)"
-                                    wire:click="deletePrepare('{{ $realm_member->username }}')"
-                                >
-                                    {{ __('Remove Member') }}
-                                </flux:menu.item>
-                            </flux:menu>
-                        </flux:dropdown>
-                    </div>
-                </flux:table.cell>
-            </flux:table.row>
-        @empty
-            <flux:table.row>
-                <flux:table.cell colspan="4">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('realms.no_members_found') }}</span>
-                    </div>
-                </flux:table.cell>
-            </flux:table.row>
-        @endforelse
-        </flux:table.rows>
-    </flux:table>
+                                    {{ __('profile.membershipsAsPdf') }}
+                                </flux:button>
+                            @endcan
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        icon="pencil"
+                                        :disabled="auth()->user()->cannot('admin', $community)"
+                                        wire:navigate
+                                        :href="auth()->user()->can('admin', $community) ? route('profile', ['username' => $realm_member->username]) : null"
+                                    >
+                                        {{ __('Edit') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="user-minus"
+                                        :disabled="auth()->user()->cannot('remove_member', $community)"
+                                        wire:click="deletePrepare('{{ $realm_member->username }}')"
+                                    >
+                                        {{ __('Remove Member') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforeach
+            </flux:table.rows>
+        </flux:table>
 
-    @if(count($realm_members) > 0)
-        <div class="pagination">
-            <flux:pagination :paginator="$realm_members" />
-        </div>
-    @endif
+            <div class="pagination">
+                <flux:pagination :paginator="$realm_members" />
+            </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('realms.no_members_found') }}" />
+        @endif
 
     <div class="block h-[1px]"></div>
 
