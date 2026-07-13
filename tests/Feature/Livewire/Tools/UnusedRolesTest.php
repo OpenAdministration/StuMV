@@ -29,7 +29,19 @@ test('it lists roles without memberships and hides roles that are in use', funct
     ]);
 
     Livewire::test(UnusedRoles::class, ['uid' => $community])
+        ->call('loadUnusedRoles')
         ->assertStatus(200)
         ->assertSee('Role unused')
         ->assertDontSee('Role used');
+});
+
+test('loading is deferred until loadUnusedRoles runs', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'unused');
+    actingAsModerator($community);
+
+    Livewire::test(UnusedRoles::class, ['uid' => $community])
+        ->assertSet('ready', false)
+        ->assertDontSee('Role unused');
 });
