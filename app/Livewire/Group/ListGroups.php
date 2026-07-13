@@ -56,7 +56,9 @@ class ListGroups extends Component
         if ($this->search) {
             $groupsQuery->whereContains('cn', trim($this->search));
         }
-        $groups = $groupsQuery->get();
+        $groups = $groupsQuery->get()
+            ->sortBy(fn ($group) => mb_strtolower((string) $group->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
 
         return view('livewire.group.list-group', [
             'groups' => $groups,

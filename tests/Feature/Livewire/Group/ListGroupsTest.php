@@ -55,3 +55,37 @@ test('the group search filters the list', function (): void {
         ->assertSee('alpha')
         ->assertDontSee('beta');
 });
+
+test('groups are sorted by cn ascending by default', function (): void {
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'zeta');
+    TestLdap::makeGroup($community, 'alpha');
+    TestLdap::makeGroup($community, 'mike');
+    actingAsModerator($community);
+
+    $cns = Livewire::test(ListGroups::class, ['uid' => $community])
+        ->viewData('groups')
+        ->map(fn ($group) => $group->getFirstAttribute('cn'))
+        ->values()
+        ->all();
+
+    expect($cns)->toBe(['alpha', 'mike', 'zeta']);
+});
+
+test('sortBy toggles direction and re-sorts the groups descending', function (): void {
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'zeta');
+    TestLdap::makeGroup($community, 'alpha');
+    TestLdap::makeGroup($community, 'mike');
+    actingAsModerator($community);
+
+    $cns = Livewire::test(ListGroups::class, ['uid' => $community])
+        ->call('sortBy', 'cn')
+        ->assertSet('sortDirection', 'desc')
+        ->viewData('groups')
+        ->map(fn ($group) => $group->getFirstAttribute('cn'))
+        ->values()
+        ->all();
+
+    expect($cns)->toBe(['zeta', 'mike', 'alpha']);
+});
