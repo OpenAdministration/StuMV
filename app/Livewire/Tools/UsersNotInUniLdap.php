@@ -6,8 +6,10 @@ use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Ldap\Uni\User as UniLdapUser;
 use App\Ldap\User;
+use App\Models\ProfilePicture;
 use App\Models\RoleMembership;
 use Flux\Flux;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -105,7 +107,14 @@ class UsersNotInUniLdap extends Component
 
         // Database
         RoleMembership::where('username', $this->userToDelete)->delete();
-        User::where('username', $this->userToDelete)->delete();
+        \App\Models\User::where('username', $this->userToDelete)->delete();
+
+        // Profile picture
+        $picture = ProfilePicture::where('user', $this->userToDelete)->first();
+        if ($picture) {
+            Storage::disk('public')->delete('avatars/'.$picture->file_id.'.jpg');
+            $picture->delete();
+        }
 
         Flux::toast(variant: 'success', text: __('tools.userDeletedSuccessfully'));
         Flux::modal('confirm-delete-user')->close();

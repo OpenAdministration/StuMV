@@ -1,8 +1,12 @@
 <?php
 
 use App\Ldap\Domain;
+use App\Ldap\User as LdapUser;
 use App\Livewire\Tools\UsersNotInUniLdap;
+use App\Models\ProfilePicture;
+use App\Models\User as DbUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use LdapRecord\Connection;
 use LdapRecord\Container;
 use Livewire\Livewire;
@@ -131,4 +135,40 @@ test('the uni LDAP batch size is configurable via ldap.uni_batch_size', function
     foreach ($mailQueries as $query) {
         expect(substr_count($query, 'mail='))->toBeLessThanOrEqual(5);
     }
+});
+
+test('deleting a user removes the LDAP entry, database rows, and profile picture', function (): void {
+    Storage::fake('public');
+
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsSuperAdmin();
+
+    Storage::disk('public')->put('avatars/some-file-id.jpg', 'fake-image-contents');
+    ProfilePicture::create([
+        'user' => $member->username,
+        'file_id' => 'some-file-id',
+    ]);
+
+    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+        ->set('userToDelete', $member->username)
+        ->call('deleteUser');
+
+    expect(LdapUser::findByUsername($member->username))->toBeNull()
+        ->and(DbUser::where('username', $member->username)->exists())->toBeFalse()
+        ->and(ProfilePicture::where('user', $member->username)->exists())->toBeFalse();
+    Storage::disk('public')->assertMissing('avatars/some-file-id.jpg');
+});
+
+test('deleting a user without a profile picture does not error', function (): void {
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsSuperAdmin();
+
+    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+        ->set('userToDelete', $member->username)
+        ->call('deleteUser')
+        ->assertOk();
+
+    expect(LdapUser::findByUsername($member->username))->toBeNull();
 });
