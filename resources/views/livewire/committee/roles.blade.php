@@ -1,7 +1,18 @@
 <div class="flex-col space-y-8" wire:init="loadRoles">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
-            <flux:heading size="xl">{{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>
+            <flux:heading size="xl" class="flex gap-4">
+                {{ __('committees.roles_heading', ['name' => $committee->getFirstAttribute('description')]) }}
+                @can('edit', [$committee, $community])
+                    <flux:button
+                        variant="subtle"
+                        icon="pencil"
+                        class="-mt-1"
+                        :href="route('committees.edit', ['uid' => $uid, 'ou' => $ou])"
+                        title="{{ __('Edit') }}"
+                    />
+                @endcan
+            </flux:heading>
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
         <div class="flex flex-col gap-2">

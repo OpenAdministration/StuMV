@@ -3,13 +3,15 @@
         <div class="flex-1 space-y-4">
             <flux:heading size="xl" class="flex gap-4">
                 {{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}
-                <flux:button
-                    variant="subtle"
-                    icon="pencil"
-                    class="-mt-1"
-                    :href="route('committees.roles.edit', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                    title="{{ __('Edit') }}"
-                />
+                @can('edit', [$role, $committee, $community])
+                    <flux:button
+                        variant="subtle"
+                        icon="pencil"
+                        class="-mt-1"
+                        :href="route('committees.roles.edit', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                        title="{{ __('Edit') }}"
+                    />
+                @endcan
             </flux:heading>
             <flux:text class="text-base">{{ __('roles.membership_explanation') }}</flux:text>
         </div>
