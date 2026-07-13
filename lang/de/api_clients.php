@@ -3,7 +3,7 @@
 return [
     'list_title' => 'API-Clients',
     'headline' => 'API-Clients',
-    'explanation' => 'Hier registrierte Anwendungen dürfen die Verzeichnis-API (Gremien, Rollen, Gruppen und Nutzer:innen) dieser Studierendenschaft abfragen. Jeder Client authentifiziert sich eigenständig, ohne Nutzer:in, und sieht ausschließlich die Daten dieser Studierendenschaft.',
+    'explanation' => 'Hier registrierte Anwendungen dürfen die Verzeichnis-API (Gremien, Rollen, Gruppen und Nutzer:innen) dieser Studierendenschaft abfragen.',
     'new' => 'Neuer Client',
     'new_title' => 'Neuen API-Client registrieren',
     'name' => 'Name',
