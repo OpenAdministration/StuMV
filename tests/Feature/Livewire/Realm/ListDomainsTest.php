@@ -79,6 +79,15 @@ test('sortBy toggles direction and re-sorts the domains descending', function ()
     expect($dcs)->toBe(['zeta.test', 'mike.test', 'alpha.test']);
 });
 
+test('the domains list shows a warning callout when there are no domains', function (): void {
+    $community = newCommunity();
+    actingAsModerator($community);
+
+    Livewire::test(ListDomains::class, ['uid' => $community])
+        ->assertSeeHtml('data-flux-callout')
+        ->assertSee(__('domain.nothing_found'));
+});
+
 test('the domains list is paginated to 10 per page', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
