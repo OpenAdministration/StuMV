@@ -60,7 +60,7 @@
                     {{ __('realms.dashboard.groups_headline') }}
                 </flux:sidebar.item>
                 <flux:sidebar.item
-                    icon="external-link"
+                    icon="unplug"
                     wire:navigate
                     :href="route('realms.api-clients', ['uid' => $uid])"
                 >
