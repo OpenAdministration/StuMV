@@ -49,19 +49,38 @@ class UsersNotInUniLdap extends Component
             $domains[] = $item->dc[0];
         }
 
-        foreach ($members as $member) {
-            $memberEmailParts = explode('@', (string) $member->getFirstAttribute('mail'));
-            if (in_array($memberEmailParts[1], $domains)) {
-                $uniMember = UniLdapUser::where('mail', '=', $member->getFirstAttribute('mail'))->first();
-                if ($uniMember === null) {
-                    // Livewire can't serialize a raw LdapRecord model as a
-                    // public property value, so keep only the plain fields
-                    // the view actually needs.
-                    $this->results[] = [
-                        'uid' => $member->getFirstAttribute('uid'),
-                        'cn' => $member->getFirstAttribute('cn'),
-                    ];
-                }
+        // Only members whose email belongs to one of this realm's registered
+        // domains are relevant to look up in the uni LDAP at all.
+        $candidates = $members->filter(function ($member) use ($domains): bool {
+            $emailParts = explode('@', (string) $member->getFirstAttribute('mail'));
+
+            return isset($emailParts[1]) && in_array($emailParts[1], $domains, true);
+        });
+
+        $mails = $candidates
+            ->map(fn ($member) => $member->getFirstAttribute('mail'))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        // One batched lookup instead of one uni LDAP query per candidate.
+        $mailsFoundInUniLdap = empty($mails)
+            ? []
+            : UniLdapUser::whereIn('mail', $mails)
+                ->get()
+                ->map(fn (UniLdapUser $user) => $user->getFirstAttribute('mail'))
+                ->all();
+
+        foreach ($candidates as $member) {
+            if (! in_array($member->getFirstAttribute('mail'), $mailsFoundInUniLdap, true)) {
+                // Livewire can't serialize a raw LdapRecord model as a
+                // public property value, so keep only the plain fields
+                // the view actually needs.
+                $this->results[] = [
+                    'uid' => $member->getFirstAttribute('uid'),
+                    'cn' => $member->getFirstAttribute('cn'),
+                ];
             }
         }
 
