@@ -21,8 +21,6 @@
                     />
                 @endif
             </div>
-        @elseif($node['hasChildren'] && $isSearching)
-            <div></div>
         @else
             @if($isLastItem)
                 <div class="flex justify-center items-end px-4 pb-6">
