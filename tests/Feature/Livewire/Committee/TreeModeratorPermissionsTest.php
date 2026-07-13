@@ -6,13 +6,12 @@ use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
 /**
- * The tree computes each node's "can edit/delete this committee" flag once
- * per node and threads it down to descendants (see
- * ListCommitteesTree::buildNode()), instead of re-deriving it via
- * Committee::hasModerator()'s ancestor walk for every node - these lock in
- * that the resulting per-node permission is still correct end-to-end through
- * the rendered menu, not just at the policy layer (already covered by
- * CommitteeModeratorAuthorizationTest and CommitteeModeratorTest).
+ * Committees can only be created/edited/deleted by community moderators -
+ * committee moderators are scoped to roles/role memberships within their
+ * committee, not the committee itself (see CommitteePolicy::edit()/delete()).
+ * ListCommitteesTree::buildNode() computes a single flat "is a community
+ * moderator" flag once and reuses it for every node, rather than checking
+ * per-committee.
  */
 uses(RefreshDatabase::class);
 
@@ -25,7 +24,7 @@ function deleteButtonIsDisabled(string $html, string $committeeDn): bool
     return str_contains(substr($html, $pos, strlen($marker) + 30), 'disabled="disabled"');
 }
 
-test('a committee moderator sees an enabled delete button for a nested descendant of their committee', function (): void {
+test('a committee moderator sees a disabled delete button for their own committee and its descendants', function (): void {
     $community = newCommunity();
     $parent = TestLdap::makeCommittee($community, 'parent');
     $child = TestLdap::makeCommittee($community, 'child', parentDn: $parent->getDn());
@@ -37,23 +36,8 @@ test('a committee moderator sees an enabled delete button for a nested descendan
         ->call('toggleChildren', $parent->getDn())
         ->html();
 
-    expect(deleteButtonIsDisabled($html, $parent->getDn()))->toBeFalse()
-        ->and(deleteButtonIsDisabled($html, $child->getDn()))->toBeFalse();
-});
-
-test('a committee moderator sees a disabled delete button for an unrelated committee', function (): void {
-    $community = newCommunity();
-    $committeeA = TestLdap::makeCommittee($community, 'committee-a');
-    $committeeB = TestLdap::makeCommittee($community, 'committee-b');
-    $moderator = TestLdap::committeeModerator($committeeA, $community);
-    $this->actingAs($moderator);
-
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
-        ->call('loadCommittees')
-        ->html();
-
-    expect(deleteButtonIsDisabled($html, $committeeA->getDn()))->toBeFalse()
-        ->and(deleteButtonIsDisabled($html, $committeeB->getDn()))->toBeTrue();
+    expect(deleteButtonIsDisabled($html, $parent->getDn()))->toBeTrue()
+        ->and(deleteButtonIsDisabled($html, $child->getDn()))->toBeTrue();
 });
 
 test('a plain community member sees disabled delete buttons for every committee', function (): void {

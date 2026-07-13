@@ -8,9 +8,7 @@
             placeholder="{{ __('committees.select_committee') }}"
             wire:model="parent_dn"
         >
-            @if($canCreateTopLevel)
-                <flux:select.option value="">{{ __('committees.no_parent_committee') }}</flux:select.option>
-            @endif
+            <flux:select.option value="">{{ __('committees.no_parent_committee') }}</flux:select.option>
             @foreach($select_parents as $key => $select_parent)
                 <flux:select.option value="{{ $key }}">{{ $select_parent['description'] }}</flux:select.option>
             @endforeach

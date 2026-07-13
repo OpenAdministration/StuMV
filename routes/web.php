@@ -83,12 +83,11 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         // end member
     });
 
-    // mods only
+    // committee/community moderators only - role and role-membership actions
+    // within a committee (or one moderated by an ancestor of it)
     Route::middleware(['communityMod'])->group(function (): void {
         // mod
-        Route::livewire('{uid}/new-committee', NewCommittee::class)->name('committees.new');
         Route::livewire('{uid}/committees/{ou}/new-role', NewRole::class)->name('committees.roles.new');
-        Route::livewire('{uid}/committees/{ou}/edit', EditCommittee::class)->name('committees.edit');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/edit', EditRole::class)->name('committees.roles.edit');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
         Route::livewire('{uid}/committees/{ou}/role/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
@@ -96,6 +95,13 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{uid}/committees/{ou}/new-moderator', NewCommitteeModerator::class)->name('committees.moderators.new');
         // end mod
     });
+
+    // community moderators only - committees themselves are not delegable to
+    // committee moderators, unlike their roles/role-memberships above
+    Route::livewire('{uid}/new-committee', NewCommittee::class)->name('committees.new')
+        ->can('moderator', 'uid');
+    Route::livewire('{uid}/committees/{ou}/edit', EditCommittee::class)->name('committees.edit')
+        ->can('moderator', 'uid');
 
     // mods, admins and superadmins
     Route::middleware(['can:tools,uid'])->group(function (): void {

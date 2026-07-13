@@ -135,16 +135,14 @@ class ListCommitteesTree extends Component
 
         $search = mb_strtolower(trim($this->search));
 
-        // Community moderators (or an ancestor a top-level committee's
-        // moderator) already carry "is a moderator" down to every committee -
-        // computed once here and threaded through buildNode() so each node
-        // only ever has to check its OWN moderators group, not walk back up
-        // through every ancestor (Committee::hasModerator() would otherwise
-        // redo that walk from scratch for every single node in the tree).
-        $isCommunityModerator = auth()->user()->can('moderator', $community);
+        // Committees can only be created/edited/deleted by community
+        // moderators (committee moderators are scoped to roles/role
+        // memberships within their committee, not the committee itself) - a
+        // single flat check, reused for every node in the tree.
+        $isModerator = auth()->user()->can('moderator', $community);
 
         $nodes = $committees
-            ->map(fn (Committee $committee): ?array => $this->buildNode($committee, $search, $isCommunityModerator))
+            ->map(fn (Committee $committee): ?array => $this->buildNode($committee, $search, $isModerator))
             ->filter()
             ->values()
             ->all();
@@ -167,9 +165,8 @@ class ListCommitteesTree extends Component
      *
      * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array, isModerator: bool}|null
      */
-    protected function buildNode(Committee $committee, string $search, bool $ancestorIsModerator): ?array
+    protected function buildNode(Committee $committee, string $search, bool $isModerator): ?array
     {
-        $isModerator = $ancestorIsModerator || $committee->isDirectModerator(auth()->user());
         $isUnfoldedByUser = $search === '' && in_array($committee->getDn(), $this->unfolded, true);
 
         // Collapsed and not searching: we only need to know whether an expand

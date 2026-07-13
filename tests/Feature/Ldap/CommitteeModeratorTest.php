@@ -79,13 +79,3 @@ test('the hidden moderators group is excluded from the committee roles list', fu
     expect($roleCns)->toContain('mitglied')
         ->not->toContain('moderators');
 });
-
-test('hasCommitteeModeratorSomewhere is true if the user moderates any committee in the community', function (): void {
-    $community = newCommunity();
-    $committee = TestLdap::makeCommittee($community, 'fsr');
-    $moderator = TestLdap::committeeModerator($committee, $community);
-    $unrelatedUser = TestLdap::member($community);
-
-    expect($community->hasCommitteeModeratorSomewhere($moderator))->toBeTrue()
-        ->and($community->hasCommitteeModeratorSomewhere($unrelatedUser))->toBeFalse();
-});

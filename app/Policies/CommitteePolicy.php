@@ -8,32 +8,31 @@ use App\Models\User;
 
 class CommitteePolicy
 {
+    /**
+     * Whether $user moderates this committee specifically (directly, or via
+     * an ancestor committee) - used only by RolePolicy/MembershipPolicy for
+     * role and role-membership actions. Committee moderators do NOT get this
+     * for committee create/edit/delete themselves - those stay
+     * community-moderator-only, see edit()/delete()/create() below.
+     */
     public function moderator(User $user, Committee $committee, Community $community)
     {
         return $user->can('moderator', $community) || $committee->hasModerator($user);
     }
 
-    /**
-     * Gates entry points that don't yet have a specific committee to check
-     * against (e.g. picking a parent for a brand new committee) - true if
-     * the user could possibly create/manage something in this community,
-     * either as a community moderator or as a moderator of any committee in
-     * it. Callers still need to re-check the specific target once known
-     * (e.g. via the moderator ability above).
-     */
     public function create(User $user, Community $community): bool
     {
-        return $user->can('moderator', $community) || $community->hasCommitteeModeratorSomewhere($user);
+        return $user->can('moderator', $community);
     }
 
     public function edit(User $user, Committee $committee, Community $community): bool
     {
-        return $user->can('moderator', [$committee, $community]);
+        return $user->can('moderator', $community);
     }
 
     public function delete(User $user, Committee $committee, Community $community): bool
     {
-        return $user->can('moderator', [$committee, $community]);
+        return $user->can('moderator', $community);
     }
 
     public function viewAny(User $user, Community $community): bool
