@@ -36,7 +36,7 @@ test('the breadcrumbs bar starts with a home icon linking to /', function (): vo
     $html = $section[1] ?? '';
 
     expect($html)->toContain('href="/"')
-        ->and(strpos($html, 'href="/"'))->toBeLessThan(strpos($html, $community->getLongName()));
+        ->and(strpos($html, 'href="/"'))->toBeLessThan(strpos($html, (string) $community->getLongName()));
 });
 
 test('the group members page has a breadcrumb showing the group and linking back to the groups list', function (): void {

@@ -46,7 +46,7 @@ function realmMember(string $realmUid, string $fullName): string
         'realm' => $realmUid,
         'full_name' => $fullName,
     ]);
-    \App\Ldap\User::findByUsername($member->username)->fill(['cn' => $fullName])->save();
+    App\Ldap\User::findByUsername($member->username)->fill(['cn' => $fullName])->save();
 
     return $member->username;
 }
