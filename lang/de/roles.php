@@ -19,6 +19,7 @@ return [
     'members.delete_title' => 'Mitgliedschaft von :name löschen',
     'members.delete_text' => 'Soll die Mitgliedschaft von :name wirklich gelöscht werden?',
     'delete_warning' => 'Soll die Rolle :name wirklich gelöscht werden?',
+    'delete.confirm' => 'Wenn du dir sicher bist tippe in das nachfolgende Textfeld: ',
     'delete_member_warning' => 'Soll die Mitgliedschaft von :name wirklich gelöscht werden?',
     'message_delete_member_success' => 'Das Mitglied wurde erfolgreich aus der Rolle entfernt.',
     'edit' => 'Rolle :name bearbeiten',

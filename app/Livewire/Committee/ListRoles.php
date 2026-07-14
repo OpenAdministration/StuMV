@@ -38,6 +38,8 @@ class ListRoles extends Component
 
     public string $deleteRoleName;
 
+    public string $deleteConfirmText = '';
+
     public bool $showOnlyActive = false;
 
     public bool $ready = false;
@@ -164,6 +166,7 @@ class ListRoles extends Component
         $this->authorize('delete', [$r, $this->committee(), $this->community()]);
         $this->deleteRoleCn = $cn;
         $this->deleteRoleName = $r->getFirstAttribute('description');
+        $this->deleteConfirmText = '';
         Flux::modal('delete')->show();
     }
 
@@ -171,6 +174,12 @@ class ListRoles extends Component
     {
         $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
         $this->authorize('delete', [$role, $this->committee(), $this->community()]);
+
+        if ($this->deleteConfirmText !== $this->deleteRoleCn) {
+            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteRoleCn]));
+
+            return;
+        }
 
         // Delete role memberships
         RoleMembership::where('role_cn', $role->getFirstAttribute('cn'))

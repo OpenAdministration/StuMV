@@ -7,6 +7,7 @@ return [
     'new' => 'Neue Gruppe anlegen',
     'delete_title' => 'Gruppe :name löschen',
     'delete_warning' => 'Soll die Gruppe :name wirklich gelöscht werden?',
+    'delete.confirm' => 'Wenn du dir sicher bist tippe in das nachfolgende Textfeld: ',
     'edit' => 'Gruppe :name bearbeiten',
     'no_roles_found' => 'Keine Rollen gefunden',
     'search_roles' => 'Durchsuche Rollen',

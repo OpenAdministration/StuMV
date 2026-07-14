@@ -3,6 +3,7 @@
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Livewire\Realm\EditRealm;
+use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\NewDomain;
 use App\Livewire\Realm\NewRealm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,6 +41,33 @@ test('an admin can rename their realm', function (): void {
         ->assertHasNoErrors();
 
     expect(Community::findByUid($uid)->getFirstAttribute('description'))->toBe('Renamed Realm');
+});
+
+test('a super admin can delete a realm once the shortcode is confirmed', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsSuperAdmin();
+
+    Livewire::test(ListRealms::class)
+        ->call('deletePrepare', $uid)
+        ->set('deleteConfirmText', $uid)
+        ->call('deleteCommit');
+
+    expect(Community::findByUid($uid))->toBeNull();
+});
+
+test('deleting a realm is rejected if the typed shortcode does not match', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsSuperAdmin();
+
+    Livewire::test(ListRealms::class)
+        ->call('deletePrepare', $uid)
+        ->set('deleteConfirmText', 'wrong-code')
+        ->call('deleteCommit')
+        ->assertHasErrors('deleteConfirmText');
+
+    expect(Community::findByUid($uid))->not->toBeNull();
 });
 
 test('an admin can add a domain to their realm', function (): void {

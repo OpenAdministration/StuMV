@@ -41,6 +41,7 @@ test('an admin can delete a group', function (): void {
 
     Livewire::test(ListGroups::class, ['uid' => $community])
         ->call('deletePrepare', $uid, 'newsletter')
+        ->set('deleteConfirmText', 'newsletter')
         ->call('deleteCommit');
 
     expect(Group::find(Group::dnFrom($uid, 'newsletter')))->toBeNull();

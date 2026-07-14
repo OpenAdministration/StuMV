@@ -8,6 +8,7 @@ return [
     'new' => 'Neue Studierendenschaft anlegen',
     'delete_title' => 'Studierendenschaft :name löschen',
     'delete_warning' => 'Soll :name wirklich gelöscht werden?',
+    'delete.confirm' => 'Wenn du dir sicher bist tippe in das nachfolgende Textfeld: ',
     'edit' => ':name bearbeiten',
     'edit_headline' => 'Studierendenschaft :name ändern',
     'edit_explanation' => 'Hier findest du alle aktuell anpassbaren Faktoren zu deiner Studierendenschaft.',

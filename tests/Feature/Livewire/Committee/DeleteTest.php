@@ -46,6 +46,7 @@ test('a moderator can delete a role', function (): void {
 
     Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
         ->call('deletePrepare', 'mitglied')
+        ->set('deleteConfirmText', 'mitglied')
         ->call('deleteCommit');
 
     expect($committee->roles()->where('cn', 'mitglied')->exists())->toBeFalse();

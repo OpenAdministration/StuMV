@@ -30,6 +30,8 @@ class ListGroups extends Component
 
     public string $deleteGroupName = '';
 
+    public string $deleteConfirmText = '';
+
     public function sortBy($field)
     {
         if ($this->sortField === $field) {
@@ -83,6 +85,7 @@ class ListGroups extends Component
     {
         $this->deleteGroupDn = Group::dnFrom($uid, $cn);
         $this->deleteGroupName = $cn;
+        $this->deleteConfirmText = '';
         Flux::modal('delete')->show();
     }
 
@@ -90,6 +93,12 @@ class ListGroups extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
+
+        if ($this->deleteConfirmText !== $this->deleteGroupName) {
+            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteGroupName]));
+
+            return;
+        }
 
         // Delete role group relationships
         GroupMembership::where('group_dn', $this->deleteGroupDn)->delete();

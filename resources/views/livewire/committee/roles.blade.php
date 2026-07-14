@@ -163,6 +163,14 @@
                 <div>
                     <flux:heading size="lg" class="modal-header">{{ __('roles.delete_title', ['name' => $deleteRoleName]) }}</flux:heading>
                     <flux:text class="mt-2">{{ __('roles.delete_warning', ['name' => $deleteRoleName]) }}</flux:text>
+                    <flux:text class="mt-2">{{ __('roles.delete.confirm') }}<strong>{{ $deleteRoleCn }}</strong></flux:text>
+                    <flux:field class="mt-4">
+                        <flux:input
+                            wire:model="deleteConfirmText"
+                            :placeholder="$deleteRoleCn"
+                        />
+                        <flux:error name="deleteConfirmText" />
+                    </flux:field>
                 </div>
                 <div class="flex justify-end gap-2">
                     <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>

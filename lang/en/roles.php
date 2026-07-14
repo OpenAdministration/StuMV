@@ -19,6 +19,7 @@ return [
     'members.delete_title' => 'Delete membership of :name',
     'members.delete_text' => 'Should the membership of :name really be deleted?',
     'delete_warning' => 'Should the role :name really be deleted?',
+    'delete.confirm' => 'If you are sure, type the following into the text field below: ',
     'delete_member_warning' => 'Should the membership of :name really be deleted?',
     'message_delete_member_success' => 'The member was successfully removed from the role.',
     'edit' => 'Edit role :name',

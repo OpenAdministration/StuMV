@@ -27,6 +27,8 @@ class ListRealms extends Component
 
     public string $deleteRealmName = '';
 
+    public string $deleteConfirmText = '';
+
     public function sortBy($field): void
     {
         if ($this->sortField === $field) {
@@ -103,6 +105,7 @@ class ListRealms extends Component
         $c = Community::findOrFailByUid($uid);
         $this->authorize('delete', $c);
         $this->deleteRealmName = $uid;
+        $this->deleteConfirmText = '';
         Flux::modal('delete')->show();
     }
 
@@ -110,6 +113,13 @@ class ListRealms extends Component
     {
         $community = Community::findOrFailByUid($this->deleteRealmName);
         $this->authorize('delete', $community);
+
+        if ($this->deleteConfirmText !== $this->deleteRealmName) {
+            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteRealmName]));
+
+            return;
+        }
+
         $community->delete(recursive: true);
         // reset everything to prevent a 404 modal
         unset($this->deleteRealmName);

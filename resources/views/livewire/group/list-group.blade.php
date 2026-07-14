@@ -103,6 +103,14 @@
             <div>
                 <flux:heading size="lg" class="modal-header">{{ __('groups.delete_title', ['name' => $deleteGroupName]) }}</flux:heading>
                 <flux:text class="mt-2">{{ __('groups.delete_warning', ['name' => $deleteGroupName]) }}</flux:text>
+                <flux:text class="mt-2">{{ __('groups.delete.confirm') }}<strong>{{ $deleteGroupName }}</strong></flux:text>
+                <flux:field class="mt-4">
+                    <flux:input
+                        wire:model="deleteConfirmText"
+                        :placeholder="$deleteGroupName"
+                    />
+                    <flux:error name="deleteConfirmText" />
+                </flux:field>
             </div>
             <div class="flex flex-wrap justify-end gap-4">
                 <flux:button

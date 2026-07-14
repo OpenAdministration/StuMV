@@ -7,6 +7,7 @@ return [
     'new' => 'Create new group',
     'delete_title' => 'Delete group :name',
     'delete_warning' => 'Should the group :name really be deleted?',
+    'delete.confirm' => 'If you are sure, type the following into the text field below: ',
     'edit' => 'Edit group :name',
     'no_roles_found' => 'No roles found!',
     'search_roles' => 'Search roles',

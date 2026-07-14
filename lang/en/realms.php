@@ -8,6 +8,7 @@ return [
     'new' => 'Create new realm',
     'delete_title' => 'Delete realm :name',
     'delete_warning' => 'Should the realm :name really be deleted?',
+    'delete.confirm' => 'If you are sure, type the following into the text field below: ',
     'edit' => 'Edit realm :name',
     'edit_headline' => 'Edit student body :name',
     'edit_explanation' => 'Here you will find all currently adjustable factors of your student body.',
