@@ -54,9 +54,9 @@ class Users extends Controller
 
             return [
                 'committee' => $committee?->getFirstAttribute('ou'),
-                'committee_description' => $committee?->getFirstAttribute('description'),
-                'cn' => $role->getFirstAttribute('cn'),
-                'description' => $role->getFirstAttribute('description'),
+                'committee_name' => $committee?->getFirstAttribute('description'),
+                'role' => $role->getFirstAttribute('cn'),
+                'role_name' => $role->getFirstAttribute('description'),
             ];
         })->values());
     }

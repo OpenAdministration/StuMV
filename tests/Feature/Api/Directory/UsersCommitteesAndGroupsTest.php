@@ -19,7 +19,7 @@ test('a registered client can list the roles/committees of a user', function ():
 
     $response->assertOk()->assertJsonFragment([
         'committee' => 'fsr',
-        'cn' => 'mitglied',
+        'role' => 'mitglied',
     ]);
 });
 
