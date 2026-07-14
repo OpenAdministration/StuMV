@@ -19,3 +19,12 @@ test('the select excludes users who are already super admins', function (): void
     expect($usernames)->toContain($eligibleUser->getFirstAttribute('uid'))
         ->not->toContain($existingSuperAdmin->username);
 });
+
+test('saving with a non-existent user dn reports an error instead of crashing', function (): void {
+    actingAsSuperAdmin();
+
+    Livewire::test(AddSuperAdmins::class)
+        ->set('usersToAdd', ['uid=does-not-exist,ou=Users,dc=stumv,dc=de'])
+        ->call('save')
+        ->assertHasErrors('dn');
+});

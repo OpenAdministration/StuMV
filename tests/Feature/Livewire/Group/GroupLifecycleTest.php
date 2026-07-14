@@ -5,6 +5,7 @@ use App\Livewire\Group\AddRoleToGroup;
 use App\Livewire\Group\EditGroup;
 use App\Livewire\Group\NewGroup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
@@ -78,4 +79,27 @@ test('an admin can rename a group', function (): void {
 
     expect(Group::find(Group::dnFrom($uid, 'newsletter'))->getFirstAttribute('description'))
         ->toBe('Newsletter Team');
+});
+
+test('the dn property on edit group cannot be tampered with from the client', function (): void {
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(EditGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+        ->set('dn', 'cn=other,ou=Groups,dc=stumv,dc=de');
+})->throws(CannotUpdateLockedPropertyException::class);
+
+test('saving a group redirects back to the previous page instead of the role overview', function (): void {
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    $previousUrl = route('realms.groups', ['uid' => $community]);
+    $this->from($previousUrl);
+
+    Livewire::test(EditGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+        ->set('name', 'Newsletter Team')
+        ->call('save')
+        ->assertRedirect($previousUrl);
 });

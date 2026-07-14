@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User;
 use Flux\Flux;
+use LdapRecord\LdapRecordException;
 use Livewire\Component;
 
 class AddSuperAdmins extends Component

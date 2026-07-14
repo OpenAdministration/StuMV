@@ -5,6 +5,8 @@ namespace App\Livewire\Group;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use Flux\Flux;
+use LdapRecord\LdapRecordException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
@@ -47,7 +49,7 @@ class EditGroup extends Component
 
             Flux::toast(variant: 'success', text: __('groups.edit_success'));
 
-            return to_route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->cn]);
+            $this->redirect(url()->previous());
         } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
 
