@@ -81,6 +81,19 @@ test('the group search filters the list', function (): void {
         ->assertDontSee('beta');
 });
 
+test('the group search also matches the description', function (): void {
+    $community = newCommunity();
+    $alpha = TestLdap::makeGroup($community, 'alpha');
+    $alpha->fill(['description' => 'Newsletter editors'])->save();
+    TestLdap::makeGroup($community, 'beta');
+    actingAsModerator($community);
+
+    Livewire::test(ListGroups::class, ['uid' => $community])
+        ->set('search', 'newsletter')
+        ->assertSee('alpha')
+        ->assertDontSee('beta');
+});
+
 test('groups are sorted by cn ascending by default', function (): void {
     $community = newCommunity();
     TestLdap::makeGroup($community, 'zeta');

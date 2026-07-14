@@ -55,7 +55,9 @@ class ListGroups extends Component
     {
         $groupsQuery = Group::query()->in(Group::dnRoot($this->realm_uid));
         if ($this->search) {
-            $groupsQuery->whereContains('cn', trim($this->search));
+            $search = trim($this->search);
+            $groupsQuery->whereContains('cn', $search)
+                ->orWhereContains('description', $search);
         }
         $sorted = $groupsQuery->get()
             ->sortBy(fn ($group) => mb_strtolower((string) $group->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
