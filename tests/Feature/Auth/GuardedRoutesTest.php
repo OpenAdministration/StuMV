@@ -7,8 +7,8 @@
  */
 dataset('guarded routes', [
     'realm picker' => '/pick-realm',
-    'profile' => '/profile/alice',
-    'profile memberships' => '/profile/alice/memberships',
+    'profile' => '/profile/admin',
+    'profile memberships' => '/profile/admin/memberships',
     'community dashboard' => '/testcom/dashboard',
     'community members' => '/testcom/members/',
     'committee tree' => '/testcom/committees',

@@ -3,7 +3,7 @@
 # skeleton plus six ready-to-use logins covering the ThürStudFVO separation of
 # financial responsibilities. All demo accounts share the password
 # "Demo-password1" (cleartext here so slapadd stores it verbatim; a simple bind
-# still compares fine, exactly like the admin/alice sample accounts).
+# still compares fine, exactly like the admin sample account).
 #
 # Structure produced here is what `php artisan community:new demo` +
 # registration would create: ou=demo community with Groups/Committees/Domains
@@ -195,3 +195,57 @@ objectClass: top
 cn: mitglied
 description: Mitglied
 uniqueMember: uid=demo-fsr,ou=People,dc=stumv,dc=de
+
+# --- StuFiS permission groups (ou=Groups) -------------------------------
+# StuFiS consumes these via its "stumv" login: /api-legacy/my/groups returns
+# the DN of every ou=Groups entry the logged-in user belongs to
+# (App\Http\Controllers\Api\Groups), and StuFiS's StumvAuthService matches
+# those DNs against its STUMV_GROUP_* config to derive its own roles. The
+# "login" group (cn=members, above) and the global "admin" group
+# (cn=super-admins in 00-base.ldif) already exist; these are the four finance
+# groups StuFiS additionally expects. Membership mirrors the ThürStudFVO
+# personas of the demo accounts above.
+#
+#   StuFiS role            group cn (STUMV_GROUP_*)      demo members
+#   ---------------------  ---------------------------  ------------------------
+#   ref-finanzen           ref-finanzen (REVISION)      hhv, kv, revision
+#   ref-finanzen-hv        ref-finanzen-hhv (HV)        hhv
+#   ref-finanzen-kv        ref-finanzen-kv (KV)         kv
+#   ref-finanzen-belege    ref-finanzen-belege (INVOICE) hhv, kv
+
+# Base finance-department access — held by everyone in the Referat Finanzen.
+dn: cn=ref-finanzen,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen
+description: Referat Finanzen (StuFiS-Zugang)
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-revision,ou=People,dc=stumv,dc=de
+
+# Haushaltsverantwortliche:r (budget) — StuFiS ref-finanzen-hv.
+dn: cn=ref-finanzen-hhv,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen-hhv
+description: Haushaltsverantwortliche:r
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+
+# Kassenverantwortliche:r (cash/treasury) — StuFiS ref-finanzen-kv.
+dn: cn=ref-finanzen-kv,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen-kv
+description: Kassenverantwortliche:r
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+
+# Belege (receipt management) — StuFiS ref-finanzen-belege. Handled by the
+# operational finance officers; the auditor (revision) is deliberately left
+# out to preserve the ThürStudFVO separation of duties.
+dn: cn=ref-finanzen-belege,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen-belege
+description: Belege
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de

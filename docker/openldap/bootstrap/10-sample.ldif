@@ -12,16 +12,6 @@ givenName: Admin
 mail: admin@stumv.de
 userPassword: admin-not-production
 
-dn: uid=alice,ou=People,dc=stumv,dc=de
-objectClass: inetOrgPerson
-objectClass: top
-uid: alice
-cn: Alice Example
-sn: Example
-givenName: Alice
-mail: alice@stumv.de
-userPassword: alice-not-production
-
 # --- a community with the standard sub-structure ------------------------
 dn: ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: organizationalUnit
@@ -58,7 +48,6 @@ dn: cn=members,ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
 cn: members
-uniqueMember: uid=alice,ou=People,dc=stumv,dc=de
 uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
 
 dn: cn=moderators,ou=testcom,ou=Communities,dc=stumv,dc=de

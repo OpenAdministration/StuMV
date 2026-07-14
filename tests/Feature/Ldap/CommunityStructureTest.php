@@ -29,7 +29,7 @@ test('the members group exposes the community members', function (): void {
 
     $uids = $members->map(fn ($m) => $m->getFirstAttribute('uid'));
 
-    expect($uids)->toContain('alice')->toContain('admin');
+    expect($uids)->toContain('admin');
 });
 
 test('the admins group of the demo community contains its admin', function (): void {

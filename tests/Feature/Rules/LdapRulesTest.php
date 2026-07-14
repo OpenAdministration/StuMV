@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 /**
  * The custom validation rules resolve their answers from LDAP. These run against
  * the seeded directory (docker/openldap/bootstrap): the "testcom" community owns
- * the registerable domain example.test with members alice + admin, while the
+ * the registerable domain example.test with member admin, while the
  * "demo" community's members are the demo-* users.
  */
 function passesRule(string $attribute, mixed $value, object $rule): bool
@@ -39,7 +39,7 @@ describe('UniqueDomain', function (): void {
 
 describe('UniqueEmail', function (): void {
     test('rejects an address already in the directory', function (): void {
-        expect(passesRule('email', 'alice@stumv.de', new UniqueEmail))->toBeFalse();
+        expect(passesRule('email', 'admin@stumv.de', new UniqueEmail))->toBeFalse();
     });
 
     test('accepts an unused address', function (): void {
@@ -49,7 +49,7 @@ describe('UniqueEmail', function (): void {
 
 describe('UserIsMember', function (): void {
     test('accepts a member of the community', function (): void {
-        expect(passesRule('user', 'alice', new UserIsMember('testcom')))->toBeTrue();
+        expect(passesRule('user', 'admin', new UserIsMember('testcom')))->toBeTrue();
     });
 
     test('rejects a user who is not a member of the community', function (): void {
