@@ -34,5 +34,5 @@ return [
     'members_headline' => 'Members of rights group :name',
     'members_explanation' => 'Below are the users assigned to this rights group via a role, along with their sync status in LDAP. A change may take until the next sync run to be reflected there.',
     'members.search' => 'Search members',
-    'no_members_found' => 'There are no members for this group',
+    'no_members_found' => 'There are no members in this group.',
 ];

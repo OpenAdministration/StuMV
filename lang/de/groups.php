@@ -34,5 +34,5 @@ return [
     'members_headline' => 'Mitglieder der Rechtegruppe :name',
     'members_explanation' => 'Unten findest du die Nutzer:innen, die dieser Rechtegruppe über eine Rolle zugeordnet sind, sowie ihren Synchronisationsstatus im LDAP. Es kann bis zum nächsten Synchronisations-Durchlauf dauern, bis eine Änderung dort ankommt.',
     'members.search' => 'Durchsuche Mitglieder',
-    'no_members_found' => 'Für diese Gruppe gibt es keine Mitglieder',
+    'no_members_found' => 'In dieser Gruppe gibt es keine Mitglieder.',
 ];
