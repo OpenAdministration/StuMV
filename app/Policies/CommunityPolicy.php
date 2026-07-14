@@ -15,7 +15,7 @@ class CommunityPolicy
 
     public function picked(): bool
     {
-        return Route::current()?->hasParameter('uid');
+        return Route::current()?->hasParameter('realm');
         // return session()->exists('realm_uid');
     }
 

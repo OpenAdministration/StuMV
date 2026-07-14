@@ -20,9 +20,9 @@ test('a community moderator sees the edit committee button', function (): void {
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    $editUrl = route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']);
+    $editUrl = route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
         ->call('loadRoles')
         ->assertSeeHtml('href="'.$editUrl.'"');
 });
@@ -33,9 +33,9 @@ test('a committee moderator does not see the edit committee button', function ()
     $moderator = TestLdap::committeeModerator($committee, $community);
     test()->actingAs($moderator);
 
-    $editUrl = route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']);
+    $editUrl = route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
         ->call('loadRoles')
         ->assertDontSeeHtml('href="'.$editUrl.'"');
 });
@@ -45,9 +45,9 @@ test('a plain member does not see the edit committee button', function (): void 
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsMember($community);
 
-    $editUrl = route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']);
+    $editUrl = route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
         ->call('loadRoles')
         ->assertDontSeeHtml('href="'.$editUrl.'"');
 });
@@ -59,9 +59,9 @@ test('a committee moderator sees the edit role button', function (): void {
     $moderator = TestLdap::committeeModerator($committee, $community);
     test()->actingAs($moderator);
 
-    $editUrl = route('committees.roles.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr', 'cn' => 'mitglied']);
+    $editUrl = route('committees.roles.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr', 'cn' => 'mitglied']);
 
-    Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+    Livewire::test(ListRoleMembers::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
         ->assertSeeHtml('href="'.$editUrl.'"');
 });
 
@@ -71,8 +71,8 @@ test('a plain member does not see the edit role button', function (): void {
     $role = TestLdap::makeRole($committee, 'mitglied');
     actingAsMember($community);
 
-    $editUrl = route('committees.roles.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr', 'cn' => 'mitglied']);
+    $editUrl = route('committees.roles.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr', 'cn' => 'mitglied']);
 
-    Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+    Livewire::test(ListRoleMembers::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
         ->assertDontSeeHtml('href="'.$editUrl.'"');
 });

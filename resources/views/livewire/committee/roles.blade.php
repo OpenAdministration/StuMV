@@ -8,7 +8,7 @@
                         variant="subtle"
                         icon="pencil"
                         class="-mt-1"
-                        :href="route('committees.edit', ['uid' => $uid, 'ou' => $ou])"
+                        :href="route('committees.edit', ['realm' => $uid, 'ou' => $ou])"
                         title="{{ __('Edit') }}"
                     />
                 @endcan
@@ -19,7 +19,7 @@
             <flux:button
                 variant="primary"
                 icon="plus"
-                :href="$isModerator ? route('committees.roles.new', ['uid' => $uid, 'ou' => $ou]) : null"
+                :href="$isModerator ? route('committees.roles.new', ['realm' => $uid, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
                 {{ __('New Role') }}
@@ -27,7 +27,7 @@
             <flux:button
                 icon="user-star"
                 wire:navigate
-                :href="route('committees.moderators', ['uid' => $uid, 'ou' => $ou])"
+                :href="route('committees.moderators', ['realm' => $uid, 'ou' => $ou])"
             >
                 {{ __('committees.link_moderators') }}
             </flux:button>
@@ -77,7 +77,7 @@
                         <div class="flex-1">
                             <flux:link
                                 wire:navigate
-                                href="{{ route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
+                                href="{{ route('committees.roles.members', ['realm' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) }}"
                             >
                                 {{ $role->getFirstAttribute('description') }}
                             </flux:link>
@@ -91,14 +91,14 @@
                                         <flux:menu.item
                                             icon="users"
                                             wire:navigate
-                                            :href="route('committees.roles.members', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                            :href="route('committees.roles.members', ['realm' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
                                         >
                                             {{ __('roles.link_members') }}
                                         </flux:menu.item>
                                         <flux:menu.item
                                             icon="pencil"
                                             wire:navigate
-                                            :href="$isModerator ? route('committees.roles.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) : null"
+                                            :href="$isModerator ? route('committees.roles.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) : null"
                                             :disabled="!$isModerator"
                                         >
                                             {{ __('roles.link_edit') }}
@@ -135,7 +135,7 @@
                             <flux:button
                                 icon="plus"
                                 href="{{ route('committees.roles.add-member', [
-                                    'uid' => $uid,
+                                    'realm' => $uid,
                                     'ou' => $ou,
                                     'cn' => $role->getFirstAttribute('cn')
                                 ]) }}"

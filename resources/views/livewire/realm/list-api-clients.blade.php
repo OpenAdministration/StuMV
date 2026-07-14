@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="route('realms.api-clients.new', ['uid' => $uid])"
+                :href="route('realms.api-clients.new', ['realm' => $uid])"
             >
                 {{ __('api_clients.new') }}
             </flux:button>

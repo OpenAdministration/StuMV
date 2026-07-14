@@ -10,6 +10,6 @@ uses(RefreshDatabase::class);
 test('renders the dashboard for a community member', function (): void {
     actingAsMember('demo');
 
-    Livewire::test(CommunityDashboard::class, ['uid' => Community::findByUid('demo')])
+    Livewire::test(CommunityDashboard::class, ['realm' => Community::findByUid('demo')])
         ->assertStatus(200);
 });

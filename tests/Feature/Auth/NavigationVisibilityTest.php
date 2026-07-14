@@ -34,7 +34,7 @@ test('a plain member does not see the admin nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsMember($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -46,7 +46,7 @@ test('a moderator sees the admin nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsModerator($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -58,7 +58,7 @@ test('an admin sees the admin nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsAdmin($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -70,7 +70,7 @@ test('a super admin sees the admin nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsSuperAdmin();
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -82,7 +82,7 @@ test('a plain member does not see the groups nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsMember($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -94,7 +94,7 @@ test('a moderator does not see the groups nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsModerator($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -106,7 +106,7 @@ test('an admin sees the groups nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsAdmin($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -118,7 +118,7 @@ test('a super admin sees the groups nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsSuperAdmin();
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -130,7 +130,7 @@ test('a plain member does not see the domains nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsMember($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -142,7 +142,7 @@ test('a moderator does not see the domains nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsModerator($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -154,7 +154,7 @@ test('an admin sees the domains nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsAdmin($community);
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 
@@ -166,7 +166,7 @@ test('a super admin sees the domains nav link', function (): void {
     $uid = $community->getShortCode();
     actingAsSuperAdmin();
 
-    $html = $this->get(route('realms.dashboard', ['uid' => $uid]))
+    $html = $this->get(route('realms.dashboard', ['realm' => $uid]))
         ->assertOk()
         ->getContent();
 

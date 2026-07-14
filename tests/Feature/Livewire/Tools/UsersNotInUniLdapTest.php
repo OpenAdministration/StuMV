@@ -29,7 +29,7 @@ test('the page 404s when the uni LDAP connection has no base_dn configured', fun
     $community = newCommunity();
     actingAsModerator($community);
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->assertStatus(404);
 });
 
@@ -44,7 +44,7 @@ test('a member missing from the university LDAP is listed without crashing', fun
     $member = TestLdap::member($community);
     actingAsModerator($community);
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->call('searchForUsersNotInUniLdap')
         ->assertSet('comparisonCompleted', true)
         ->assertSee($member->username);
@@ -73,7 +73,7 @@ test('checking members against the university LDAP uses a single batched query, 
         }
     });
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->call('searchForUsersNotInUniLdap');
 
     expect($mailQueries)->toHaveCount(1);
@@ -102,7 +102,7 @@ test('checking more than 10 members batches the uni LDAP lookup in groups of 10'
         }
     });
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->call('searchForUsersNotInUniLdap');
 
     expect($mailQueries)->toHaveCount(2);
@@ -136,7 +136,7 @@ test('the uni LDAP batch size is configurable via ldap.uni_batch_size', function
         }
     });
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->call('searchForUsersNotInUniLdap');
 
     // 12 candidates at a batch size of 5 -> 3 batches (5, 5, 2).
@@ -168,7 +168,7 @@ test('results are sorted by name', function (): void {
 
     actingAsModerator($community);
 
-    $html = Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    $html = Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->call('searchForUsersNotInUniLdap')
         ->html();
 
@@ -198,7 +198,7 @@ test('the search field filters results by name', function (): void {
 
     actingAsModerator($community);
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->call('searchForUsersNotInUniLdap')
         ->assertSee('Apple')
         ->assertSee('Mango')
@@ -220,7 +220,7 @@ test('deleting a user removes the LDAP entry, database rows, and profile picture
         'file_id' => 'some-file-id',
     ]);
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->set('userToDelete', $member->username)
         ->call('deleteUser');
 
@@ -235,7 +235,7 @@ test('deleting a user without a profile picture does not error', function (): vo
     $member = TestLdap::member($community);
     actingAsSuperAdmin();
 
-    Livewire::test(UsersNotInUniLdap::class, ['uid' => $community])
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
         ->set('userToDelete', $member->username)
         ->call('deleteUser')
         ->assertOk();

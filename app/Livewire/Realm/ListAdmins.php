@@ -35,9 +35,9 @@ class ListAdmins extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->community_name = $uid->getFirstAttribute('ou');
+        $this->community_name = $realm->getFirstAttribute('ou');
     }
 
     public function loadAdmins(): void

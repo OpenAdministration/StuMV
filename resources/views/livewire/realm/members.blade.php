@@ -10,7 +10,7 @@
                     variant="primary"
                     icon="user-plus"
                     wire:navigate
-                    href="{{ route('realms.members.new', ['uid' => $community_name]) }}"
+                    href="{{ route('realms.members.new', ['realm' => $community_name]) }}"
                 >
                     {{ __('Add Member') }}
                 </flux:button>

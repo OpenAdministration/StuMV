@@ -22,9 +22,9 @@ class NewMember extends Component
     #[Rule('required|string')]
     public string $realm_uid = '';
 
-    public function mount(Community $uid): void
+    public function mount(Community $realm): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
     public function render(): Factory|View|Application
@@ -58,6 +58,6 @@ class NewMember extends Component
 
         Flux::toast(variant: 'success', text: __('Added new Member'));
 
-        return to_route('realms.members', ['uid' => $this->realm_uid]);
+        return to_route('realms.members', ['realm' => $this->realm_uid]);
     }
 }

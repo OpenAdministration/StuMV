@@ -26,9 +26,9 @@ test('a plain member sees no href on the disabled Add Admin button', function ()
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
-    $html = Livewire::test(ListAdmins::class, ['uid' => $community])->html();
+    $html = Livewire::test(ListAdmins::class, ['realm' => $community])->html();
 
-    $newAdminUrl = route('realms.admins.new', ['uid' => $community->getShortCode()]);
+    $newAdminUrl = route('realms.admins.new', ['realm' => $community->getShortCode()]);
     expect($html)->not->toContain('href="'.$newAdminUrl.'"');
 });
 
@@ -39,7 +39,7 @@ test('a plain member sees no href on another member\'s disabled profile link', f
     User::where('username', $otherMember->username)->update(['realm' => $community->getShortCode()]);
     $this->actingAs($member);
 
-    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->html();
 
@@ -53,8 +53,8 @@ test('a plain member sees no href on the disabled New Role button', function ():
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
-    $html = Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])->html();
+    $html = Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])->html();
 
-    $newRoleUrl = route('committees.roles.new', ['uid' => $community->getShortCode(), 'ou' => 'fsr']);
+    $newRoleUrl = route('committees.roles.new', ['realm' => $community->getShortCode(), 'ou' => 'fsr']);
     expect($html)->not->toContain('href="'.$newRoleUrl.'"');
 });

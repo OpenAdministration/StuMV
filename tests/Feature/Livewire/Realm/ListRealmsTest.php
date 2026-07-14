@@ -22,5 +22,5 @@ test('a member of a single community is sent straight to its dashboard', functio
     actingAsMember($community);
 
     Livewire::test(ListRealms::class)
-        ->assertRedirect(route('realms.dashboard', ['uid' => $community->getShortCode()]));
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 });

@@ -20,6 +20,6 @@
     </flux:field>
 
     <x-slot:abort_route>
-        {{ route('committees.list', ['uid' => $realm_uid]) }}
+        {{ route('committees.list', ['realm' => $realm_uid]) }}
     </x-slot:abort_route>
 </x-livewire-form>

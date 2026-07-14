@@ -49,9 +49,9 @@ class NewCommittee extends Component
         ],
     ];
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
     public function rules(): array
@@ -140,7 +140,7 @@ class NewCommittee extends Component
         }
 
         return response()->redirectToRoute('committees.roles', [
-            'uid' => $this->realm_uid,
+            'realm' => $this->realm_uid,
             'ou' => $this->ou,
         ]);
     }

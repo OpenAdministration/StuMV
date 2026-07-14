@@ -19,7 +19,7 @@
             </flux:pillbox>
         </flux:field>
         <x-slot:abort_route>
-            {{ route('committees.moderators', ['uid' => $realm_uid, 'ou' => $ou]) }}
+            {{ route('committees.moderators', ['realm' => $realm_uid, 'ou' => $ou]) }}
         </x-slot:abort_route>
     </x-livewire-form>
 </div>

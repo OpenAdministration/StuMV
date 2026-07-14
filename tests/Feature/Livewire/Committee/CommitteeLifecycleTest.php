@@ -14,7 +14,7 @@ test('a moderator can create a committee with its default roles', function (): v
     $uid = $community->getShortCode();
     actingAsModerator($community);
 
-    Livewire::test(NewCommittee::class, ['uid' => $community])
+    Livewire::test(NewCommittee::class, ['realm' => $community])
         ->set('ou', 'fsr')
         ->set('description', 'Fachschaftsrat')
         ->set('roles', ['member', 'head'])
@@ -32,7 +32,7 @@ test('committee short names are validated', function (): void {
     $community = newCommunity();
     actingAsModerator($community);
 
-    Livewire::test(NewCommittee::class, ['uid' => $community])
+    Livewire::test(NewCommittee::class, ['realm' => $community])
         ->set('ou', 'Not Valid!')
         ->set('description', 'whatever')
         ->call('save')
@@ -45,7 +45,7 @@ test('a moderator can rename a committee', function (): void {
     TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    Livewire::test(EditCommittee::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(EditCommittee::class, ['realm' => $community, 'ou' => 'fsr'])
         ->set('description', 'Renamed Committee')
         ->call('save')
         ->assertHasNoErrors();
@@ -61,7 +61,7 @@ test('a community moderator sees every committee as a selectable parent', functi
     actingAsModerator($community);
 
     $dns = array_keys(
-        Livewire::test(NewCommittee::class, ['uid' => $community])->viewData('select_parents')
+        Livewire::test(NewCommittee::class, ['realm' => $community])->viewData('select_parents')
     );
 
     expect($dns)->toContain($committeeA->getDn())

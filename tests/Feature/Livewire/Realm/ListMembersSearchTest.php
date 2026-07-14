@@ -59,7 +59,7 @@ test('members are listed sorted by name', function (): void {
     realmMember($uid, 'Mango Person');
     actingAsMember($community);
 
-    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->html();
 
@@ -79,7 +79,7 @@ test('sortBy toggles direction and re-sorts the member list descending', functio
     realmMember($uid, 'Mango Person');
     actingAsMember($community);
 
-    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->call('sortBy', 'cn')
         ->assertSet('sortDirection', 'desc')
@@ -100,7 +100,7 @@ test('the member list filters by name', function (): void {
     realmMember($uid, 'Bob Builder');
     actingAsMember($community);
 
-    Livewire::test(ListMembers::class, ['uid' => $community])
+    Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->set('search', 'Alice')
         ->assertSee('Alice Wonder')
@@ -112,7 +112,7 @@ test('the browser tab title includes the community name', function (): void {
     $community = newCommunity();
     actingAsMember($community);
 
-    $this->get(route('realms.members', ['uid' => $community->getShortCode()]))
+    $this->get(route('realms.members', ['realm' => $community->getShortCode()]))
         ->assertOk()
         ->assertSee('<title>Members of '.$community->getLongName().' | ', false);
 });
@@ -139,7 +139,7 @@ test('search stays scoped to the community and does not leak other realms', func
         'full_name' => 'Leaker Person',
     ]);
 
-    Livewire::test(ListMembers::class, ['uid' => $community])
+    Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->set('search', 'zzleak')
         ->assertDontSee('Leaker Person');
@@ -151,7 +151,7 @@ test('an admin sees a working profile link for members', function (): void {
     $username = realmMember($uid, 'Alice Wonder');
     actingAsAdmin($community);
 
-    Livewire::test(ListMembers::class, ['uid' => $community])
+    Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->assertSeeHtml('href="'.route('profile', ['username' => $username]).'"');
 });
@@ -162,7 +162,7 @@ test('a moderator sees the export-as-PDF control for members', function (): void
     $username = realmMember($uid, 'Alice Wonder');
     actingAsModerator($community);
 
-    Livewire::test(ListMembers::class, ['uid' => $community])
+    Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->assertSeeHtml('wire:click="exportPdf(\''.$username.'\')"');
 });
@@ -176,7 +176,7 @@ test('an admin sees a working remove-member control', function (): void {
     $username = realmMember($uid, 'Alice Wonder');
     actingAsAdmin($community);
 
-    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->html();
 
@@ -194,7 +194,7 @@ test('a super admin can remove a member through the full prepare/confirm flow', 
     $username = realmMember($uid, 'Alice Wonder');
     actingAsSuperAdmin();
 
-    Livewire::test(ListMembers::class, ['uid' => $community])
+    Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->call('removePrepare', $username)
         ->assertSet('deleteMemberUsername', $username)
@@ -215,7 +215,7 @@ test('the admin/moderator permission check does not scale with the number of mem
     }
 
     $queriesForTwo = countAdminAndModeratorGroupQueries(function () use ($community): void {
-        Livewire::test(ListMembers::class, ['uid' => $community])->call('loadMembers');
+        Livewire::test(ListMembers::class, ['realm' => $community])->call('loadMembers');
     });
 
     foreach (range(3, 8) as $i) {
@@ -223,7 +223,7 @@ test('the admin/moderator permission check does not scale with the number of mem
     }
 
     $queriesForEight = countAdminAndModeratorGroupQueries(function () use ($community): void {
-        Livewire::test(ListMembers::class, ['uid' => $community])->call('loadMembers');
+        Livewire::test(ListMembers::class, ['realm' => $community])->call('loadMembers');
     });
 
     expect($queriesForEight)->toBe($queriesForTwo);

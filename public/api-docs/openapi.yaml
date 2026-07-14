@@ -29,13 +29,13 @@ tags:
   - name: Users
     description: A single directory user, and the committees/roles or groups they belong to.
 paths:
-  /{uid}/committees:
+  /{realm}/committees:
     get:
       tags: [Committees]
       summary: List a community's committees
       security: [{ oauth2: [committees] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
       responses:
         '200':
           description: OK
@@ -47,13 +47,13 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
-  /{uid}/committees/{ou}:
+  /{realm}/committees/{ou}:
     get:
       tags: [Committees]
       summary: Look up a single committee
       security: [{ oauth2: [committees] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/CommitteeOu'
       responses:
         '200':
@@ -65,13 +65,13 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/committees/{ou}/roles:
+  /{realm}/committees/{ou}/roles:
     get:
       tags: [Committees]
       summary: List the roles of a committee
       security: [{ oauth2: [committees] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/CommitteeOu'
       responses:
         '200':
@@ -85,13 +85,13 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/committees/{ou}/roles/{cn}:
+  /{realm}/committees/{ou}/roles/{cn}:
     get:
       tags: [Committees]
       summary: Look up a single role
       security: [{ oauth2: [committees] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/CommitteeOu'
         - $ref: '#/components/parameters/RoleCn'
       responses:
@@ -104,13 +104,13 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/committees/{ou}/roles/{cn}/members:
+  /{realm}/committees/{ou}/roles/{cn}/members:
     get:
       tags: [Committees]
       summary: List the usernames of a role's current members
       security: [{ oauth2: [committees] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/CommitteeOu'
         - $ref: '#/components/parameters/RoleCn'
       responses:
@@ -126,13 +126,13 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/groups:
+  /{realm}/groups:
     get:
       tags: [Groups]
       summary: List a community's permission groups
       security: [{ oauth2: [groups] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
       responses:
         '200':
           description: OK
@@ -144,13 +144,13 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
-  /{uid}/groups/{cn}:
+  /{realm}/groups/{cn}:
     get:
       tags: [Groups]
       summary: Look up a single group
       security: [{ oauth2: [groups] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/GroupCn'
       responses:
         '200':
@@ -162,13 +162,13 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/groups/{cn}/members:
+  /{realm}/groups/{cn}/members:
     get:
       tags: [Groups]
       summary: List the usernames of a group's current members
       security: [{ oauth2: [groups] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/GroupCn'
       responses:
         '200':
@@ -183,14 +183,14 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/users/{username}:
+  /{realm}/users/{username}:
     get:
       tags: [Users]
       summary: Look up a single user
       description: Only users who are actually a member of this community can be looked up.
       security: [{ oauth2: [users] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/Username'
       responses:
         '200':
@@ -202,7 +202,7 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/users/{username}/roles:
+  /{realm}/users/{username}/roles:
     get:
       tags: [Users]
       summary: List the roles a user currently holds
@@ -210,10 +210,10 @@ paths:
         Roles anywhere in the community's committee tree (arbitrarily nested)
         that currently have this user as an actual LDAP member. Only the
         `ou`/`cn` short codes are returned - look up their names via
-        `/{uid}/committees/{ou}` and `/{uid}/committees/{ou}/roles/{cn}`.
+        `/{realm}/committees/{ou}` and `/{realm}/committees/{ou}/roles/{cn}`.
       security: [{ oauth2: [users] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/Username'
       responses:
         '200':
@@ -227,17 +227,17 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/users/{username}/committees:
+  /{realm}/users/{username}/committees:
     get:
       tags: [Users]
       summary: List the committees a user currently has a role in
       description: |
         The short codes (`ou`) of committees where the user holds at least
         one role, deduplicated. Look up committee names via
-        `/{uid}/committees/{ou}`.
+        `/{realm}/committees/{ou}`.
       security: [{ oauth2: [users] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/Username'
       responses:
         '200':
@@ -252,16 +252,16 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/users/{username}/groups:
+  /{realm}/users/{username}/groups:
     get:
       tags: [Users]
       summary: List the permission groups a user is currently in
       description: |
         The short codes (`cn`) of groups the user is a member of. Look up
-        group names via `/{uid}/groups/{cn}`.
+        group names via `/{realm}/groups/{cn}`.
       security: [{ oauth2: [users] }]
       parameters:
-        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Realm'
         - $ref: '#/components/parameters/Username'
       responses:
         '200':
@@ -289,8 +289,8 @@ components:
             users: Read directory user info (profile, committees, groups)
 
   parameters:
-    CommunityUid:
-      name: uid
+    Realm:
+      name: realm
       in: path
       required: true
       description: The community's short code.

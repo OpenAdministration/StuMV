@@ -15,7 +15,7 @@ test('roles are sorted by name', function (): void {
     TestLdap::makeRole($committee, 'mmm')->fill(['description' => 'Mango'])->save();
     actingAsModerator($community);
 
-    $html = Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    $html = Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
         ->html();

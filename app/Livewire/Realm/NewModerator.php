@@ -20,9 +20,9 @@ class NewModerator extends Component
     #[Rule('required|string')]
     public string $realm_uid = '';
 
-    public function mount(Community $uid): void
+    public function mount(Community $realm): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
     public function render(): Factory|View|Application
@@ -57,6 +57,6 @@ class NewModerator extends Component
             }
         }
 
-        return to_route('realms.mods', ['uid' => $this->realm_uid]);
+        return to_route('realms.mods', ['realm' => $this->realm_uid]);
     }
 }

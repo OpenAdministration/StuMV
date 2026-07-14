@@ -43,9 +43,9 @@ class ListRoleMembers extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $uid, string $ou, string $cn)
+    public function mount(Community $realm, string $ou, string $cn)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
     }
@@ -195,7 +195,7 @@ class ListRoleMembers extends Component
 
         Flux::toast(variant: 'success', text: __('roles.message_delete_member_success'));
 
-        return to_route('committees.roles.members', ['uid' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
+        return to_route('committees.roles.members', ['realm' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }
 
     public function close()

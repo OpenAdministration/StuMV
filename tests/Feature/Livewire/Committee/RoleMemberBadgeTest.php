@@ -29,7 +29,7 @@ test('the role card shows a badge with the active member count', function (): vo
     ]);
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->assertSeeHtml('data-flux-badge')
         ->assertSee('2');

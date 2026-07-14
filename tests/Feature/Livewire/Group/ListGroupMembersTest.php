@@ -28,7 +28,7 @@ test('a member with an active role membership already synced to LDAP shows as sy
 
     actingAsAdmin($community);
 
-    $rows = Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $rows = Livewire::test(ListGroupMembers::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->assertSee($active->ldap()->getFirstAttribute('cn'))
         ->viewData('members');
 
@@ -55,7 +55,7 @@ test('a member with an active role membership not yet synced to LDAP shows as pe
 
     actingAsAdmin($community);
 
-    $rows = Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $rows = Livewire::test(ListGroupMembers::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->assertSee($active->ldap()->getFirstAttribute('cn'))
         ->viewData('members');
 
@@ -71,7 +71,7 @@ test('a member present in LDAP without a backing active role membership shows as
 
     actingAsAdmin($community);
 
-    $rows = Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $rows = Livewire::test(ListGroupMembers::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->assertSee($stale->getFirstAttribute('cn'))
         ->viewData('members');
 
@@ -101,7 +101,7 @@ test('the group members search filters the list', function (): void {
 
     actingAsAdmin($community);
 
-    Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    Livewire::test(ListGroupMembers::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->set('search', 'Alpha')
         ->assertSee('Alpha Alison')
         ->assertDontSee('Beta Baker');
@@ -112,7 +112,7 @@ test('a group with no members shows a warning callout', function (): void {
     TestLdap::makeGroup($community, 'newsletter');
     actingAsAdmin($community);
 
-    Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    Livewire::test(ListGroupMembers::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->assertSeeHtml('data-flux-callout');
 });
 
@@ -121,6 +121,6 @@ test('the groups list links to the group members page', function (): void {
     TestLdap::makeGroup($community, 'newsletter');
     actingAsAdmin($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
-        ->assertSeeHtml(route('realms.groups.members', ['uid' => $community->getShortCode(), 'cn' => 'newsletter']));
+    Livewire::test(ListGroups::class, ['realm' => $community])
+        ->assertSeeHtml(route('realms.groups.members', ['realm' => $community->getShortCode(), 'cn' => 'newsletter']));
 });

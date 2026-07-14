@@ -20,7 +20,7 @@ test('renders the edit form for an existing membership', function (): void {
     ]);
 
     Livewire::test(EditRoleMembership::class, [
-        'uid' => Community::findByUid('demo'),
+        'realm' => Community::findByUid('demo'),
         'ou' => 'FSR',
         'cn' => 'mitglied',
         'id' => $membership->id,

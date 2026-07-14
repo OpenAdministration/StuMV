@@ -9,9 +9,9 @@ class CommunityDashboard extends Component
 {
     public string $uid;
 
-    public function mount(?Community $uid)
+    public function mount(?Community $realm)
     {
-        $this->uid = $uid?->getShortCode();
+        $this->uid = $realm?->getShortCode();
     }
 
     public function render()

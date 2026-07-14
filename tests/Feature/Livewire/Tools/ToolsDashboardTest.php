@@ -11,7 +11,7 @@ test('the uni LDAP tools are hidden from the dashboard when not configured', fun
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(ToolsDashboard::class, ['uid' => $community])
+    Livewire::test(ToolsDashboard::class, ['realm' => $community])
         ->assertDontSee(__('tools.importUsersFromUniLdap_headline'))
         ->assertDontSee(__('tools.usersNotInUniLdap_headline'))
         ->assertSee(__('tools.compareEmailList_headline'))
@@ -23,7 +23,7 @@ test('the uni LDAP tools are shown on the dashboard when configured', function (
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(ToolsDashboard::class, ['uid' => $community])
+    Livewire::test(ToolsDashboard::class, ['realm' => $community])
         ->assertSee(__('tools.importUsersFromUniLdap_headline'))
         ->assertSee(__('tools.usersNotInUniLdap_headline'));
 });

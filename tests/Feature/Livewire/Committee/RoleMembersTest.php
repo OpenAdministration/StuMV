@@ -59,7 +59,7 @@ test('cancelling the delete modal closes it', function (): void {
         'from' => today(),
     ]);
 
-    Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+    Livewire::test(ListRoleMembers::class, ['realm' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
         ->call('prepareDeletion', $membership->id)
         ->call('close')
         ->assertDispatched('modal-close', name: 'delete');
@@ -68,7 +68,7 @@ test('cancelling the delete modal closes it', function (): void {
 test('renders the member list for a seeded role', function (): void {
     actingAsModerator('demo');
 
-    Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+    Livewire::test(ListRoleMembers::class, ['realm' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
         ->assertStatus(200)
         ->assertSet('cn', 'mitglied');
 });
@@ -76,7 +76,7 @@ test('renders the member list for a seeded role', function (): void {
 test('the member list can be lazily loaded', function (): void {
     actingAsModerator('demo');
 
-    Livewire::test(ListRoleMembers::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+    Livewire::test(ListRoleMembers::class, ['realm' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
         ->assertSet('ready', false)
         ->call('loadMembers')
         ->assertSet('ready', true);
@@ -99,7 +99,7 @@ test('the edit/delete permission check does not scale with the number of members
 
     $queriesForTwo = countModeratorAndAdminQueries(function () use ($community, $committee, $role): void {
         Livewire::test(ListRoleMembers::class, [
-            'uid' => $community,
+            'realm' => $community,
             'ou' => $committee->getFirstAttribute('ou'),
             'cn' => $role->getFirstAttribute('cn'),
         ])->call('loadMembers');
@@ -116,7 +116,7 @@ test('the edit/delete permission check does not scale with the number of members
 
     $queriesForEight = countModeratorAndAdminQueries(function () use ($community, $committee, $role): void {
         Livewire::test(ListRoleMembers::class, [
-            'uid' => $community,
+            'realm' => $community,
             'ou' => $committee->getFirstAttribute('ou'),
             'cn' => $role->getFirstAttribute('cn'),
         ])->call('loadMembers');
@@ -140,7 +140,7 @@ test('a member already synced to the LDAP role group is not pending', function (
     actingAsModerator($community);
 
     $status = Livewire::test(ListRoleMembers::class, [
-        'uid' => $community,
+        'realm' => $community,
         'ou' => $committee->getFirstAttribute('ou'),
         'cn' => $role->getFirstAttribute('cn'),
     ])
@@ -164,7 +164,7 @@ test('an active member not yet synced to the LDAP role group is pending', functi
     actingAsModerator($community);
 
     $status = Livewire::test(ListRoleMembers::class, [
-        'uid' => $community,
+        'realm' => $community,
         'ou' => $committee->getFirstAttribute('ou'),
         'cn' => $role->getFirstAttribute('cn'),
     ])
@@ -191,7 +191,7 @@ test('the total LDAP query count does not scale with the number of members shown
 
     $queriesForTwo = countLdapQueries(function () use ($community, $committee, $role): void {
         Livewire::test(ListRoleMembers::class, [
-            'uid' => $community,
+            'realm' => $community,
             'ou' => $committee->getFirstAttribute('ou'),
             'cn' => $role->getFirstAttribute('cn'),
         ])->call('loadMembers');
@@ -208,7 +208,7 @@ test('the total LDAP query count does not scale with the number of members shown
 
     $queriesForEight = countLdapQueries(function () use ($community, $committee, $role): void {
         Livewire::test(ListRoleMembers::class, [
-            'uid' => $community,
+            'realm' => $community,
             'ou' => $committee->getFirstAttribute('ou'),
             'cn' => $role->getFirstAttribute('cn'),
         ])->call('loadMembers');
@@ -231,7 +231,7 @@ test('the role members list is paginated to 10 per page', function (): void {
     }
     actingAsModerator($community);
 
-    $component = Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+    $component = Livewire::test(ListRoleMembers::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
         ->call('loadMembers');
 
     expect($component->viewData('members'))->toHaveCount(10);
@@ -252,7 +252,7 @@ test('the search field filters role members by name', function (): void {
     RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $bob->username, 'from' => today()]);
     actingAsModerator($community);
 
-    Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+    Livewire::test(ListRoleMembers::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
         ->call('loadMembers')
         ->set('search', 'Alice')
         ->assertSee('Alice Wonder')
@@ -270,7 +270,7 @@ test('role members are sorted by name ascending by default', function (): void {
     }
     actingAsModerator($community);
 
-    $html = Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+    $html = Livewire::test(ListRoleMembers::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
         ->call('loadMembers')
         ->html();
 
@@ -293,7 +293,7 @@ test('sortBy toggles direction and re-sorts role members descending', function (
     }
     actingAsModerator($community);
 
-    $html = Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+    $html = Livewire::test(ListRoleMembers::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
         ->call('loadMembers')
         ->call('sortBy', 'name')
         ->assertSet('sortDirection', 'desc')

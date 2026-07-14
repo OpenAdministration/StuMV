@@ -25,9 +25,9 @@ class NewRole extends Component
 
     public string $description;
 
-    public function mount(Community $uid, $ou)
+    public function mount(Community $realm, $ou)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 
@@ -65,6 +65,6 @@ class NewRole extends Component
 
         Flux::toast(variant: 'success', text: __('New Role created'));
 
-        return to_route('committees.roles', ['ou' => $this->ou, 'uid' => $this->uid]);
+        return to_route('committees.roles', ['ou' => $this->ou, 'realm' => $this->uid]);
     }
 }

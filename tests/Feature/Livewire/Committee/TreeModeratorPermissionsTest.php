@@ -31,7 +31,7 @@ test('a committee moderator sees a disabled delete button for their own committe
     $moderator = TestLdap::committeeModerator($parent, $community);
     $this->actingAs($moderator);
 
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    $html = Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->call('toggleChildren', $parent->getDn())
         ->html();
@@ -51,11 +51,11 @@ test('a plain community member sees a non-navigable (not just visually disabled)
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    $html = Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->html();
 
-    $editUrl = route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']);
+    $editUrl = route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']);
 
     expect($html)->not->toContain('href="'.$editUrl.'"');
 });
@@ -66,7 +66,7 @@ test('a plain community member sees disabled delete buttons for every committee'
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    $html = Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->html();
 
@@ -79,7 +79,7 @@ test('a community moderator sees enabled delete buttons for every committee', fu
     $committeeB = TestLdap::makeCommittee($community, 'committee-b');
     actingAsModerator($community);
 
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    $html = Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->html();
 

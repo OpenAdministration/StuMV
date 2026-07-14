@@ -12,7 +12,7 @@ uses(RefreshDatabase::class);
 test('renders the add-role-to-group screen for an admin', function (): void {
     actingAsAdmin('demo');
 
-    Livewire::test(AddRoleToGroup::class, ['uid' => Community::findByUid('demo'), 'cn' => 'some-group'])
+    Livewire::test(AddRoleToGroup::class, ['realm' => Community::findByUid('demo'), 'cn' => 'some-group'])
         ->assertStatus(200)
         ->assertSet('group_cn', 'some-group');
 });
@@ -26,7 +26,7 @@ test('the role select excludes roles already added to the group', function (): v
     GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $addedRole->getDn()]);
     actingAsAdmin($community);
 
-    $roleDns = Livewire::test(AddRoleToGroup::class, ['uid' => $community, 'cn' => 'grp'])
+    $roleDns = Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'grp'])
         ->set('selected_committee_dn', $committee->getDn())
         ->viewData('roles')
         ->map(fn ($role) => $role->getDn());

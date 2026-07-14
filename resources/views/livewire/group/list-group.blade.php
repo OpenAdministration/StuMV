@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="route('realms.groups.new', ['uid' => $realm_uid])"
+                :href="route('realms.groups.new', ['realm' => $realm_uid])"
             >
                 {{ __('New Group') }}
             </flux:button>
@@ -38,7 +38,7 @@
                     <flux:table.cell>
                         <flux:link
                             wire:navigate
-                            href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                            href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
                         >
                             {{ $group->getFirstAttribute('cn') }}
                         </flux:link>
@@ -51,20 +51,20 @@
                                 <flux:menu.item
                                     icon="users"
                                     wire:navigate
-                                    href="{{ route('realms.groups.members', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                    href="{{ route('realms.groups.members', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
                                 >
                                     {{ __('groups.link_members') }}
                                 </flux:menu.item>
                                 <flux:menu.item
                                     icon="square-user"
                                     wire:navigate
-                                    href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                    href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
                                 >
                                     {{ __('groups.manage_roles') }}
                                 </flux:menu.item>
                                 <flux:menu.item
                                     icon="pencil"
-                                    href="{{ route('realms.groups.edit', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                    href="{{ route('realms.groups.edit', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
                                 >
                                     {{ __('groups.link_edit') }}
                                 </flux:menu.item>

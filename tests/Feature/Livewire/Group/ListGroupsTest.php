@@ -20,15 +20,15 @@ test('the list, create and edit pages label the description field "Description",
     TestLdap::makeGroup($community, 'newsletter');
     actingAsAdmin($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
+    Livewire::test(ListGroups::class, ['realm' => $community])
         ->assertSee('Description')
         ->assertDontSee('Full Name');
 
-    Livewire::test(NewGroup::class, ['uid' => $community])
+    Livewire::test(NewGroup::class, ['realm' => $community])
         ->assertSee('Description')
         ->assertDontSee('Full Groupname');
 
-    Livewire::test(EditGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+    Livewire::test(EditGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->assertSee('Description')
         ->assertDontSee('Full Groupname');
 });
@@ -39,7 +39,7 @@ test('an admin can delete a group', function (): void {
     TestLdap::makeGroup($community, 'newsletter');
     actingAsAdmin($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
+    Livewire::test(ListGroups::class, ['realm' => $community])
         ->call('deletePrepare', $uid, 'newsletter')
         ->set('deleteConfirmText', 'newsletter')
         ->call('deleteCommit');
@@ -53,7 +53,7 @@ test('deletePrepare fills in the group name for the confirmation modal', functio
     TestLdap::makeGroup($community, 'newsletter');
     actingAsAdmin($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
+    Livewire::test(ListGroups::class, ['realm' => $community])
         ->call('deletePrepare', $uid, 'newsletter')
         ->assertSet('deleteGroupName', 'newsletter')
         ->assertSee('newsletter');
@@ -65,7 +65,7 @@ test('groups are listed without using the LDAP slice/VLV query', function (): vo
     TestLdap::makeGroup($community, 'grp2');
     actingAsModerator($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
+    Livewire::test(ListGroups::class, ['realm' => $community])
         ->assertSee('grp1')
         ->assertSee('grp2');
 });
@@ -76,7 +76,7 @@ test('the group search filters the list', function (): void {
     TestLdap::makeGroup($community, 'beta');
     actingAsModerator($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
+    Livewire::test(ListGroups::class, ['realm' => $community])
         ->set('search', 'alpha')
         ->assertSee('alpha')
         ->assertDontSee('beta');
@@ -89,7 +89,7 @@ test('the group search also matches the description', function (): void {
     TestLdap::makeGroup($community, 'beta');
     actingAsModerator($community);
 
-    Livewire::test(ListGroups::class, ['uid' => $community])
+    Livewire::test(ListGroups::class, ['realm' => $community])
         ->set('search', 'newsletter')
         ->assertSee('alpha')
         ->assertDontSee('beta');
@@ -102,7 +102,7 @@ test('groups are sorted by cn ascending by default', function (): void {
     TestLdap::makeGroup($community, 'mike');
     actingAsModerator($community);
 
-    $cns = Livewire::test(ListGroups::class, ['uid' => $community])
+    $cns = Livewire::test(ListGroups::class, ['realm' => $community])
         ->viewData('groups')
         ->map(fn ($group) => $group->getFirstAttribute('cn'))
         ->values()
@@ -118,7 +118,7 @@ test('sortBy toggles direction and re-sorts the groups descending', function ():
     TestLdap::makeGroup($community, 'mike');
     actingAsModerator($community);
 
-    $cns = Livewire::test(ListGroups::class, ['uid' => $community])
+    $cns = Livewire::test(ListGroups::class, ['realm' => $community])
         ->call('sortBy', 'cn')
         ->assertSet('sortDirection', 'desc')
         ->viewData('groups')
@@ -136,7 +136,7 @@ test('the groups list is paginated to 10 per page', function (): void {
     }
     actingAsModerator($community);
 
-    $component = Livewire::test(ListGroups::class, ['uid' => $community]);
+    $component = Livewire::test(ListGroups::class, ['realm' => $community]);
     $page1Cns = $component->viewData('groups')
         ->map(fn ($group) => $group->getFirstAttribute('cn'))
         ->values()

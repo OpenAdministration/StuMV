@@ -8,7 +8,7 @@
             variant="primary"
             icon="plus"
             wire:navigate
-            :href="auth()->user()->can('create', [\App\Ldap\Committee::class, $community]) ? route('committees.new', ['uid' => $realm]) : null" :disabled="auth()->user()->cannot('create', [\App\Ldap\Committee::class, $community])">
+            :href="auth()->user()->can('create', [\App\Ldap\Committee::class, $community]) ? route('committees.new', ['realm' => $realm]) : null" :disabled="auth()->user()->cannot('create', [\App\Ldap\Committee::class, $community])">
             {{ __('New Committee') }}
         </flux:button>
     </div>

@@ -23,7 +23,7 @@ test('a committee moderator can add another moderator to their committee', funct
     $newMod = TestLdap::member($community);
     $this->actingAs($moderator);
 
-    Livewire::test(NewCommitteeModerator::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(NewCommitteeModerator::class, ['realm' => $community, 'ou' => 'fsr'])
         ->set('dn', [$newMod->ldap()->getDn()])
         ->call('save');
 
@@ -37,12 +37,12 @@ test('a plain member can view a committee\'s moderators but cannot add one', fun
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadModerators')
         ->assertOk()
         ->assertSee($moderator->full_name);
 
-    Livewire::test(NewCommitteeModerator::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(NewCommitteeModerator::class, ['realm' => $community, 'ou' => 'fsr'])
         ->assertForbidden();
 });
 
@@ -53,7 +53,7 @@ test('a plain member cannot remove a committee moderator', function (): void {
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadModerators')
         ->call('deletePrepare', $target->username)
         ->assertForbidden();
@@ -67,7 +67,7 @@ test('a committee moderator of a different committee can view but not manage thi
     $targetB = TestLdap::committeeModerator($committeeB, $community);
     $this->actingAs($moderatorA);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => 'committee-b'])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => 'committee-b'])
         ->call('loadModerators')
         ->assertOk()
         ->assertSee($targetB->full_name)
@@ -82,7 +82,7 @@ test('deletePrepare shows the confirmation modal', function (): void {
     $target = TestLdap::committeeModerator($committee, $community);
     $this->actingAs($actor);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadModerators')
         ->call('deletePrepare', $target->username)
         ->assertDispatched('modal-show', name: 'delete')
@@ -96,7 +96,7 @@ test('deleteCommit removes the moderator and closes the modal', function (): voi
     $target = TestLdap::committeeModerator($committee, $community);
     $this->actingAs($actor);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadModerators')
         ->call('deletePrepare', $target->username)
         ->call('deleteCommit')
@@ -112,7 +112,7 @@ test('a moderator can remove themselves without the page crashing on re-render',
     $moderator = TestLdap::committeeModerator($committee, $community);
     $this->actingAs($moderator);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadModerators')
         ->call('deletePrepare', $moderator->username)
         ->call('deleteCommit')

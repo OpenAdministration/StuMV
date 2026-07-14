@@ -18,9 +18,9 @@ class NewDomain extends Component
     #[Validate(as: 'Domain')]
     public string $dc;
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
     }
 
     public function rules()
@@ -49,6 +49,6 @@ class NewDomain extends Component
 
         $d->setDn("dc=$this->dc,".Domain::dnRoot($this->uid));
         $d->save();
-        $this->redirectRoute('realms.domains', ['uid' => $this->uid]);
+        $this->redirectRoute('realms.domains', ['realm' => $this->uid]);
     }
 }

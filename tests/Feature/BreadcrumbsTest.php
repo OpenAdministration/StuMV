@@ -10,7 +10,7 @@ test('the role-members breadcrumb shows the role description, not its short code
     actingAsModerator($community);
 
     $response = $this->get(route('committees.roles.members', [
-        'uid' => $uid,
+        'realm' => $uid,
         'ou' => 'fsr',
         'cn' => 'mitglied',
     ]));
@@ -30,7 +30,7 @@ test('the breadcrumbs bar starts with a home icon linking to /', function (): vo
     $uid = $community->getShortCode();
     actingAsMember($community);
 
-    $response = $this->get(route('realms.members', ['uid' => $uid]));
+    $response = $this->get(route('realms.members', ['realm' => $uid]));
 
     preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
     $html = $section[1] ?? '';
@@ -45,7 +45,7 @@ test('the group members page has a breadcrumb showing the group and linking back
     TestLdap::makeGroup($community, 'newsletter');
     actingAsAdmin($community);
 
-    $response = $this->get(route('realms.groups.members', ['uid' => $uid, 'cn' => 'newsletter']));
+    $response = $this->get(route('realms.groups.members', ['realm' => $uid, 'cn' => 'newsletter']));
 
     $response->assertOk();
 
@@ -53,7 +53,7 @@ test('the group members page has a breadcrumb showing the group and linking back
 
     expect($section[1] ?? '')
         ->toContain('newsletter')
-        ->toContain(route('realms.groups', ['uid' => $uid]));
+        ->toContain(route('realms.groups', ['realm' => $uid]));
 });
 
 test('the community name is not truncated when it is the only breadcrumb item, as on the dashboard', function (): void {
@@ -61,7 +61,7 @@ test('the community name is not truncated when it is the only breadcrumb item, a
     $uid = $community->getShortCode();
     actingAsMember($community);
 
-    $response = $this->get(route('realms.dashboard', ['uid' => $uid]));
+    $response = $this->get(route('realms.dashboard', ['realm' => $uid]));
 
     $response->assertOk();
 
@@ -77,7 +77,7 @@ test('breadcrumb titles that are not committee names are also width-capped and t
     $uid = $community->getShortCode();
     actingAsMember($community);
 
-    $response = $this->get(route('realms.members', ['uid' => $uid]));
+    $response = $this->get(route('realms.members', ['realm' => $uid]));
 
     preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
 

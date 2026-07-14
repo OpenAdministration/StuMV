@@ -39,7 +39,7 @@
             <div class="flex flex-col gap-3 py-1">
                 <flux:link
                     wire:navigate
-                    href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                    href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
                 >
                     {{ $committee->getFirstAttribute('description') }}
                 </flux:link>
@@ -48,7 +48,7 @@
                         @foreach($node['matchingRoles'] ?? [] as $role)
                             <a
                                 wire:navigate
-                                href="{{ route('committees.roles.members', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
+                                href="{{ route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
                             >
                                 <flux:badge size="sm">{{ $role->getFirstAttribute('description') }}</flux:badge>
                             </a>
@@ -64,14 +64,14 @@
                     <flux:menu.item
                         icon="users"
                         wire:navigate
-                        href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
                         class="md:hidden"
                     >
                         {{ __('committees.link_roles') }}
                     </flux:menu.item>
                     <flux:menu.item
                         icon="pencil"
-                        :href="$node['isModerator'] ? route('committees.edit', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) : null"
+                        :href="$node['isModerator'] ? route('committees.edit', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) : null"
                         :disabled="!$node['isModerator']"
                     >
                         {{ __('committees.link_edit') }}

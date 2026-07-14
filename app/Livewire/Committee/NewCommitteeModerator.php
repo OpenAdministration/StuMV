@@ -24,9 +24,9 @@ class NewCommitteeModerator extends Component
     #[Rule('required|string')]
     public string $ou = '';
 
-    public function mount(Community $uid, string $ou): void
+    public function mount(Community $realm, string $ou): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 
@@ -69,6 +69,6 @@ class NewCommitteeModerator extends Component
             }
         }
 
-        return to_route('committees.moderators', ['uid' => $this->realm_uid, 'ou' => $this->ou]);
+        return to_route('committees.moderators', ['realm' => $this->realm_uid, 'ou' => $this->ou]);
     }
 }

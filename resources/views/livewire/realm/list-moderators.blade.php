@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="user-plus"
                 wire:navigate
-                :href="auth()->user()->can('add_moderator', $community) ? route('realms.mods.new', ['uid' => $community_name]) : null"
+                :href="auth()->user()->can('add_moderator', $community) ? route('realms.mods.new', ['realm' => $community_name]) : null"
                 :disabled="auth()->user()->cannot('add_moderator', $community)"
             >
                 {{ __('Add Moderators') }}

@@ -21,7 +21,7 @@ test('a committee moderator cannot edit their own committee', function (): void 
     $moderator = TestLdap::committeeModerator($committee, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']))
+        ->get(route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']))
         ->assertStatus(403);
 });
 
@@ -32,7 +32,7 @@ test('a committee moderator cannot edit a descendant committee', function (): vo
     $moderator = TestLdap::committeeModerator($parent, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'child']))
+        ->get(route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'child']))
         ->assertStatus(403);
 });
 
@@ -42,7 +42,7 @@ test('a committee moderator cannot create a new committee', function (): void {
     $moderator = TestLdap::committeeModerator($committee, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.new', ['uid' => $community->getShortCode()]))
+        ->get(route('committees.new', ['realm' => $community->getShortCode()]))
         ->assertStatus(403);
 });
 
@@ -51,9 +51,9 @@ test('a community moderator can still edit and create committees', function (): 
     TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    $this->get(route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']))
+    $this->get(route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']))
         ->assertStatus(200);
-    $this->get(route('committees.new', ['uid' => $community->getShortCode()]))
+    $this->get(route('committees.new', ['realm' => $community->getShortCode()]))
         ->assertStatus(200);
 });
 
@@ -63,7 +63,7 @@ test('a plain community member cannot edit any committee', function (): void {
     $member = TestLdap::member($community);
 
     $this->actingAs($member)
-        ->get(route('committees.edit', ['uid' => $community->getShortCode(), 'ou' => 'fsr']))
+        ->get(route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'fsr']))
         ->assertStatus(403);
 });
 
@@ -73,7 +73,7 @@ test('a committee moderator can create a new role in their own committee', funct
     $moderator = TestLdap::committeeModerator($committee, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.roles.new', ['uid' => $community->getShortCode(), 'ou' => 'fsr']))
+        ->get(route('committees.roles.new', ['realm' => $community->getShortCode(), 'ou' => 'fsr']))
         ->assertStatus(200);
 });
 
@@ -84,7 +84,7 @@ test('a committee moderator can create a new role in a descendant committee', fu
     $moderator = TestLdap::committeeModerator($parent, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.roles.new', ['uid' => $community->getShortCode(), 'ou' => 'child']))
+        ->get(route('committees.roles.new', ['realm' => $community->getShortCode(), 'ou' => 'child']))
         ->assertStatus(200);
 });
 
@@ -95,7 +95,7 @@ test('a committee moderator cannot create a role in an unrelated committee', fun
     $moderator = TestLdap::committeeModerator($committeeA, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.roles.new', ['uid' => $community->getShortCode(), 'ou' => 'committee-b']))
+        ->get(route('committees.roles.new', ['realm' => $community->getShortCode(), 'ou' => 'committee-b']))
         ->assertStatus(403);
 });
 
@@ -106,7 +106,7 @@ test('a committee moderator cannot create a role in their committee\'s own paren
     $moderator = TestLdap::committeeModerator($child, $community);
 
     $this->actingAs($moderator)
-        ->get(route('committees.roles.new', ['uid' => $community->getShortCode(), 'ou' => 'parent']))
+        ->get(route('committees.roles.new', ['realm' => $community->getShortCode(), 'ou' => 'parent']))
         ->assertStatus(403);
 });
 
@@ -116,7 +116,7 @@ test('a committee moderator does not gain community-wide tools access', function
     $moderator = TestLdap::committeeModerator($committee, $community);
 
     $this->actingAs($moderator)
-        ->get(route('tools.dashboard', ['uid' => $community->getShortCode()]))
+        ->get(route('tools.dashboard', ['realm' => $community->getShortCode()]))
         ->assertStatus(403);
 });
 
@@ -126,6 +126,6 @@ test('a committee moderator cannot add or remove community-wide moderators', fun
     $moderator = TestLdap::committeeModerator($committee, $community);
 
     $this->actingAs($moderator)
-        ->get(route('realms.mods.new', ['uid' => $community->getShortCode()]))
+        ->get(route('realms.mods.new', ['realm' => $community->getShortCode()]))
         ->assertStatus(403);
 });

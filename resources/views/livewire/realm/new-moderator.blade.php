@@ -19,7 +19,7 @@
             </flux:pillbox>
         </flux:field>
         <x-slot:abort_route>
-            {{ route('realms.mods', ['uid' => $realm_uid]) }}
+            {{ route('realms.mods', ['realm' => $realm_uid]) }}
         </x-slot:abort_route>
     </x-livewire-form>
 </div>

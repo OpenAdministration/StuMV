@@ -48,9 +48,9 @@ class ListGroups extends Component
         $this->resetPage();
     }
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->realm_uid = $uid->getShortCode();
+        $this->realm_uid = $realm->getShortCode();
     }
 
     public function render()

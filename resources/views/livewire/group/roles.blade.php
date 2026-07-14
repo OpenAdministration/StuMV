@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="route('realms.groups.roles.add', ['uid' => $realm_uid, 'cn' => $group_cn])"
+                :href="route('realms.groups.roles.add', ['realm' => $realm_uid, 'cn' => $group_cn])"
             >
                 {{ __('Add Role') }}
             </flux:button>
@@ -36,7 +36,7 @@
                 <flux:table.cell>
                     <flux:link
                         wire:navigate
-                        href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou')]) }}"
+                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou')]) }}"
                     >
                         {{ $role->committee()->getFirstAttribute('description') }}
                     </flux:link>
@@ -44,7 +44,7 @@
                 <flux:table.cell>
                     <flux:link
                         wire:navigate
-                        href="{{ route('committees.roles.members', ['uid' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
+                        href="{{ route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
                     >
                         {{ $role->getFirstAttribute('description') }}
                     </flux:link>

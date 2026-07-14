@@ -15,7 +15,7 @@ class CommunityAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $community = $request->route()?->parameter('uid');
+        $community = $request->route()?->parameter('realm');
         $user = $request->user();
         if ($user?->can('admin', $community) || $user?->ldap()->isSuperAdmin()) {
             return $next($request);

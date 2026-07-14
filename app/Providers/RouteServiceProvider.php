@@ -21,7 +21,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
-        Route::bind('uid', fn (string $value) => Community::findByOrFail('ou', $value));
+        Route::bind('realm', fn (string $value) => Community::findByOrFail('ou', $value));
         // $this->model('uid', Community::class);
 
         $this->routes(function (): void {

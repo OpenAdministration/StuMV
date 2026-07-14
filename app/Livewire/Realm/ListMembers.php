@@ -33,9 +33,9 @@ class ListMembers extends Component
 
     public string $community_name;
 
-    public function mount(Community $uid): void
+    public function mount(Community $realm): void
     {
-        $this->community_name = $uid->getFirstAttribute('ou');
+        $this->community_name = $realm->getFirstAttribute('ou');
     }
 
     public function loadMembers(): void

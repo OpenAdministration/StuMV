@@ -14,6 +14,6 @@
     </flux:field>
     
     <x-slot:abort_route>
-        {{ route('realms.groups', ['uid' => $realm_uid]) }}
+        {{ route('realms.groups', ['realm' => $realm_uid]) }}
     </x-slot:abort_route>
 </x-livewire-form>

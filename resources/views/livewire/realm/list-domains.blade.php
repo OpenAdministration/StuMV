@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.domains.new', ['uid' => $uid]) : null"
+                :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.domains.new', ['realm' => $uid]) : null"
                 :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
             >
                 {{ __('New Domain') }}

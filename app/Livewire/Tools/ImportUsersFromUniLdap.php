@@ -44,11 +44,11 @@ class ImportUsersFromUniLdap extends Component
         ];
     }
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
         abort_unless(filled(config('ldap.connections.uni.base_dn')), 404);
 
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
     }
 
     public function render()

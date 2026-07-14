@@ -12,7 +12,7 @@ test('a new client-credentials client can be registered for the community', func
     $uid = $community->getShortCode();
     actingAsAdmin($community);
 
-    Livewire::test(NewApiClient::class, ['uid' => $community])
+    Livewire::test(NewApiClient::class, ['realm' => $community])
         ->set('name', 'My New Client')
         ->set('scopes', ['committees', 'users'])
         ->call('save');
@@ -28,7 +28,7 @@ test('the plaintext secret is shown once after creation', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewApiClient::class, ['uid' => $community])
+    Livewire::test(NewApiClient::class, ['realm' => $community])
         ->set('name', 'My New Client')
         ->set('scopes', ['committees'])
         ->call('save')
@@ -40,7 +40,7 @@ test('the secret reveal panel actually renders the secret', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    $component = Livewire::test(NewApiClient::class, ['uid' => $community])
+    $component = Livewire::test(NewApiClient::class, ['realm' => $community])
         ->set('name', 'My New Client')
         ->set('scopes', ['committees'])
         ->call('save');
@@ -53,7 +53,7 @@ test('registering a client requires a name', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewApiClient::class, ['uid' => $community])
+    Livewire::test(NewApiClient::class, ['realm' => $community])
         ->set('name', '')
         ->set('scopes', ['committees'])
         ->call('save')
@@ -64,7 +64,7 @@ test('registering a client requires at least one scope', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewApiClient::class, ['uid' => $community])
+    Livewire::test(NewApiClient::class, ['realm' => $community])
         ->set('name', 'My New Client')
         ->set('scopes', [])
         ->call('save')
@@ -75,7 +75,7 @@ test('registering a client rejects scopes outside the allowed directory scopes',
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewApiClient::class, ['uid' => $community])
+    Livewire::test(NewApiClient::class, ['realm' => $community])
         ->set('name', 'My New Client')
         ->set('scopes', ['profile'])
         ->call('save')

@@ -20,9 +20,9 @@ class EditRealm extends Component
     #[Rule('required|min:6')]
     public string $name = '';
 
-    public function mount(Community $uid): void
+    public function mount(Community $realm): void
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         // here is an implicit search for the realm and return 404 if not existent
         $this->name = $this->realm->description[0] ?? '';
     }
@@ -46,6 +46,6 @@ class EditRealm extends Component
 
         Flux::toast(variant: 'success', text: __('realms.edit_success', ['realm' => $this->uid]));
 
-        return to_route('realms.dashboard', ['uid' => $this->uid]);
+        return to_route('realms.dashboard', ['realm' => $this->uid]);
     }
 }

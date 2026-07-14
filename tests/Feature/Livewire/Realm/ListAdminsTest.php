@@ -38,7 +38,7 @@ test('admins are sorted by name ascending by default', function (): void {
     }
     actingAsModerator($community);
 
-    $cns = Livewire::test(ListAdmins::class, ['uid' => $community])
+    $cns = Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('loadAdmins')
         ->viewData('realm_admins')
         ->map(fn ($user) => $user->getFirstAttribute('cn'))
@@ -56,7 +56,7 @@ test('sortBy toggles direction and re-sorts the admins descending', function ():
     }
     actingAsModerator($community);
 
-    $cns = Livewire::test(ListAdmins::class, ['uid' => $community])
+    $cns = Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('loadAdmins')
         ->call('sortBy', 'cn')
         ->assertSet('sortDirection', 'desc')
@@ -76,7 +76,7 @@ test('the admins list is paginated to 10 per page', function (): void {
     }
     actingAsModerator($community);
 
-    $component = Livewire::test(ListAdmins::class, ['uid' => $community])->call('loadAdmins');
+    $component = Livewire::test(ListAdmins::class, ['realm' => $community])->call('loadAdmins');
 
     expect($component->viewData('realm_admins'))->toHaveCount(10);
 
@@ -91,7 +91,7 @@ test('the search field filters the admins list', function (): void {
     TestLdap::attach($adminsGroup, TestLdap::makeUser('betaadmin'));
     actingAsModerator($community);
 
-    Livewire::test(ListAdmins::class, ['uid' => $community])
+    Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('loadAdmins')
         ->set('search', 'alphaadmin')
         ->assertSee('Test alphaadmin')
@@ -104,7 +104,7 @@ test('an admin sees a working profile link for other admins', function (): void 
     TestLdap::attach($adminsGroup, TestLdap::makeUser('otheradmin'));
     actingAsAdmin($community);
 
-    Livewire::test(ListAdmins::class, ['uid' => $community])
+    Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('loadAdmins')
         ->assertSeeHtml('href="'.route('profile', ['username' => 'otheradmin']).'"');
 });
@@ -119,7 +119,7 @@ test('the admin permission check does not scale with the number of admins shown'
     }
 
     $queriesForTwo = countAdminGroupQueries(function () use ($community): void {
-        Livewire::test(ListAdmins::class, ['uid' => $community])->call('loadAdmins');
+        Livewire::test(ListAdmins::class, ['realm' => $community])->call('loadAdmins');
     });
 
     foreach (range(3, 8) as $i) {
@@ -127,7 +127,7 @@ test('the admin permission check does not scale with the number of admins shown'
     }
 
     $queriesForEight = countAdminGroupQueries(function () use ($community): void {
-        Livewire::test(ListAdmins::class, ['uid' => $community])->call('loadAdmins');
+        Livewire::test(ListAdmins::class, ['realm' => $community])->call('loadAdmins');
     });
 
     expect($queriesForEight)->toBe($queriesForTwo);

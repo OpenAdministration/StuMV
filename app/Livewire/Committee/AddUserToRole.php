@@ -37,9 +37,9 @@ class AddUserToRole extends Component
     #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $uid, $ou, $cn)
+    public function mount(Community $realm, $ou, $cn)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
         $this->start_date = today()->format('Y-m-d');
@@ -95,7 +95,7 @@ class AddUserToRole extends Component
         }
 
         return to_route('committees.roles.members', [
-            'uid' => $this->uid,
+            'realm' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
         ]);

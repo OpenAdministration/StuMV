@@ -13,11 +13,11 @@ class Committees extends Controller
 {
     use AuthorizesDirectoryClient;
 
-    public function index(Request $request, Community $uid)
+    public function index(Request $request, Community $realm)
     {
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
-        $committees = Committee::fromCommunity($uid->getShortCode())->get();
+        $committees = Committee::fromCommunity($realm->getShortCode())->get();
 
         return response()->json($committees->map(fn (Committee $committee): array => [
             'ou' => $committee->getFirstAttribute('ou'),
@@ -25,11 +25,11 @@ class Committees extends Controller
         ])->values());
     }
 
-    public function show(Request $request, Community $uid, string $ou)
+    public function show(Request $request, Community $realm, string $ou)
     {
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
-        $committee = Committee::findByNameOrFail($uid, $ou);
+        $committee = Committee::findByNameOrFail($realm, $ou);
 
         return response()->json([
             'ou' => $committee->getFirstAttribute('ou'),
@@ -37,11 +37,11 @@ class Committees extends Controller
         ]);
     }
 
-    public function roles(Request $request, Community $uid, string $ou)
+    public function roles(Request $request, Community $realm, string $ou)
     {
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
-        $committee = Committee::findByNameOrFail($uid, $ou);
+        $committee = Committee::findByNameOrFail($realm, $ou);
         $roles = $committee->roles()->get();
 
         return response()->json($roles->map(fn (Role $role): array => [
@@ -50,12 +50,12 @@ class Committees extends Controller
         ])->values());
     }
 
-    public function role(Request $request, Community $uid, string $ou, string $cn)
+    public function role(Request $request, Community $realm, string $ou, string $cn)
     {
-        $committee = Committee::findByNameOrFail($uid, $ou);
+        $committee = Committee::findByNameOrFail($realm, $ou);
         $role = $committee->roles()->where('cn', $cn)->first() ?? abort(404);
 
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
         return response()->json([
             'cn' => $role->getFirstAttribute('cn'),
@@ -63,12 +63,12 @@ class Committees extends Controller
         ]);
     }
 
-    public function roleMembers(Request $request, Community $uid, string $ou, string $cn)
+    public function roleMembers(Request $request, Community $realm, string $ou, string $cn)
     {
-        $committee = Committee::findByNameOrFail($uid, $ou);
+        $committee = Committee::findByNameOrFail($realm, $ou);
         $role = $committee->roles()->where('cn', $cn)->first() ?? abort(404);
 
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
         // uniqueMember entries resolve to either Role or User entries -
         // filter down to the actual people (entries carrying a uid).

@@ -24,9 +24,9 @@ class EditGroup extends Component
     #[Rule('required|min:6')]
     public string $name;
 
-    public function mount(Community $uid, $cn)
+    public function mount(Community $realm, $cn)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->cn = $cn;
         $this->dn = Group::dnFrom($this->uid, $cn);
         $group = Group::findOrFail($this->dn);

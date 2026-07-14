@@ -12,11 +12,11 @@ class Groups extends Controller
 {
     use AuthorizesDirectoryClient;
 
-    public function index(Request $request, Community $uid)
+    public function index(Request $request, Community $realm)
     {
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
-        $groups = Group::query()->in(Group::dnRoot($uid->getShortCode()))->get();
+        $groups = Group::query()->in(Group::dnRoot($realm->getShortCode()))->get();
 
         return response()->json($groups->map(fn (Group $group): array => [
             'cn' => $group->getFirstAttribute('cn'),
@@ -24,11 +24,11 @@ class Groups extends Controller
         ])->values());
     }
 
-    public function show(Request $request, Community $uid, string $cn)
+    public function show(Request $request, Community $realm, string $cn)
     {
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
-        $group = Group::query()->in(Group::dnRoot($uid->getShortCode()))->where('cn', $cn)->first() ?? abort(404);
+        $group = Group::query()->in(Group::dnRoot($realm->getShortCode()))->where('cn', $cn)->first() ?? abort(404);
 
         return response()->json([
             'cn' => $group->getFirstAttribute('cn'),
@@ -36,11 +36,11 @@ class Groups extends Controller
         ]);
     }
 
-    public function members(Request $request, Community $uid, string $cn)
+    public function members(Request $request, Community $realm, string $cn)
     {
-        $this->authorizeClientForCommunity($uid);
+        $this->authorizeClientForCommunity($realm);
 
-        $group = Group::query()->in(Group::dnRoot($uid->getShortCode()))->where('cn', $cn)->first() ?? abort(404);
+        $group = Group::query()->in(Group::dnRoot($realm->getShortCode()))->where('cn', $cn)->first() ?? abort(404);
 
         // uniqueMember entries resolve to either Role or User entries -
         // filter down to the actual people (entries carrying a uid).

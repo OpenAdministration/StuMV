@@ -25,7 +25,7 @@ test('domains are listed without using the LDAP slice/VLV query', function (): v
     makeDomain($uid, 'beta.test');
     actingAsModerator($community);
 
-    Livewire::test(ListDomains::class, ['uid' => $community])
+    Livewire::test(ListDomains::class, ['realm' => $community])
         ->assertSee('alpha.test')
         ->assertSee('beta.test');
 });
@@ -37,7 +37,7 @@ test('the domain search filters the list', function (): void {
     makeDomain($uid, 'beta.test');
     actingAsModerator($community);
 
-    Livewire::test(ListDomains::class, ['uid' => $community])
+    Livewire::test(ListDomains::class, ['realm' => $community])
         ->set('search', 'alpha')
         ->assertSee('alpha.test')
         ->assertDontSee('beta.test');
@@ -51,7 +51,7 @@ test('domains are sorted by short name ascending by default', function (): void 
     makeDomain($uid, 'mike.test');
     actingAsModerator($community);
 
-    $dcs = Livewire::test(ListDomains::class, ['uid' => $community])
+    $dcs = Livewire::test(ListDomains::class, ['realm' => $community])
         ->viewData('domains')
         ->map(fn ($domain) => $domain->getFirstAttribute('dc'))
         ->values()
@@ -68,7 +68,7 @@ test('sortBy toggles direction and re-sorts the domains descending', function ()
     makeDomain($uid, 'mike.test');
     actingAsModerator($community);
 
-    $dcs = Livewire::test(ListDomains::class, ['uid' => $community])
+    $dcs = Livewire::test(ListDomains::class, ['realm' => $community])
         ->call('sortBy', 'dc')
         ->assertSet('sortDirection', 'desc')
         ->viewData('domains')
@@ -83,7 +83,7 @@ test('the domains list shows a warning callout when there are no domains', funct
     $community = newCommunity();
     actingAsModerator($community);
 
-    Livewire::test(ListDomains::class, ['uid' => $community])
+    Livewire::test(ListDomains::class, ['realm' => $community])
         ->assertSeeHtml('data-flux-callout')
         ->assertSee(__('domain.nothing_found'));
 });
@@ -96,7 +96,7 @@ test('the domains list is paginated to 10 per page', function (): void {
     }
     actingAsModerator($community);
 
-    $component = Livewire::test(ListDomains::class, ['uid' => $community]);
+    $component = Livewire::test(ListDomains::class, ['realm' => $community]);
 
     expect($component->viewData('domains'))->toHaveCount(10);
 

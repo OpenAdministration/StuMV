@@ -24,9 +24,9 @@ class ListCommitteeModerators extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $uid, string $ou): void
+    public function mount(Community $realm, string $ou): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 

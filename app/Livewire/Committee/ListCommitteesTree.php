@@ -37,9 +37,9 @@ class ListCommitteesTree extends Component
 
     public string $deleteConfirmText = '';
 
-    public function mount(Community $uid): void
+    public function mount(Community $realm): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
     public function loadCommittees(): void
@@ -117,7 +117,7 @@ class ListCommitteesTree extends Component
         Flux::modal('delete-committee')->close();
 
         return to_route('committees.list', [
-            'uid' => $this->realm_uid,
+            'realm' => $this->realm_uid,
         ]);
     }
 
@@ -236,7 +236,7 @@ class ListCommitteesTree extends Component
 
     /**
      * @return list<Role> this committee's own roles (not its descendants')
-     *                     whose cn/description match the search term
+     *                    whose cn/description match the search term
      */
     protected function matchingRoles(Committee $committee, string $search): array
     {

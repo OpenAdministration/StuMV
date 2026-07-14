@@ -8,7 +8,7 @@
                         variant="subtle"
                         icon="pencil"
                         class="-mt-1"
-                        :href="route('committees.roles.edit', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                        :href="route('committees.roles.edit', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou])"
                         title="{{ __('Edit') }}"
                     />
                 @endif
@@ -19,14 +19,14 @@
             <flux:button
                 variant="primary"
                 icon="user-plus"
-                :href="$isModerator ? route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
+                :href="$isModerator ? route('committees.roles.add-member', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
                 {{ __('Add Member') }}
             </flux:button>
             <flux:button
                 icon="calendar-x"
-                :href="$isModerator ? route('committees.roles.terminate-memberships', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
+                :href="$isModerator ? route('committees.roles.terminate-memberships', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
                 {{ __('roles.members.terminate_memberships') }}
@@ -144,7 +144,7 @@
                                         icon="pencil"
                                         wire:navigate
                                         :disabled="!$isModerator"
-                                        :href="$isModerator ? route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
+                                        :href="$isModerator ? route('committees.roles.members.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
                                     >
                                         {{ __('roles.link_edit') }}
                                     </flux:menu.item>

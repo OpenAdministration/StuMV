@@ -34,9 +34,9 @@ class ListRolesInGroup extends Component
 
     public array $deleteRoleName = [];
 
-    public function mount(Community $uid, $cn)
+    public function mount(Community $realm, $cn)
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->group_cn = $cn;
         $this->group_dn = Group::dnFrom($this->realm_uid, $cn);
     }

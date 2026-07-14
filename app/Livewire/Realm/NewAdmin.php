@@ -17,9 +17,9 @@ class NewAdmin extends Component
     #[Rule('required|string')]
     public string $realm_uid = '';
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
     public function render()
@@ -53,6 +53,6 @@ class NewAdmin extends Component
             }
         }
 
-        return to_route('realms.admins', ['uid' => $this->realm_uid]);
+        return to_route('realms.admins', ['realm' => $this->realm_uid]);
     }
 }

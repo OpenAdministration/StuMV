@@ -15,7 +15,7 @@ test('a moderator can create a role in a committee', function (): void {
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    Livewire::test(NewRole::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(NewRole::class, ['realm' => $community, 'ou' => 'fsr'])
         ->set('cn', 'kasse')
         ->set('description', 'Kassenwart')
         ->call('save')
@@ -29,7 +29,7 @@ test('moderators is reserved as a role name since it names the committee\'s hidd
     TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    Livewire::test(NewRole::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(NewRole::class, ['realm' => $community, 'ou' => 'fsr'])
         ->set('cn', 'moderators')
         ->set('description', 'Sneaky Role')
         ->call('save')
@@ -42,7 +42,7 @@ test('a moderator can rename a role', function (): void {
     TestLdap::makeRole($committee, 'mitglied');
     actingAsModerator($community);
 
-    Livewire::test(EditRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+    Livewire::test(EditRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
         ->set('description', 'Ordentliches Mitglied')
         ->call('save')
         ->assertHasNoErrors();
@@ -58,7 +58,7 @@ test('a moderator can add a community member to a role', function (): void {
     $member = TestLdap::member($community);
     actingAsModerator($community);
 
-    Livewire::test(AddUserToRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+    Livewire::test(AddUserToRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
         ->set('usernames', [$member->username])
         ->set('start_date', today()->format('Y-m-d'))
         ->call('save')
@@ -85,7 +85,7 @@ test('the add-user-to-role select excludes members already active in the role', 
     ]);
     actingAsModerator($community);
 
-    $usernames = Livewire::test(AddUserToRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+    $usernames = Livewire::test(AddUserToRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
         ->viewData('users')
         ->map(fn ($user) => $user->getFirstAttribute('uid'));
 
@@ -101,7 +101,7 @@ test('a user who is not a member of the community cannot be added to a role', fu
     $outsider = TestLdap::makeUser();
     actingAsModerator($community);
 
-    Livewire::test(AddUserToRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+    Livewire::test(AddUserToRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
         ->set('usernames', [$outsider->getFirstAttribute('uid')])
         ->set('start_date', today()->format('Y-m-d'))
         ->call('save')
@@ -118,7 +118,7 @@ test('an unknown username is rejected with a validation error, not a crash', fun
 
     // Regression: previously UserIsMember let unknown usernames through and the
     // RoleMembership insert then hit the username foreign key (500).
-    Livewire::test(AddUserToRole::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+    Livewire::test(AddUserToRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
         ->set('usernames', ['ghost-'.uniqid()])
         ->set('start_date', today()->format('Y-m-d'))
         ->call('save')

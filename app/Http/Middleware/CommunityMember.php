@@ -18,7 +18,7 @@ class CommunityMember
      */
     public function handle(Request $request, Closure $next)
     {
-        $community = $request->route('uid');
+        $community = $request->route('realm');
         if (! ($community instanceof Community)) {
             abort(404);
         }

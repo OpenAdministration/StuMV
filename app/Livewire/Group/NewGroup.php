@@ -23,9 +23,9 @@ class NewGroup extends Component
     #[Rule('required|min:6')]
     public string $name = '';
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->realm_uid = $uid->getShortCode();
+        $this->realm_uid = $realm->getShortCode();
     }
 
     public function render(): Factory|View|Application
@@ -47,7 +47,7 @@ class NewGroup extends Component
 
             Flux::toast(variant: 'success', text: __('Added new Group'));
 
-            return to_route('realms.groups.roles', ['uid' => $this->realm_uid, 'cn' => $this->cn]);
+            return to_route('realms.groups.roles', ['realm' => $this->realm_uid, 'cn' => $this->cn]);
         } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
 

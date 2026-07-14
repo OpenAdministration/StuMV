@@ -44,9 +44,9 @@ class ListRoles extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $uid, $ou)
+    public function mount(Community $realm, $ou)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 
@@ -195,7 +195,7 @@ class ListRoles extends Component
         Flux::toast(variant: 'success', text: __('Role was deleted'));
 
         return to_route('committees.roles', [
-            'uid' => $this->uid,
+            'realm' => $this->uid,
             'ou' => $this->ou,
         ]);
     }

@@ -15,9 +15,9 @@ class ListApiClients extends Component
 
     public string $revokeClientName = '';
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
     }
 
     public function render()

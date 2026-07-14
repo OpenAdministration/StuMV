@@ -37,7 +37,7 @@ test('deletePrepare shows the confirmation modal', function (): void {
     actingAsAdmin($community);
     $mod = TestLdap::moderator($community);
 
-    Livewire::test(ListModerators::class, ['uid' => $community])
+    Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->call('deletePrepare', $mod->username)
         ->assertDispatched('modal-show', name: 'delete')
@@ -51,7 +51,7 @@ test('deleteCommit removes the moderator and closes the modal', function (): voi
     actingAsAdmin($community);
     $mod = TestLdap::moderator($community);
 
-    Livewire::test(ListModerators::class, ['uid' => $community])
+    Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->call('deletePrepare', $mod->username)
         ->call('deleteCommit')
@@ -70,7 +70,7 @@ test('moderators are sorted by name ascending by default', function (): void {
     }
     actingAsAdmin($community);
 
-    $cns = Livewire::test(ListModerators::class, ['uid' => $community])
+    $cns = Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->viewData('realm_members')
         ->map(fn ($user) => $user->getFirstAttribute('cn'))
@@ -88,7 +88,7 @@ test('sortBy toggles direction and re-sorts the moderators descending', function
     }
     actingAsAdmin($community);
 
-    $cns = Livewire::test(ListModerators::class, ['uid' => $community])
+    $cns = Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->call('sortBy', 'cn')
         ->assertSet('sortDirection', 'desc')
@@ -108,7 +108,7 @@ test('the moderators list is paginated to 10 per page', function (): void {
     }
     actingAsAdmin($community);
 
-    $component = Livewire::test(ListModerators::class, ['uid' => $community])->call('loadModerators');
+    $component = Livewire::test(ListModerators::class, ['realm' => $community])->call('loadModerators');
 
     expect($component->viewData('realm_members'))->toHaveCount(10);
 
@@ -123,7 +123,7 @@ test('the search field filters the moderators list', function (): void {
     TestLdap::attach($modsGroup, TestLdap::makeUser('betamod'));
     actingAsAdmin($community);
 
-    Livewire::test(ListModerators::class, ['uid' => $community])
+    Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->set('search', 'alphamod')
         ->assertSee('Test alphamod')
@@ -136,7 +136,7 @@ test('an admin sees a working profile link for moderators', function (): void {
     TestLdap::attach($modsGroup, TestLdap::makeUser('othermod'));
     actingAsAdmin($community);
 
-    Livewire::test(ListModerators::class, ['uid' => $community])
+    Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->assertSeeHtml('href="'.route('profile', ['username' => 'othermod']).'"');
 });
@@ -151,7 +151,7 @@ test('the admin permission check does not scale with the number of moderators sh
     }
 
     $queriesForTwo = countAdminGroupQueriesForModerators(function () use ($community): void {
-        Livewire::test(ListModerators::class, ['uid' => $community])->call('loadModerators');
+        Livewire::test(ListModerators::class, ['realm' => $community])->call('loadModerators');
     });
 
     foreach (range(3, 8) as $i) {
@@ -159,7 +159,7 @@ test('the admin permission check does not scale with the number of moderators sh
     }
 
     $queriesForEight = countAdminGroupQueriesForModerators(function () use ($community): void {
-        Livewire::test(ListModerators::class, ['uid' => $community])->call('loadModerators');
+        Livewire::test(ListModerators::class, ['realm' => $community])->call('loadModerators');
     });
 
     expect($queriesForEight)->toBe($queriesForTwo);

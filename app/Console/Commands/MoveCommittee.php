@@ -61,7 +61,7 @@ class MoveCommittee extends Command
 
             $newParentDn = $targetCommittee->getDn();
 
-            if ($newParentDn === $committee->getDn() || str_ends_with($newParentDn, ','.$committee->getDn())) {
+            if ($newParentDn === $committee->getDn() || str_ends_with((string) $newParentDn, ','.$committee->getDn())) {
                 $this->error('Cannot move a committee into itself or one of its own descendants.');
 
                 return self::FAILURE;

@@ -2,7 +2,7 @@
     <flux:sidebar.header class="flex h-[4rem] px-6 shrink-0 items-center bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 border-r lg:border-r-0 border-r-zinc-300  dark:border-r-zinc-700 z-10">
         <a
             wire:navigate
-            href="{{ \App\Providers\RouteServiceProvider::home($uid) }}"
+            href="{{ \App\Providers\RouteServiceProvider::home($realm) }}"
             class="flex gap-3 items-center lg:justify-center pr-4 w-full"
         >
             <x-application-logo class="size-8"/>
@@ -16,37 +16,37 @@
             <flux:sidebar.item
                 icon="house"
                 wire:navigate
-                :href="route('realms.dashboard', ['uid' => $uid])"
+                :href="route('realms.dashboard', ['realm' => $realm])"
             >
                 {{ __('Dashboard') }}
             </flux:sidebar.item>
             <flux:sidebar.item
                 icon="network"
                 wire:navigate
-                :href="route('committees.list', ['uid' => $uid])"
+                :href="route('committees.list', ['realm' => $realm])"
             >
                 {{ __('Committees and Roles') }}
             </flux:sidebar.item>
             <flux:sidebar.item
                 icon="users"
                 wire:navigate
-                :href="route('realms.members', ['uid' => $uid])"
+                :href="route('realms.members', ['realm' => $realm])"
             >
                 {{ __('People') }}
             </flux:sidebar.item>
             <flux:sidebar.item
                 icon="user-star"
                 wire:navigate
-                :href="route('realms.mods', ['uid' => $uid])"
+                :href="route('realms.mods', ['realm' => $realm])"
             >
                 {{ __('realms.dashboard.mods_headline') }}
             </flux:sidebar.item>
-            @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('uid'))
+            @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('realm'))
             @if(auth()->user()->can('moderator', $currentCommunity) || auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
                 <flux:sidebar.item
                     icon="shield-user"
                     wire:navigate
-                    :href="route('realms.admins', ['uid' => $uid])"
+                    :href="route('realms.admins', ['realm' => $realm])"
                 >
                     {{ __('realms.dashboard.admin_headline') }}
                 </flux:sidebar.item>
@@ -55,31 +55,31 @@
                 <flux:sidebar.item
                     icon="key-round"
                     wire:navigate
-                    :href="route('realms.groups', ['uid' => $uid])"
+                    :href="route('realms.groups', ['realm' => $realm])"
                 >
                     {{ __('realms.dashboard.groups_headline') }}
                 </flux:sidebar.item>
                 <flux:sidebar.item
                     icon="globe"
                     wire:navigate
-                    :href="route('realms.domains', ['uid' => $uid])"
+                    :href="route('realms.domains', ['realm' => $realm])"
                 >
                     {{ __('realms.dashboard.domains_headline') }}
                 </flux:sidebar.item>
                 <flux:sidebar.item
                     icon="unplug"
                     wire:navigate
-                    :href="route('realms.api-clients', ['uid' => $uid])"
+                    :href="route('realms.api-clients', ['realm' => $realm])"
                 >
                     {{ __('api_clients.list_title') }}
                 </flux:sidebar.item>
             @endif
-            @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('uid'))
+            @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('realm'))
                 <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="hammer"
                     wire:navigate
-                    :href="route('tools.dashboard', ['uid' => $uid])"
+                    :href="route('tools.dashboard', ['realm' => $realm])"
                     :current="request()->is('*/tools') || request()->is('*/tools/*')"
                 >
                     {{ __('tools.tools') }}

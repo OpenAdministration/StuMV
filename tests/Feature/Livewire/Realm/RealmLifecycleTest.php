@@ -35,7 +35,7 @@ test('an admin can rename their realm', function (): void {
     $uid = $community->getShortCode();
     actingAsAdmin($community);
 
-    Livewire::test(EditRealm::class, ['uid' => $community])
+    Livewire::test(EditRealm::class, ['realm' => $community])
         ->set('name', 'Renamed Realm')
         ->call('save')
         ->assertHasNoErrors();
@@ -76,7 +76,7 @@ test('an admin can add a domain to their realm', function (): void {
     actingAsAdmin($community);
     $dc = 'dom'.bin2hex(random_bytes(3)).'.de';
 
-    Livewire::test(NewDomain::class, ['uid' => $community])
+    Livewire::test(NewDomain::class, ['realm' => $community])
         ->set('dc', $dc)
         ->call('save')
         ->assertHasNoErrors();

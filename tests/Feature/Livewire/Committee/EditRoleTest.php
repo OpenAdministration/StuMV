@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('renders the edit form for a seeded role', function (): void {
     actingAsModerator('demo');
 
-    Livewire::test(EditRole::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
+    Livewire::test(EditRole::class, ['realm' => Community::findByUid('demo'), 'ou' => 'FSR', 'cn' => 'mitglied'])
         ->assertStatus(200)
         ->assertSet('cn', 'mitglied');
 });

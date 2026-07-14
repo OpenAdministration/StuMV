@@ -17,7 +17,7 @@ test('a moderator can delete a committee once the name is confirmed', function (
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('confirmDeleteCommittee', $committee->getDn())
         ->set('deleteConfirmText', 'fsr')
         ->call('deleteCommittee');
@@ -31,7 +31,7 @@ test('a plain member cannot delete a committee', function (): void {
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsMember($community);
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('confirmDeleteCommittee', $committee->getDn())
         ->assertForbidden();
 
@@ -44,7 +44,7 @@ test('a moderator can delete a role', function (): void {
     TestLdap::makeRole($committee, 'mitglied');
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('deletePrepare', 'mitglied')
         ->set('deleteConfirmText', 'mitglied')
         ->call('deleteCommit');
@@ -66,7 +66,7 @@ test('a moderator can terminate an active role membership', function (): void {
         'from' => today()->subMonth(),
     ]);
 
-    Livewire::test(TerminateRoleMemberships::class, ['uid' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+    Livewire::test(TerminateRoleMemberships::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
         ->set('membershipsToTerminate', [$membership->id])
         ->set('terminationDate', today()->format('Y-m-d'))
         ->call('save')

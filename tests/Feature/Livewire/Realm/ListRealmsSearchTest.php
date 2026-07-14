@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\SuperUserGroup;
 use App\Livewire\Realm\ListRealms;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -135,7 +136,7 @@ test('the "only mine" switch also applies for a super admin', function (): void 
     $notMine = newCommunity('notm'.bin2hex(random_bytes(3)));
 
     $ldapUser = TestLdap::makeUser();
-    TestLdap::attach(\App\Ldap\SuperUserGroup::group(), $ldapUser);
+    TestLdap::attach(SuperUserGroup::group(), $ldapUser);
     TestLdap::attach($mine->membersGroup(), $ldapUser);
     $this->actingAs(TestLdap::databaseUser($ldapUser));
 

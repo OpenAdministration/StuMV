@@ -57,7 +57,7 @@ test('resolving role members from LDAP is batched into a single query regardless
     $moderator = actingAsModerator($community);
 
     $queriesForOneRole = countMemberLookupQueryEvents(function () use ($community, $committee): void {
-        Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+        Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
             ->call('loadRoles');
     }, $moderator->username);
 
@@ -65,7 +65,7 @@ test('resolving role members from LDAP is batched into a single query regardless
     makeRoleWithActiveMembers($committee, 'role3', $community, 2);
 
     $queriesForThreeRoles = countMemberLookupQueryEvents(function () use ($community, $committee): void {
-        Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+        Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
             ->call('loadRoles');
     }, $moderator->username);
 
@@ -86,7 +86,7 @@ test('roles still show their active members after batching the LDAP lookup', fun
     ]);
     actingAsModerator($community);
 
-    $roleData = Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+    $roleData = Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
         ->call('loadRoles')
         ->viewData('roleData');
 

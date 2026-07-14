@@ -38,9 +38,9 @@ class EditRoleMembership extends Component
     #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $uid, $ou, $cn, $id)
+    public function mount(Community $realm, $ou, $cn, $id)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
         $this->id = $id;
@@ -72,7 +72,7 @@ class EditRoleMembership extends Component
         Flux::toast(variant: 'success', text: __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
 
         return to_route('committees.roles.members', [
-            'uid' => $this->uid,
+            'realm' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
             'id' => $this->id,

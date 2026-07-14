@@ -73,7 +73,7 @@ class ListRealms extends Component
         $canEnter = $this->communityMemberships($ldapUser);
 
         if (count($canEnter) === 1) {
-            $this->redirectRoute('realms.dashboard', ['uid' => \Arr::first(array_keys($canEnter))], navigate: true);
+            $this->redirectRoute('realms.dashboard', ['realm' => \Arr::first(array_keys($canEnter))], navigate: true);
         }
     }
 
@@ -178,6 +178,6 @@ class ListRealms extends Component
     {
         $c = Community::findOrFailByUid($realm_uid);
         $this->authorize('enter', $c);
-        $this->redirectRoute('realms.dashboard', ['uid' => $realm_uid]);
+        $this->redirectRoute('realms.dashboard', ['realm' => $realm_uid]);
     }
 }

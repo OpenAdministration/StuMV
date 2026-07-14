@@ -15,7 +15,7 @@ test('matches are rendered as cards', function (): void {
 
     $ldapUser = User::findByUsername($member->username);
 
-    $response = Livewire::test(CompareEmailList::class, ['uid' => $community])
+    $response = Livewire::test(CompareEmailList::class, ['realm' => $community])
         ->set('emailAddressesInput', $ldapUser->getFirstAttribute('mail'))
         ->call('compareEmailAddressesWithLdap')
         ->assertSeeHtml('data-flux-card')

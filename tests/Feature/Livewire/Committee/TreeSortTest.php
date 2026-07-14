@@ -14,7 +14,7 @@ test('top-level committees are sorted by name', function (): void {
     TestLdap::makeCommittee($community, 'mmm')->fill(['description' => 'Mango'])->save();
     actingAsModerator($community);
 
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    $html = Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->html();
 
@@ -34,7 +34,7 @@ test('children within a folder are sorted by name too', function (): void {
     TestLdap::makeCommittee($community, 'c3', parentDn: $parent->getDn())->fill(['description' => 'Bob'])->save();
     actingAsModerator($community);
 
-    $html = Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    $html = Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->call('toggleChildren', $parent->getDn())
         ->html();

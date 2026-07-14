@@ -17,7 +17,7 @@ class CommunityModerator
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $community = Route::current()->parameter('uid');
+        $community = Route::current()->parameter('realm');
         $ou = Route::current()->parameter('ou');
 
         // Every route this middleware guards is a role/role-membership

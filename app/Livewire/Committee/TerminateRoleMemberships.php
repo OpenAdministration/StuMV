@@ -24,9 +24,9 @@ class TerminateRoleMemberships extends Component
 
     public ?string $terminationDate = null;
 
-    public function mount(Community $uid, string $ou, string $cn)
+    public function mount(Community $realm, string $ou, string $cn)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
         $this->terminationDate = today()->format('Y-m-d');
@@ -62,7 +62,7 @@ class TerminateRoleMemberships extends Component
         Flux::toast(variant: 'success', text: __('roles.message_terminate_member_success'));
 
         return to_route('committees.roles.members', [
-            'uid' => $this->uid,
+            'realm' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
         ]);

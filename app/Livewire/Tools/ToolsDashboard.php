@@ -13,9 +13,9 @@ class ToolsDashboard extends Component
 
     public bool $unildapDataExists = false;
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->unildapDataExists = filled(config('ldap.connections.uni.base_dn'));
     }
 

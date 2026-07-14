@@ -22,9 +22,9 @@ class AddRoleToGroup extends Component
 
     public string $selected_role_dn;
 
-    public function mount(Community $uid, $cn)
+    public function mount(Community $realm, $cn)
     {
-        $this->uid = $uid->getShortCode();
+        $this->uid = $realm->getShortCode();
         $this->group_cn = $cn;
     }
 
@@ -67,6 +67,6 @@ class AddRoleToGroup extends Component
 
         Flux::toast(variant: 'success', text: __('groups.success_role_add'));
 
-        return to_route('realms.groups.roles', ['uid' => $this->uid, 'cn' => $this->group_cn]);
+        return to_route('realms.groups.roles', ['realm' => $this->uid, 'cn' => $this->group_cn]);
     }
 }

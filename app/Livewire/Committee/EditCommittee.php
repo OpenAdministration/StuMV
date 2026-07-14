@@ -24,9 +24,9 @@ class EditCommittee extends Component
     #[Validate('required|min:3')]
     public string $description = '';
 
-    public function mount(Community $uid, string $ou)
+    public function mount(Community $realm, string $ou)
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $c = Committee::findByName($this->realm_uid, $ou);
         $this->description = $c->getFirstAttribute('description');
@@ -58,6 +58,6 @@ class EditCommittee extends Component
 
         Flux::toast(variant: 'success', text: __('Saved'));
 
-        return response()->redirectToRoute('committees.list', ['uid' => $this->realm_uid]);
+        return response()->redirectToRoute('committees.list', ['realm' => $this->realm_uid]);
     }
 }

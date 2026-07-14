@@ -16,7 +16,7 @@ test('searching auto-unfolds branches down to the match without manual toggling'
     $other = TestLdap::makeCommittee($community, 'other');
     actingAsModerator($community);
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->assertDontSee('Committee grandchild')
         ->set('search', 'grandchild')
@@ -34,7 +34,7 @@ test('toggle buttons are hidden while searching but shown otherwise', function (
 
     $toggleMarker = "toggleChildren('{$parent->getDn()}')";
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->assertSeeHtml($toggleMarker)
         ->set('search', 'child')
@@ -51,14 +51,14 @@ test('searching by role name surfaces its committee and shows the role as a badg
     TestLdap::makeRole($other, 'schriftfuehrer');
     actingAsModerator($community);
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->assertDontSee('Committee fsr')
         ->set('search', 'kassenwart')
         ->assertSee('Committee parent')
         ->assertSee('Committee fsr')
         ->assertSee('Role kassenwart')
-        ->assertSeeHtml(route('committees.roles.members', ['uid' => $community->getShortCode(), 'ou' => 'fsr', 'cn' => 'kassenwart']))
+        ->assertSeeHtml(route('committees.roles.members', ['realm' => $community->getShortCode(), 'ou' => 'fsr', 'cn' => 'kassenwart']))
         ->assertDontSee('Committee other')
         ->assertDontSee('Role schriftfuehrer');
 });
@@ -69,7 +69,7 @@ test('a committee that matches by name on its own does not gain role badges for 
     TestLdap::makeRole($committee, 'kassenwart');
     actingAsModerator($community);
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->set('search', 'fsr')
         ->assertSee('Committee fsr')
@@ -82,7 +82,7 @@ test('clearing the search restores manual fold state', function (): void {
     $child = TestLdap::makeCommittee($community, 'child', parentDn: $parent->getDn());
     actingAsModerator($community);
 
-    Livewire::test(ListCommitteesTree::class, ['uid' => $community])
+    Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
         ->assertDontSee('Committee child')
         ->set('search', 'child')

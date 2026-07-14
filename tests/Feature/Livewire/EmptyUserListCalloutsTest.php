@@ -19,7 +19,7 @@ test('the admins list shows a warning callout when there are no admins', functio
     $community = newCommunity();
     actingAsMember($community);
 
-    Livewire::test(ListAdmins::class, ['uid' => $community])
+    Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('loadAdmins')
         ->assertSeeHtml('data-flux-callout')
         ->assertSee(__('realms.no_admins_found'));
@@ -29,7 +29,7 @@ test('the moderators list shows a warning callout when there are no moderators',
     $community = newCommunity();
     actingAsMember($community);
 
-    Livewire::test(ListModerators::class, ['uid' => $community])
+    Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
         ->assertSeeHtml('data-flux-callout')
         ->assertSee(__('realms.no_moderators_found'));
@@ -43,7 +43,7 @@ test('the members list shows a warning callout when a search matches no members'
     $community = newCommunity();
     actingAsMember($community);
 
-    Livewire::test(ListMembers::class, ['uid' => $community])
+    Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
         ->set('search', 'no-such-member-xyz')
         ->assertSeeHtml('data-flux-callout');
@@ -54,7 +54,7 @@ test('the committee moderators list shows a warning callout when there are no mo
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsMember($community);
 
-    Livewire::test(ListCommitteeModerators::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou')])
+    Livewire::test(ListCommitteeModerators::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
         ->call('loadModerators')
         ->assertSeeHtml('data-flux-callout')
         ->assertSee(__('committees.no_mods_found'));
@@ -67,7 +67,7 @@ test('the role members list shows a warning callout when the role has no members
     actingAsModerator($community);
 
     Livewire::test(ListRoleMembers::class, [
-        'uid' => $community,
+        'realm' => $community,
         'ou' => $committee->getFirstAttribute('ou'),
         'cn' => $role->getFirstAttribute('cn'),
     ])

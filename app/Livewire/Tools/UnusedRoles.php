@@ -12,9 +12,9 @@ class UnusedRoles extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $uid)
+    public function mount(Community $realm)
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
     public function loadUnusedRoles(): void

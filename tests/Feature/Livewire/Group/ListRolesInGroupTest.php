@@ -17,7 +17,7 @@ test('deletePrepare shows the confirmation modal with the translated role name',
 
     $membership = GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
 
-    Livewire::test(ListRolesInGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+    Livewire::test(ListRolesInGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->call('deletePrepare', $membership->id)
         ->assertDispatched('modal-show', name: 'delete')
         ->assertDontSee('groups.delete_role_title')
@@ -36,7 +36,7 @@ test('deleting a role from a group removes only that specific row, even with dup
     $first = GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
     $second = GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
 
-    Livewire::test(ListRolesInGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+    Livewire::test(ListRolesInGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->call('deletePrepare', $first->id)
         ->call('deleteCommit')
         ->assertDispatched('modal-close', name: 'delete');
@@ -55,7 +55,7 @@ test('the roles-in-group list shows one row per membership row', function (): vo
     GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
     GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
 
-    $html = Livewire::test(ListRolesInGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $html = Livewire::test(ListRolesInGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->html();
 
     expect(substr_count($html, 'Role mitglied'))->toBe(2);

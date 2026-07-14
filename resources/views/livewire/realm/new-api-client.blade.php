@@ -18,7 +18,7 @@
         <flux:callout variant="warning" icon="triangle-alert" heading="{{ __('api_clients.client_secret_warning') }}" />
 
         <div class="flex justify-end">
-            <flux:button variant="primary" wire:navigate href="{{ route('realms.api-clients', ['uid' => $uid]) }}">
+            <flux:button variant="primary" wire:navigate href="{{ route('realms.api-clients', ['realm' => $uid]) }}">
                 {{ __('api_clients.done') }}
             </flux:button>
         </div>
@@ -45,7 +45,7 @@
         </flux:field>
 
         <x-slot:abort_route>
-            {{ route('realms.api-clients', ['uid' => $uid]) }}
+            {{ route('realms.api-clients', ['realm' => $uid]) }}
         </x-slot:abort_route>
     </x-livewire-form>
 @endif

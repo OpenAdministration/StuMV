@@ -28,7 +28,7 @@ test('the page 404s when the uni LDAP connection has no base_dn configured', fun
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
+    Livewire::test(ImportUsersFromUniLdap::class, ['realm' => $community])
         ->assertStatus(404);
 });
 
@@ -36,7 +36,7 @@ test('the feature is shown when the uni LDAP connection has a base_dn configured
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
+    Livewire::test(ImportUsersFromUniLdap::class, ['realm' => $community])
         ->assertStatus(200);
 });
 
@@ -44,7 +44,7 @@ test('searching for an email with no match in the university LDAP reports not fo
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
+    Livewire::test(ImportUsersFromUniLdap::class, ['realm' => $community])
         ->set('email', 'nobody-such-address@example.test')
         ->call('getUserData')
         ->assertSet('searchCompleted', true)
@@ -61,7 +61,7 @@ test('an unreachable university LDAP connection is handled gracefully instead of
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(ImportUsersFromUniLdap::class, ['uid' => $community])
+    Livewire::test(ImportUsersFromUniLdap::class, ['realm' => $community])
         ->set('email', 'someone@example.test')
         ->call('getUserData')
         ->assertSet('searchCompleted', true)

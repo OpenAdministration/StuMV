@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('renders the edit form for a seeded committee', function (): void {
     actingAsModerator('demo');
 
-    Livewire::test(EditCommittee::class, ['uid' => Community::findByUid('demo'), 'ou' => 'FSR'])
+    Livewire::test(EditCommittee::class, ['realm' => Community::findByUid('demo'), 'ou' => 'FSR'])
         ->assertStatus(200)
         ->assertSet('ou', 'FSR');
 });

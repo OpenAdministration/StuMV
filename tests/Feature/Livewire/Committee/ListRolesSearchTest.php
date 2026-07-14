@@ -15,7 +15,7 @@ test('with the active-only filter off, every role is listed', function (): void 
     TestLdap::makeRole($committee, 'beta');
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
         ->assertSee('Role alpha')
@@ -29,7 +29,7 @@ test('the role list filters by the search term', function (): void {
     TestLdap::makeRole($committee, 'beta');
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
         ->set('search', 'alpha')
@@ -51,7 +51,7 @@ test('the active-only filter hides roles without members and shows those with me
     ]);
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', true)
         ->assertSee('Role staffed')
@@ -63,7 +63,7 @@ test('sorting by a column toggles the direction', function (): void {
     $committee = TestLdap::makeCommittee($community, 'fsr');
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->assertSet('sortDirection', 'asc')
         ->call('sortBy', 'cn')          // same field -> toggles
         ->assertSet('sortDirection', 'desc')

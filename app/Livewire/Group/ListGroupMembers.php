@@ -48,9 +48,9 @@ class ListGroupMembers extends Component
         $this->resetPage();
     }
 
-    public function mount(Community $uid, $cn): void
+    public function mount(Community $realm, $cn): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->group_cn = $cn;
     }
 

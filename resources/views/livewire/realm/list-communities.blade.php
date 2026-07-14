@@ -82,7 +82,7 @@
                                     <flux:menu.item
                                         icon="pencil"
                                         :disabled="Auth::user()->cannot('edit', $realm)"
-                                        :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['uid' => $realm->getShortCode()]) : null"
+                                        :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['realm' => $realm->getShortCode()]) : null"
                                         wire:navigate
                                     >
                                         {{ __('Edit') }}

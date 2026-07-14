@@ -25,7 +25,7 @@ test('an admin can promote a member to admin', function (): void {
     $memberDn = LdapUser::findByUsername($member->username)->getDn();
     actingAsAdmin($community);
 
-    Livewire::test(NewAdmin::class, ['uid' => $community])
+    Livewire::test(NewAdmin::class, ['realm' => $community])
         ->set('dn', [$memberDn])
         ->call('save')
         ->assertHasNoErrors();
@@ -38,7 +38,7 @@ test('an admin can remove another admin', function (): void {
     $target = TestLdap::admin($community);
     actingAsAdmin($community);
 
-    Livewire::test(ListAdmins::class, ['uid' => $community])
+    Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('deletePrepare', $target->username)
         ->call('deleteCommit');
 
@@ -51,7 +51,7 @@ test('an admin can add a moderator', function (): void {
     $memberDn = LdapUser::findByUsername($member->username)->getDn();
     actingAsAdmin($community);
 
-    Livewire::test(NewModerator::class, ['uid' => $community])
+    Livewire::test(NewModerator::class, ['realm' => $community])
         ->set('dn', [$memberDn])
         ->call('save')
         ->assertHasNoErrors();
@@ -64,7 +64,7 @@ test('a super admin can add a community member', function (): void {
     $outsider = TestLdap::makeUser();
     actingAsSuperAdmin();
 
-    Livewire::test(NewMember::class, ['uid' => $community])
+    Livewire::test(NewMember::class, ['realm' => $community])
         ->set('selectedUsers', [$outsider->getDn()])
         ->call('save')
         ->assertHasNoErrors();
@@ -79,7 +79,7 @@ test('the new member select excludes users already in the members group', functi
     $outsider = TestLdap::makeUser();
     actingAsSuperAdmin();
 
-    $dns = Livewire::test(NewMember::class, ['uid' => $community])
+    $dns = Livewire::test(NewMember::class, ['realm' => $community])
         ->viewData('selectable_users')
         ->map(fn ($user) => $user->getDn());
 

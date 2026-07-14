@@ -28,7 +28,7 @@
                                 <flux:table.cell>
                                     <flux:link
                                         wire:navigate
-                                        href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou')]) }}"
+                                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou')]) }}"
                                     >
                                         {{ $role->committee()->getFirstAttribute('description') }}
                                     </flux:link>
@@ -49,7 +49,7 @@
                                 <flux:table.cell>
                                     <flux:link
                                         wire:navigate
-                                        href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
                                     >
                                         {{ $committee->getFirstAttribute('description') }}
                                     </flux:link>

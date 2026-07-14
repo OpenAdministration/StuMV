@@ -13,7 +13,7 @@ test('a moderator sees the add member button', function (): void {
     TestLdap::makeRole($committee, 'mitglied');
     actingAsModerator($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
         ->assertSeeHtml('Add Member');
@@ -25,7 +25,7 @@ test('a super admin sees the add member button', function (): void {
     TestLdap::makeRole($committee, 'mitglied');
     actingAsSuperAdmin();
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
         ->assertSeeHtml('Add Member');
@@ -37,7 +37,7 @@ test('a plain member does not see the add member button', function (): void {
     TestLdap::makeRole($committee, 'mitglied');
     actingAsMember($community);
 
-    Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
+    Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
         ->assertDontSeeHtml('Add Member');

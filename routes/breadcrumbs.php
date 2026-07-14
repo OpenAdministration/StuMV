@@ -19,7 +19,7 @@ Breadcrumbs::for('realms.new', function (BreadcrumbTrail $trail, array $routePar
 });
 
 Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $community = Route::current()->parameter('uid');
+    $community = Route::current()->parameter('realm');
     $name = $community->getFirstAttribute('description') ?: $community->getFirstAttribute('ou');
     $trail->push($name, route('realms.dashboard', $community->getFirstAttribute('ou')), ['truncate' => true]);
 });
@@ -150,7 +150,7 @@ Breadcrumbs::for('committees.new', function (BreadcrumbTrail $trail, array $rout
 
 Breadcrumbs::for('committees.details', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.list', $routeParams);
-    $uid = $routeParams['uid'];
+    $uid = $routeParams['realm'];
     $c = Committee::findByOrFail('ou', $routeParams['ou']);
     foreach ($c->committeePath() as $committee) {
         $routeParams['ou'] = $committee;
@@ -178,7 +178,7 @@ Breadcrumbs::for('committees.roles.new', function (BreadcrumbTrail $trail, array
 
 Breadcrumbs::for('committees.roles.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.roles', $routeParams);
-    $committee = Committee::findByName($routeParams['uid'], $routeParams['ou']);
+    $committee = Committee::findByName($routeParams['realm'], $routeParams['ou']);
     $role = $committee?->roles()->where('cn', $routeParams['cn'])->first();
     $name = $role?->getFirstAttribute('description') ?: $routeParams['cn'];
     $trail->push($name, route('committees.roles.members', $routeParams), ['truncate' => true]);
