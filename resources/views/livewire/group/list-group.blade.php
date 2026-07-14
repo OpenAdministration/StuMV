@@ -28,7 +28,7 @@
                     {{ __('Short Name') }}
                 </flux:table.column>
                 <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
-                    {{ __('Full Name') }}
+                    {{ __('Description') }}
                 </flux:table.column>
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
@@ -42,8 +42,8 @@
                         >
                             {{ $group->getFirstAttribute('cn') }}
                         </flux:link>
-                    </x-table.cell>
-                    <flux:table.cell>{{ $group->getFirstAttribute('description') }}</x-table.cell>
+                    </flux:table.cell>
+                    <flux:table.cell>{{ $group->getFirstAttribute('description') }}</flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
                         <flux:dropdown>
                             <flux:button size="sm" icon="ellipsis-vertical" />

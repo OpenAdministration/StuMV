@@ -1,12 +1,37 @@
 <?php
 
 use App\Ldap\Group;
+use App\Livewire\Group\EditGroup;
 use App\Livewire\Group\ListGroups;
+use App\Livewire\Group\NewGroup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
+
+test('the list, create and edit pages label the description field "Description", not "Full Name"/"Full Groupname"', function (): void {
+    // Force English so the labels render as the literal, untranslated keys -
+    // in German "Full Name" itself renders as just "Name" (still used
+    // elsewhere, e.g. edit-role.blade.php), which would be too generic a
+    // substring to safely assert the absence of.
+    app()->setLocale('en');
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroups::class, ['uid' => $community])
+        ->assertSee('Description')
+        ->assertDontSee('Full Name');
+
+    Livewire::test(NewGroup::class, ['uid' => $community])
+        ->assertSee('Description')
+        ->assertDontSee('Full Groupname');
+
+    Livewire::test(EditGroup::class, ['uid' => $community, 'cn' => 'newsletter'])
+        ->assertSee('Description')
+        ->assertDontSee('Full Groupname');
+});
 
 test('an admin can delete a group', function (): void {
     $community = newCommunity();

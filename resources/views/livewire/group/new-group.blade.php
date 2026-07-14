@@ -9,7 +9,7 @@
         <flux:input wire:model="cn" />
     </flux:field>
     <flux:field>
-        <flux:label>{{ __('Full Groupname') }}</flux:label>
+        <flux:label>{{ __('Description') }}</flux:label>
         <flux:input wire:model="name" />
     </flux:field>
     
