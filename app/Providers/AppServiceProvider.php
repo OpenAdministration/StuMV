@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
@@ -42,6 +43,15 @@ class AppServiceProvider extends ServiceProvider
         // Passport 13 ships no authorization/consent screen and does not bind
         // AuthorizationViewResponse by default, so register our own consent view.
         Passport::authorizationView('auth.oauth.authorize');
+
+        // Laravel 13 dropped the automatic route('login') fallback in the
+        // exception handler's unauthenticated() - a guest AuthenticationException
+        // with no redirect target now yields an empty 401 instead of a login
+        // redirect. Passport's authorize endpoint throws exactly that for guests
+        // (GET /oauth/authorize carries only `web`, not `auth`), which broke SSO
+        // login: visitors hit a bare 401 instead of the login form. Restore the
+        // redirect so they log in and bounce back to the authorization request.
+        AuthenticationException::redirectUsing(static fn (): string => route('login'));
 
         Password::defaults(static fn () => Password::min(12)
             ->letters()
