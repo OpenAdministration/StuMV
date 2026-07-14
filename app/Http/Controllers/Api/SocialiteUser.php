@@ -21,9 +21,11 @@ class SocialiteUser extends Controller
             'username' => $user->username, // filled with ldap uid
             'name' => $user->full_name, // cn
             'email' => $user->email,
-            // Public URL to the stored avatar (same shape as Directory\Users);
-            // the raw jpegPhoto is base64 and breaks response()->json().
-            'picture' => $picture ? asset('storage/avatars/'.$picture->file_id.'.jpg') : null,
+            // Public URL to the stored avatar. Socialite's standard claim is
+            // 'avatar' (Laravel\Socialite\User::getAvatar), which is what the
+            // StuFis Passport driver reads; the raw jpegPhoto is base64 and
+            // breaks response()->json().
+            'avatar' => $picture ? asset('storage/avatars/'.$picture->file_id.'.jpg') : null,
             'iban' => null,
             'address' => json_encode([
                 'street_address' => $ldapUser->getFirstAttribute('street'),
