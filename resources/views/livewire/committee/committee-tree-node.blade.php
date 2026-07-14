@@ -49,7 +49,7 @@
                             wire:navigate
                             href="{{ route('committees.roles.members', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
                         >
-                            <flux:badge size="sm" color="blue">{{ $role->getFirstAttribute('description') }}</flux:badge>
+                            <flux:badge size="sm">{{ $role->getFirstAttribute('description') }}</flux:badge>
                         </a>
                     @endforeach
                 </div>
