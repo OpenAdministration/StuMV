@@ -1,5 +1,5 @@
-<div class="flex-col space-y-8">
-    <div class="flex flex-col sm:flex-row gap-6">
+<div class="flex-col">
+    <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.list_headline') }}</flux:heading>
             <flux:text class="text-base">{{  __('realms.list_explanation') }}</flux:text>
@@ -26,7 +26,7 @@
     </div>
 
     <div
-        class="flex items-center gap-3"
+        class="flex items-center gap-3 mb-8"
         x-data="{ showOnlyMine: $persist(false).as('realms.showOnlyMine') }"
         x-init="
             $wire.showOnlyMine = showOnlyMine;
@@ -36,82 +36,67 @@
         <flux:switch wire:model.live="showOnlyMine" label="{{ __('realms.show_only_mine') }}" align="left" />
     </div>
 
-    <div class="flex justify-between">
-        <flux:input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search') }}"/>
-    </div>
-    <flux:table>
-        <flux:table.columns>
-            <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
-                {{ __('Name') }}
-            </flux:table.column>
-            <flux:table.column sortable :sorted="$sortField === 'ou'" :direction="$sortDirection" wire:click="sortBy('ou')">
-                {{ __('realms.shortcode') }}
-            </flux:table.column>
-            <flux:table.column></flux:table.column>
-        </flux:table.columns>
-        <flux:table.rows>
-        @php /** @var \App\Ldap\Community $realm */ @endphp
-        @forelse($realms as $realm)
-            <flux:table.row>
-                <flux:table.cell>
-                    <flux:link
-                        :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
-                        wire:click="enter('{{ $realm->getShortCode() }}')"
-                        class="cursor-pointer"
-                    >
-                        {{ $realm->getLongName() }}
-                    </flux:link>
-                </flux:table.cell>
-                <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
-                <flux:table.cell class="flex justify-end gap-2">
-                    <flux:button
-                        size="sm"
-                        variant="primary"
-                        icon="log-in"
-                        :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
-                        wire:click="enter('{{ $realm->getShortCode() }}')"
-                    >
-                        {{ __('Enter') }}
-                    </flux:button>
-                    <flux:dropdown>
-                        <flux:button size="sm" icon="ellipsis-vertical" />
-                        <flux:menu>
-                            <flux:menu.item
-                                icon="pencil"
-                                :disabled="Auth::user()->cannot('edit', $realm)"
-                                :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['uid' => $realm->getShortCode()]) : null"
-                                wire:navigate
-                            >
-                                {{ __('Edit') }}
-                            </flux:menu.item>
-                            <flux:menu.item
-                                variant="danger"
-                                icon="trash-2"
-                                :disabled="Auth::user()->cannot('delete', $realm)"
-                                wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
-                                {{ __('Delete') }}
-                            </flux:menu.item>
-                        </flux:menu>
-                    </flux:dropdown>
-                </flux:table.cell>
-            </flux:table.row>
-        @empty
-            <flux:table.row>
-                <flux:table.cell colspan="6">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('realms.no_realms_found') }}</span>
-                    </div>
-                </flux:table.cell>
-            </flux:table.row>
-        @endforelse
-        </flux:table.rows>
-    </flux:table>
+    <flux:field class="mb-8">
+        <flux:label>{{ __('realms.search') }}</flux:label>
+        <flux:input wire:model.live="search" />
+    </flux:field>
 
-    @if(count($realms) > 0)
-        <div class="pagination">
-            <flux:pagination :paginator="$realms" />
-        </div>
-    @endif
+    <div class="pb-8">
+        @if(count($realms) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">{{ __('Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'ou'" :direction="$sortDirection" wire:click="sortBy('ou')">{{ __('realms.shortcode') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                @php /** @var \App\Ldap\Community $realm */ @endphp
+                @foreach($realms as $realm)
+                    <flux:table.row>
+                        <flux:table.cell>{{ $realm->getLongName() }}</flux:table.cell>
+                        <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
+                        <flux:table.cell class="flex justify-end gap-2">
+                            <flux:button
+                                size="sm"
+                                variant="primary"
+                                icon="log-in"
+                                :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
+                                wire:click="enter('{{ $realm->getShortCode() }}')"
+                            >
+                                {{ __('Enter') }}
+                            </flux:button>
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        icon="pencil"
+                                        :disabled="Auth::user()->cannot('edit', $realm)"
+                                        :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['uid' => $realm->getShortCode()]) : null"
+                                        wire:navigate
+                                    >
+                                        {{ __('Edit') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="trash-2"
+                                        :disabled="Auth::user()->cannot('delete', $realm)"
+                                        wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
+                                        {{ __('Delete') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+                </flux:table.rows>
+            </flux:table>
+            <div class="pagination">
+                <flux:pagination :paginator="$realms" />
+            </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('realms.no_realms_found') }}" />
+        @endif
+    </div>
 
     <form wire:submit="deleteCommit">
         <flux:modal name="delete" class="md:w-96">
