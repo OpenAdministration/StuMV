@@ -36,7 +36,7 @@
         @endif
 
         <div class="flex items-center border-b border-zinc-200 dark:border-zinc-700 py-2">
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-3 py-1">
                 <flux:link
                     wire:navigate
                     href="{{ route('committees.roles', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
