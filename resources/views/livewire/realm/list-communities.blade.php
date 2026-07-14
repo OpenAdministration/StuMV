@@ -53,7 +53,18 @@
                 @php /** @var \App\Ldap\Community $realm */ @endphp
                 @foreach($realms as $realm)
                     <flux:table.row>
-                        <flux:table.cell>{{ $realm->getLongName() }}</flux:table.cell>
+                        <flux:table.cell>
+                            @if($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))
+                                <flux:link
+                                    wire:click="enter('{{ $realm->getShortCode() }}')"
+                                    class="cursor-pointer"
+                                >
+                                    {{ $realm->getLongName() }}
+                                </flux:link>
+                            @else
+                                {{ $realm->getLongName() }}
+                            @endif
+                        </flux:table.cell>
                         <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
                         <flux:table.cell class="flex justify-end gap-2">
                             <flux:button
