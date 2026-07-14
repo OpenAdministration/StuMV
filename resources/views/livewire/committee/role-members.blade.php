@@ -102,13 +102,16 @@
                         @endif
                     </flux:table.cell>
                     <flux:table.cell>
-                        <flux:link
-                            wire:navigate
-                            :disabled="!$isAdmin"
-                            :href="$isAdmin ? route('profile', ['username' => $member->username]) : null"
-                        >
+                        @if($isAdmin)
+                            <flux:link
+                                wire:navigate
+                                :href="route('profile', ['username' => $member->username])"
+                            >
+                                {{ $displayName }}
+                            </flux:link>
+                        @else
                             {{ $displayName }}
-                        </flux:link>
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell>{{ \Carbon\Carbon::parse($member->from)->format('Y-m-d') }}</flux:table.cell>
                     <flux:table.cell>
