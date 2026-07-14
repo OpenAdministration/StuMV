@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\User;
 use App\Livewire\Tools\CompareEmailList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -12,7 +13,7 @@ test('matches are rendered as cards', function (): void {
     $member = TestLdap::member($community);
     actingAsModerator($community);
 
-    $ldapUser = \App\Ldap\User::findByUsername($member->username);
+    $ldapUser = User::findByUsername($member->username);
 
     Livewire::test(CompareEmailList::class, ['uid' => $community])
         ->set('emailAddressesInput', $ldapUser->getFirstAttribute('mail'))

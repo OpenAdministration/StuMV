@@ -76,7 +76,7 @@ function actingAsSuperAdmin(): User
 
 function actingAsDirectoryClient(Community $community, array $scopes = []): PassportClient
 {
-    $client = app(ClientRepository::class)->createClientCredentialsGrantClient('Test Client');
+    $client = resolve(ClientRepository::class)->createClientCredentialsGrantClient('Test Client');
     $client->forceFill(['community_uid' => $community->getShortCode()])->save();
 
     Passport::actingAsClient($client, $scopes);

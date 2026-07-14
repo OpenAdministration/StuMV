@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 
 function makeApiClient(string $uid, string $name, array $scopes = ['committees']): PassportClient
 {
-    $client = app(ClientRepository::class)->createClientCredentialsGrantClient($name);
+    $client = resolve(ClientRepository::class)->createClientCredentialsGrantClient($name);
     $client->forceFill(['community_uid' => $uid, 'scopes' => $scopes])->save();
 
     return $client;
@@ -52,5 +52,5 @@ test('a revoked client can no longer authenticate against the directory API', fu
         ->call('revokePrepare', $client->id)
         ->call('revokeCommit');
 
-    expect(app(ClientRepository::class)->findActive($client->id))->toBeNull();
+    expect(resolve(ClientRepository::class)->findActive($client->id))->toBeNull();
 });

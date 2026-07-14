@@ -3,6 +3,7 @@
 use App\Livewire\Committee\ListRoles;
 use App\Livewire\Realm\ListAdmins;
 use App\Livewire\Realm\ListMembers;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
@@ -35,7 +36,7 @@ test('a plain member sees no href on another member\'s disabled profile link', f
     $community = newCommunity();
     $member = TestLdap::member($community);
     $otherMember = TestLdap::member($community);
-    \App\Models\User::where('username', $otherMember->username)->update(['realm' => $community->getShortCode()]);
+    User::where('username', $otherMember->username)->update(['realm' => $community->getShortCode()]);
     $this->actingAs($member);
 
     $html = Livewire::test(ListMembers::class, ['uid' => $community])

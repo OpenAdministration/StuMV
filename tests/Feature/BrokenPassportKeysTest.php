@@ -39,7 +39,7 @@ test('a broken Passport encryption key renders as 403, not a leaked LogicExcepti
 });
 
 test('an unrelated LogicException is not swallowed by the Passport key mapping', function (): void {
-    $handler = app(ExceptionHandler::class);
+    $handler = resolve(ExceptionHandler::class);
 
     $exception = new LogicException('Some unrelated programming error');
 

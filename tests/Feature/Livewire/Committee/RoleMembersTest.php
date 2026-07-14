@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Community;
+use App\Ldap\User;
 use App\Livewire\Committee\ListRoleMembers;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -129,7 +130,7 @@ test('a member already synced to the LDAP role group is not pending', function (
     $committee = TestLdap::makeCommittee($community, 'fsr');
     $role = TestLdap::makeRole($committee, 'mitglied');
     $member = TestLdap::member($community);
-    TestLdap::attach($role, \App\Ldap\User::findByUsername($member->username));
+    TestLdap::attach($role, User::findByUsername($member->username));
     $membership = RoleMembership::create([
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
@@ -244,9 +245,9 @@ test('the search field filters role members by name', function (): void {
     $committee = TestLdap::makeCommittee($community, 'fsr');
     $role = TestLdap::makeRole($committee, 'mitglied');
     $alice = TestLdap::member($community);
-    \App\Ldap\User::findByUsername($alice->username)->fill(['cn' => 'Alice Wonder'])->save();
+    User::findByUsername($alice->username)->fill(['cn' => 'Alice Wonder'])->save();
     $bob = TestLdap::member($community);
-    \App\Ldap\User::findByUsername($bob->username)->fill(['cn' => 'Bob Builder'])->save();
+    User::findByUsername($bob->username)->fill(['cn' => 'Bob Builder'])->save();
     RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $alice->username, 'from' => today()]);
     RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $bob->username, 'from' => today()]);
     actingAsModerator($community);
@@ -264,7 +265,7 @@ test('role members are sorted by name ascending by default', function (): void {
     $role = TestLdap::makeRole($committee, 'mitglied');
     foreach (['Zebra', 'Apple', 'Mango'] as $name) {
         $member = TestLdap::member($community);
-        \App\Ldap\User::findByUsername($member->username)->fill(['cn' => $name])->save();
+        User::findByUsername($member->username)->fill(['cn' => $name])->save();
         RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $member->username, 'from' => today()]);
     }
     actingAsModerator($community);
@@ -287,7 +288,7 @@ test('sortBy toggles direction and re-sorts role members descending', function (
     $role = TestLdap::makeRole($committee, 'mitglied');
     foreach (['Zebra', 'Apple', 'Mango'] as $name) {
         $member = TestLdap::member($community);
-        \App\Ldap\User::findByUsername($member->username)->fill(['cn' => $name])->save();
+        User::findByUsername($member->username)->fill(['cn' => $name])->save();
         RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $member->username, 'from' => today()]);
     }
     actingAsModerator($community);

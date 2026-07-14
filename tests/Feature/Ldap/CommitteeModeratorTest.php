@@ -1,6 +1,5 @@
 <?php
 
-use App\Ldap\Committee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\TestLdap;
 

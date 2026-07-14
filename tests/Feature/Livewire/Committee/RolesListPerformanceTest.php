@@ -1,5 +1,7 @@
 <?php
 
+use App\Ldap\Committee;
+use App\Ldap\Community;
 use App\Livewire\Committee\ListRoles;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,7 +37,7 @@ function countMemberLookupQueryEvents(Closure $callback, string $excludeUsername
     return $queries;
 }
 
-function makeRoleWithActiveMembers(App\Ldap\Committee $committee, string $cn, App\Ldap\Community $community, int $memberCount): void
+function makeRoleWithActiveMembers(Committee $committee, string $cn, Community $community, int $memberCount): void
 {
     $role = TestLdap::makeRole($committee, $cn);
     foreach (range(1, $memberCount) as $i) {

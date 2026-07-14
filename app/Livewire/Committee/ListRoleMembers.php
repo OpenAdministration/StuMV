@@ -123,11 +123,11 @@ class ListRoleMembers extends Component
 
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
-            $members = $members->filter(fn ($member) => str_contains(mb_strtolower($displayName($member)), $search))->values();
+            $members = $members->filter(fn ($member) => str_contains(mb_strtolower((string) $displayName($member)), $search))->values();
         }
 
         $sorted = (match ($this->sortField) {
-            'name' => $members->sortBy(fn ($member) => mb_strtolower($displayName($member)), SORT_NATURAL, $this->sortDirection === 'desc'),
+            'name' => $members->sortBy(fn ($member) => mb_strtolower((string) $displayName($member)), SORT_NATURAL, $this->sortDirection === 'desc'),
             default => $members->sortBy($this->sortField, SORT_REGULAR, $this->sortDirection === 'desc'),
         })->values();
 

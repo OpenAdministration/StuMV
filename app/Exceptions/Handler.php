@@ -53,9 +53,7 @@ class Handler extends ExceptionHandler
         // route binding resolving a Community) throw this when nothing
         // matches - render it like Eloquent's ModelNotFoundException
         // (a 404) instead of leaking as an uncaught 500.
-        $this->renderable(function (ObjectNotFoundException $e, $request) {
-            return $this->render($request, new NotFoundHttpException($e->getMessage(), $e));
-        });
+        $this->renderable(fn (ObjectNotFoundException $e, $request) => $this->render($request, new NotFoundHttpException($e->getMessage(), $e)));
 
         // league/oauth2-server throws a bare LogicException (not caught by
         // Passport's own ValidateToken::validateToken()) when it can't load
