@@ -1,0 +1,43 @@
+<?php
+
+use App\Models\ProfilePicture;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Passport\Passport;
+use Tests\Support\TestLdap;
+
+/**
+ * The legacy delegated-user endpoint (/api-legacy/user, served by SocialiteUser)
+ * is still consumed by StuFis via its "stumv" Socialite driver. Its "picture"
+ * claim must be a URL, matching Directory\Users - the raw base64 jpegPhoto used
+ * to be dumped into the JSON body, which breaks response()->json() and StuFis's
+ * normalizeUrl().
+ */
+uses(RefreshDatabase::class);
+
+test('the legacy user endpoint returns a null picture when the user has no photo', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+
+    Passport::actingAs($user, ['profile']);
+
+    $this->getJson('/api-legacy/user')
+        ->assertOk()
+        ->assertJson(['picture' => null]);
+});
+
+test('the legacy user endpoint returns a public url to the profile picture', function (): void {
+    Storage::fake('public');
+
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+
+    Storage::disk('public')->put('avatars/some-file-id.jpg', 'fake-image-contents');
+    ProfilePicture::create(['user' => $user->username, 'file_id' => 'some-file-id']);
+
+    Passport::actingAs($user, ['profile']);
+
+    $this->getJson('/api-legacy/user')
+        ->assertOk()
+        ->assertJson(['picture' => asset('storage/avatars/some-file-id.jpg')]);
+});
