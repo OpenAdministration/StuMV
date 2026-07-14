@@ -43,16 +43,18 @@
                 >
                     {{ $committee->getFirstAttribute('description') }}
                 </flux:link>
-                <div class="flex flex-wrap gap-2">
-                    @foreach($node['matchingRoles'] ?? [] as $role)
-                        <a
-                            wire:navigate
-                            href="{{ route('committees.roles.members', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
-                        >
-                            <flux:badge size="sm">{{ $role->getFirstAttribute('description') }}</flux:badge>
-                        </a>
-                    @endforeach
-                </div>
+                @if(count($node['matchingRoles'] ?? []) > 0)
+                    <div class="flex flex-wrap gap-2">
+                        @foreach($node['matchingRoles'] ?? [] as $role)
+                            <a
+                                wire:navigate
+                                href="{{ route('committees.roles.members', ['uid' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
+                            >
+                                <flux:badge size="sm">{{ $role->getFirstAttribute('description') }}</flux:badge>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
         <div class="flex justify-end items-center gap-2 border-b border-zinc-200 dark:border-zinc-700 py-2 pl-4">
