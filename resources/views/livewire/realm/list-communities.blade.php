@@ -1,4 +1,4 @@
-<div class="fleflux:col space-y-8">
+<div class="flex-col space-y-8">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.list_headline') }}</flux:heading>
@@ -25,13 +25,28 @@
         </div>
     </div>
 
+    <div
+        class="flex items-center gap-3"
+        x-data="{ showOnlyMine: $persist(false).as('realms.showOnlyMine') }"
+        x-init="
+            $wire.showOnlyMine = showOnlyMine;
+            $watch('$wire.showOnlyMine', value => showOnlyMine = value);
+        "
+    >
+        <flux:switch wire:model.live="showOnlyMine" label="{{ __('realms.show_only_mine') }}" align="left" />
+    </div>
+
     <div class="flex justify-between">
         <flux:input.group wire:model.live.debounce="search" placeholder="{{ __('realms.search') }}"/>
     </div>
     <flux:table>
         <flux:table.columns>
-            <flux:table.column>{{ __('realms.shortcode') }}</flux:table.column>
-            <flux:table.column>{{ __('Name') }}</flux:table.column>
+            <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
+                {{ __('Name') }}
+            </flux:table.column>
+            <flux:table.column sortable :sorted="$sortField === 'ou'" :direction="$sortDirection" wire:click="sortBy('ou')">
+                {{ __('realms.shortcode') }}
+            </flux:table.column>
             <flux:table.column></flux:table.column>
         </flux:table.columns>
         <flux:table.rows>
@@ -44,10 +59,10 @@
                         wire:click="enter('{{ $realm->getShortCode() }}')"
                         class="cursor-pointer"
                     >
-                        {{ $realm->getShortCode() }}
+                        {{ $realm->getLongName() }}
                     </flux:link>
                 </flux:table.cell>
-                <flux:table.cell>{{ $realm->getLongName() }}</flux:table.cell>
+                <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
                 <flux:table.cell class="flex justify-end gap-2">
                     <flux:button
                         size="sm"
@@ -91,6 +106,12 @@
         @endforelse
         </flux:table.rows>
     </flux:table>
+
+    @if(count($realms) > 0)
+        <div class="pagination">
+            <flux:pagination :paginator="$realms" />
+        </div>
+    @endif
 
     <form wire:submit="deleteCommit">
         <flux:modal name="delete" class="md:w-96">

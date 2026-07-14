@@ -4,6 +4,7 @@ return [
     'list_title' => 'Select student body',
     'no_realms_found' => 'No realms found!',
     'search' => 'Search realms',
+    'show_only_mine' => 'Show only student bodies I am a member of',
     'shortcode' => 'Shortcode',
     'new' => 'Create new realm',
     'delete_title' => 'Delete realm :name',

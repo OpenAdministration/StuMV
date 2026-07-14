@@ -4,6 +4,7 @@ return [
     'list_title' => 'Studierendenschaft auswählen',
     'no_realms_found' => 'Keine Studierendenschaft gefunden',
     'search' => 'Durchsuche Studierendenschaften',
+    'show_only_mine' => 'Nur Studierendenschaften anzeigen, denen ich angehöre',
     'shortcode' => 'Kürzel',
     'new' => 'Neue Studierendenschaft anlegen',
     'delete_title' => 'Studierendenschaft :name löschen',

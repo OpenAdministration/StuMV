@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,7 +21,7 @@ class ListRealms extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'uid';
+    public string $sortField = 'description';
 
     #[Url]
     public string $sortDirection = 'asc';
@@ -28,6 +29,8 @@ class ListRealms extends Component
     public string $deleteRealmName = '';
 
     public string $deleteConfirmText = '';
+
+    public bool $showOnlyMine = false;
 
     public function sortBy($field): void
     {
@@ -41,6 +44,11 @@ class ListRealms extends Component
     }
 
     public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShowOnlyMine(): void
     {
         $this->resetPage();
     }
@@ -71,13 +79,44 @@ class ListRealms extends Component
 
     public function render(Request $request)
     {
-        $communitySlice = Community::query()
+        $communityQuery = Community::query()
             ->setDn(Community::$rootDn)->search()
-            ->list()
-            ->get();
+            ->list();
+
+        if ($this->search) {
+            $search = trim($this->search);
+            $communityQuery->whereContains('ou', $search)
+                ->orWhereContains('description', $search);
+        }
+
+        $sorted = $communityQuery->get()
+            ->sortBy(fn (Community $community): string => mb_strtolower((string) $community->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
 
         $ldapUser = Auth::user()->ldap();
-        $canEnter = $ldapUser->isSuperAdmin() ? true : $this->communityMemberships($ldapUser);
+        // Actual LDAP membership, independent of superadmin status - used
+        // both for the "only mine" filter below and (for non-superadmins)
+        // to gate the Enter button per row.
+        $myMemberships = $this->communityMemberships($ldapUser);
+
+        if ($this->showOnlyMine) {
+            $sorted = $sorted
+                ->filter(fn (Community $community): bool => array_key_exists($community->getShortCode(), $myMemberships))
+                ->values();
+        }
+
+        // LdapRecord collections aren't Eloquent builders, so pagination is
+        // done manually: sort the full result, then slice out the page.
+        $perPage = 10;
+        $page = $this->getPage();
+        $communitySlice = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
+
+        $canEnter = $ldapUser->isSuperAdmin() ? true : $myMemberships;
 
         return view('livewire.realm.list-communities', [
             'realms' => $communitySlice,
