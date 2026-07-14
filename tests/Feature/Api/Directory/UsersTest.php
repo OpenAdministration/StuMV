@@ -27,6 +27,19 @@ test('a registered client can look up a member of its community', function (): v
     ]);
 });
 
+test('the response includes the user\'s course of study (Studiengang)', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $target = TestLdap::member($community);
+    LdapUser::findByUsername($target->username)->fill(['description' => 'Informatik'])->save();
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}");
+
+    $response->assertOk()->assertJson(['course' => 'Informatik']);
+});
+
 test('a user with a profile picture gets its URL in the response', function (): void {
     Storage::fake('public');
 

@@ -24,5 +24,7 @@ Route::middleware('client')->group(function (): void {
 
     Route::middleware('scope:users')->group(function (): void {
         Route::get('{uid}/users/{username}', [Users::class, 'show']);
+        Route::get('{uid}/users/{username}/committees', [Users::class, 'committees']);
+        Route::get('{uid}/users/{username}/groups', [Users::class, 'groups']);
     });
 });
