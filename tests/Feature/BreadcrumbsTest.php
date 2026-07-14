@@ -39,6 +39,23 @@ test('the breadcrumbs bar starts with a home icon linking to /', function (): vo
         ->and(strpos($html, 'href="/"'))->toBeLessThan(strpos($html, $community->getLongName()));
 });
 
+test('the group members page has a breadcrumb showing the group and linking back to the groups list', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    $response = $this->get(route('realms.groups.members', ['uid' => $uid, 'cn' => 'newsletter']));
+
+    $response->assertOk();
+
+    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+
+    expect($section[1] ?? '')
+        ->toContain('newsletter')
+        ->toContain(route('realms.groups', ['uid' => $uid]));
+});
+
 test('breadcrumb titles that are not committee names are also width-capped and truncated', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
