@@ -26,7 +26,6 @@ Breadcrumbs::for('realms', function (BreadcrumbTrail $trail, array $routeParams)
 
 Breadcrumbs::for('realms.dashboard', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
-    $trail->push(__('Dashboard'), route('realms.dashboard', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams): void {
