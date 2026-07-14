@@ -15,7 +15,6 @@
                 <flux:table.columns>
                     <flux:table.column class="w-[55px]"></flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('User') }}</flux:table.column>
-                    <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
                 @foreach($members as $row)
@@ -26,10 +25,19 @@
                             $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                         }
                         $displayName = $user->getFirstAttribute('cn') ?? $user->getFirstAttribute('uid');
+                        $statusColor = match ($row['status']) {
+                            'synced' => 'green',
+                            'pending' => 'yellow',
+                            default => 'red',
+                        };
                     @endphp
                     <flux:table.row>
                         <flux:table.cell>
-                            <flux:avatar src="{{ $jpegPhoto }}" name="{{ $displayName }}" />
+                            <flux:avatar
+                                badge badge:color="{{ $statusColor }}"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $displayName }}"
+                            />
                         </flux:table.cell>
                         <flux:table.cell>
                             <flux:link
@@ -38,15 +46,6 @@
                             >
                                 {{ $displayName }}
                             </flux:link>
-                        </flux:table.cell>
-                        <flux:table.cell class="flex justify-end">
-                            @if($row['status'] === 'synced')
-                                <flux:badge color="green" variant="solid">{{ __('groups.status_synced') }}</flux:badge>
-                            @elseif($row['status'] === 'pending')
-                                <flux:badge color="yellow" variant="solid">{{ __('groups.status_pending') }}</flux:badge>
-                            @else
-                                <flux:badge color="red" variant="solid">{{ __('groups.status_stale') }}</flux:badge>
-                            @endif
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

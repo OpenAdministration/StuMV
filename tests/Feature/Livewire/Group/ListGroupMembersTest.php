@@ -28,11 +28,12 @@ test('a member with an active role membership already synced to LDAP shows as sy
 
     actingAsAdmin($community);
 
-    Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $rows = Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
         ->assertSee($active->ldap()->getFirstAttribute('cn'))
-        ->assertSee(__('groups.status_synced'))
-        ->assertDontSee(__('groups.status_pending'))
-        ->assertDontSee(__('groups.status_stale'));
+        ->viewData('members');
+
+    expect(collect($rows->items())->firstWhere(fn (array $row) => $row['user']->getFirstAttribute('uid') === $active->username)['status'])
+        ->toBe('synced');
 });
 
 test('a member with an active role membership not yet synced to LDAP shows as pending', function (): void {
@@ -54,10 +55,12 @@ test('a member with an active role membership not yet synced to LDAP shows as pe
 
     actingAsAdmin($community);
 
-    Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $rows = Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
         ->assertSee($active->ldap()->getFirstAttribute('cn'))
-        ->assertSee(__('groups.status_pending'))
-        ->assertDontSee(__('groups.status_synced'));
+        ->viewData('members');
+
+    expect(collect($rows->items())->firstWhere(fn (array $row) => $row['user']->getFirstAttribute('uid') === $active->username)['status'])
+        ->toBe('pending');
 });
 
 test('a member present in LDAP without a backing active role membership shows as stale', function (): void {
@@ -68,11 +71,12 @@ test('a member present in LDAP without a backing active role membership shows as
 
     actingAsAdmin($community);
 
-    Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
+    $rows = Livewire::test(ListGroupMembers::class, ['uid' => $community, 'cn' => 'newsletter'])
         ->assertSee($stale->getFirstAttribute('cn'))
-        ->assertSee(__('groups.status_stale'))
-        ->assertDontSee(__('groups.status_synced'))
-        ->assertDontSee(__('groups.status_pending'));
+        ->viewData('members');
+
+    expect(collect($rows->items())->firstWhere(fn (array $row) => $row['user']->getFirstAttribute('uid') === $stale->getFirstAttribute('uid'))['status'])
+        ->toBe('stale');
 });
 
 test('the group members search filters the list', function (): void {

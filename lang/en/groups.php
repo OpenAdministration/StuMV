@@ -35,7 +35,4 @@ return [
     'members_explanation' => 'Below are the users assigned to this rights group via a role, along with their sync status in LDAP. A change may take until the next sync run to be reflected there.',
     'members.search' => 'Search members',
     'no_members_found' => 'There are no members for this group',
-    'status_synced' => 'Active in LDAP',
-    'status_pending' => 'Not yet synced',
-    'status_stale' => 'Pending removal',
 ];

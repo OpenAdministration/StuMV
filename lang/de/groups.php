@@ -32,10 +32,7 @@ return [
     'link_members' => 'Mitglieder anzeigen',
     'members_title' => 'Mitglieder der Gruppe :name',
     'members_headline' => 'Mitglieder der Rechtegruppe :name',
-    'members_explanation' => 'Unten findest du die Nutzer:innen, die dieser Rechtegruppe über eine Rolle zugeordnet sind, sowie ihren Synchronisationsstatus in LDAP. Es kann bis zum nächsten Sync-Lauf dauern, bis eine Änderung dort ankommt.',
+    'members_explanation' => 'Unten findest du die Nutzer:innen, die dieser Rechtegruppe über eine Rolle zugeordnet sind, sowie ihren Synchronisationsstatus im LDAP. Es kann bis zum nächsten Synchronisations-Durchlauf dauern, bis eine Änderung dort ankommt.',
     'members.search' => 'Durchsuche Mitglieder',
     'no_members_found' => 'Für diese Gruppe gibt es keine Mitglieder',
-    'status_synced' => 'Aktiv in LDAP',
-    'status_pending' => 'Wird noch synchronisiert',
-    'status_stale' => 'Wird demnächst entfernt',
 ];
