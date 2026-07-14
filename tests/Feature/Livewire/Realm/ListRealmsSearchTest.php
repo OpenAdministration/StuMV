@@ -85,6 +85,28 @@ test('sortBy switches to sorting by shortcode when that column is clicked', func
         ->toBeLessThan(array_search($zeta->getShortCode(), $codes, true));
 });
 
+test('the community name is only a clickable link to enter when the user can actually enter', function (): void {
+    $canEnter1 = newCommunity('cane1'.bin2hex(random_bytes(3)));
+    $canEnter2 = newCommunity('cane2'.bin2hex(random_bytes(3)));
+    $cannotEnter = newCommunity('cant'.bin2hex(random_bytes(3)));
+
+    // A member of two communities (not just one) so mount() doesn't
+    // auto-redirect straight to a single dashboard.
+    $ldapUser = TestLdap::makeUser();
+    TestLdap::attach($canEnter1->membersGroup(), $ldapUser);
+    TestLdap::attach($canEnter2->membersGroup(), $ldapUser);
+    $this->actingAs(TestLdap::databaseUser($ldapUser));
+
+    $html = Livewire::test(ListRealms::class)->html();
+
+    // Each row always has the (possibly disabled) "Enter" button carrying
+    // this wire:click - a community the user can enter additionally wraps
+    // its name in a matching link, so the marker appears twice there but
+    // only once (the button) for one they can't enter.
+    expect(substr_count($html, "wire:click=\"enter('{$canEnter1->getShortCode()}')\""))->toBe(2)
+        ->and(substr_count($html, "wire:click=\"enter('{$cannotEnter->getShortCode()}')\""))->toBe(1);
+});
+
 test('the "only mine" switch hides communities the user is not a member of', function (): void {
     $mine1 = newCommunity('mine1'.bin2hex(random_bytes(3)));
     $mine2 = newCommunity('mine2'.bin2hex(random_bytes(3)));

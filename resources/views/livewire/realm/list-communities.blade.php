@@ -38,7 +38,7 @@
 
     <flux:field class="mb-8">
         <flux:label>{{ __('realms.search') }}</flux:label>
-        <flux:input wire:model.live="search" />
+        <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
 
     <div class="pb-8">
