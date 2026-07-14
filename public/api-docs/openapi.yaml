@@ -47,6 +47,24 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /{uid}/committees/{ou}:
+    get:
+      tags: [Committees]
+      summary: Look up a single committee
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/CommitteeOu'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Committee' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /{uid}/committees/{ou}/roles:
     get:
       tags: [Committees]
@@ -63,6 +81,25 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Role' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{uid}/committees/{ou}/roles/{cn}:
+    get:
+      tags: [Committees]
+      summary: Look up a single role
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/CommitteeOu'
+        - $ref: '#/components/parameters/RoleCn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -107,6 +144,24 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /{uid}/groups/{cn}:
+    get:
+      tags: [Groups]
+      summary: Look up a single group
+      security: [{ oauth2: [groups] }]
+      parameters:
+        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/GroupCn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Group' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /{uid}/groups/{cn}/members:
     get:
       tags: [Groups]
@@ -147,13 +202,15 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
-  /{uid}/users/{username}/committees:
+  /{uid}/users/{username}/roles:
     get:
       tags: [Users]
-      summary: List the roles/committees a user currently holds
+      summary: List the roles a user currently holds
       description: |
         Roles anywhere in the community's committee tree (arbitrarily nested)
-        that currently have this user as an actual LDAP member.
+        that currently have this user as an actual LDAP member. Only the
+        `committee`/`role` short codes are returned - look up their names via
+        `/{uid}/committees/{ou}` and `/{uid}/committees/{ou}/roles/{cn}`.
       security: [{ oauth2: [users] }]
       parameters:
         - $ref: '#/components/parameters/CommunityUid'
@@ -166,6 +223,31 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/UserRole' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{uid}/users/{username}/committees:
+    get:
+      tags: [Users]
+      summary: List the committees a user currently has a role in
+      description: |
+        The short codes (`ou`) of committees where the user holds at least
+        one role, deduplicated. Look up committee names via
+        `/{uid}/committees/{ou}`.
+      security: [{ oauth2: [users] }]
+      parameters:
+        - $ref: '#/components/parameters/CommunityUid'
+        - $ref: '#/components/parameters/Username'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+                example: ["fsr"]
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -276,9 +358,7 @@ components:
       type: object
       properties:
         committee: { type: string, nullable: true, example: FSR }
-        committee_name: { type: string, nullable: true, example: Fachschaftsrat }
         role: { type: string, example: mitglied }
-        role_name: { type: string, example: Mitglied }
 
   responses:
     Unauthorized:

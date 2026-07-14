@@ -24,6 +24,18 @@ class Groups extends Controller
         ])->values());
     }
 
+    public function show(Request $request, Community $uid, string $cn)
+    {
+        $this->authorizeClientForCommunity($uid);
+
+        $group = Group::query()->in(Group::dnRoot($uid->getShortCode()))->where('cn', $cn)->first() ?? abort(404);
+
+        return response()->json([
+            'cn' => $group->getFirstAttribute('cn'),
+            'description' => $group->getFirstAttribute('description'),
+        ]);
+    }
+
     public function members(Request $request, Community $uid, string $cn)
     {
         $this->authorizeClientForCommunity($uid);

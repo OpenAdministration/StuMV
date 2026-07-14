@@ -25,6 +25,18 @@ class Committees extends Controller
         ])->values());
     }
 
+    public function show(Request $request, Community $uid, string $ou)
+    {
+        $this->authorizeClientForCommunity($uid);
+
+        $committee = Committee::findByNameOrFail($uid, $ou);
+
+        return response()->json([
+            'ou' => $committee->getFirstAttribute('ou'),
+            'description' => $committee->getFirstAttribute('description'),
+        ]);
+    }
+
     public function roles(Request $request, Community $uid, string $ou)
     {
         $this->authorizeClientForCommunity($uid);
@@ -36,6 +48,19 @@ class Committees extends Controller
             'cn' => $role->getFirstAttribute('cn'),
             'description' => $role->getFirstAttribute('description'),
         ])->values());
+    }
+
+    public function role(Request $request, Community $uid, string $ou, string $cn)
+    {
+        $committee = Committee::findByNameOrFail($uid, $ou);
+        $role = $committee->roles()->where('cn', $cn)->first() ?? abort(404);
+
+        $this->authorizeClientForCommunity($uid);
+
+        return response()->json([
+            'cn' => $role->getFirstAttribute('cn'),
+            'description' => $role->getFirstAttribute('description'),
+        ]);
     }
 
     public function roleMembers(Request $request, Community $uid, string $ou, string $cn)

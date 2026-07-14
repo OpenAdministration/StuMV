@@ -13,17 +13,21 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('client')->group(function (): void {
     Route::middleware('scope:committees')->group(function (): void {
         Route::get('{uid}/committees', [Committees::class, 'index']);
+        Route::get('{uid}/committees/{ou}', [Committees::class, 'show']);
         Route::get('{uid}/committees/{ou}/roles', [Committees::class, 'roles']);
+        Route::get('{uid}/committees/{ou}/roles/{cn}', [Committees::class, 'role']);
         Route::get('{uid}/committees/{ou}/roles/{cn}/members', [Committees::class, 'roleMembers']);
     });
 
     Route::middleware('scope:groups')->group(function (): void {
         Route::get('{uid}/groups', [Groups::class, 'index']);
+        Route::get('{uid}/groups/{cn}', [Groups::class, 'show']);
         Route::get('{uid}/groups/{cn}/members', [Groups::class, 'members']);
     });
 
     Route::middleware('scope:users')->group(function (): void {
         Route::get('{uid}/users/{username}', [Users::class, 'show']);
+        Route::get('{uid}/users/{username}/roles', [Users::class, 'roles']);
         Route::get('{uid}/users/{username}/committees', [Users::class, 'committees']);
         Route::get('{uid}/users/{username}/groups', [Users::class, 'groups']);
     });

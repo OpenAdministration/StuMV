@@ -44,6 +44,28 @@ test('a client registered for a different community cannot list this community\'
     $this->getJson("/api/$uid/groups")->assertForbidden();
 });
 
+test('a registered client can look up a single group', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $group = TestLdap::makeGroup($community, 'lecturers');
+    $group->fill(['description' => 'Lecturers'])->save();
+
+    actingAsDirectoryClient($community, ['groups']);
+
+    $response = $this->getJson("/api/$uid/groups/lecturers");
+
+    $response->assertOk()->assertExactJson(['cn' => 'lecturers', 'description' => 'Lecturers']);
+});
+
+test('looking up an unknown group returns 404', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    actingAsDirectoryClient($community, ['groups']);
+
+    $this->getJson("/api/$uid/groups/unknown")->assertNotFound();
+});
+
 test('a registered client can list the members of a group', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

@@ -34,31 +34,50 @@ class Users extends Controller
         ]);
     }
 
-    public function committees(Request $request, Community $uid, string $username)
+    public function roles(Request $request, Community $uid, string $username)
     {
         $this->authorizeClientForCommunity($uid);
 
         $user = $this->findMemberOrFail($uid, $username);
 
-        // Roles anywhere in the community's committee tree (arbitrarily
-        // nested) that currently have this user as an actual LDAP member -
-        // the same source of truth Committees::roleMembers() reads from.
-        // uniqueMember is DN-syntax, which OpenLDAP only indexes/matches for
-        // equality, not substrings - whereContains() silently returns nothing.
-        $roles = Role::query()->in(Committee::dnRoot($uid->getShortCode()))
-            ->where('uniqueMember', '=', $user->getDn())
-            ->get();
+        $roles = $this->userRoles($uid, $user);
 
         return response()->json($roles->map(function (Role $role): array {
             $committee = $role->committee();
 
             return [
                 'committee' => $committee?->getFirstAttribute('ou'),
-                'committee_name' => $committee?->getFirstAttribute('description'),
                 'role' => $role->getFirstAttribute('cn'),
-                'role_name' => $role->getFirstAttribute('description'),
             ];
         })->values());
+    }
+
+    public function committees(Request $request, Community $uid, string $username)
+    {
+        $this->authorizeClientForCommunity($uid);
+
+        $user = $this->findMemberOrFail($uid, $username);
+
+        $committees = $this->userRoles($uid, $user)
+            ->map(fn (Role $role): ?Committee => $role->committee())
+            ->filter()
+            ->unique(fn (Committee $committee): string => $committee->getDn());
+
+        return response()->json($committees->map(fn (Committee $committee): string => $committee->getFirstAttribute('ou'))->values());
+    }
+
+    /**
+     * Roles anywhere in the community's committee tree (arbitrarily nested)
+     * that currently have this user as an actual LDAP member - the same
+     * source of truth Committees::roleMembers() reads from. uniqueMember is
+     * DN-syntax, which OpenLDAP only indexes/matches for equality, not
+     * substrings - whereContains() silently returns nothing.
+     */
+    private function userRoles(Community $uid, LdapUser $user)
+    {
+        return Role::query()->in(Committee::dnRoot($uid->getShortCode()))
+            ->where('uniqueMember', '=', $user->getDn())
+            ->get();
     }
 
     public function groups(Request $request, Community $uid, string $username)

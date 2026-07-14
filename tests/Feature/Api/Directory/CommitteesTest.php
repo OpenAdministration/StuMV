@@ -54,6 +54,28 @@ test('a client registered for a different community cannot list this community\'
     $this->getJson("/api/$uid/committees")->assertForbidden();
 });
 
+test('a registered client can look up a single committee', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $committee->fill(['description' => 'Fachschaftsrat'])->save();
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->getJson("/api/$uid/committees/fsr");
+
+    $response->assertOk()->assertExactJson(['ou' => 'fsr', 'description' => 'Fachschaftsrat']);
+});
+
+test('looking up an unknown committee returns 404', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $this->getJson("/api/$uid/committees/unknown")->assertNotFound();
+});
+
 test('a registered client can list the roles of a committee', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
@@ -65,6 +87,30 @@ test('a registered client can list the roles of a committee', function (): void 
     $response = $this->getJson("/api/$uid/committees/fsr/roles");
 
     $response->assertOk()->assertJsonFragment(['cn' => 'mitglied']);
+});
+
+test('a registered client can look up a single role', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $role->fill(['description' => 'Mitglied'])->save();
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->getJson("/api/$uid/committees/fsr/roles/mitglied");
+
+    $response->assertOk()->assertExactJson(['cn' => 'mitglied', 'description' => 'Mitglied']);
+});
+
+test('looking up an unknown role returns 404', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeCommittee($community, 'fsr');
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $this->getJson("/api/$uid/committees/fsr/roles/unknown")->assertNotFound();
 });
 
 test('a registered client can list the members of a role', function (): void {

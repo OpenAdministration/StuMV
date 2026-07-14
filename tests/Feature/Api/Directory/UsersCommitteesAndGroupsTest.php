@@ -5,7 +5,55 @@ use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
-test('a registered client can list the roles/committees of a user', function (): void {
+test('a registered client can list the roles a user currently holds', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $target = TestLdap::member($community);
+    TestLdap::attach($role, $target->ldap());
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}/roles");
+
+    $response->assertOk()->assertExactJson([
+        ['committee' => 'fsr', 'role' => 'mitglied'],
+    ]);
+});
+
+test('a user with no roles gets an empty list, not an error', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $target = TestLdap::member($community);
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}/roles");
+
+    $response->assertOk()->assertExactJson([]);
+});
+
+test('listing a user\'s roles requires the users scope - committees and groups no longer suffice', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $target = TestLdap::member($community);
+
+    actingAsDirectoryClient($community, ['committees', 'groups']);
+
+    $this->getJson("/api/$uid/users/{$target->username}/roles")->assertForbidden();
+});
+
+test('listing roles of an unknown username returns 404', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $this->getJson("/api/$uid/users/does-not-exist/roles")->assertNotFound();
+});
+
+test('a registered client can list the committees a user currently has a role in', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $committee = TestLdap::makeCommittee($community, 'fsr');
@@ -17,13 +65,27 @@ test('a registered client can list the roles/committees of a user', function ():
 
     $response = $this->getJson("/api/$uid/users/{$target->username}/committees");
 
-    $response->assertOk()->assertJsonFragment([
-        'committee' => 'fsr',
-        'role' => 'mitglied',
-    ]);
+    $response->assertOk()->assertExactJson(['fsr']);
 });
 
-test('a user with no roles gets an empty list, not an error', function (): void {
+test('a user with roles in the same committee only lists it once', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $roleA = TestLdap::makeRole($committee, 'mitglied');
+    $roleB = TestLdap::makeRole($committee, 'vorsitz');
+    $target = TestLdap::member($community);
+    TestLdap::attach($roleA, $target->ldap());
+    TestLdap::attach($roleB, $target->ldap());
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}/committees");
+
+    $response->assertOk()->assertExactJson(['fsr']);
+});
+
+test('a user with no committee roles gets an empty list, not an error', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $target = TestLdap::member($community);
@@ -99,7 +161,7 @@ test('listing groups of an unknown username returns 404', function (): void {
     $this->getJson("/api/$uid/users/does-not-exist/groups")->assertNotFound();
 });
 
-test('listing committees/groups of a user who is not a member of this community returns 404', function (): void {
+test('listing roles/committees/groups of a user who is not a member of this community returns 404', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $otherCommunity = newCommunity();
@@ -107,6 +169,7 @@ test('listing committees/groups of a user who is not a member of this community 
 
     actingAsDirectoryClient($community, ['users']);
 
+    $this->getJson("/api/$uid/users/{$elsewhereUser->username}/roles")->assertNotFound();
     $this->getJson("/api/$uid/users/{$elsewhereUser->username}/committees")->assertNotFound();
     $this->getJson("/api/$uid/users/{$elsewhereUser->username}/groups")->assertNotFound();
 });
@@ -119,6 +182,7 @@ test('a client registered for a different community cannot query this community\
 
     actingAsDirectoryClient($otherCommunity, ['users']);
 
+    $this->getJson("/api/$uid/users/{$target->username}/roles")->assertForbidden();
     $this->getJson("/api/$uid/users/{$target->username}/committees")->assertForbidden();
     $this->getJson("/api/$uid/users/{$target->username}/groups")->assertForbidden();
 });
