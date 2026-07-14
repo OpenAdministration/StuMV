@@ -56,6 +56,22 @@ test('the group members page has a breadcrumb showing the group and linking back
         ->toContain(route('realms.groups', ['uid' => $uid]));
 });
 
+test('the community name is not truncated when it is the only breadcrumb item, as on the dashboard', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsMember($community);
+
+    $response = $this->get(route('realms.dashboard', ['uid' => $uid]));
+
+    $response->assertOk();
+
+    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+    $html = $section[1] ?? '';
+
+    expect($html)->toContain((string) $community->getLongName())
+        ->not->toContain('max-w-[20ch]');
+});
+
 test('breadcrumb titles that are not committee names are also width-capped and truncated', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

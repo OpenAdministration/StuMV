@@ -5,11 +5,11 @@
             @foreach($breadcrumbs as $breadcrumb)
                 @if($breadcrumb->url && !$loop->last)
                     <flux:breadcrumbs.item href="{{ $breadcrumb->url }}">
-                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb])
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb, 'onlyItem' => count($breadcrumbs) === 1])
                     </flux:breadcrumbs.item>
                 @else
                     <flux:breadcrumbs.item>
-                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb])
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumb, 'onlyItem' => count($breadcrumbs) === 1])
                     </flux:breadcrumbs.item>
                 @endif
             @endforeach
