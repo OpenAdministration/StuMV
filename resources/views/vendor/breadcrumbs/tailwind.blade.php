@@ -1,5 +1,14 @@
 @unless ($breadcrumbs->isEmpty())
+    @php
+        // Route-model-bound 'uid' is a Community LDAP entry, not the plain
+        // short code route()/RouteServiceProvider::home() expect (unlike
+        // Eloquent, LdapRecord models don't resolve their route key on their
+        // own when passed straight to route()).
+        $homeCommunity = \Illuminate\Support\Facades\Route::current()?->parameter('uid');
+        $homeUid = $homeCommunity?->getFirstAttribute('ou');
+    @endphp
     <flux:breadcrumbs>
+        <flux:breadcrumbs.item icon="house" href="{{ \App\Providers\RouteServiceProvider::home($homeUid) }}" />
         @if(count($breadcrumbs) < 5)
             @foreach($breadcrumbs as $breadcrumb)
                 @if($breadcrumb->url && !$loop->last)
@@ -13,8 +22,12 @@
                 @endif
             @endforeach
         @else
-            <flux:breadcrumbs.item href="{{ $breadcrumbs[0]->url }}">{{ $breadcrumbs[0]->title }}</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item href="{{ $breadcrumbs[1]->url }}">{{ $breadcrumbs[1]->title }}</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ $breadcrumbs[0]->url }}">
+                @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumbs[0]])
+            </flux:breadcrumbs.item>
+            <flux:breadcrumbs.item href="{{ $breadcrumbs[1]->url }}">
+                @include('vendor.breadcrumbs.title', ['breadcrumb' => $breadcrumbs[1]])
+            </flux:breadcrumbs.item>
             <flux:breadcrumbs.item>
                 <flux:dropdown>
                     <flux:button icon="ellipsis" variant="ghost" size="sm" />
