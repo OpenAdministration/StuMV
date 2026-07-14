@@ -29,4 +29,13 @@ return [
     'roles_add_headline' => 'Einer Rolle mit dem Recht :name verknüpfen',
     'roles_add_explanation' => 'Wähle ein Gremium und dann die Rolle aus, die die Rechte erhalten soll.',
     'list_title' => 'Rechtegruppen',
+    'link_members' => 'Mitglieder anzeigen',
+    'members_title' => 'Mitglieder der Gruppe :name',
+    'members_headline' => 'Mitglieder der Rechtegruppe :name',
+    'members_explanation' => 'Unten findest du die Nutzer:innen, die dieser Rechtegruppe über eine Rolle zugeordnet sind, sowie ihren Synchronisationsstatus in LDAP. Es kann bis zum nächsten Sync-Lauf dauern, bis eine Änderung dort ankommt.',
+    'members.search' => 'Durchsuche Mitglieder',
+    'no_members_found' => 'Für diese Gruppe gibt es keine Mitglieder',
+    'status_synced' => 'Aktiv in LDAP',
+    'status_pending' => 'Wird noch synchronisiert',
+    'status_stale' => 'Wird demnächst entfernt',
 ];

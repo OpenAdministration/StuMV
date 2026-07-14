@@ -49,6 +49,13 @@
                             <flux:button size="sm" icon="ellipsis-vertical" />
                             <flux:menu>
                                 <flux:menu.item
+                                    icon="user-group"
+                                    wire:navigate
+                                    href="{{ route('realms.groups.members', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                >
+                                    {{ __('groups.link_members') }}
+                                </flux:menu.item>
+                                <flux:menu.item
                                     icon="users"
                                     wire:navigate
                                     href="{{ route('realms.groups.roles', ['uid' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"

@@ -29,4 +29,13 @@ return [
     'roles_add_headline' => 'Link to a role with the right :name',
     'roles_add_explanation' => 'Select a committee and then the role that should receive the rights.',
     'list_title' => 'Rights groups',
+    'link_members' => 'View members',
+    'members_title' => 'Members of group :name',
+    'members_headline' => 'Members of rights group :name',
+    'members_explanation' => 'Below are the users assigned to this rights group via a role, along with their sync status in LDAP. A change may take until the next sync run to be reflected there.',
+    'members.search' => 'Search members',
+    'no_members_found' => 'There are no members for this group',
+    'status_synced' => 'Active in LDAP',
+    'status_pending' => 'Not yet synced',
+    'status_stale' => 'Pending removal',
 ];

@@ -16,6 +16,7 @@ use App\Livewire\Committee\NewRole;
 use App\Livewire\Committee\TerminateRoleMemberships;
 use App\Livewire\Group\AddRoleToGroup;
 use App\Livewire\Group\EditGroup;
+use App\Livewire\Group\ListGroupMembers;
 use App\Livewire\Group\ListGroups;
 use App\Livewire\Group\ListRolesInGroup;
 use App\Livewire\Group\NewGroup;
@@ -120,6 +121,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{uid}/new-group', NewGroup::class)->name('realms.groups.new');
         Route::livewire('{uid}/group/{cn}/roles', ListRolesInGroup::class)->name('realms.groups.roles');
         Route::livewire('{uid}/group/{cn}/add-role', AddRoleToGroup::class)->name('realms.groups.roles.add');
+        Route::livewire('{uid}/group/{cn}/members', ListGroupMembers::class)->name('realms.groups.members');
         Route::livewire('{uid}/domains', ListDomains::class)->name('realms.domains');
         Route::livewire('{uid}/new-domain', NewDomain::class)->name('realms.domains.new');
         Route::livewire('{uid}/api-clients', ListApiClients::class)->name('realms.api-clients');
