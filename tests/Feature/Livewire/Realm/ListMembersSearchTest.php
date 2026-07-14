@@ -65,6 +65,28 @@ test('members are listed sorted by name', function (): void {
         ->and($posMango)->toBeLessThan($posZebra);
 });
 
+test('sortBy toggles direction and re-sorts the member list descending', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    realmMember($uid, 'Zebra Person');
+    realmMember($uid, 'Apple Person');
+    realmMember($uid, 'Mango Person');
+    actingAsMember($community);
+
+    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+        ->call('loadMembers')
+        ->call('sortBy', 'full_name')
+        ->assertSet('sortDirection', 'desc')
+        ->html();
+
+    $posApple = strpos($html, 'Apple Person');
+    $posMango = strpos($html, 'Mango Person');
+    $posZebra = strpos($html, 'Zebra Person');
+
+    expect($posZebra)->toBeLessThan($posMango)
+        ->and($posMango)->toBeLessThan($posApple);
+});
+
 test('the member list filters by name', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

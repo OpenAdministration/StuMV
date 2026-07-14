@@ -32,7 +32,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column class="w-[55px]"></flux:table.column>
-                    <flux:table.column>{{ __('Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'full_name'" :direction="$sortDirection" wire:click="sortBy('full_name')">{{ __('Name') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
