@@ -25,7 +25,7 @@ test('the role-members breadcrumb shows the role description, not its short code
         ->not->toContain('>mitglied<');
 });
 
-test('the breadcrumbs bar starts with a home icon linking to the realm dashboard', function (): void {
+test('the breadcrumbs bar starts with a home icon linking to /', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     actingAsMember($community);
@@ -35,18 +35,8 @@ test('the breadcrumbs bar starts with a home icon linking to the realm dashboard
     preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
     $html = $section[1] ?? '';
 
-    $homeUrl = route('realms.dashboard', $uid);
-
-    // The community-name breadcrumb already links to this same dashboard
-    // URL, so the icon item existing means the href now appears twice (icon
-    // + community name) - once means only the pre-existing link is there.
-    expect(substr_count($html, 'href="'.$homeUrl.'"'))->toBe(2);
-
-    // And the first breadcrumb item (before the community's own name) must
-    // be icon-only, not a second copy of the name.
-    $firstItemEnd = strpos($html, 'data-flux-breadcrumbs-item', strpos($html, 'data-flux-breadcrumbs-item') + 1);
-    $firstItem = substr($html, 0, $firstItemEnd);
-    expect($firstItem)->not->toContain($community->getLongName());
+    expect($html)->toContain('href="/"')
+        ->and(strpos($html, 'href="/"'))->toBeLessThan(strpos($html, $community->getLongName()));
 });
 
 test('breadcrumb titles that are not committee names are also width-capped and truncated', function (): void {

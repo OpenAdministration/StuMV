@@ -1,14 +1,6 @@
 @unless ($breadcrumbs->isEmpty())
-    @php
-        // Route-model-bound 'uid' is a Community LDAP entry, not the plain
-        // short code route()/RouteServiceProvider::home() expect (unlike
-        // Eloquent, LdapRecord models don't resolve their route key on their
-        // own when passed straight to route()).
-        $homeCommunity = \Illuminate\Support\Facades\Route::current()?->parameter('uid');
-        $homeUid = $homeCommunity?->getFirstAttribute('ou');
-    @endphp
     <flux:breadcrumbs>
-        <flux:breadcrumbs.item icon="house" href="{{ \App\Providers\RouteServiceProvider::home($homeUid) }}" />
+        <flux:breadcrumbs.item icon="house" href="/" />
         @if(count($breadcrumbs) < 5)
             @foreach($breadcrumbs as $breadcrumb)
                 @if($breadcrumb->url && !$loop->last)
