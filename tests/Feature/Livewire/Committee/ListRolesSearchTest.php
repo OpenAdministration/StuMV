@@ -52,7 +52,8 @@ test('the active-only filter hides roles without members and shows those with me
     actingAsModerator($community);
 
     Livewire::test(ListRoles::class, ['uid' => $community, 'ou' => 'fsr'])
-        ->call('loadRoles') // showOnlyActive defaults to true
+        ->call('loadRoles')
+        ->set('showOnlyActive', true)
         ->assertSee('Role staffed')
         ->assertDontSee('Role empty');
 });

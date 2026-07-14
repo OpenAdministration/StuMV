@@ -43,6 +43,30 @@ class ListRealms extends Component
         $this->resetPage();
     }
 
+    /**
+     * Redirecting straight to a single-community member's dashboard has to
+     * happen here, not in render(): a redirect called from inside render()
+     * only sets the "redirect" effect for the response - it doesn't stop the
+     * rest of render() (and the full picker view it returns) from still
+     * executing. A redirect from mount() runs before Livewire decides
+     * whether to call render() at all, so it genuinely skips building the
+     * picker view.
+     */
+    public function mount(): void
+    {
+        $ldapUser = Auth::user()->ldap();
+
+        if ($ldapUser->isSuperAdmin()) {
+            return;
+        }
+
+        $canEnter = $this->communityMemberships($ldapUser);
+
+        if (count($canEnter) === 1) {
+            $this->redirectRoute('realms.dashboard', ['uid' => \Arr::first(array_keys($canEnter))], navigate: true);
+        }
+    }
+
     public function render(Request $request)
     {
         $communitySlice = Community::query()
@@ -51,27 +75,27 @@ class ListRealms extends Component
             ->get();
 
         $ldapUser = Auth::user()->ldap();
-        if ($ldapUser->isSuperAdmin()) {
-            $canEnter = true;
-        } else {
-            $memberships = $ldapUser->memberOf;
-            $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.Community::rootDn().'$/', $value));
-
-            $canEnter = \Arr::mapWithKeys($communityMemberships, static function (string $value) {
-                $uid = str($value)->remove(','.Community::rootDn(), false)->remove('cn=members,ou=')->value();
-
-                return [$uid => true];
-            });
-
-            if (count($canEnter) === 1) {
-                $this->redirectRoute('realms.dashboard', ['uid' => \Arr::first(array_keys($canEnter))], navigate: true);
-            }
-        }
+        $canEnter = $ldapUser->isSuperAdmin() ? true : $this->communityMemberships($ldapUser);
 
         return view('livewire.realm.list-communities', [
             'realms' => $communitySlice,
             'canEnter' => $canEnter,
         ])->title(__('realms.list_title'));
+    }
+
+    /**
+     * @return array<string, true> community short codes this user is a member of
+     */
+    private function communityMemberships($ldapUser): array
+    {
+        $memberships = $ldapUser->memberOf;
+        $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.Community::rootDn().'$/', $value));
+
+        return \Arr::mapWithKeys($communityMemberships, static function (string $value) {
+            $uid = str($value)->remove(','.Community::rootDn(), false)->remove('cn=members,ou=')->value();
+
+            return [$uid => true];
+        });
     }
 
     public function deletePrepare($uid): void

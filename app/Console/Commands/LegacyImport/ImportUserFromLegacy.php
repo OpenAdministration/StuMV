@@ -6,6 +6,8 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ImportUserFromLegacy extends Command
 {
@@ -57,6 +59,20 @@ class ImportUserFromLegacy extends Command
             if (! $realms[$user->realm_uid]->membersGroup()->members()->exists($ldapUser)) {
                 $realms[$user->realm_uid]->membersGroup()->members()->attach($ldapUser);
             }
+
+            // The DB user row (used for login sessions, not LDAP auth
+            // itself) doesn't exist yet for a legacy user importing for the
+            // first time - create it same as ImportUsersFromUniLdap does,
+            // but only set the login-irrelevant password/verification once.
+            $dbUser = \App\Models\User::firstOrNew(['username' => $user->username]);
+            $dbUser->full_name = $user->fullName;
+            $dbUser->email = $user->email;
+            $dbUser->realm = $user->realm_uid;
+            if (! $dbUser->exists) {
+                $dbUser->password = Hash::make(Str::uuid());
+                $dbUser->email_verified_at = now();
+            }
+            $dbUser->save();
         }
     }
 }
