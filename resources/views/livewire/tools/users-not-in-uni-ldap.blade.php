@@ -19,7 +19,7 @@
             @if($comparisonCompleted && count($results) > 0)
                 <flux:field class="mb-4">
                     <flux:label>{{ __('tools.search') }}</flux:label>
-                    <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+                    <flux:input icon="search" clearable wire:model.live="search" />
                 </flux:field>
                 <flux:fieldset>
                     <flux:legend class="w-full flex py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">

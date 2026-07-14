@@ -27,7 +27,7 @@
 
     <flux:field>
         <flux:label>{{ __('realms.search_admins') }}</flux:label>
-        <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+        <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
 
     <div wire:loading.flex wire:target="loadAdmins" class="flex justify-center py-16">

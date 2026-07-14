@@ -18,7 +18,7 @@
 
     <flux:field class="mb-8">
         <flux:label>{{ __('groups.search') }}</flux:label>
-        <flux:input icon="search" wire:model.live.debounce.500ms="search" />
+        <flux:input icon="search" wire:model.live="search" />
     </flux:field>
 
     <div class="pb-8">

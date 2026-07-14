@@ -43,7 +43,7 @@
         <flux:input
             icon="search"
             clearable
-            wire:model.live.debounce.500ms="search"
+            wire:model.live="search"
         />
     </flux:field>
 

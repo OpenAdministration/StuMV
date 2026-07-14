@@ -17,7 +17,7 @@
 
     <flux:field class="mb-8">
         <flux:label>{{ __('superadmins.search_placeholder') }}</flux:label>
-        <flux:input icon="search" clearable wire:model.live.debounce.500ms="search" />
+        <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
 
     <div class="pb-8">
