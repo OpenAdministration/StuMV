@@ -7,6 +7,7 @@ use App\Ldap\User;
 use App\Livewire\Profile\Memberships;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,7 +20,7 @@ class ListMembers extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'full_name';
+    public string $sortField = 'cn';
 
     #[Url]
     public string $sortDirection = 'asc';
@@ -75,7 +76,6 @@ class ListMembers extends Component
                 'livewire.realm.members', [
                     'realm_members' => collect(),
                     'community' => $community,
-                    'ldap_users' => collect(),
                     'isAdmin' => $isAdmin,
                     'isModerator' => $isModerator,
                     'canRemoveMember' => $canRemoveMember,
@@ -83,30 +83,31 @@ class ListMembers extends Component
             )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
         }
 
-        $membersQuery = \App\Models\User::where('realm', $this->community_name);
+        $members = $community->membersGroup()->members()->get();
 
-        if ($this->search != '') {
-            // Group the OR so it stays scoped to the realm; an ungrouped orWhere
-            // would leak users from other realms whose username matches.
-            $membersQuery->where(function ($query): void {
-                $query->where('full_name', 'like', '%'.$this->search.'%')
-                    ->orWhere('username', 'like', '%'.$this->search.'%');
-            });
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $members = $members->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search)
+                || str_contains(mb_strtolower((string) $user->getFirstAttribute('uid')), $search));
         }
 
-        $members = $membersQuery->orderBy($this->sortField, $this->sortDirection)->paginate(10);
-        $ldapUsers = collect();
-        $usernames = $members->pluck('username')->filter()->values()->all();
+        $sorted = $members
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
 
-        if (! empty($usernames)) {
-            $ldapUsers = User::query()->whereIn('uid', $usernames)->get()->keyBy('uid');
-        }
+        $perPage = 10;
+        $page = $this->getPage();
+        $members = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         return view(
             'livewire.realm.members', [
                 'realm_members' => $members,
                 'community' => $community,
-                'ldap_users' => $ldapUsers,
                 'isAdmin' => $isAdmin,
                 'isModerator' => $isModerator,
                 'canRemoveMember' => $canRemoveMember,

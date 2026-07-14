@@ -35,12 +35,17 @@ test('the moderators list shows a warning callout when there are no moderators',
         ->assertSee(__('realms.no_moderators_found'));
 });
 
-test('the members list shows a warning callout when there are no members', function (): void {
+test('the members list shows a warning callout when a search matches no members', function (): void {
+    // A genuinely empty members list is unreachable here: viewing this page
+    // at all requires being a member of the community, and the list is
+    // sourced from that very same LDAP members group, so the viewer always
+    // appears in it - use a non-matching search to reach the empty state.
     $community = newCommunity();
     actingAsMember($community);
 
     Livewire::test(ListMembers::class, ['uid' => $community])
         ->call('loadMembers')
+        ->set('search', 'no-such-member-xyz')
         ->assertSeeHtml('data-flux-callout');
 });
 

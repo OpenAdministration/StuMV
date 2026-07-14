@@ -32,7 +32,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column class="w-[55px]"></flux:table.column>
-                    <flux:table.column sortable :sorted="$sortField === 'full_name'" :direction="$sortDirection" wire:click="sortBy('full_name')">{{ __('Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -40,27 +40,26 @@
                 <flux:table.row>
                     <flux:table.cell>
                         @php
-                            $ldapUser = $ldap_users[$realm_member->username] ?? null;
-                            $jpegPhoto = $ldapUser ? $ldapUser->getFirstAttribute('jpegPhoto') : null;
+                            $jpegPhoto = $realm_member->getFirstAttribute('jpegPhoto');
                             if ($jpegPhoto) {
                                 $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                             }
                         @endphp
                         <flux:avatar
                             src="{{ $jpegPhoto }}"
-                            name="{{ $realm_member->full_name }}"
+                            name="{{ $realm_member->getFirstAttribute('cn') }}"
                         />
                     </flux:table.cell>
                     <flux:table.cell>
                         @if($isAdmin)
                             <flux:link
                                 wire:navigate
-                                :href="route('profile', ['username' => $realm_member->username])"
+                                :href="route('profile', ['username' => $realm_member->getFirstAttribute('uid')])"
                             >
-                                {{ $realm_member->full_name }}
+                                {{ $realm_member->getFirstAttribute('cn') }}
                             </flux:link>
                         @else
-                            {{ $realm_member->full_name }}
+                            {{ $realm_member->getFirstAttribute('cn') }}
                         @endif
                     </flux:table.cell>
                     <flux:table.cell>
@@ -70,7 +69,7 @@
                                     size="sm"
                                     variant="primary"
                                     icon="file-text"
-                                    wire:click="exportPdf('{{ $realm_member->username }}')"
+                                    wire:click="exportPdf('{{ $realm_member->getFirstAttribute('uid') }}')"
                                 >
                                     {{ __('profile.membershipsAsPdf') }}
                                 </flux:button>
@@ -82,7 +81,7 @@
                                         icon="pencil"
                                         :disabled="!$isAdmin"
                                         wire:navigate
-                                        :href="$isAdmin ? route('profile', ['username' => $realm_member->username]) : null"
+                                        :href="$isAdmin ? route('profile', ['username' => $realm_member->getFirstAttribute('uid')]) : null"
                                     >
                                         {{ __('Edit') }}
                                     </flux:menu.item>
@@ -90,7 +89,7 @@
                                         variant="danger"
                                         icon="user-minus"
                                         :disabled="!$canRemoveMember"
-                                        wire:click="deletePrepare('{{ $realm_member->username }}')"
+                                        wire:click="removePrepare('{{ $realm_member->getFirstAttribute('uid') }}')"
                                     >
                                         {{ __('Remove Member') }}
                                     </flux:menu.item>
@@ -112,7 +111,7 @@
 
     <div class="block h-[1px]"></div>
 
-    <form wire:submit="deleteCommit">
+    <form wire:submit="removeCommit">
         <flux:modal name="remove">
             <div class="space-y-6">
                 <div>

@@ -33,7 +33,12 @@ function countAdminAndModeratorGroupQueries(Closure $callback): int
     return $queries;
 }
 
-/** Create a community member whose database record carries the realm + name. */
+/**
+ * Create a community member with the given display name - set on both the
+ * LDAP entry (the list's source of truth is the LDAP members group, so this
+ * is what actually shows up) and the database row (still used for the
+ * PDF export and other DB-backed lookups).
+ */
 function realmMember(string $realmUid, string $fullName): string
 {
     $member = TestLdap::member($realmUid);
@@ -41,6 +46,7 @@ function realmMember(string $realmUid, string $fullName): string
         'realm' => $realmUid,
         'full_name' => $fullName,
     ]);
+    \App\Ldap\User::findByUsername($member->username)->fill(['cn' => $fullName])->save();
 
     return $member->username;
 }
@@ -75,7 +81,7 @@ test('sortBy toggles direction and re-sorts the member list descending', functio
 
     $html = Livewire::test(ListMembers::class, ['uid' => $community])
         ->call('loadMembers')
-        ->call('sortBy', 'full_name')
+        ->call('sortBy', 'cn')
         ->assertSet('sortDirection', 'desc')
         ->html();
 
@@ -119,12 +125,17 @@ test('search stays scoped to the community and does not leak other realms', func
     // A member of THIS realm whose name does not match the search term.
     realmMember($uid, 'Alice Mine');
 
-    // A user in a DIFFERENT realm whose username contains the search term.
+    // A member of a DIFFERENT realm's own LDAP members group whose username
+    // contains the search term - the list is scoped by group membership now,
+    // so this checks that scoping, not just an unrelated/unattached user.
+    $otherCommunity = newCommunity();
     $leakUid = 'zzleak'.bin2hex(random_bytes(3));
-    TestLdap::makeUser($leakUid);
+    $leakLdapUser = TestLdap::makeUser($leakUid);
+    $leakLdapUser->fill(['cn' => 'Leaker Person'])->save();
+    TestLdap::attach($otherCommunity->membersGroup(), $leakLdapUser);
     User::factory()->create([
         'username' => $leakUid,
-        'realm' => 'some-other-realm',
+        'realm' => $otherCommunity->getShortCode(),
         'full_name' => 'Leaker Person',
     ]);
 
@@ -154,6 +165,44 @@ test('a moderator sees the export-as-PDF control for members', function (): void
     Livewire::test(ListMembers::class, ['uid' => $community])
         ->call('loadMembers')
         ->assertSeeHtml('wire:click="exportPdf(\''.$username.'\')"');
+});
+
+test('an admin sees a working remove-member control', function (): void {
+    // The blade previously called deletePrepare/deleteCommit, which don't
+    // exist on the component (only removePrepare/removeCommit do) - clicking
+    // "Remove Member" would have thrown a MethodNotFoundException.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $username = realmMember($uid, 'Alice Wonder');
+    actingAsAdmin($community);
+
+    $html = Livewire::test(ListMembers::class, ['uid' => $community])
+        ->call('loadMembers')
+        ->html();
+
+    expect($html)->toContain('wire:click="removePrepare(\''.$username.'\')"')
+        ->toContain('wire:submit="removeCommit"')
+        ->not->toContain('deletePrepare')
+        ->not->toContain('deleteCommit');
+});
+
+test('a super admin can remove a member through the full prepare/confirm flow', function (): void {
+    // remove_member is superadmin-only (CommunityPolicy::remove_member) -
+    // an admin can see the disabled control but not actually invoke it.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $username = realmMember($uid, 'Alice Wonder');
+    actingAsSuperAdmin();
+
+    Livewire::test(ListMembers::class, ['uid' => $community])
+        ->call('loadMembers')
+        ->call('removePrepare', $username)
+        ->assertSet('deleteMemberUsername', $username)
+        ->call('removeCommit');
+
+    expect($community->membersGroup()->members()->get()->contains(
+        fn ($user) => $user->getFirstAttribute('uid') === $username
+    ))->toBeFalse();
 });
 
 test('the admin/moderator permission check does not scale with the number of members shown', function (): void {
