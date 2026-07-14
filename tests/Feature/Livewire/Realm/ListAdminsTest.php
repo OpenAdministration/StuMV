@@ -2,10 +2,33 @@
 
 use App\Livewire\Realm\ListAdmins;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use LdapRecord\Container;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
+
+/**
+ * admin/remove_admin are the same check for every row (they only depend on
+ * $community, never on the row) - count the LDAP admins-group lookups they
+ * trigger to catch a regression back to per-row/per-check evaluation.
+ */
+function countAdminGroupQueries(Closure $callback): int
+{
+    $queries = 0;
+    Container::getInstance()->getDispatcher()->listen('LdapRecord\Query\Events\*', function ($eventName, $events) use (&$queries): void {
+        foreach ($events as $event) {
+            $query = $event->getQuery()->getUnescapedQuery();
+            if (str_contains($query, 'cn=admins')) {
+                $queries++;
+            }
+        }
+    });
+
+    $callback();
+
+    return $queries;
+}
 
 test('admins are sorted by name ascending by default', function (): void {
     $community = newCommunity();
@@ -73,4 +96,39 @@ test('the search field filters the admins list', function (): void {
         ->set('search', 'alphaadmin')
         ->assertSee('Test alphaadmin')
         ->assertDontSee('Test betaadmin');
+});
+
+test('an admin sees a working profile link for other admins', function (): void {
+    $community = newCommunity();
+    $adminsGroup = $community->adminsGroup();
+    TestLdap::attach($adminsGroup, TestLdap::makeUser('otheradmin'));
+    actingAsAdmin($community);
+
+    Livewire::test(ListAdmins::class, ['uid' => $community])
+        ->call('loadAdmins')
+        ->assertSeeHtml('href="'.route('profile', ['username' => 'otheradmin']).'"');
+});
+
+test('the admin permission check does not scale with the number of admins shown', function (): void {
+    $community = newCommunity();
+    $adminsGroup = $community->adminsGroup();
+    actingAsAdmin($community);
+
+    foreach (range(1, 2) as $i) {
+        TestLdap::attach($adminsGroup, TestLdap::makeUser(sprintf('scaleadm%02d', $i)));
+    }
+
+    $queriesForTwo = countAdminGroupQueries(function () use ($community): void {
+        Livewire::test(ListAdmins::class, ['uid' => $community])->call('loadAdmins');
+    });
+
+    foreach (range(3, 8) as $i) {
+        TestLdap::attach($adminsGroup, TestLdap::makeUser(sprintf('scaleadm%02d', $i)));
+    }
+
+    $queriesForEight = countAdminGroupQueries(function () use ($community): void {
+        Livewire::test(ListAdmins::class, ['uid' => $community])->call('loadAdmins');
+    });
+
+    expect($queriesForEight)->toBe($queriesForTwo);
 });

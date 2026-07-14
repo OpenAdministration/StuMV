@@ -64,11 +64,19 @@ class ListModerators extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
 
+        // admin/remove_moderator are the same check for every row (they only
+        // depend on $community, never on the row) - computed once here
+        // (admin hits LDAP) rather than repeatedly per row.
+        $isAdmin = auth()->user()->can('admin', $community);
+        $canRemoveModerator = auth()->user()->can('remove_moderator', $community);
+
         if (! $this->ready) {
             return view(
                 'livewire.realm.list-moderators', [
                     'community' => $community,
                     'realm_members' => collect(),
+                    'isAdmin' => $isAdmin,
+                    'canRemoveModerator' => $canRemoveModerator,
                 ]
             )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
         }
@@ -93,6 +101,8 @@ class ListModerators extends Component
             'livewire.realm.list-moderators', [
                 'community' => $community,
                 'realm_members' => $mods,
+                'isAdmin' => $isAdmin,
+                'canRemoveModerator' => $canRemoveModerator,
             ]
         )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
     }

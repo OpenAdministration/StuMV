@@ -58,17 +58,16 @@
                         />
                     </flux:table.cell>
                     <flux:table.cell>
-                        @can('admin', $community)
+                        @if($isAdmin)
                             <flux:link
                                 wire:navigate
-                                :disabled="auth()->user()->cannot('admin', [$community])"
-                                :href="auth()->user()->can('admin', [$community]) ? route('profile', ['username' => $realm_admin->uid[0]]) : null"
+                                :href="route('profile', ['username' => $realm_admin->uid[0]])"
                             >
                                 {{ $realm_admin->cn[0] }}
                             </flux:link>
                         @else
                             {{ $realm_admin->cn[0] }}
-                        @endcan
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
                         <flux:dropdown>
@@ -77,7 +76,7 @@
                                 <flux:menu.item
                                     variant="danger"
                                     icon="user-minus"
-                                    :disabled="auth()->user()->cannot('remove_admin', $community)"
+                                    :disabled="!$canRemoveAdmin"
                                     wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
                                 >
                                     {{ __('Delete') }}

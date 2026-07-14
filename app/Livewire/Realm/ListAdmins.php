@@ -71,11 +71,19 @@ class ListAdmins extends Component
     {
         $community = $this->community();
 
+        // admin/remove_admin are the same check for every row (they only
+        // depend on $community, never on the row) - computed once here
+        // (admin hits LDAP) rather than repeatedly per row and per menu item.
+        $isAdmin = $community && auth()->user()->can('admin', $community);
+        $canRemoveAdmin = $community && auth()->user()->can('remove_admin', $community);
+
         if (! $this->ready) {
             return view(
                 'livewire.realm.list-admins', [
                     'community' => $community,
                     'realm_admins' => collect(),
+                    'isAdmin' => $isAdmin,
+                    'canRemoveAdmin' => $canRemoveAdmin,
                 ]
             )->title(__('realms.admins_headline', [
                 'name' => $community->description[0],
@@ -103,6 +111,8 @@ class ListAdmins extends Component
             'livewire.realm.list-admins', [
                 'community' => $community,
                 'realm_admins' => $admins,
+                'isAdmin' => $isAdmin,
+                'canRemoveAdmin' => $canRemoveAdmin,
             ]
         )->title(__('realms.admins_headline', [
             'name' => $community->description[0],
