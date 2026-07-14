@@ -4,6 +4,7 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Flux\Flux;
@@ -160,10 +161,11 @@ class ListCommitteesTree extends Component
      * children's full attributes fetched from LDAP - only a cheap existence
      * check to decide whether to show an expand arrow.
      *
-     * Returns null while searching if neither this committee nor any of its
-     * descendants match, so the branch is dropped entirely.
+     * Returns null while searching if neither this committee, any of its
+     * roles, nor any of its descendants match, so the branch is dropped
+     * entirely.
      *
-     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array, isModerator: bool}|null
+     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array, isModerator: bool, matchingRoles: array}|null
      */
     protected function buildNode(Committee $committee, string $search, bool $isModerator): ?array
     {
@@ -178,6 +180,7 @@ class ListCommitteesTree extends Component
                 'unfolded' => false,
                 'children' => [],
                 'isModerator' => $isModerator,
+                'matchingRoles' => [],
             ];
         }
 
@@ -190,8 +193,9 @@ class ListCommitteesTree extends Component
             ->all();
 
         $ownMatches = $search !== '' && $this->committeeOwnMatches($committee, $search);
+        $matchingRoles = $search !== '' ? $this->matchingRoles($committee, $search) : [];
 
-        if ($search !== '' && ! $ownMatches && empty($childNodes)) {
+        if ($search !== '' && ! $ownMatches && empty($matchingRoles) && empty($childNodes)) {
             return null;
         }
 
@@ -205,6 +209,7 @@ class ListCommitteesTree extends Component
             'unfolded' => $unfolded,
             'children' => $childNodes,
             'isModerator' => $isModerator,
+            'matchingRoles' => $matchingRoles,
         ];
     }
 
@@ -227,5 +232,24 @@ class ListCommitteesTree extends Component
         ]);
 
         return array_any($values, fn ($value) => mb_stripos(mb_strtolower((string) $value), $search) !== false);
+    }
+
+    /**
+     * @return list<Role> this committee's own roles (not its descendants')
+     *                     whose cn/description match the search term
+     */
+    protected function matchingRoles(Committee $committee, string $search): array
+    {
+        return $committee->roles()->get()
+            ->filter(function (Role $role) use ($search): bool {
+                $values = array_filter([
+                    $role->getFirstAttribute('cn'),
+                    $role->getFirstAttribute('description'),
+                ]);
+
+                return array_any($values, fn ($value) => mb_stripos(mb_strtolower((string) $value), $search) !== false);
+            })
+            ->values()
+            ->all();
     }
 }
