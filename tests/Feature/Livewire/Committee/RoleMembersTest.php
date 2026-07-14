@@ -215,3 +215,70 @@ test('the total LDAP query count does not scale with the number of members shown
 
     expect($queriesForEight)->toBe($queriesForTwo);
 });
+
+test('the search field filters role members by name', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $alice = TestLdap::member($community);
+    \App\Ldap\User::findByUsername($alice->username)->fill(['cn' => 'Alice Wonder'])->save();
+    $bob = TestLdap::member($community);
+    \App\Ldap\User::findByUsername($bob->username)->fill(['cn' => 'Bob Builder'])->save();
+    RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $alice->username, 'from' => today()]);
+    RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $bob->username, 'from' => today()]);
+    actingAsModerator($community);
+
+    Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+        ->call('loadMembers')
+        ->set('search', 'Alice')
+        ->assertSee('Alice Wonder')
+        ->assertDontSee('Bob Builder');
+});
+
+test('role members are sorted by name ascending by default', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    foreach (['Zebra', 'Apple', 'Mango'] as $name) {
+        $member = TestLdap::member($community);
+        \App\Ldap\User::findByUsername($member->username)->fill(['cn' => $name])->save();
+        RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $member->username, 'from' => today()]);
+    }
+    actingAsModerator($community);
+
+    $html = Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+        ->call('loadMembers')
+        ->html();
+
+    $posApple = strpos($html, 'Apple');
+    $posMango = strpos($html, 'Mango');
+    $posZebra = strpos($html, 'Zebra');
+
+    expect($posApple)->toBeLessThan($posMango)
+        ->and($posMango)->toBeLessThan($posZebra);
+});
+
+test('sortBy toggles direction and re-sorts role members descending', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    foreach (['Zebra', 'Apple', 'Mango'] as $name) {
+        $member = TestLdap::member($community);
+        \App\Ldap\User::findByUsername($member->username)->fill(['cn' => $name])->save();
+        RoleMembership::create(['role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $member->username, 'from' => today()]);
+    }
+    actingAsModerator($community);
+
+    $html = Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+        ->call('loadMembers')
+        ->call('sortBy', 'name')
+        ->assertSet('sortDirection', 'desc')
+        ->html();
+
+    $posApple = strpos($html, 'Apple');
+    $posMango = strpos($html, 'Mango');
+    $posZebra = strpos($html, 'Zebra');
+
+    expect($posZebra)->toBeLessThan($posMango)
+        ->and($posMango)->toBeLessThan($posApple);
+});

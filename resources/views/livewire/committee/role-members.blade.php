@@ -38,16 +38,14 @@
         <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
     </div>
 
-    {{--
     <flux:field>
         <flux:label>{{ __('roles.members.search') }}</flux:label>
         <flux:input
             icon="search"
             clearable
-            wire:model.live.debounce="search"
+            wire:model.live.debounce.500ms="search"
         />
     </flux:field>
-    --}}
 
     <div class="pb-6 sm:pb-8">
         @if (! $ready)
@@ -63,10 +61,10 @@
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column class="w-[55px]"></flux:table.column>
-                        <flux:table.column>{{ __('User') }}</flux:table.column>
-                        <flux:table.column>{{ __('From') }}</flux:table.column>
-                        <flux:table.column>{{ __('Until') }}</flux:table.column>
-                        <flux:table.column>{{ __('Decided') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('User') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'from'" :direction="$sortDirection" wire:click="sortBy('from')">{{ __('From') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'until'" :direction="$sortDirection" wire:click="sortBy('until')">{{ __('Until') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'decided'" :direction="$sortDirection" wire:click="sortBy('decided')">{{ __('Decided') }}</flux:table.column>
                         <flux:table.column>{{ __('Comment') }}</flux:table.column>
                         <flux:table.column></flux:table.column>
                     </flux:table.columns>

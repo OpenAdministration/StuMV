@@ -51,6 +51,17 @@ class ListRoleMembers extends Component
         $this->ready = true;
     }
 
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            // toggle direction
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+            $this->sortField = $field;
+        }
+    }
+
     public function render()
     {
         $community = Community::findOrFailByUid($this->uid);
@@ -84,16 +95,27 @@ class ListRoleMembers extends Component
             $membersQuery->active(today());
         }
 
-        if ($this->search !== '') {
-            $membersQuery->where('cn', $this->search);
-        }
-
         $members = $membersQuery->get();
 
         $usernames = $members->pluck('username')->unique()->filter()->all();
         $userCache = empty($usernames)
             ? []
             : User::query()->whereIn('uid', $usernames)->get()->keyBy('uid')->all();
+
+        // The member's display name only exists in LDAP, not on the
+        // RoleMembership row itself, so search/sort-by-name are applied here
+        // in PHP (after $userCache is resolved) rather than as a DB query.
+        $displayName = fn ($member) => $userCache[$member->username]?->getFirstAttribute('cn') ?? $member->username;
+
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $members = $members->filter(fn ($member) => str_contains(mb_strtolower($displayName($member)), $search))->values();
+        }
+
+        $members = (match ($this->sortField) {
+            'name' => $members->sortBy(fn ($member) => mb_strtolower($displayName($member)), SORT_NATURAL, $this->sortDirection === 'desc'),
+            default => $members->sortBy($this->sortField, SORT_REGULAR, $this->sortDirection === 'desc'),
+        })->values();
 
         // Whether an active membership's user is still actually in the
         // role's LDAP group ("pending" - approved here but not yet synced
