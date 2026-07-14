@@ -93,7 +93,7 @@
     </flux:table>
 
     <form wire:submit="deleteCommit">
-        <flux:modal name="delete">
+        <flux:modal name="delete" class="md:w-96">
             <div class="space-y-6">
                 <div>
                     <flux:heading size="lg" class="modal-header">{{ __('realms.delete_title', ['name' => $deleteRealmName]) }}</flux:heading>
@@ -107,9 +107,9 @@
                         <flux:error name="deleteConfirmText" />
                     </flux:field>
                 </div>
-                <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                <div class="flex flex-wrap justify-end gap-4">
+                    <flux:button icon="ban" wire:click="close()">{{ __('Cancel') }}</flux:button>
+                    <flux:button variant="primary" icon="trash-2" type="submit">{{ __('Delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>
