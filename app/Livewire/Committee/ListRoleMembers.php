@@ -7,12 +7,16 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\RoleMembership;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class ListRoleMembers extends Component
 {
+    use WithPagination;
+
     #[Url]
     public string $search = '';
 
@@ -60,6 +64,16 @@ class ListRoleMembers extends Component
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedShowOnlyActive(): void
+    {
+        $this->resetPage();
     }
 
     public function render()
@@ -112,10 +126,19 @@ class ListRoleMembers extends Component
             $members = $members->filter(fn ($member) => str_contains(mb_strtolower($displayName($member)), $search))->values();
         }
 
-        $members = (match ($this->sortField) {
+        $sorted = (match ($this->sortField) {
             'name' => $members->sortBy(fn ($member) => mb_strtolower($displayName($member)), SORT_NATURAL, $this->sortDirection === 'desc'),
             default => $members->sortBy($this->sortField, SORT_REGULAR, $this->sortDirection === 'desc'),
         })->values();
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $members = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
 
         // Whether an active membership's user is still actually in the
         // role's LDAP group ("pending" - approved here but not yet synced

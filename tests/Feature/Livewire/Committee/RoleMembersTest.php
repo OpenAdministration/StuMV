@@ -216,6 +216,29 @@ test('the total LDAP query count does not scale with the number of members shown
     expect($queriesForEight)->toBe($queriesForTwo);
 });
 
+test('the role members list is paginated to 10 per page', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    foreach (range(1, 15) as $i) {
+        RoleMembership::create([
+            'role_cn' => 'mitglied',
+            'committee_dn' => $committee->getDn(),
+            'username' => TestLdap::member($community)->username,
+            'from' => today(),
+        ]);
+    }
+    actingAsModerator($community);
+
+    $component = Livewire::test(ListRoleMembers::class, ['uid' => $community, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')])
+        ->call('loadMembers');
+
+    expect($component->viewData('members'))->toHaveCount(10);
+
+    $page2 = $component->call('gotoPage', 2)->viewData('members');
+    expect($page2)->toHaveCount(5);
+});
+
 test('the search field filters role members by name', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');

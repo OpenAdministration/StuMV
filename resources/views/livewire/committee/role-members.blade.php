@@ -166,6 +166,10 @@
             @endforeach
             </flux:table.rows>
         </flux:table>
+
+                    <div class="pagination">
+                        <flux:pagination :paginator="$members" />
+                    </div>
                 @else
                     <flux:callout variant="warning" icon="circle-alert" heading="{{ __('roles.no_members_found') }}" />
                 @endif
