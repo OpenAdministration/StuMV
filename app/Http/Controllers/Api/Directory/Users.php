@@ -46,8 +46,8 @@ class Users extends Controller
             $committee = $role->committee();
 
             return [
-                'committee' => $committee?->getFirstAttribute('ou'),
-                'role' => $role->getFirstAttribute('cn'),
+                'ou' => $committee?->getFirstAttribute('ou'),
+                'cn' => $role->getFirstAttribute('cn'),
             ];
         })->values());
     }
@@ -90,10 +90,7 @@ class Users extends Controller
             ->where('uniqueMember', '=', $user->getDn())
             ->get();
 
-        return response()->json($groups->map(fn (Group $group): array => [
-            'cn' => $group->getFirstAttribute('cn'),
-            'description' => $group->getFirstAttribute('description'),
-        ])->values());
+        return response()->json($groups->map(fn (Group $group): string => $group->getFirstAttribute('cn'))->values());
     }
 
     /**

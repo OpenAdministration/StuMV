@@ -209,7 +209,7 @@ paths:
       description: |
         Roles anywhere in the community's committee tree (arbitrarily nested)
         that currently have this user as an actual LDAP member. Only the
-        `committee`/`role` short codes are returned - look up their names via
+        `ou`/`cn` short codes are returned - look up their names via
         `/{uid}/committees/{ou}` and `/{uid}/committees/{ou}/roles/{cn}`.
       security: [{ oauth2: [users] }]
       parameters:
@@ -256,6 +256,9 @@ paths:
     get:
       tags: [Users]
       summary: List the permission groups a user is currently in
+      description: |
+        The short codes (`cn`) of groups the user is a member of. Look up
+        group names via `/{uid}/groups/{cn}`.
       security: [{ oauth2: [users] }]
       parameters:
         - $ref: '#/components/parameters/CommunityUid'
@@ -267,7 +270,8 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/Group' }
+                items: { type: string }
+                example: ["newsletter"]
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -357,8 +361,8 @@ components:
     UserRole:
       type: object
       properties:
-        committee: { type: string, nullable: true, example: FSR }
-        role: { type: string, example: mitglied }
+        ou: { type: string, nullable: true, example: FSR }
+        cn: { type: string, example: mitglied }
 
   responses:
     Unauthorized:

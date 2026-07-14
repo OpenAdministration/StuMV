@@ -18,7 +18,7 @@ test('a registered client can list the roles a user currently holds', function (
     $response = $this->getJson("/api/$uid/users/{$target->username}/roles");
 
     $response->assertOk()->assertExactJson([
-        ['committee' => 'fsr', 'role' => 'mitglied'],
+        ['ou' => 'fsr', 'cn' => 'mitglied'],
     ]);
 });
 
@@ -127,7 +127,7 @@ test('a registered client can list the groups of a user', function (): void {
 
     $response = $this->getJson("/api/$uid/users/{$target->username}/groups");
 
-    $response->assertOk()->assertJsonFragment(['cn' => 'newsletter']);
+    $response->assertOk()->assertExactJson(['newsletter']);
 });
 
 test('a user with no groups gets an empty list, not an error', function (): void {
