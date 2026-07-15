@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\SuperUserGroup;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -28,7 +29,7 @@ test('a member of several communities visiting / is redirected to the picker', f
 test('a superadmin visiting / is redirected to the picker even with a single membership', function (): void {
     $community = newCommunity();
     $ldapUser = TestLdap::makeUser();
-    TestLdap::attach(\App\Ldap\SuperUserGroup::group(), $ldapUser);
+    TestLdap::attach(SuperUserGroup::group(), $ldapUser);
     TestLdap::attach($community->membersGroup(), $ldapUser);
     $this->actingAs(TestLdap::databaseUser($ldapUser));
 

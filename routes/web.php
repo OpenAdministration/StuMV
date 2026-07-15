@@ -43,6 +43,7 @@ use App\Livewire\Tools\ImportUsersFromUniLdap;
 use App\Livewire\Tools\ToolsDashboard;
 use App\Livewire\Tools\UnusedRoles;
 use App\Livewire\Tools\UsersNotInUniLdap;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 
 // Set language based on the user's preferences
@@ -65,7 +66,7 @@ if ($lang) {
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
 
-    Route::get('/', static fn () => redirect(\App\Providers\RouteServiceProvider::home()));
+    Route::get('/', static fn () => redirect(RouteServiceProvider::home()));
     Route::livewire('/profile/{username}', Profile::class)->name('profile');
     Route::livewire('/profile/{username}/memberships', Memberships::class)->name('profile.memberships');
     Route::livewire('/profile/{username}/picture', Picture::class)->name('profile.picture');
