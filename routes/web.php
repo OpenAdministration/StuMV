@@ -93,7 +93,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{realm}/committees/{ou}/roles/{cn}/edit', EditRole::class)->name('committees.roles.edit');
         Route::livewire('{realm}/committees/{ou}/roles/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
         Route::livewire('{realm}/committees/{ou}/roles/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
-        Route::livewire('{realm}/committees/{ou}/roles/{cn}/membership/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
+        Route::livewire('{realm}/committees/{ou}/roles/{cn}/memberships/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
         Route::livewire('{realm}/committees/{ou}/new-moderator', NewCommitteeModerator::class)->name('committees.moderators.new');
         // end mod
     });
