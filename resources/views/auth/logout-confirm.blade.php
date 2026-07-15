@@ -14,7 +14,7 @@
             </p>
             <form method="POST" action="{{ route('logout', ['redirect_uri' => $redirect_uri]) }}">
                 @csrf
-                <div class="flex justify-evenly">
+                <div class="flex flex-wrap gap-3 items-center justify-end">
                     <flux:button icon="ban" href="/">{{ __('Cancel') }}</flux:button>
                     <flux:button variant="primary" icon="log-out" type="submit">{{ __('Log Out') }}</flux:button>
                 </div>
