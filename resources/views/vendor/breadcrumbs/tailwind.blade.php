@@ -14,10 +14,13 @@
         </flux:breadcrumbs>
     @else
         {{--
-            Collapses middle breadcrumbs (everything between the first item
-            and the last) into a "..." dropdown once they no longer fit the
-            available width, instead of a fixed item-count threshold. Home
-            and the first/last breadcrumb always stay visible.
+            Collapses everything between home and the current (last) item into
+            a "..." dropdown once it no longer fits the available width,
+            instead of a fixed item-count threshold. Only home and the last
+            (current-page) item are ever exempt from collapsing - every other
+            item is treated uniformly as collapsible, starting from the one
+            closest to home, so there's no fixed-width floor that can still
+            overflow on a narrow enough viewport or a long enough trail.
 
             An off-screen clone of every possible item (never collapsed) is
             rendered purely to measure natural widths - real widths depend on
@@ -47,15 +50,14 @@
                 recalculate() {
                     const available = this.$el.clientWidth;
                     const home = this.$refs.measureHome.offsetWidth;
-                    const first = this.$refs.measureFirst.offsetWidth;
                     const last = this.$refs.measureLast.offsetWidth;
                     const dropdown = this.$refs.measureDropdown.offsetWidth;
-                    const middles = Array.from(this.$refs.measureMiddles.children).map(el => el.offsetWidth);
+                    const collapsibles = Array.from(this.$refs.measureCollapsibles.children).map(el => el.offsetWidth);
 
-                    for (let collapsed = 0; collapsed <= middles.length; collapsed++) {
-                        const shown = middles.slice(collapsed).reduce((a, b) => a + b, 0);
+                    for (let collapsed = 0; collapsed <= collapsibles.length; collapsed++) {
+                        const shown = collapsibles.slice(collapsed).reduce((a, b) => a + b, 0);
                         const reserve = collapsed > 0 ? dropdown : 0;
-                        if (home + first + last + reserve + shown <= available || collapsed === middles.length) {
+                        if (home + last + reserve + shown <= available || collapsed === collapsibles.length) {
                             this.collapsedCount = collapsed;
                             return;
                         }
@@ -66,41 +68,45 @@
             <flux:breadcrumbs>
                 <flux:breadcrumbs.item icon="house" href="/" />
 
-                @if($items[0]->url)
-                    <flux:breadcrumbs.item href="{{ $items[0]->url }}">
-                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[0]])
-                    </flux:breadcrumbs.item>
-                @else
+                {{--
+                    x-show is passed through by <flux:breadcrumbs.item> onto its
+                    INNER link/text element, not the item's own outer box - a
+                    "hidden" item would still render its outer box and
+                    separator chevron at full width. <template x-if> instead
+                    removes the whole item from the DOM, which is what's
+                    actually needed here.
+                --}}
+                <template x-if="collapsedCount > 0">
                     <flux:breadcrumbs.item>
-                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[0]])
+                        <flux:dropdown>
+                            <flux:button icon="ellipsis" variant="ghost" size="sm" />
+                            <flux:navmenu>
+                                @for($i = 0; $i <= $total - 2; $i++)
+                                    @if($items[$i]->url)
+                                        <template x-if="{{ $i }} < collapsedCount">
+                                            <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}">
+                                                {{ $items[$i]->title }}
+                                            </flux:navmenu.item>
+                                        </template>
+                                    @endif
+                                @endfor
+                            </flux:navmenu>
+                        </flux:dropdown>
                     </flux:breadcrumbs.item>
-                @endif
+                </template>
 
-                <flux:breadcrumbs.item x-show="collapsedCount > 0">
-                    <flux:dropdown>
-                        <flux:button icon="ellipsis" variant="ghost" size="sm" />
-                        <flux:navmenu>
-                            @for($i = 1; $i <= $total - 2; $i++)
-                                @if($items[$i]->url)
-                                    <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}" x-show="{{ $i }} <= collapsedCount">
-                                        {{ $items[$i]->title }}
-                                    </flux:navmenu.item>
-                                @endif
-                            @endfor
-                        </flux:navmenu>
-                    </flux:dropdown>
-                </flux:breadcrumbs.item>
-
-                @for($i = 1; $i <= $total - 2; $i++)
-                    @if($items[$i]->url)
-                        <flux:breadcrumbs.item href="{{ $items[$i]->url }}" x-show="{{ $i }} > collapsedCount">
-                            @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
-                        </flux:breadcrumbs.item>
-                    @else
-                        <flux:breadcrumbs.item x-show="{{ $i }} > collapsedCount">
-                            @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
-                        </flux:breadcrumbs.item>
-                    @endif
+                @for($i = 0; $i <= $total - 2; $i++)
+                    <template x-if="{{ $i }} >= collapsedCount">
+                        @if($items[$i]->url)
+                            <flux:breadcrumbs.item href="{{ $items[$i]->url }}">
+                                @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
+                            </flux:breadcrumbs.item>
+                        @else
+                            <flux:breadcrumbs.item>
+                                @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
+                            </flux:breadcrumbs.item>
+                        @endif
+                    </template>
                 @endfor
 
                 <flux:breadcrumbs.item>
@@ -110,14 +116,11 @@
 
             <flux:breadcrumbs class="invisible absolute pointer-events-none" aria-hidden="true">
                 <flux:breadcrumbs.item x-ref="measureHome" icon="house" href="/" />
-                <flux:breadcrumbs.item x-ref="measureFirst" href="{{ $items[0]->url }}">
-                    @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[0]])
-                </flux:breadcrumbs.item>
                 <flux:breadcrumbs.item x-ref="measureDropdown">
                     <flux:button icon="ellipsis" variant="ghost" size="sm" />
                 </flux:breadcrumbs.item>
-                <span x-ref="measureMiddles" class="contents">
-                    @for($i = 1; $i <= $total - 2; $i++)
+                <span x-ref="measureCollapsibles" class="contents">
+                    @for($i = 0; $i <= $total - 2; $i++)
                         <flux:breadcrumbs.item href="{{ $items[$i]->url }}">
                             @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
                         </flux:breadcrumbs.item>

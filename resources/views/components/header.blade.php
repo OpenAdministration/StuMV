@@ -1,6 +1,6 @@
 <flux:navbar class="flex h-[4rem] min-w-0 shrink-0 items-center gap-x-4 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-4 sm:gap-x-6 sm:px-6 lg:px-8 z-10 print:hidden">
     <flux:sidebar.toggle class="lg:hidden" icon="menu" />
-    <div class="hidden md:flex min-w-0 flex-1">
+    <div class="md:flex min-w-0 flex-1">
         @php
             // Resolve route params here so the breadcrumbs work regardless of how
             // the layout passes data down. LDAP Entry bindings are reduced to their
