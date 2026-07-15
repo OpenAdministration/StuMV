@@ -34,6 +34,7 @@
             class="relative w-full overflow-hidden"
             x-data="{
                 collapsedCount: 0,
+                lastCollapsed: false,
                 _ro: null,
                 _onNavigated: null,
                 init() {
@@ -67,11 +68,19 @@
                     for (let collapsed = 0; collapsed <= collapsibles.length; collapsed++) {
                         const shown = collapsibles.slice(collapsed).reduce((a, b) => a + b, 0);
                         const reserve = collapsed > 0 ? dropdown : 0;
-                        if (home + last + reserve + shown <= available || collapsed === collapsibles.length) {
+                        if (home + last + reserve + shown <= available) {
                             this.collapsedCount = collapsed;
+                            this.lastCollapsed = false;
                             return;
                         }
                     }
+
+                    // Not even home + the current page + dropdown fits with
+                    // everything else already collapsed - fold the current
+                    // page into the dropdown too, as a last resort, leaving
+                    // just home + '...'.
+                    this.collapsedCount = collapsibles.length;
+                    this.lastCollapsed = true;
                 },
             }"
         >
@@ -86,23 +95,43 @@
                     x-if removes the whole item from the DOM instead, which is
                     what's actually needed here.
                 --}}
-                <template x-if="collapsedCount > 0">
-                    <flux:breadcrumbs.item>
-                        <flux:dropdown>
-                            <flux:button icon="ellipsis" variant="ghost" size="sm" />
-                            <flux:navmenu>
-                                @for($i = 0; $i <= $total - 2; $i++)
-                                    @if($items[$i]->url)
-                                        <template x-if="collapsedCount > {{ $i }}">
-                                            <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}">
-                                                {{ $items[$i]->title }}
-                                            </flux:navmenu.item>
-                                        </template>
-                                    @endif
-                                @endfor
-                            </flux:navmenu>
-                        </flux:dropdown>
-                    </flux:breadcrumbs.item>
+                <template x-if="collapsedCount > 0 || lastCollapsed">
+                    {{--
+                        The current page (a separate template x-if right after
+                        this one) always stays in the DOM even when hidden, so
+                        Flux's own "last visible item" separator styling never
+                        actually applies to this dropdown - hide its separator
+                        manually once it's the last thing actually shown. A
+                        plain (non-Flux) wrapping div is needed for the class
+                        binding to land where CSS can reach the separator: Flux
+                        only special-cases bare "class"/"style" attributes onto
+                        the item's outer box, not x-bind:class.
+                    --}}
+                    <div x-bind:class="{ '[&_[data-flux-breadcrumbs-item]>svg]:hidden': lastCollapsed }">
+                        <flux:breadcrumbs.item>
+                            <flux:dropdown>
+                                <flux:button icon="ellipsis" variant="ghost" size="sm" />
+                                <flux:navmenu>
+                                    @for($i = 0; $i <= $total - 2; $i++)
+                                        @if($items[$i]->url)
+                                            <template x-if="collapsedCount > {{ $i }}">
+                                                <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}">
+                                                    {{ $items[$i]->title }}
+                                                </flux:navmenu.item>
+                                            </template>
+                                        @endif
+                                    @endfor
+                                    {{-- The current page itself, only shown here once there's no
+                                         room left for it in the main bar either. --}}
+                                    <template x-if="lastCollapsed">
+                                        <flux:navmenu.item icon="corner-down-right">
+                                            {{ $items[$total - 1]->title }}
+                                        </flux:navmenu.item>
+                                    </template>
+                                </flux:navmenu>
+                            </flux:dropdown>
+                        </flux:breadcrumbs.item>
+                    </div>
                 </template>
 
                 @for($i = 0; $i <= $total - 2; $i++)
@@ -119,9 +148,11 @@
                     </template>
                 @endfor
 
-                <flux:breadcrumbs.item>
-                    @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$total - 1]])
-                </flux:breadcrumbs.item>
+                <template x-if="!lastCollapsed">
+                    <flux:breadcrumbs.item>
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$total - 1]])
+                    </flux:breadcrumbs.item>
+                </template>
             </flux:breadcrumbs>
 
             <flux:breadcrumbs class="invisible absolute pointer-events-none" aria-hidden="true">
