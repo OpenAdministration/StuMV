@@ -47,14 +47,21 @@
                     this._ro?.disconnect();
                     if (this._onNavigated) document.removeEventListener('livewire:navigated', this._onNavigated);
                 },
+                itemWidth(ref) {
+                    // The Flux breadcrumb item component forwards x-ref onto
+                    // its INNER link/text element, not the item's own outer
+                    // box - which excludes the separator chevron (a sibling
+                    // of that inner element). Walk up to the real item box.
+                    return ref.closest('[data-flux-breadcrumbs-item]').offsetWidth;
+                },
                 recalculate() {
                     const available = this.$el.clientWidth;
-                    const home = this.$refs.measureHome.offsetWidth;
-                    const last = this.$refs.measureLast.offsetWidth;
-                    const dropdown = this.$refs.measureDropdown.offsetWidth;
+                    const home = this.itemWidth(this.$refs.measureHome);
+                    const last = this.itemWidth(this.$refs.measureLast);
+                    const dropdown = this.itemWidth(this.$refs.measureDropdown);
                     const collapsibles = [];
                     for (let i = 0; this.$refs['measureCollapsible' + i]; i++) {
-                        collapsibles.push(this.$refs['measureCollapsible' + i].offsetWidth);
+                        collapsibles.push(this.itemWidth(this.$refs['measureCollapsible' + i]));
                     }
 
                     for (let collapsed = 0; collapsed <= collapsibles.length; collapsed++) {
@@ -72,12 +79,12 @@
                 <flux:breadcrumbs.item icon="house" href="/" />
 
                 {{--
-                    x-show is passed through by <flux:breadcrumbs.item> onto its
-                    INNER link/text element, not the item's own outer box - a
-                    "hidden" item would still render its outer box and
-                    separator chevron at full width. <template x-if> instead
-                    removes the whole item from the DOM, which is what's
-                    actually needed here.
+                    x-show is passed through by the Flux breadcrumb item
+                    component onto its INNER link/text element, not the item's
+                    own outer box - a "hidden" item would still render its
+                    outer box and separator chevron at full width. A template
+                    x-if removes the whole item from the DOM instead, which is
+                    what's actually needed here.
                 --}}
                 <template x-if="collapsedCount > 0">
                     <flux:breadcrumbs.item>
@@ -86,7 +93,7 @@
                             <flux:navmenu>
                                 @for($i = 0; $i <= $total - 2; $i++)
                                     @if($items[$i]->url)
-                                        <template x-if="{{ $i }} < collapsedCount">
+                                        <template x-if="collapsedCount > {{ $i }}">
                                             <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}">
                                                 {{ $items[$i]->title }}
                                             </flux:navmenu.item>
