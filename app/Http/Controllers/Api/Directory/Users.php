@@ -16,13 +16,13 @@ class Users extends Controller
 {
     use AuthorizesDirectoryClient;
 
-    public function show(Request $request, Community $realm, string $username)
+    public function show(Request $request, Community $realm, string $uid)
     {
         $this->authorizeClientForCommunity($realm);
 
-        $user = $this->findMemberOrFail($realm, $username);
+        $user = $this->findMemberOrFail($realm, $uid);
 
-        $picture = ProfilePicture::where('user', $username)->first();
+        $picture = ProfilePicture::where('user', $uid)->first();
 
         return response()->json([
             'uid' => $user->getFirstAttribute('uid'),
@@ -34,11 +34,11 @@ class Users extends Controller
         ]);
     }
 
-    public function roles(Request $request, Community $realm, string $username)
+    public function roles(Request $request, Community $realm, string $uid)
     {
         $this->authorizeClientForCommunity($realm);
 
-        $user = $this->findMemberOrFail($realm, $username);
+        $user = $this->findMemberOrFail($realm, $uid);
 
         $roles = $this->userRoles($realm, $user);
 
@@ -52,11 +52,11 @@ class Users extends Controller
         })->values());
     }
 
-    public function committees(Request $request, Community $realm, string $username)
+    public function committees(Request $request, Community $realm, string $uid)
     {
         $this->authorizeClientForCommunity($realm);
 
-        $user = $this->findMemberOrFail($realm, $username);
+        $user = $this->findMemberOrFail($realm, $uid);
 
         $committees = $this->userRoles($realm, $user)
             ->map(fn (Role $role): ?Committee => $role->committee())
@@ -80,11 +80,11 @@ class Users extends Controller
             ->get();
     }
 
-    public function groups(Request $request, Community $realm, string $username)
+    public function groups(Request $request, Community $realm, string $uid)
     {
         $this->authorizeClientForCommunity($realm);
 
-        $user = $this->findMemberOrFail($realm, $username);
+        $user = $this->findMemberOrFail($realm, $uid);
 
         $groups = Group::query()->in(Group::dnRoot($realm->getShortCode()))
             ->where('uniqueMember', '=', $user->getDn())
@@ -97,9 +97,9 @@ class Users extends Controller
      * Keep the lookup realm-bound: only expose users who are actually a
      * member of this community, not any LDAP account anywhere.
      */
-    private function findMemberOrFail(Community $realm, string $username): LdapUser
+    private function findMemberOrFail(Community $realm, string $uid): LdapUser
     {
-        $user = LdapUser::findByUsername($username) ?? abort(404);
+        $user = LdapUser::findByUsername($uid) ?? abort(404);
 
         abort_unless($realm->membersGroup()->members()->exists($user), 404);
 

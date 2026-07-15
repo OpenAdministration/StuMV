@@ -26,9 +26,9 @@ Route::middleware('client')->group(function (): void {
     });
 
     Route::middleware('scope:users')->group(function (): void {
-        Route::get('{realm}/users/{username}', [Users::class, 'show']);
-        Route::get('{realm}/users/{username}/roles', [Users::class, 'roles']);
-        Route::get('{realm}/users/{username}/committees', [Users::class, 'committees']);
-        Route::get('{realm}/users/{username}/groups', [Users::class, 'groups']);
+        Route::get('{realm}/users/{uid}', [Users::class, 'show']);
+        Route::get('{realm}/users/{uid}/roles', [Users::class, 'roles']);
+        Route::get('{realm}/users/{uid}/committees', [Users::class, 'committees']);
+        Route::get('{realm}/users/{uid}/groups', [Users::class, 'groups']);
     });
 });
