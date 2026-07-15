@@ -23,7 +23,7 @@
 
     <div class="pb-8">
         @if(count($rows) > 0)
-            <flux:table class="mb-6 sm:mb-8">
+            <flux:table>
                 <flux:table.columns>
                     <flux:table.column sortable :sorted="$sortField === 'committee'" :direction="$sortDirection" wire:click="sortBy('committee')">{{ __('groups.committee_name') }}</flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'role'" :direction="$sortDirection" wire:click="sortBy('role')">{{ __('groups.role_name') }}</flux:table.column>
