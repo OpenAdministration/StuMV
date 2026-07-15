@@ -65,7 +65,7 @@ if ($lang) {
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
 
-    Route::get('/', static fn () => to_route('realms.pick'));
+    Route::get('/', static fn () => redirect(\App\Providers\RouteServiceProvider::home()));
     Route::livewire('/profile/{username}', Profile::class)->name('profile');
     Route::livewire('/profile/{username}/memberships', Memberships::class)->name('profile.memberships');
     Route::livewire('/profile/{username}/picture', Picture::class)->name('profile.picture');

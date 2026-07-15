@@ -129,14 +129,7 @@ class ListRealms extends Component
      */
     private function communityMemberships($ldapUser): array
     {
-        $memberships = $ldapUser->memberOf;
-        $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.Community::rootDn().'$/', $value));
-
-        return \Arr::mapWithKeys($communityMemberships, static function (string $value) {
-            $uid = str($value)->remove(','.Community::rootDn(), false)->remove('cn=members,ou=')->value();
-
-            return [$uid => true];
-        });
+        return Community::membershipsFor($ldapUser);
     }
 
     public function deletePrepare($uid): void

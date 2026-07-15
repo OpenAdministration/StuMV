@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Ldap\Community;
+use App\Ldap\User as LdapUser;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +53,22 @@ class RouteServiceProvider extends ServiceProvider
     public static function home($uid = null)
     {
         if (empty($uid)) {
+            // Skip the /pick-realm Livewire component boot for the common
+            // case of a single-community member - go straight to their
+            // dashboard in one redirect instead of two. Not every
+            // authenticated App\Models\User has a matching LDAP entry (e.g.
+            // mid-registration/email-verification) - findByUsername()
+            // (unlike ->ldap()) returns null instead of aborting for those.
+            $ldapUser = LdapUser::findByUsername(Auth::user()->username);
+
+            if ($ldapUser && ! $ldapUser->isSuperAdmin()) {
+                $memberships = Community::membershipsFor($ldapUser);
+
+                if (count($memberships) === 1) {
+                    return route('realms.dashboard', array_key_first($memberships));
+                }
+            }
+
             return route('realms.pick');
         }
 

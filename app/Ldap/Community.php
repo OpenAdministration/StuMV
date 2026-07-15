@@ -50,6 +50,21 @@ class Community extends OrganizationalUnit implements LdapImportable
         return $this->description[0] ?? '';
     }
 
+    /**
+     * @return array<string, true> community short codes the given LDAP user is a member of
+     */
+    public static function membershipsFor($ldapUser): array
+    {
+        $memberships = $ldapUser->memberOf;
+        $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.self::rootDn().'$/', $value));
+
+        return \Arr::mapWithKeys($communityMemberships, static function (string $value) {
+            $uid = str($value)->remove(','.self::rootDn(), false)->remove('cn=members,ou=')->value();
+
+            return [$uid => true];
+        });
+    }
+
     #[\Override]
     protected static function boot(): void
     {
