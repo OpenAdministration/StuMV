@@ -75,12 +75,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::middleware(['communityMember'])->group(function (): void {
         // member
         Route::livewire('{realm}/dashboard', CommunityDashboard::class)->name('realms.dashboard');
-        Route::livewire('{realm}/members/', ListMembers::class)->name('realms.members');
-        Route::livewire('{realm}/mods/', ListModerators::class)->name('realms.mods');
-        Route::livewire('{realm}/admins/', ListAdmins::class)->name('realms.admins');
+        Route::livewire('{realm}/members', ListMembers::class)->name('realms.members');
+        Route::livewire('{realm}/moderators', ListModerators::class)->name('realms.mods');
+        Route::livewire('{realm}/admins', ListAdmins::class)->name('realms.admins');
         Route::livewire('{realm}/committees', ListCommitteesTree::class)->name('committees.list');
         Route::livewire('{realm}/committees/{ou}', ListRoles::class)->name('committees.roles');
-        Route::livewire('{realm}/committees/{ou}/role/{cn}', ListRoleMembers::class)->name('committees.roles.members');
+        Route::livewire('{realm}/committees/{ou}/roles/{cn}', ListRoleMembers::class)->name('committees.roles.members');
         Route::livewire('{realm}/committees/{ou}/moderators', ListCommitteeModerators::class)->name('committees.moderators');
         // end member
     });
@@ -90,10 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::middleware(['communityMod'])->group(function (): void {
         // mod
         Route::livewire('{realm}/committees/{ou}/new-role', NewRole::class)->name('committees.roles.new');
-        Route::livewire('{realm}/committees/{ou}/role/{cn}/edit', EditRole::class)->name('committees.roles.edit');
-        Route::livewire('{realm}/committees/{ou}/role/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
-        Route::livewire('{realm}/committees/{ou}/role/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
-        Route::livewire('{realm}/committees/{ou}/role/{cn}/membership/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
+        Route::livewire('{realm}/committees/{ou}/roles/{cn}/edit', EditRole::class)->name('committees.roles.edit');
+        Route::livewire('{realm}/committees/{ou}/roles/{cn}/new-member', AddUserToRole::class)->name('committees.roles.add-member');
+        Route::livewire('{realm}/committees/{ou}/roles/{cn}/terminate-memberships', TerminateRoleMemberships::class)->name('committees.roles.terminate-memberships');
+        Route::livewire('{realm}/committees/{ou}/roles/{cn}/membership/{id}', EditRoleMembership::class)->name('committees.roles.members.edit');
         Route::livewire('{realm}/committees/{ou}/new-moderator', NewCommitteeModerator::class)->name('committees.moderators.new');
         // end mod
     });
