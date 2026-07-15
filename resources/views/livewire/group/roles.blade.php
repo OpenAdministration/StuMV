@@ -16,35 +16,34 @@
         </div>
     </div>
 
-    {{--
-    <flux:field>
+    <flux:field class="mb-8">
         <flux:label>{{ __('groups.roles.search') }}</flux:label>
-        <flux:input wire:model.live.debounce="search" />
+        <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
-    --}}
 
     <flux:table class="mb-6 sm:mb-8">
         <flux:table.columns>
-            <flux:table.column>{{ __('groups.committee_name') }}</flux:table.column>
-            <flux:table.column>{{ __('groups.role_name') }}</flux:table.column>
-            <flux:table.column></flux:table.colum>
-        </flux:table-columns>
+            <flux:table.column sortable :sorted="$sortField === 'committee'" :direction="$sortDirection" wire:click="sortBy('committee')">{{ __('groups.committee_name') }}</flux:table.column>
+            <flux:table.column sortable :sorted="$sortField === 'role'" :direction="$sortDirection" wire:click="sortBy('role')">{{ __('groups.role_name') }}</flux:table.column>
+            <flux:table.column></flux:table.column>
+        </flux:table.columns>
         <flux:table.rows>
         @forelse($rows as $row)
             @php($role = $row['role'])
+            @php($committee = $row['committee'])
             <flux:table.row>
                 <flux:table.cell>
                     <flux:link
                         wire:navigate
-                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou')]) }}"
+                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee?->getFirstAttribute('ou')]) }}"
                     >
-                        {{ $role->committee()->getFirstAttribute('description') }}
+                        {{ $committee?->getFirstAttribute('description') }}
                     </flux:link>
                 </flux:table.cell>
                 <flux:table.cell>
                     <flux:link
                         wire:navigate
-                        href="{{ route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $role->committee()->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
+                        href="{{ route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $committee?->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
                     >
                         {{ $role->getFirstAttribute('description') }}
                     </flux:link>
@@ -75,6 +74,12 @@
         @endforelse
         </flux:table.rows>
     </flux:table>
+
+    @if($rows->hasPages())
+        <div class="pagination">
+            <flux:pagination :paginator="$rows" />
+        </div>
+    @endif
 
     <flux:modal name="delete">
         <div class="space-y-6">

@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Group;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Models\GroupMembership;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,7 +21,7 @@ class ListRolesInGroup extends Component
     public string $search = '';
 
     #[Url]
-    public string $sortField = 'name';
+    public string $sortField = 'committee';
 
     #[Url]
     public string $sortDirection = 'asc';
@@ -63,22 +65,70 @@ class ListRolesInGroup extends Component
             ->where('group_dn', $this->group_dn)
             ->get();
 
+        // A single subtree search under the realm's committee tree is one
+        // LDAP round-trip regardless of how many distinct roles/committees
+        // are referenced below - findMany() by contrast issues one
+        // read-by-DN query per entry, so it wouldn't actually save anything
+        // here once there's more than a handful of rows.
         $rolesByDn = $groupRoles->isEmpty()
             ? collect()
-            : Role::query()->findMany($groupRoles->pluck('role_dn')->unique()->all())
-                ->keyBy(fn (Role $role) => $role->getDn());
+            : Role::query()->in(Committee::dnRoot($this->realm_uid))->get()
+                ->keyBy(fn (Role $role) => $role->getDn())
+                ->only($groupRoles->pluck('role_dn')->unique()->all());
+
+        $committeesByDn = $rolesByDn->isEmpty()
+            ? collect()
+            : Committee::fromCommunity($this->realm_uid)->get()
+                ->keyBy(fn (Committee $committee) => $committee->getDn());
 
         $rows = $groupRoles
-            ->map(fn (GroupMembership $groupRole): array => [
-                'groupRole' => $groupRole,
-                'role' => $rolesByDn->get($groupRole->role_dn),
-            ])
-            ->filter(fn (array $row): bool => $row['role'] !== null)
+            ->map(function (GroupMembership $groupRole) use ($rolesByDn, $committeesByDn): ?array {
+                $role = $rolesByDn->get($groupRole->role_dn);
+
+                if (! $role) {
+                    return null;
+                }
+
+                return [
+                    'groupRole' => $groupRole,
+                    'role' => $role,
+                    'committee' => $committeesByDn->get($role->getParentDn()),
+                ];
+            })
+            ->filter()
             ->values();
+
+        if ($this->search) {
+            $search = mb_strtolower(trim($this->search));
+            $rows = $rows->filter(function (array $row) use ($search): bool {
+                $role = $row['role'];
+                $committee = $row['committee'];
+
+                return str_contains(mb_strtolower((string) $role->getFirstAttribute('description')), $search)
+                    || str_contains(mb_strtolower((string) $committee?->getFirstAttribute('description')), $search);
+            })->values();
+        }
+
+        $rows = $rows->sortBy(function (array $row): string {
+            $sortValue = $this->sortField === 'role'
+                ? $row['role']->getFirstAttribute('description')
+                : $row['committee']?->getFirstAttribute('description');
+
+            return mb_strtolower((string) $sortValue);
+        }, SORT_NATURAL, $this->sortDirection === 'desc')->values();
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $paginated = new LengthAwarePaginator(
+            $rows->forPage($page, $perPage)->values(),
+            $rows->count(),
+            $perPage,
+            $page,
+        );
 
         return view(
             'livewire.group.roles', [
-                'rows' => $rows,
+                'rows' => $paginated,
             ]
         )->title(__('groups.roles_list_title', ['name' => $this->group_cn]));
     }
