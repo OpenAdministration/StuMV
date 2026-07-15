@@ -52,7 +52,10 @@
                     const home = this.$refs.measureHome.offsetWidth;
                     const last = this.$refs.measureLast.offsetWidth;
                     const dropdown = this.$refs.measureDropdown.offsetWidth;
-                    const collapsibles = Array.from(this.$refs.measureCollapsibles.children).map(el => el.offsetWidth);
+                    const collapsibles = [];
+                    for (let i = 0; this.$refs['measureCollapsible' + i]; i++) {
+                        collapsibles.push(this.$refs['measureCollapsible' + i].offsetWidth);
+                    }
 
                     for (let collapsed = 0; collapsed <= collapsibles.length; collapsed++) {
                         const shown = collapsibles.slice(collapsed).reduce((a, b) => a + b, 0);
@@ -119,13 +122,11 @@
                 <flux:breadcrumbs.item x-ref="measureDropdown">
                     <flux:button icon="ellipsis" variant="ghost" size="sm" />
                 </flux:breadcrumbs.item>
-                <span x-ref="measureCollapsibles" class="contents">
-                    @for($i = 0; $i <= $total - 2; $i++)
-                        <flux:breadcrumbs.item href="{{ $items[$i]->url }}">
-                            @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
-                        </flux:breadcrumbs.item>
-                    @endfor
-                </span>
+                @for($i = 0; $i <= $total - 2; $i++)
+                    <flux:breadcrumbs.item x-ref="measureCollapsible{{ $i }}" href="{{ $items[$i]->url }}">
+                        @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$i]])
+                    </flux:breadcrumbs.item>
+                @endfor
                 <flux:breadcrumbs.item x-ref="measureLast">
                     @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$total - 1]])
                 </flux:breadcrumbs.item>
