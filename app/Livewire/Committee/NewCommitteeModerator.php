@@ -61,7 +61,7 @@ class NewCommitteeModerator extends Component
                 $user = User::findOrFail($dn);
                 $committee->moderatorsGroup()->members()->attach($user);
 
-                Flux::toast(variant: 'success', text: __('Added new Moderator'));
+                Flux::toast(variant: 'success', text: __('common.added_new_moderator'));
             } catch (LdapRecordException $exception) {
                 $this->addError('dn', $exception->getMessage());
 

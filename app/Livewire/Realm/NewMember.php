@@ -56,7 +56,7 @@ class NewMember extends Component
             }
         }
 
-        Flux::toast(variant: 'success', text: __('Added new Member'));
+        Flux::toast(variant: 'success', text: __('realms.added_new_member'));
 
         return to_route('realms.members', ['realm' => $this->realm_uid]);
     }

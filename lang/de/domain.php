@@ -17,5 +17,6 @@ return [
     'delete_title' => 'Möchtest du die Domain :name wirklich löschen?',
     'delete_warning' => 'Wenn du die Domain löschst, können u.a. neue Nutzer:innen mit einer E-Mail-Adresse dieser Domain nicht automatisch deiner Studierendenschaft zugeordnet werden.',
     'nothing_found' => 'Keine Domains gefunden',
+    'new_button' => 'Domain hinzufügen',
 
 ];

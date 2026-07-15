@@ -55,7 +55,7 @@ class EditRoleMembership extends Component
     public function render()
     {
         return view('livewire.committee.edit-role-membership')
-            ->title(__('roles.membership-edit_headline'));
+            ->title(__('roles.membership_edit_headline'));
     }
 
     public function save()

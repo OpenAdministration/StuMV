@@ -7,7 +7,7 @@
     </div>
     <x-livewire-form class="space-y-8">
         <flux:field>
-            <flux:label>{{ __('Committee') }}</flux:label>
+            <flux:label>{{ __('groups.field_committee') }}</flux:label>
             <flux:select
                 variant="listbox"
                 searchable
@@ -20,7 +20,7 @@
         </flux:field>
 
         <flux:field>
-            <flux:label>{{ __('Role') }}</flux:label>
+            <flux:label>{{ __('groups.field_role') }}</flux:label>
             <flux:select
                 variant="listbox"
                 searchable

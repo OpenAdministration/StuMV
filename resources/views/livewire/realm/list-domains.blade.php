@@ -12,7 +12,7 @@
                 :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.domains.new', ['realm' => $uid]) : null"
                 :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
             >
-                {{ __('New Domain') }}
+                {{ __('domain.new_button') }}
             </flux:button>
         </div>
     </div>
@@ -26,7 +26,7 @@
         @if(count($domains) > 0)
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column sortable :sorted="$sortField === 'dc'" :direction="$sortDirection" wire:click="sortBy('dc')">{{ __('Short Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'dc'" :direction="$sortDirection" wire:click="sortBy('dc')">{{ __('common.short_name') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
@@ -42,7 +42,7 @@
                                 icon="trash"
                                 wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
                             >
-                                {{ __('Delete') }}
+                                {{ __('common.delete') }}
                             </flux:button>
                         </flux:table.cell>
                     </flux:table.row>
@@ -66,8 +66,8 @@
                     <flux:text class="mt-2">{{ __('domain.delete_warning', ['name' => $deleteDomain]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

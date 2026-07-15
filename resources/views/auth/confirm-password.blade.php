@@ -15,12 +15,12 @@
             @csrf
             <!-- Password -->
             <x-input.group id="password" type="password" required autocomplete="current-password">
-                <x-slot name="label">{{ __('Password') }}</x-slot>
+                <x-slot name="label">{{ __('common.password') }}</x-slot>
             </x-input.group>
 
             <div class="flex justify-end mt-4">
                 <x-button>
-                    {{ __('Confirm') }}
+                    {{ __('auth.confirm') }}
                 </x-button>
             </div>
         </form>

@@ -11,7 +11,7 @@
                 wire:navigate
                 :href="route('realms.groups.new', ['realm' => $realm_uid])"
             >
-                {{ __('New Group') }}
+                {{ __('groups.new_button') }}
             </flux:button>
         </div>
     </div>
@@ -25,10 +25,10 @@
         <flux:table>
             <flux:table.columns>
                 <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">
-                    {{ __('Short Name') }}
+                    {{ __('common.short_name') }}
                 </flux:table.column>
                 <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
-                    {{ __('Description') }}
+                    {{ __('groups.description_label') }}
                 </flux:table.column>
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
@@ -73,7 +73,7 @@
                                     icon="trash-2"
                                     wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
                                 >
-                                    {{ __('Delete') }}
+                                    {{ __('common.delete') }}
                                 </flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
@@ -117,14 +117,14 @@
                     icon="ban"
                     x-on:click="$flux.modal('delete').close()"
                 >
-                    {{ __('Cancel') }}
+                    {{ __('common.cancel') }}
                 </flux:button>
                 <flux:button
                     variant="primary"
                     icon="trash-2"
                     wire:click="deleteCommit()"
                 >
-                    {{ __('Delete') }}
+                    {{ __('common.delete') }}
                 </flux:button>
             </div>
         </div>

@@ -13,8 +13,8 @@
                 <flux:icon.list-check class="size-5" />
             </div>
             <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('tools.compareEmailList_headline') }}</flux:heading>
-                <flux:text class="mt-2">{{ __('tools.compareEmailList_explanation') }}</flux:text>
+                <flux:heading size="lg">{{ __('tools.compare_email_list_headline') }}</flux:heading>
+                <flux:text class="mt-2">{{ __('tools.compare_email_list_explanation') }}</flux:text>
             </flux:card>
         </a>
         @if($unildapDataExists)
@@ -27,8 +27,8 @@
                     <flux:icon.user-plus class="size-5" />
                 </div>
                 <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                    <flux:heading size="lg">{{ __('tools.importUsersFromUniLdap_headline') }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('tools.importUsersFromUniLdap_explanation') }}</flux:text>
+                    <flux:heading size="lg">{{ __('tools.import_users_from_uni_ldap_headline') }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('tools.import_users_from_uni_ldap_explanation') }}</flux:text>
                 </flux:card>
             </a>
             <a
@@ -40,8 +40,8 @@
                     <flux:icon.user-search class="size-5" />
                 </div>
                 <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                    <flux:heading size="lg">{{ __('tools.usersNotInUniLdap_headline') }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('tools.usersNotInUniLdap_explanation') }}</flux:text>
+                    <flux:heading size="lg">{{ __('tools.users_not_in_uni_ldap_headline') }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('tools.users_not_in_uni_ldap_explanation') }}</flux:text>
                 </flux:card>
             </a>
         @endif
@@ -54,8 +54,8 @@
                 <flux:icon.list-x class="size-5" />
             </div>
             <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('tools.unusedRoles_headline') }}</flux:heading>
-                <flux:text class="mt-2">{{ __('tools.unusedRoles_explanation') }}</flux:text>
+                <flux:heading size="lg">{{ __('tools.unused_roles_headline') }}</flux:heading>
+                <flux:text class="mt-2">{{ __('tools.unused_roles_explanation') }}</flux:text>
             </flux:card>
         </a>
     </div>

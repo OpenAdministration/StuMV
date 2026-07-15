@@ -192,7 +192,7 @@ class ListRoles extends Component
         // Delete role
         $role->delete();
 
-        Flux::toast(variant: 'success', text: __('Role was deleted'));
+        Flux::toast(variant: 'success', text: __('roles.role_deleted'));
 
         return to_route('committees.roles', [
             'realm' => $this->uid,

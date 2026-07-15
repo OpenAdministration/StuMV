@@ -12,7 +12,7 @@
                     wire:navigate
                     href="{{ route('realms.members.new', ['realm' => $community_name]) }}"
                 >
-                    {{ __('Add Member') }}
+                    {{ __('common.add_member') }}
                 </flux:button>
             @endcan
         </div>
@@ -71,7 +71,7 @@
                                     icon="file-text"
                                     wire:click="exportPdf('{{ $realm_member->getFirstAttribute('uid') }}')"
                                 >
-                                    {{ __('profile.membershipsAsPdf') }}
+                                    {{ __('profile.memberships_as_pdf') }}
                                 </flux:button>
                             @endif
                             <flux:dropdown>
@@ -83,7 +83,7 @@
                                         wire:navigate
                                         :href="$isAdmin ? route('profile', ['username' => $realm_member->getFirstAttribute('uid')]) : null"
                                     >
-                                        {{ __('Edit') }}
+                                        {{ __('common.edit') }}
                                     </flux:menu.item>
                                     <flux:menu.item
                                         variant="danger"
@@ -91,7 +91,7 @@
                                         :disabled="!$canRemoveMember"
                                         wire:click="removePrepare('{{ $realm_member->getFirstAttribute('uid') }}')"
                                     >
-                                        {{ __('Remove Member') }}
+                                        {{ __('realms.remove_member') }}
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
@@ -119,8 +119,8 @@
                     <flux:text class="mt-2">{{ __('realms.delete_member_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

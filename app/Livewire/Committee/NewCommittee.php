@@ -68,8 +68,8 @@ class NewCommittee extends Component
     protected function validationAttributes(): array
     {
         return [
-            'ou' => __('Short Committee Name'),
-            'description' => __('Full Committee Name'),
+            'ou' => __('committees.short_name_label'),
+            'description' => __('committees.full_name_label'),
         ];
     }
 

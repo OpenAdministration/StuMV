@@ -7,7 +7,7 @@
 
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto space-y-6">
-            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('profile.noteProfilePicturesPublic') }}" />
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('profile.note_profile_pictures_public') }}" />
 
             <div x-data="cropper">
                 <div>

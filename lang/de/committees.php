@@ -30,9 +30,9 @@ return [
     'new_role_title' => 'Neue Rolle erstellen',
     'select_committee' => 'Wähle ein Gremium aus',
     'select_user' => 'Wähle eine:n Benutzer:in',
-    'foldSubItems' => 'Untergeordnete Gremien von :committee einklappen',
-    'unfoldSubItems' => 'Untergeordnete Gremien von :committee ausklappen',
-    'showOnlyActiveRoles' => 'Zeige nur Rollen mit aktiven Mitgliedschaften',
+    'fold_sub_items' => 'Untergeordnete Gremien von :committee einklappen',
+    'unfold_sub_items' => 'Untergeordnete Gremien von :committee ausklappen',
+    'show_only_active_roles' => 'Zeige nur Rollen mit aktiven Mitgliedschaften',
     'link_moderators' => 'Moderator:innen',
     'mods_heading' => 'Moderator:innen von :name',
     'mods_explanation' => 'Moderator:innen eines Gremiums können, wie allgemeine Moderator:innen, Gremien und Rollen anlegen, bearbeiten und löschen sowie Rollenmitgliedschaften verwalten. Dabei sind sie allerdings beschränkt auf dieses und seine untergeordneten Gremien.',
@@ -41,4 +41,9 @@ return [
     'new_mod_explanation' => 'Wähle eine:n Nutzer:in aus, der:die Moderator:in dieses Gremiums und seiner untergeordneten Gremien werden soll.',
     'delete_mod_title' => ':name als Moderator:in entfernen',
     'delete_mod_warning' => 'Soll :name (:username) wirklich als Moderator:in dieses Gremiums entfernt werden?',
+
+    'breadcrumb_title' => 'Gremien',
+    'new_button' => 'Neues Gremium',
+    'short_name_label' => 'Gremienkürzel',
+    'full_name_label' => 'Gremienname',
 ];

@@ -11,7 +11,7 @@
                 wire:navigate
                 :href="route('realms.groups.roles.add', ['realm' => $realm_uid, 'cn' => $group_cn])"
             >
-                {{ __('Add Role') }}
+                {{ __('groups.add_role_button') }}
             </flux:button>
         </div>
     </div>
@@ -68,7 +68,7 @@
                                                 icon="trash-2"
                                                 wire:click="deletePrepare({{ $row['groupRole']->id }})"
                                             >
-                                                {{ __('Delete') }}
+                                                {{ __('common.delete') }}
                                             </flux:menu.item>
                                         </flux:menu>
                                     </flux:dropdown>
@@ -94,8 +94,8 @@
                 <flux:text class="mt-2">{{ __('groups.delete_role_warning', $deleteRoleName) }}</flux:text>
             </div>
             <div class="flex justify-end gap-2">
-                <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                <flux:button variant="danger" wire:click="deleteCommit">{{ __('Delete') }}</flux:button>
+                <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                <flux:button variant="danger" wire:click="deleteCommit">{{ __('common.delete') }}</flux:button>
             </div>
         </div>
     </flux:modal>

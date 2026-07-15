@@ -9,7 +9,7 @@
                         icon="chevron-down"
                         wire:click="toggleChildren('{{ $committee->getDn() }}')"
                         class="cursor-pointer"
-                        title="{{ __('committees.foldSubItems', ['committee' => $committee->getFirstAttribute('description')]) }}"
+                        title="{{ __('committees.fold_sub_items', ['committee' => $committee->getFirstAttribute('description')]) }}"
                     />
                 @else
                     <flux:button
@@ -17,7 +17,7 @@
                         icon="chevron-right"
                         wire:click="toggleChildren('{{ $committee->getDn() }}')"
                         class="cursor-pointer"
-                        title="{{ __('committees.unfoldSubItems', ['committee' => $committee->getFirstAttribute('description')]) }}"
+                        title="{{ __('committees.unfold_sub_items', ['committee' => $committee->getFirstAttribute('description')]) }}"
                     />
                 @endif
             </div>
@@ -82,7 +82,7 @@
                         wire:click="confirmDeleteCommittee('{{ $committee->getDn() }}')"
                         :disabled="!$node['isModerator']"
                     >
-                        {{ __('Delete') }}
+                        {{ __('common.delete') }}
                     </flux:menu.item>
                 </flux:menu>
             </flux:dropdown>

@@ -1,7 +1,7 @@
 <div class="max-w-6xl mx-auto w-full">
     <div class="space-y-4 mb-8">
-        <flux:heading size="xl">{{ __('tools.usersNotInUniLdap_headline') }}</flux:heading>
-        <flux:text class="text-base">{{  __('tools.usersNotInUniLdap_explanation') }}</flux:text>
+        <flux:heading size="xl">{{ __('tools.users_not_in_uni_ldap_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('tools.users_not_in_uni_ldap_explanation') }}</flux:text>
     </div>
     <div class="pb-6 sm:pb-8 space-y-6">
         <div>
@@ -11,7 +11,7 @@
                     icon="search"
                     wire:click="searchForUsersNotInUniLdap"
                 >
-                    {{ __('tools.startSearch') }}
+                    {{ __('tools.start_search') }}
                 </flux:button>
             @endif
         </div>
@@ -54,7 +54,7 @@
                 <flux:callout
                     variant="danger"
                     icon="circle-x"
-                    heading="{{ __('tools.noMatchesFound') }}"
+                    heading="{{ __('tools.no_matches_found') }}"
                     class="mt-[.35rem]"
                 />
             @endif

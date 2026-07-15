@@ -4,7 +4,7 @@
     </div>
     <div class="grid gap-6 mb-6">
         <flux:field class="col-span-full">
-            <flux:label>{{ __('Users') }}</flux:label>
+            <flux:label>{{ __('roles.users') }}</flux:label>
             <flux:pillbox
                 multiple
                 searchable
@@ -19,7 +19,7 @@
             </flux:pillbox>
         </flux:field>
         <flux:field>
-            <flux:label>{{ __('Termination Date') }}</flux:label>
+            <flux:label>{{ __('roles.termination_date_label') }}</flux:label>
             <flux:input type="date" wire:model="terminationDate" />
             <flux:error name="terminationDate" />
         </flux:field>

@@ -20,7 +20,7 @@ class UniqueCommittee implements ValidationRule
     {
         $notUnique = Committee::fromCommunity($this->realm_uid)->where('ou', $value)->exists();
         if ($notUnique) {
-            $fail('validation.unique')->translate(['attribute' => __('Short Name')]);
+            $fail('validation.unique')->translate(['attribute' => __('common.short_name')]);
         }
     }
 }

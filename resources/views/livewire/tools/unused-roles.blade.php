@@ -1,7 +1,7 @@
 <div class="max-w-6xl mx-auto w-full" wire:init="loadUnusedRoles">
     <div class="space-y-4 mb-8">
-        <flux:heading size="xl">{{ __('tools.unusedRoles_headline') }}</flux:heading>
-        <flux:text class="text-base">{{  __('tools.unusedRoles_explanation') }}</flux:text>
+        <flux:heading size="xl">{{ __('tools.unused_roles_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('tools.unused_roles_explanation') }}</flux:text>
     </div>
     <div wire:loading.flex wire:target="loadUnusedRoles" class="flex justify-center py-16">
         <flux:icon.loading />

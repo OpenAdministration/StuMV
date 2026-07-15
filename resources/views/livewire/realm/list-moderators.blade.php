@@ -12,7 +12,7 @@
                 :href="auth()->user()->can('add_moderator', $community) ? route('realms.mods.new', ['realm' => $community_name]) : null"
                 :disabled="auth()->user()->cannot('add_moderator', $community)"
             >
-                {{ __('Add Moderators') }}
+                {{ __('common.add_moderators') }}
             </flux:button>
         </div>
     </div>
@@ -72,7 +72,7 @@
                                         :disabled="!$canRemoveModerator"
                                         wire:click="deletePrepare('{{ $realm_member->uid[0] }}')"
                                     >
-                                        {{ __('Remove Moderator') }}
+                                        {{ __('common.remove_moderator') }}
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
@@ -101,8 +101,8 @@
                     <flux:text class="mt-2">{{ __('realms.delete_mod_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

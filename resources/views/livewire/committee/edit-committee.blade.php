@@ -5,17 +5,17 @@
     </div>
 
     <flux:field>
-        <flux:label>{{ __('Parent Committee') }}</flux:label>
+        <flux:label>{{ __('committees.parent_committee') }}</flux:label>
         <flux:input wire:model="parent_ou" disabled />
     </flux:field>
 
     <flux:field>
-        <flux:label>{{ __('Short Committee Name') }}</flux:label>
+        <flux:label>{{ __('committees.short_name_label') }}</flux:label>
         <flux:input wire:model="ou" disabled />
     </flux:field>
 
     <flux:field>
-        <flux:label>{{ __('Full Committee Name') }}</flux:label>
+        <flux:label>{{ __('committees.full_name_label') }}</flux:label>
         <flux:input wire:model="description" />
     </flux:field>
 

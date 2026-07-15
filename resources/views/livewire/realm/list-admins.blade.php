@@ -9,7 +9,7 @@
                 icon="mail"
                 href="mailto:{{ config('app.help_contact_mail') }}"
             >
-                {{ __('Contact us') }}
+                {{ __('common.contact_us') }}
             </flux:button>
         </div>
         <div>
@@ -20,7 +20,7 @@
                 :href="auth()->user()->can('add_admin', $community) ? route('realms.admins.new', ['realm' => $community_name]) : null"
                 :disabled="auth()->user()->cannot('add_admin', $community)"
             >
-                {{ __('Add Admin') }}
+                {{ __('realms.add_admin_button') }}
             </flux:button>
         </div>
     </div>
@@ -79,7 +79,7 @@
                                     :disabled="!$canRemoveAdmin"
                                     wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
                                 >
-                                    {{ __('Delete') }}
+                                    {{ __('common.delete') }}
                                 </flux:menu.item>
                             </flux:menu>
                         </flux:dropdown>
@@ -107,8 +107,8 @@
                     <flux:text class="mt-2">{{ __('realms.delete_admin_warning', ['name' => $deleteAdminName]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

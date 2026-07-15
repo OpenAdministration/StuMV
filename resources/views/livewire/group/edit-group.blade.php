@@ -4,12 +4,12 @@
     </div>
 
     <flux:field>
-        <flux:label>{{ __('Short Groupname') }}</flux:label>
+        <flux:label>{{ __('groups.short_name_label') }}</flux:label>
         <flux:input wire:model="cn" disabled />
     </flux:field>
 
     <flux:field>
-        <flux:label>{{ __('Description') }}</flux:label>
+        <flux:label>{{ __('groups.description_label') }}</flux:label>
         <flux:input wire:model="name" />
     </flux:field>
 </x-livewire-form>

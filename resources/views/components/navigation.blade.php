@@ -18,21 +18,21 @@
                 wire:navigate
                 :href="route('realms.dashboard', ['realm' => $realm])"
             >
-                {{ __('Dashboard') }}
+                {{ __('realms.nav_dashboard') }}
             </flux:sidebar.item>
             <flux:sidebar.item
                 icon="network"
                 wire:navigate
                 :href="route('committees.list', ['realm' => $realm])"
             >
-                {{ __('Committees and Roles') }}
+                {{ __('realms.nav_committees_and_roles') }}
             </flux:sidebar.item>
             <flux:sidebar.item
                 icon="users"
                 wire:navigate
                 :href="route('realms.members', ['realm' => $realm])"
             >
-                {{ __('People') }}
+                {{ __('realms.nav_people') }}
             </flux:sidebar.item>
             <flux:sidebar.item
                 icon="user-star"
@@ -102,7 +102,7 @@
                 wire:navigate
                 :href="route('realms.pick')"
             >
-                {{ __('Change Realm') }}
+                {{ __('realms.change_realm') }}
             </flux:sidebar.item>
         @endcan
     </flux:sidebar.nav>

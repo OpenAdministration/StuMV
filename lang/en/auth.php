@@ -26,4 +26,17 @@ return [
     'verification_mail_line_between_greeting_and_action' => 'Please click the button to confirm your email address and activate your account in the StuMV.',
     'verification_mail_button_action' => 'Confirm email address',
     'verification_mail_line_after_action' => 'If you did not create an account in the StuMV, you do not need to do anything further.',
+
+    'remember_me' => 'Remember me',
+    'forgot_password' => 'Forgot your password?',
+    'resend_verification_email' => 'Resend verification Email',
+    'log_in' => 'Log in',
+    'log_out' => 'Log out',
+    'confirm' => 'Confirm',
+    'username_or_mail' => 'Username or Mail',
+    'reset_password' => 'Reset Password',
+    'send_reset_link' => 'Send Reset Link',
+    'sign_up_prompt' => 'Sign up and get started!',
+    'log_out_button' => 'Log Out',
+    'confirm_logout_title' => 'Confirm logout',
 ];

@@ -56,7 +56,7 @@ class EditCommittee extends Component
         $c->setAttribute('description', $this->description);
         $c->save();
 
-        Flux::toast(variant: 'success', text: __('Saved'));
+        Flux::toast(variant: 'success', text: __('common.saved'));
 
         return response()->redirectToRoute('committees.list', ['realm' => $this->realm_uid]);
     }

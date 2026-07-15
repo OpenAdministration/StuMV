@@ -77,7 +77,7 @@ test('a super admin sees the account-active switch and can disable a user', func
     actingAsSuperAdmin();
 
     Livewire::test(Profile::class, ['username' => $target->username])
-        ->assertSee(__('profile.userIsActive'))
+        ->assertSee(__('profile.user_is_active'))
         ->set('userIsActive', false)
         ->call('save')
         ->assertHasNoErrors();
@@ -131,7 +131,7 @@ test('a regular user does not see the account-active switch on their own profile
     $user = actingAsMember($community);
 
     Livewire::test(Profile::class, ['username' => $user->username])
-        ->assertDontSee(__('profile.userIsActive'));
+        ->assertDontSee(__('profile.user_is_active'));
 });
 
 test('a non-superadmin cannot lock their own account by tampering with the field directly', function (): void {

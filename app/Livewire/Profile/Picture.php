@@ -75,7 +75,7 @@ class Picture extends Component
             'file_id' => $imgID,
         ]);
 
-        Flux::toast(variant: 'success', text: trans('profile.pictureAdded'));
+        Flux::toast(variant: 'success', text: trans('profile.picture_added'));
 
         return to_route('profile.picture', ['username' => $this->uid]);
     }
@@ -98,7 +98,7 @@ class Picture extends Component
         // Delete database entry
         $pictureDB->delete();
 
-        Flux::toast(variant: 'success', text: trans('profile.pictureRemoved'));
+        Flux::toast(variant: 'success', text: trans('profile.picture_removed'));
 
         return to_route('profile.picture', ['username' => $this->uid]);
     }

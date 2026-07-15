@@ -23,7 +23,7 @@ class UniqueRole implements ValidationRule
         // excluded from Committee::roles() so it never shows up as a regular
         // role - it has to be reserved here explicitly instead.
         if ($value === 'moderators') {
-            $fail(__('validation.unique', ['attribute' => __('Short Name')]));
+            $fail(__('validation.unique', ['attribute' => __('common.short_name')]));
 
             return;
         }
@@ -31,7 +31,7 @@ class UniqueRole implements ValidationRule
         $committee = Committee::findByName($this->uid, $this->committee_ou);
         $exists = $committee->roles()->where('cn', $value)->exists();
         if ($exists) {
-            $fail(__('validation.unique', ['attribute' => __('Short Name')]));
+            $fail(__('validation.unique', ['attribute' => __('common.short_name')]));
         }
     }
 }

@@ -12,7 +12,7 @@
                 :href="$isModerator ? route('committees.moderators.new', ['realm' => $realm_uid, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
-                {{ __('Add Moderators') }}
+                {{ __('common.add_moderators') }}
             </flux:button>
         </div>
     </div>
@@ -58,7 +58,7 @@
                                         :disabled="!$isModerator"
                                         wire:click="deletePrepare('{{ $moderator->uid[0] }}')"
                                     >
-                                        {{ __('Remove Moderator') }}
+                                        {{ __('common.remove_moderator') }}
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
@@ -82,8 +82,8 @@
                     <flux:text class="mt-2">{{ __('committees.delete_mod_warning', ['name' => $deleteModeratorName, 'username' => $deleteModeratorUsername]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

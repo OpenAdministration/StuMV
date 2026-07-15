@@ -36,4 +36,13 @@ return [
     'members_explanation' => 'Unten findest du die Nutzer:innen, die dieser Rechtegruppe über eine Rolle zugeordnet sind, sowie ihren Synchronisationsstatus im LDAP. Es kann bis zum nächsten Synchronisations-Durchlauf dauern, bis eine Änderung dort ankommt.',
     'members.search' => 'Durchsuche Mitglieder',
     'no_members_found' => 'In dieser Gruppe gibt es keine Mitglieder.',
+
+    'breadcrumb_title' => 'Gruppen',
+    'new_button' => 'Neue Rechtegruppe',
+    'short_name_label' => 'Kürzel für die Rechtegruppe',
+    'description_label' => 'Beschreibung',
+    'add_role_button' => 'Rolle hinzufügen',
+    'field_committee' => 'Gremium/Organisation',
+    'field_role' => 'Rolle',
+    'added_new_group' => 'Neue Rechtegruppe erstellt. Füge hier jetzt die Rollen hinzu.',
 ];

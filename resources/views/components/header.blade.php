@@ -40,7 +40,7 @@
                     :href="route('profile', auth()->user()->username)"
                     icon="circle-user"
                 >
-                    {{ __('Profile') }}
+                    {{ __('profile.breadcrumb') }}
                 </flux:navmenu.item>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -49,7 +49,7 @@
                         onclick="event.preventDefault(); this.closest('form').submit();"
                         icon="log-out"
                     >
-                        {{ __('Log out') }}
+                        {{ __('auth.log_out') }}
                     </flux:navmenu.item>
                 </form>
             </flux:navmenu>

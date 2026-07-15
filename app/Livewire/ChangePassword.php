@@ -47,7 +47,7 @@ class ChangePassword extends Component
         return view('livewire.change-password', [
             'givenName' => $givenName,
             'sn' => $sn,
-        ])->title(__('Change Password'));
+        ])->title(__('profile.change_password_title'));
     }
 
     public function save()

@@ -55,7 +55,7 @@ class Memberships extends Component
             'memberships' => $memberships,
             'givenName' => $givenName,
             'sn' => $sn,
-        ])->title(__('Profile'));
+        ])->title(__('profile.breadcrumb'));
     }
 
     public function exportPdf()

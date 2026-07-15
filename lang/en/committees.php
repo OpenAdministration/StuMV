@@ -30,9 +30,9 @@ return [
     'new_role_title' => 'Create new role',
     'select_committee' => 'Select a committee',
     'select_user' => 'Select a user',
-    'foldSubItems' => 'Fold subordinate committees of :committee',
-    'unfoldSubItems' => 'Unfold subordinate committees of :committee',
-    'showOnlyActiveRoles' => 'Show only roles with active memberships',
+    'fold_sub_items' => 'Fold subordinate committees of :committee',
+    'unfold_sub_items' => 'Unfold subordinate committees of :committee',
+    'show_only_active_roles' => 'Show only roles with active memberships',
     'link_moderators' => 'Moderators',
     'mods_heading' => 'Moderators of :name',
     'mods_explanation' => 'Moderators of a committee can, like general moderators, create, edit and delete committees and roles, and manage role memberships. However, they are limited to this committee and its subordinate committees.',
@@ -41,4 +41,9 @@ return [
     'new_mod_explanation' => 'Select a user who should become a moderator of this committee and its sub-committees.',
     'delete_mod_title' => 'Remove :name as a moderator',
     'delete_mod_warning' => 'Should :name (:username) really be removed as a moderator of this committee?',
+
+    'breadcrumb_title' => 'Committees',
+    'new_button' => 'New Committee',
+    'short_name_label' => 'Short Committee Name',
+    'full_name_label' => 'Full Committee Name',
 ];

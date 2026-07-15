@@ -9,7 +9,7 @@
                 icon="mail"
                 href="mailto:{{ config('app.help_contact_mail') }}"
             >
-                {{ __('Contact us') }}
+                {{ __('common.contact_us') }}
             </flux:button>
         </div>
         <div>
@@ -20,7 +20,7 @@
                 :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.new') : null"
                 :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
             >
-                {{ __('New Realm') }}
+                {{ __('realms.new_button') }}
             </flux:button>
         </div>
     </div>
@@ -74,7 +74,7 @@
                                 :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
                                 wire:click="enter('{{ $realm->getShortCode() }}')"
                             >
-                                {{ __('Enter') }}
+                                {{ __('realms.enter_button') }}
                             </flux:button>
                             <flux:dropdown>
                                 <flux:button size="sm" icon="ellipsis-vertical" />
@@ -85,14 +85,14 @@
                                         :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['realm' => $realm->getShortCode()]) : null"
                                         wire:navigate
                                     >
-                                        {{ __('Edit') }}
+                                        {{ __('common.edit') }}
                                     </flux:menu.item>
                                     <flux:menu.item
                                         variant="danger"
                                         icon="trash-2"
                                         :disabled="Auth::user()->cannot('delete', $realm)"
                                         wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
-                                        {{ __('Delete') }}
+                                        {{ __('common.delete') }}
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
@@ -125,8 +125,8 @@
                     </flux:field>
                 </div>
                 <div class="flex flex-wrap justify-end gap-4">
-                    <flux:button icon="ban" wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" icon="trash-2" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button icon="ban" wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" icon="trash-2" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

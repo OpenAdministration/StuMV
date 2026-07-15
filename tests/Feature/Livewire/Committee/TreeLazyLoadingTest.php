@@ -16,11 +16,11 @@ test('a collapsed committee shows an expand arrow but not its children', functio
 
     Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
-        ->assertSee(__('committees.unfoldSubItems', ['committee' => 'Committee parent']))
+        ->assertSee(__('committees.unfold_sub_items', ['committee' => 'Committee parent']))
         ->assertDontSee('Child Committee')
         ->call('toggleChildren', $parent->getDn())
         ->assertSee('Child Committee')
-        ->assertSee(__('committees.foldSubItems', ['committee' => 'Committee parent']));
+        ->assertSee(__('committees.fold_sub_items', ['committee' => 'Committee parent']));
 });
 
 test('a childless committee shows no expand arrow', function (): void {
@@ -31,6 +31,6 @@ test('a childless committee shows no expand arrow', function (): void {
 
     Livewire::test(ListCommitteesTree::class, ['realm' => $community])
         ->call('loadCommittees')
-        ->assertDontSee(__('committees.unfoldSubItems', ['committee' => 'Committee lonely']))
-        ->assertDontSee(__('committees.foldSubItems', ['committee' => 'Committee lonely']));
+        ->assertDontSee(__('committees.unfold_sub_items', ['committee' => 'Committee lonely']))
+        ->assertDontSee(__('committees.fold_sub_items', ['committee' => 'Committee lonely']));
 });

@@ -26,7 +26,7 @@
                 <flux:table.columns>
                     <flux:table.column class="w-[55px]"></flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
-                    <flux:table.column sortable :sorted="$sortField === 'uid'" :direction="$sortDirection" wire:click="sortBy('uid')">{{ __('Username') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'uid'" :direction="$sortDirection" wire:click="sortBy('uid')">{{ __('common.username') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -62,7 +62,7 @@
                                         icon="user-minus"
                                         wire:click="deletePrepare('{{ $superadmin->uid[0] }}')"
                                     >
-                                        {{ __('Delete') }}
+                                        {{ __('common.delete') }}
                                     </flux:menu.item>
                                 </flux:menu>
                             </flux:dropdown>
@@ -88,8 +88,8 @@
                     <flux:text class="mt-2">{{ __('realms.delete_admin_warning', ['name' => $deleteAdminName]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

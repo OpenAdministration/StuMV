@@ -10,7 +10,7 @@
             <x-livewire-form :abort_route="null" wire:submit="save">
                 <div class="grid lg:grid-cols-2 gap-6">
                     <flux:field>
-                        <flux:label>{{ __('Username') }}</flux:label>
+                        <flux:label>{{ __('common.username') }}</flux:label>
                         <flux:input wire:model="uid" disabled />
                     </flux:field>
                     <flux:field>
@@ -59,7 +59,7 @@
                 @can('superadmin', \App\Models\User::class)
                     <div class="mt-6 space-y-4">
                         <flux:separator variant="subtle" />
-                        <flux:switch wire:model.live="userIsActive" label="{{ __('profile.userIsActive') }}" description="{{ __('profile.userIsActiveDescription') }}" />
+                        <flux:switch wire:model.live="userIsActive" label="{{ __('profile.user_is_active') }}" description="{{ __('profile.user_is_active_description') }}" />
                         <flux:separator variant="subtle" />
                     </div>
                 @endcan

@@ -23,7 +23,7 @@
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
-                    <flux:button icon="ban" type="submit">{{ __('Cancel') }}</flux:button>
+                    <flux:button icon="ban" type="submit">{{ __('common.cancel') }}</flux:button>
                 </form>
 
                 <form method="POST" action="{{ route('passport.authorizations.approve') }}">

@@ -77,7 +77,7 @@
                     <flux:text class="mt-2">{{ __('api_clients.revoke_warning', ['name' => $revokeClientName]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
                     <flux:button variant="danger" type="submit">{{ __('api_clients.revoke') }}</flux:button>
                 </div>
             </div>

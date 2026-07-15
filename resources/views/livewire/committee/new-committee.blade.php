@@ -1,7 +1,7 @@
 <x-livewire-form class="max-w-6xl mx-auto w-full">
-    <flux:heading size="xl" class="mb-6">{{ __('New Committee') }}</flux:heading>
+    <flux:heading size="xl" class="mb-6">{{ __('committees.new_button') }}</flux:heading>
     <flux:field class="flex flex-col mb-6">
-        <flux:label>{{ __('Parent Committee') }}</flux:label>
+        <flux:label>{{ __('committees.parent_committee') }}</flux:label>
         <flux:select
             variant="listbox"
             searchable
@@ -15,13 +15,13 @@
         </flux:select>
     </flux:field>
     <flux:field class="flex flex-col mb-6">
-        <flux:label>{{ __('Short Committee Name') }}</flux:label>
+        <flux:label>{{ __('committees.short_name_label') }}</flux:label>
         <flux:description>{{ __('committees.new_hint_shortname') }}</flux:description>
         <flux:input type="text" wire:model.live="ou" required />
         <flux:error name="ou" />
     </flux:field>
     <flux:field class="flex flex-col mb-6">
-        <flux:label>{{ __('Full Committee Name') }}</flux:label>
+        <flux:label>{{ __('committees.full_name_label') }}</flux:label>
         <flux:description>{{ __('committees.new_hint_longname') }}</flux:description>
         <flux:input type="text" wire:model.live="description" required />
         <flux:error name="description" />

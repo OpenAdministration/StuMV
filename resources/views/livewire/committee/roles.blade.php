@@ -9,7 +9,7 @@
                         icon="pencil"
                         class="-mt-1"
                         :href="route('committees.edit', ['realm' => $uid, 'ou' => $ou])"
-                        title="{{ __('Edit') }}"
+                        title="{{ __('common.edit') }}"
                     />
                 @endcan
             </flux:heading>
@@ -22,7 +22,7 @@
                 :href="$isModerator ? route('committees.roles.new', ['realm' => $uid, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
-                {{ __('New Role') }}
+                {{ __('roles.new_button') }}
             </flux:button>
             <flux:button
                 icon="user-star"
@@ -42,7 +42,7 @@
             $watch('$wire.showOnlyActive', value => showOnlyActive = value);
         "
     >
-        <flux:switch wire:model.live="showOnlyActive" label="{{ __('committees.showOnlyActiveRoles') }}" align="left" />
+        <flux:switch wire:model.live="showOnlyActive" label="{{ __('committees.show_only_active_roles') }}" align="left" />
     </div>
 
     <flux:field>
@@ -108,7 +108,7 @@
                                             icon="trash-2"
                                             :disabled="!$isModerator"
                                             wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
-                                            {{ __('Delete') }}
+                                            {{ __('common.delete') }}
                                         </flux:menu.item>
                                     </flux:menu>
                                 </flux:dropdown>
@@ -139,7 +139,7 @@
                                     'ou' => $ou,
                                     'cn' => $role->getFirstAttribute('cn')
                                 ]) }}"
-                                title="{{ __('Add Member') }}"
+                                title="{{ __('common.add_member') }}"
                                 class="size-[3rem]!"
                             />
                         @endif
@@ -173,8 +173,8 @@
                     </flux:field>
                 </div>
                 <div class="flex flex-wrap justify-end gap-4">
-                    <flux:button icon="ban" wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" icon="trash-2" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button icon="ban" wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" icon="trash-2" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

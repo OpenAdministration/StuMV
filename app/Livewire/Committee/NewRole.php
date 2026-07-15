@@ -63,7 +63,7 @@ class NewRole extends Component
         $r->inside($c);
         $r->save();
 
-        Flux::toast(variant: 'success', text: __('New Role created'));
+        Flux::toast(variant: 'success', text: __('roles.new_role_created'));
 
         return to_route('committees.roles', ['ou' => $this->ou, 'realm' => $this->uid]);
     }

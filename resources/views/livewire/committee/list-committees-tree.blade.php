@@ -47,14 +47,14 @@
                     icon="ban"
                     x-on:click="$flux.modal('delete-committee').close()"
                 >
-                    {{ __('Cancel') }}
+                    {{ __('common.cancel') }}
                 </flux:button>
                 <flux:button
                     variant="primary"
                     icon="trash-2"
                     wire:click="deleteCommittee"
                 >
-                    {{ __('Delete') }}
+                    {{ __('common.delete') }}
                 </flux:button>
             </div>
         </div>

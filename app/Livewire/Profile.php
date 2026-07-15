@@ -95,7 +95,7 @@ class Profile extends Component
             'full_name' => $this->givenName.' '.$this->sn,
         ]);
 
-        Flux::toast(variant: 'success', text: __('Saved'));
+        Flux::toast(variant: 'success', text: __('common.saved'));
         $this->redirect('/profile/'.$this->uid, navigate: true);
     }
 

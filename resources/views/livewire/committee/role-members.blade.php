@@ -9,7 +9,7 @@
                         icon="pencil"
                         class="-mt-1"
                         :href="route('committees.roles.edit', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                        title="{{ __('Edit') }}"
+                        title="{{ __('common.edit') }}"
                     />
                 @endif
             </flux:heading>
@@ -22,7 +22,7 @@
                 :href="$isModerator ? route('committees.roles.add-member', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
                 :disabled="!$isModerator"
             >
-                {{ __('Add Member') }}
+                {{ __('common.add_member') }}
             </flux:button>
             <flux:button
                 icon="calendar-x"
@@ -42,7 +42,7 @@
             $watch('$wire.showOnlyActive', value => showOnlyActive = value);
         "
     >
-        <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.showOnlyActiveMemberships') }}" align="left" />
+        <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.show_only_active_memberships') }}" align="left" />
     </div>
 
     <flux:field>
@@ -68,11 +68,11 @@
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column class="w-[55px]"></flux:table.column>
-                        <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('User') }}</flux:table.column>
-                        <flux:table.column sortable :sorted="$sortField === 'from'" :direction="$sortDirection" wire:click="sortBy('from')">{{ __('From') }}</flux:table.column>
-                        <flux:table.column sortable :sorted="$sortField === 'until'" :direction="$sortDirection" wire:click="sortBy('until')">{{ __('Until') }}</flux:table.column>
-                        <flux:table.column sortable :sorted="$sortField === 'decided'" :direction="$sortDirection" wire:click="sortBy('decided')">{{ __('Decided') }}</flux:table.column>
-                        <flux:table.column>{{ __('Comment') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('common.user') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'from'" :direction="$sortDirection" wire:click="sortBy('from')">{{ __('roles.membership_from') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'until'" :direction="$sortDirection" wire:click="sortBy('until')">{{ __('roles.membership_until') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'decided'" :direction="$sortDirection" wire:click="sortBy('decided')">{{ __('roles.membership_decided') }}</flux:table.column>
+                        <flux:table.column>{{ __('roles.membership_comment') }}</flux:table.column>
                         <flux:table.column></flux:table.column>
                     </flux:table.columns>
                     <flux:table.rows>
@@ -162,7 +162,7 @@
                                             wire:click="prepareDeletion({{ $member->id }})"
                                             :disabled="!$isModerator"
                                         >
-                                            {{ __('Delete') }}
+                                            {{ __('common.delete') }}
                                         </flux:menu.item>
                                     </flux:modal.trigger>
                                 </flux:menu>
@@ -191,8 +191,8 @@
                     <flux:text class="mt-2">{{ __('roles.members.delete_text', ['name' => $deleteUsername]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <flux:button wire:click="close()">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="primary" type="submit">{{ __('Delete') }}</flux:button>
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

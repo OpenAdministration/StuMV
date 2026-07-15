@@ -1,12 +1,12 @@
 <div class="max-w-6xl mx-auto w-full">
     <div class="space-y-4 mb-8">
-        <flux:heading size="xl">{{ __('tools.compareEmailList_headline') }}</flux:heading>
-        <flux:text class="text-base">{{  __('tools.compareEmailList_explanation') }}</flux:text>
+        <flux:heading size="xl">{{ __('tools.compare_email_list_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('tools.compare_email_list_explanation') }}</flux:text>
     </div>
     <div class="grid md:grid-cols-2 gap-6 pb-6 sm:pb-8">
         <div class="space-y-4">
             <flux:textarea
-                label="{{ __('tools.emailAddresses') }}"
+                label="{{ __('tools.email_addresses') }}"
                 wire:model.blur="emailAddressesInput"
                 class="h-[15rem]"
             />
@@ -15,7 +15,7 @@
                 icon="search"
                 wire:click="compareEmailAddressesWithLdap"
             >
-                {{ __('tools.checkForMatches') }}
+                {{ __('tools.check_for_matches') }}
             </flux:button>
         </div>
         <div>
@@ -26,7 +26,7 @@
                         <flux:callout
                             variant="warning"
                             icon="circle-alert"
-                            heading="{{ __('tools.noMatchesFound') }}"
+                            heading="{{ __('tools.no_matches_found') }}"
                             class="mt-[.35rem]"
                         />
                     @else

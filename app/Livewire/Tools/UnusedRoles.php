@@ -28,7 +28,7 @@ class UnusedRoles extends Component
             return view('livewire.tools.unused-roles', [
                 'unusedCommittees' => [],
                 'unusedRoles' => [],
-            ])->title(__('tools.unusedRoles_headline'));
+            ])->title(__('tools.unused_roles_headline'));
         }
 
         $committees = Committee::fromCommunity($this->realm_uid)->get();
@@ -61,6 +61,6 @@ class UnusedRoles extends Component
         return view('livewire.tools.unused-roles', [
             'unusedCommittees' => $unusedCommittees,
             'unusedRoles' => $unusedRoles,
-        ])->title(__('tools.unusedRoles_headline'));
+        ])->title(__('tools.unused_roles_headline'));
     }
 }

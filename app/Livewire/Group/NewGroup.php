@@ -45,7 +45,7 @@ class NewGroup extends Component
             $group->setDn("cn=$this->cn,ou=Groups,ou=$this->realm_uid,ou=Communities,{$group->getBaseDn()}");
             $group->save();
 
-            Flux::toast(variant: 'success', text: __('Added new Group'));
+            Flux::toast(variant: 'success', text: __('groups.added_new_group'));
 
             return to_route('realms.groups.roles', ['realm' => $this->realm_uid, 'cn' => $this->cn]);
         } catch (LdapRecordException $exception) {

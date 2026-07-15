@@ -17,4 +17,6 @@ return [
     'help.only_uni_mail' => 'Please use the email address of your university.',
     'help.password' => 'Your password must contain at least 12 characters, including a special character, a lowercase and an uppercase letter. It must also not be easy to guess.',
     'error.email_in_use' => 'This account already exists.',
+    'first_name_label' => 'First name',
+    'last_name_label' => 'Last name',
 ];
