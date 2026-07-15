@@ -16,11 +16,11 @@
         {{--
             Collapses everything between home and the current (last) item into
             a "..." dropdown once it no longer fits the available width,
-            instead of a fixed item-count threshold. Only home and the last
-            (current-page) item are ever exempt from collapsing - every other
-            item is treated uniformly as collapsible, starting from the one
-            closest to home, so there's no fixed-width floor that can still
-            overflow on a narrow enough viewport or a long enough trail.
+            instead of a fixed item-count threshold. Home always stays; every
+            other item, including the current page as a last resort, is
+            collapsible - starting from the one closest to home - so there's
+            no fixed-width floor that can still overflow on a narrow enough
+            viewport or a long enough trail.
 
             An off-screen clone of every possible item (never collapsed) is
             rendered purely to measure natural widths - real widths depend on
@@ -32,6 +32,7 @@
         --}}
         <div
             class="relative w-full overflow-hidden"
+            x-bind:class="{ 'stumv-breadcrumbs-last-collapsed': lastCollapsed }"
             x-data="{
                 collapsedCount: 0,
                 lastCollapsed: false,
@@ -96,42 +97,29 @@
                     what's actually needed here.
                 --}}
                 <template x-if="collapsedCount > 0 || lastCollapsed">
-                    {{--
-                        The current page (a separate template x-if right after
-                        this one) always stays in the DOM even when hidden, so
-                        Flux's own "last visible item" separator styling never
-                        actually applies to this dropdown - hide its separator
-                        manually once it's the last thing actually shown. A
-                        plain (non-Flux) wrapping div is needed for the class
-                        binding to land where CSS can reach the separator: Flux
-                        only special-cases bare "class"/"style" attributes onto
-                        the item's outer box, not x-bind:class.
-                    --}}
-                    <div x-bind:class="{ '[&_[data-flux-breadcrumbs-item]>svg]:hidden': lastCollapsed }">
-                        <flux:breadcrumbs.item>
-                            <flux:dropdown>
-                                <flux:button icon="ellipsis" variant="ghost" size="sm" />
-                                <flux:navmenu>
-                                    @for($i = 0; $i <= $total - 2; $i++)
-                                        @if($items[$i]->url)
-                                            <template x-if="collapsedCount > {{ $i }}">
-                                                <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}">
-                                                    {{ $items[$i]->title }}
-                                                </flux:navmenu.item>
-                                            </template>
-                                        @endif
-                                    @endfor
-                                    {{-- The current page itself, only shown here once there's no
-                                         room left for it in the main bar either. --}}
-                                    <template x-if="lastCollapsed">
-                                        <flux:navmenu.item icon="corner-down-right">
-                                            {{ $items[$total - 1]->title }}
-                                        </flux:navmenu.item>
-                                    </template>
-                                </flux:navmenu>
-                            </flux:dropdown>
-                        </flux:breadcrumbs.item>
-                    </div>
+                    <flux:breadcrumbs.item>
+                        <flux:dropdown>
+                            <flux:button icon="ellipsis" variant="ghost" size="sm" />
+                            <flux:navmenu>
+                                @for($i = 0; $i <= $total - 2; $i++)
+                                    @if($items[$i]->url)
+                                        <template x-if="collapsedCount > {{ $i }}">
+                                            <flux:navmenu.item icon="corner-down-right" href="{{ $items[$i]->url }}">
+                                                {{ $items[$i]->title }}
+                                            </flux:navmenu.item>
+                                        </template>
+                                    @endif
+                                @endfor
+                                {{-- The current page itself, only shown here once there's no
+                                     room left for it in the main bar either. --}}
+                                <template x-if="lastCollapsed">
+                                    <flux:navmenu.item icon="corner-down-right">
+                                        {{ $items[$total - 1]->title }}
+                                    </flux:navmenu.item>
+                                </template>
+                            </flux:navmenu>
+                        </flux:dropdown>
+                    </flux:breadcrumbs.item>
                 </template>
 
                 @for($i = 0; $i <= $total - 2; $i++)
@@ -169,6 +157,22 @@
                     @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[$total - 1]])
                 </flux:breadcrumbs.item>
             </flux:breadcrumbs>
+
+            {{--
+                The dropdown item is never actually the DOM's last child (the
+                current-page item's own template tag always follows it, even
+                when empty), so Flux's own group-last separator-hiding never
+                applies to it - hide it explicitly instead, once the dropdown
+                really is the last thing shown. Targeted via :has() rather
+                than an extra wrapper element around the item: wrapping it
+                would make it trivially "last child" of that 1-item wrapper,
+                permanently hiding its separator instead of only when needed.
+            --}}
+            <style>
+                .stumv-breadcrumbs-last-collapsed [data-flux-breadcrumbs-item]:has([data-flux-dropdown]) > svg {
+                    display: none;
+                }
+            </style>
         </div>
     @endif
 @endunless
