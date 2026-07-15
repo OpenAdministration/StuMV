@@ -1,7 +1,7 @@
 <?php
 
 use App\Ldap\User as LdapUser;
-use App\Livewire\Profile;
+use App\Livewire\Profile\Profile;
 use App\Models\User as DbUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;

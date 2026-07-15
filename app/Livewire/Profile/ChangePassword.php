@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Profile;
 
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
@@ -44,7 +44,7 @@ class ChangePassword extends Component
         $givenName = $user->getFirstAttribute('givenName');
         $sn = $user->getFirstAttribute('sn');
 
-        return view('livewire.change-password', [
+        return view('livewire.profile.change-password', [
             'givenName' => $givenName,
             'sn' => $sn,
         ])->title(__('profile.change_password_title'));

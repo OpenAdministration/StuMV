@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Profile;
 
 use App\Ldap\User;
 use Flux\Flux;
@@ -60,7 +60,7 @@ class Profile extends Component
 
     public function render()
     {
-        return view('livewire.profile')->title(__('profile.title', ['name' => $this->givenName.' '.$this->sn]));
+        return view('livewire.profile.profile')->title(__('profile.title', ['name' => $this->givenName.' '.$this->sn]));
     }
 
     public function save()

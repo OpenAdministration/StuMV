@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\ChangePassword;
+use App\Livewire\Profile\ChangePassword;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;

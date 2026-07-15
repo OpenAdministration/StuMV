@@ -7,7 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Livewire\ChangePassword;
+use App\Livewire\Profile\ChangePassword;
 use App\Livewire\RegisterUser;
 use Illuminate\Support\Facades\Route;
 
