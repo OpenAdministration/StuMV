@@ -6,6 +6,7 @@ return [
     'explanation' => 'Hier registrierte Anwendungen dürfen die Verzeichnis-API (Gremien, Rollen, Gruppen und Nutzer:innen) dieser Studierendenschaft abfragen.',
     'new' => 'Neuer Client',
     'new_title' => 'Neuen API-Client registrieren',
+    'search' => 'Durchsuche API-Clients',
     'name' => 'Name',
     'name_placeholder' => 'z. B. StuFiS',
     'scopes' => 'Berechtigungen',

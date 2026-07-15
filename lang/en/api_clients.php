@@ -6,6 +6,7 @@ return [
     'explanation' => 'Applications registered here may query the directory API (committees, roles, groups and users) for this community.',
     'new' => 'New client',
     'new_title' => 'Register a new API client',
+    'search' => 'Search API clients',
     'name' => 'Name',
     'name_placeholder' => 'e.g. StuFiS',
     'scopes' => 'Scopes',
