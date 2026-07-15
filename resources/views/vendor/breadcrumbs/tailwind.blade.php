@@ -9,7 +9,7 @@
         <flux:breadcrumbs>
             <flux:breadcrumbs.item icon="house" href="/" />
             <flux:breadcrumbs.item>
-                @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[0], 'onlyItem' => true])
+                @include('vendor.breadcrumbs.title', ['breadcrumb' => $items[0]])
             </flux:breadcrumbs.item>
         </flux:breadcrumbs>
     @else

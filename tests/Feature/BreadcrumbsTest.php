@@ -65,7 +65,7 @@ test('the group members page has a breadcrumb showing the group and linking back
         ->toContain(route('realms.groups', ['realm' => $uid]));
 });
 
-test('the community name is not truncated when it is the only breadcrumb item, as on the dashboard', function (): void {
+test('the community name is shown in full on the community dashboard, where it is the only breadcrumb item', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     actingAsMember($community);
@@ -84,7 +84,7 @@ test('the community name is not truncated when it is the only breadcrumb item, a
         ->not->toContain('max-w-[20ch]');
 });
 
-test('breadcrumb titles that are not committee names are also width-capped and truncated', function (): void {
+test('breadcrumb titles are shown in full, not CSS-truncated - the responsive collapse handles overflow instead', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     actingAsMember($community);
@@ -96,5 +96,7 @@ test('breadcrumb titles that are not committee names are also width-capped and t
     // marked data-flux-breadcrumbs), so stop at whichever comes first.
     preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
 
-    expect($section[1] ?? '')->toContain('max-w-[20ch]');
+    expect($section[1] ?? '')
+        ->toContain((string) $community->getLongName())
+        ->not->toContain('max-w-[20ch]');
 });
