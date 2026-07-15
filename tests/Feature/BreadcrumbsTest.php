@@ -18,7 +18,10 @@ test('the role-members breadcrumb shows the role description, not its short code
     // Scope the assertion to the breadcrumbs bar only (bounded by the next
     // header element): the page heading also shows the role description, so
     // an unbounded/whole-page assertSee() would pass even without the fix.
-    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+    // Scoped to the first data-flux-breadcrumbs block: the visible
+    // breadcrumbs render before the off-screen width-measurement clone
+    // (also marked data-flux-breadcrumbs).
+    preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
 
     expect($section[1] ?? '')
         ->toContain('Role mitglied')
@@ -32,7 +35,10 @@ test('the breadcrumbs bar starts with a home icon linking to /', function (): vo
 
     $response = $this->get(route('realms.members', ['realm' => $uid]));
 
-    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+    // Scoped to the first data-flux-breadcrumbs block only: the visible
+    // breadcrumbs render before the off-screen width-measurement clone (also
+    // marked data-flux-breadcrumbs), so stop at whichever comes first.
+    preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
     $html = $section[1] ?? '';
 
     expect($html)->toContain('href="/"')
@@ -49,7 +55,10 @@ test('the group members page has a breadcrumb showing the group and linking back
 
     $response->assertOk();
 
-    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+    // Scoped to the first data-flux-breadcrumbs block only: the visible
+    // breadcrumbs render before the off-screen width-measurement clone (also
+    // marked data-flux-breadcrumbs), so stop at whichever comes first.
+    preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
 
     expect($section[1] ?? '')
         ->toContain('newsletter')
@@ -65,7 +74,10 @@ test('the community name is not truncated when it is the only breadcrumb item, a
 
     $response->assertOk();
 
-    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+    // Scoped to the first data-flux-breadcrumbs block only: the visible
+    // breadcrumbs render before the off-screen width-measurement clone (also
+    // marked data-flux-breadcrumbs), so stop at whichever comes first.
+    preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
     $html = $section[1] ?? '';
 
     expect($html)->toContain((string) $community->getLongName())
@@ -79,7 +91,10 @@ test('breadcrumb titles that are not committee names are also width-capped and t
 
     $response = $this->get(route('realms.members', ['realm' => $uid]));
 
-    preg_match('#data-flux-breadcrumbs>(.*?)ml-auto flex justify-end#s', (string) $response->getContent(), $section);
+    // Scoped to the first data-flux-breadcrumbs block only: the visible
+    // breadcrumbs render before the off-screen width-measurement clone (also
+    // marked data-flux-breadcrumbs), so stop at whichever comes first.
+    preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
 
     expect($section[1] ?? '')->toContain('max-w-[20ch]');
 });
