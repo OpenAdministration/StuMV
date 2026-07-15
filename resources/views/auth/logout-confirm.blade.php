@@ -1,7 +1,14 @@
 <x-guest-layout>
     <x-auth-card>
-        <x-slot:slot class="space-y-5">
-            <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('Confirm logout') }}</h2>
+        <!-- Validation Errors -->
+        @if(session('errors'))
+            <div class="w-full max-w-[28rem]!">
+                <x-auth-validation-errors :errors="$errors" />
+            </div>
+        @endif
+
+        <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-xs">
+            <flux:heading size="xl">{{ __('Confirm logout') }}</flux:heading>
             <p>
                 {{ __('auth.logout_confirmation', ['user' => $shown_username]) }}
             </p>
@@ -9,10 +16,9 @@
                 @csrf
                 <div class="flex justify-evenly">
                     <flux:button icon="ban" href="/">{{ __('Cancel') }}</flux:button>
-                    <flux:button variant="danger" icon="log-out" type="submit">{{ __('Log Out') }}</flux:button>
+                    <flux:button variant="primary" icon="log-out" type="submit">{{ __('Log Out') }}</flux:button>
                 </div>
             </form>
-        </x-slot:slot>
-        <!-- Validation Errors -->
+        </flux:card>
     </x-auth-card>
 </x-guest-layout>
