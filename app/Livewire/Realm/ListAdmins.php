@@ -85,10 +85,7 @@ class ListAdmins extends Component
                     'isAdmin' => $isAdmin,
                     'canRemoveAdmin' => $canRemoveAdmin,
                 ]
-            )->title(__('realms.admins_headline', [
-                'name' => $community->description[0],
-                'uid' => $community->ou[0],
-            ]));
+            )->title(__('realms.admins_headline'));
         }
 
         $admins = $community?->adminsGroup()->members()->get() ?? collect();
@@ -114,10 +111,7 @@ class ListAdmins extends Component
                 'isAdmin' => $isAdmin,
                 'canRemoveAdmin' => $canRemoveAdmin,
             ]
-        )->title(__('realms.admins_headline', [
-            'name' => $community->description[0],
-            'uid' => $community->ou[0],
-        ]));
+        )->title(__('realms.admins_headline'));
     }
 
     public function deletePrepare($username): void

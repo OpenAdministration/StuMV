@@ -1,7 +1,7 @@
 <div class="flex-col space-y-8 pb-6 sm:pb-8" wire:init="loadMembers">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
-            <flux:heading size="xl">{{ __('realms.members_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</flux:text>
+            <flux:heading size="xl">{{ __('realms.members_heading') }}</flux:heading>
             <flux:text class="text-base">{{ __('realms.members_explanation') }}</flux:text>
         </div>
         <div>

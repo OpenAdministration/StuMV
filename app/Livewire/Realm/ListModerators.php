@@ -78,7 +78,7 @@ class ListModerators extends Component
                     'isAdmin' => $isAdmin,
                     'canRemoveModerator' => $canRemoveModerator,
                 ]
-            )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
+            )->title(__('realms.mods_heading'));
         }
 
         $mods = $community->moderatorsGroup()->members()->get();
@@ -104,7 +104,7 @@ class ListModerators extends Component
                 'isAdmin' => $isAdmin,
                 'canRemoveModerator' => $canRemoveModerator,
             ]
-        )->title(__('realms.mods_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $this->community_name]));
+        )->title(__('realms.mods_heading'));
     }
 
     public function deletePrepare($uid): void

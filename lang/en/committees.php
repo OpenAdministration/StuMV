@@ -17,7 +17,7 @@ return [
     'manage_roles' => 'Manage roles',
     'link_roles' => 'Roles',
     'link_edit' => 'Edit',
-    'list.headline' => 'Committees of :name',
+    'list.headline' => 'Committees',
     'list.explain_text' => 'This is the list of committees, organizations and subdivisions (in short: committees). Committees can only be edited or deleted by moderators.',
     'edit_title' => 'Edit committee',
     'edit_headline' => 'Edit committee :name',
