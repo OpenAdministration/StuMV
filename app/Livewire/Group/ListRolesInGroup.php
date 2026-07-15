@@ -36,11 +36,18 @@ class ListRolesInGroup extends Component
 
     public array $deleteRoleName = [];
 
+    public bool $ready = false;
+
     public function mount(Community $realm, $cn)
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->group_cn = $cn;
         $this->group_dn = Group::dnFrom($this->realm_uid, $cn);
+    }
+
+    public function loadRoles(): void
+    {
+        $this->ready = true;
     }
 
     public function sortBy($field)
@@ -61,6 +68,12 @@ class ListRolesInGroup extends Component
 
     public function render()
     {
+        if (! $this->ready) {
+            return view('livewire.group.roles', [
+                'rows' => new LengthAwarePaginator(collect(), 0, 10),
+            ])->title(__('groups.roles_list_title', ['name' => $this->group_cn]));
+        }
+
         $groupRoles = GroupMembership::query()
             ->where('group_dn', $this->group_dn)
             ->get();

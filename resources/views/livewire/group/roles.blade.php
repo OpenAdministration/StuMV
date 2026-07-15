@@ -1,4 +1,4 @@
-<div class="flex-col">
+<div class="flex-col" wire:init="loadRoles">
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1">
             <flux:heading size="xl" class="mb-4">{{ __('groups.roles_headline', ['name' => $group_cn]) }}</flux:heading>
@@ -22,57 +22,68 @@
     </flux:field>
 
     <div class="pb-8">
-        @if(count($rows) > 0)
-            <flux:table>
-                <flux:table.columns>
-                    <flux:table.column sortable :sorted="$sortField === 'committee'" :direction="$sortDirection" wire:click="sortBy('committee')">{{ __('groups.committee_name') }}</flux:table.column>
-                    <flux:table.column sortable :sorted="$sortField === 'role'" :direction="$sortDirection" wire:click="sortBy('role')">{{ __('groups.role_name') }}</flux:table.column>
-                    <flux:table.column></flux:table.column>
-                </flux:table.columns>
-                <flux:table.rows>
-                @foreach($rows as $row)
-                    @php($role = $row['role'])
-                    @php($committee = $row['committee'])
-                    <flux:table.row>
-                        <flux:table.cell>
-                            <flux:link
-                                wire:navigate
-                                href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee?->getFirstAttribute('ou')]) }}"
-                            >
-                                {{ $committee?->getFirstAttribute('description') }}
-                            </flux:link>
-                        </flux:table.cell>
-                        <flux:table.cell>
-                            <flux:link
-                                wire:navigate
-                                href="{{ route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $committee?->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
-                            >
-                                {{ $role->getFirstAttribute('description') }}
-                            </flux:link>
-                        </flux:table.cell>
-                        <flux:table.cell class="flex justify-end gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="trash"
-                                        wire:click="deletePrepare({{ $row['groupRole']->id }})"
-                                    >
-                                        {{ __('Delete') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
-                        </flux:table.cell>
-                    </flux:table.row>
-                @endforeach
-                </flux:table.rows>
-            </flux:table>
-            <div class="pagination">
-                <flux:pagination :paginator="$rows" />
+        @if(! $ready)
+            <div class="flex justify-center py-16">
+                <flux:icon.loading />
             </div>
         @else
-            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('groups.no_roles_found') }}" />
+            <div wire:loading.flex wire:target="search, sortBy" class="flex justify-center py-4">
+                <flux:icon.loading />
+            </div>
+            <div wire:loading.remove wire:target="search, sortBy">
+                @if(count($rows) > 0)
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column sortable :sorted="$sortField === 'committee'" :direction="$sortDirection" wire:click="sortBy('committee')">{{ __('groups.committee_name') }}</flux:table.column>
+                            <flux:table.column sortable :sorted="$sortField === 'role'" :direction="$sortDirection" wire:click="sortBy('role')">{{ __('groups.role_name') }}</flux:table.column>
+                            <flux:table.column></flux:table.column>
+                        </flux:table.columns>
+                        <flux:table.rows>
+                        @foreach($rows as $row)
+                            @php($role = $row['role'])
+                            @php($committee = $row['committee'])
+                            <flux:table.row>
+                                <flux:table.cell>
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee?->getFirstAttribute('ou')]) }}"
+                                    >
+                                        {{ $committee?->getFirstAttribute('description') }}
+                                    </flux:link>
+                                </flux:table.cell>
+                                <flux:table.cell>
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $committee?->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
+                                    >
+                                        {{ $role->getFirstAttribute('description') }}
+                                    </flux:link>
+                                </flux:table.cell>
+                                <flux:table.cell class="flex justify-end gap-2">
+                                    <flux:dropdown>
+                                        <flux:button size="sm" icon="ellipsis-vertical" />
+                                        <flux:menu>
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="trash-2"
+                                                wire:click="deletePrepare({{ $row['groupRole']->id }})"
+                                            >
+                                                {{ __('Delete') }}
+                                            </flux:menu.item>
+                                        </flux:menu>
+                                    </flux:dropdown>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                    <div class="pagination">
+                        <flux:pagination :paginator="$rows" />
+                    </div>
+                @else
+                    <flux:callout variant="warning" icon="circle-alert" heading="{{ __('groups.no_roles_found') }}" />
+                @endif
+            </div>
         @endif
     </div>
 
