@@ -16,7 +16,7 @@ return [
     'no_members_found' => 'Für diese Studierendenschaft gibt es keine Mitglieder',
     'search_members' => 'Durchsuche Mitglieder',
     'manage_members' => 'Mitglieder verwalten',
-    'members_heading' => 'Mitglieder verwalten',
+    'members_heading' => 'Mitglieder',
     'members_explanation' => 'Alle Nutzer:innen, die deiner Studierendenschaft zugeordnet sind, werden hier aufgelistet. Die Organisationszugehörigkeit sollte nur in absoluten Ausnahmefällen aufgelöst werden',
     'new_member' => 'Neues Mitglied hinzufügen',
     'new_member_label' => 'Verfügbare Nutzer:innen',

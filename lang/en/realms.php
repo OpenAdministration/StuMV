@@ -16,7 +16,7 @@ return [
     'no_members_found' => 'There are no members for this student body',
     'search_members' => 'Search members',
     'manage_members' => 'Manage members',
-    'members_heading' => 'Manage members',
+    'members_heading' => 'Members',
     'members_explanation' => 'All users assigned to your student body are listed here. Membership in the organization should only be revoked in absolute exceptional cases.',
     'new_member' => 'Add a new member',
     'new_member_label' => 'Available users',
