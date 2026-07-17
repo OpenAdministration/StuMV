@@ -18,8 +18,6 @@
         @can('superadmin', \App\Models\User::class)
             <livewire:sync-ldap />
         @endcan
-
-        <x-info />
         
         <flux:dropdown align="end">
             @php
@@ -30,17 +28,36 @@
             @endphp
             <flux:profile :chevron="false" size="xl" avatar="{{ $jpegPhoto }}" avatar:name="{{ auth()->user()->full_name }}" />
             <flux:navmenu class="max-w-[20rem]">
-                <div class="px-2 py-1.5">
-                    <flux:heading size="lg" class="truncate">{{ auth()->user()->full_name }}</flux:heading>
-                    <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
-                </div>
-                <flux:navmenu.separator />
                 <flux:navmenu.item
                     wire:navigate
                     :href="route('profile', auth()->user()->username)"
+                >
+                    <flux:heading size="lg" class="truncate">{{ auth()->user()->full_name }}</flux:heading>
+                    <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
+                </flux:navmenu.item>
+                <flux:navmenu.separator />
+                <x-info />
+                <flux:navmenu.item
+                    wire:navigate
+                    :href="route('documentation')"
+                    icon="book"
+                >
+                    {{ __('common.footer_documentation') }}
+                </flux:navmenu.item>
+                <flux:navmenu.separator />
+                <flux:navmenu.item
+                    wire:navigate
+                    :href="route('about')"
                     icon="circle-user"
                 >
-                    {{ __('profile.breadcrumb') }}
+                    {{ __('common.footer_about') }}
+                </flux:navmenu.item>
+                <flux:navmenu.item
+                    wire:navigate
+                    :href="route('privacy')"
+                    icon="circle-user"
+                >
+                    {{ __('common.footer_privacy') }}
                 </flux:navmenu.item>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

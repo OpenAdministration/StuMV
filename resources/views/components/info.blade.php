@@ -1,6 +1,5 @@
 <flux:modal.trigger name="info">
-    <flux:button
-        variant="ghost"
+    <flux:navmenu.item
         icon="info"
         title="{{ __('common.about') }} {{ config('app.name') }} &hellip;"
     />
@@ -31,10 +30,6 @@
                         <span>{{ __('common.footer_by') }}</span>
                         <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration</flux:link>
                     </div>
-                </div>
-                <div class="flex flex-wrap items-center justify-center gap-2 bg-zinc-100 dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 -mx-6 -mb-6 p-6">
-                    <flux:button size="sm" icon="external-link" target="_blank" rel="noopener noreferrer" :href="route('documentation')">{{ __('common.footer_documentation') }}</flux:button>
-                    <flux:button size="sm" icon="external-link" target="_blank" rel="noopener noreferrer" :href="route('source-code')">{{ __('common.footer_source_code') }}</flux:button>
                 </div>
             </div>
         </div>
