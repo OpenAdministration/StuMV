@@ -146,11 +146,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
 
 // guest routes
 Route::get('about', fn () => redirect(config('app.about_url')))->name('about');
-
 Route::get('privacy', fn () => redirect(config('app.privacy_url')))->name('privacy');
-
 Route::get('terms', fn () => redirect(config('app.terms_url')))->name('terms');
 
+Route::get('documentation', fn () => redirect('https://www.stufis.de/stumv'))->name('documentation');
 Route::get('source-code', fn () => redirect('https://github.com/openadministration/stumv'))->name('source-code');
 
 require __DIR__.'/auth.php';
