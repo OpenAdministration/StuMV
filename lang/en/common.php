@@ -27,5 +27,6 @@ return [
     'footer_terms' => 'Terms',
     'footer_privacy' => 'Privacy',
     'footer_license' => 'License',
+    'footer_documentation' => 'Documentation',
     'footer_source_code' => 'Source code',
 ];

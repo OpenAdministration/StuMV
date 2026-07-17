@@ -27,5 +27,6 @@ return [
     'footer_terms' => 'Nutzungsbedingungen',
     'footer_privacy' => 'Datenschutz',
     'footer_license' => 'Lizenz',
+    'footer_documentation' => 'Handbuch',
     'footer_source_code' => 'Quelltext',
 ];
