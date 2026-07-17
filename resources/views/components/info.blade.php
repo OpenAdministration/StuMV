@@ -12,12 +12,17 @@
             <flux:heading size="lg" class="modal-header">{{ config('app.name') }}</flux:heading>
             <div class="text-center">
                 <h3 class="text-xl font-bold text-zinc-800 dark:text-white">{{ config('app.name') }} <span class="font-normal ml-1"> 2.0.0</span></h3>
+                @if(config('app.name') === 'StuMV')
+                    <div class="mt-6">
+                        <p><b>Stu</b>dentische <b>M</b>itglieder-<b>V</b>erwaltung</p>
+                    </div>
+                @endif
                 <div class="mt-6">
                     <p>&copy; 2020 &ndash; {{ date("Y") }} Open Administration GmbH</p>
                     <p class="mt-2"><span class="font-semibold">{{ __('common.footer_license') }}:</span> <flux:link href="https://www.gnu.org/licenses/agpl-3.0.txt" target="_blank" rel="noopener noreferrer">AGPLv3</flux:link></p>
                 </div>
-                <div class="mt-6">
-                    @if (config('app.name') !== 'StuMV')
+                <div class="mt-6 mb-6">
+                    @if(config('app.name') !== 'StuMV')
                         <p class="text-zinc-800 dark:text-white mb-2">{{ __('common.based_on', ['name' => config('app.name')]) }} <flux:link href="https://github.com/OpenAdministration/StuMV" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</p>
                     @endif
                     <div class="text-zinc-800 dark:text-white flex space-x-1 items-center justify-center">
