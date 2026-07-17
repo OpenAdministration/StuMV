@@ -53,7 +53,6 @@
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
                 <flux:navmenu.item
-                    icon="circle-user"
                     :href="route('about')"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -61,7 +60,6 @@
                     {{ __('common.footer_about') }}
                 </flux:navmenu.item>
                 <flux:navmenu.item
-                    icon="circle-user"
                     :href="route('privacy')"
                     target="_blank"
                     rel="noopener noreferrer"
