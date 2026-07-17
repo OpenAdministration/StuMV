@@ -31,6 +31,7 @@
                 <flux:navmenu.item
                     wire:navigate
                     :href="route('profile', auth()->user()->username)"
+                    class="flex-col justify-start"
                 >
                     <flux:heading size="lg" class="truncate">{{ auth()->user()->full_name }}</flux:heading>
                     <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
@@ -47,7 +48,6 @@
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
                 <flux:navmenu.item
-                    icon="circle-user"
                     :href="route('about')"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -55,7 +55,6 @@
                     {{ __('common.footer_about') }}
                 </flux:navmenu.item>
                 <flux:navmenu.item
-                    icon="circle-user"
                     :href="route('privacy')"
                     target="_blank"
                     rel="noopener noreferrer"
