@@ -38,24 +38,27 @@
                 <flux:navmenu.separator />
                 <x-info />
                 <flux:navmenu.item
-                    wire:navigate
-                    :href="route('documentation')"
                     icon="notebook-text"
+                    :href="route('documentation')"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
                     {{ __('common.footer_documentation') }}
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
                 <flux:navmenu.item
-                    wire:navigate
-                    :href="route('about')"
                     icon="circle-user"
+                    :href="route('about')"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
                     {{ __('common.footer_about') }}
                 </flux:navmenu.item>
                 <flux:navmenu.item
-                    wire:navigate
-                    :href="route('privacy')"
                     icon="circle-user"
+                    :href="route('privacy')"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
                     {{ __('common.footer_privacy') }}
                 </flux:navmenu.item>
