@@ -40,7 +40,7 @@
                 <flux:navmenu.item
                     wire:navigate
                     :href="route('documentation')"
-                    icon="book"
+                    icon="notebook-text"
                 >
                     {{ __('common.footer_documentation') }}
                 </flux:navmenu.item>
