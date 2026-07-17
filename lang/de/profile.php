@@ -11,6 +11,7 @@ return [
     'in' => 'in',
     'memberships' => 'Mitgliedschaften',
     'memberships_as_pdf' => 'Mitgliedschaften als PDF',
+    'no_memberships_found' => 'Für dieses Profil gibt es keine Mitgliedschaften',
     'note_profile_pictures_public' => 'Profilbilder sind öffentlich zugänglich! Durch das Hochladen eines Bildes stimmst du der Veröffentlichung zu.',
     'personal_data' => 'Stammdaten',
     'picture' => 'Bild',

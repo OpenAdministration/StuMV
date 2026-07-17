@@ -27,6 +27,14 @@ test('the memberships page lists a users active role memberships', function (): 
         ->assertSee('Role mitglied'); // the role description set by the factory
 });
 
+test('the memberships page shows a callout when there are no memberships', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+
+    Livewire::test(Memberships::class, ['username' => $user->username])
+        ->assertSee(__('profile.no_memberships_found'));
+});
+
 test('a user cannot view someone else memberships', function (): void {
     $community = newCommunity();
     actingAsMember($community);
