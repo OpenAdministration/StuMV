@@ -240,6 +240,21 @@ test('the role members list is paginated to 10 per page', function (): void {
     expect($page2)->toHaveCount(5);
 });
 
+test('the current page is bound to the url before members are lazily loaded', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    actingAsModerator($community);
+
+    $component = Livewire::test(ListRoleMembers::class, [
+        'realm' => $community,
+        'ou' => $committee->getFirstAttribute('ou'),
+        'cn' => $role->getFirstAttribute('cn'),
+    ]);
+
+    expect($component->effects['url'] ?? [])->toHaveKey('paginators.page');
+});
+
 test('the search field filters role members by name', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');

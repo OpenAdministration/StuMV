@@ -48,6 +48,11 @@ class ListRoleMembers extends Component
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
+
+        // Resolves and registers the "page" query-string binding now, since
+        // members load lazily (wire:init) and render() otherwise wouldn't
+        // touch pagination until after the initial page load.
+        $this->getPage();
     }
 
     public function loadMembers(): void
