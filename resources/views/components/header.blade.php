@@ -26,15 +26,20 @@
                     $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
                 }
             @endphp
-            <flux:profile :chevron="false" size="xl" avatar="{{ $jpegPhoto }}" avatar:name="{{ auth()->user()->full_name }}" />
+            <flux:profile
+                :chevron="false"
+                size="xl"
+                avatar="{{ $jpegPhoto }}"
+                avatar:name="{{ auth()->user()->full_name }}"
+                title="{{ auth()->user()->full_name }}"
+            />
             <flux:navmenu class="max-w-[20rem]">
                 <flux:navmenu.item
+                    icon="circle-user"
                     wire:navigate
                     :href="route('profile', auth()->user()->username)"
-                    class="flex-col justify-start"
                 >
-                    <flux:heading size="lg" class="truncate">{{ auth()->user()->full_name }}</flux:heading>
-                    <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
+                    {{ __('profile.breadcrumb') }}
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
                 <x-info />
@@ -48,6 +53,7 @@
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
                 <flux:navmenu.item
+                    icon="circle-user"
                     :href="route('about')"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -55,6 +61,7 @@
                     {{ __('common.footer_about') }}
                 </flux:navmenu.item>
                 <flux:navmenu.item
+                    icon="circle-user"
                     :href="route('privacy')"
                     target="_blank"
                     rel="noopener noreferrer"
