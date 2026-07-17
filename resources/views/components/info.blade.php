@@ -1,8 +1,7 @@
 <flux:modal.trigger name="info">
-    <flux:navmenu.item
-        icon="info"
-        title="{{ __('common.about') }} {{ config('app.name') }} &hellip;"
-    />
+    <flux:navmenu.item icon="info">
+        {{ __('common.about') }} {{ config('app.name') }} &hellip;
+    </flux:navmenu.item>
 </flux:modal.trigger>
 
 <flux:modal name="info" class="md:w-[30rem] mx-auto">
@@ -20,7 +19,7 @@
                     <p>&copy; 2020 &ndash; {{ date("Y") }} Open Administration GmbH</p>
                     <p class="mt-2"><span class="font-semibold">{{ __('common.footer_license') }}:</span> <flux:link href="https://www.gnu.org/licenses/agpl-3.0.txt" target="_blank" rel="noopener noreferrer">AGPLv3</flux:link></p>
                 </div>
-                <div class="mt-6 mb-6">
+                <div class="mt-6">
                     @if(config('app.name') !== 'StuMV')
                         <p class="text-zinc-800 dark:text-white mb-2">{{ __('common.based_on', ['name' => config('app.name')]) }} <flux:link href="https://github.com/OpenAdministration/StuMV" target="_blank" rel="noopener noreferrer">StuMV</flux:link>.</p>
                     @endif

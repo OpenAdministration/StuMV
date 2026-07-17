@@ -59,6 +59,7 @@
                 >
                     {{ __('common.footer_privacy') }}
                 </flux:navmenu.item>
+                <flux:navmenu.separator />
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <flux:navmenu.item
