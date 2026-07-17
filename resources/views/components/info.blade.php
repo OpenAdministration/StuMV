@@ -11,7 +11,7 @@
         <div>
             <flux:heading size="lg" class="modal-header">{{ config('app.name') }}</flux:heading>
             <div class="text-center">
-                <h3 class="text-xl font-bold text-zinc-800 dark:text-white">{{ config('app.name') }} <span class="font-normal ml-1"> 1.0.0-alpha</span></h3>
+                <h3 class="text-xl font-bold text-zinc-800 dark:text-white">{{ config('app.name') }} <span class="font-normal ml-1"> 2.0.0</span></h3>
                 <div class="mt-6">
                     <p>&copy; 2020 &ndash; {{ date("Y") }} Open Administration GmbH</p>
                     <p class="mt-2"><span class="font-semibold">{{ __('common.footer_license') }}:</span> <flux:link href="https://www.gnu.org/licenses/agpl-3.0.txt" target="_blank" rel="noopener noreferrer">AGPLv3</flux:link></p>
