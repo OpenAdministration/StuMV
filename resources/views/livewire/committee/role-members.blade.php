@@ -187,8 +187,8 @@
         <flux:modal name="delete">
             <div class="space-y-6">
                 <div>
-                    <flux:heading size="lg" class="modal-header">{{ __('roles.members.delete_title', ['name' => $deleteUsername]) }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('roles.members.delete_text', ['name' => $deleteUsername]) }}</flux:text>
+                    <flux:heading size="lg" class="modal-header">{{ __('roles.members.delete_title', ['name' => $deleteDisplayName]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('roles.members.delete_text', ['name' => $deleteDisplayName]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-2">
                     <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>

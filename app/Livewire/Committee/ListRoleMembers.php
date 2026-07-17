@@ -105,6 +105,7 @@ class ListRoleMembers extends Component
                 'isModerator' => $isModerator,
                 'isAdmin' => $isAdmin,
                 'memberStatuses' => [],
+                'deleteDisplayName' => isset($this->deleteUsername) ? $this->deleteUsername : null,
             ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
         }
 
@@ -174,6 +175,7 @@ class ListRoleMembers extends Component
             'isModerator' => $isModerator,
             'isAdmin' => $isAdmin,
             'memberStatuses' => $memberStatuses,
+            'deleteDisplayName' => isset($this->deleteUsername) ? ($userCache[$this->deleteUsername]?->getFirstAttribute('cn') ?? $this->deleteUsername) : null,
         ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
     }
 
@@ -184,7 +186,11 @@ class ListRoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('delete', [$membership, $committee, $community]);
 
-        $this->deleteUsername = User::findOrFailByUsername($membership->username)->getFirstAttribute('cn');
+        // The row that triggered this already has its display name in
+        // render()'s $userCache - store just the username here (a plain DB
+        // field) and let render() resolve the name from that cache, rather
+        // than an extra LDAP round-trip for a name we're about to refetch.
+        $this->deleteUsername = $membership->username;
         $this->deleteId = $membership->id;
     }
 

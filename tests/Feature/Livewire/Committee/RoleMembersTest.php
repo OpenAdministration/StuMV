@@ -65,6 +65,30 @@ test('cancelling the delete modal closes it', function (): void {
         ->assertDispatched('modal-close', name: 'delete');
 });
 
+test('preparing a deletion shows the correct display name', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $member = TestLdap::member($community);
+    User::findByUsername($member->username)->fill(['cn' => 'Carol Delete'])->save();
+    $membership = RoleMembership::create([
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today(),
+    ]);
+    actingAsModerator($community);
+
+    Livewire::test(ListRoleMembers::class, [
+        'realm' => $community,
+        'ou' => $committee->getFirstAttribute('ou'),
+        'cn' => $role->getFirstAttribute('cn'),
+    ])
+        ->call('loadMembers')
+        ->call('prepareDeletion', $membership->id)
+        ->assertSee('Carol Delete');
+});
+
 test('renders the member list for a seeded role', function (): void {
     actingAsModerator('demo');
 
