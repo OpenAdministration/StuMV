@@ -59,7 +59,7 @@ class Picture extends Component
         $imgID = Str::uuid();
 
         // Save image to storage
-        Storage::disk('public')->put('avatars/'.$imgID.'.jpg', $imgResized);
+        $imgResized->storePubliclyAs(path: 'avatars', name: $imgID.'.jpg', disk: 'public');
 
         // Save user image relation
         $pictureDB = ProfilePicture::create([
