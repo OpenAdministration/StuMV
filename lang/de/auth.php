@@ -29,7 +29,7 @@ return [
 
     'remember_me' => 'Angemeldet bleiben',
     'forgot_password' => 'Passwort vergessen?',
-    'resend_verification_email' => 'Verifizierungs-E-Mail (erneut) senden',
+    'send_verification_email' => 'Verifizierungs-E-Mail senden',
     'log_in' => 'Anmelden',
     'log_out' => 'Abmelden',
     'confirm' => 'Bestätigen',

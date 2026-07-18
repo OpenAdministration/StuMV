@@ -29,7 +29,7 @@ return [
 
     'remember_me' => 'Remember me',
     'forgot_password' => 'Forgot your password?',
-    'resend_verification_email' => 'Resend verification Email',
+    'send_verification_email' => 'Send verification Email',
     'log_in' => 'Log in',
     'log_out' => 'Log out',
     'confirm' => 'Confirm',

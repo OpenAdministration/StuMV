@@ -10,17 +10,23 @@
             <div>{{ __('auth.verification_text') }}</div>
 
             <div class="flex flex-wrap gap-2 items-center justify-between">
-                <form method="POST" action="{{ route('verification.send') }}">
-                    @csrf
-                    <flux:button variant="primary" type="submit">
-                        {{ __('auth.resend_verification_email') }}
-                    </flux:button>
-                </form>
-
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <flux:button type="submit">
+                    <flux:button
+                        type="submit"
+                        icon="log-out"
+                    >
                         {{ __('auth.log_out') }}
+                    </flux:button>
+                </form>
+                <form method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <flux:button
+                        variant="primary"
+                        type="submit"
+                        icon="send"
+                    >
+                        {{ __('auth.send_verification_email') }}
                     </flux:button>
                 </form>
             </div>
