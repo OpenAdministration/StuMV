@@ -53,6 +53,7 @@
                     <flux:pillbox.option value="committees">{{ __('oidc_clients.scope_committees') }}</flux:pillbox.option>
                     <flux:pillbox.option value="groups">{{ __('oidc_clients.scope_groups') }}</flux:pillbox.option>
                     <flux:pillbox.option value="users">{{ __('oidc_clients.scope_users') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="iban">{{ __('oidc_clients.scope_iban') }}</flux:pillbox.option>
                 </flux:pillbox>
             </flux:field>
 

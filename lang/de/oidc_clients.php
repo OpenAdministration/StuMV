@@ -24,6 +24,7 @@ return [
     'scope_committees' => 'Gremien & Rollen',
     'scope_groups' => 'Gruppen',
     'scope_users' => 'Nutzer:innen',
+    'scope_iban' => 'IBAN',
     'no_clients_found' => 'Noch keine OIDC-Clients registriert.',
     'status' => 'Status',
     'status_active' => 'Aktiv',

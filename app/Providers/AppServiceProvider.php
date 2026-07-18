@@ -29,17 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Merged so the OpenID Connect package's scopes (openid, email, phone -
-        // config/openid.php) are available alongside StuMV's own; where both
-        // define a scope (profile, address), StuMV's own description wins.
-        Passport::tokensCan(array_merge(config('openid.passport.tokens_can'), [
-            'profile' => 'Grant Profile Info Access',
-            'committees' => 'Grant Committee Access',
-            'groups' => 'Grant Group Access',
-            'users' => 'Grant Directory User Info Access',
-            'iban' => 'Grant IBAN Access',
-            'address' => 'Grant Address Access',
-        ]));
+        // config/openid.php's tokens_can is the single source of truth for
+        // scopes: the OpenID Connect package's discovery endpoint reads it
+        // directly for scopes_supported, so any scope granted via Passport
+        // must live there to be advertised at /.well-known/openid-configuration.
+        Passport::tokensCan(config('openid.passport.tokens_can'));
 
         Passport::setDefaultScope(['profile']);
 

@@ -9,9 +9,7 @@ use Livewire\Component;
 
 class NewOidcClient extends Component
 {
-    // 'iban' is deliberately left out - it's sensitive financial data that
-    // shouldn't be a one-click grant for an arbitrary third-party app.
-    public const AVAILABLE_SCOPES = ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users'];
+    public const AVAILABLE_SCOPES = ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users', 'iban'];
 
     public string $name = '';
 
