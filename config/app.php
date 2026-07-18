@@ -210,6 +210,10 @@ return [
         /*
          * Package Service Providers...
          */
+        // Registered in place of Laravel\Passport\PassportServiceProvider
+        // (disabled via composer.json's dont-discover) - this extends it to
+        // also wire up OpenID Connect (id_token, discovery, JWKS, userinfo).
+        OpenIDConnect\Laravel\PassportServiceProvider::class,
 
         /*
          * Application Service Providers...

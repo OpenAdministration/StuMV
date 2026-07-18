@@ -236,3 +236,17 @@ Breadcrumbs::for('superadmins.list', function (BreadcrumbTrail $trail, array $ro
 Breadcrumbs::for('superadmins.add', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->push(__('common.new'), route('superadmins.add' /* none */), ['truncate' => true]);
 });
+
+Breadcrumbs::for('oidc-clients.list', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->push(__('oidc_clients.list_title'), route('oidc-clients.list' /* none */), ['truncate' => true]);
+});
+
+Breadcrumbs::for('oidc-clients.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('oidc-clients.list');
+    $trail->push(__('oidc_clients.new'), route('oidc-clients.new' /* none */), ['truncate' => true]);
+});
+
+Breadcrumbs::for('oidc-clients.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('oidc-clients.list');
+    $trail->push(__('common.edit'), route('oidc-clients.edit', $routeParams), ['truncate' => true]);
+});

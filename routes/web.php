@@ -21,6 +21,9 @@ use App\Livewire\Group\ListGroups;
 use App\Livewire\Group\ListRolesInGroup;
 use App\Livewire\Group\NewGroup;
 use App\Livewire\ListSuperUsers;
+use App\Livewire\Oidc\EditOidcClient;
+use App\Livewire\Oidc\ListOidcClients;
+use App\Livewire\Oidc\NewOidcClient;
 use App\Livewire\Profile\Memberships;
 use App\Livewire\Profile\Picture;
 use App\Livewire\Profile\Profile;
@@ -140,6 +143,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('superadmins', ListSuperUsers::class)->name('superadmins.list');
         Route::livewire('add-superadmins', AddSuperAdmins::class)->name('superadmins.add');
         Route::livewire('new-realm', NewRealm::class)->name('realms.new');
+        Route::livewire('oidc-clients', ListOidcClients::class)->name('oidc-clients.list');
+        Route::livewire('oidc-clients/new', NewOidcClient::class)->name('oidc-clients.new');
+        Route::livewire('oidc-clients/{client}/edit', EditOidcClient::class)->name('oidc-clients.edit');
     });
     // end auth verified
 });

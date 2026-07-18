@@ -98,6 +98,13 @@
                 {{ __('Superadmins') }}
             </flux:sidebar.item>
             <flux:sidebar.item
+                icon="shield-check"
+                wire:navigate
+                :href="route('oidc-clients.list')"
+            >
+                {{ __('oidc_clients.list_title') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item
                 icon="log-in"
                 wire:navigate
                 :href="route('realms.pick')"
