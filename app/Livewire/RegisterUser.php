@@ -115,7 +115,7 @@ class RegisterUser extends Component
         try {
             $user->save();
             $community->membersGroup()->members()->attach($user);
-            
+
             // Credentials must be keyed for the LDAP guard (see LoginRequest);
             // a positional array does not validate.
             // Auth::validate (not attempt) syncs the LDAP user into the
