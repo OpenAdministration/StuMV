@@ -5,6 +5,7 @@ namespace App\Livewire\Profile;
 use App\Ldap\User;
 use App\Models\ProfilePicture;
 use Flux\Flux;
+use Illuminate\Support\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
@@ -45,18 +46,9 @@ class Picture extends Component
 
     public function savePicture()
     {
-        $img = imagecreatefromstring(base64_decode(str_replace('data:image/jpeg;base64,', '', $this->picture))); // convert base64 string to image object
-        $width = imagesx($img); // initial width of the image
-        $height = imagesy($img); // initial height of the image
-        $imgSize = 400; // size the image should be resized to
-
-        // Resize the image
-        $thumb = imagecreatetruecolor($imgSize, $imgSize);
-        imagecopyresized($thumb, $img, 0, 0, 0, 0, $imgSize, $imgSize, $width, $height);
-        ob_start();
-        imagejpeg($thumb, null);
-        $imgResized = ob_get_clean();
-        $imgBase64 = base64_encode($imgResized);
+        $img = Image::fromBase64($this->picture);
+        $imgResized = $img->resize(400, 400);
+        $imgBase64 = $imgResized->toBase64();
 
         // Write base64 encoded image to LDAP
         $user = User::findOrFailByUsername($this->uid);
