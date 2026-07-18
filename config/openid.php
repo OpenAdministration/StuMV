@@ -15,6 +15,7 @@ return [
             'profile' => 'Information about your profile',
             'email' => 'Information about your email address',
             'phone' => 'Information about your phone numbers',
+            'address' => 'Information about your address',
             'committees' => 'Information about your committees and roles',
             'groups' => 'Information about your groups',
             'users' => 'Information about users',

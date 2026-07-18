@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Realm\NewApiClient;
+use App\Livewire\Api\NewApiClient;
 use App\Models\PassportClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;

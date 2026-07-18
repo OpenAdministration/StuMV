@@ -42,9 +42,9 @@ test('registration screen can be rendered and livewire is there', function (): v
     $response->assertSeeLivewire('register-user');
 });
 
-test('a valid registration persists every submitted field, joins the community and logs in', function (): void {
+test('a valid registration persists every submitted field, joins the community and requires email verification', function (): void {
     // Fake only Registered so the email-verification listener stays quiet, while
-    // the LDAP auth events that Auth::attempt() relies on still fire.
+    // the LDAP auth events that Auth::validate() relies on still fire.
     Event::fake([Registered::class]);
 
     $email = $this->username.'@example.test';
@@ -60,7 +60,7 @@ test('a valid registration persists every submitted field, joins the community a
         ->set('password_confirmation', $this->password)
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('verification.notice'));
+        ->assertRedirect(route('login'));
 
     // Every attribute the component writes must round-trip to the directory.
     $ldapUser = LdapUser::findByUsername($this->username);
@@ -79,11 +79,12 @@ test('a valid registration persists every submitted field, joins the community a
     // ...and the database entry records that community as its realm.
     expect(DbUser::where('username', $this->username)->value('realm'))->toBe('testcom');
 
-    // ...the Registered event fired, and the user is logged straight in (which
-    // also proves the password was stored in a form LDAP can bind against).
+    // ...the Registered event fired (which also proves the password was
+    // stored in a form LDAP can bind against, since Auth::validate() checks
+    // it), but the freshly registered user is not logged in - they still
+    // need to verify their email first.
     Event::assertDispatched(Registered::class);
-    $this->assertAuthenticated();
-    expect(auth()->user()->username)->toBe($this->username);
+    $this->assertGuest();
 });
 
 test('registration is refused for a domain that is not registerable', function (): void {

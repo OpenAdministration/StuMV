@@ -53,7 +53,7 @@ uses(RefreshDatabase::class);
 test('the discovery document advertises the openid scopes and endpoints', function (): void {
     $this->getJson('/.well-known/openid-configuration')
         ->assertOk()
-        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address']])
+        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users', 'iban']])
         ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri']);
 });
 

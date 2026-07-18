@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Realm\ListApiClients;
+use App\Livewire\Api\ListApiClients;
 use App\Models\PassportClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\ClientRepository;

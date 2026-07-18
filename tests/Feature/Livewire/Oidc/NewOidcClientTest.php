@@ -95,7 +95,7 @@ test('registering a client requires at least one scope', function (): void {
         ->assertHasErrors(['scopes' => 'required']);
 });
 
-test('registering a client rejects the iban scope', function (): void {
+test('registering a client accepts the iban scope', function (): void {
     actingAsSuperAdmin();
 
     Livewire::test(NewOidcClient::class)
@@ -103,7 +103,26 @@ test('registering a client rejects the iban scope', function (): void {
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['iban'])
         ->call('save')
-        ->assertHasErrors(['scopes.0' => 'in']);
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->scopes)->toBe(['iban']);
+});
+
+test('registering a client accepts the address scope', function (): void {
+    actingAsSuperAdmin();
+
+    Livewire::test(NewOidcClient::class)
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['address'])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->scopes)->toBe(['address']);
 });
 
 test('a non-superadmin cannot register an OIDC client', function (): void {
