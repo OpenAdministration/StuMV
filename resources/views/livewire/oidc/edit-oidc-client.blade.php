@@ -18,7 +18,7 @@
 
         <flux:field>
             <flux:label>{{ __('oidc_clients.scopes') }}</flux:label>
-            <flux:pillbox wire:model="scopes">
+            <flux:pillbox multiple wire:model="scopes">
                 <flux:pillbox.option value="openid">{{ __('oidc_clients.scope_openid') }}</flux:pillbox.option>
                 <flux:pillbox.option value="profile">{{ __('oidc_clients.scope_profile') }}</flux:pillbox.option>
                 <flux:pillbox.option value="email">{{ __('oidc_clients.scope_email') }}</flux:pillbox.option>
