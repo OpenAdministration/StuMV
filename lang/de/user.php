@@ -17,4 +17,7 @@ return [
     'help.only_uni_mail' => 'Bitte verwende deine E-Mail-Adresse deiner Hochschule.',
     'help.password' => 'Dein Passwort muss mindestens 12 Zeichen enthalten, davon ein Sonderzeichen, ein Klein- und ein Großbuchstaben. Zusätzlich darf es nicht leicht zu erraten sein.',
     'error.email_in_use' => 'Dieser Account existiert bereits.',
+    'registration_successful_verify_email' => 'Registrierung erfolgreich! Bitte bestätige deine E-Mail-Adresse, indem du auf den Link in der Bestätigungs-E-Mail klickst, die wir dir gerade geschickt haben.',
+    'first_name_label' => 'Vorname',
+    'last_name_label' => 'Nachname',
 ];

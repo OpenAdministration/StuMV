@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Ldap\Committee;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Ldap\User;
@@ -14,27 +13,26 @@ class Groups extends Controller
     public function all(Request $request)
     {
         // no filter applied
-        $groups = $this->prepareData(function (string $dn){
-            return true;
-        });
+        $groups = $this->prepareData(fn (string $dn) => true);
+
         return response()->json($groups);
     }
 
     public function fromCommunity(Request $request, string $community_uid)
     {
         // only one specific community as filter
-        $groups = $this->prepareData(function (string $dn) use ($community_uid){
-            return str_contains($dn, "ou=Committees,ou=$community_uid");
-        });
+        $groups = $this->prepareData(fn (string $dn) => str_contains($dn, "ou=Committees,ou=$community_uid"));
+
         return response()->json($groups);
     }
 
     /**
      * Returns all Group memberships (not roles) as array, can be filtered
-     * @param callable $filter the filter which should be applied to the collected result
+     *
+     * @param  callable  $filter  the filter which should be applied to the collected result
      * @return array the fetched groups
      */
-    private function prepareData(callable $filter) : array
+    private function prepareData(callable $filter): array
     {
         /** @var User $ldapUser */
         $ldapUser = \Auth::user()->ldap();
@@ -43,18 +41,15 @@ class Groups extends Controller
         $roles = Role::query()->where('uniqueMember', $userDn)->get();
 
         $groupsQuery = Group::query()->orWhere('uniqueMember', '=', $userDn);
-        foreach ($roles as $role){
+        foreach ($roles as $role) {
             $groupsQuery->orWhere('uniqueMember', '=', $role->getDn());
         }
         $groups = $groupsQuery->get();
 
         // returns the (filtered) group DNs as array
-        return $groups->map(function ($item){
-            return $item->getDn();
-        })->reject(function (string $dn){
+        return $groups->map(fn ($item) => $item->getDn())->reject(
             // throw out the committee roles. only memberships and permissions inside
-            return str_contains($dn, 'ou=Committees');
-        })->filter($filter)
-        ->toArray();
+            fn (string $dn) => str_contains($dn, 'ou=Committees'))->filter($filter)
+            ->toArray();
     }
 }

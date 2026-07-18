@@ -1,68 +1,75 @@
-<div class="flex-col space-y-4">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.domains_headline') }}</h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('realms.domains_explanation') }}</p>
+<div class="flex-col">
+    <div class="flex flex-col sm:flex-row gap-6 mb-8">
+        <div class="flex-1 space-y-4">
+            <flux:heading size="xl">{{ __('realms.domains_headline') }}</flux:heading>
+            <flux:text class="text-base">{{ __('realms.domains_explanation') }}</flux:text>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary :href="route('realms.domains.new', ['uid' => $uid])" icon-leading="fas-plus" :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)">
-                {{ __('New Domain') }}
-            </x-button.link-primary>
-        </div>
-    </div>
-    <div class="flex justify-between">
-        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('committees.search') }}"></x-input.group>
-    </div>
-    <x-table>
-        <x-slot name="head">
-            <x-table.heading
-                sortable wire:click="sortBy('ou')" :direction="$sortField === 'name' ? $sortDirection : null"
+        <div>
+            <flux:button
+                variant="primary"
+                icon="plus"
+                wire:navigate
+                :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.domains.new', ['realm' => $uid]) : null"
+                :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
             >
-                {{ __('Short Name') }}
-            </x-table.heading>
-            <x-table.heading/>
-        </x-slot>
-        @forelse($domainSlice->items() as $domain)
-            <x-table.row>
-                <x-table.cell>{{ $domain->getFirstAttribute('dc') }}</x-table.cell>
-                <x-table.cell>{{ $domain->getFirstAttribute('description') }}</x-table.cell>
-                <x-table.cell>
+                {{ __('domain.new_button') }}
+            </flux:button>
+        </div>
+    </div>
 
-                </x-table.cell>
-                <x-table.cell>
+    <flux:field class="mb-8">
+        <flux:label>{{ __('committees.search') }}</flux:label>
+        <flux:input wire:model.live.debounce="search" />
+    </flux:field>
 
-                </x-table.cell>
-                <x-table.cell>
-                    <x-button.link-danger icon-leading="fas-trash" wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')">
-                        {{ __('Delete') }}
-                    </x-button.link-danger>
-                </x-table.cell>
-            </x-table.row>
-        @empty
-            <x-table.row>
-                <x-table.cell colspan="6">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('domain.nothing_found') }}</span>
-                    </div>
-                </x-table.cell>
-            </x-table.row>
-        @endforelse
-    </x-table>
+    <div class="pb-8">
+        @if(count($domains) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column sortable :sorted="$sortField === 'dc'" :direction="$sortDirection" wire:click="sortBy('dc')">{{ __('common.short_name') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                @foreach($domains as $domain)
+                    <flux:table.row>
+                        <flux:table.cell>{{ $domain->getFirstAttribute('dc') }}</flux:table.cell>
+                        <flux:table.cell>{{ $domain->getFirstAttribute('description') }}</flux:table.cell>
+                        <flux:table.cell class="flex justify-end gap-2">
+                            <flux:button
+                                size="sm"
+                                variant="danger"
+                                icon="trash"
+                                wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
+                            >
+                                {{ __('common.delete') }}
+                            </flux:button>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+                </flux:table.rows>
+            </flux:table>
+
+            <div class="pagination">
+                <flux:pagination :paginator="$domains" />
+            </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('domain.nothing_found') }}" />
+        @endif
+    </div>
 
     <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('domain.delete_title', ['name' => $deleteDomain]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <div class="y">
-                    <span>{{ __('domain.delete_warning', ['name' => $deleteDomain]) }}</span>
+        <flux:modal name="delete">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('domain.delete_title', ['name' => $deleteDomain]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('domain.delete_warning', ['name' => $deleteDomain]) }}</flux:text>
                 </div>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
-            </x-slot:footer>
-        </x-modal.confirmation>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
     </form>
 </div>

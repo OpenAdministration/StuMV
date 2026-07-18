@@ -1,0 +1,63 @@
+# Sample directory contents for local development and manual testing, so the
+# app has a community to show and memberOf (via dynlist) can be exercised.
+# Automated tests create their own fixtures and do not rely on this data.
+
+dn: uid=admin,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: admin
+cn: Admin User
+sn: User
+givenName: Admin
+mail: admin@stumv.de
+userPassword: admin-not-production
+
+# --- a community with the standard sub-structure ------------------------
+dn: ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: testcom
+description: Test Community
+
+dn: ou=Groups,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+dn: ou=Committees,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Committees
+
+dn: ou=Domains,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Domains
+
+# A registerable domain: users with an @example.test address can self-register
+# into this community (used by the LDAP registration/login test).
+dn: dc=example.test,ou=Domains,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: domain
+objectClass: top
+dc: example.test
+
+# A community always carries the full members/moderators/admins skeleton (this
+# is what Community::generateSkeleton() produces); keep the sample complete so
+# it matches production shape.
+dn: cn=members,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: members
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+
+dn: cn=moderators,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: moderators
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+
+dn: cn=admins,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: admins
+uniqueMember: uid=admin,ou=People,dc=stumv,dc=de

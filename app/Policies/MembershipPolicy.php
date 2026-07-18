@@ -9,26 +9,30 @@ use App\Models\User;
 
 class MembershipPolicy
 {
-    public function create(User $user, Committee $committee, Community $community) : bool {
+    public function create(User $user, Committee $committee, Community $community): bool
+    {
         return // add committee mods
             $user->can('moderator', [$committee, $community]);
     }
 
-    public function edit(User $user, RoleMembership $membership, Committee $committee, Community $community) : bool {
+    public function edit(User $user, RoleMembership $membership, Committee $committee, Community $community): bool
+    {
         return $user->can('moderator', [$committee, $community]);
     }
 
-    public function terminate(User $user, RoleMembership $membership, Committee $committee, Community $community) : bool {
+    public function terminate(User $user, RoleMembership $membership, Committee $committee, Community $community): bool
+    {
         return $user->can('moderator', [$committee, $community]);
     }
 
-    public function delete(User $user, RoleMembership $membership, Committee $committee, Community $community) : bool {
+    public function delete(User $user, RoleMembership $membership, Committee $committee, Community $community): bool
+    {
         return $user->can('moderator', [$committee, $community]);
     }
 
-    public function view(User $user, RoleMembership $membership, Committee $committee, Community $community) : bool {
+    public function view(User $user, RoleMembership $membership, Committee $committee, Community $community): bool
+    {
         return $user->can('member', [$committee, $community])
             || $user->can('superadmin');
     }
-
 }

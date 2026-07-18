@@ -52,19 +52,18 @@ class AuthServiceProvider extends ServiceProvider
     {
         Passport::useClientModel(PassportClient::class);
 
-        VerifyEmail::toMailUsing(static function (object $notifiable, string $url) {
-            return (new MailMessage)
-                ->subject(Lang::get('auth.verification_mail_subject'))
-                ->line(Lang::get('auth.verification_mail_line_between_greeting_and_action'))
-                ->action(Lang::get('auth.verification_mail_button_action'), $url)
-                ->line(Lang::get('auth.verification_mail_line_after_action'));
-        });
+        VerifyEmail::toMailUsing(static fn (object $notifiable, string $url) => (new MailMessage)
+            ->subject(Lang::get('auth.verification_mail_subject'))
+            ->line(Lang::get('auth.verification_mail_line_between_greeting_and_action'))
+            ->action(Lang::get('auth.verification_mail_button_action'), $url)
+            ->line(Lang::get('auth.verification_mail_line_after_action')));
 
         ResetPassword::toMailUsing(static function (mixed $notifiable, string $token) {
             $url = url(route('password.reset', [
                 'token' => $token,
                 'mail' => $notifiable->getEmailForPasswordReset(),
             ], false));
+
             return (new MailMessage)
                 ->subject(Lang::get('passwords.reset_mail_subject'))
                 ->line(Lang::get('passwords.reset_mail_line_between_greeting_and_action'))

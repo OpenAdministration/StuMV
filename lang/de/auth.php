@@ -25,5 +25,18 @@ return [
     'verification_mail_subject' => 'E-Mail-Adresse bestätigen',
     'verification_mail_line_between_greeting_and_action' => 'Bitte klicke den Button, um deine E-Mail-Adresse zu bestätigen und deinen Account im StuMV freizuschalten.',
     'verification_mail_button_action' => 'E-Mail-Adresse bestätigen',
-    'verification_mail_line_after_action' => 'Falls du im StuMV keinen Account erstellt hast, musst du nichts weiter tun.'
+    'verification_mail_line_after_action' => 'Falls du im StuMV keinen Account erstellt hast, musst du nichts weiter tun.',
+
+    'remember_me' => 'Angemeldet bleiben',
+    'forgot_password' => 'Passwort vergessen?',
+    'send_verification_email' => 'Verifizierungs-E-Mail senden',
+    'log_in' => 'Anmelden',
+    'log_out' => 'Abmelden',
+    'confirm' => 'Bestätigen',
+    'username_or_mail' => 'Anmeldename oder E-Mail',
+    'reset_password' => 'Passwort zurücksetzen',
+    'send_reset_link' => 'Link zum Zurücksetzen versenden',
+    'sign_up_prompt' => 'Registriere dich und leg los!',
+    'log_out_button' => 'Logout',
+    'confirm_logout_title' => 'Bestätige Logout',
 ];

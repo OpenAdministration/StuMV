@@ -4,35 +4,38 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 class NewModerator extends Component
 {
-    #public string $search = "";
+    #[Rule('required')]
+    public array $dn = [];
 
     #[Rule('required|string')]
-    public string $dn = "";
+    public string $realm_uid = '';
 
-    #[Rule('required|string')]
-    public string $realm_uid = "";
-
-
-    public function mount(Community $uid) : void
+    public function mount(Community $realm): void
     {
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render(): Factory|View|Application
     {
         $c = Community::findOrFailByUid($this->realm_uid);
         $userList = $c->membersGroup()->members()->get();
         $moderators = $c->moderatorsGroup()->members()->get();
         // baseCollection does like strings in contains, ldapCollection does not...
         $moderatorDns = $moderators->modelDns()->toBase();
-        $selectable_users = $userList->filter(fn ($user) => $moderatorDns->doesntContain($user->getDn()));
+        $selectable_users = $userList->filter(fn ($user) => $moderatorDns->doesntContain($user->getDn()))
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
+
         return view('livewire.realm.new-moderator', [
             'community' => $c,
             'selectable_users' => $selectable_users,
@@ -42,17 +45,20 @@ class NewModerator extends Component
     public function save()
     {
         $this->validate();
-        try{
-            $user = User::findOrFail($this->dn);
-            $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->moderatorsGroup()->members()->attach($user);
-            return redirect()->route('realms.mods', ['uid' => $this->realm_uid])
-                ->with('message', __('Added new Moderator'));
-        } catch (LdapRecordException $exception){
-            $this->addError('dn', $exception->getMessage());
-            return false;
+        foreach ($this->dn as $dn) {
+            try {
+                $user = User::findOrFail($dn);
+                $realm = Community::findOrFailByUid($this->realm_uid);
+                $realm->moderatorsGroup()->members()->attach($user);
+
+                Flux::toast(variant: 'success', text: __('common.added_new_moderator'));
+            } catch (LdapRecordException $exception) {
+                $this->addError('dn', $exception->getMessage());
+
+                return false;
+            }
         }
+
+        return to_route('realms.mods', ['realm' => $this->realm_uid]);
     }
-
-
 }

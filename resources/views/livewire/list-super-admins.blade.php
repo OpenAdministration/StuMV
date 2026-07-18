@@ -1,55 +1,97 @@
-<div class="flex-col space-y-4">
-    <div class="flex justify-between">
-        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('superadmins.search_placeholder') }}"></x-input.group>
-        <x-button.link-primary icon-leading="fas-plus" href="{{ route('superadmins.add') }}" class="flex">
-            {{ __('New') }}
-        </x-button.link-primary>
+<div class="flex-col">
+    <div class="flex flex-col sm:flex-row gap-6 mb-8">
+        <div class="flex-1 space-y-4">
+            <flux:heading size="xl">{{ __('superadmins.list_title') }}</flux:heading>
+        </div>
+        <div>
+            <flux:button
+                variant="primary"
+                icon="user-plus"
+                wire:navigate
+                :href="route('superadmins.add')"
+            >
+                {{ __('superadmins.new_title') }}
+            </flux:button>
+        </div>
     </div>
-    <x-table>
-        <x-slot name="head">
-            <x-table.heading
-                sortable wire:click="sortBy('full_name')" :direction="$sortField === 'full_name' ? $sortDirection : null"
-            >
-                {{ __('Name') }}
-            </x-table.heading>
-            <x-table.heading
-                sortable wire:click="sortBy('username')" :direction="$sortField === 'from' ? $sortDirection : null"
-            >
-                {{ __('Username') }}
-            </x-table.heading>
-            <x-table.heading/>
-        </x-slot>
-        @forelse($superadmins as $superadmin)
-            <x-table.row>
-                <x-table.cell>{{ $superadmin->cn[0] }}</x-table.cell>
-                <x-table.cell>{{ $superadmin->uid[0] }}</x-table.cell>
-                <x-table.cell>
-                    <x-button.link-danger wire:click="deletePrepare('{{ $superadmin->uid[0] }}')">{{ __('Delete') }}</x-button.link-danger>
-                </x-table.cell>
-            </x-table.row>
-        @empty
-            <x-table.row>
-                <x-table.cell colspan="4">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('realms.no_admins_found') }}</span>
-                    </div>
-                </x-table.cell>
-            </x-table.row>
-        @endforelse
-    </x-table>
+
+    <flux:field class="mb-8">
+        <flux:label>{{ __('superadmins.search_placeholder') }}</flux:label>
+        <flux:input icon="search" clearable wire:model.live="search" />
+    </flux:field>
+
+    <div class="pb-8">
+        @if(count($superadmins) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column class="w-[55px]"></flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'uid'" :direction="$sortDirection" wire:click="sortBy('uid')">{{ __('common.username') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                @foreach($superadmins as $superadmin)
+                    <flux:table.row>
+                        <flux:table.cell>
+                            @php
+                                $jpegPhoto = $superadmin->jpegPhoto[0] ?? null;
+                                if ($jpegPhoto) {
+                                    $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                                }
+                            @endphp
+                            <flux:avatar
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $superadmin->cn[0] }}"
+                            />
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <flux:link
+                                wire:navigate
+                                href="{{ route('profile', ['username' => $superadmin->uid[0]]) }}"
+                            >
+                                {{ $superadmin->cn[0] }}
+                            </flux:link>
+                        </flux:table.cell>
+                        <flux:table.cell>{{ $superadmin->uid[0] }}</flux:table.cell>
+                        <flux:table.cell class="flex justify-end gap-2">
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="user-minus"
+                                        wire:click="deletePrepare('{{ $superadmin->uid[0] }}')"
+                                    >
+                                        {{ __('common.delete') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+                </flux:table.rows>
+            </flux:table>
+
+            <div class="pagination">
+                <flux:pagination :paginator="$superadmins" />
+            </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('superadmins.no_admins_found') }}" />
+        @endif
+    </div>
 
     <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('realms.delete_admin_title', ['name' => $deleteAdminName]) }}
-            </x-slot:title>
-            <x-slot:content>
-                {{ __('realms.delete_admin_warning', ['name' => $deleteAdminName]) }}
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
-            </x-slot:footer>
-        </x-modal.confirmation>
+        <flux:modal name="delete">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('realms.delete_admin_title', ['name' => $deleteAdminName]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.delete_admin_warning', ['name' => $deleteAdminName]) }}</flux:text>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
     </form>
 </div>

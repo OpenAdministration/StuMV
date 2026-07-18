@@ -20,6 +20,7 @@ return [
     'after_or_equal' => 'The :attribute must be a date after or equal to :date.',
     'alpha' => 'The :attribute must only contain letters.',
     'alpha_dash' => 'The :attribute must only contain letters, numbers, dashes and underscores.',
+    'username' => 'May only contain lowercase letters, numbers, dashes, underscores and dots.',
     'alpha_num' => 'The :attribute must only contain letters and numbers.',
     'array' => 'The :attribute must be an array.',
     'before' => 'The :attribute must be a date before :date.',
@@ -135,6 +136,7 @@ return [
     'uploaded' => 'The :attribute failed to upload.',
     'url' => 'The :attribute must be a valid URL.',
     'uuid' => 'The :attribute must be a valid UUID.',
+    'disabled' => 'Cannot be changed.',
 
     /*
     |--------------------------------------------------------------------------
@@ -164,6 +166,14 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'email' => 'email address',
+        'start_date' => 'start date',
+        'end_date' => 'end date',
+        'decision_date' => 'decision date',
+        'password' => 'password',
+        'username' => 'username',
+        'mail' => 'email address',
+    ],
 
 ];

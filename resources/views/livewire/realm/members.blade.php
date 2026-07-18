@@ -1,70 +1,128 @@
-<div class="flex-col space-y-4">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.members_heading', ['name' => $community->getFirstAttribute('description'), 'uid' => $community_name]) }}</h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('realms.members_explanation') }}</p>
+<div class="flex-col space-y-8 pb-6 sm:pb-8" wire:init="loadMembers">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex-1 space-y-4">
+            <flux:heading size="xl">{{ __('realms.members_heading') }}</flux:heading>
+            <flux:text class="text-base">{{ __('realms.members_explanation') }}</flux:text>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary
-                href="{{ route('realms.members.new', ['uid' => $community_name]) }}" icon-leading="fas-plus"
-                :disabled="auth()->user()->cannot('add_member', $community)">
-                {{ __('Add Member') }}
-            </x-button.link-primary>
+        <div>
+            @can('add_member', $community)
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    wire:navigate
+                    href="{{ route('realms.members.new', ['realm' => $community_name]) }}"
+                >
+                    {{ __('common.add_member') }}
+                </flux:button>
+            @endcan
         </div>
     </div>
 
-    <div class="flex justify-between">
-        <x-input.group type="text" wire:model.live="search" placeholder="{{ __('realms.search_members') }}"></x-input.group>
-    </div>
-    <x-table>
-        <x-slot name="head">
-            <x-table.heading
-                sortable wire:click="sortBy('full_name')" :direction="$sortField === 'full_name' ? $sortDirection : null"
-            >
-                {{ __('Name') }}
-            </x-table.heading>
-            <x-table.heading
-                sortable wire:click="sortBy('username')" :direction="$sortField === 'from' ? $sortDirection : null"
-            >
-                {{ __('Username') }}
-            </x-table.heading>
-            <x-table.heading/>
-        </x-slot>
-        @forelse($realm_members as $realm_member)
-            <x-table.row>
-                <x-table.cell>{{ $realm_member->cn[0] }}</x-table.cell>
-                <x-table.cell>{{ $realm_member->uid[0] }}</x-table.cell>
-                <x-table.cell>
-                    <x-button.link-danger
-                        icon-leading="fas-triangle-exclamation"
-                        :disabled="auth()->user()->cannot('remove_member', $community)"
-                        wire:click="deletePrepare('{{ $realm_member->uid[0] }}')">{{ __('Remove Member') }}
-                    </x-button.link-danger>
-                </x-table.cell>
-            </x-table.row>
-        @empty
-            <x-table.row>
-                <x-table.cell colspan="4">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('realms.no_members_found') }}</span>
-                    </div>
-                </x-table.cell>
-            </x-table.row>
-        @endforelse
-    </x-table>
+    <flux:field>
+        <flux:label>{{ __('realms.search_members') }}</flux:label>
+        <flux:input icon="search" wire:model.live="search" />
+    </flux:field>
 
-    <form wire:submit="deleteCommit">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('realms.delete_member_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
-            </x-slot:title>
-            <x-slot:content>
-                {{ __('realms.delete_member_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
-            </x-slot:footer>
-        </x-modal.confirmation>
+    <div wire:loading.flex wire:target="loadMembers" class="flex justify-center py-16">
+        <flux:icon.loading />
+    </div>
+
+    <div wire:loading.remove wire:target="loadMembers" class="pb-8">
+        @if(count($realm_members) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column class="w-[55px]"></flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+            @foreach($realm_members as $realm_member)
+                <flux:table.row>
+                    <flux:table.cell>
+                        @php
+                            $jpegPhoto = $realm_member->getFirstAttribute('jpegPhoto');
+                            if ($jpegPhoto) {
+                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                            }
+                        @endphp
+                        <flux:avatar
+                            src="{{ $jpegPhoto }}"
+                            name="{{ $realm_member->getFirstAttribute('cn') }}"
+                        />
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        @if($isAdmin)
+                            <flux:link
+                                wire:navigate
+                                :href="route('profile', ['username' => $realm_member->getFirstAttribute('uid')])"
+                            >
+                                {{ $realm_member->getFirstAttribute('cn') }}
+                            </flux:link>
+                        @else
+                            {{ $realm_member->getFirstAttribute('cn') }}
+                        @endif
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            @if($isModerator)
+                                <flux:button
+                                    size="sm"
+                                    variant="primary"
+                                    icon="file-text"
+                                    wire:click="exportPdf('{{ $realm_member->getFirstAttribute('uid') }}')"
+                                >
+                                    {{ __('profile.memberships_as_pdf') }}
+                                </flux:button>
+                            @endif
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        icon="pencil"
+                                        :disabled="!$isAdmin"
+                                        wire:navigate
+                                        :href="$isAdmin ? route('profile', ['username' => $realm_member->getFirstAttribute('uid')]) : null"
+                                    >
+                                        {{ __('common.edit') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="user-minus"
+                                        :disabled="!$canRemoveMember"
+                                        wire:click="removePrepare('{{ $realm_member->getFirstAttribute('uid') }}')"
+                                    >
+                                        {{ __('realms.remove_member') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforeach
+            </flux:table.rows>
+        </flux:table>
+
+            <div class="pagination">
+                <flux:pagination :paginator="$realm_members" />
+            </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('realms.no_members_found') }}" />
+        @endif
+
+    <div class="block h-[1px]"></div>
+
+    <form wire:submit="removeCommit">
+        <flux:modal name="remove">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('realms.delete_member_title', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.delete_member_warning', ['name' => $deleteMemberName, 'username' => $deleteMemberUsername]) }}</flux:text>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
     </form>
 </div>

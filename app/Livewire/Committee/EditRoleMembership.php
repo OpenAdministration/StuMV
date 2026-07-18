@@ -2,21 +2,15 @@
 
 namespace App\Livewire\Committee;
 
-use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\User;
-use App\Models\Role;
 use App\Models\RoleMembership;
-use App\Rules\UserIsMember;
-use Carbon\Carbon;
+use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class EditRoleMembership extends Component
 {
-
     #[Locked]
     public string $uid;
 
@@ -32,18 +26,21 @@ class EditRoleMembership extends Component
     #[Locked]
     public string $username = '';
 
-    #[Validate('required|date:Y-m-d', as: 'Starting Date')]
-    public $start_date;
-    #[Validate('nullable|date:Y-m-d', as: 'Ending Date')]
-    public $end_date = '';
-    #[Validate('nullable|date:Y-m-d', as: 'Decision Date')]
-    public $decision_date = '';
+    #[Validate('date:Y-m-d')]
+    public ?string $start_date = null;
 
-    #[Validate('string')]
+    #[Validate('date:Y-m-d|nullable')]
+    public ?string $end_date = null;
+
+    #[Validate('date:Y-m-d|nullable')]
+    public ?string $decision_date = null;
+
+    #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $uid, $ou, $cn, $id){
-        $this->uid = $uid->getFirstAttribute('ou');
+    public function mount(Community $realm, $ou, $cn, $id)
+    {
+        $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
         $this->id = $id;
@@ -58,24 +55,27 @@ class EditRoleMembership extends Component
     public function render()
     {
         return view('livewire.committee.edit-role-membership')
-            ->title(__('committees.edit_role_membership_title', ['role' => $this->cn]));
+            ->title(__('roles.membership_edit_headline'));
     }
 
-    public function save(){
+    public function save()
+    {
         $this->validate();
         $membership = RoleMembership::findOrFail($this->id);
         $membership->update([
             'from' => $this->start_date,
-            'until' => !empty($this->end_date) ? $this->end_date : null,
-            'decided' => !empty($this->decision_date) ? $this->decision_date : null,
-            'comment' => !empty($this->comment) ? $this->comment : null,
+            'until' => ! empty($this->end_date) ? $this->end_date : null,
+            'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
+            'comment' => ! empty($this->comment) ? $this->comment : null,
         ]);
-        return redirect()->route('committees.roles.members', [
-            'uid' => $this->uid,
+
+        Flux::toast(variant: 'success', text: __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
+
+        return to_route('committees.roles.members', [
+            'realm' => $this->uid,
             'ou' => $this->ou,
             'cn' => $this->cn,
             'id' => $this->id,
-        ])->with('message', __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
+        ]);
     }
-
 }

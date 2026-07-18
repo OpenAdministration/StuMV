@@ -14,9 +14,9 @@ class NewCommunityCommand extends Command
     public function handle(): void
     {
         $community = Community::make([
-            'ou' => $this->argument('uid')
+            'ou' => $this->argument('uid'),
         ]);
-        $community->setDn("ou={$this->argument('uid')}," . Community::rootDn());
+        $community->setDn("ou={$this->argument('uid')},".Community::rootDn());
         $community->generateSkeleton();
     }
 }

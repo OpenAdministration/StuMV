@@ -1,0 +1,147 @@
+# Based on https://github.com/dockersamples/laravel-docker-examples
+# (c) 2024 Sergei Shitikov
+# License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
+
+services:
+    ldap:
+        # Prod-faithful OpenLDAP: same Symas build as production, with the
+        # server config and seed data baked in (see docker/openldap/). The
+        # container listens on 1389; data is intentionally ephemeral so every
+        # run starts from a clean, reproducible directory.
+        build:
+            context: ./docker/openldap
+            dockerfile: Dockerfile
+        ports:
+            # host:container — the app reaches it in-network as ldap:1389
+            - "${LDAP_HOST_PORT:-13389}:1389"
+        networks:
+            - stumv
+        healthcheck:
+            test: ["CMD", "/opt/symas/bin/ldapwhoami", "-x",
+                   "-H", "ldap://127.0.0.1:1389",
+                   "-D", "uid=stumv,ou=Services,dc=stumv,dc=de",
+                   "-w", "stumv-not-production"]
+            start_period: 5s
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    phpldapadmin:
+        # phpLDAPadmin 2.x web UI at http://localhost:${LDAP_ADMIN_PORT:-8081}
+        # (itself a Laravel/ldaprecord app). Log in with DN
+        # "cn=Administration,dc=stumv,dc=de" / "admin-not-production".
+        image: docker.io/phpldapadmin/phpldapadmin:2.3
+        environment:
+            # Throwaway app key for this viewer (its own Laravel instance).
+            APP_KEY: "base64:AVZk1ACUBXwgt9MaMPsikC796jlc0ShhoQMJ6o+8PGg="
+            # Connect to the in-network ldap server on its non-TLS port 1389.
+            LDAP_HOST: ldap
+            LDAP_PORT: "1389"
+            LDAP_USERNAME: "cn=Administration,dc=stumv,dc=de"
+            LDAP_PASSWORD: admin-not-production
+            LDAP_SSL: "false"
+            LDAP_TLS: "false"
+        ports:
+            - "${LDAP_ADMIN_PORT:-8081}:8080"
+        networks:
+            - stumv
+        depends_on:
+            ldap:
+                condition: service_healthy
+    nginx:
+        image: nginx:latest
+        ports:
+            - "8080:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro,z
+        networks:
+            - stumv
+        environment:
+            - NGINX_HOST=localhost
+        depends_on:
+            php-fpm:
+                condition: service_started
+    php-fpm:
+        build:
+            context: .
+            dockerfile: ./docker/php-fpm/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        volumes:
+          - ./:/var/www:z
+        networks:
+            - stumv
+        env_file:
+            - .env.docker
+        user: "${UID:-1000}:${GID:-1000}"
+        # Rootless podman: map the host user to the same UID/GID inside the
+        # container so the bind-mounted project stays writable (storage/, etc.).
+        userns_mode: "keep-id"
+        depends_on:
+            mariadb:
+                condition: service_healthy
+            ldap:
+                condition: service_healthy
+    mariadb:
+        image: mariadb:latest
+        restart: always
+        environment:
+            MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+            #MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+            MYSQL_USER: "${DB_USERNAME}"
+            MYSQL_PASSWORD: "${DB_PASSWORD}"
+            MYSQL_DATABASE: "${DB_DATABASE}"
+        volumes:
+            - mysql-data:/var/lib/mysql
+        ports:
+            - "${DB_HOST_PORT:-13306}:3306"
+        env_file:
+            - .env.docker
+        networks:
+            - stumv
+        healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            start_period: 10s
+            interval: 10s
+            timeout: 5s
+            retries: 3
+    phpmyadmin:
+        # phpMyAdmin web UI at http://localhost:${DB_ADMIN_PORT:-8082}.
+        # Connect to the in-network mariadb server; log in with the app's
+        # throwaway DB credentials (stumv / local_stumv_password).
+        image: docker.io/phpmyadmin:5
+        environment:
+            PMA_HOST: mariadb
+            PMA_PORT: "3306"
+        ports:
+            - "${DB_ADMIN_PORT:-8082}:80"
+        networks:
+            - stumv
+        depends_on:
+            mariadb:
+                condition: service_healthy
+    workspace:
+        build:
+            context: .
+            dockerfile: ./docker/workspace/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+        ports:
+            - "${VITE_PORT:-5173}:5173"
+        tty: true  # Enables an interactive terminal
+        stdin_open: true  # Keeps standard input open for "docker exec"
+        env_file:
+            - .env.docker
+        user: "${UID:-1000}:${GID:-1000}"
+        # Rootless podman: keep the host UID/GID inside the container (see php-fpm).
+        userns_mode: "keep-id"
+        volumes:
+            - ./:/var/www:z
+        networks:
+            - stumv
+volumes:
+    mysql-data:
+networks:
+    stumv:

@@ -17,13 +17,13 @@
         "bg-red-100" => $isError,
     ])>
         <div class="flex">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 @if($isSuccess)
-                    <x-fas-award class="h-5 w-5 text-green-400"/>
+                    <flux:icon name="award" class="h-5 w-5 text-green-400" />
                 @elseif($isWarning)
-                    <x-fas-triangle-exclamation class="h-5 w-5 text-yellow-500"/>
-                @elseif($isError)
-                    <x-fas-poo-storm class="h-5 w-5 text-red-400"/>
+                    <flux:icon name="triangle-alert" class="h-5 w-5 text-yellow-500" />
+                @elseif($iError)
+                    <flux:icon name="zap" class="h-5 w-5 text-red-400" />
                 @endif
             </div>
             <div class="ml-3">

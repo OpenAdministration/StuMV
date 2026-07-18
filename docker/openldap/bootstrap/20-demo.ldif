@@ -1,0 +1,251 @@
+# Demo realm for development / manual testing, mirroring the public StuFiS demo
+# (https://stufis.de/demo-login). Provides a "demo" community with the standard
+# skeleton plus six ready-to-use logins covering the ThürStudFVO separation of
+# financial responsibilities. All demo accounts share the password
+# "Demo-password1" (cleartext here so slapadd stores it verbatim; a simple bind
+# still compares fine, exactly like the admin sample account).
+#
+# Structure produced here is what `php artisan community:new demo` +
+# registration would create: ou=demo community with Groups/Committees/Domains
+# sub-OUs, admins/moderators/members groups, a registerable domain, committees
+# (StuRa, FSR) and roles (groupOfUniqueNames) under them.
+
+# --- demo people --------------------------------------------------------
+dn: uid=demo-hhv,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: demo-hhv
+cn: Hanna Haushalt
+sn: Haushalt
+givenName: Hanna
+mail: demo-hhv@demo.stumv.de
+description: Demo: Haushaltsverantwortliche (Budget Manager)
+userPassword: Demo-password1
+
+dn: uid=demo-kv,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: demo-kv
+cn: Karl Kasse
+sn: Kasse
+givenName: Karl
+mail: demo-kv@demo.stumv.de
+description: Demo: Kassenverantwortliche (Cashier)
+userPassword: Demo-password1
+
+dn: uid=demo-revision,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: demo-revision
+cn: Rita Revision
+sn: Revision
+givenName: Rita
+mail: demo-revision@demo.stumv.de
+description: Demo: Revision (Internal Auditor)
+userPassword: Demo-password1
+
+dn: uid=demo-stura,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: demo-stura
+cn: Stefan Studierendenrat
+sn: Studierendenrat
+givenName: Stefan
+mail: demo-stura@demo.stumv.de
+description: Demo: Studierendenrat (Student Council Member)
+userPassword: Demo-password1
+
+dn: uid=demo-fsr,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: demo-fsr
+cn: Frank Fachschaft
+sn: Fachschaft
+givenName: Frank
+mail: demo-fsr@demo.stumv.de
+description: Demo: Fachschaftsrat (Department Council Member)
+userPassword: Demo-password1
+
+dn: uid=demo-studi,ou=People,dc=stumv,dc=de
+objectClass: inetOrgPerson
+objectClass: top
+uid: demo-studi
+cn: Sara Studentin
+sn: Studentin
+givenName: Sara
+mail: demo-studi@demo.stumv.de
+description: Demo: Studentin (Guest/Student)
+userPassword: Demo-password1
+
+# --- demo community skeleton --------------------------------------------
+dn: ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: demo
+description: StuFiS Demo-Mandant
+
+dn: ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+description: The Groups
+
+dn: ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Committees
+description: The Committees
+
+dn: ou=Domains,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Domains
+description: The Domains
+
+# Registerable domain: users with an @demo.stumv.de address can self-register
+# into the demo community.
+dn: dc=demo.stumv.de,ou=Domains,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: domain
+objectClass: top
+dc: demo.stumv.de
+
+# --- community-level membership groups ----------------------------------
+dn: cn=admins,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: admins
+uniqueMember: uid=demo-stura,ou=People,dc=stumv,dc=de
+
+dn: cn=moderators,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: moderators
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+
+dn: cn=members,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: members
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-revision,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-stura,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-fsr,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-studi,ou=People,dc=stumv,dc=de
+
+# --- committees and their roles -----------------------------------------
+# StuRa (Studierendenrat) is the top-level student council. The financial-
+# oversight roles the ThürStudFVO keeps separate live in a nested
+# "Referat Finanzen" sub-committee (Gremium) below StuRa.
+dn: ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: StuRa
+description: Studierendenrat (Demo)
+
+# cn is a URL-safe slug (matches the app's NewRole rule ^[a-z0-9-]*$); the
+# human-readable name shown in the UI is the description attribute.
+dn: cn=mitglied,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: mitglied
+description: Mitglied
+uniqueMember: uid=demo-stura,ou=People,dc=stumv,dc=de
+
+# Referat Finanzen — finance body nested below StuRa, holding the three
+# separated financial-responsibility roles.
+dn: ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: Referat Finanzen
+description: Referat Finanzen (Demo)
+
+dn: cn=haushaltsverantwortliche,ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: haushaltsverantwortliche
+description: Haushaltsverantwortliche:r
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+
+dn: cn=kassenverantwortliche,ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: kassenverantwortliche
+description: Kassenverantwortliche:r
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+
+dn: cn=revision,ou=Referat Finanzen,ou=StuRa,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: revision
+description: Revision
+uniqueMember: uid=demo-revision,ou=People,dc=stumv,dc=de
+
+# FSR (Fachschaftsrat) — department-level council, with a member role.
+dn: ou=FSR,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: FSR
+description: Fachschaftsrat (Demo)
+
+dn: cn=mitglied,ou=FSR,ou=Committees,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: mitglied
+description: Mitglied
+uniqueMember: uid=demo-fsr,ou=People,dc=stumv,dc=de
+
+# --- StuFiS permission groups (ou=Groups) -------------------------------
+# StuFiS consumes these via its "stumv" login: /api-legacy/my/groups returns
+# the DN of every ou=Groups entry the logged-in user belongs to
+# (App\Http\Controllers\Api\Groups), and StuFiS's StumvAuthService matches
+# those DNs against its STUMV_GROUP_* config to derive its own roles. The
+# "login" group (cn=members, above) and the global "admin" group
+# (cn=super-admins in 00-base.ldif) already exist; these are the four finance
+# groups StuFiS additionally expects. Membership mirrors the ThürStudFVO
+# personas of the demo accounts above.
+#
+#   StuFiS role            group cn (STUMV_GROUP_*)      demo members
+#   ---------------------  ---------------------------  ------------------------
+#   ref-finanzen           ref-finanzen (REVISION)      hhv, kv, revision
+#   ref-finanzen-hv        ref-finanzen-hhv (HV)        hhv
+#   ref-finanzen-kv        ref-finanzen-kv (KV)         kv
+#   ref-finanzen-belege    ref-finanzen-belege (INVOICE) hhv, kv
+
+# Base finance-department access — held by everyone in the Referat Finanzen.
+dn: cn=ref-finanzen,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen
+description: Referat Finanzen (StuFiS-Zugang)
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-revision,ou=People,dc=stumv,dc=de
+
+# Haushaltsverantwortliche:r (budget) — StuFiS ref-finanzen-hv.
+dn: cn=ref-finanzen-hhv,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen-hhv
+description: Haushaltsverantwortliche:r
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+
+# Kassenverantwortliche:r (cash/treasury) — StuFiS ref-finanzen-kv.
+dn: cn=ref-finanzen-kv,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen-kv
+description: Kassenverantwortliche:r
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de
+
+# Belege (receipt management) — StuFiS ref-finanzen-belege. Handled by the
+# operational finance officers; the auditor (revision) is deliberately left
+# out to preserve the ThürStudFVO separation of duties.
+dn: cn=ref-finanzen-belege,ou=Groups,ou=demo,ou=Communities,dc=stumv,dc=de
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: ref-finanzen-belege
+description: Belege
+uniqueMember: uid=demo-hhv,ou=People,dc=stumv,dc=de
+uniqueMember: uid=demo-kv,ou=People,dc=stumv,dc=de

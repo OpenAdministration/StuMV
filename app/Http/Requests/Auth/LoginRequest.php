@@ -41,31 +41,31 @@ class LoginRequest extends FormRequest
      *
      * @return void
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function authenticate()
     {
         $this->ensureIsNotRateLimited();
 
         $credentials = [
-            'password' => $this->get('password'),
+            'password' => $this->input('password'),
         ];
 
-        $validator = Validator::make(['email' => $this->get('uid')], [
-            'email' => 'required|email'
+        $validator = Validator::make(['email' => $this->input('uid')], [
+            'email' => ['required', 'email'],
         ]);
-        if($validator->passes()){
-            $credentials['mail'] = $this->get('uid');
-        }else{
-            $credentials['uid'] = $this->get('uid');
+        if ($validator->passes()) {
+            $credentials['mail'] = $this->input('uid');
+        } else {
+            $credentials['uid'] = $this->input('uid');
         }
         try {
             $auth = Auth::attempt($credentials, $this->boolean('remember'));
-        } catch (LdapRecordException $ldapRecordException){
+        } catch (LdapRecordException) {
             // this should not be needed, but it is for bad credentials right now -> TLS Error :/
             $auth = false;
         }
-        if (!$auth) {
+        if (! $auth) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -81,7 +81,7 @@ class LoginRequest extends FormRequest
      *
      * @return void
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function ensureIsNotRateLimited()
     {

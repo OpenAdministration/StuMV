@@ -4,7 +4,6 @@ namespace App\Ldap;
 
 use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
-use Illuminate\Support\Arr;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Entry;
 
@@ -18,17 +17,19 @@ class Domain extends Entry
      */
     public static array $objectClasses = [
         'domain',
-        'top'
+        'top',
     ];
 
-    public static function dnRoot(string $uid){
+    public static function dnRoot(string $uid)
+    {
         return "ou=Domains,ou=$uid,ou=Communities,{base}";
     }
 
-    public function community() : Community
+    public function community(): Community
     {
         $dn = DistinguishedName::explode($this->getDn());
         $communityDn = implode(',', array_slice($dn, 2));
+
         return Community::find($communityDn);
     }
 }

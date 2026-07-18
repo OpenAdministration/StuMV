@@ -1,18 +1,25 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.new_mod_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $realm_uid]) }}</h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('realms.new_mod_explanation') }}</p>
+<div>
+    <x-livewire-form>
+        <div class="mb-6">
+            <flux:heading size="xl" class="mb-4">{{ __('realms.new_mod_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $realm_uid]) }}</flux:heading>
+            <flux:text class="text-base">{{ __('realms.new_mod_explanation') }}</flux:text>
         </div>
-    </div>
 
-    <x-select wire:model.live="dn" class="mt-2">
-        <x-slot:label>{{ __('realms.new_admin_label') }}</x-slot:label>
-        @foreach($selectable_users as $user)
-            <option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</option>
-        @endforeach
-    </x-select>
-    <x-slot:abort_route>
-        {{ route('realms.mods', ['uid' => $realm_uid]) }}
-    </x-slot:abort_route>
-</x-livewire-form>
+        <flux:field>
+            <flux:label>{{ __('realms.new_admin_label') }}</flux:label>
+            <flux:pillbox
+                multiple
+                searchable
+                placeholder="{{ __('realms.select_user') }}"
+                wire:model="dn"
+            >
+                @foreach($selectable_users as $user)
+                    <flux:pillbox.option value="{{ $user->getDn() }}">{{ $user->cn[0] }} ({{ $user->uid[0] }})</flux:pillbox.option>
+                @endforeach
+            </flux:pillbox>
+        </flux:field>
+        <x-slot:abort_route>
+            {{ route('realms.mods', ['realm' => $realm_uid]) }}
+        </x-slot:abort_route>
+    </x-livewire-form>
+</div>

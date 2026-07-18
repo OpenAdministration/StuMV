@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property integer $id
+ * @property int $id
  * @property string $realm_uid
- * @property integer $parent_committee_id
+ * @property int $parent_committee_id
  * @property string $name
  * @property Committee $parentCommittee
  * @property Realm $realm
@@ -39,18 +38,18 @@ class Committee extends Model
      */
     public function parentCommittee(): Relation
     {
-        return $this->belongsTo(__CLASS__, 'parent_committee_id');
+        return $this->belongsTo(self::class, 'parent_committee_id');
     }
 
-    public function childCommittee() : Relation
+    public function childCommittee(): Relation
     {
-        return $this->hasMany(__CLASS__, 'parent_committee_id', 'id');
+        return $this->hasMany(self::class, 'parent_committee_id', 'id');
     }
 
     /**
      * @return BelongsTo
      */
-    public function realm() : Relation
+    public function realm(): Relation
     {
         return $this->belongsTo(Realm::class);
     }

@@ -3,16 +3,17 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class CommunityDashboard extends Component
 {
     public string $uid;
 
-    public function mount(?Community $uid){
-        $this->uid = $uid?->getShortCode();
+    public function mount(?Community $realm)
+    {
+        $this->uid = $realm?->getShortCode();
     }
+
     public function render()
     {
         $community = Community::findOrFailByUid($this->uid);
@@ -21,6 +22,6 @@ class CommunityDashboard extends Component
         return view('livewire.realm.community-dashboard', [
             'community' => $community,
             'name' => $name,
-        ])->title(__('realms.dashboard.title'));
+        ])->title(__('realms.dashboard.headline', ['name' => $name]));
     }
 }

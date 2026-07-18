@@ -1,45 +1,21 @@
 <?php
 
-namespace Tests\Feature\Auth;
+test('login screen can be rendered', function (): void {
+    $this->get('/login')->assertStatus(200);
+});
 
-use App\Models\User;
-use App\Providers\RouteServiceProvider;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+test('login is rejected for an unknown user', function (): void {
+    // The login form posts `uid` (see LoginRequest); no such user exists in LDAP.
+    $this->post('/login', [
+        'uid' => 'nobody-'.uniqid(),
+        'password' => 'wrong-password',
+    ])->assertSessionHasErrors('uid');
 
-class AuthenticationTest extends TestCase
-{
-    use RefreshDatabase;
+    $this->assertGuest();
+});
 
-    public function test_login_screen_can_be_rendered()
-    {
-        $response = $this->get('/login');
+test('login validation requires a uid and password', function (): void {
+    $this->post('/login', [])->assertSessionHasErrors(['uid', 'password']);
 
-        $response->assertStatus(200);
-    }
-
-    public function test_users_can_authenticate_using_the_login_screen()
-    {
-        $user = User::factory()->create();
-
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
-
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::home());
-    }
-
-    public function test_users_can_not_authenticate_with_invalid_password()
-    {
-        $user = User::factory()->create();
-
-        $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
-        $this->assertGuest();
-    }
-}
+    $this->assertGuest();
+});

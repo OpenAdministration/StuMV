@@ -2,16 +2,13 @@
 
 namespace App\Ldap;
 
-use App\Ldap\Relations\HasOneChild;
 use App\Ldap\Traits\HasRelationships;
 use App\Ldap\Traits\SearchScopeTrait;
 use LdapRecord\Laravel\ImportableFromLdap;
 use LdapRecord\Laravel\LdapImportable;
-use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
-use LdapRecord\Models\Relations\Relation;
-use LdapRecord\Query\Builder;
+use LdapRecord\Query\Model\Builder;
 
 /***
  * @property $ou
@@ -19,67 +16,88 @@ use LdapRecord\Query\Builder;
  */
 class Community extends OrganizationalUnit implements LdapImportable
 {
+    use HasRelationships;
     use ImportableFromLdap;
     use SearchScopeTrait;
-    use HasRelationships;
 
     public static string $rootDn = 'ou=Communities,{base}';
 
     public static function rootDn()
     {
         // would be nice if we could substitute a bit more elegant
-        return 'ou=Communities,' . config('ldap.connections.default.base_dn');
+        return 'ou=Communities,'.config('ldap.connections.default.base_dn');
     }
 
-    public static function findByUid(string $uid): self|null
+    public static function findByUid(string $uid): ?self
     {
         return self::query()
             ->whereEquals('ou', $uid)
-            ->first()
-            ;
+            ->first();
     }
 
-    public static function findOrFailByUid(string $uid) : self {
+    public static function findOrFailByUid(string $uid): self
+    {
         return self::findByUid($uid) ?? abort(404);
     }
 
-    public function getShortCode(){
+    public function getShortCode()
+    {
         return $this->ou[0];
     }
 
-    public function getLongName(){
+    public function getLongName()
+    {
         return $this->description[0] ?? '';
     }
 
+    /**
+     * @return array<string, true> community short codes the given LDAP user is a member of
+     */
+    public static function membershipsFor($ldapUser): array
+    {
+        $memberships = $ldapUser->memberOf;
+        $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.self::rootDn().'$/', $value));
+
+        return \Arr::mapWithKeys($communityMemberships, static function (string $value) {
+            $uid = str($value)->remove(','.self::rootDn(), false)->remove('cn=members,ou=')->value();
+
+            return [$uid => true];
+        });
+    }
+
+    #[\Override]
     protected static function boot(): void
     {
         parent::boot();
 
-        static::addGlobalScope('limitResults', static function (Builder $builder){
+        static::addGlobalScope('limitResults', static function (Builder $builder): void {
             $builder->in(self::$rootDn)
                 ->where('ou', '!=', 'Communities');
         });
     }
 
-    public function getRouteKeyName() : string {
+    public function getRouteKeyName(): string
+    {
         return 'ou';
     }
 
-
-
-    public function membersGroup() : Group {
+    public function membersGroup(): Group
+    {
         return Group::query()->in($this->getDn())->where('cn', 'members')->first();
     }
 
-    public function moderatorsGroup() : Group {
+    public function moderatorsGroup(): Group
+    {
         return Group::query()->in($this->getDn())->where('cn', 'moderators')->first();
     }
 
-    public function adminsGroup() : Group {
+    public function adminsGroup(): Group
+    {
         return Group::query()->in($this->getDn())->where('cn', 'admins')->first();
     }
 
-    public function generateSkeleton() {
+    public function generateSkeleton()
+    {
 
         $this->save();
 
@@ -87,25 +105,24 @@ class Community extends OrganizationalUnit implements LdapImportable
         foreach ([
             'Groups' => 'The Groups',
             'Committees' => 'The Committees',
-            'Domains' => 'The Domains'
-                 ] as $ouName => $ouDescription){
+            'Domains' => 'The Domains',
+        ] as $ouName => $ouDescription) {
             $ou = new OrganizationalUnit([
                 'ou' => $ouName,
-                'description' => $ouDescription
+                'description' => $ouDescription,
             ]);
-            $ou->setDn("ou=$ouName," . $this->getDn());
+            $ou->setDn("ou=$ouName,".$this->getDn());
             $ou->save();
         }
 
         // generate mayor Groups
-        foreach (['admins', 'moderators', 'members'] as $gName){
+        foreach (['admins', 'moderators', 'members'] as $gName) {
             $g = new Group([
                 'cn' => $gName,
                 'uniqueMember' => '',
             ]);
-            $g->setDn("cn=$gName," . $this->getDn());
+            $g->setDn("cn=$gName,".$this->getDn());
             $g->save();
         }
     }
-
 }

@@ -1,23 +1,31 @@
 <x-guest-layout>
     <x-auth-card>
-        <div class="mb-4 text-sm text-gray-600">
-            {{ __('auth.forgot_password_text') }}
-        </div>
-
         <!-- Session Status -->
-        <x-auth-session-status class="mb-4" :status="session('status')" />
+        @if(session('status'))
+            <div class="w-full max-w-[28rem]!">
+                <x-auth-session-status :status="session('status')" />
+            </div>
+        @endif
 
         <form method="POST" action="{{ route('password.email') }}">
             @csrf
-            <!-- Email Address -->
-            <x-input.group id="mail" name="mail" :label="__('Email')" :value="old('email')" required/>
+            <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-xs">
+                <flux:heading size="xl">{{ __('auth.forgot_password') }}</flux:heading>
 
-            <div class="flex gap-x-6 items-center justify-end mt-5">
-                <a href="{{ route('login') }}" class="text-sm font-semibold leading-6 text-gray-900">{{  __('Cancel') }}</a>
-                <x-button.primary type="submit">
-                    {{ __('Send Reset Link') }}
-                </x-button.primary>
-            </div>
+                <flux:text>{{ __('auth.forgot_password_text') }}</flux:text>
+
+                <flux:field>
+                    <flux:label>{{ __('common.email') }}</flux:label>
+                    <flux:input name="mail" :value="old('email')" required />
+                </flux:field>
+
+                <div class="flex flex-wrap gap-3 items-center justify-end">
+                    <flux:button icon="ban" href="{{ route('login') }}">{{  __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" icon="send" type="submit">
+                        {{ __('auth.send_reset_link') }}
+                    </flux:button>
+                </div>
+            </flux:card>
         </form>
     </x-auth-card>
 </x-guest-layout>

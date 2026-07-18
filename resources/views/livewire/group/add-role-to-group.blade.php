@@ -1,26 +1,37 @@
-<div class="flex-col space-y-4">
+<div class="flex-col space-y-8">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('groups.roles_add_headline', ['name' => $group_cn]) }}</h1>
-            <p class="mt-2 text-sm text-gray-700">
-                {{  __('groups.roles_add_explanation', ['name' => $group_cn]) }}
-            </p>
+            <flux:heading size="xl" class="mb-4">{{ __('groups.roles_add_headline', ['name' => $group_cn]) }}</flux:heading>
+            <flux:text class="text-base">{{  __('groups.roles_add_explanation', ['name' => $group_cn]) }}</flux:text>
         </div>
     </div>
-    <x-livewire-form>
-        <x-select :label="__('Committee')" wire:model.live="selected_committee_dn">
-            @foreach($committees as $committee)
-                <option value="{{ $committee->getDn() }}">
-                    {{ $committee->getFirstAttribute('description') }} ({{ $committee->getFirstAttribute('ou') }})
-                </option>
-            @endforeach
-        </x-select>
-        <x-select :label="__('Role')" wire:model="selected_role_dn" :disabled="empty($selected_committee_dn)">
-            @foreach($roles as $role)
-                <option value="{{ $role->getDn() }}">
-                    {{ $role->getFirstAttribute('description') }} ({{ $role->getFirstAttribute('cn') }})
-                </option>
-            @endforeach
-        </x-select>
+    <x-livewire-form class="space-y-8">
+        <flux:field>
+            <flux:label>{{ __('groups.field_committee') }}</flux:label>
+            <flux:select
+                variant="listbox"
+                searchable
+                wire:model.live="selected_committee_dn"
+            >
+                @foreach($committees as $committee)
+                    <flux:select.option value="{{ $committee->getDn() }}">{{ $committee->getFirstAttribute('description') }} ({{ $committee->getFirstAttribute('ou') }})</flux:select.option>
+                @endforeach
+            </flux:select>
+        </flux:field>
+
+        <flux:field>
+            <flux:label>{{ __('groups.field_role') }}</flux:label>
+            <flux:select
+                variant="listbox"
+                searchable
+                wire:model="selected_role_dn"
+                :disabled="empty($selected_committee_dn)"
+            >
+                @foreach($roles as $role)
+                    <flux:select.option value="{{ $role->getDn() }}">{{ $role->getFirstAttribute('description') }} ({{ $role->getFirstAttribute('cn') }})</flux:select.option>
+                @endforeach
+            </flux:select>
+            <flux:error name="selected_role_dn" />
+        </flux:field>
     </x-livewire-form>
 </div>

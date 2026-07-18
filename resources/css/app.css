@@ -1,5 +1,115 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
-
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
 @import 'cropperjs/dist/cropper.min.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --livewire-progress-bar-color: var(--color-accent-content) !important;
+}
+
+body {
+    @apply h-full bg-zinc-50 dark:bg-zinc-900;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+main {
+    @apply flex;
+}
+
+main > div {
+    @apply w-full max-w-7xl;
+    margin: 0 auto;
+}
+
+/* Flux */
+
+table th,
+table td {
+    @apply text-base! text-zinc-800! dark:text-white!;
+}
+
+table th {
+    @apply font-bold!;
+}
+
+ui-label {
+    @apply font-semibold! mb-2! text-zinc-600 dark:text-zinc-300;
+}
+
+ui-toast-group {
+    @apply mt-[5.5rem]!;
+}
+
+.flux-input-rounded-br-md > button,
+.flux-input-rounded-br-md > input {
+    @apply rounded-none! rounded-br-md!;
+}
+
+.breadcrumbs svg {
+    @apply text-zinc-400 dark:text-zinc-500;
+}
+
+ui-sidebar ui-tooltip > a {
+    @apply h-10! -mx-3! w-[calc(100%_+_1.5rem)]!;
+}
+
+ui-sidebar ui-tooltip > a > div:last-of-type {
+    @apply text-base! font-medium! text-zinc-800 dark:text-white;
+}
+
+ui-sidebar ui-tooltip a svg {
+    @apply size-6!;
+}
+
+ui-modal dialog {
+    @apply mx-6 mb-6 sm:m-auto dark:bg-zinc-900!;
+}
+
+ui-modal .modal-header {
+    @apply mb-6 -mx-6 -mt-6 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 font-semibold!;
+}
+
+ui-modal button {
+    @apply -mt-2 -mr-2;
+}
+
+ui-dropdown nav a svg {
+    @apply mr-3!;
+}
+
+input:disabled {
+    @apply bg-zinc-100 dark:bg-zinc-800 cursor-not-allowed;
+}
+
+
+/* Pagination */
+
+.pagination > div {
+    @apply border-zinc-200 dark:border-zinc-700;
+}
+
+.pagination > div div {
+    @apply text-sm!;
+}
+
+.pagination > div > div:last-of-type {
+    @apply divide-x divide-zinc-200 dark:divide-zinc-700 p-0;
+}
+
+.pagination > div > div:last-of-type div,
+.pagination > div > div:last-of-type button {
+    @apply text-sm! h-8 px-3 rounded-none;
+}
+
+.pagination > div > div:last-of-type button {
+    @apply cursor-pointer;
+}
+
+.pagination > div > div:last-of-type div[aria-current="page"] {
+    @apply bg-zinc-100 dark:bg-zinc-800;
+}

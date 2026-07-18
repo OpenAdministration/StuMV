@@ -4,49 +4,62 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use LdapRecord\LdapRecordException;
-use LdapRecord\Query\Builder;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 class NewMember extends Component
 {
-    public string $search = "";
-    #[Rule('required|string')]
-    public string $dn = "";
+    public string $search = '';
+
+    #[Rule('required|array')]
+    public array $selectedUsers = [];
 
     #[Rule('required|string')]
-    public string $realm_uid = "";
+    public string $realm_uid = '';
 
-
-    public function mount(Community $uid):void{
-        $this->realm_uid = $uid->getFirstAttribute('ou');
+    public function mount(Community $realm): void
+    {
+        $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render(): \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
+    public function render(): Factory|View|Application
     {
-        $userList = User::query()
-            ->search('uid', $this->search)
-            ->search('dn', $this->search)
+        $realm = Community::findOrFailByUid($this->realm_uid);
+        $userList = User::query()->search()
             ->get();
-        return view('livewire.realm.new-member', ['selectable_users' => $userList])
+        $memberDns = $realm->membersGroup()->members()->get()->modelDns()->toBase();
+        $selectable_users = $userList->filter(fn ($user) => $memberDns->doesntContain($user->getDn()))
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
+
+        return view('livewire.realm.new-member', ['selectable_users' => $selectable_users])
             ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));
     }
 
     public function save()
     {
         $this->validate();
-        try {
-            $user = User::findOrFail($this->dn);
-            $realm = Community::findOrFailByUid($this->realm_uid);
-            $realm->membersGroup()->members()->attach($user);
-            return redirect()->route('realms.members', ['uid' => $this->realm_uid])
-                ->with('message', __('Added new Member'));
-        } catch (LdapRecordException $exception) {
-            $this->addError('dn', $exception->getMessage());
-            return false;
+        foreach ($this->selectedUsers as $dn) {
+            try {
+                $user = User::findOrFail($dn);
+                $realm = Community::findOrFailByUid($this->realm_uid);
+                $realm->membersGroup()->members()->attach($user);
+
+                \App\Models\User::where('username', $user->getFirstAttribute('uid'))->update(['realm' => $this->realm_uid]);
+            } catch (LdapRecordException $exception) {
+                $this->addError('dn', $exception->getMessage());
+
+                return false;
+            }
         }
+
+        Flux::toast(variant: 'success', text: __('realms.added_new_member'));
+
+        return to_route('realms.members', ['realm' => $this->realm_uid]);
     }
-
-
 }

@@ -1,0 +1,42 @@
+<div class="max-w-6xl mx-auto w-full">
+    <div class="space-y-4 mb-8">
+        <flux:heading size="xl">{{ __('tools.import_users_from_uni_ldap_headline') }}</flux:heading>
+        <flux:text class="text-base">{{  __('tools.import_users_from_uni_ldap_explanation') }}</flux:text>
+    </div>
+    <div class="pb-6 sm:pb-8 space-y-6">
+        <div class="space-y-4">
+            @if(!$searchCompleted)
+                <flux:input label="{{ __('tools.email_address') }}" wire:model.live.blur="email" />
+                <flux:button
+                    variant="primary"
+                    icon="search"
+                    wire:click="getUserData"
+                >
+                    {{ __('tools.get_user_data') }}
+                </flux:button>
+            @endif
+        </div>
+        @if($searchCompleted && !$userNotFound)
+            <div class="space-y-4">
+                <flux:input label="{{ __('tools.email_address') }}" wire:model="email" />
+                <flux:input label="{{ __('tools.username') }}" wire:model="username" />
+                <flux:input label="{{ __('tools.firstname') }}" wire:model="firstname" />
+                <flux:input label="{{ __('tools.lastname') }}" wire:model="lastname" />
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    wire:click="createUser"
+                >
+                    {{ __('tools.create_user') }}
+                </flux:button>
+            </div>
+        @elseif($searchCompleted && $userNotFound)
+            <flux:callout
+                variant="danger"
+                icon="circle-x"
+                heading="{{ __('tools.user_not_found_in_uni_ldap') }}"
+                class="mt-[.35rem]"
+            />
+        @endif
+    </div>
+</div>

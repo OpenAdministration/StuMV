@@ -1,0 +1,373 @@
+openapi: 3.0.3
+info:
+  title: StuMV Directory API
+  description: |
+    Read-only directory API exposing a community's committees, roles, groups
+    and members. Authentication is OAuth2 client-credentials only (Laravel
+    Passport) - a client is registered for exactly one community and can
+    only query that community's data, regardless of which scopes it holds.
+
+    Get a token:
+
+    ```
+    curl -X POST /oauth/token \
+      -d grant_type=client_credentials \
+      -d client_id=... \
+      -d client_secret=... \
+      -d scope="committees groups users"
+    ```
+
+    Then send it as `Authorization: Bearer <token>` on every request below.
+  version: "1.0.0"
+servers:
+  - url: /api
+tags:
+  - name: Committees
+    description: Committees, their roles, and role members.
+  - name: Groups
+    description: LDAP permission groups and their members.
+  - name: Users
+    description: A single directory user, and the committees/roles or groups they belong to.
+paths:
+  /{realm}/committees:
+    get:
+      tags: [Committees]
+      summary: List a community's committees
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Committee' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /{realm}/committees/{ou}:
+    get:
+      tags: [Committees]
+      summary: Look up a single committee
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/CommitteeOu'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Committee' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/committees/{ou}/roles:
+    get:
+      tags: [Committees]
+      summary: List the roles of a committee
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/CommitteeOu'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Role' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/committees/{ou}/roles/{cn}:
+    get:
+      tags: [Committees]
+      summary: Look up a single role
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/CommitteeOu'
+        - $ref: '#/components/parameters/RoleCn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/committees/{ou}/roles/{cn}/members:
+    get:
+      tags: [Committees]
+      summary: List the usernames of a role's current members
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/CommitteeOu'
+        - $ref: '#/components/parameters/RoleCn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+                example: ["jdoe", "asmith"]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/groups:
+    get:
+      tags: [Groups]
+      summary: List a community's permission groups
+      security: [{ oauth2: [groups] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Group' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /{realm}/groups/{cn}:
+    get:
+      tags: [Groups]
+      summary: Look up a single group
+      security: [{ oauth2: [groups] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/GroupCn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Group' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/groups/{cn}/members:
+    get:
+      tags: [Groups]
+      summary: List the usernames of a group's current members
+      security: [{ oauth2: [groups] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/GroupCn'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+                example: ["jdoe", "asmith"]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/users/{uid}:
+    get:
+      tags: [Users]
+      summary: Look up a single user
+      description: Only users who are actually a member of this community can be looked up.
+      security: [{ oauth2: [users] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/UserUid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/users/{uid}/roles:
+    get:
+      tags: [Users]
+      summary: List the roles a user currently holds
+      description: |
+        Roles anywhere in the community's committee tree (arbitrarily nested)
+        that currently have this user as an actual LDAP member. Only the
+        `ou`/`cn` short codes are returned - look up their names via
+        `/{realm}/committees/{ou}` and `/{realm}/committees/{ou}/roles/{cn}`.
+      security: [{ oauth2: [users] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/UserUid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/UserRole' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/users/{uid}/committees:
+    get:
+      tags: [Users]
+      summary: List the committees a user currently has a role in
+      description: |
+        The short codes (`ou`) of committees where the user holds at least
+        one role, deduplicated. Look up committee names via
+        `/{realm}/committees/{ou}`.
+      security: [{ oauth2: [users] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/UserUid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+                example: ["fsr"]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /{realm}/users/{uid}/groups:
+    get:
+      tags: [Users]
+      summary: List the permission groups a user is currently in
+      description: |
+        The short codes (`cn`) of groups the user is a member of. Look up
+        group names via `/{realm}/groups/{cn}`.
+      security: [{ oauth2: [users] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - $ref: '#/components/parameters/UserUid'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+                example: ["newsletter"]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /oauth/token
+          scopes:
+            committees: Read committees, roles and role members
+            groups: Read permission groups and their members
+            users: Read directory user info (profile, committees, groups)
+
+  parameters:
+    Realm:
+      name: realm
+      in: path
+      required: true
+      description: The community's short code.
+      schema: { type: string }
+      example: demo
+    CommitteeOu:
+      name: ou
+      in: path
+      required: true
+      description: The committee's short name (ou).
+      schema: { type: string }
+      example: FSR
+    RoleCn:
+      name: cn
+      in: path
+      required: true
+      description: The role's short name (cn).
+      schema: { type: string }
+      example: mitglied
+    GroupCn:
+      name: cn
+      in: path
+      required: true
+      description: The group's short name (cn).
+      schema: { type: string }
+      example: newsletter
+    UserUid:
+      name: uid
+      in: path
+      required: true
+      description: The user's username (LDAP uid).
+      schema: { type: string }
+      example: jdoe
+
+  schemas:
+    Committee:
+      type: object
+      properties:
+        ou: { type: string, example: FSR }
+        description: { type: string, example: Fachschaftsrat }
+    Role:
+      type: object
+      properties:
+        cn: { type: string, example: mitglied }
+        description: { type: string, example: Mitglied }
+    Group:
+      type: object
+      properties:
+        cn: { type: string, example: newsletter }
+        description: { type: string, example: Newsletter-Verteiler }
+    User:
+      type: object
+      properties:
+        uid: { type: string, example: jdoe }
+        name: { type: string, example: Jane Doe }
+        given_name: { type: string, example: Jane }
+        family_name: { type: string, example: Doe }
+        course:
+          type: string
+          nullable: true
+          description: Studiengang (course of study).
+          example: Informatik
+        picture:
+          type: string
+          nullable: true
+          format: uri
+          example: https://stumv.example/storage/avatars/abc123.jpg
+    UserRole:
+      type: object
+      properties:
+        ou: { type: string, nullable: true, example: FSR }
+        cn: { type: string, example: mitglied }
+
+  responses:
+    Unauthorized:
+      description: Missing, invalid or expired access token.
+    Forbidden:
+      description: The token's client is not registered for this community, or lacks the required scope.
+    NotFound:
+      description: The community, committee, role, group or user does not exist (or the user is not a member of this community).

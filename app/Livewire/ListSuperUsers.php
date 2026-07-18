@@ -2,37 +2,37 @@
 
 namespace App\Livewire;
 
-use App\Ldap\Community;
 use App\Ldap\SuperUserGroup;
 use App\Ldap\User;
-use Livewire\Attributes\Title;
+use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListSuperUsers extends Component {
-
+class ListSuperUsers extends Component
+{
     use WithPagination;
 
     #[Url]
     public string $search = '';
+
     #[Url]
     public string $sortField = 'cn';
+
     #[Url]
     public string $sortDirection = 'asc';
 
     public bool $showDeleteModal = false;
 
     public string $deleteAdminName = '';
-    public string $deleteAdminDn = '';
-
 
     public function sortBy($field): void
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -43,42 +43,42 @@ class ListSuperUsers extends Component {
         $this->resetPage();
     }
 
+    public function render()
+    {
+        $superadmins = SuperUserGroup::group()->members()->get();
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $superadmins = $superadmins->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search)
+                || str_contains(mb_strtolower((string) $user->getFirstAttribute('uid')), $search));
+        }
+        $sorted = $superadmins
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
 
-    public function render() {
-        $superGroup = SuperUserGroup::group();
-        $listSuperadmins = $superGroup->members()
-            //->search('cn', $this->search)
-            ->get()
-        ;
-        return view(
-            'livewire.list-super-admins', [
-                'superadmins' => $listSuperadmins,
-                //->orderBy($this->sortField, $this->sortDirection)
-                //->paginate(10),
-                // all users that aren't admins on this realm
-                //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
-            ]
-        )->title(__('list_superusers_title'));
+        $perPage = 10;
+        $page = $this->getPage();
+        $superadmins = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
+
+        return view('livewire.list-super-admins', [
+            'superadmins' => $superadmins,
+        ])->title(__('superadmins.list_title'));
     }
 
     public function deletePrepare($username): void
     {
-        $user = User::findByUsername($username);
-        $userBelongsToRealm = Community::findByUid($this->community_name)?->adminsGroup()->members()->get()->contains($user);
-        if(!$userBelongsToRealm) {
-            // check if the user to delete is an admin in this realm
-            unset($this->deleteAdminName);
-            return;
-        }
         $this->deleteAdminName = $username;
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
     {
-        $admins = Community::findByUid($this->community_name)?->adminsGroup()->members();
         $user = User::findByUsername($this->deleteAdminName);
-        $admins->detach($user);
+        SuperUserGroup::group()->members()->detach($user);
 
         // reset everything to prevent a 404 modal
         $this->close();
@@ -87,6 +87,6 @@ class ListSuperUsers extends Component {
     public function close(): void
     {
         unset($this->deleteAdminName);
-        $this->showDeleteModal = false;
+        Flux::modal('delete')->close();
     }
 }

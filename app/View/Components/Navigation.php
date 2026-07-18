@@ -7,18 +7,18 @@ use Illuminate\View\Component;
 
 class Navigation extends Component
 {
-    public string $uid = '';
+    public string $realm = '';
 
     public function __construct()
     {
-        $community = Route::current()?->parameter('uid');
-        if($community){
-            $this->uid = $community->getFirstAttribute('ou');
+        $community = Route::current()?->parameter('realm');
+        if ($community) {
+            $this->realm = $community->getFirstAttribute('ou');
         }
     }
 
     public function render()
     {
-        return $this->view('components.navigation', ['uid' => $this->uid]);
+        return $this->view('components.navigation', ['realm' => $this->realm]);
     }
 }

@@ -16,7 +16,7 @@ class NewDomainCommand extends Command
         $d = Domain::make([
             'dc' => $this->argument('fqdn'),
         ]);
-        $d->setDn("dc={$this->argument('fqdn')}," . Domain::dnRoot($this->argument('community-uid')));
+        $d->setDn("dc={$this->argument('fqdn')},".Domain::dnRoot($this->argument('community-uid')));
         $d->save();
     }
 }

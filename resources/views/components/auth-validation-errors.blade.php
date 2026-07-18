@@ -1,15 +1,17 @@
 @props(['errors'])
 
 @if ($errors->any())
-    <div {{ $attributes }}>
-        <div class="font-medium text-red-600">
+    <flux:callout variant="danger" icon="circle-x">
+        <flux:callout.heading>
             {{ __('Whoops! Something went wrong.') }}
-        </div>
+        </flux:callout.heading>
 
-        <ul class="mt-3 list-disc list-inside text-sm text-red-600">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
+        <flux:callout.text>
+            <ul class="list-disc ml-6">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </flux:callout.text>
+    </flux:callout>
 @endif

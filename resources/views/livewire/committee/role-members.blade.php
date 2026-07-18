@@ -1,140 +1,200 @@
-<div class="flex-col space-y-4">
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900 inline-flex items-center">
+<div class="flex-col space-y-8" wire:init="loadMembers">
+    <div class="flex flex-col sm:flex-row gap-6">
+        <div class="flex-1 space-y-4">
+            <flux:heading size="xl" class="flex gap-4">
                 {{ __('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]) }}
-                <x-link :href="route('committees.roles.edit', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])" >
-                    <x-fas-pencil class="mx-2"/>
-                </x-link>
-            </h1>
-            <p class="mt-2 text-sm text-gray-700">{{ __('roles.membership_explanation') }}</p>
+                @if($isModerator)
+                    <flux:button
+                        variant="subtle"
+                        icon="pencil"
+                        class="-mt-1"
+                        :href="route('committees.roles.edit', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                        title="{{ __('common.edit') }}"
+                    />
+                @endif
+            </flux:heading>
+            <flux:text class="text-base">{{ __('roles.membership_explanation') }}</flux:text>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-            <x-button.link-primary
-                :href="route('committees.roles.add-member', ['uid' => $uid, 'cn' => $cn, 'ou' => $ou])"
-                :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
-                icon-leading="fas-plus"
+        <div class="flex flex-col gap-2">
+            <flux:button
+                variant="primary"
+                icon="user-plus"
+                :href="$isModerator ? route('committees.roles.add-member', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
+                :disabled="!$isModerator"
             >
-                {{ __('Add Member') }}
-            </x-button.link-primary>
+                {{ __('common.add_member') }}
+            </flux:button>
+            <flux:button
+                icon="calendar-x"
+                :href="$isModerator ? route('committees.roles.terminate-memberships', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
+                :disabled="!$isModerator"
+            >
+                {{ __('roles.members.terminate_memberships') }}
+            </flux:button>
         </div>
     </div>
-    <div class="flex justify-between">
-        <x-input.group wire:model.live.debounce="search" placeholder="{{ __('roles.members.search') }}"></x-input.group>
+
+    <div
+        class="flex items-center gap-3"
+        x-data="{ showOnlyActive: $persist(true).as('roleMembers.showOnlyActive') }"
+        x-init="
+            $wire.showOnlyActive = showOnlyActive;
+            $watch('$wire.showOnlyActive', value => showOnlyActive = value);
+        "
+    >
+        <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.show_only_active_memberships') }}" align="left" />
     </div>
-    <x-table>
-        <x-slot name="head">
-            <x-table.heading/>
-            <x-table.heading>
-                {{ __('User') }}
-            </x-table.heading>
-            <x-table.heading>
-                {{ __('From') }}
-            </x-table.heading>
-            <x-table.heading>
-                {{ __('Until') }}
-            </x-table.heading>
-            <x-table.heading>
-                {{ __('Decided') }}
-            </x-table.heading>
-            <x-table.heading>
-                {{ __('Comment') }}
-            </x-table.heading>
-            <x-table.heading/>
-        </x-slot>
-        @forelse($members as $member)
-            <x-table.row>
-                <x-table.cell>
-                    <span @class(["inline-block", "h-2", "w-2", "flex-shrink-0", "rounded-full",
-                        "bg-green-400" => $member->isActive() && !$member->isPending(),
-                        "bg-yellow-400" => $member->isPending(),
-                        "bg-gray-200" => !$member->isActive(),
-                    ]) aria-hidden="true"></span>
-                </x-table.cell>
-                <x-table.cell>
-                    {{ $member->username }}
-                </x-table.cell>
-                <x-table.cell><span class="flex justify-center">
-                    {{ $member->from->format('d.m.Y') }}
-                </span></x-table.cell>
-                <x-table.cell><span class="flex justify-center">
-                    @empty($member->until)
-                            <x-button.link
-                                    :disabled="auth()->user()->cannot('create', [\App\Models\RoleMembership::class, $committee, $community])"
-                                    wire:click="prepareTermination({{ $member->id }})"
+
+    <flux:field>
+        <flux:label>{{ __('roles.members.search') }}</flux:label>
+        <flux:input
+            icon="search"
+            clearable
+            wire:model.live="search"
+        />
+    </flux:field>
+
+    <div class="pb-6 sm:pb-8">
+        @if (! $ready)
+            <div class="flex justify-center py-16">
+                <flux:icon.loading />
+            </div>
+        @else
+            <div wire:loading.flex wire:target="showOnlyActive" class="flex justify-center py-4">
+                <flux:icon.loading />
+            </div>
+            <div wire:loading.remove wire:target="showOnlyActive">
+                @if(count($members) > 0)
+                <flux:table>
+                    <flux:table.columns>
+                        <flux:table.column class="w-[55px]"></flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('common.user') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'from'" :direction="$sortDirection" wire:click="sortBy('from')">{{ __('roles.membership_from') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'until'" :direction="$sortDirection" wire:click="sortBy('until')">{{ __('roles.membership_until') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'decided'" :direction="$sortDirection" wire:click="sortBy('decided')">{{ __('roles.membership_decided') }}</flux:table.column>
+                        <flux:table.column>{{ __('roles.membership_comment') }}</flux:table.column>
+                        <flux:table.column></flux:table.column>
+                    </flux:table.columns>
+                    <flux:table.rows>
+            @foreach($members as $member)
+                <flux:table.row>
+                    <flux:table.cell>
+                        @php
+                            $user = $userCache[$member->username] ?? null;
+                            $jpegPhoto = $user?->getFirstAttribute('jpegPhoto');
+                            if ($jpegPhoto) {
+                                $jpegPhoto = 'data:image/jpeg;base64,' . $jpegPhoto;
+                            }
+                            $displayName = $user?->getFirstAttribute('cn') ?? $member->username;
+                            $status = $memberStatuses[$member->id];
+                        @endphp
+                        @if($status['isActive'] && !$status['isPending'])
+                            <flux:avatar
+                                badge badge:color="green"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $displayName }}"
+                            />
+                        @elseif($status['isPending'])
+                            <flux:avatar
+                                badge badge:color="yellow"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $displayName }}"
+                            />
+                        @else
+                            <flux:avatar
+                                badge badge:color="gray"
+                                src="{{ $jpegPhoto }}"
+                                name="{{ $displayName }}"
+                            />
+                        @endif
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        @if($isAdmin)
+                            <flux:link
+                                wire:navigate
+                                :href="route('profile', ['username' => $member->username])"
                             >
-                            <x-fas-forward-fast/>
-                        </x-button.link>
+                                {{ $displayName }}
+                            </flux:link>
                         @else
-                            {{ $member->until->format('d.m.Y') }}
-                        @endempty
-                </span></x-table.cell>
-                <x-table.cell><span class="flex justify-center">
-                    @empty($member->decided)
-                            <hr class="mx-5 grow"/>
+                            {{ $displayName }}
+                        @endif
+                    </flux:table.cell>
+                    <flux:table.cell>{{ \Carbon\Carbon::parse($member->from)->format('Y-m-d') }}</flux:table.cell>
+                    <flux:table.cell>
+                        @empty($member->until)
+                            <flux:separator />
                         @else
-                            {{ $member->decided->format('d.m.Y') }}
+                            {{ \Carbon\Carbon::parse($member->until)->format('Y-m-d') }}
                         @endempty
-                </span></x-table.cell>
-                <x-table.cell>
-                    @empty($member->comment)
-                        <hr class="mx-5 grow"/>
-                    @else
-                        {{ $member->comment }}
-                    @endempty
-                </x-table.cell>
-                <x-table.cell class="flex gap-x-6 items-center">
-                    <x-link :disabled="auth()->user()->cannot('edit', [$member, $committee, $community])"
-                            href="{{ route('committees.roles.members.edit', ['uid' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) }}">
-                        <x-fas-pencil/>
-                    </x-link>
-                    <x-button.link-danger
-                            wire:click="prepareDeletion({{ $member->id }})"
-                            :disabled="auth()->user()->cannot('delete', [$member, $committee, $community])">
-                        <x-fas-trash/>
-                    </x-button.link-danger>
-                </x-table.cell>
-            </x-table.row>
-        @empty
-            <x-table.row>
-                <x-table.cell colspan="6">
-                    <div class="flex justify-center item-center">
-                        <span class="text-gray-400 text-xl py-2 font-medium">{{ __('roles.no_members_found') }}</span>
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        @empty($member->decided)
+                            <flux:separator />
+                        @else
+                            {{ \Carbon\Carbon::parse($member->decided)->format('Y-m-d') }}
+                        @endempty
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        @empty($member->comment)
+                            <flux:separator />
+                        @else
+                            {{ $member->comment }}
+                        @endempty
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        icon="pencil"
+                                        wire:navigate
+                                        :disabled="!$isModerator"
+                                        :href="$isModerator ? route('committees.roles.members.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
+                                    >
+                                        {{ __('roles.link_edit') }}
+                                    </flux:menu.item>
+                                    <flux:modal.trigger name="delete">
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="prepareDeletion({{ $member->id }})"
+                                            :disabled="!$isModerator"
+                                        >
+                                            {{ __('common.delete') }}
+                                        </flux:menu.item>
+                                    </flux:modal.trigger>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
+                    </flux:table.cell>
+                </flux:table.row>
+            @endforeach
+            </flux:table.rows>
+        </flux:table>
+
+                    <div class="pagination">
+                        <flux:pagination :paginator="$members" />
                     </div>
-                </x-table.cell>
-            </x-table.row>
-        @endforelse
-    </x-table>
+                @else
+                    <flux:callout variant="warning" icon="circle-alert" heading="{{ __('roles.no_members_found') }}" />
+                @endif
+    </div>
+    @endif
 
     <form wire:submit="commitDeletion">
-        <x-modal.confirmation wire:model="showDeleteModal">
-            <x-slot:title>
-                {{ __('roles.members.delete_title', ['name' => $deleteUsername]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <span>{{ __('roles.members.delete_text', ['name' => $deleteUsername]) }}</span>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.danger type="submit">{{ __('Delete') }}</x-button.danger>
-            </x-slot:footer>
-        </x-modal.confirmation>
-    </form>
-
-
-    <form wire:submit="commitTermination">
-        <x-modal.confirmation wire:model="showTerminateModal">
-            <x-slot:title>
-                {{ __('roles.members.terminate_title', ['name' => $terminateUsername]) }}
-            </x-slot:title>
-            <x-slot:content>
-                <span>{{ __('roles.members.terminate_text', ['name' => $terminateUsername]) }}</span>
-                <x-input.group autofocus type="date" :label="__('Termination Date')" wire:model="terminateDate"/>
-            </x-slot:content>
-            <x-slot:footer>
-                <x-button.secondary wire:click="close()">{{ __('Cancel') }}</x-button.secondary>
-                <x-button.primary type="submit">{{ __('Terminate') }}</x-button.primary>
-            </x-slot:footer>
-        </x-modal.confirmation>
+        <flux:modal name="delete">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('roles.members.delete_title', ['name' => $deleteDisplayName]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('roles.members.delete_text', ['name' => $deleteDisplayName]) }}</flux:text>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="primary" type="submit">{{ __('common.delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
     </form>
 </div>

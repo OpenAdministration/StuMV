@@ -1,31 +1,34 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\Directory\Committees;
+use App\Http\Controllers\Api\Directory\Groups;
+use App\Http\Controllers\Api\Directory\Users;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
 */
-Route::middleware('auth:api')->group(function (){
-    Route::any('user', \App\Http\Controllers\Api\SocialiteUser::class);
-
-    Route::middleware('scope:committees')->group(function (){
-        Route::any('my/committees', [\App\Http\Controllers\Api\Committees::class, 'all']);
-        Route::any('my/committees/{community_uid}', [\App\Http\Controllers\Api\Committees::class, 'fromCommunity']);
+Route::middleware('client')->group(function (): void {
+    Route::middleware('scope:committees')->group(function (): void {
+        Route::get('{realm}/committees', [Committees::class, 'index']);
+        Route::get('{realm}/committees/{ou}', [Committees::class, 'show']);
+        Route::get('{realm}/committees/{ou}/roles', [Committees::class, 'roles']);
+        Route::get('{realm}/committees/{ou}/roles/{cn}', [Committees::class, 'role']);
+        Route::get('{realm}/committees/{ou}/roles/{cn}/members', [Committees::class, 'roleMembers']);
     });
 
-    Route::middleware('scope:groups')->group(function (){
-        Route::any('my/groups', [\App\Http\Controllers\Api\Groups::class, 'all']);
-        Route::any('my/groups/{community_uid}', [\App\Http\Controllers\Api\Groups::class, 'fromCommunity']);
+    Route::middleware('scope:groups')->group(function (): void {
+        Route::get('{realm}/groups', [Groups::class, 'index']);
+        Route::get('{realm}/groups/{cn}', [Groups::class, 'show']);
+        Route::get('{realm}/groups/{cn}/members', [Groups::class, 'members']);
     });
 
+    Route::middleware('scope:users')->group(function (): void {
+        Route::get('{realm}/users/{uid}', [Users::class, 'show']);
+        Route::get('{realm}/users/{uid}/roles', [Users::class, 'roles']);
+        Route::get('{realm}/users/{uid}/committees', [Users::class, 'committees']);
+        Route::get('{realm}/users/{uid}/groups', [Users::class, 'groups']);
+    });
 });
-
-

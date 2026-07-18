@@ -1,0 +1,105 @@
+<?php
+
+use App\Ldap\Group;
+use App\Livewire\Group\AddRoleToGroup;
+use App\Livewire\Group\EditGroup;
+use App\Livewire\Group\NewGroup;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
+use Livewire\Livewire;
+use Tests\Support\TestLdap;
+
+uses(RefreshDatabase::class);
+
+test('an admin can map a role to a group', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('save');
+
+    $this->assertDatabaseHas('role_group_relation', [
+        'group_dn' => $group->getDn(),
+        'role_dn' => $role->getDn(),
+    ]);
+});
+
+test('adding the same role to a group twice is rejected', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('save');
+
+    Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('save')
+        ->assertHasErrors('selected_role_dn');
+
+    $this->assertDatabaseCount('role_group_relation', 1);
+});
+
+test('an admin can create a group', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsAdmin($community);
+
+    Livewire::test(NewGroup::class, ['realm' => $community])
+        ->set('cn', 'newsletter')
+        ->set('name', 'Newsletter Editors')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $group = Group::find(Group::dnFrom($uid, 'newsletter'));
+    expect($group)->not->toBeNull()
+        ->and($group->getFirstAttribute('description'))->toBe('Newsletter Editors');
+});
+
+test('an admin can rename a group', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(EditGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
+        ->set('name', 'Newsletter Team')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Group::find(Group::dnFrom($uid, 'newsletter'))->getFirstAttribute('description'))
+        ->toBe('Newsletter Team');
+});
+
+test('the dn property on edit group cannot be tampered with from the client', function (): void {
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(EditGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
+        ->set('dn', 'cn=other,ou=Groups,dc=stumv,dc=de');
+})->throws(CannotUpdateLockedPropertyException::class);
+
+test('saving a group redirects back to the previous page instead of the role overview', function (): void {
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    $previousUrl = route('realms.groups', ['realm' => $community]);
+    $this->from($previousUrl);
+
+    Livewire::test(EditGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
+        ->set('name', 'Newsletter Team')
+        ->call('save')
+        ->assertRedirect($previousUrl);
+});

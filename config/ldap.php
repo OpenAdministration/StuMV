@@ -34,8 +34,21 @@ return [
             'port' => env('LDAP_PORT', 389),
             'base_dn' => env('LDAP_BASE_DN'),
             'timeout' => env('LDAP_TIMEOUT', 5),
-            'use_ssl' => env('LDAP_SSL', false),
             'use_tls' => env('LDAP_TLS', false),
+            'options' => [
+                // See: http://php.net/ldap_set_option
+                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
+                LDAP_OPT_PROTOCOL_VERSION => 3,
+            ],
+        ],
+        'uni' => [
+            'hosts' => [env('UNI_LDAP_HOST', '127.0.0.1')],
+            'username' => env('UNI_LDAP_USERNAME'),
+            'password' => env('UNI_LDAP_PASSWORD'),
+            'port' => env('UNI_LDAP_PORT', 389),
+            'base_dn' => env('UNI_LDAP_BASE_DN'),
+            'timeout' => env('UNI_LDAP_TIMEOUT', 5),
+            'use_tls' => env('UNI_LDAP_TLS', false),
             'options' => [
                 // See: http://php.net/ldap_set_option
                 LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
@@ -75,5 +88,20 @@ return [
         'enabled' => env('LDAP_CACHE', false),
         'driver' => env('CACHE_DRIVER', 'file'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | University LDAP Search Batch Size
+    |--------------------------------------------------------------------------
+    |
+    | The university LDAP server enforces a maximum number of results per
+    | search request. Lookups against it are chunked into batches of this
+    | size instead of a single unbounded query. This is a plain app-level
+    | setting, not an LdapRecord connection option, so it lives here at the
+    | top level rather than inside "connections.uni".
+    |
+    */
+
+    'uni_batch_size' => env('UNI_LDAP_BATCH_SIZE', 10),
 
 ];

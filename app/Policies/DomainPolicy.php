@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-
 use App\Ldap\Community;
 use App\Models\User;
 

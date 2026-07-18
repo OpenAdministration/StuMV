@@ -1,17 +1,42 @@
-<x-livewire-form>
-    <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-            <h1 class="text-base font-semibold leading-6 text-gray-900">{{ __('realms.add_members_to_role_heading') }}</h1>
+<div>
+    <x-livewire-form class="w-full">
+        <div class="mb-6">
+            <flux:heading size="xl">{{ __('realms.add_members_to_role_heading', ['role' => $roleName]) }}</flux:heading>
         </div>
-    </div>
-    <x-input.group :label="__('Short Rolename')" wire:model="cn" disabled/>
-    <x-select :label="__('Add new User')" wire:model="username">
-        @foreach($users as $user)
-            <option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</option>
-        @endforeach
-    </x-select>
-    <x-input.group type="date" wire:model="start_date" :label="__('Starting')"/>
-    <x-input.group type="date" wire:model="end_date" :label="__('Ending')"/>
-    <x-input.group type="date" wire:model="decision_date" :label="__('Decided')"/>
-    <x-input.group wire:model="comment" :label="__('Comment')"/>
-</x-livewire-form>
+        <div class="grid sm:grid-cols-2 gap-6 mb-6">
+            <flux:field class="col-span-full">
+                <flux:label>{{ __('roles.add_new_user') }}</flux:label>
+                <flux:pillbox
+                    multiple
+                    searchable
+                    placeholder="{{ __('committees.select_user') }}"
+                    wire:model="usernames"
+                >
+                    @foreach($users as $user)
+                        <flux:pillbox.option value="{{ $user->getFirstAttribute('uid') }}">{{ $user->getFirstAttribute('uid') }} ({{ $user->getFirstAttribute('cn') }})</flux:pillbox.option>
+                    @endforeach
+                </flux:pillbox>
+            </flux:field>
+            <flux:field>
+                <flux:label>{{ __('roles.membership_starting') }}</flux:label>
+                <flux:input type="date" wire:model="start_date" wire:change="updateDecisionDate" />
+                <flux:error name="start_date" />
+            </flux:field>
+            <flux:field>
+                <flux:label>{{ __('roles.membership_ending') }}</flux:label>
+                <flux:input type="date" wire:model="end_date" />
+                <flux:error name="end_date" />
+            </flux:field>
+            <flux:field>
+                <flux:label>{{ __('roles.membership_decided') }}</flux:label>
+                <flux:input type="date" wire:model="decision_date" />
+                <flux:error name="decision_date" />
+            </flux:field>
+            <flux:field>
+                <flux:label>{{ __('roles.membership_comment') }}</flux:label>
+                <flux:input wire:model="comment" />
+                <flux:error name="comment" />
+            </flux:field>
+        </div>
+    </x-livewire-form>
+</div>

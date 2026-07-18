@@ -1,161 +1,116 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="ml-2.5 shrink-0 flex items-center">
-                    <a href="{{ \App\Providers\RouteServiceProvider::home($uid) }}" wire:navigate class="flex space-x-3 items-center">
-                        <x-application-logo />
-                        <span class="text-3xl font-extrabold text-gray-800 tracking-tighter">{{ Config::get('app.name') }}</span>
-                    </a>
-                </div>
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    @can('picked', \App\Ldap\Community::class)
-                        <x-nav-link wire:navigate :active="Route::is('realms.dashboard')"
-                                    :href="route('realms.dashboard', ['uid' => $uid])"
-                        >
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
-                        <x-nav-link wire:navigate :active="request()->routeIs('committees.list')"
-                                    :href="route('committees.list', ['uid' => $uid])"
-                        >
-                            {{ __('Committees and Roles') }}
-                        </x-nav-link>
-                        <x-nav-link wire:navigate :active="request()->routeIs('realms.members')"
-                                    :href="route('realms.members', ['uid' => $uid])"
-                        >
-                            {{ __('People') }}
-                        </x-nav-link>
-                    @endcan
-                    @can('superadmin', \App\Models\User::class)
-                        <x-nav-link wire:navigate :active="request()->routeIs('superadmins.list')"
-                                    :href="route('superadmins.list')"
-                        >
-                            <x-fas-dragon/> {{ __('Superadmins') }}
-                        </x-nav-link>
-                        <x-nav-link :active="request()->routeIs('realms.pick')"
-                                    :href="route('realms.pick')">
-                            <x-fas-repeat/> {{ __('Change Realm') }}
-                        </x-nav-link>
-                    @endcan
-                </div>
-            </div>
+<flux:sidebar collapsible="mobile" class="w-[22rem]! p-0! flex flex-col gap-0! h-full grow bg-zinc-100 dark:bg-zinc-800">
+    <flux:sidebar.header class="flex h-[4rem] px-6 shrink-0 items-center bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 border-r lg:border-r-0 border-r-zinc-300  dark:border-r-zinc-700 z-10">
+        <a
+            wire:navigate
+            href="{{ \App\Providers\RouteServiceProvider::home($realm) }}"
+            class="flex gap-3 items-center lg:justify-center pr-4 w-full"
+        >
+            <x-application-logo class="size-8"/>
+            <span class="text-2xl font-bold">{{ config('app.name') }}</span>
+        </a>
+        <flux:sidebar.collapse class="lg:hidden" />
+    </flux:sidebar.header>
 
-            <div class="flex items-center">
-                <!-- Help Icon -->
-                <a href="mailto:{{ config('app.help_contact_mail') }}" class="text-gray-500">
-                    <x-fas-question/>
-                </a>
-                <div>
-                    <!-- Settings Dropdown -->
-                    <div class="hidden sm:flex sm:items-center sm:ml-6 x-space-5">
-                        <x-dropdown align="right" width="48">
-                            <x-slot name="trigger">
-                                <button class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out">
-                                    <div>{{ Auth::user()->full_name }}</div>
-
-                                    <div class="ml-1">
-                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                </button>
-                            </x-slot>
-                            <x-slot name="content">
-                                <x-dropdown-link :href="route('profile')">{{ __('Profile') }}</x-dropdown-link>
-                                <x-dropdown-link :href="route('password.change')">{{ __('Change Password') }}</x-dropdown-link>
-
-                                <hr class="h-px my-1 mx-1 bg-gray-200 border-0">
-
-                                <!-- Authentication -->
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-
-                                    <x-dropdown-link :href="route('logout')"
-                                                     onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                        {{ __('Log Out') }}
-                                    </x-dropdown-link>
-                                </form>
-                            </x-slot>
-                        </x-dropdown>
-                    </div>
-
-                    <!-- Hamburger -->
-                    <div class="-mr-2 flex items-center sm:hidden">
-                        <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                                <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+    <flux:sidebar.nav class="grow overflow-y-auto border-r border-zinc-200 dark:border-zinc-700 px-6 py-4">
+        @can('picked', \App\Ldap\Community::class)
+            <flux:sidebar.item
+                icon="house"
+                wire:navigate
+                :href="route('realms.dashboard', ['realm' => $realm])"
+            >
+                {{ __('realms.nav_dashboard') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item
+                icon="list-tree"
+                wire:navigate
+                :href="route('committees.list', ['realm' => $realm])"
+            >
+                {{ __('realms.nav_committees_and_roles') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item
+                icon="users"
+                wire:navigate
+                :href="route('realms.members', ['realm' => $realm])"
+            >
+                {{ __('realms.nav_people') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item
+                icon="user-star"
+                wire:navigate
+                :href="route('realms.mods', ['realm' => $realm])"
+            >
+                {{ __('realms.dashboard.mods_headline') }}
+            </flux:sidebar.item>
+            @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('realm'))
+            @if(auth()->user()->can('moderator', $currentCommunity) || auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+                <flux:sidebar.item
+                    icon="shield-user"
+                    wire:navigate
+                    :href="route('realms.admins', ['realm' => $realm])"
+                >
+                    {{ __('realms.dashboard.admin_headline') }}
+                </flux:sidebar.item>
+            @endif
+            @if(auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+                <flux:sidebar.item
+                    icon="key-round"
+                    wire:navigate
+                    :href="route('realms.groups', ['realm' => $realm])"
+                >
+                    {{ __('realms.dashboard.groups_headline') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item
+                    icon="globe"
+                    wire:navigate
+                    :href="route('realms.domains', ['realm' => $realm])"
+                >
+                    {{ __('realms.dashboard.domains_headline') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item
+                    icon="unplug"
+                    wire:navigate
+                    :href="route('realms.api-clients', ['realm' => $realm])"
+                >
+                    {{ __('api_clients.list_title') }}
+                </flux:sidebar.item>
+            @endif
+            @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('realm'))
+                <flux:separator class="my-2" />
+                <flux:sidebar.item
+                    icon="hammer"
+                    wire:navigate
+                    :href="route('tools.dashboard', ['realm' => $realm])"
+                    :current="request()->is('*/tools') || request()->is('*/tools/*')"
+                >
+                    {{ __('tools.tools') }}
+                </flux:sidebar.item>
+            @endcan
+        @endcan
+        @can('superadmin', \App\Models\User::class)
             @can('picked', \App\Ldap\Community::class)
-                <x-responsive-nav-link wire:navigate :active="Route::is('realms.dashboard')"
-                                       :href="route('realms.dashboard', ['uid' => $uid])"
-                >
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link wire:navigate :active="request()->routeIs('committees.list')"
-                                       :href="route('committees.list', ['uid' => $uid])"
-                >
-                    {{ __('Committees and Roles') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link wire:navigate :active="request()->routeIs('realms.members')"
-                                       :href="route('realms.members', ['uid' => $uid])"
-                >
-                    {{ __('People') }}
-                </x-responsive-nav-link>
+                <flux:separator class="my-2" />
             @endcan
-            @can('superadmin', \App\Models\User::class)
-                <x-responsive-nav-link wire:navigate :active="request()->routeIs('superadmins.list')"
-                                       :href="route('superadmins.list')"
-                >
-                    <x-slot:icon><x-fas-dragon/></x-slot:icon>
-                    {{ __('Superadmins') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :active="request()->routeIs('realms.pick')"
-                                       :href="route('realms.pick')">
-                    <x-slot:icon><x-fas-door-open/></x-slot:icon>
-                    {{ __('Change Realm') }}
-                </x-responsive-nav-link>
-            @endcan
-
-
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4 mb-3">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->full_name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
-            <x-responsive-nav-link :active="request()->routeIs('profile')"
-                                   :href="route('profile')">
-                {{ __('Profil') }}
-            </x-responsive-nav-link>
-            <div>
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                                           onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
+            <flux:sidebar.item
+                icon="squirrel"
+                wire:navigate
+                :href="route('superadmins.list')"
+            >
+                {{ __('Superadmins') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item
+                icon="network"
+                wire:navigate
+                :href="route('oidc-clients.list')"
+            >
+                {{ __('oidc_clients.list_title') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item
+                icon="log-in"
+                wire:navigate
+                :href="route('realms.pick')"
+            >
+                {{ __('realms.change_realm') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.nav>
+</flux:sidebar>

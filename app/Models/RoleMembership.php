@@ -3,18 +3,19 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Date;
 
 /**
- * @property integer $role_id
- * @property integer $user_id
+ * @property int $role_id
+ * @property int $user_id
  * @property string $from
  * @property string $until
  * @property Role $role
- * @property User $user
  */
 class RoleMembership extends Model
 {
@@ -38,12 +39,6 @@ class RoleMembership extends Model
         'comment',
     ];
 
-    protected $casts = [
-        'from' => 'date',
-        'until' => 'date',
-        'decided' => 'date',
-    ];
-
     /**
      * @return BelongsTo
      */
@@ -52,43 +47,38 @@ class RoleMembership extends Model
         return $this->belongsTo(Role::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function user(): Relation
+    public function isActive(): bool
     {
-        return $this->belongsTo(User::class, 'username', 'username');
-    }
-
-    public function ldapRole() : \App\Ldap\Role
-    {
-        return \App\Ldap\Role::find("cn=$this->role_cn,$this->committee_dn");
-    }
-
-    public function isActive() : bool {
-        return Carbon::today()->betweenIncluded(
-            $this->from->format('Y-m-d'),
-            $this->until?->format('Y-m-d')
-        );
-    }
-
-    public function isPending() : bool {
-        if($this->isActive()){
-            $userGroups = $this->user->ldap()->groups();
-            return !$userGroups->exists($this->ldapRole());
+        if ($this->until) {
+            return Date::today()->betweenIncluded(
+                $this->from->format('Y-m-d'),
+                $this->until?->format('Y-m-d')
+            );
+        } else {
+            return true;
         }
-        return false;
     }
 
-    public function scopeActive(Builder $query, Carbon $date = null)
+    #[Scope]
+    protected function active(Builder $query, ?Carbon $date = null)
     {
-        if(is_null($date)){
+        if (is_null($date)) {
             $date = today();
         }
         $query->whereDate('from', '<=', $date)
-            ->where(function ($query) use ($date){
+            ->where(function ($query) use ($date): void {
                 $query->whereDate('until', '>=', $date)
                     ->orWhereNull('until');
             });
+    }
+
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'from' => 'date',
+            'until' => 'date',
+            'decided' => 'date',
+        ];
     }
 }

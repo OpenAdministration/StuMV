@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -16,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
+    #[\Override]
     public function register()
     {
         //
@@ -28,35 +29,42 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Passport::tokensCan([
-            'profile' => 'Grant Profile Info Access',
-            'committees' => 'Grant Committee Access',
-            'groups' => 'Grant Group Access',
-            'iban' => 'Grant IBAN Access',
-            'address' => 'Grant Address Access'
-        ]);
+        // config/openid.php's tokens_can is the single source of truth for
+        // scopes: the OpenID Connect package's discovery endpoint reads it
+        // directly for scopes_supported, so any scope granted via Passport
+        // must live there to be advertised at /.well-known/openid-configuration.
+        Passport::tokensCan(config('openid.passport.tokens_can'));
 
         Passport::setDefaultScope(['profile']);
 
-        Password::defaults(static function () {
-            return Password::min(12)
-                ->letters()
-                ->mixedCase()
-                ->numbers()
-                ->symbols()
-                ->uncompromised();
-        });
+        // Passport 13 ships no authorization/consent screen and does not bind
+        // AuthorizationViewResponse by default, so register our own consent view.
+        Passport::authorizationView('auth.oauth.authorize');
 
-        Builder::macro('search', function ($field, $string){
-            return $string ? $this->orWhere($field, 'like', '%' . $string . '%') : $this;
-        });
+        // Laravel 13 dropped the automatic route('login') fallback in the
+        // exception handler's unauthenticated() - a guest AuthenticationException
+        // with no redirect target now yields an empty 401 instead of a login
+        // redirect. Passport's authorize endpoint throws exactly that for guests
+        // (GET /oauth/authorize carries only `web`, not `auth`), which broke SSO
+        // login: visitors hit a bare 401 instead of the login form. Restore the
+        // redirect so they log in and bounce back to the authorization request.
+        AuthenticationException::redirectUsing(static fn (): string => route('login'));
 
-        if($this->app->hasDebugModeEnabled()){
+        Password::defaults(static fn () => Password::min(12)
+            ->letters()
+            ->mixedCase()
+            ->numbers()
+            ->symbols()
+            ->uncompromised());
+
+        Builder::macro('search', fn ($field, $string) => $string ? $this->orWhere($field, 'like', '%'.$string.'%') : $this);
+
+        if ($this->app->hasDebugModeEnabled()) {
             Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
                 info("Missing translation key [$key] detected.");
+
                 return $key;
             });
         }
     }
 }
-

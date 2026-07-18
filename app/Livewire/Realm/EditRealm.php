@@ -3,11 +3,10 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
-use Illuminate\Support\Facades\Request;
+use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -21,15 +20,16 @@ class EditRealm extends Component
     #[Rule('required|min:6')]
     public string $name = '';
 
-    public function mount(Community $uid): void
+    public function mount(Community $realm): void
     {
-        $this->uid = $uid->getFirstAttribute('ou');
+        $this->uid = $realm->getFirstAttribute('ou');
         // here is an implicit search for the realm and return 404 if not existent
-        $this->name = $this->realm->description[0] ?? "";
+        $this->name = $this->realm->description[0] ?? '';
     }
 
     #[Computed(persist: true)]
-    public function realm() : Community{
+    public function realm(): Community
+    {
         return Community::findOrFailByUid($this->uid);
     }
 
@@ -38,11 +38,14 @@ class EditRealm extends Component
         return view('livewire.edit-realm')->title(__('realms.dashboard.title', ['realm' => $this->uid]));
     }
 
-    public function save(){
+    public function save()
+    {
         $r = Community::findOrFailByUid($this->uid);
-        $r->description =  [$this->name];
+        $r->description = [$this->name];
         $r->save();
-        return redirect()->route('realms.dashboard', ['uid' => $this->uid])
-            ->with('message', __('realms.edit_success', ['realm' => $this->uid]));
+
+        Flux::toast(variant: 'success', text: __('realms.edit_success', ['realm' => $this->uid]));
+
+        return to_route('realms.dashboard', ['realm' => $this->uid]);
     }
 }

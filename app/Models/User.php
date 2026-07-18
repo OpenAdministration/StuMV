@@ -12,15 +12,15 @@ use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 
 class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
     use AuthenticatesWithLdap;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'user';
 
     /***
      * @inheritDoc
      */
-    public function getLdapGuidColumn() : string
+    public function getLdapGuidColumn(): string
     {
         // openLdap specific
         return 'uid';
@@ -36,6 +36,7 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
         'username',
         'email',
         'password',
+        'realm',
     ];
 
     /**
@@ -49,20 +50,23 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    /**
      * @return \App\Ldap\User Returns the equivalent LDAP user
      */
-    public function ldap() : \App\Ldap\User
+    public function ldap(): \App\Ldap\User
     {
         return \App\Ldap\User::findOrFailByUsername($this->username);
     }
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    #[\Override]
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+        ];
+    }
 }

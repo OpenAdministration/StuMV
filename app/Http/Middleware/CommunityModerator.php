@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Ldap\Committee;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -12,14 +13,24 @@ class CommunityModerator
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request):Response  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $community = Route::current()->parameter('uid');
-        if($request->user()->cannot('moderator', $community)){
+        $community = Route::current()->parameter('realm');
+        $ou = Route::current()->parameter('ou');
+
+        // Every route this middleware guards is a role/role-membership
+        // action scoped to a specific committee - a committee moderator's
+        // authority covers this committee and its descendants, not the whole
+        // community. Committee create/edit/delete themselves are gated
+        // separately (community-moderator-only, see routes/web.php).
+        $committee = Committee::findByName($community->getShortCode(), $ou) ?? abort(404);
+
+        if ($request->user()->cannot('moderator', [$committee, $community])) {
             abort(403);
         }
+
         return $next($request);
     }
 }

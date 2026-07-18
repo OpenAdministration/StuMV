@@ -4,41 +4,53 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class ListAdmins extends Component {
-
+class ListAdmins extends Component
+{
     use WithPagination;
 
     #[Url]
     public string $search = '';
+
     #[Url]
-    public string $sortField = 'full_name';
+    public string $sortField = 'cn';
+
     #[Url]
     public string $sortDirection = 'asc';
 
     #[Locked]
     public string $community_name;
 
-    public bool $showDeleteModal = false;
-
     public string $deleteAdminName = '';
 
+    public string $deleteAdminUsername = '';
 
-    public function mount(Community $uid) {
-        $this->community_name = $uid->getFirstAttribute('ou');
+    public bool $ready = false;
+
+    public function mount(Community $realm)
+    {
+        $this->community_name = $realm->getFirstAttribute('ou');
+    }
+
+    public function loadAdmins(): void
+    {
+        $this->ready = true;
     }
 
     public function sortBy($field): void
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             // toggle direction
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        }else{
+        } else {
             $this->sortDirection = 'asc';
             $this->sortField = $field;
         }
@@ -55,21 +67,51 @@ class ListAdmins extends Component {
         return Community::findByUid($this->community_name);
     }
 
-    public function render() {
-        $admins = $this->community()?->adminsGroup()->members()->get();
+    public function render()
+    {
+        $community = $this->community();
+
+        // admin/remove_admin are the same check for every row (they only
+        // depend on $community, never on the row) - computed once here
+        // (admin hits LDAP) rather than repeatedly per row and per menu item.
+        $isAdmin = $community && auth()->user()->can('admin', $community);
+        $canRemoveAdmin = $community && auth()->user()->can('remove_admin', $community);
+
+        if (! $this->ready) {
+            return view(
+                'livewire.realm.list-admins', [
+                    'community' => $community,
+                    'realm_admins' => collect(),
+                    'isAdmin' => $isAdmin,
+                    'canRemoveAdmin' => $canRemoveAdmin,
+                ]
+            )->title(__('realms.admins_headline'));
+        }
+
+        $admins = $community?->adminsGroup()->members()->get() ?? collect();
+        if ($this->search !== '') {
+            $search = mb_strtolower($this->search);
+            $admins = $admins->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
+        }
+        $sorted = $this->sortUsers($admins);
+
+        $perPage = 10;
+        $page = $this->getPage();
+        $admins = new LengthAwarePaginator(
+            $sorted->forPage($page, $perPage)->values(),
+            $sorted->count(),
+            $perPage,
+            $page,
+        );
+
         return view(
             'livewire.realm.list-admins', [
-                'community' => $this->community(),
+                'community' => $community,
                 'realm_admins' => $admins,
-                //->orderBy($this->sortField, $this->sortDirection)
-                //->paginate(10),
-                // all users that aren't admins on this realm
-                //'free_admins' => User::all()->except($this->community->admins()->modelKeys()),
+                'isAdmin' => $isAdmin,
+                'canRemoveAdmin' => $canRemoveAdmin,
             ]
-        )->title(__('realms.admins_heading', [
-            'name' => $this->community()->description[0],
-            'uid' => $this->community()->ou[0]
-        ]));
+        )->title(__('realms.admins_headline'));
     }
 
     public function deletePrepare($username): void
@@ -78,13 +120,15 @@ class ListAdmins extends Component {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
         $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
-        if(!$userIsAdmin) {
+        if (! $userIsAdmin) {
             // check if the user to delete is an admin in this realm
-            unset($this->deleteAdminName);
+            unset($this->deleteAdminUsername, $this->deleteAdminName);
+
             return;
         }
+        $this->deleteAdminUsername = $username;
         $this->deleteAdminName = $user->getFirstAttribute('cn');
-        $this->showDeleteModal = true;
+        Flux::modal('delete')->show();
     }
 
     public function deleteCommit(): void
@@ -92,7 +136,7 @@ class ListAdmins extends Component {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
         $admins = $community?->adminsGroup()->members();
-        $user = User::findByUsername($this->deleteAdminName);
+        $user = User::findByUsername($this->deleteAdminUsername);
         $admins->detach($user);
 
         // reset everything to prevent a 404 modal
@@ -101,7 +145,18 @@ class ListAdmins extends Component {
 
     public function close(): void
     {
-        unset($this->deleteAdminName);
-        $this->showDeleteModal = false;
+        unset($this->deleteAdminUsername, $this->deleteAdminName);
+        Flux::modal('delete')->close();
+    }
+
+    /**
+     * Sorted client-side (rather than via an LDAP orderBy) because the
+     * production directory doesn't support the sssvlv sort control.
+     */
+    protected function sortUsers(Collection $users): Collection
+    {
+        return $users
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->values();
     }
 }
