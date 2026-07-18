@@ -73,7 +73,7 @@
                                     @else
                                         <flux:menu.item
                                             variant="danger"
-                                            icon="trash"
+                                            icon="trash-2"
                                             wire:click="deletePrepare('{{ $client->id }}')"
                                         >
                                             {{ __('oidc_clients.delete') }}
