@@ -115,9 +115,12 @@ class RegisterUser extends Component
         try {
             $user->save();
             $community->membersGroup()->members()->attach($user);
+            
             // Credentials must be keyed for the LDAP guard (see LoginRequest);
-            // a positional array does not authenticate.
-            Auth::attempt(['uid' => $this->username, 'password' => $this->password]);
+            // a positional array does not validate.
+            // Auth::validate (not attempt) syncs the LDAP user into the
+            // database without logging the freshly registered user in.
+            Auth::validate(['uid' => $this->username, 'password' => $this->password]);
 
             $eloquentUser = \App\Models\User::where('username', $this->username)->first();
             $eloquentUser->update([
