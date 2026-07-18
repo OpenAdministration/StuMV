@@ -15,6 +15,7 @@ use Illuminate\Filesystem\FilesystemServiceProvider;
 use Illuminate\Foundation\Providers\ConsoleSupportServiceProvider;
 use Illuminate\Foundation\Providers\FoundationServiceProvider;
 use Illuminate\Hashing\HashServiceProvider;
+use Illuminate\Image\ImageServiceProvider;
 use Illuminate\Mail\MailServiceProvider;
 use Illuminate\Notifications\NotificationServiceProvider;
 use Illuminate\Pagination\PaginationServiceProvider;
@@ -196,6 +197,7 @@ return [
         FilesystemServiceProvider::class,
         FoundationServiceProvider::class,
         HashServiceProvider::class,
+        ImageServiceProvider::class,
         MailServiceProvider::class,
         NotificationServiceProvider::class,
         PaginationServiceProvider::class,
