@@ -44,16 +44,16 @@
 
             <flux:field>
                 <flux:label>{{ __('oidc_clients.scopes') }}</flux:label>
-                <flux:checkbox.group wire:model="scopes">
-                    <flux:checkbox value="openid" label="{{ __('oidc_clients.scope_openid') }}" />
-                    <flux:checkbox value="profile" label="{{ __('oidc_clients.scope_profile') }}" />
-                    <flux:checkbox value="email" label="{{ __('oidc_clients.scope_email') }}" />
-                    <flux:checkbox value="phone" label="{{ __('oidc_clients.scope_phone') }}" />
-                    <flux:checkbox value="address" label="{{ __('oidc_clients.scope_address') }}" />
-                    <flux:checkbox value="committees" label="{{ __('oidc_clients.scope_committees') }}" />
-                    <flux:checkbox value="groups" label="{{ __('oidc_clients.scope_groups') }}" />
-                    <flux:checkbox value="users" label="{{ __('oidc_clients.scope_users') }}" />
-                </flux:checkbox.group>
+                <flux:pillbox wire:model="scopes">
+                    <flux:pillbox.option value="openid">{{ __('oidc_clients.scope_openid') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="profile">{{ __('oidc_clients.scope_profile') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="email">{{ __('oidc_clients.scope_email') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="phone">{{ __('oidc_clients.scope_phone') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="address">{{ __('oidc_clients.scope_address') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="committees">{{ __('oidc_clients.scope_committees') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="groups">{{ __('oidc_clients.scope_groups') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="users">{{ __('oidc_clients.scope_users') }}</flux:pillbox.option>
+                </flux:pillbox>
             </flux:field>
 
             <x-slot:abort_route>

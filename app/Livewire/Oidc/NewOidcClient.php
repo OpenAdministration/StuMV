@@ -17,7 +17,7 @@ class NewOidcClient extends Component
 
     public string $redirectUris = '';
 
-    public array $scopes = ['openid'];
+    public array $scopes = ['openid', 'profile', 'email', 'groups'];
 
     public ?string $createdClientId = null;
 
