@@ -38,11 +38,11 @@
 
             <flux:field>
                 <flux:label>{{ __('api_clients.scopes') }}</flux:label>
-                <flux:checkbox.group wire:model="scopes">
-                    <flux:checkbox value="committees" label="{{ __('api_clients.scope_committees') }}" />
-                    <flux:checkbox value="groups" label="{{ __('api_clients.scope_groups') }}" />
-                    <flux:checkbox value="users" label="{{ __('api_clients.scope_users') }}" />
-                </flux:checkbox.group>
+                <flux:pillbox multiple wire:model="scopes">
+                    <flux:pillbox.option value="committees">{{ __('api_clients.scope_committees') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="groups">{{ __('api_clients.scope_groups') }}</flux:pillbox.option>
+                    <flux:pillbox.option value="users">{{ __('api_clients.scope_users') }}</flux:pillbox.option>
+                </flux:pillbox>
             </flux:field>
 
             <x-slot:abort_route>

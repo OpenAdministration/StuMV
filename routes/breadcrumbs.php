@@ -111,6 +111,11 @@ Breadcrumbs::for('realms.api-clients.new', function (BreadcrumbTrail $trail, arr
     $trail->push(__('api_clients.new'), route('realms.api-clients.new', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.api-clients.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.api-clients', $routeParams);
+    $trail->push(__('common.edit'), route('realms.api-clients.edit', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.groups.new', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms.groups', $routeParams);
     $trail->push(__('groups.new_button'), route('realms.groups.new', $routeParams), ['truncate' => true]);

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\Api;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
@@ -38,7 +38,7 @@ class NewApiClient extends Component
 
     public function render()
     {
-        return view('livewire.realm.new-api-client')->title(__('api_clients.new_title'));
+        return view('livewire.api.new-api-client')->title(__('api_clients.new_title'));
     }
 
     public function save(ClientRepository $clients)

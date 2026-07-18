@@ -54,6 +54,14 @@
                         @unless($client->revoked)
                             <flux:button
                                 size="sm"
+                                icon="pencil"
+                                wire:navigate
+                                :href="route('realms.api-clients.edit', ['realm' => $uid, 'client' => $client->id])"
+                            >
+                                {{ __('common.edit') }}
+                            </flux:button>
+                            <flux:button
+                                size="sm"
                                 variant="danger"
                                 icon="ban"
                                 wire:click="revokePrepare('{{ $client->id }}')"
