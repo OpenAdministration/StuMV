@@ -45,6 +45,8 @@
             </div>
 
             <x-slot:abort_route>{{ route('login') }}</x-slot:abort_route>
+            <x-slot:submit_label>{{ __('user.register') }}</x-slot:submit_label>
+            <x-slot:submit_icon>user-plus</x-slot:submit_icon>
         </x-livewire-form>
     </flux:card>
 </x-auth-card>
