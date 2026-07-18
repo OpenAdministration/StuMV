@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Middleware\SuperAdminMiddleware;
+use App\Livewire\AddSuperAdmins;
 use App\Livewire\Api\EditApiClient;
 use App\Livewire\Api\ListApiClients;
 use App\Livewire\Api\NewApiClient;
-use App\Livewire\AddSuperAdmins;
 use App\Livewire\Committee\AddUserToRole;
 use App\Livewire\Committee\EditCommittee;
 use App\Livewire\Committee\EditRole;
