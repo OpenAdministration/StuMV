@@ -129,7 +129,7 @@ class RegisterUser extends Component
             // SendEmailVerificationNotification listener requires to send.
             event(new Registered($eloquentUser));
 
-            return to_route('verification.notice')->with('message', __('Successfully Registered'));
+            return to_route('login')->with('message', __('Successfully Registered'));
 
         } catch (LdapRecordException $ldapRecordException) {
             dump($ldapRecordException->getDetailedError());
