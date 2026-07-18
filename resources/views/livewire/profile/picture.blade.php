@@ -26,16 +26,27 @@
                         <img id="image" class="h-[15rem] xl:h-[25rem]" x-show="imageIsSelected">
                     @endif
                 </div>
-                <div class="mt-6 flex items-center justify-end gap-x-6">
+                <div class="mt-6 flex items-center justify-end gap-x-3">
                     @if($avatarID)
-                        <flux:button variant="danger" wire:click="deletePicture">
+                        <flux:button
+                            variant="danger"
+                            icon="trash-2"
+                            wire:click="deletePicture"
+                        >
                             {{ __('Entfernen') }}
                         </flux:button>
                     @else
-                        <flux:button @click="cancelPicture">
+                        <flux:button
+                            icon="ban"
+                            @click="cancelPicture"
+                        >
                             {{ __('Abbrechen') }}
                         </flux:button>
-                        <flux:button variant="primary" @click="cropPicture">
+                        <flux:button
+                            variant="primary"
+                            icon="save"
+                            @click="cropPicture"
+                        >
                             {{ __('Speichern') }}
                         </flux:button>
                     @endif
