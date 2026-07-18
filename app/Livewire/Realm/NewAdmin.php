@@ -28,7 +28,9 @@ class NewAdmin extends Component
         $userList = $community->membersGroup()->members()->get();
         $admins = $community->adminsGroup()->members()->get();
         $adminDns = $admins->modelDns()->toBase();
-        $selectable_users = $userList->filter(fn ($user) => $adminDns->doesntContain($user->getDn()));
+        $selectable_users = $userList->filter(fn ($user) => $adminDns->doesntContain($user->getDn()))
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
 
         return view('livewire.realm.new-admin', [
             'selectable_users' => $selectable_users,

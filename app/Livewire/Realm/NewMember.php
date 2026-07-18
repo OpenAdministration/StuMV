@@ -33,7 +33,9 @@ class NewMember extends Component
         $userList = User::query()->search()
             ->get();
         $memberDns = $realm->membersGroup()->members()->get()->modelDns()->toBase();
-        $selectable_users = $userList->filter(fn ($user) => $memberDns->doesntContain($user->getDn()));
+        $selectable_users = $userList->filter(fn ($user) => $memberDns->doesntContain($user->getDn()))
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
 
         return view('livewire.realm.new-member', ['selectable_users' => $selectable_users])
             ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));

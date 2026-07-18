@@ -16,7 +16,9 @@ class AddSuperAdmins extends Component
     {
         $users = User::get();
         $adminDns = SuperUserGroup::group()->members()->get()->modelDns()->toBase();
-        $selectableUsers = $users->filter(fn ($user) => $adminDns->doesntContain($user->getDn()));
+        $selectableUsers = $users->filter(fn ($user) => $adminDns->doesntContain($user->getDn()))
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
 
         return view('livewire.add-super-admins', [
             'users' => $selectableUsers,

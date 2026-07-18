@@ -40,7 +40,9 @@ class NewCommitteeModerator extends Component
         $moderators = $committee->moderatorsGroup()->members()->get();
         // baseCollection does like strings in contains, ldapCollection does not...
         $moderatorDns = $moderators->modelDns()->toBase();
-        $selectable_users = $userList->filter(fn ($user) => $moderatorDns->doesntContain($user->getDn()));
+        $selectable_users = $userList->filter(fn ($user) => $moderatorDns->doesntContain($user->getDn()))
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
+            ->values();
 
         return view('livewire.committee.new-committee-moderator', [
             'committee' => $committee,
