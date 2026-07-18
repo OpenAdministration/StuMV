@@ -21,7 +21,7 @@
                 {{ __('realms.nav_dashboard') }}
             </flux:sidebar.item>
             <flux:sidebar.item
-                icon="network"
+                icon="list-tree"
                 wire:navigate
                 :href="route('committees.list', ['realm' => $realm])"
             >
@@ -98,7 +98,7 @@
                 {{ __('Superadmins') }}
             </flux:sidebar.item>
             <flux:sidebar.item
-                icon="shield-check"
+                icon="network"
                 wire:navigate
                 :href="route('oidc-clients.list')"
             >
