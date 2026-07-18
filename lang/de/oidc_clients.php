@@ -16,7 +16,7 @@ return [
     'redirect_uris_required' => 'Gib mindestens eine Redirect-URI an.',
     'redirect_uri_invalid' => ':uri ist keine gültige URL.',
     'scopes' => 'Berechtigungen',
-    'scope_openid' => 'OpenID Connect (id_token)',
+    'scope_openid' => 'OpenID',
     'scope_profile' => 'Profil',
     'scope_email' => 'E-Mail-Adresse',
     'scope_phone' => 'Telefonnummer',
