@@ -105,7 +105,7 @@ class ListRoleMembers extends Component
                 'isModerator' => $isModerator,
                 'isAdmin' => $isAdmin,
                 'memberStatuses' => [],
-                'deleteDisplayName' => isset($this->deleteUsername) ? $this->deleteUsername : null,
+                'deleteDisplayName' => $this->deleteUsername ?? null,
             ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
         }
 

@@ -18,7 +18,7 @@ use Tests\Support\TestLdap;
  */
 function actingWithRealAccessToken(User $user, array $scopes): void
 {
-    $client = app(ClientRepository::class)->createAuthorizationCodeGrantClient('Test SSO Client', ['https://example.test/callback']);
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Test SSO Client', ['https://example.test/callback']);
 
     $token = Token::create([
         'id' => Str::random(80),
@@ -37,8 +37,8 @@ function actingWithRealAccessToken(User $user, array $scopes): void
     ]);
 
     $user->withAccessToken($accessToken);
-    app('auth')->guard('api')->setUser($user);
-    app('auth')->shouldUse('api');
+    resolve('auth')->guard('api')->setUser($user);
+    resolve('auth')->shouldUse('api');
 }
 
 /**

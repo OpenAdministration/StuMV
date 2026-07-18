@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
+use OpenIDConnect\Laravel\PassportServiceProvider;
 
 return [
 
@@ -213,7 +214,7 @@ return [
         // Registered in place of Laravel\Passport\PassportServiceProvider
         // (disabled via composer.json's dont-discover) - this extends it to
         // also wire up OpenID Connect (id_token, discovery, JWKS, userinfo).
-        OpenIDConnect\Laravel\PassportServiceProvider::class,
+        PassportServiceProvider::class,
 
         /*
          * Application Service Providers...
