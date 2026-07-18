@@ -46,7 +46,7 @@ class Picture extends Component
 
     public function savePicture()
     {
-        $img = Image::fromBase64($this->picture);
+        $img = Image::fromBase64(Str::after($this->picture, 'base64,'));
         $imgResized = $img->resize(400, 400);
         $imgBase64 = $imgResized->toBase64();
 
