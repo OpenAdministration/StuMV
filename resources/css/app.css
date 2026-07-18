@@ -22,7 +22,7 @@ main {
 }
 
 main > div {
-    @apply w-full max-w-6xl;
+    @apply w-full max-w-7xl;
     margin: 0 auto;
 }
 
