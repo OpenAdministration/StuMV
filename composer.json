@@ -16,6 +16,7 @@
         "directorytree/ldaprecord": "^4.0",
         "directorytree/ldaprecord-laravel": "^4.0",
         "guzzlehttp/guzzle": "^7.2",
+        "intervention/image": "^4.0",
         "jeremy379/laravel-openid-connect": "^3.3",
         "laravel/framework": "^13.20",
         "laravel/passport": "^13.0",
