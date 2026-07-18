@@ -242,11 +242,11 @@ Breadcrumbs::for('oidc-clients.list', function (BreadcrumbTrail $trail, array $r
 });
 
 Breadcrumbs::for('oidc-clients.new', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('oidc-clients.list');
+    $trail->parent('oidc-clients.list', $routeParams);
     $trail->push(__('oidc_clients.new'), route('oidc-clients.new' /* none */), ['truncate' => true]);
 });
 
 Breadcrumbs::for('oidc-clients.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('oidc-clients.list');
+    $trail->parent('oidc-clients.list', $routeParams);
     $trail->push(__('common.edit'), route('oidc-clients.edit', $routeParams), ['truncate' => true]);
 });
