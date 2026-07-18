@@ -115,14 +115,19 @@ class RegisterUser extends Component
         try {
             $user->save();
             $community->membersGroup()->members()->attach($user);
-            event(new Registered($user));
             // Credentials must be keyed for the LDAP guard (see LoginRequest);
             // a positional array does not authenticate.
             Auth::attempt(['uid' => $this->username, 'password' => $this->password]);
 
-            \App\Models\User::where('username', $this->username)->update([
+            $eloquentUser = \App\Models\User::where('username', $this->username)->first();
+            $eloquentUser->update([
                 'realm' => $community->getFirstAttribute('ou'),
             ]);
+
+            // Fired with the Eloquent user (not the LDAP one) since only it
+            // implements MustVerifyEmail/Notifiable, which the
+            // SendEmailVerificationNotification listener requires to send.
+            event(new Registered($eloquentUser));
 
             return to_route('verification.notice')->with('message', __('Successfully Registered'));
 
