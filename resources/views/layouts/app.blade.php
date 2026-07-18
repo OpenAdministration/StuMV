@@ -20,7 +20,7 @@
         <div class="grid grid-rows-[auto_1fr] w-full h-full">
             @include('components.header')
 
-            <main class="h-full flex-1 overflow-x-hidden overflow-y-auto p-6 sm:p-8">
+            <main class="h-full flex-1 overflow-x-hidden overflow-y-auto p-6 sm:px-8">
                 <x-alert/>
                 {{ $slot }}
             </main>
