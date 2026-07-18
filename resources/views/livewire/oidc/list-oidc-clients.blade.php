@@ -51,36 +51,38 @@
                                 <flux:badge color="green" variant="solid">{{ __('oidc_clients.status_active') }}</flux:badge>
                             @endif
                         </flux:table.cell>
-                        <flux:table.cell class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    @unless($client->revoked)
-                                        <flux:menu.item
-                                            icon="pencil"
-                                            wire:navigate
-                                            href="{{ route('oidc-clients.edit', ['client' => $client->id]) }}"
-                                        >
-                                            {{ __('common.edit') }}
-                                        </flux:menu.item>
-                                        <flux:menu.item
-                                            variant="danger"
-                                            icon="ban"
-                                            wire:click="revokePrepare('{{ $client->id }}')"
-                                        >
-                                            {{ __('oidc_clients.revoke') }}
-                                        </flux:menu.item>
-                                    @else
-                                        <flux:menu.item
-                                            variant="danger"
-                                            icon="trash-2"
-                                            wire:click="deletePrepare('{{ $client->id }}')"
-                                        >
-                                            {{ __('oidc_clients.delete') }}
-                                        </flux:menu.item>
-                                    @endunless
-                                </flux:menu>
-                            </flux:dropdown>
+                        <flux:table.cell>
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        @unless($client->revoked)
+                                            <flux:menu.item
+                                                icon="pencil"
+                                                wire:navigate
+                                                href="{{ route('oidc-clients.edit', ['client' => $client->id]) }}"
+                                            >
+                                                {{ __('common.edit') }}
+                                            </flux:menu.item>
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="ban"
+                                                wire:click="revokePrepare('{{ $client->id }}')"
+                                            >
+                                                {{ __('oidc_clients.revoke') }}
+                                            </flux:menu.item>
+                                        @else
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="trash-2"
+                                                wire:click="deletePrepare('{{ $client->id }}')"
+                                            >
+                                                {{ __('oidc_clients.delete') }}
+                                            </flux:menu.item>
+                                        @endunless
+                                    </flux:menu>
+                                </flux:dropdown>
+                            </div>
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach
