@@ -124,6 +124,32 @@ test('granting the profile and phone scopes includes their claims', function ():
         ->assertJsonMissing(['email' => $user->email]);
 });
 
+test('granting the groups scope includes the groups claim', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    $group = TestLdap::makeGroup($community, 'finance');
+    TestLdap::attach($group, $user->ldap());
+
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'groups']);
+
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
+        ->assertOk()
+        ->assertJson(['groups' => ['finance']]);
+});
+
+test('the groups claim is omitted without the groups scope', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    $group = TestLdap::makeGroup($community, 'finance');
+    TestLdap::attach($group, $user->ldap());
+
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'email']);
+
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
+        ->assertOk()
+        ->assertJsonMissingPath('groups');
+});
+
 test('authorizing against a client bound to a different realm is rejected', function (): void {
     $community = newCommunity();
     $otherCommunity = newCommunity();

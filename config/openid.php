@@ -37,6 +37,9 @@ return [
         //     'company_phone',
         //     'company_email',
         // ],
+        'groups' => [
+            'groups',
+        ],
     ],
 
     /**

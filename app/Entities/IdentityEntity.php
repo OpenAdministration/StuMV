@@ -2,6 +2,7 @@
 
 namespace App\Entities;
 
+use App\Ldap\Group;
 use App\Models\ProfilePicture;
 use App\Models\User;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
@@ -45,6 +46,16 @@ class IdentityEntity implements IdentityEntityInterface
                 'postal_code' => $ldapUser->getFirstAttribute('postalCode'),
                 'locality' => $ldapUser->getFirstAttribute('l'),
             ],
+
+            // Only surfaced to clients granted the "groups" scope (see the
+            // matching custom claim set in config/openid.php) - same source
+            // as the Directory API's Users::groups().
+            'groups' => Group::query()->in(Group::dnRoot($this->user->realm))
+                ->where('uniqueMember', '=', $ldapUser->getDn())
+                ->get()
+                ->map(fn (Group $group): string => $group->getFirstAttribute('cn'))
+                ->values()
+                ->all(),
         ]);
     }
 }
