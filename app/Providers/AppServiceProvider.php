@@ -7,7 +7,7 @@ use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -86,11 +86,11 @@ class AppServiceProvider extends ServiceProvider
         // here or the signature it produces won't match the route at all.
         VerifyEmail::createUrlUsing(static fn ($notifiable) => URL::temporarySignedRoute(
             'verification.verify',
-            Carbon::now()->addMinutes(config('auth.verification.expire', 60)),
+            Date::now()->addMinutes(config('auth.verification.expire', 60)),
             [
                 'realm' => $notifiable->realm,
                 'id' => $notifiable->getKey(),
-                'hash' => sha1($notifiable->getEmailForVerification()),
+                'hash' => sha1((string) $notifiable->getEmailForVerification()),
             ]
         ));
 

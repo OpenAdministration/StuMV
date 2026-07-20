@@ -14,6 +14,7 @@ class PassportClient extends Client
      * casts() additively in initializeHasAttributes(), so this is the safe
      * place to add one.
      */
+    #[\Override]
     protected function casts(): array
     {
         return [
@@ -27,15 +28,15 @@ class PassportClient extends Client
      * NewOidcClient/EditOidcClient); defaults to true (show the prompt).
      *
      * When consent is required, still skips it for a user who has already
-     * consented to exactly this scope set - checked against
-     * oauth_client_consents (see App\Listeners\RecordOidcClientConsent),
-     * not against currently-active tokens: Passport's own
-     * AuthorizationController::hasGrantedScopes() already provides an
-     * active-token-based fallback (still useful and left untouched), but
-     * relying on that alone would force a fresh prompt every time a token
-     * merely expires, even though nothing about the actual grant changed.
-     * This record is only cleared when the client's scopes themselves
-     * change (see EditOidcClient::save()).
+     * been granted a token covering the same scopes - mirrors
+     * Laravel\Passport\Http\Controllers\AuthorizationController::hasGrantedScopes(),
+     * except it doesn't require that token to still be within its expiry
+     * window. Passport's own version only considers currently-active
+     * tokens, which would force a fresh prompt on every access-token expiry
+     * even though nothing about the actual grant changed; EditOidcClient::save()
+     * already revokes every one of this client's tokens as soon as its
+     * scopes change, so "not revoked" alone is exactly the signal that
+     * should invalidate remembered consent, not the passage of time.
      */
     #[\Override]
     public function skipsAuthorization(Authenticatable $user, array $scopes): bool
@@ -44,14 +45,22 @@ class PassportClient extends Client
             return true;
         }
 
-        $consent = OidcClientConsent::where('client_id', $this->id)
-            ->where('user_id', $user->getAuthIdentifier())
-            ->first();
+        return $this->hasGrantedScopes($user, $scopes);
+    }
 
-        if (! $consent) {
-            return false;
+    private function hasGrantedScopes(Authenticatable $user, array $scopes): bool
+    {
+        $grantedTokens = $this->tokens()->where([
+            ['user_id', '=', $user->getAuthIdentifier()],
+            ['revoked', '=', false],
+        ]);
+
+        if (empty($scopes)) {
+            return $grantedTokens->exists();
         }
 
-        return collect($scopes)->pluck('id')->diff($consent->scopes ?? [])->isEmpty();
+        return collect($scopes)->pluck('id')->diff(
+            $grantedTokens->pluck('scopes')->flatten()
+        )->isEmpty();
     }
 }
