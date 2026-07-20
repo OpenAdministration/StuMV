@@ -14,45 +14,45 @@
                         <flux:input wire:model="uid" disabled />
                     </flux:field>
                     <flux:field>
-                        <flux:label>{{ __('E-Mail') }}</flux:label>
+                        <flux:label>{{ __('common.email') }}</flux:label>
                         <flux:input wire:model="email" disabled />
                     </flux:field>
                 </div>
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">
                     <flux:field>
-                        <flux:label>{{ __('Vorname') }}</flux:label>
+                        <flux:label>{{ __('user.first_name_label') }}</flux:label>
                         <flux:input wire:model="givenName" />
                     </flux:field>
                     <flux:field>
-                        <flux:label>{{ __('Nachname') }}</flux:label>
+                        <flux:label>{{ __('user.last_name_label') }}</flux:label>
                         <flux:input wire:model="sn" />
                     </flux:field>
                 </div>
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">
                     <flux:field>
-                        <flux:label>{{ __('Studiengang') }}</flux:label>
+                        <flux:label>{{ __('profile.course_label') }}</flux:label>
                         <flux:input wire:model="course" />
                     </flux:field>
                 </div>
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">
                     <flux:field>
-                        <flux:label>{{ __('Straße und Hausnummer') }}</flux:label>
+                        <flux:label>{{ __('profile.street_label') }}</flux:label>
                         <flux:input wire:model="street" />
                     </flux:field>
                     <div class="grid grid-cols-[1fr_2fr] gap-6">
                         <flux:field>
-                            <flux:label>{{ __('Postleitzahl') }}</flux:label>
+                            <flux:label>{{ __('profile.postal_code_label') }}</flux:label>
                             <flux:input wire:model="postalCode" />
                         </flux:field>
                         <flux:field>
-                            <flux:label>{{ __('Ort') }}</flux:label>
+                            <flux:label>{{ __('profile.city_label') }}</flux:label>
                             <flux:input wire:model="city" />
                         </flux:field>
                     </div>
                 </div>
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">
                     <flux:field>
-                        <flux:label>{{ __('Telefon') }}</flux:label>
+                        <flux:label>{{ __('profile.phone_label') }}</flux:label>
                         <flux:input wire:model="phone" />
                     </flux:field>
                 </div>

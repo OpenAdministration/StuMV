@@ -27,4 +27,10 @@ return [
     'breadcrumb' => 'Profil',
     'change_password_title' => 'Passwort ändern',
     'password_confirm_label' => 'Passwort wiederholen',
+    'course_label' => 'Studiengang',
+    'street_label' => 'Straße und Hausnummer',
+    'postal_code_label' => 'Postleitzahl',
+    'city_label' => 'Ort',
+    'phone_label' => 'Telefon',
+    'remove_picture' => 'Entfernen',
 ];

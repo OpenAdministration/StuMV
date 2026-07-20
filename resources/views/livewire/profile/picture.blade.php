@@ -39,7 +39,7 @@
                             icon="trash-2"
                             wire:click="deletePicture"
                         >
-                            {{ __('Entfernen') }}
+                            {{ __('profile.remove_picture') }}
                         </flux:button>
                     @elseif($upload && $upload->isPreviewable())
                         <flux:button
@@ -47,14 +47,14 @@
                             wire:click="cancelUpload"
                             @click="destroyCropper()"
                         >
-                            {{ __('Abbrechen') }}
+                            {{ __('common.cancel') }}
                         </flux:button>
                         <flux:button
                             variant="primary"
                             icon="save"
                             @click="cropPicture()"
                         >
-                            {{ __('Speichern') }}
+                            {{ __('common.save') }}
                         </flux:button>
                     @endif
                 </div>

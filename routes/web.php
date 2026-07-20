@@ -55,13 +55,6 @@ use Illuminate\Support\Facades\Route;
 use OpenIDConnect\Laravel\JwksController;
 use OpenIDConnect\Laravel\UserInfoController;
 
-// Set language based on the user's preferences
-$availableLanguages = ['de', 'en'];
-$lang = Request::getPreferredLanguage($availableLanguages);
-if ($lang) {
-    Config::set('app.locale', $lang);
-}
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes

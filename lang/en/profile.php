@@ -27,4 +27,10 @@ return [
     'breadcrumb' => 'Profile',
     'change_password_title' => 'Change Password',
     'password_confirm_label' => 'Password confirm',
+    'course_label' => 'Course of study',
+    'street_label' => 'Street and house number',
+    'postal_code_label' => 'Postal code',
+    'city_label' => 'City',
+    'phone_label' => 'Phone',
+    'remove_picture' => 'Remove',
 ];
