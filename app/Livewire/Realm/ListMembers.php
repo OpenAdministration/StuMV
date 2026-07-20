@@ -83,7 +83,7 @@ class ListMembers extends Component
             )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
         }
 
-        $members = $community->membersGroup()->members()->get();
+        $members = User::query()->in($community->peopleDn())->get();
 
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
@@ -118,11 +118,10 @@ class ListMembers extends Component
     public function removePrepare($uid): void
     {
         $community = Community::findOrFailByUid($this->community_name);
-        $user = User::findOrFailByUsername($uid);
         $this->authorize('remove_member', $community);
-        $userBelongsToRealm = $community->membersGroup()->members()->whereEquals('uid', $uid)->get();
-        if (! $userBelongsToRealm) {
-            // only allow deletes from the same realm
+        // Only allow deletes of accounts actually located under this realm.
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $uid)->first();
+        if (! $user) {
             return;
         }
         $this->deleteMemberName = $user->getFirstAttribute('cn');
@@ -134,8 +133,10 @@ class ListMembers extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_member', $community);
-        $user = User::findOrFailByUsername($this->deleteMemberUsername);
-        $community->membersGroup()->members()->detach($user);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteMemberUsername)->first();
+        // Deleting the account is what "removing a member" means now -
+        // membership is the physical location itself, not a group entry.
+        $user?->delete();
         Flux::modal('remove')->close();
     }
 
@@ -147,9 +148,9 @@ class ListMembers extends Component
 
     public function exportPdf($username)
     {
-        $memberships = resolve(Memberships::class)->getMemberships($username, false);
-        $user = User::findOrFailByUsername($username);
         $community = Community::findOrFailByUid($this->community_name);
+        $memberships = resolve(Memberships::class)->getMemberships($this->community_name, $username, false);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $username)->first() ?? abort(404);
         $pdf = Pdf::loadView('pdfs.memberships', [
             'fullName' => $user->cn[0],
             'community' => $community->description[0],

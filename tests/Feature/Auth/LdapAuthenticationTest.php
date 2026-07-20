@@ -21,7 +21,7 @@ const DOMAIN = 'example.test';
  */
 function registerLdapUser(string $username, string $password): void
 {
-    Livewire::test('register-user')
+    Livewire::test('register-user', ['realm' => Community::findByUid('testcom')])
         ->set('first_name', 'Test')
         ->set('last_name', 'User')
         ->set('username', $username)
@@ -32,18 +32,10 @@ function registerLdapUser(string $username, string $password): void
         ->assertHasNoErrors();
 }
 
-/**
- * Remove the per-test user from LDAP, detaching it from the community members
- * group first so we don't leave dangling uniqueMember references behind.
- */
+/** Remove the per-test user from LDAP. */
 function purgeLdapUser(string $username): void
 {
-    $ldapUser = LdapUser::findByUsername($username);
-    if ($ldapUser === null) {
-        return;
-    }
-    Community::findByUid('testcom')?->membersGroup()?->members()->detach($ldapUser);
-    $ldapUser->delete();
+    LdapUser::findByUsername($username)?->delete();
 }
 
 beforeEach(function (): void {
@@ -70,11 +62,9 @@ test('a registered user becomes a member of the community', function (): void {
     registerLdapUser($this->username, $this->password);
 
     $community = Community::findByUid('testcom');
-    $isMember = $community->membersGroup()->members()
-        ->get()
-        ->contains(fn ($member) => $member->getFirstAttribute('uid') === $this->username);
+    $ldapUser = LdapUser::findByUsername($this->username);
 
-    expect($isMember)->toBeTrue();
+    expect($ldapUser->getDn())->toEndWith(','.$community->peopleDn());
 });
 
 test('a registered user can log in', function (): void {
@@ -82,9 +72,9 @@ test('a registered user can log in', function (): void {
     auth()->logout();
     $this->assertGuest();
 
-    $this->post('/login', ['uid' => $this->username, 'password' => $this->password])
+    $this->post('/testcom/login', ['uid' => $this->username, 'password' => $this->password])
         ->assertSessionHasNoErrors()
-        ->assertRedirect(RouteServiceProvider::home());
+        ->assertRedirect(RouteServiceProvider::home('testcom'));
 
     $this->assertAuthenticated();
     expect(auth()->user())->toBeInstanceOf(User::class);
@@ -95,9 +85,9 @@ test('a registered user can log in with their email address', function (): void 
     auth()->logout();
 
     // LoginRequest routes an email-shaped uid to the `mail` attribute.
-    $this->post('/login', ['uid' => $this->username.'@'.DOMAIN, 'password' => $this->password])
+    $this->post('/testcom/login', ['uid' => $this->username.'@'.DOMAIN, 'password' => $this->password])
         ->assertSessionHasNoErrors()
-        ->assertRedirect(RouteServiceProvider::home());
+        ->assertRedirect(RouteServiceProvider::home('testcom'));
 
     $this->assertAuthenticated();
 });
@@ -106,7 +96,7 @@ test('login is rejected with a wrong password', function (): void {
     registerLdapUser($this->username, $this->password);
     auth()->logout();
 
-    $this->post('/login', ['uid' => $this->username, 'password' => 'wrong-password'])
+    $this->post('/testcom/login', ['uid' => $this->username, 'password' => 'wrong-password'])
         ->assertSessionHasErrors('uid');
 
     $this->assertGuest();
@@ -120,7 +110,7 @@ test('a locked user cannot log in even with the correct password', function (): 
     $ldapUser->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldapUser->save();
 
-    $this->post('/login', ['uid' => $this->username, 'password' => $this->password])
+    $this->post('/testcom/login', ['uid' => $this->username, 'password' => $this->password])
         ->assertSessionHasErrors('uid');
 
     $this->assertGuest();

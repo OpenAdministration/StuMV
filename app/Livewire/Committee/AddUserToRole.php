@@ -4,6 +4,7 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use Flux\Flux;
@@ -59,7 +60,7 @@ class AddUserToRole extends Component
     public function render()
     {
         $c = Community::findByOrFail('ou', $this->uid);
-        $users = $c->membersGroup()->members()->get();
+        $users = User::query()->in($c->peopleDn())->get();
 
         $committee = Committee::findByName($this->uid, $this->ou);
         $role = $committee?->roles()->where('cn', $this->cn)->first();
@@ -87,6 +88,7 @@ class AddUserToRole extends Component
             RoleMembership::create([
                 'role_cn' => $this->cn,
                 'committee_dn' => $committee->getDn(),
+                'realm' => $this->uid,
                 'username' => $username,
                 'from' => $this->start_date,
                 'until' => ! empty($this->end_date) ? $this->end_date : null,

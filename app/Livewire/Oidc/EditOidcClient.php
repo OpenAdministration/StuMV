@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Oidc;
 
+use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
 use Illuminate\Validation\Rule;
@@ -14,15 +15,20 @@ class EditOidcClient extends Component
     #[Locked]
     public string $clientId;
 
+    public string $uid = '';
+
     public string $name = '';
 
     public string $redirectUris = '';
 
     public array $scopes = [];
 
-    public function mount(PassportClient $client)
+    public function mount(Community $realm, PassportClient $client): void
     {
-        abort_if($client->community_uid !== null, 404);
+        abort_if($realm->isAdminRealm(), 404);
+        $this->uid = $realm->getFirstAttribute('ou');
+
+        abort_if($client->community_uid !== $this->uid || ! $client->hasGrantType('authorization_code'), 404);
 
         $this->clientId = $client->id;
         $this->name = $client->name;
@@ -72,7 +78,7 @@ class EditOidcClient extends Component
     {
         $this->validate();
 
-        $client = PassportClient::whereNull('community_uid')->findOrFail($this->clientId);
+        $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->clientId);
 
         $clients->update($client, $this->name, $this->redirectUriList());
         $client->forceFill([
@@ -81,6 +87,6 @@ class EditOidcClient extends Component
 
         Flux::toast(variant: 'success', text: __('oidc_clients.edit_success'));
 
-        $this->redirect(route('oidc-clients.list'), navigate: true);
+        $this->redirect(route('realms.oidc-clients', ['realm' => $this->uid]), navigate: true);
     }
 }

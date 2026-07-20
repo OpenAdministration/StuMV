@@ -42,17 +42,15 @@ class LdapSyncGroups extends Command
             $date = Date::createFromFormat('Y-m-d', $this->option('date'));
         }
 
-        // Fetch every active membership, every LDAP user they refer to, and
-        // every group/role mapping in one query each - instead of one query
-        // per group/role mapping encountered while walking the realm/group
-        // tree below.
+        // Fetch every active membership and every group/role mapping in one
+        // query each - instead of one query per group/role mapping
+        // encountered while walking the realm/group tree below. LDAP users
+        // are resolved per-realm instead (see the loop below): usernames are
+        // only unique within one realm now, so a single global uid lookup
+        // could resolve the wrong realm's account and sync the wrong person
+        // into a security-relevant LDAP group.
         $memberships = RoleMembership::active($date)->get();
         $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
-
-        $ldapUsersByUsername = LdapUser::query()
-            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
-            ->get()
-            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
 
         $groupRolesByGroup = GroupMembership::all()->groupBy('group_dn');
 
@@ -62,9 +60,16 @@ class LdapSyncGroups extends Command
             ->get();
 
         foreach ($realms as $realm) {
-            $this->comment('> '.$realm->getFirstAttribute('ou'));
+            $realmUid = $realm->getFirstAttribute('ou');
+            $this->comment('> '.$realmUid);
 
-            $groups = Group::query()->in(Group::dnRoot($realm->getFirstAttribute('ou')))->get();
+            $usernamesInRealm = $memberships->where('realm', $realmUid)->pluck('username')->unique()->all();
+            $ldapUsersByUsername = empty($usernamesInRealm)
+                ? collect()
+                : LdapUser::query()->in($realm->peopleDn())->whereIn('uid', $usernamesInRealm)->get()
+                    ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
+
+            $groups = Group::query()->in(Group::dnRoot($realmUid))->get();
             foreach ($groups as $group) {
                 $this->comment('  |-> '.$group->getDn());
 

@@ -112,7 +112,7 @@
                         @if($isAdmin)
                             <flux:link
                                 wire:navigate
-                                :href="route('profile', ['username' => $member->username])"
+                                :href="route('profile', ['realm' => $uid, 'username' => $member->username])"
                             >
                                 {{ $displayName }}
                             </flux:link>

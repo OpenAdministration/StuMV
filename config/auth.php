@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Rules\DenyLockedUsers;
+use App\Ldap\Scopes\ScopedToRealmPeople;
 use App\Ldap\User;
 
 return [
@@ -73,12 +74,22 @@ return [
             'rules' => [
                 DenyLockedUsers::class,
             ],
+            'scopes' => [
+                // Restricts every LDAP search this guard performs to the
+                // {realm} bound on the current route - see
+                // App\Ldap\Scopes\ScopedToRealmPeople for why this is safe to
+                // apply globally to the guard (only realm-scoped routes ever
+                // trigger LDAP authentication now).
+                ScopedToRealmPeople::class,
+            ],
             'database' => [
                 'model' => App\Models\User::class,
                 'sync_passwords' => false,
-                'sync_existing' => [
-                    'email' => 'mail',
-                ],
+                // Must not auto-match on email: two independent realm-scoped
+                // accounts (see the "admin" dual-account case) can legitimately
+                // share an email address, and this fallback would incorrectly
+                // collapse them onto a single database row.
+                'sync_existing' => false,
                 'sync_attributes' => [
                     'full_name' => 'cn',
                     'email' => 'mail',

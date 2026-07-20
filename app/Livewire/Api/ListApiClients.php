@@ -30,6 +30,7 @@ class ListApiClients extends Component
 
     public function mount(Community $realm)
     {
+        abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
@@ -49,9 +50,20 @@ class ListApiClients extends Component
         $this->resetPage();
     }
 
+    /**
+     * OIDC clients now also carry a community_uid, so grant_types (not just
+     * community_uid) is what actually distinguishes the two client kinds
+     * sharing this table.
+     */
+    private function scopeToRealmApiClients()
+    {
+        return PassportClient::where('community_uid', $this->uid)
+            ->whereJsonContains('grant_types', 'client_credentials');
+    }
+
     public function render()
     {
-        $clients = PassportClient::where('community_uid', $this->uid)
+        $clients = $this->scopeToRealmApiClients()
             ->when($this->search !== '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
@@ -62,7 +74,7 @@ class ListApiClients extends Component
 
     public function revokePrepare(string $clientId): void
     {
-        $client = PassportClient::where('community_uid', $this->uid)->findOrFail($clientId);
+        $client = $this->scopeToRealmApiClients()->findOrFail($clientId);
         $this->revokeClientId = $client->id;
         $this->revokeClientName = $client->name;
         Flux::modal('revoke')->show();
@@ -70,7 +82,7 @@ class ListApiClients extends Component
 
     public function revokeCommit(): void
     {
-        $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->revokeClientId);
+        $client = $this->scopeToRealmApiClients()->findOrFail($this->revokeClientId);
 
         $client->tokens()->with('refreshToken')->each(function ($token): void {
             $token->refreshToken?->revoke();

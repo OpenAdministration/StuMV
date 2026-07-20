@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Ldap\Community;
-use App\Ldap\User as LdapUser;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -52,26 +51,25 @@ class RouteServiceProvider extends ServiceProvider
 
     public static function home($uid = null)
     {
-        if (empty($uid)) {
-            // Skip the /pick-realm Livewire component boot for the common
-            // case of a single-community member - go straight to their
-            // dashboard in one redirect instead of two. Not every
-            // authenticated App\Models\User has a matching LDAP entry (e.g.
-            // mid-registration/email-verification) - findByUsername()
-            // (unlike ->ldap()) returns null instead of aborting for those.
-            $ldapUser = LdapUser::findByUsername(Auth::user()->username);
+        if (! empty($uid)) {
+            return route('realms.dashboard', $uid);
+        }
 
-            if ($ldapUser && ! $ldapUser->isSuperAdmin()) {
-                $memberships = Community::membershipsFor($ldapUser);
+        // Login is realm-scoped now, so an account has at most one realm by
+        // construction - no membership counting needed, just trust the
+        // "realm" column that was (re-)stamped on this account at login time
+        // (see AuthenticatedSessionController::store()). Not every
+        // authenticated App\Models\User has a matching LDAP entry yet (e.g.
+        // mid-registration/email-verification) - ldapOrNull() (unlike
+        // ->ldap()) returns null instead of aborting for those.
+        $ldapUser = Auth::user()->ldapOrNull();
 
-                if (count($memberships) === 1) {
-                    return route('realms.dashboard', array_key_first($memberships));
-                }
-            }
-
+        if ($ldapUser && $ldapUser->isSuperAdmin()) {
             return route('realms.pick');
         }
 
-        return route('realms.dashboard', $uid);
+        return Auth::user()->realm
+            ? route('realms.dashboard', Auth::user()->realm)
+            : route('realms.pick');
     }
 }

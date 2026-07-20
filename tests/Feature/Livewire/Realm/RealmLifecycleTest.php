@@ -26,7 +26,7 @@ test('a super admin can create a realm with the full skeleton', function (): voi
     TestLdap::track($community); // hand the component-created community to teardown
 
     expect($community)->not->toBeNull()
-        ->and($community->membersGroup())->not->toBeNull()
+        ->and(\LdapRecord\Models\OpenLDAP\OrganizationalUnit::query()->find($community->peopleDn()))->not->toBeNull()
         ->and($community->adminsGroup())->not->toBeNull();
 });
 

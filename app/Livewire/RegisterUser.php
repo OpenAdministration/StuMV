@@ -2,20 +2,26 @@
 
 namespace App\Livewire;
 
-use App\Ldap\Domain;
+use App\Ldap\Community;
 use App\Ldap\User;
+use App\Models\RealmBranding;
 use App\Rules\DomainRegistrationRule;
 use App\Rules\UniqueEmail;
+use App\Support\RealmContext;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class RegisterUser extends Component
 {
     // public User $user;
+
+    #[Locked]
+    public string $realm_uid;
 
     public string $email = '';
 
@@ -36,13 +42,21 @@ class RegisterUser extends Component
 
     public string $domain = '';
 
+    public function mount(Community $realm): void
+    {
+        abort_if($realm->isAdminRealm(), 404);
+        $this->realm_uid = $realm->getShortCode();
+    }
+
     protected function rules(): array
     {
+        $community = Community::findOrFailByUid($this->realm_uid);
+
         return [
             'email' => [
                 'required',
                 'email',
-                new UniqueEmail,
+                new UniqueEmail($community),
             ],
             'password' => [
                 'required',
@@ -51,7 +65,7 @@ class RegisterUser extends Component
             ],
             'domain' => [
                 'required',
-                new DomainRegistrationRule,
+                new DomainRegistrationRule($community),
             ],
         ];
     }
@@ -91,8 +105,10 @@ class RegisterUser extends Component
 
     public function render()
     {
-        return view('livewire.register-user')
-            ->layout('layouts.guest')
+        $branding = RealmBranding::forRealm($this->realm_uid);
+
+        return view('livewire.register-user', ['branding' => $branding])
+            ->layout('layouts.guest', ['branding' => $branding])
             ->title(__('user.register'));
     }
 
@@ -100,8 +116,7 @@ class RegisterUser extends Component
     {
         $this->validateDomain();
         $this->validate();
-        $domain = Domain::findByOrFail('dc', $this->domain);
-        $community = $domain->community();
+        $community = Community::findOrFailByUid($this->realm_uid);
         $user = new User([
             'uid' => $this->username,
             'cn' => $this->first_name.' '.$this->last_name,
@@ -111,18 +126,33 @@ class RegisterUser extends Component
             'userPassword' => '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID),
             // usually ldap SHOULD hash it itself - did not work
         ]);
-        $user->setDn("uid=$this->username,ou=People,{base}");
+        $user->setDn("uid=$this->username,".$community->peopleDn());
         try {
             $user->save();
-            $community->membersGroup()->members()->attach($user);
+            // Membership is the location itself now - no group to attach to.
+
+            // entryUUID is server-assigned and not part of the in-memory
+            // model right after an insert - refresh so getConvertedGuid()
+            // below actually returns it.
+            $user->refresh();
 
             // Credentials must be keyed for the LDAP guard (see LoginRequest);
             // a positional array does not validate.
             // Auth::validate (not attempt) syncs the LDAP user into the
-            // database without logging the freshly registered user in.
+            // database without logging the freshly registered user in. This
+            // component's save() runs through Livewire's own update
+            // mechanism, not a plain request to {realm}/register - the
+            // current request has no bound {realm} route parameter for
+            // ScopedToRealmPeople to read (unlike a real controller action
+            // bound directly to that route, e.g. AuthenticatedSessionController::store()),
+            // so it has to be told explicitly here.
+            app(RealmContext::class)->set($community);
             Auth::validate(['uid' => $this->username, 'password' => $this->password]);
 
-            $eloquentUser = \App\Models\User::where('username', $this->username)->first();
+            // Resolve by the fresh LDAP entry's own GUID, not by username -
+            // a username search could now match a different realm's existing
+            // account sharing the same username.
+            $eloquentUser = \App\Models\User::where('uid', $user->getConvertedGuid())->first();
             $eloquentUser->update([
                 'realm' => $community->getFirstAttribute('ou'),
             ]);
@@ -132,10 +162,11 @@ class RegisterUser extends Component
             // SendEmailVerificationNotification listener requires to send.
             event(new Registered($eloquentUser));
 
-            return to_route('login')->with('status', __('user.registration_successful_verify_email'));
+            return to_route('realm.login', ['realm' => $this->realm_uid])->with('status', __('user.registration_successful_verify_email'));
 
         } catch (LdapRecordException $ldapRecordException) {
-            dump($ldapRecordException->getDetailedError());
+            report($ldapRecordException);
+            $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));
         }
     }
 }

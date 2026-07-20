@@ -8,10 +8,14 @@ use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 /**
- * Registration is LDAP-backed: the RegisterUser Livewire component validates the
- * email domain against the registerable domains in LDAP and, on success, creates
- * the account in the directory and logs the user in. The seeded example.test
- * domain belongs to the "testcom" community (docker/openldap/bootstrap).
+ * Registration is LDAP-backed and realm-bound: the RegisterUser Livewire
+ * component (mounted at {realm}/register) validates the email domain against
+ * that specific realm's registerable domains and, on success, creates the
+ * account directly under its People branch and logs the user in. There is no
+ * dedicated register-realm picker anymore - /register just redirects to the
+ * shared /login picker, whose realm-specific login page links onward to
+ * {realm}/register. The seeded example.test domain belongs to the "testcom"
+ * community (docker/openldap/bootstrap).
  */
 beforeEach(function (): void {
     // Unique per run so repeated local runs don't collide; removed in afterEach.
@@ -24,22 +28,24 @@ afterEach(function (): void {
     purgeRegisteredUser($this->username);
 });
 
-/** Detach from the community and delete the LDAP user a registration created. */
+/** Delete the LDAP user a registration created. */
 function purgeRegisteredUser(string $username): void
 {
-    $ldapUser = LdapUser::findByUsername($username);
-    if ($ldapUser === null) {
-        return;
-    }
-    Community::findByUid('testcom')?->membersGroup()?->members()->detach($ldapUser);
-    $ldapUser->delete();
+    LdapUser::findByUsername($username)?->delete();
 }
 
-test('registration screen can be rendered and livewire is there', function (): void {
-    $response = $this->get('/register');
+test('the registration picker redirects to the shared login picker', function (): void {
+    $this->get('/register')->assertRedirect(route('login'));
+});
 
-    $response->assertStatus(200);
-    $response->assertSeeLivewire('register-user');
+test('the realm-specific registration form can be reached directly', function (): void {
+    $this->get(route('realm.register', ['realm' => 'testcom']))
+        ->assertStatus(200)
+        ->assertSeeLivewire('register-user');
+});
+
+test('the admin realm has no registration form', function (): void {
+    $this->get(route('realm.register', ['realm' => 'admin']))->assertNotFound();
 });
 
 test('a valid registration persists every submitted field, joins the community and requires email verification', function (): void {
@@ -47,11 +53,12 @@ test('a valid registration persists every submitted field, joins the community a
     // the LDAP auth events that Auth::validate() relies on still fire.
     Event::fake([Registered::class]);
 
+    $community = Community::findByUid('testcom');
     $email = $this->username.'@example.test';
 
     // Set email first: the component's updatedEmail() hook pre-fills the name
     // fields from the address, so our explicit values must be set afterwards.
-    Livewire::test('register-user')
+    Livewire::test('register-user', ['realm' => $community])
         ->set('email', $email)
         ->set('first_name', 'Happy')
         ->set('last_name', 'Path')
@@ -60,7 +67,7 @@ test('a valid registration persists every submitted field, joins the community a
         ->set('password_confirmation', $this->password)
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('login'));
+        ->assertRedirect(route('realm.login', ['realm' => 'testcom']));
 
     // Every attribute the component writes must round-trip to the directory.
     $ldapUser = LdapUser::findByUsername($this->username);
@@ -71,10 +78,10 @@ test('a valid registration persists every submitted field, joins the community a
         ->and($ldapUser->getFirstAttribute('cn'))->toBe('Happy Path')
         ->and($ldapUser->getFirstAttribute('mail'))->toBe($email);
 
-    // The account joined the community that owns the registration domain...
-    $members = Community::findByUid('testcom')->membersGroup()->members()->get()
-        ->map(fn ($member) => $member->getFirstAttribute('uid'));
-    expect($members)->toContain($this->username);
+    // The account joined the community that owns the registration domain -
+    // membership is the location itself, so its entry lives directly under
+    // that community's own People branch.
+    expect($ldapUser->getDn())->toEndWith(','.$community->peopleDn());
 
     // ...and the database entry records that community as its realm.
     expect(DbUser::where('username', $this->username)->value('realm'))->toBe('testcom');
@@ -87,8 +94,10 @@ test('a valid registration persists every submitted field, joins the community a
     $this->assertGuest();
 });
 
-test('registration is refused for a domain that is not registerable', function (): void {
-    Livewire::test('register-user')
+test('registration is refused for a domain that is not registerable in this realm', function (): void {
+    $community = Community::findByUid('testcom');
+
+    Livewire::test('register-user', ['realm' => $community])
         ->set('first_name', 'Jon')
         ->set('last_name', 'Doe')
         ->set('username', 'jondoe')
@@ -99,21 +108,33 @@ test('registration is refused for a domain that is not registerable', function (
         ->assertHasErrors('domain');
 });
 
+test('registration is refused for a domain registered to a different realm', function (): void {
+    $demo = Community::findByUid('demo');
+
+    Livewire::test('register-user', ['realm' => $demo])
+        ->set('email', 'someone@example.test') // registered to testcom, not demo
+        ->call('save')
+        ->assertHasErrors('domain');
+});
+
 test('the username may only contain lowercase url-safe characters', function (): void {
-    Livewire::test('register-user')
+    $community = Community::findByUid('testcom');
+
+    Livewire::test('register-user', ['realm' => $community])
         ->set('username', 'Not Allowed!')
         ->call('save')
         ->assertHasErrors('username');
 });
 
 test('registration enforces the password policy', function (): void {
+    $community = Community::findByUid('testcom');
     $short = 'Ab1$';        // too short
     $noUpper = 'abcdefg1$';  // no uppercase
     $noNumber = 'Abcdefg$';  // no number
     $noSymbol = 'Abcdefg1';  // no symbol
     $valid = 'Abcdef1$';     // satisfies Password::default()
 
-    Livewire::test('register-user')
+    Livewire::test('register-user', ['realm' => $community])
         ->set('password', $short)->call('save')->assertHasErrors('password')
         ->set('password', $noUpper)->call('save')->assertHasErrors('password')
         ->set('password', $noNumber)->call('save')->assertHasErrors('password')

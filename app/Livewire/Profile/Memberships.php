@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Profile;
 
+use App\Ldap\Committee;
+use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Ldap\User;
 use App\Models\RoleMembership;
@@ -12,19 +14,34 @@ use Livewire\Component;
 class Memberships extends Component
 {
     #[Locked]
+    public string $realm_uid;
+
+    #[Locked]
     public $currentUsername;
 
     public bool $showOnlyActive = true;
 
-    public function mount($username)
+    public function mount(Community $realm, $username)
     {
-        $this->authorize('manageProfile', [User::class, $username]);
+        $this->authorize('manageProfile', [User::class, $realm, $username]);
+        $this->realm_uid = $realm->getShortCode();
         $this->currentUsername = $username;
     }
 
-    public function getMemberships(string $username, bool $onlyActive)
+    /**
+     * A plain realm parameter (not $this->realm_uid) so this is safely
+     * callable on an instance resolved outside the normal Livewire
+     * lifecycle (e.g. ListMembers::exportPdf() via resolve(Memberships::class)),
+     * which never runs mount().
+     */
+    public function getMemberships(string $realmUid, string $username, bool $onlyActive)
     {
-        $query = RoleMembership::where('username', $username);
+        // committee_dn is a bare string column (no realm reference of its
+        // own) - filter by which realm's Committees branch it falls under
+        // in addition to username, since the same username can now
+        // independently exist in more than one realm.
+        $query = RoleMembership::where('username', $username)
+            ->where('committee_dn', 'like', '%'.Committee::dnRootResolved($realmUid));
         if ($onlyActive) {
             $query->whereNull('until');
         }
@@ -46,8 +63,8 @@ class Memberships extends Component
 
     public function render()
     {
-        $memberships = $this->getMemberships($this->currentUsername, $this->showOnlyActive);
-        $user = User::findOrFailByUsername($this->currentUsername);
+        $memberships = $this->getMemberships($this->realm_uid, $this->currentUsername, $this->showOnlyActive);
+        $user = User::query()->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())->where('uid', '=', $this->currentUsername)->first() ?? abort(404);
         $givenName = $user->getFirstAttribute('givenName');
         $sn = $user->getFirstAttribute('sn');
 
@@ -60,8 +77,8 @@ class Memberships extends Component
 
     public function exportPdf()
     {
-        $memberships = $this->getMemberships($this->currentUsername, false);
-        $user = User::findOrFailByUsername($this->currentUsername);
+        $memberships = $this->getMemberships($this->realm_uid, $this->currentUsername, false);
+        $user = User::query()->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())->where('uid', '=', $this->currentUsername)->first() ?? abort(404);
         $pdf = Pdf::loadView('pdfs.memberships', [
             'fullName' => $user->cn[0],
             'community' => null,

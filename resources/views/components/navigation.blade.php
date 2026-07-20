@@ -21,12 +21,22 @@
                 {{ __('realms.nav_dashboard') }}
             </flux:sidebar.item>
             <flux:sidebar.item
-                icon="list-tree"
+                icon="circle-user"
                 wire:navigate
-                :href="route('committees.list', ['realm' => $realm])"
+                :href="route('profile', ['realm' => $realm, 'username' => auth()->user()->username])"
             >
-                {{ __('realms.nav_committees_and_roles') }}
+                {{ __('realms.dashboard.profile_heading') }}
             </flux:sidebar.item>
+            @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('realm'))
+            @unless($currentCommunity->isAdminRealm())
+                <flux:sidebar.item
+                    icon="list-tree"
+                    wire:navigate
+                    :href="route('committees.list', ['realm' => $realm])"
+                >
+                    {{ __('realms.nav_committees_and_roles') }}
+                </flux:sidebar.item>
+            @endunless
             <flux:sidebar.item
                 icon="users"
                 wire:navigate
@@ -34,15 +44,16 @@
             >
                 {{ __('realms.nav_people') }}
             </flux:sidebar.item>
-            <flux:sidebar.item
-                icon="user-star"
-                wire:navigate
-                :href="route('realms.mods', ['realm' => $realm])"
-            >
-                {{ __('realms.dashboard.mods_headline') }}
-            </flux:sidebar.item>
-            @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('realm'))
-            @if(auth()->user()->can('moderator', $currentCommunity) || auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+            @unless($currentCommunity->isAdminRealm())
+                <flux:sidebar.item
+                    icon="user-star"
+                    wire:navigate
+                    :href="route('realms.mods', ['realm' => $realm])"
+                >
+                    {{ __('realms.dashboard.mods_headline') }}
+                </flux:sidebar.item>
+            @endunless
+            @if(! $currentCommunity->isAdminRealm() && (auth()->user()->can('moderator', $currentCommunity) || auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class)))
                 <flux:sidebar.item
                     icon="shield-user"
                     wire:navigate
@@ -51,7 +62,7 @@
                     {{ __('realms.dashboard.admin_headline') }}
                 </flux:sidebar.item>
             @endif
-            @if(auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+            @if(! $currentCommunity->isAdminRealm() && (auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class)))
                 <flux:sidebar.item
                     icon="key-round"
                     wire:navigate
@@ -73,8 +84,15 @@
                 >
                     {{ __('api_clients.list_title') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item
+                    icon="network"
+                    wire:navigate
+                    :href="route('realms.oidc-clients', ['realm' => $realm])"
+                >
+                    {{ __('oidc_clients.list_title') }}
+                </flux:sidebar.item>
             @endif
-            @can('tools', \Illuminate\Support\Facades\Route::current()->parameter('realm'))
+            @if(! $currentCommunity->isAdminRealm() && auth()->user()->can('tools', $currentCommunity))
                 <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="hammer"
@@ -84,26 +102,12 @@
                 >
                     {{ __('tools.tools') }}
                 </flux:sidebar.item>
-            @endcan
+            @endif
         @endcan
         @can('superadmin', \App\Models\User::class)
             @can('picked', \App\Ldap\Community::class)
                 <flux:separator class="my-2" />
             @endcan
-            <flux:sidebar.item
-                icon="squirrel"
-                wire:navigate
-                :href="route('superadmins.list')"
-            >
-                {{ __('Superadmins') }}
-            </flux:sidebar.item>
-            <flux:sidebar.item
-                icon="network"
-                wire:navigate
-                :href="route('oidc-clients.list')"
-            >
-                {{ __('oidc_clients.list_title') }}
-            </flux:sidebar.item>
             <flux:sidebar.item
                 icon="log-in"
                 wire:navigate

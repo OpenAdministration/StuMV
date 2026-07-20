@@ -56,6 +56,7 @@ class ListGroupMembers extends Component
 
     public function render()
     {
+        $community = Community::findOrFailByUid($this->realm_uid);
         $group = Group::findOrFail(Group::dnFrom($this->realm_uid, $this->group_cn));
 
         // A group's members are derived from the active memberships of every
@@ -72,7 +73,7 @@ class ListGroupMembers extends Component
         $usernames = $desiredMemberships->pluck('username')->unique()->filter()->all();
         $ldapUsersByUsername = empty($usernames)
             ? collect()
-            : User::query()->whereIn('uid', $usernames)->get()->keyBy(fn (User $user) => $user->getFirstAttribute('uid'));
+            : User::query()->in($community->peopleDn())->whereIn('uid', $usernames)->get()->keyBy(fn (User $user) => $user->getFirstAttribute('uid'));
 
         // The actual LDAP state (what "ldap:sync-groups" last wrote), so we
         // can flag members that are desired but not yet synced ("pending")

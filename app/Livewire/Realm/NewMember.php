@@ -4,22 +4,40 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Rules\UniqueEmail;
 use Flux\Flux;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
-use Livewire\Attributes\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
+/**
+ * A realm-admin-facing registration form: unlike self-registration
+ * (App\Livewire\RegisterUser), this creates a brand-new account directly
+ * under the admin's own realm and deliberately skips domain-registration
+ * checking - an admin adding someone here is a trusted, manual action, not
+ * an unsupervised public signup that needs gating by email domain.
+ */
 class NewMember extends Component
 {
-    public string $search = '';
+    public string $email = '';
 
-    #[Rule('required|array')]
-    public array $selectedUsers = [];
+    #[Validate('required|string|max:255')]
+    public string $first_name = '';
 
-    #[Rule('required|string')]
+    #[Validate('required|string|max:255')]
+    public string $last_name = '';
+
+    #[Validate('required|string|min:3|max:255|regex:/^[0-9a-z_\-\.]*$/')]
+    public string $username = '';
+
+    #[Validate]
+    public string $password = '';
+
+    #[Validate]
+    public string $password_confirmation = '';
+
     public string $realm_uid = '';
 
     public function mount(Community $realm): void
@@ -27,35 +45,68 @@ class NewMember extends Component
         $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render(): Factory|View|Application
+    protected function rules(): array
     {
-        $realm = Community::findOrFailByUid($this->realm_uid);
-        $userList = User::query()->search()
-            ->get();
-        $memberDns = $realm->membersGroup()->members()->get()->modelDns()->toBase();
-        $selectable_users = $userList->filter(fn ($user) => $memberDns->doesntContain($user->getDn()))
-            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
-            ->values();
+        return [
+            'email' => [
+                'required',
+                'email',
+                new UniqueEmail(Community::findOrFailByUid($this->realm_uid)),
+            ],
+            'password' => [
+                'required',
+                Password::default(),
+                'confirmed',
+            ],
+        ];
+    }
 
-        return view('livewire.realm.new-member', ['selectable_users' => $selectable_users])
+    public function render()
+    {
+        return view('livewire.realm.new-member')
             ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));
     }
 
     public function save()
     {
         $this->validate();
-        foreach ($this->selectedUsers as $dn) {
-            try {
-                $user = User::findOrFail($dn);
-                $realm = Community::findOrFailByUid($this->realm_uid);
-                $realm->membersGroup()->members()->attach($user);
 
-                \App\Models\User::where('username', $user->getFirstAttribute('uid'))->update(['realm' => $this->realm_uid]);
-            } catch (LdapRecordException $exception) {
-                $this->addError('dn', $exception->getMessage());
+        $realm = Community::findOrFailByUid($this->realm_uid);
 
-                return false;
-            }
+        $user = new User([
+            'uid' => $this->username,
+            'cn' => $this->first_name.' '.$this->last_name,
+            'sn' => $this->last_name,
+            'givenName' => $this->first_name,
+            'mail' => $this->email,
+            'userPassword' => '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID),
+        ]);
+        $user->setDn("uid=$this->username,".$realm->peopleDn());
+
+        try {
+            $user->save();
+
+            // entryUUID is server-assigned and not part of the in-memory
+            // model right after an insert - refresh so getConvertedGuid()
+            // below actually returns it.
+            $user->refresh();
+
+            \App\Models\User::updateOrCreate(
+                ['uid' => $user->getConvertedGuid()],
+                [
+                    'username' => $this->username,
+                    'full_name' => $this->first_name.' '.$this->last_name,
+                    'email' => $this->email,
+                    'email_verified_at' => now(),
+                    'password' => password_hash(Str::random(40), PASSWORD_ARGON2ID),
+                    'realm' => $this->realm_uid,
+                ],
+            );
+        } catch (LdapRecordException $ldapRecordException) {
+            report($ldapRecordException);
+            $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));
+
+            return false;
         }
 
         Flux::toast(variant: 'success', text: __('realms.added_new_member'));

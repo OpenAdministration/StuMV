@@ -72,7 +72,7 @@ class ListCommitteeModerators extends Component
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
         $this->authorize('moderator', [$committee, $community]);
 
-        $user = User::findOrFailByUsername($username);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $username)->first() ?? abort(404);
         $isModerator = $committee->moderatorsGroup()->members()->contains($user);
         if (! $isModerator) {
             return;
@@ -88,7 +88,7 @@ class ListCommitteeModerators extends Component
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
         $this->authorize('moderator', [$committee, $community]);
 
-        $user = User::findOrFailByUsername($this->deleteModeratorUsername);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteModeratorUsername)->first() ?? abort(404);
         $committee->moderatorsGroup()->members()->detach($user);
         $this->close();
     }

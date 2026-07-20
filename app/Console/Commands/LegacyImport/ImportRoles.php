@@ -73,6 +73,7 @@ class ImportRoles extends Command
                 RoleMembership::create([
                     'role_cn' => $role->rshort,
                     'committee_dn' => $c->getDn(),
+                    'realm' => $role->realm_uid,
                     'username' => $assertion->username,
                     'from' => $assertion->from,
                     'until' => $assertion->until,

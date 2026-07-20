@@ -7,8 +7,9 @@ use Tests\Support\TestLdap;
 /**
  * Exercises the on-the-fly directory builder (Tests\Support\TestLdap) and, with
  * it, App\Ldap\Community::generateSkeleton() — the code that lays out a new
- * community's Groups/Committees/Domains OUs and its admins/moderators/members
- * groups. Everything created here is torn down by the global afterEach.
+ * community's People/Groups/Committees/Domains OUs and its admins/moderators
+ * groups (membership is the location itself now, there is no members group).
+ * Everything created here is torn down by the global afterEach.
  */
 test('a freshly built community has the full group skeleton', function (): void {
     $community = newCommunity();
@@ -16,7 +17,7 @@ test('a freshly built community has the full group skeleton', function (): void 
     $found = Community::findByUid($community->getShortCode());
 
     expect($found)->not->toBeNull()
-        ->and($found->membersGroup())->not->toBeNull()
+        ->and(\LdapRecord\Models\OpenLDAP\OrganizationalUnit::query()->find($found->peopleDn()))->not->toBeNull()
         ->and($found->moderatorsGroup())->not->toBeNull()
         ->and($found->adminsGroup())->not->toBeNull();
 });

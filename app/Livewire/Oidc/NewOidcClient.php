@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Oidc;
 
+use App\Ldap\Community;
 use App\Models\PassportClient;
 use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
@@ -17,9 +18,17 @@ class NewOidcClient extends Component
 
     public array $scopes = ['openid', 'profile', 'email', 'groups'];
 
+    public string $uid = '';
+
     public ?string $createdClientId = null;
 
     public ?string $createdClientSecret = null;
+
+    public function mount(Community $realm): void
+    {
+        abort_if($realm->isAdminRealm(), 404);
+        $this->uid = $realm->getFirstAttribute('ou');
+    }
 
     protected function redirectUriList(): array
     {
@@ -66,6 +75,7 @@ class NewOidcClient extends Component
         /** @var PassportClient $client */
         $client = $clients->createAuthorizationCodeGrantClient($this->name, $this->redirectUriList());
         $client->forceFill([
+            'community_uid' => $this->uid,
             'scopes' => array_values($this->scopes),
         ])->save();
 

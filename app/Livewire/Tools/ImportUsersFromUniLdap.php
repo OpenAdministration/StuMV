@@ -39,7 +39,7 @@ class ImportUsersFromUniLdap extends Component
             'email' => [
                 'required',
                 'email',
-                new UniqueEmail,
+                new UniqueEmail(Community::findByOrFail('ou', $this->uid)),
             ],
         ];
     }
@@ -96,10 +96,9 @@ class ImportUsersFromUniLdap extends Component
             'userPassword' => '{ARGON2}'.password_hash(Str::uuid(), PASSWORD_ARGON2ID),
             // usually ldap SHOULD hash it itself - did not work
         ]);
-        $user->setDn("uid=$this->username,ou=People,{base}");
+        $user->setDn("uid=$this->username,".$community->peopleDn());
         try {
             $user->save();
-            $community->membersGroup()->members()->attach($user);
 
             \App\Models\User::create([
                 'username' => $this->username,

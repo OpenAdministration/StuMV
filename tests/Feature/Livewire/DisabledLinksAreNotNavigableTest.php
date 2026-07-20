@@ -43,7 +43,7 @@ test('a plain member sees no href on another member\'s disabled profile link', f
         ->call('loadMembers')
         ->html();
 
-    $profileUrl = route('profile', ['username' => $otherMember->username]);
+    $profileUrl = route('profile', ['realm' => $community->getShortCode(), 'username' => $otherMember->username]);
     expect($html)->not->toContain('href="'.$profileUrl.'"');
 });
 

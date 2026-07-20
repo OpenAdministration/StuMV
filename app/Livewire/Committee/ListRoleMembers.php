@@ -120,7 +120,7 @@ class ListRoleMembers extends Component
         $usernames = $members->pluck('username')->unique()->filter()->all();
         $userCache = empty($usernames)
             ? []
-            : User::query()->whereIn('uid', $usernames)->get()->keyBy('uid')->all();
+            : User::query()->in($community->peopleDn())->whereIn('uid', $usernames)->get()->keyBy('uid')->all();
 
         // The member's display name only exists in LDAP, not on the
         // RoleMembership row itself, so search/sort-by-name are applied here

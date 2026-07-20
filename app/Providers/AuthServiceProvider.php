@@ -60,6 +60,7 @@ class AuthServiceProvider extends ServiceProvider
 
         ResetPassword::toMailUsing(static function (mixed $notifiable, string $token) {
             $url = url(route('password.reset', [
+                'realm' => $notifiable->realm,
                 'token' => $token,
                 'mail' => $notifiable->getEmailForPasswordReset(),
             ], false));

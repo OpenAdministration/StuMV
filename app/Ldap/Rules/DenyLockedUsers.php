@@ -11,6 +11,6 @@ class DenyLockedUsers implements Rule
 {
     public function passes(LdapRecord $user, ?Eloquent $model = null): bool
     {
-        return ! User::isLockedByUsername($user->getFirstAttribute('uid'));
+        return ! User::isLockedByUsername($user->getFirstAttribute('uid'), $user->getParentDn());
     }
 }

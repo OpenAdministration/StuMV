@@ -8,31 +8,35 @@ use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
 
-function makeOidcClient(string $name, array $scopes = ['openid']): PassportClient
+function makeOidcClient(string $name, string $communityUid, array $scopes = ['openid']): PassportClient
 {
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient($name, ['https://app.example.com/callback']);
-    $client->forceFill(['scopes' => $scopes])->save();
+    $client->forceFill(['community_uid' => $communityUid, 'scopes' => $scopes])->save();
 
     return $client;
 }
 
-test('only community-independent clients are listed, not the directory API ones', function (): void {
+test('only this realm\'s OIDC clients are listed, not its API clients or another realm\'s OIDC clients', function (): void {
     $community = newCommunity();
-    makeOidcClient('My SSO App');
+    $otherCommunity = newCommunity();
+    makeOidcClient('My SSO App', $community->getShortCode());
+    makeOidcClient('Other Realm SSO App', $otherCommunity->getShortCode());
     $directoryClient = resolve(ClientRepository::class)->createClientCredentialsGrantClient('Directory API Client');
     $directoryClient->forceFill(['community_uid' => $community->getShortCode()])->save();
-    actingAsSuperAdmin();
+    actingAsAdmin($community);
 
-    Livewire::test(ListOidcClients::class)
+    Livewire::test(ListOidcClients::class, ['realm' => $community])
         ->assertSee('My SSO App')
+        ->assertDontSee('Other Realm SSO App')
         ->assertDontSee('Directory API Client');
 });
 
 test('a client can be revoked', function (): void {
-    $client = makeOidcClient('My SSO App');
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    $client = makeOidcClient('My SSO App', $community->getShortCode());
+    actingAsAdmin($community);
 
-    Livewire::test(ListOidcClients::class)
+    Livewire::test(ListOidcClients::class, ['realm' => $community])
         ->call('revokePrepare', $client->id)
         ->call('revokeCommit');
 
@@ -40,19 +44,36 @@ test('a client can be revoked', function (): void {
 });
 
 test('a revoked client can no longer authenticate', function (): void {
-    $client = makeOidcClient('My SSO App');
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    $client = makeOidcClient('My SSO App', $community->getShortCode());
+    actingAsAdmin($community);
 
-    Livewire::test(ListOidcClients::class)
+    Livewire::test(ListOidcClients::class, ['realm' => $community])
         ->call('revokePrepare', $client->id)
         ->call('revokeCommit');
 
     expect(resolve(ClientRepository::class)->findActive($client->id))->toBeNull();
 });
 
-test('a non-superadmin cannot view the OIDC client list', function (): void {
+test('an admin cannot revoke another realm\'s OIDC client', function (): void {
     $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $client = makeOidcClient('Other Realm SSO App', $otherCommunity->getShortCode());
     actingAsAdmin($community);
 
-    $this->get(route('oidc-clients.list'))->assertForbidden();
+    Livewire::test(ListOidcClients::class, ['realm' => $community])
+        ->call('revokePrepare', $client->id);
+})->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+
+test('a non-admin cannot view the OIDC client list', function (): void {
+    $community = newCommunity();
+    actingAsModerator($community);
+
+    $this->get(route('realms.oidc-clients', ['realm' => $community->getShortCode()]))->assertForbidden();
+});
+
+test('the admin realm has no OIDC clients feature', function (): void {
+    actingAsSuperAdmin();
+
+    $this->get(route('realms.oidc-clients', ['realm' => 'admin']))->assertNotFound();
 });

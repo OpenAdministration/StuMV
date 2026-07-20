@@ -4,22 +4,12 @@ use App\Ldap\User as LdapUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 /**
- * App\Ldap\User exposes memberOf()/moderatorOf()/adminOf() relations that list
- * the community groups a user belongs to at each level. These pin that each one
+ * App\Ldap\User exposes moderatorOf()/adminOf() relations that list the
+ * community groups a user belongs to at each level. These pin that each one
  * targets the group its name promises (a regression guard: adminOf/moderatorOf
- * previously copy-pasted memberOf and all filtered cn='members').
+ * previously copy-pasted each other's cn filter).
  */
 uses(RefreshDatabase::class);
-
-test('memberOf lists the members groups the user belongs to', function (): void {
-    $community = newCommunity();
-    $member = actingAsMember($community);
-
-    $cns = LdapUser::findByUsername($member->username)->memberOf()->get()
-        ->map(fn ($group) => $group->getFirstAttribute('cn'));
-
-    expect($cns)->toContain('members')->not->toContain('admins');
-});
 
 test('adminOf lists the admins groups the user belongs to', function (): void {
     $community = newCommunity();

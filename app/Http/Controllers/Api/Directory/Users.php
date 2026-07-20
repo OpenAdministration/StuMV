@@ -30,7 +30,7 @@ class Users extends Controller
             'given_name' => $user->getFirstAttribute('givenName'),
             'family_name' => $user->getFirstAttribute('sn'),
             'course' => $user->getFirstAttribute('description'),
-            'picture' => $picture ? asset('storage/avatars/'.$picture->file_id.'.jpg') : null,
+            'picture' => $picture ? asset('storage/avatars/'.$picture->file_id.'.webp') : null,
         ]);
     }
 
@@ -94,15 +94,12 @@ class Users extends Controller
     }
 
     /**
-     * Keep the lookup realm-bound: only expose users who are actually a
-     * member of this community, not any LDAP account anywhere.
+     * Keep the lookup realm-bound: search directly under this community's
+     * own People branch, rather than a global uid search - simpler, and
+     * correct now that the same uid can independently exist in other realms.
      */
     private function findMemberOrFail(Community $realm, string $uid): LdapUser
     {
-        $user = LdapUser::findByUsername($uid) ?? abort(404);
-
-        abort_unless($realm->membersGroup()->members()->exists($user), 404);
-
-        return $user;
+        return LdapUser::query()->in($realm->peopleDn())->where('uid', '=', $uid)->first() ?? abort(404);
     }
 }

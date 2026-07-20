@@ -37,7 +37,7 @@
                 <flux:navmenu.item
                     icon="circle-user"
                     wire:navigate
-                    :href="route('profile', auth()->user()->username)"
+                    :href="route('profile', ['realm' => auth()->user()->realm, 'username' => auth()->user()->username])"
                 >
                     {{ __('profile.breadcrumb') }}
                 </flux:navmenu.item>

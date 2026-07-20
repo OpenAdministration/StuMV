@@ -41,6 +41,17 @@ class Committee extends OrganizationalUnit
         return "ou=Committees,ou=$uid,ou=Communities,{base}";
     }
 
+    /**
+     * Same as dnRoot(), but with {base} substituted for the connection's
+     * real base DN - needed to compare against plain-string DN columns in
+     * the database (e.g. role_user_relation.committee_dn), which store the
+     * fully resolved DN, never the literal "{base}" placeholder.
+     */
+    public static function dnRootResolved(string $uid): string
+    {
+        return "ou=Committees,ou=$uid,".Community::rootDn();
+    }
+
     public function setDnFrom(string $uid, string|array $ous): static
     {
         $dn = self::dnFrom($uid, $ous);

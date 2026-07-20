@@ -32,7 +32,7 @@
         </flux:field>
 
         <x-slot:abort_route>
-            {{ route('oidc-clients.list') }}
+            {{ route('realms.oidc-clients', ['realm' => $uid]) }}
         </x-slot:abort_route>
     </x-livewire-form>
 </div>

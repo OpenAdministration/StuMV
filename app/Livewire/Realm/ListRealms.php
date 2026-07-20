@@ -129,7 +129,11 @@ class ListRealms extends Component
      */
     private function communityMemberships($ldapUser): array
     {
-        return Community::membershipsFor($ldapUser);
+        // A physical entry lives under at most one community's People branch
+        // now, so this is either empty or a single entry - never more.
+        $realm = Community::membershipFor($ldapUser);
+
+        return $realm === null ? [] : [$realm => true];
     }
 
     public function deletePrepare($uid): void

@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :branding="$branding">
     <x-auth-card>
         <!-- Session Status -->
         @if(session('status'))
@@ -7,24 +7,21 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}" class="w-full flex">
+        <form method="POST" action="{{ route('realm.login', ['realm' => $realm->getShortCode()]) }}" class="w-full flex">
             @csrf
-            <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-xs">
+            <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-800 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
+                <x-auth-logo :branding="$branding" />
+
                 <flux:field>
                     <flux:label>{{ __('auth.username_or_mail') }}</flux:label>
-                    <flux:input type="text" name="uid" id="uid" :value="old('uid')" required autofocus tabindex="1" />
+                    <flux:input type="text" name="uid" id="uid" :value="old('uid')" required autofocus />
                     <flux:error name="uid" />
                 </flux:field>
 
                 <flux:field>
-                    <div class="flex justify-between">
-                        <flux:label>{{ __('common.password') }}</flux:label>
-                        @if (Route::has('password.request'))
-                            <flux:link wire:navigate href="{{ route('password.request') }}" variant="subtle" class="text-sm">{{ __('auth.forgot_password') }}</flux:link>
-                        @endif
-                    </div>
-                    <flux:input type="password" name="password" id="password" required tabindex="2" />
-                    <flux:error name="" />
+                    <flux:label>{{ __('common.password') }}</flux:label>
+                    <flux:input type="password" name="password" id="password" required />
+                    <flux:error name="password" />
                 </flux:field>
 
                 <flux:field variant="inline" class="items-center">
@@ -32,11 +29,26 @@
                     <flux:label class="mb-0!">{{ __('auth.remember_me') }}</flux:label>
                 </flux:field>
 
-                <flux:button variant="primary" icon="log-in" type="submit" tabindex="3">{{ __('auth.log_in') }}</flux:button>
+                <flux:button variant="primary" icon="log-in" type="submit">{{ __('auth.log_in') }}</flux:button>
+
+                @if($ssoProviders->isNotEmpty())
+                    <flux:separator text="{{ __('auth.or_log_in_with') }}" />
+
+                    <div class="flex flex-col gap-2">
+                        @foreach($ssoProviders as $ssoProvider)
+                            <flux:button href="{{ route('sso.redirect', ['realm' => $realm->getShortCode(), 'provider' => $ssoProvider->id]) }}">
+                                {{ __('sso_providers.login_button', ['name' => $ssoProvider->name]) }}
+                            </flux:button>
+                        @endforeach
+                    </div>
+                @endif
 
                 <flux:separator />
 
-                <flux:button icon="user-plus" href="{{ route('register') }}">{{ __('auth.sign_up_prompt') }}</flux:button>
+                <div class="grid grid-cols-2 gap-2">
+                    <flux:button wire:navigate href="{{ route('password.request', ['realm' => $realm->getShortCode()]) }}">{{ __('auth.forgot_password') }}</flux:button>
+                    <flux:button wire:navigate href="{{ route('realm.register', ['realm' => $realm->getShortCode()]) }}">{{ __('auth.sign_up_prompt') }}</flux:button>
+                </div>
             </flux:card>
         </form>
     </x-auth-card>

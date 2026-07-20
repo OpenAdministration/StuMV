@@ -54,7 +54,7 @@
                         @if($isAdmin)
                             <flux:link
                                 wire:navigate
-                                :href="route('profile', ['username' => $realm_member->getFirstAttribute('uid')])"
+                                :href="route('profile', ['realm' => $community_name, 'username' => $realm_member->getFirstAttribute('uid')])"
                             >
                                 {{ $realm_member->getFirstAttribute('cn') }}
                             </flux:link>
@@ -81,7 +81,7 @@
                                         icon="pencil"
                                         :disabled="!$isAdmin"
                                         wire:navigate
-                                        :href="$isAdmin ? route('profile', ['username' => $realm_member->getFirstAttribute('uid')]) : null"
+                                        :href="$isAdmin ? route('profile', ['realm' => $community_name, 'username' => $realm_member->getFirstAttribute('uid')]) : null"
                                     >
                                         {{ __('common.edit') }}
                                     </flux:menu.item>

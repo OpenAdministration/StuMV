@@ -80,13 +80,40 @@ olcAccess: {4}to dn.exact="cn=super-admins,dc=stumv,dc=de"
 olcAccess: {5}to dn.exact="ou=Communities,dc=stumv,dc=de"
   by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
   by users read
-olcAccess: {6}to dn.sub="ou=Communities,dc=stumv,dc=de"
+# Per-realm People branches (ou=People,ou=<realm>,ou=Communities,...) - these
+# must precede the generic Communities catch-all below (OpenLDAP evaluates
+# olcAccess in index order, first match wins), and mirror {1}-{3}'s shape so
+# self-service password changes and anonymous bind-auth keep working for
+# accounts that have been split out of the flat ou=People branch.
+olcAccess: {6}to dn.regex="^uid=[^,]+,ou=People,ou=[^,]+,ou=Communities,dc=stumv,dc=de$" attrs=userPassword
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by self write
+  by anonymous auth
+  by * none
+olcAccess: {7}to dn.regex="^ou=People,ou=[^,]+,ou=Communities,dc=stumv,dc=de$"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by users read
+olcAccess: {8}to dn.regex="^[^,]+,ou=People,ou=[^,]+,ou=Communities,dc=stumv,dc=de$"
   by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
   by group/groupOfUniqueNames/uniqueMember="cn=read,ou=Permissions,ou=Services,dc=stumv,dc=de" read
   by anonymous none
-olcAccess: {7}to dn.exact="dc=stumv,dc=de"
+olcAccess: {9}to dn.sub="ou=Communities,dc=stumv,dc=de"
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by group/groupOfUniqueNames/uniqueMember="cn=read,ou=Permissions,ou=Services,dc=stumv,dc=de" read
+  by anonymous none
+# {4} only ever granted write to cn=super-admins' own attributes (e.g. its
+# uniqueMember list), never the ability to create/delete the entry itself -
+# that requires write access to its *parent*'s children pseudo-attribute,
+# which nothing previously granted (the group only ever existed via the
+# initial slapadd bootstrap, which runs as root and bypasses ACLs). The
+# realm-split migration command is the first thing that ever needs to
+# delete cn=super-admins at runtime, once its members have been relocated.
+olcAccess: {10}to dn.exact="dc=stumv,dc=de" attrs=children
+  by group/groupOfUniqueNames/uniqueMember="cn=write,ou=Permissions,ou=Services,dc=stumv,dc=de" write
+  by * none
+olcAccess: {11}to dn.exact="dc=stumv,dc=de"
   by users read
-olcAccess: {8}to *
+olcAccess: {12}to *
   by users read
   by anonymous none
 

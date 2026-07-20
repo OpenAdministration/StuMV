@@ -13,8 +13,13 @@
         @vite('resources/css/theme.css')
         @vite('resources/js/app.js')
     </head>
-    <body class="flex flex-col h-full bg-zinc-100 dark:bg-zinc-900 overflow-y-auto">
-        <main class="flex flex-col my-auto py-8 overflow-y-visible">
+    <body
+        class="flex flex-col h-full bg-zinc-100! dark:bg-zinc-900! bg-cover bg-center bg-fixed overflow-y-auto"
+        @if(($branding ?? null)?->background_id)
+            style="background-image: url('{{ asset('storage/realm-branding/' . $branding->background_id) }}')"
+        @endif
+    >
+        <main class="flex-1 flex flex-col my-auto py-8 overflow-y-visible">
             {{ $slot }}
         </main>
         @include('layouts.footer')

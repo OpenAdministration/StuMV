@@ -36,7 +36,7 @@ class NewCommitteeModerator extends Component
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
         $this->authorize('moderator', [$committee, $community]);
 
-        $userList = $community->membersGroup()->members()->get();
+        $userList = User::query()->in($community->peopleDn())->get();
         $moderators = $committee->moderatorsGroup()->members()->get();
         // baseCollection does like strings in contains, ldapCollection does not...
         $moderatorDns = $moderators->modelDns()->toBase();

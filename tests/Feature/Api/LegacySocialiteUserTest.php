@@ -33,12 +33,12 @@ test('the legacy user endpoint returns a public url to the profile picture', fun
     $community = newCommunity();
     $user = TestLdap::member($community);
 
-    Storage::disk('public')->put('avatars/some-file-id.jpg', 'fake-image-contents');
-    ProfilePicture::create(['user' => $user->username, 'file_id' => 'some-file-id']);
+    Storage::disk('public')->put('avatars/some-file-id.webp', 'fake-image-contents');
+    ProfilePicture::create(['user' => $user->username, 'realm' => $community->getShortCode(), 'file_id' => 'some-file-id']);
 
     Passport::actingAs($user, ['profile']);
 
     $this->getJson('/api-legacy/user')
         ->assertOk()
-        ->assertJson(['avatar' => asset('storage/avatars/some-file-id.jpg')]);
+        ->assertJson(['avatar' => asset('storage/avatars/some-file-id.webp')]);
 });

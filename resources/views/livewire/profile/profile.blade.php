@@ -3,7 +3,7 @@
         <flux:heading size="xl" class="max-w-6xl mx-auto">{{ $givenName }} {{ $sn }}</flux:heading>
     </div>
 
-    <x-navbar-profile :username="$currentUsername" />
+    <x-navbar-profile :realm="$realm_uid" :username="$currentUsername" />
 
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto space-y-6">

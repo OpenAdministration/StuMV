@@ -12,8 +12,8 @@ class SocialiteUser extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-        $ldapUser = User::findOrFailByUsername($user->username);
-        $picture = ProfilePicture::where('user', $user->username)->first();
+        $ldapUser = $user->ldap();
+        $picture = ProfilePicture::where('user', $user->username)->where('realm', $user->realm)->first();
 
         return response()->json([
             'id' => $user->uid, // not ldap uid, but uuid
@@ -25,7 +25,7 @@ class SocialiteUser extends Controller
             // 'avatar' (Laravel\Socialite\User::getAvatar), which is what the
             // StuFis Passport driver reads; the raw jpegPhoto is base64 and
             // breaks response()->json().
-            'avatar' => $picture ? asset('storage/avatars/'.$picture->file_id.'.jpg') : null,
+            'avatar' => $picture ? asset('storage/avatars/'.$picture->file_id.'.webp') : null,
             'iban' => null,
             'address' => json_encode([
                 'street_address' => $ldapUser->getFirstAttribute('street'),

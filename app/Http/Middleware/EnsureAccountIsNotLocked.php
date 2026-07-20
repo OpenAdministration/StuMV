@@ -20,8 +20,9 @@ class EnsureAccountIsNotLocked
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
+        $ldapUser = $user?->ldapOrNull();
 
-        if ($user && LdapUser::isLockedByUsername($user->username)) {
+        if ($ldapUser && LdapUser::isLockedByUsername($ldapUser->getFirstAttribute('uid'), $ldapUser->getParentDn())) {
             Auth::guard('web')->logout();
 
             $request->session()->invalidate();

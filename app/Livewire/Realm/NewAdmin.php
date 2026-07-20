@@ -25,7 +25,7 @@ class NewAdmin extends Component
     public function render()
     {
         $community = Community::findOrFailByUid($this->realm_uid);
-        $userList = $community->membersGroup()->members()->get();
+        $userList = User::query()->in($community->peopleDn())->get();
         $admins = $community->adminsGroup()->members()->get();
         $adminDns = $admins->modelDns()->toBase();
         $selectable_users = $userList->filter(fn ($user) => $adminDns->doesntContain($user->getDn()))

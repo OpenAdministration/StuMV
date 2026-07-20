@@ -11,6 +11,7 @@ return [
     'confirm_password' => 'Confirm Password',
     'cancel' => 'Cancel',
     'save' => 'Save',
+    'drop_file_here' => 'Drop a file here or click to browse',
     'saved' => 'Saved',
     'new' => 'New',
     'edit' => 'Edit',

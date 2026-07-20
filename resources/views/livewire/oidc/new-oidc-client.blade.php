@@ -18,7 +18,7 @@
         <flux:callout variant="warning" icon="triangle-alert" heading="{{ __('oidc_clients.client_secret_warning') }}" />
 
         <div class="flex justify-end">
-            <flux:button variant="primary" wire:navigate href="{{ route('oidc-clients.list') }}">
+            <flux:button variant="primary" wire:navigate href="{{ route('realms.oidc-clients', ['realm' => $uid]) }}">
                 {{ __('oidc_clients.done') }}
             </flux:button>
         </div>
@@ -58,7 +58,7 @@
             </flux:field>
 
             <x-slot:abort_route>
-                {{ route('oidc-clients.list') }}
+                {{ route('realms.oidc-clients', ['realm' => $uid]) }}
             </x-slot:abort_route>
         </x-livewire-form>
     </div>

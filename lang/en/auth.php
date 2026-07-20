@@ -31,6 +31,7 @@ return [
     'forgot_password' => 'Forgot your password?',
     'send_verification_email' => 'Send verification Email',
     'log_in' => 'Log in',
+    'or_log_in_with' => 'or log in with',
     'log_out' => 'Log out',
     'confirm' => 'Confirm',
     'username_or_mail' => 'Username or Mail',
@@ -39,4 +40,7 @@ return [
     'sign_up_prompt' => 'Sign up and get started!',
     'log_out_button' => 'Log Out',
     'confirm_logout_title' => 'Confirm logout',
+    'pick_realm_label' => 'Community',
+    'pick_realm_placeholder' => 'Select a community',
+    'pick_realm_continue' => 'Continue',
 ];

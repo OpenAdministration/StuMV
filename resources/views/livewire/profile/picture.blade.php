@@ -2,8 +2,8 @@
     <div class="pt-6 sm:pt-8 px-6 sm:px-8 pb-3">
         <flux:heading size="xl" class="max-w-6xl mx-auto">{{ $givenName }} {{ $sn }}</flux:heading>
     </div>
-    
-    <x-navbar-profile :username="$currentUsername" />
+
+    <x-navbar-profile :realm="$realm_uid" :username="$currentUsername" />
 
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-6xl mx-auto space-y-6">
@@ -12,18 +12,24 @@
             <div x-data="cropper">
                 <div>
                     @if($avatarID)
-                        <img class="h-[15rem] rounded-md shadow-sm border border-zinc-200 dark:border-zinc-700" src="{{ asset('storage/avatars/' . $avatarID . '.jpg') }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
-                    @else
-                        <input
-                            id="imageInput"
-                            type="file"
-                            accept="image/*"
-                            class="w-full h-[15rem] xl:h-[25rem] px-3 py-2 border border-zinc-200 rounded-md cursor-pointer"
-                            :value="imageCropped"
-                            x-show="!imageIsSelected"
-                            x-on:change="loadImage"
+                        <img class="h-[15rem] xl:h-[20rem] rounded-md shadow-sm border border-zinc-200 dark:border-zinc-700" src="{{ asset('storage/avatars/' . $avatarID . '.webp') }}" alt="Profile picture of {{ $givenName }} {{ $sn }}">
+                    @elseif($upload && $upload->isPreviewable())
+                        <img
+                            wire:key="cropper-image"
+                            x-ref="image"
+                            x-init="initCropper()"
+                            src="{{ $upload->temporaryUrl() }}"
+                            class="h-[15rem] xl:h-[20rem]"
                         >
-                        <img id="image" class="h-[15rem] xl:h-[25rem]" x-show="imageIsSelected">
+                    @else
+                        <flux:file-upload wire:model="upload" accept="image/*">
+                            <flux:file-upload.dropzone
+                                :heading="__('common.drop_file_here')"
+                                text="JPEG, PNG, WebP"
+                                class="h-[15rem] xl:h-[20rem]"
+                            />
+                        </flux:file-upload>
+                        <flux:error name="upload" />
                     @endif
                 </div>
                 <div class="mt-6 flex items-center justify-end gap-x-3">
@@ -35,17 +41,18 @@
                         >
                             {{ __('Entfernen') }}
                         </flux:button>
-                    @else
+                    @elseif($upload && $upload->isPreviewable())
                         <flux:button
                             icon="ban"
-                            @click="cancelPicture"
+                            wire:click="cancelUpload"
+                            @click="destroyCropper()"
                         >
                             {{ __('Abbrechen') }}
                         </flux:button>
                         <flux:button
                             variant="primary"
                             icon="save"
-                            @click="cropPicture"
+                            @click="cropPicture()"
                         >
                             {{ __('Speichern') }}
                         </flux:button>
@@ -60,60 +67,39 @@
 <script>
 Alpine.data('cropper', () => {
     return {
-        img: null,
-        imgInput: null,
-        file: null,
-        imageFile: null,
-        imageCropped: null,
-        imageIsSelected: false,
         cropper: null,
-        loadImage() {
-            this.img = document.getElementById('image');
-            if (this.cropper != null) {
-                this.cropper.destroy();
-            }
+        initCropper() {
+            this.destroyCropper();
 
-            this.cropper = new Cropper(this.img, {
+            this.cropper = new Cropper(this.$refs.image, {
                 aspectRatio: 1 / 1,
                 zoomable: false,
                 // Keep the crop box from being dragged/resized past the
                 // image's own edges, into the empty canvas area.
                 viewMode: 1,
             });
-
-            this.file = event.target.files[0]
-
-            if (this.file.type.indexOf('image/') === -1) {
-                alert('Bitte wähle eine Bild-Datei aus. / Please select an image file.')
-                return
-            }
-
-            if (typeof FileReader === 'function') {
-                const reader = new FileReader()
-
-                reader.onload = (event) => {
-                    this.imageFile = event.target?.result
-                    this.cropper.replace(event.target?.result)
-                };
-
-                reader.readAsDataURL(this.file);
-                this.imageIsSelected = true;
-            } else {
-                alert('Dein Browser scheint die FileReader-API nicht zu unterstützen. / Your browser does not seem to support the FileReader API.')
+        },
+        destroyCropper() {
+            if (this.cropper != null) {
+                this.cropper.destroy();
+                this.cropper = null;
             }
         },
         cropPicture() {
-            $wire.picture = this.cropper.getCroppedCanvas().toDataURL('image/jpeg')
-            $wire.savePicture()
-        },
-        cancelPicture() {
-            this.img = null
-            this.imgInput = null
-            this.file = null
-            this.imageFile = null
-            this.imageCropped = null
-            this.cropper.destroy()
-            this.imageIsSelected = false
+            // Rounded, in the original (uploaded) image's own pixel
+            // coordinates - matches Illuminate\Image\Image::crop()'s
+            // (width, height, x, y) signature, applied server-side to the
+            // originally uploaded file rather than a client-exported canvas.
+            const data = this.cropper.getData(true);
+
+            $wire.set('cropX', data.x);
+            $wire.set('cropY', data.y);
+            $wire.set('cropWidth', data.width);
+            $wire.set('cropHeight', data.height);
+
+            this.destroyCropper();
+
+            $wire.savePicture();
         },
     }
 })

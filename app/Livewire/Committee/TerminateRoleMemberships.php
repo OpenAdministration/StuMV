@@ -39,7 +39,7 @@ class TerminateRoleMemberships extends Component
         $committee = Committee::findByName($this->uid, $this->ou);
         $role = $committee?->roles()->where('cn', $this->cn)->first();
         $memberships = $role->dbMemberships()->active(today())->get()
-            ->sortBy(fn ($m): string => mb_strtolower((string) User::findOrFailByUsername($m->username)->getFirstAttribute('cn')), SORT_NATURAL)
+            ->sortBy(fn ($m): string => mb_strtolower((string) (User::query()->in($community->peopleDn())->where('uid', '=', $m->username)->first()?->getFirstAttribute('cn') ?? $m->username)), SORT_NATURAL)
             ->values();
 
         return view('livewire.committee.terminate-role-memberships', [

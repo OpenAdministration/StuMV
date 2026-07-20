@@ -24,8 +24,8 @@ test('findOrFailByUid aborts with a 404 for an unknown community', function (): 
     Community::findOrFailByUid('does-not-exist');
 })->throws(NotFoundHttpException::class);
 
-test('the members group exposes the community members', function (): void {
-    $members = Community::findByUid('testcom')->membersGroup()->members()->get();
+test('membership is the location itself - testcom People branch exposes its members', function (): void {
+    $members = \App\Ldap\User::query()->in(Community::findByUid('testcom')->peopleDn())->get();
 
     $uids = $members->map(fn ($m) => $m->getFirstAttribute('uid'));
 

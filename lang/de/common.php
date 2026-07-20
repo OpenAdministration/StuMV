@@ -11,6 +11,7 @@ return [
     'confirm_password' => 'Passwort wiederholen',
     'cancel' => 'Abbrechen',
     'save' => 'Speichern',
+    'drop_file_here' => 'Datei hierher ziehen oder klicken zum Auswählen',
     'saved' => 'Erfolgreich gespeichert',
     'new' => 'Neu',
     'edit' => 'Bearbeiten',

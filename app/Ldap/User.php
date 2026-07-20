@@ -42,10 +42,15 @@ class User extends \LdapRecord\Models\OpenLDAP\User
      * returns it when explicitly named in a select (never via a plain "*"
      * fetch, and not even via a base-scoped find() by DN), so it must always
      * be checked through a fresh, explicit where()-based query like this one.
+     *
+     * $peopleDn scopes the search to the one People branch this specific
+     * account actually lives under (its own getParentDn()) - required now
+     * that the same uid can independently exist in more than one realm.
      */
-    public static function isLockedByUsername(string $username): bool
+    public static function isLockedByUsername(string $username, string $peopleDn): bool
     {
         $fresh = self::query()
+            ->in($peopleDn)
             ->select(['*', 'pwdAccountLockedTime'])
             ->where('uid', '=', $username)
             ->first();
@@ -61,7 +66,7 @@ class User extends \LdapRecord\Models\OpenLDAP\User
 
     public function isSuperAdmin(): bool
     {
-        return SuperUserGroup::group()->members()->exists($this);
+        return Community::membershipFor($this) === Community::ADMIN_REALM_UID;
     }
 
     public function adminOf(): HasMany
@@ -76,14 +81,6 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     {
         $hm = $this->hasMany(Group::class, 'uniqueMember');
         $hm->getQuery()->where('cn', '=', 'moderators');
-
-        return $hm;
-    }
-
-    public function memberOf(): HasMany
-    {
-        $hm = $this->hasMany(Group::class, 'uniqueMember');
-        $hm->getQuery()->where('cn', '=', 'members');
 
         return $hm;
     }

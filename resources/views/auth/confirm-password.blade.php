@@ -1,10 +1,6 @@
-<x-guest-layout>
+<x-guest-layout :branding="$branding ?? null">
     <x-auth-card>
-        <x-slot name="logo">
-            <a href="/">
-                <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-            </a>
-        </x-slot>
+        <x-auth-logo :branding="$branding ?? null" />
 
         <div class="mb-4 text-sm text-gray-600">
             {{ __('auth.secure_area_text') }}

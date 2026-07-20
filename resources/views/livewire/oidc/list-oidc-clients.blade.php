@@ -9,7 +9,7 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="route('oidc-clients.new')"
+                :href="route('realms.oidc-clients.new', ['realm' => $uid])"
             >
                 {{ __('oidc_clients.new') }}
             </flux:button>
@@ -60,7 +60,7 @@
                                             <flux:menu.item
                                                 icon="pencil"
                                                 wire:navigate
-                                                href="{{ route('oidc-clients.edit', ['client' => $client->id]) }}"
+                                                href="{{ route('realms.oidc-clients.edit', ['realm' => $uid, 'client' => $client->id]) }}"
                                             >
                                                 {{ __('common.edit') }}
                                             </flux:menu.item>

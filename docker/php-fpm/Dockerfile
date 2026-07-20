@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     libjpeg-dev \
     libfreetype-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    libavif-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-avif --with-webp \
     && docker-php-ext-install -j$(nproc) \
     gd \
     ldap \
@@ -64,6 +66,11 @@ WORKDIR /var/www
 # Copy the entrypoint script
 COPY ./docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Raise upload/memory limits above PHP's stingy defaults - realm branding
+# uploads (background photos especially) routinely exceed the 2M/8M/128M
+# defaults.
+COPY ./docker/php-fpm/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 # Switch back to the non-privileged user to run the application
 USER www-data

@@ -6,7 +6,7 @@
     <div class="grid md:grid-cols-2 gap-6 pb-6 sm:pb-8">
         <a
             wire:navigate
-            href="{{ route('profile', auth()->user()->username) }}"
+            href="{{ route('profile', ['realm' => $uid, 'username' => auth()->user()->username]) }}"
             aria-label="{{ __('realms.dashboard.profile_heading', ['name' => $name]) }}"
             class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
         >
@@ -18,20 +18,22 @@
                 <flux:text class="mt-2">{{ __('realms.dashboard.profile_explanation', ['name' => $name]) }}</flux:text>
             </flux:card>
         </a>
-        <a
-            wire:navigate
-            href="{{ route('committees.list', $uid) }}"
-            aria-label="{{ __('realms.dashboard.committee_headline', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-        >
-            <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                <flux:icon.network class="size-5" />
-            </div>
-            <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('realms.dashboard.committee_headline', ['name' => $name]) }}</flux:heading>
-                <flux:text class="mt-2">{{ __('realms.dashboard.committee_explanation', ['name' => $name]) }}</flux:text>
-            </flux:card>
-        </a>
+        @unless($community->isAdminRealm())
+            <a
+                wire:navigate
+                href="{{ route('committees.list', $uid) }}"
+                aria-label="{{ __('realms.dashboard.committee_headline', ['name' => $name]) }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.network class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('realms.dashboard.committee_headline', ['name' => $name]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.dashboard.committee_explanation', ['name' => $name]) }}</flux:text>
+                </flux:card>
+            </a>
+        @endunless
         <a
             wire:navigate
             href="{{ route('realms.members', $uid) }}"
@@ -46,21 +48,23 @@
                 <flux:text class="mt-2">{{ __('realms.dashboard.members_explanation', ['name' => $name]) }}</flux:text>
             </flux:card>
         </a>
-        <a
-            wire:navigate
-            href="{{ route('realms.mods', $uid) }}"
-            aria-label="{{ __('realms.dashboard.mods_headline', ['name' => $name]) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-        >
-            <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                <flux:icon.user-star class="size-5" />
-            </div>
-            <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('realms.dashboard.mods_headline', ['name' => $name]) }}</flux:heading>
-                <flux:text class="mt-2">{{ __('realms.dashboard.mods_explanation', ['name' => $name]) }}</flux:text>
-            </flux:card>
-        </a>
-        @if(auth()->user()->can('moderator', $community) || auth()->user()->can('admin', $community) || auth()->user()->can('superadmin', \App\Models\User::class))
+        @unless($community->isAdminRealm())
+            <a
+                wire:navigate
+                href="{{ route('realms.mods', $uid) }}"
+                aria-label="{{ __('realms.dashboard.mods_headline', ['name' => $name]) }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.user-star class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('realms.dashboard.mods_headline', ['name' => $name]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.dashboard.mods_explanation', ['name' => $name]) }}</flux:text>
+                </flux:card>
+            </a>
+        @endunless
+        @if(! $community->isAdminRealm() && (auth()->user()->can('moderator', $community) || auth()->user()->can('admin', $community) || auth()->user()->can('superadmin', \App\Models\User::class)))
             <a
                 wire:navigate
                 href="{{ route('realms.admins', $uid) }}"
@@ -92,7 +96,23 @@
                 </flux:card>
             </a>
         @endcan
-        @can('viewAny', [\App\Ldap\Group::class, $community])
+        @can('edit', $community)
+            <a
+                wire:navigate
+                href="{{ route('realms.branding', $uid) }}"
+                aria-label="{{ __('realms.dashboard.branding_headline', ['name' => $name]) }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.palette class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('realms.dashboard.branding_headline', ['name' => $name]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.dashboard.branding_explanation', ['name' => $name]) }}</flux:text>
+                </flux:card>
+            </a>
+        @endcan
+        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
             <a
                 wire:navigate
                 href="{{ route('realms.groups', $uid) }}"
@@ -107,8 +127,8 @@
                     <flux:text class="mt-2">{{ __('realms.dashboard.groups_explanation', ['name' => $name]) }}</flux:text>
                 </flux:card>
             </a>
-        @endcan
-        @can('viewAny', [\App\Ldap\Group::class, $community])
+        @endif
+        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
             <a
                 wire:navigate
                 href="{{ route('realms.domains', $uid) }}"
@@ -123,8 +143,8 @@
                     <flux:text class="mt-2">{{ __('realms.dashboard.domains_explanation', ['name' => $name]) }}</flux:text>
                 </flux:card>
             </a>
-        @endcan
-        @can('viewAny', [\App\Ldap\Group::class, $community])
+        @endif
+        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
             <a
                 wire:navigate
                 href="{{ route('realms.api-clients', $uid) }}"
@@ -139,6 +159,38 @@
                     <flux:text class="mt-2">{{ __('api_clients.explanation') }}</flux:text>
                 </flux:card>
             </a>
-        @endcan
+        @endif
+        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
+            <a
+                wire:navigate
+                href="{{ route('realms.oidc-clients', $uid) }}"
+                aria-label="{{ __('oidc_clients.headline') }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.network class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('oidc_clients.headline') }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('oidc_clients.explanation') }}</flux:text>
+                </flux:card>
+            </a>
+        @endif
+        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
+            <a
+                wire:navigate
+                href="{{ route('realms.sso-providers', $uid) }}"
+                aria-label="{{ __('sso_providers.headline') }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.git-pull-request-create-arrow class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('sso_providers.headline') }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('sso_providers.explanation') }}</flux:text>
+                </flux:card>
+            </a>
+        @endif
     </div>
 </div>

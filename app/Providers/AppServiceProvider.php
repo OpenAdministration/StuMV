@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
+use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Lang;
@@ -19,7 +21,22 @@ class AppServiceProvider extends ServiceProvider
     #[\Override]
     public function register()
     {
-        //
+        $this->app->singleton(RealmContext::class);
+
+        // 'auth.password' is a deferred service (PasswordResetServiceProvider) -
+        // container::extend() is the only override style that survives being
+        // registered before the deferred provider's own singleton() binding
+        // actually runs, since extenders apply to whatever gets built,
+        // whenever that happens to be.
+        $this->app->extend('auth.password', fn ($manager, $app) => new RealmScopedPasswordBrokerManager($app));
+
+        // OIDC clients (and their /oauth/* endpoints) are realm-bound now -
+        // the package's global routes are replaced with realm-prefixed ones
+        // registered in routes/web.php, reusing the same vendor controllers.
+        // Must happen in register() (runs for every provider before any
+        // provider's boot()), since OpenIDConnect\Laravel\PassportServiceProvider
+        // - registered before this one - checks this flag in its own boot().
+        Passport::ignoreRoutes();
     }
 
     /**
@@ -45,10 +62,20 @@ class AppServiceProvider extends ServiceProvider
         // exception handler's unauthenticated() - a guest AuthenticationException
         // with no redirect target now yields an empty 401 instead of a login
         // redirect. Passport's authorize endpoint throws exactly that for guests
-        // (GET /oauth/authorize carries only `web`, not `auth`), which broke SSO
-        // login: visitors hit a bare 401 instead of the login form. Restore the
-        // redirect so they log in and bounce back to the authorization request.
-        AuthenticationException::redirectUsing(static fn (): string => route('login'));
+        // (GET {realm}/oauth/authorize carries only `web`, not `auth`), which
+        // broke SSO login: visitors hit a bare 401 instead of the login form.
+        // Restore the redirect so they log in and bounce back to the
+        // authorization request - straight to that realm's own login screen
+        // when the request was already realm-scoped, the plain picker otherwise.
+        AuthenticationException::redirectUsing(static function ($request): string {
+            $realm = $request->route('realm');
+
+            // Community isn't Illuminate\Contracts\Routing\UrlRoutable -
+            // passing the model itself to route() falls back to its
+            // __toString(), which returns the full DN, not the short code
+            // the {realm} segment actually expects.
+            return $realm ? route('realm.login', ['realm' => $realm->getShortCode()]) : route('login');
+        });
 
         Password::defaults(static fn () => Password::min(12)
             ->letters()

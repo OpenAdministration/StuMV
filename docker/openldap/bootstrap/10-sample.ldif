@@ -1,8 +1,14 @@
 # Sample directory contents for local development and manual testing, so the
 # app has a community to show and memberOf (via dynlist) can be exercised.
 # Automated tests create their own fixtures and do not rely on this data.
+#
+# "admin" is both a superadmin (admin realm) and a testcom member - the
+# worked example of the "duplicate becomes independent accounts" rule: two
+# fully separate uid=admin entries, one per realm, each with its own
+# password, rather than one identity synced across both.
 
-dn: uid=admin,ou=People,dc=stumv,dc=de
+# --- the admin realm's own admin account ---------------------------------
+dn: uid=admin,ou=People,ou=admin,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: admin
@@ -18,6 +24,11 @@ objectClass: organizationalUnit
 objectClass: top
 ou: testcom
 description: Test Community
+
+dn: ou=People,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: People
 
 dn: ou=Groups,ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: organizationalUnit
@@ -41,23 +52,32 @@ objectClass: domain
 objectClass: top
 dc: example.test
 
-# A community always carries the full members/moderators/admins skeleton (this
-# is what Community::generateSkeleton() produces); keep the sample complete so
-# it matches production shape.
-dn: cn=members,ou=testcom,ou=Communities,dc=stumv,dc=de
-objectClass: groupOfUniqueNames
+# testcom's own, fully independent "admin" account - same uid as the admin
+# realm's account above, but a distinct physical entry (own entryUUID, own
+# password), per the "duplicate becomes independent accounts" rule. Not the
+# admin realm's account attached here - membership is the location itself,
+# there is no cross-realm group to attach to.
+dn: uid=admin,ou=People,ou=testcom,ou=Communities,dc=stumv,dc=de
+objectClass: inetOrgPerson
 objectClass: top
-cn: members
-uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+uid: admin
+cn: Admin User
+sn: User
+givenName: Admin
+mail: admin@stumv.de
+userPassword: admin-not-production
 
+# A community always carries the full moderators/admins skeleton (this is
+# what Community::generateSkeleton() produces); keep the sample complete so
+# it matches production shape.
 dn: cn=moderators,ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
 cn: moderators
-uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+uniqueMember: uid=admin,ou=People,ou=testcom,ou=Communities,dc=stumv,dc=de
 
 dn: cn=admins,ou=testcom,ou=Communities,dc=stumv,dc=de
 objectClass: groupOfUniqueNames
 objectClass: top
 cn: admins
-uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+uniqueMember: uid=admin,ou=People,ou=testcom,ou=Communities,dc=stumv,dc=de

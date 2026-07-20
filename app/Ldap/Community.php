@@ -22,6 +22,14 @@ class Community extends OrganizationalUnit implements LdapImportable
 
     public static string $rootDn = 'ou=Communities,{base}';
 
+    /**
+     * The dedicated realm superadmins live under - not a "real" community:
+     * no admins/moderators/committees/domains/API or OIDC clients of its
+     * own, see generateSkeleton(). Its members get moderator/admin/
+     * superadmin rights everywhere via CommunityPolicy instead.
+     */
+    public const ADMIN_REALM_UID = 'admin';
+
     public static function rootDn()
     {
         // would be nice if we could substitute a bit more elegant
@@ -50,19 +58,35 @@ class Community extends OrganizationalUnit implements LdapImportable
         return $this->description[0] ?? '';
     }
 
-    /**
-     * @return array<string, true> community short codes the given LDAP user is a member of
-     */
-    public static function membershipsFor($ldapUser): array
+    public static function peopleDnFor(string $uid): string
     {
-        $memberships = $ldapUser->memberOf;
-        $communityMemberships = \Arr::where($memberships, static fn (string $value, int $key) => preg_match('/^cn=members,ou=[0-9A-Za-z_\-]+,'.self::rootDn().'$/', $value));
+        return "ou=People,ou=$uid,".self::rootDn();
+    }
 
-        return \Arr::mapWithKeys($communityMemberships, static function (string $value) {
-            $uid = str($value)->remove(','.self::rootDn(), false)->remove('cn=members,ou=')->value();
+    public function peopleDn(): string
+    {
+        return 'ou=People,'.$this->getDn();
+    }
 
-            return [$uid => true];
-        });
+    public function isAdminRealm(): bool
+    {
+        return $this->getShortCode() === self::ADMIN_REALM_UID;
+    }
+
+    /**
+     * Derives the realm a specific physical LDAP entry belongs to directly
+     * from its own DN - a physical entry lives under at most one community's
+     * People branch, so no query is needed. Returns null for an entry that
+     * isn't (yet) placed under any community's People branch (e.g. still in
+     * the flat legacy ou=People, or the superadmin-only "admin" realm).
+     */
+    public static function membershipFor(\App\Ldap\User $ldapUser): ?string
+    {
+        if (preg_match('/^uid=[^,]+,ou=People,ou=([0-9A-Za-z_\-]+),'.self::rootDn().'$/', (string) $ldapUser->getDn(), $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 
     #[\Override]
@@ -71,7 +95,13 @@ class Community extends OrganizationalUnit implements LdapImportable
         parent::boot();
 
         static::addGlobalScope('limitResults', static function (Builder $builder): void {
+            // ->list() restricts this to direct (one-level) children of
+            // ou=Communities - without it, a subtree search also matches
+            // every nested OU (each community's own People/Groups/Committees/
+            // Domains branches, and every sub-committee within them) as if
+            // they were communities in their own right.
             $builder->in(self::$rootDn)
+                ->list()
                 ->where('ou', '!=', 'Communities');
         });
     }
@@ -79,11 +109,6 @@ class Community extends OrganizationalUnit implements LdapImportable
     public function getRouteKeyName(): string
     {
         return 'ou';
-    }
-
-    public function membersGroup(): Group
-    {
-        return Group::query()->in($this->getDn())->where('cn', 'members')->first();
     }
 
     public function moderatorsGroup(): Group
@@ -96,17 +121,23 @@ class Community extends OrganizationalUnit implements LdapImportable
         return Group::query()->in($this->getDn())->where('cn', 'admins')->first();
     }
 
-    public function generateSkeleton()
+    /**
+     * @param  bool  $full  Whether to also create Groups/Committees/Domains
+     *                      and the admins/moderators groups. The dedicated
+     *                      "admin" superadmin realm needs none of that - it
+     *                      only ever holds People, and its members already
+     *                      get moderator/admin/superadmin rights everywhere
+     *                      via CommunityPolicy, not through its own groups.
+     */
+    public function generateSkeleton(bool $full = true)
     {
-
         $this->save();
 
-        // generate mayor ou's
-        foreach ([
-            'Groups' => 'The Groups',
-            'Committees' => 'The Committees',
-            'Domains' => 'The Domains',
-        ] as $ouName => $ouDescription) {
+        $ous = $full
+            ? ['People' => 'The People', 'Groups' => 'The Groups', 'Committees' => 'The Committees', 'Domains' => 'The Domains']
+            : ['People' => 'The People'];
+
+        foreach ($ous as $ouName => $ouDescription) {
             $ou = new OrganizationalUnit([
                 'ou' => $ouName,
                 'description' => $ouDescription,
@@ -115,8 +146,11 @@ class Community extends OrganizationalUnit implements LdapImportable
             $ou->save();
         }
 
-        // generate mayor Groups
-        foreach (['admins', 'moderators', 'members'] as $gName) {
+        if (! $full) {
+            return;
+        }
+
+        foreach (['admins', 'moderators'] as $gName) {
             $g = new Group([
                 'cn' => $gName,
                 'uniqueMember' => '',

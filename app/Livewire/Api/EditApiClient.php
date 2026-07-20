@@ -23,9 +23,12 @@ class EditApiClient extends Component
 
     public function mount(Community $realm, PassportClient $client)
     {
+        abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getFirstAttribute('ou');
 
-        abort_if($client->community_uid !== $this->uid, 404);
+        // OIDC clients now also carry a community_uid - grant_types is what
+        // actually distinguishes the two client kinds sharing this table.
+        abort_if($client->community_uid !== $this->uid || ! $client->hasGrantType('client_credentials'), 404);
 
         $this->clientId = $client->id;
         $this->name = $client->name;
@@ -51,6 +54,7 @@ class EditApiClient extends Component
         $this->validate();
 
         $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->clientId);
+        abort_unless($client->hasGrantType('client_credentials'), 404);
 
         $clients->update($client, $this->name, []);
         $client->forceFill([

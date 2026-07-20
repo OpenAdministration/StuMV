@@ -31,7 +31,7 @@
                                 <div class="flex-1">
                                     <flux:link
                                         wire:navigate
-                                        href="{{ route('profile', ['username' => $user['uid']]) }}"
+                                        href="{{ route('profile', ['realm' => $uid, 'username' => $user['uid']]) }}"
                                     >
                                         {{ $user['cn'] }}
                                     </flux:link>

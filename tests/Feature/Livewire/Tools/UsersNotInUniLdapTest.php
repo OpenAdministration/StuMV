@@ -154,17 +154,14 @@ test('results are sorted by name', function (): void {
     $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
     $domain->save();
 
-    $zebra = TestLdap::makeUser();
+    $zebra = TestLdap::makeUser(community: $community);
     $zebra->fill(['cn' => 'Zebra'])->save();
-    TestLdap::attach($community->membersGroup(), $zebra);
 
-    $apple = TestLdap::makeUser();
+    $apple = TestLdap::makeUser(community: $community);
     $apple->fill(['cn' => 'Apple'])->save();
-    TestLdap::attach($community->membersGroup(), $apple);
 
-    $mango = TestLdap::makeUser();
+    $mango = TestLdap::makeUser(community: $community);
     $mango->fill(['cn' => 'Mango'])->save();
-    TestLdap::attach($community->membersGroup(), $mango);
 
     actingAsModerator($community);
 
@@ -188,13 +185,11 @@ test('the search field filters results by name', function (): void {
     $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
     $domain->save();
 
-    $apple = TestLdap::makeUser();
+    $apple = TestLdap::makeUser(community: $community);
     $apple->fill(['cn' => 'Apple'])->save();
-    TestLdap::attach($community->membersGroup(), $apple);
 
-    $mango = TestLdap::makeUser();
+    $mango = TestLdap::makeUser(community: $community);
     $mango->fill(['cn' => 'Mango'])->save();
-    TestLdap::attach($community->membersGroup(), $mango);
 
     actingAsModerator($community);
 
@@ -214,9 +209,10 @@ test('deleting a user removes the LDAP entry, database rows, and profile picture
     $member = TestLdap::member($community);
     actingAsSuperAdmin();
 
-    Storage::disk('public')->put('avatars/some-file-id.jpg', 'fake-image-contents');
+    Storage::disk('public')->put('avatars/some-file-id.webp', 'fake-image-contents');
     ProfilePicture::create([
         'user' => $member->username,
+        'realm' => $community->getShortCode(),
         'file_id' => 'some-file-id',
     ]);
 
@@ -227,7 +223,7 @@ test('deleting a user removes the LDAP entry, database rows, and profile picture
     expect(LdapUser::findByUsername($member->username))->toBeNull()
         ->and(DbUser::where('username', $member->username)->exists())->toBeFalse()
         ->and(ProfilePicture::where('user', $member->username)->exists())->toBeFalse();
-    Storage::disk('public')->assertMissing('avatars/some-file-id.jpg');
+    Storage::disk('public')->assertMissing('avatars/some-file-id.webp');
 });
 
 test('deleting a user without a profile picture does not error', function (): void {

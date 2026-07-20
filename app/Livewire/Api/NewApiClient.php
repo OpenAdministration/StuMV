@@ -24,6 +24,7 @@ class NewApiClient extends Component
 
     public function mount(Community $realm)
     {
+        abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getFirstAttribute('ou');
     }
 

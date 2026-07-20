@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Profile;
 
+use App\Ldap\Community;
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use Flux\Flux;
@@ -19,6 +20,9 @@ class ChangePassword extends Component
     public string $password_confirmation;
 
     #[Locked]
+    public string $realm_uid;
+
+    #[Locked]
     public $currentUsername;
 
     protected function rules(): array
@@ -32,15 +36,24 @@ class ChangePassword extends Component
         ];
     }
 
-    public function mount($username)
+    public function mount(Community $realm, $username)
     {
-        $this->authorize('manageProfile', [User::class, $username]);
+        $this->authorize('manageProfile', [User::class, $realm, $username]);
+        $this->realm_uid = $realm->getShortCode();
         $this->currentUsername = $username;
+    }
+
+    protected function findLdapUser(): User
+    {
+        return User::query()
+            ->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())
+            ->where('uid', '=', $this->currentUsername)
+            ->first() ?? abort(404);
     }
 
     public function render()
     {
-        $user = User::findOrFailByUsername($this->currentUsername);
+        $user = $this->findLdapUser();
         $givenName = $user->getFirstAttribute('givenName');
         $sn = $user->getFirstAttribute('sn');
 
@@ -53,7 +66,7 @@ class ChangePassword extends Component
     public function save()
     {
         $this->validate();
-        $ldapUser = User::findOrFailByUsername($this->currentUsername);
+        $ldapUser = $this->findLdapUser();
         $ldapUser->setAttribute('userPassword', '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
 

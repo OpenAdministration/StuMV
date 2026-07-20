@@ -32,6 +32,7 @@ class RoleMembership extends Model
     protected $fillable = [
         'role_cn',
         'committee_dn',
+        'realm',
         'username',
         'from',
         'until',

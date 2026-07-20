@@ -1,10 +1,8 @@
 <?php
 
-use App\Ldap\SuperUserGroup;
 use App\Livewire\Realm\ListRealms;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
@@ -87,62 +85,55 @@ test('sortBy switches to sorting by shortcode when that column is clicked', func
 });
 
 test('the community name is only a clickable link to enter when the user can actually enter', function (): void {
-    $canEnter1 = newCommunity('cane1'.bin2hex(random_bytes(3)));
-    $canEnter2 = newCommunity('cane2'.bin2hex(random_bytes(3)));
-    $cannotEnter = newCommunity('cant'.bin2hex(random_bytes(3)));
-
-    // A member of two communities (not just one) so mount() doesn't
-    // auto-redirect straight to a single dashboard.
-    $ldapUser = TestLdap::makeUser();
-    TestLdap::attach($canEnter1->membersGroup(), $ldapUser);
-    TestLdap::attach($canEnter2->membersGroup(), $ldapUser);
-    $this->actingAs(TestLdap::databaseUser($ldapUser));
+    // A regular member of exactly one realm never actually sees this
+    // picker rendered - mount() redirects them straight to their one
+    // dashboard before render() runs at all (that's HomeRedirectTest's
+    // "single community" case). The only actor that reaches render() while
+    // having an "enterable" community at all is a superadmin, for whom
+    // every row is enterable ($canEnter === true unconditionally - see
+    // CommunityPolicy's admin-realm-wide rights) - this pins that.
+    $community = newCommunity('cane'.bin2hex(random_bytes(3)));
+    actingAsSuperAdmin();
 
     $html = Livewire::test(ListRealms::class)->html();
 
     // Each row always has the (possibly disabled) "Enter" button carrying
-    // this wire:click - a community the user can enter additionally wraps
-    // its name in a matching link, so the marker appears twice there but
-    // only once (the button) for one they can't enter.
-    expect(substr_count($html, "wire:click=\"enter('{$canEnter1->getShortCode()}')\""))->toBe(2)
-        ->and(substr_count($html, "wire:click=\"enter('{$cannotEnter->getShortCode()}')\""))->toBe(1);
+    // this wire:click - an enterable community additionally wraps its name
+    // in a matching link, so the marker appears twice there.
+    expect(substr_count($html, "wire:click=\"enter('{$community->getShortCode()}')\""))->toBe(2);
 });
 
-test('the "only mine" switch hides communities the user is not a member of', function (): void {
-    $mine1 = newCommunity('mine1'.bin2hex(random_bytes(3)));
-    $mine2 = newCommunity('mine2'.bin2hex(random_bytes(3)));
+test('the "only mine" switch hides every community for a user who belongs to none', function (): void {
+    // Same reachability constraint as above: a regular member of exactly
+    // one realm is redirected away by mount() before this is observable,
+    // and a physical account can never be a member of more than one realm
+    // (membership is its own DN location). The only regular-user state
+    // that reaches render() at all is "member of zero realms" (e.g. an
+    // account mid-verification, not yet realm-scoped) - "only mine"
+    // correctly hides everything for it.
     $notMine = newCommunity('notm'.bin2hex(random_bytes(3)));
+    // An LDAP entry that exists but isn't placed under any community's
+    // People branch (e.g. left "unassigned" by the realm-split migration).
+    $ldapUser = Tests\Support\TestLdap::makeUser();
+    $this->actingAs(Tests\Support\TestLdap::databaseUser($ldapUser));
 
-    // A member of two communities (not just one) so mount() doesn't
-    // auto-redirect straight to a single dashboard.
-    $ldapUser = TestLdap::makeUser();
-    TestLdap::attach($mine1->membersGroup(), $ldapUser);
-    TestLdap::attach($mine2->membersGroup(), $ldapUser);
-    $this->actingAs(TestLdap::databaseUser($ldapUser));
-
-    $component = Livewire::test(ListRealms::class)
-        ->assertSee($mine1->getShortCode())
-        ->assertSee($mine2->getShortCode())
-        ->assertSee($notMine->getShortCode());
-
-    $component->set('showOnlyMine', true)
-        ->assertSee($mine1->getShortCode())
-        ->assertSee($mine2->getShortCode())
+    Livewire::test(ListRealms::class)
+        ->assertSee($notMine->getShortCode())
+        ->set('showOnlyMine', true)
         ->assertDontSee($notMine->getShortCode());
 });
 
-test('the "only mine" switch also applies for a super admin', function (): void {
-    $mine = newCommunity('mine'.bin2hex(random_bytes(3)));
+test('the "only mine" switch shows just the admin realm for a super admin', function (): void {
+    // A superadmin's only physical membership is the dedicated "admin"
+    // realm itself (see Community::ADMIN_REALM_UID) - they can administer
+    // every other realm via CommunityPolicy, but aren't a "member" of any
+    // of them by location, so "only mine" narrows down to just that one.
     $notMine = newCommunity('notm'.bin2hex(random_bytes(3)));
-
-    $ldapUser = TestLdap::makeUser();
-    TestLdap::attach(SuperUserGroup::group(), $ldapUser);
-    TestLdap::attach($mine->membersGroup(), $ldapUser);
-    $this->actingAs(TestLdap::databaseUser($ldapUser));
+    actingAsSuperAdmin();
 
     Livewire::test(ListRealms::class)
         ->set('showOnlyMine', true)
-        ->assertSee($mine->getShortCode())
+        ->assertSee(\App\Ldap\Community::ADMIN_REALM_UID)
         ->assertDontSee($notMine->getShortCode());
 });
 

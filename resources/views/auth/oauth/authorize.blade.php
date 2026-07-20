@@ -1,6 +1,12 @@
-<x-guest-layout>
+@php
+    $realm = $request->route('realm')->getShortCode();
+    $branding = \App\Models\RealmBranding::forRealm($realm);
+@endphp
+<x-guest-layout :branding="$branding">
     <x-auth-card>
         <x-slot:slot class="space-y-5">
+            <x-auth-logo :branding="$branding" />
+
             <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('Authorization Request') }}</h2>
 
             <p>
@@ -19,14 +25,14 @@
             @endif
 
             <div class="flex justify-evenly">
-                <form method="POST" action="{{ route('passport.authorizations.deny') }}">
+                <form method="POST" action="{{ route('realm.passport.authorizations.deny', ['realm' => $realm]) }}">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
                     <flux:button icon="ban" type="submit">{{ __('common.cancel') }}</flux:button>
                 </form>
 
-                <form method="POST" action="{{ route('passport.authorizations.approve') }}">
+                <form method="POST" action="{{ route('realm.passport.authorizations.approve', ['realm' => $realm]) }}">
                     @csrf
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
                     <flux:button variant="primary" icon="check" type="submit">{{ __('Authorize') }}</flux:button>

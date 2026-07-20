@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Tools;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Ldap\Uni\User as UniLdapUser;
@@ -55,7 +56,7 @@ class UsersNotInUniLdap extends Component
         $this->results = [];
 
         $community = Community::findOrFailByUid($this->uid);
-        $members = $community->membersGroup()->members()->get();
+        $members = User::query()->in($community->peopleDn())->get();
 
         $domains = [];
         $domainEntries = Domain::fromCommunity($this->uid)->get();
@@ -120,19 +121,23 @@ class UsersNotInUniLdap extends Component
         $community = Community::findByOrFail('ou', $this->uid);
         $this->authorize('remove_member', $community);
 
-        // LDAP
-        $user = User::findOrFailByUsername($this->userToDelete);
-        $community->membersGroup()->members()->detach($user);
-        $user->delete();
+        // LDAP - scoped to this realm's People branch: the same username
+        // could independently exist in another realm too, and deleting the
+        // account is what removing a member means now.
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->userToDelete)->first();
+        $user?->delete();
 
-        // Database
-        RoleMembership::where('username', $this->userToDelete)->delete();
-        \App\Models\User::where('username', $this->userToDelete)->delete();
+        // Database - committee_dn/realm-scoped for the same reason: these
+        // are bare username columns with no realm of their own.
+        RoleMembership::where('username', $this->userToDelete)
+            ->where('committee_dn', 'like', '%'.Committee::dnRootResolved($this->uid))
+            ->delete();
+        \App\Models\User::where('username', $this->userToDelete)->where('realm', $this->uid)->delete();
 
         // Profile picture
-        $picture = ProfilePicture::where('user', $this->userToDelete)->first();
+        $picture = ProfilePicture::where('user', $this->userToDelete)->where('realm', $this->uid)->first();
         if ($picture) {
-            Storage::disk('public')->delete('avatars/'.$picture->file_id.'.jpg');
+            Storage::disk('public')->delete('avatars/'.$picture->file_id.'.webp');
             $picture->delete();
         }
 

@@ -125,14 +125,13 @@ test('search stays scoped to the community and does not leak other realms', func
     // A member of THIS realm whose name does not match the search term.
     realmMember($uid, 'Alice Mine');
 
-    // A member of a DIFFERENT realm's own LDAP members group whose username
-    // contains the search term - the list is scoped by group membership now,
-    // so this checks that scoping, not just an unrelated/unattached user.
+    // A member of a DIFFERENT realm's own People branch whose username
+    // contains the search term - the list is scoped by physical location
+    // now, so this checks that scoping, not just an unrelated/unplaced user.
     $otherCommunity = newCommunity();
     $leakUid = 'zzleak'.bin2hex(random_bytes(3));
-    $leakLdapUser = TestLdap::makeUser($leakUid);
+    $leakLdapUser = TestLdap::makeUser($leakUid, $otherCommunity);
     $leakLdapUser->fill(['cn' => 'Leaker Person'])->save();
-    TestLdap::attach($otherCommunity->membersGroup(), $leakLdapUser);
     User::factory()->create([
         'username' => $leakUid,
         'realm' => $otherCommunity->getShortCode(),
@@ -153,7 +152,7 @@ test('an admin sees a working profile link for members', function (): void {
 
     Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
-        ->assertSeeHtml('href="'.route('profile', ['username' => $username]).'"');
+        ->assertSeeHtml('href="'.route('profile', ['realm' => $uid, 'username' => $username]).'"');
 });
 
 test('a moderator sees the export-as-PDF control for members', function (): void {
@@ -200,9 +199,7 @@ test('a super admin can remove a member through the full prepare/confirm flow', 
         ->assertSet('deleteMemberUsername', $username)
         ->call('removeCommit');
 
-    expect($community->membersGroup()->members()->get()->contains(
-        fn ($user) => $user->getFirstAttribute('uid') === $username
-    ))->toBeFalse();
+    expect(App\Ldap\User::query()->in($community->peopleDn())->where('uid', '=', $username)->first())->toBeNull();
 });
 
 test('the admin/moderator permission check does not scale with the number of members shown', function (): void {

@@ -60,29 +60,28 @@ test('an admin can add a moderator', function (): void {
 });
 
 test('a super admin can add a community member', function (): void {
+    // NewMember is a registration form (creates a brand-new account directly
+    // under the realm's own People branch), not a picker over existing
+    // accounts - membership is the location itself.
     $community = newCommunity();
-    $outsider = TestLdap::makeUser();
+    $username = 'newmem'.bin2hex(random_bytes(4));
+    $password = 'Aa1!'.bin2hex(random_bytes(8));
     actingAsSuperAdmin();
 
     Livewire::test(NewMember::class, ['realm' => $community])
-        ->set('selectedUsers', [$outsider->getDn()])
+        ->set('email', $username.'@example.test')
+        ->set('first_name', 'New')
+        ->set('last_name', 'Member')
+        ->set('username', $username)
+        ->set('password', $password)
+        ->set('password_confirmation', $password)
         ->call('save')
         ->assertHasNoErrors();
 
-    expect(groupHasUid(Community::findByUid($community->getShortCode()), 'membersGroup', $outsider->getFirstAttribute('uid')))->toBeTrue();
-});
+    $ldapUser = LdapUser::findByUsername($username);
+    TestLdap::track($ldapUser);
 
-test('the new member select excludes users already in the members group', function (): void {
-    $community = newCommunity();
-    $existingMember = TestLdap::member($community);
-    $existingMemberDn = LdapUser::findByUsername($existingMember->username)->getDn();
-    $outsider = TestLdap::makeUser();
-    actingAsSuperAdmin();
-
-    $dns = Livewire::test(NewMember::class, ['realm' => $community])
-        ->viewData('selectable_users')
-        ->map(fn ($user) => $user->getDn());
-
-    expect($dns)->toContain($outsider->getDn())
-        ->not->toContain($existingMemberDn);
+    expect($ldapUser)->not->toBeNull()
+        ->and($ldapUser->getDn())->toEndWith(','.$community->peopleDn())
+        ->and(\App\Models\User::where('username', $username)->value('realm'))->toBe($community->getShortCode());
 });

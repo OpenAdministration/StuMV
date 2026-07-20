@@ -116,8 +116,8 @@ class ListAdmins extends Component
 
     public function deletePrepare($username): void
     {
-        $user = User::findByUsername($username);
         $community = Community::findOrFailByUid($this->community_name);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $username)->first();
         $this->authorize('remove_admin', $community);
         $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
         if (! $userIsAdmin) {
@@ -136,7 +136,7 @@ class ListAdmins extends Component
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
         $admins = $community?->adminsGroup()->members();
-        $user = User::findByUsername($this->deleteAdminUsername);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteAdminUsername)->first();
         $admins->detach($user);
 
         // reset everything to prevent a 404 modal

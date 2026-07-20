@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Oidc;
 
+use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
 use Livewire\Attributes\Url;
@@ -21,6 +22,8 @@ class ListOidcClients extends Component
     #[Url]
     public string $sortDirection = 'asc';
 
+    public string $uid;
+
     public string $revokeClientId = '';
 
     public string $revokeClientName = '';
@@ -28,6 +31,12 @@ class ListOidcClients extends Component
     public string $deleteClientId = '';
 
     public string $deleteClientName = '';
+
+    public function mount(Community $realm): void
+    {
+        abort_if($realm->isAdminRealm(), 404);
+        $this->uid = $realm->getFirstAttribute('ou');
+    }
 
     public function sortBy($field): void
     {
@@ -45,12 +54,20 @@ class ListOidcClients extends Component
         $this->resetPage();
     }
 
+    /**
+     * OIDC clients now carry a community_uid like the Directory API's
+     * clients do, so grant_types (not community_uid) is what actually
+     * distinguishes the two client kinds sharing the same table.
+     */
+    private function scopeToRealmOidcClients()
+    {
+        return PassportClient::where('community_uid', $this->uid)
+            ->whereJsonContains('grant_types', 'authorization_code');
+    }
+
     public function render()
     {
-        // OIDC/SSO clients authenticate a delegated end user rather than
-        // querying one community's directory data, so - unlike the Directory
-        // API's clients - they aren't bound to a community_uid.
-        $clients = PassportClient::whereNull('community_uid')
+        $clients = $this->scopeToRealmOidcClients()
             ->when($this->search !== '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
@@ -61,7 +78,7 @@ class ListOidcClients extends Component
 
     public function revokePrepare(string $clientId): void
     {
-        $client = PassportClient::whereNull('community_uid')->findOrFail($clientId);
+        $client = $this->scopeToRealmOidcClients()->findOrFail($clientId);
         $this->revokeClientId = $client->id;
         $this->revokeClientName = $client->name;
         Flux::modal('revoke')->show();
@@ -69,7 +86,7 @@ class ListOidcClients extends Component
 
     public function revokeCommit(): void
     {
-        $client = PassportClient::whereNull('community_uid')->findOrFail($this->revokeClientId);
+        $client = $this->scopeToRealmOidcClients()->findOrFail($this->revokeClientId);
 
         $client->tokens()->with('refreshToken')->each(function ($token): void {
             $token->refreshToken?->revoke();
@@ -89,7 +106,7 @@ class ListOidcClients extends Component
 
     public function deletePrepare(string $clientId): void
     {
-        $client = PassportClient::whereNull('community_uid')->findOrFail($clientId);
+        $client = $this->scopeToRealmOidcClients()->findOrFail($clientId);
         $this->deleteClientId = $client->id;
         $this->deleteClientName = $client->name;
         Flux::modal('delete')->show();
@@ -97,7 +114,7 @@ class ListOidcClients extends Component
 
     public function deleteCommit(): void
     {
-        $client = PassportClient::whereNull('community_uid')->findOrFail($this->deleteClientId);
+        $client = $this->scopeToRealmOidcClients()->findOrFail($this->deleteClientId);
 
         $client->authCodes()->delete();
         $client->tokens()->delete();

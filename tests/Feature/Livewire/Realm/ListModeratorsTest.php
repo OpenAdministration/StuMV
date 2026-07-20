@@ -138,7 +138,7 @@ test('an admin sees a working profile link for moderators', function (): void {
 
     Livewire::test(ListModerators::class, ['realm' => $community])
         ->call('loadModerators')
-        ->assertSeeHtml('href="'.route('profile', ['username' => 'othermod']).'"');
+        ->assertSeeHtml('href="'.route('profile', ['realm' => $community->getShortCode(), 'username' => 'othermod']).'"');
 });
 
 test('the admin permission check does not scale with the number of moderators shown', function (): void {

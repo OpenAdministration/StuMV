@@ -54,7 +54,20 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
      */
     public function ldap(): \App\Ldap\User
     {
-        return \App\Ldap\User::findOrFailByUsername($this->username);
+        // $this->uid actually stores the LDAP entryUUID (see getLdapGuidColumn()
+        // above), not the uid attribute - a GUID lookup anchors to this specific
+        // physical entry, unlike a username search which is ambiguous once the
+        // same username can belong to independent accounts in different realms.
+        return \App\Ldap\User::query()->findByGuidOrFail($this->uid);
+    }
+
+    /**
+     * Same as ldap(), but returns null instead of aborting when this account
+     * has no matching LDAP entry (e.g. mid-registration/email-verification).
+     */
+    public function ldapOrNull(): ?\App\Ldap\User
+    {
+        return $this->uid ? \App\Ldap\User::query()->findByGuid($this->uid) : null;
     }
 
     /**

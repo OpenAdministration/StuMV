@@ -47,7 +47,7 @@ test('a user with a profile picture gets its URL in the response', function (): 
     $uid = $community->getShortCode();
     $target = TestLdap::member($community);
 
-    Storage::disk('public')->put('avatars/some-file-id.jpg', 'fake-image-contents');
+    Storage::disk('public')->put('avatars/some-file-id.webp', 'fake-image-contents');
     ProfilePicture::create([
         'user' => $target->username,
         'file_id' => 'some-file-id',
@@ -58,7 +58,7 @@ test('a user with a profile picture gets its URL in the response', function (): 
     $response = $this->getJson("/api/$uid/users/{$target->username}");
 
     $response->assertOk()->assertJson([
-        'picture' => asset('storage/avatars/some-file-id.jpg'),
+        'picture' => asset('storage/avatars/some-file-id.webp'),
     ]);
 });
 

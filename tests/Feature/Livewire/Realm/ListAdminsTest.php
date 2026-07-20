@@ -106,7 +106,7 @@ test('an admin sees a working profile link for other admins', function (): void 
 
     Livewire::test(ListAdmins::class, ['realm' => $community])
         ->call('loadAdmins')
-        ->assertSeeHtml('href="'.route('profile', ['username' => 'otheradmin']).'"');
+        ->assertSeeHtml('href="'.route('profile', ['realm' => $community->getShortCode(), 'username' => 'otheradmin']).'"');
 });
 
 test('the admin permission check does not scale with the number of admins shown', function (): void {

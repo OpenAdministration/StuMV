@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\Community;
 use App\Rules\DomainRegistrationRule;
 use App\Rules\UniqueDomain;
 use App\Rules\UniqueEmail;
@@ -18,12 +19,18 @@ function passesRule(string $attribute, mixed $value, object $rule): bool
 }
 
 describe('DomainRegistrationRule', function (): void {
-    test('accepts a domain that exists in LDAP', function (): void {
-        expect(passesRule('domain', 'example.test', new DomainRegistrationRule))->toBeTrue();
+    // Realm-bound now (registration is chosen via {realm}/register) - the
+    // domain must belong to that specific community, not just any community.
+    test('accepts a domain that exists in this realm', function (): void {
+        expect(passesRule('domain', 'example.test', new DomainRegistrationRule(Community::findByUid('testcom'))))->toBeTrue();
     });
 
-    test('rejects a domain that is not registerable', function (): void {
-        expect(passesRule('domain', 'no-such-domain.invalid', new DomainRegistrationRule))->toBeFalse();
+    test('rejects a domain that is not registerable at all', function (): void {
+        expect(passesRule('domain', 'no-such-domain.invalid', new DomainRegistrationRule(Community::findByUid('testcom'))))->toBeFalse();
+    });
+
+    test('rejects a domain that belongs to a different realm', function (): void {
+        expect(passesRule('domain', 'example.test', new DomainRegistrationRule(Community::findByUid('demo'))))->toBeFalse();
     });
 });
 
@@ -38,12 +45,19 @@ describe('UniqueDomain', function (): void {
 });
 
 describe('UniqueEmail', function (): void {
+    // Realm-scoped now - the same address is explicitly allowed to exist in
+    // more than one realm (e.g. the "admin" dual-account case), so the rule
+    // needs a realm to check against; without one it always passes.
     test('rejects an address already in the directory', function (): void {
-        expect(passesRule('email', 'admin@stumv.de', new UniqueEmail))->toBeFalse();
+        expect(passesRule('email', 'admin@stumv.de', new UniqueEmail(Community::findByUid('testcom'))))->toBeFalse();
     });
 
     test('accepts an unused address', function (): void {
-        expect(passesRule('email', 'nobody-'.uniqid().'@stumv.de', new UniqueEmail))->toBeTrue();
+        expect(passesRule('email', 'nobody-'.uniqid().'@stumv.de', new UniqueEmail(Community::findByUid('testcom'))))->toBeTrue();
+    });
+
+    test('passes with no realm to check against', function (): void {
+        expect(passesRule('email', 'admin@stumv.de', new UniqueEmail))->toBeTrue();
     });
 });
 

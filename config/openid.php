@@ -48,25 +48,18 @@ return [
 
     'routes' => [
         /**
-         * When set to true, this package will expose the OpenID Connect Discovery endpoint.
-         *  - /.well-known/openid-configuration
+         * Global discovery/jwks/userinfo routes are disabled - OIDC clients
+         * (and the endpoints they authenticate through) are realm-bound, so
+         * routes/web.php registers realm-prefixed replacements instead:
+         * {realm}/.well-known/openid-configuration (App\Http\Controllers\Oidc\RealmDiscoveryController),
+         * {realm}/oauth/jwks and {realm}/oauth/userinfo (this package's own
+         * JwksController/UserInfoController, reused as-is - neither depends
+         * on the realm, they're just registered under its path prefix).
          */
-        'discovery' => true,
-        /**
-         * When set to true, this package will expose the JSON Web Key Set endpoint.
-         */
-        'jwks' => true,
-        /**
-         * Optional URL to change the JWKS path to align with your custom Passport routes.
-         * Defaults to /oauth/jwks
-         */
+        'discovery' => false,
+        'jwks' => false,
         'jwks_url' => '/oauth/jwks',
-        /**
-         * When set to true, this package will expose the UserInfo endpoint at /oauth/userinfo.
-         * The endpoint is protected by Passport's auth:api guard and returns claims
-         * for the authenticated user filtered by the access token's granted scopes.
-         */
-        'userinfo' => true,
+        'userinfo' => false,
     ],
 
     /**

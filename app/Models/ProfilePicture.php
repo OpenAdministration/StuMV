@@ -21,6 +21,7 @@ class ProfilePicture extends Model
      */
     protected $fillable = [
         'user',
+        'realm',
         'file_id',
     ];
 }

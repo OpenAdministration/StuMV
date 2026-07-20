@@ -13,7 +13,7 @@ test('a user can edit their own profile', function (): void {
     $community = newCommunity();
     $user = actingAsMember($community);
 
-    Livewire::test(Profile::class, ['username' => $user->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->set('givenName', 'Neu')
         ->set('sn', 'Name')
         ->set('phone', '+49 30 1234')
@@ -33,7 +33,7 @@ test('saving the profile updates the full name in the database too', function ()
     $community = newCommunity();
     $user = actingAsMember($community);
 
-    Livewire::test(Profile::class, ['username' => $user->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->set('givenName', 'Neu')
         ->set('sn', 'Name')
         ->call('save')
@@ -46,7 +46,7 @@ test('first and last name are required', function (): void {
     $community = newCommunity();
     $user = actingAsMember($community);
 
-    Livewire::test(Profile::class, ['username' => $user->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->set('givenName', '')
         ->call('save')
         ->assertHasErrors('givenName');
@@ -57,7 +57,7 @@ test('a user cannot open someone else profile', function (): void {
     actingAsMember($community);
     $someoneElse = TestLdap::makeUser();
 
-    Livewire::test(Profile::class, ['username' => $someoneElse->getFirstAttribute('uid')])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $someoneElse->getFirstAttribute('uid')])
         ->assertForbidden();
 });
 
@@ -66,9 +66,29 @@ test('a super admin can open any profile', function (): void {
     $target = TestLdap::member($community);
     actingAsSuperAdmin();
 
-    Livewire::test(Profile::class, ['username' => $target->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
         ->assertStatus(200)
         ->assertSet('uid', $target->username);
+});
+
+test('a realm admin can open another users profile in their own realm', function (): void {
+    $community = newCommunity();
+    $target = TestLdap::member($community);
+    actingAsAdmin($community);
+
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
+        ->assertStatus(200)
+        ->assertSet('uid', $target->username);
+});
+
+test('a realm admin cannot open a profile in a different realm', function (): void {
+    $adminRealm = newCommunity();
+    $otherRealm = newCommunity();
+    $target = TestLdap::member($otherRealm);
+    actingAsAdmin($adminRealm);
+
+    Livewire::test(Profile::class, ['realm' => $otherRealm, 'username' => $target->username])
+        ->assertForbidden();
 });
 
 test('a super admin sees the account-active switch and can disable a user', function (): void {
@@ -76,7 +96,7 @@ test('a super admin sees the account-active switch and can disable a user', func
     $target = TestLdap::member($community);
     actingAsSuperAdmin();
 
-    Livewire::test(Profile::class, ['username' => $target->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
         ->assertSee(__('profile.user_is_active'))
         ->set('userIsActive', false)
         ->call('save')
@@ -100,7 +120,7 @@ test('a disabled user shows as inactive when the profile loads', function (): vo
     $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldap->save();
 
-    Livewire::test(Profile::class, ['username' => $target->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
         ->assertSet('userIsActive', false);
 });
 
@@ -113,7 +133,7 @@ test('a super admin can re-enable a previously disabled user', function (): void
     $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldap->save();
 
-    Livewire::test(Profile::class, ['username' => $target->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
         ->assertSet('userIsActive', false)
         ->set('userIsActive', true)
         ->call('save')
@@ -130,7 +150,7 @@ test('a regular user does not see the account-active switch on their own profile
     $community = newCommunity();
     $user = actingAsMember($community);
 
-    Livewire::test(Profile::class, ['username' => $user->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->assertDontSee(__('profile.user_is_active'));
 });
 
@@ -138,7 +158,7 @@ test('a non-superadmin cannot lock their own account by tampering with the field
     $community = newCommunity();
     $user = actingAsMember($community);
 
-    Livewire::test(Profile::class, ['username' => $user->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->set('userIsActive', false)
         ->call('save')
         ->assertForbidden();
@@ -158,7 +178,7 @@ test('a non-superadmin cannot re-enable a locked account by tampering with the f
     $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldap->save();
 
-    Livewire::test(Profile::class, ['username' => $user->username])
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->set('userIsActive', true)
         ->call('save')
         ->assertForbidden();

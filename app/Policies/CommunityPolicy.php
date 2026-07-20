@@ -27,8 +27,7 @@ class CommunityPolicy
 
     public function edit(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class)
-            || $this->admin($user, $community);
+        return $this->admin($user, $community);
     }
 
     public function delete(User $user, Community $community): bool
@@ -38,7 +37,7 @@ class CommunityPolicy
 
     public function member(User $user, Community $community): bool
     {
-        return $community->membersGroup()->members()->exists($user->ldap());
+        return str_ends_with((string) $user->ldap()->getDn(), ','.$community->peopleDn());
     }
 
     public function add_member(User $user, Community $community): bool
@@ -53,44 +52,63 @@ class CommunityPolicy
 
     public function moderator(User $user, Community $community): bool
     {
-        return $community->moderatorsGroup()->members()->exists($user->ldap());
+        // Admin-realm members get moderator/admin/superadmin rights in every
+        // realm, not just their own - checked directly here (not just via
+        // the superadmin `||` some callers below already add) so every
+        // consumer of the raw "moderator" ability picks it up too, including
+        // ones that never compose it with an explicit superadmin check.
+        //
+        // The admin realm itself has no moderators group of its own (see
+        // Community::generateSkeleton()) - only superadmin rights apply
+        // within it, so this must short-circuit before touching
+        // moderatorsGroup(), which would otherwise be null there.
+        if ($community->isAdminRealm()) {
+            return $user->can('superadmin', User::class);
+        }
+
+        return $user->can('superadmin', User::class)
+            || $community->moderatorsGroup()->members()->exists($user->ldap());
     }
 
     public function tools(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class)
-            || $this->admin($user, $community)
+        return $this->admin($user, $community)
             || $this->moderator($user, $community);
     }
 
     public function add_moderator(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class)
-            || $this->admin($user, $community)
+        return $this->admin($user, $community)
             || $this->moderator($user, $community);
     }
 
     public function remove_moderator(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class)
-            || $this->admin($user, $community)
+        return $this->admin($user, $community)
             || $this->moderator($user, $community);
     }
 
     public function admin(User $user, Community $community): bool
     {
-        return $community->adminsGroup()->members()->exists($user->ldap());
+        // See moderator() above - admin-realm members get admin rights
+        // everywhere, checked directly here for the same reason. Same
+        // short-circuit for the admin realm itself, which has no admins
+        // group of its own.
+        if ($community->isAdminRealm()) {
+            return $user->can('superadmin', User::class);
+        }
+
+        return $user->can('superadmin', User::class)
+            || $community->adminsGroup()->members()->exists($user->ldap());
     }
 
     public function add_admin(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class)
-            || $this->admin($user, $community);
+        return $this->admin($user, $community);
     }
 
     public function remove_admin(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class)
-            || $this->admin($user, $community);
+        return $this->admin($user, $community);
     }
 }

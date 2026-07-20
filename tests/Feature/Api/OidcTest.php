@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Passport\AccessToken;
 use Laravel\Passport\ClientRepository;
@@ -16,9 +17,10 @@ use Tests\Support\TestLdap;
  * token does carry a real access_token_id). This helper simulates a real,
  * DB-backed token instead, exercising the same path a genuine request takes.
  */
-function actingWithRealAccessToken(User $user, array $scopes): void
+function actingWithRealAccessToken(User $user, string $communityUid, array $scopes): void
 {
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Test SSO Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $communityUid])->save();
 
     $token = Token::create([
         'id' => Str::random(80),
@@ -46,19 +48,34 @@ function actingWithRealAccessToken(User $user, array $scopes): void
  * setup - App\Entities\IdentityEntity supplies the claims (from the local
  * user row plus LDAP, same data the legacy SocialiteUser endpoint reads),
  * and the package's ClaimExtractor filters them down to what the token's
- * granted scopes permit.
+ * granted scopes permit. Every endpoint is realm-prefixed now (OIDC clients
+ * are bound to the realm they were registered under).
  */
 uses(RefreshDatabase::class);
 
-test('the discovery document advertises the openid scopes and endpoints', function (): void {
-    $this->getJson('/.well-known/openid-configuration')
+test('the discovery document advertises the openid scopes and realm-prefixed endpoints', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $this->getJson("/$uid/.well-known/openid-configuration")
         ->assertOk()
         ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users', 'iban']])
-        ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri']);
+        ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri'])
+        ->assertJsonFragment(['authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid])])
+        ->assertJsonFragment(['token_endpoint' => route('realm.passport.token', ['realm' => $uid])])
+        ->assertJsonFragment(['userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid])])
+        ->assertJsonFragment(['jwks_uri' => route('realm.openid.jwks', ['realm' => $uid])]);
+});
+
+test('the global discovery/jwks endpoints no longer resolve', function (): void {
+    $this->getJson('/.well-known/openid-configuration')->assertNotFound();
+    $this->getJson('/oauth/jwks')->assertNotFound();
 });
 
 test('the jwks endpoint exposes the signing key', function (): void {
-    $this->getJson('/oauth/jwks')
+    $community = newCommunity();
+
+    $this->getJson('/'.$community->getShortCode().'/oauth/jwks')
         ->assertOk()
         ->assertJsonStructure(['keys' => [['kty', 'use', 'alg', 'n', 'e']]]);
 });
@@ -72,9 +89,9 @@ test('the userinfo endpoint returns claims filtered by the granted scopes', func
         'telephoneNumber' => '+49 123 456',
     ])->save();
 
-    actingWithRealAccessToken($user, ['openid', 'email']);
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'email']);
 
-    $this->getJson('/oauth/userinfo')
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
         ->assertOk()
         ->assertJson([
             'sub' => (string) $user->id,
@@ -93,9 +110,9 @@ test('granting the profile and phone scopes includes their claims', function ():
         'telephoneNumber' => '+49 123 456',
     ])->save();
 
-    actingWithRealAccessToken($user, ['openid', 'profile', 'phone']);
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'profile', 'phone']);
 
-    $this->getJson('/oauth/userinfo')
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
         ->assertOk()
         ->assertJson([
             'given_name' => 'Jane',
@@ -103,4 +120,80 @@ test('granting the profile and phone scopes includes their claims', function ():
             'phone_number' => '+49 123 456',
         ])
         ->assertJsonMissing(['email' => $user->email]);
+});
+
+test('authorizing against a client bound to a different realm is rejected', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Other Realm SSO App', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $otherCommunity->getShortCode()])->save();
+
+    $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $community->getShortCode(),
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]))->assertForbidden();
+});
+
+test('an authenticated user hitting authorize completes the code flow without a consent prompt', function (): void {
+    // App\Models\PassportClient::skipsAuthorization() always returns true in
+    // this app ("no App needs a confirmation dialog after login") - so the
+    // consent screen is never actually shown; authorize redirects straight
+    // back to the client with a code. See the next test for the consent
+    // view itself (unreachable via this flow, but still wired up via
+    // Passport::authorizationView() and worth protecting against regressing
+    // back to the old, now-removed global route names).
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Test SSO Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertRedirect();
+    expect($response->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
+});
+
+test('the oauth consent view points its approve/deny forms at this realm\'s own routes', function (): void {
+    // The consent view is unreachable via the normal authorize flow in this
+    // app (PassportClient::skipsAuthorization() always returns true), but
+    // it's still wired up via Passport::authorizationView() and needs its
+    // {realm} route parameter bound the same way a real {realm}/oauth/*
+    // request would - so render it through an ad-hoc real route rather than
+    // hand-building a Request/Route pair (route model binding is otherwise
+    // easy to get subtly wrong in a way that doesn't match production).
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Consent View Client', ['https://example.test/callback']);
+
+    Route::middleware('web')->get('{realm}/_test-render-oauth-consent', function (\App\Ldap\Community $realm, Illuminate\Http\Request $request) use ($client) {
+        return view('auth.oauth.authorize', [
+            'client' => $client,
+            'scopes' => [],
+            'request' => $request,
+            'authToken' => 'test-token',
+        ]);
+    });
+
+    $html = $this->get("/$uid/_test-render-oauth-consent")->assertOk()->getContent();
+
+    // If the view still referenced the old, now-removed global route names
+    // (passport.authorizations.approve/deny), rendering it would already
+    // have thrown a RouteNotFoundException above.
+    expect($html)->toContain(route('realm.passport.authorizations.approve', ['realm' => $uid]))
+        ->toContain(route('realm.passport.authorizations.deny', ['realm' => $uid]));
 });

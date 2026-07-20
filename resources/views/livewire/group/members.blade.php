@@ -42,7 +42,7 @@
                         <flux:table.cell>
                             <flux:link
                                 wire:navigate
-                                href="{{ route('profile', ['username' => $user->getFirstAttribute('uid')]) }}"
+                                href="{{ route('profile', ['realm' => $realm_uid, 'username' => $user->getFirstAttribute('uid')]) }}"
                             >
                                 {{ $displayName }}
                             </flux:link>

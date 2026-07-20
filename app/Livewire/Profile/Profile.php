@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Profile;
 
+use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
@@ -10,6 +11,9 @@ use Livewire\Component;
 
 class Profile extends Component
 {
+    #[Locked]
+    public string $realm_uid;
+
     #[Locked]
     public string $uid;
 
@@ -36,9 +40,10 @@ class Profile extends Component
 
     public $userIsActive = true;
 
-    public function mount($username)
+    public function mount(Community $realm, $username)
     {
-        $this->authorize('manageProfile', [User::class, $username]);
+        $this->authorize('manageProfile', [User::class, $realm, $username]);
+        $this->realm_uid = $realm->getShortCode();
         $this->currentUsername = $username;
         $user = $this->findUserWithLockStatus($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
@@ -91,12 +96,12 @@ class Profile extends Component
 
         $user->save();
 
-        \App\Models\User::where('username', $this->uid)->update([
+        \App\Models\User::where('uid', $user->getConvertedGuid())->update([
             'full_name' => $this->givenName.' '.$this->sn,
         ]);
 
         Flux::toast(variant: 'success', text: __('common.saved'));
-        $this->redirect('/profile/'.$this->uid, navigate: true);
+        $this->redirect(route('profile', ['realm' => $this->realm_uid, 'username' => $this->uid]), navigate: true);
     }
 
     /**
@@ -107,6 +112,7 @@ class Profile extends Component
     protected function findUserWithLockStatus(string $username): User
     {
         return User::query()
+            ->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())
             ->select(['*', 'pwdAccountLockedTime'])
             ->where('uid', '=', $username)
             ->first() ?? abort(404);

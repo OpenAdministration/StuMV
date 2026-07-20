@@ -111,7 +111,7 @@ class ListModerators extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_moderator', $community);
-        $user = User::findOrFailByUsername($uid);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $uid)->first() ?? abort(404);
         $userBelongsToRealm = $community->moderatorsGroup()->members()->contains($user);
         if (! $userBelongsToRealm) {
             // only allow deletes from the same realm
@@ -126,7 +126,7 @@ class ListModerators extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_moderator', $community);
-        $user = User::findOrFailByUsername($this->deleteMemberUsername);
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteMemberUsername)->first() ?? abort(404);
         $community->moderatorsGroup()->members()->detach($user);
         $this->close();
     }

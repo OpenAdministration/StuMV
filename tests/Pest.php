@@ -2,6 +2,7 @@
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
+use App\Models\RealmSsoProvider;
 use App\Models\User;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
@@ -97,6 +98,30 @@ function actingAsDirectoryClient(Community $community, array $scopes = []): Pass
 function newCommunity(?string $uid = null): Community
 {
     return TestLdap::makeCommunity($uid);
+}
+
+/*
+|--------------------------------------------------------------------------
+| External identity provider helper
+|--------------------------------------------------------------------------
+|
+| Creates a real (but never contacted in most tests) RealmSsoProvider row
+| pointing at a fake issuer - see Tests\Support\FakesSso for stubbing the
+| actual discovery/token/userinfo HTTP exchange in login-flow tests.
+|
+*/
+
+function makeSsoProvider(string $realmUid, string $name = 'Test IdP', bool $enabled = true): RealmSsoProvider
+{
+    return RealmSsoProvider::create([
+        'realm' => $realmUid,
+        'name' => $name,
+        'issuer' => 'https://idp.example.test',
+        'client_id' => 'client-id',
+        'client_secret' => 'client-secret',
+        'groups_claim' => 'groups',
+        'enabled' => $enabled,
+    ]);
 }
 
 /*

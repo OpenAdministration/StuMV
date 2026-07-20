@@ -30,6 +30,7 @@ test('ldap:sync-roles projects active DB memberships onto the LDAP role', functi
     $role->members()->attach($stale);
     // Active DB membership that should end up in the LDAP role.
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $active->username,
@@ -62,12 +63,14 @@ test('ldap:sync-roles leaves already-correct members untouched instead of cleari
     $role->members()->attach($stale);
 
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $memberA->username,
         'from' => today()->subMonth(),
     ]);
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $memberB->username,
@@ -99,12 +102,14 @@ test('ldap:sync-roles fetches active memberships once, not once per role', funct
     $memberB = TestLdap::member($community);
 
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee1->getDn(),
         'username' => $memberA->username,
         'from' => today()->subMonth(),
     ]);
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee2->getDn(),
         'username' => $memberB->username,
@@ -134,6 +139,7 @@ test('ldap:sync-groups fetches active memberships and group mappings once, not o
     GroupMembership::create(['group_dn' => $group1->getDn(), 'role_dn' => $role->getDn()]);
     GroupMembership::create(['group_dn' => $group2->getDn(), 'role_dn' => $role->getDn()]);
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $member->username,
@@ -165,6 +171,7 @@ test('ldap:sync-groups projects role memberships onto the LDAP group', function 
     // The role is mapped to the group, and has one active member.
     GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $active->username,
@@ -191,6 +198,7 @@ test('ldap:sync-groups logs member additions at the group\'s own tree depth, not
 
     GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $active->username,
@@ -212,6 +220,7 @@ test('ldap:sync-roles logs member additions at the role\'s own tree depth', func
     $active = TestLdap::member($community);
 
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $active->username,

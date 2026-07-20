@@ -16,23 +16,32 @@ uses(RefreshDatabase::class);
  * one at a time (User::findOrFailByUsername() per membership per role),
  * instead of batching every username across every role into a single
  * whereIn() query - count how many separate person-lookup query events fire
- * for role members (excluding the acting moderator's own user lookup, which
- * is unrelated - it's from the already-optimized moderator-ability check) to
- * catch a regression back to the per-member lookup.
+ * for role members (excluding entryuuid=-based lookups, which are
+ * Auth::user()->ldap() resolving the acting user's own identity for
+ * authorization checks, unrelated to resolving role members - a person is
+ * never looked up that way here) to catch a regression back to the
+ * per-member lookup.
  */
-function countMemberLookupQueryEvents(Closure $callback, string $excludeUsername): int
+function countMemberLookupQueryEvents(Closure $callback): int
 {
     $queries = 0;
-    Container::getInstance()->getDispatcher()->listen('LdapRecord\Query\Events\*', function ($eventName, $events) use (&$queries, $excludeUsername): void {
+    $listener = function ($eventName, $events) use (&$queries): void {
         foreach ($events as $event) {
             $query = $event->getQuery()->getUnescapedQuery();
-            if (str_contains($query, 'objectclass=inetorgperson') && str_contains($query, 'uid=') && ! str_contains($query, "uid=$excludeUsername")) {
+            if (str_contains($query, 'objectclass=inetorgperson') && str_contains($query, '(uid=') && ! str_contains($query, 'entryuuid=')) {
                 $queries++;
             }
         }
-    });
+    };
 
-    $callback();
+    $dispatcher = Container::getInstance()->getDispatcher();
+    $dispatcher->listen('LdapRecord\Query\Events\*', $listener);
+
+    try {
+        $callback();
+    } finally {
+        $dispatcher->forget('LdapRecord\Query\Events\*');
+    }
 
     return $queries;
 }
@@ -42,6 +51,7 @@ function makeRoleWithActiveMembers(Committee $committee, string $cn, Community $
     $role = TestLdap::makeRole($committee, $cn);
     foreach (range(1, $memberCount) as $i) {
         RoleMembership::create([
+            'realm' => $community->getShortCode(),
             'role_cn' => $cn,
             'committee_dn' => $committee->getDn(),
             'username' => TestLdap::member($community)->username,
@@ -54,12 +64,12 @@ test('resolving role members from LDAP is batched into a single query regardless
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');
     makeRoleWithActiveMembers($committee, 'role1', $community, 2);
-    $moderator = actingAsModerator($community);
+    actingAsModerator($community);
 
     $queriesForOneRole = countMemberLookupQueryEvents(function () use ($community, $committee): void {
         Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
             ->call('loadRoles');
-    }, $moderator->username);
+    });
 
     makeRoleWithActiveMembers($committee, 'role2', $community, 2);
     makeRoleWithActiveMembers($committee, 'role3', $community, 2);
@@ -67,7 +77,7 @@ test('resolving role members from LDAP is batched into a single query regardless
     $queriesForThreeRoles = countMemberLookupQueryEvents(function () use ($community, $committee): void {
         Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => $committee->getFirstAttribute('ou')])
             ->call('loadRoles');
-    }, $moderator->username);
+    });
 
     expect($queriesForOneRole)->toBe(1)
         ->and($queriesForThreeRoles)->toBe(1);
@@ -79,6 +89,7 @@ test('roles still show their active members after batching the LDAP lookup', fun
     $role = TestLdap::makeRole($committee, 'mitglied');
     $member = TestLdap::member($community);
     RoleMembership::create([
+        'realm' => $community->getShortCode(),
         'role_cn' => 'mitglied',
         'committee_dn' => $committee->getDn(),
         'username' => $member->username,

@@ -43,16 +43,14 @@ class LdapSyncRoles extends Command
             $date = Date::createFromFormat('Y-m-d', $this->option('date'));
         }
 
-        // Fetch every active membership, and every LDAP user they refer to,
-        // in one query each - instead of one query per role/user encountered
-        // while walking the realm/committee/role tree below.
+        // Fetch every active membership in one query - instead of one query
+        // per role/user encountered while walking the realm/committee/role
+        // tree below. LDAP users are resolved per-realm instead (see the
+        // loop below): usernames are only unique within one realm now, so a
+        // single global uid lookup could resolve the wrong realm's account
+        // and sync the wrong person into a security-relevant LDAP role.
         $memberships = RoleMembership::active($date)->get();
         $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
-
-        $ldapUsersByUsername = LdapUser::query()
-            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
-            ->get()
-            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
 
         $realms = Community::query()
             ->setDn(Community::$rootDn)->search()
@@ -60,9 +58,16 @@ class LdapSyncRoles extends Command
             ->get();
 
         foreach ($realms as $realm) {
-            $this->comment('> '.$realm->getFirstAttribute('ou'));
+            $realmUid = $realm->getFirstAttribute('ou');
+            $this->comment('> '.$realmUid);
 
-            $committees = Committee::fromCommunity($realm->getFirstAttribute('ou'))
+            $usernamesInRealm = $memberships->where('realm', $realmUid)->pluck('username')->unique()->all();
+            $ldapUsersByUsername = empty($usernamesInRealm)
+                ? collect()
+                : LdapUser::query()->in($realm->peopleDn())->whereIn('uid', $usernamesInRealm)->get()
+                    ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
+
+            $committees = Committee::fromCommunity($realmUid)
                 ->searchFor('ou', $this->argument('committee'))
                 ->get();
             foreach ($committees as $committee) {

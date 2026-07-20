@@ -120,7 +120,7 @@ class ListRoles extends Component
         $allUsernames = collect($roleUsernames)->flatten()->unique()->values()->all();
         $userCache = empty($allUsernames)
             ? []
-            : User::query()->whereIn('uid', $allUsernames)->get()->keyBy('uid')->all();
+            : User::query()->in($community->peopleDn())->whereIn('uid', $allUsernames)->get()->keyBy('uid')->all();
 
         $roleData = [];
         foreach ($rolesSlice as $role) {

@@ -33,7 +33,7 @@ class IdentityEntity implements IdentityEntityInterface
             'given_name' => $ldapUser->getFirstAttribute('givenName'),
             'family_name' => $ldapUser->getFirstAttribute('sn'),
             'preferred_username' => $this->user->username,
-            'picture' => $picture ? asset('storage/avatars/'.$picture->file_id.'.jpg') : null,
+            'picture' => $picture ? asset('storage/avatars/'.$picture->file_id.'.webp') : null,
 
             'email' => $this->user->email,
             'email_verified' => $this->user->email_verified_at !== null,

@@ -65,9 +65,21 @@ objectClass: top
 cn: read
 uniqueMember: uid=stumv,ou=Services,dc=stumv,dc=de
 
-# --- super-admins group -------------------------------------------------
-dn: cn=super-admins,dc=stumv,dc=de
-objectClass: groupOfUniqueNames
+# --- dedicated "admin" realm ---------------------------------------------
+# Superadmins live here instead of a global super-admins group - see
+# Community::generateSkeleton(full: false): just the community OU and its
+# People branch, no Groups/Committees/Domains/admins/moderators of its own
+# (its members get moderator/admin/superadmin rights everywhere via
+# CommunityPolicy instead). The actual admin person entry lives in
+# 10-sample.ldif, alongside its independent testcom-member clone.
+dn: ou=admin,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
 objectClass: top
-cn: super-admins
-uniqueMember: uid=admin,ou=People,dc=stumv,dc=de
+ou: admin
+description: Superadmins
+
+dn: ou=People,ou=admin,ou=Communities,dc=stumv,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: People
+description: The People

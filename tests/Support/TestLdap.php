@@ -6,7 +6,6 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Ldap\Role;
-use App\Ldap\SuperUserGroup;
 use App\Ldap\User as LdapUser;
 use App\Models\User;
 use LdapRecord\Models\Model as LdapModel;
@@ -14,11 +13,13 @@ use LdapRecord\Models\Model as LdapModel;
 /**
  * Builds throwaway, fully wired LDAP fixtures on the fly.
  *
- * Authorization in this app is decided against LDAP group membership (see
- * CommunityPolicy / UserPolicy), so a usable acting-as user needs three things
- * kept in sync: an LDAP entry under ou=People, membership in the right LDAP
- * group(s), and a database User whose `username` matches the LDAP `uid` (that is
- * what App\Models\User::ldap() resolves on).
+ * Authorization in this app is decided against LDAP group membership and
+ * physical location (see CommunityPolicy / UserPolicy), so a usable
+ * acting-as user needs three things kept in sync: an LDAP entry under the
+ * realm's own ou=People branch (membership is the location itself),
+ * membership in the right LDAP role group(s), and a database User whose
+ * `uid` matches the LDAP entry's own entryUUID (that is what
+ * App\Models\User::ldap() resolves on).
  *
  * On top of users this also builds directory *structure* — whole community
  * skeletons, committees, roles and groups — so tests can create exactly the
@@ -38,8 +39,19 @@ class TestLdap
     /** @var list<LdapModel> structural entries (communities/committees/roles/groups) to delete on teardown. */
     private static array $entries = [];
 
-    /** Create a fresh LDAP person with a unique uid. */
-    public static function makeUser(?string $uid = null): LdapUser
+    /**
+     * Create a fresh LDAP person with a unique uid.
+     *
+     * @param  Community|null  $community  Where to place the entry - a
+     *                                      specific realm's People branch, or
+     *                                      (default) the flat legacy
+     *                                      ou=People branch, which is never
+     *                                      in scope for any realm - the
+     *                                      right place for a deliberate
+     *                                      "outsider"/"not a member of this
+     *                                      realm" test fixture.
+     */
+    public static function makeUser(?string $uid = null, ?Community $community = null): LdapUser
     {
         $uid ??= 'testusr'.bin2hex(random_bytes(4));
         LdapUser::findByUsername($uid)?->delete();
@@ -52,8 +64,13 @@ class TestLdap
             'mail' => $uid.'@example.test',
             'userPassword' => '{ARGON2}'.password_hash('Aa1!'.bin2hex(random_bytes(6)), PASSWORD_ARGON2ID),
         ]);
-        $ldap->setDn("uid=$uid,ou=People,{base}");
+        $ldap->setDn($community !== null ? "uid=$uid,".$community->peopleDn() : "uid=$uid,ou=People,{base}");
         $ldap->save();
+
+        // entryUUID is server-assigned and not part of the in-memory model
+        // right after an insert - refresh so getConvertedGuid() (used by
+        // databaseUser() below) actually returns it.
+        $ldap->refresh();
 
         self::$users[] = $ldap;
 
@@ -68,60 +85,65 @@ class TestLdap
     }
 
     /** Create the matching database user that actingAs() drives. */
-    public static function databaseUser(LdapUser $ldap): User
+    public static function databaseUser(LdapUser $ldap, ?Community $realm = null): User
     {
         return User::factory()->create([
+            'uid' => $ldap->getConvertedGuid(),
             'username' => $ldap->getFirstAttribute('uid'),
             'full_name' => $ldap->getFirstAttribute('cn'),
             'email' => $ldap->getFirstAttribute('mail'),
+            'realm' => $realm?->getShortCode(),
         ]);
     }
 
     public static function member(string|Community $community): User
     {
         $community = self::resolveCommunity($community);
-        $ldap = self::makeUser();
-        self::attach($community->membersGroup(), $ldap);
+        $ldap = self::makeUser(community: $community);
 
-        return self::databaseUser($ldap);
+        return self::databaseUser($ldap, $community);
     }
 
     public static function moderator(string|Community $community): User
     {
         $community = self::resolveCommunity($community);
-        $ldap = self::makeUser();
-        self::attach($community->membersGroup(), $ldap);
+        $ldap = self::makeUser(community: $community);
         self::attach($community->moderatorsGroup(), $ldap);
 
-        return self::databaseUser($ldap);
+        return self::databaseUser($ldap, $community);
     }
 
     public static function admin(string|Community $community): User
     {
         $community = self::resolveCommunity($community);
-        $ldap = self::makeUser();
-        self::attach($community->membersGroup(), $ldap);
+        $ldap = self::makeUser(community: $community);
         self::attach($community->adminsGroup(), $ldap);
 
-        return self::databaseUser($ldap);
+        return self::databaseUser($ldap, $community);
     }
 
+    /** A member of the dedicated "admin" realm - see Community::ADMIN_REALM_UID. */
     public static function superAdmin(): User
     {
-        $ldap = self::makeUser();
-        self::attach(SuperUserGroup::group(), $ldap);
+        $adminRealm = Community::findByUid(Community::ADMIN_REALM_UID)
+            ?? tap(new Community(['ou' => Community::ADMIN_REALM_UID, 'description' => 'Superadmins']), function (Community $community): void {
+                $community->setDn('ou='.Community::ADMIN_REALM_UID.','.Community::rootDn());
+                $community->generateSkeleton(full: false);
+                self::$entries[] = $community;
+            });
 
-        return self::databaseUser($ldap);
+        $ldap = self::makeUser(community: $adminRealm);
+
+        return self::databaseUser($ldap, $adminRealm);
     }
 
     /** A member of $community, and a moderator of just $committee (not the community itself). */
     public static function committeeModerator(Committee $committee, Community $community): User
     {
-        $ldap = self::makeUser();
-        self::attach($community->membersGroup(), $ldap);
+        $ldap = self::makeUser(community: $community);
         self::attach($committee->moderatorsGroup(), $ldap);
 
-        return self::databaseUser($ldap);
+        return self::databaseUser($ldap, $community);
     }
 
     /**

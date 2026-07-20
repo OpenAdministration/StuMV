@@ -8,9 +8,10 @@ use Livewire\Livewire;
 uses(RefreshDatabase::class);
 
 test('a new authorization-code client can be registered', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', "https://app.example.com/callback\nhttps://app.example.com/other-callback")
         ->set('scopes', ['openid', 'profile', 'email'])
@@ -21,14 +22,15 @@ test('a new authorization-code client can be registered', function (): void {
     expect($client->grant_types)->toBe(['authorization_code', 'refresh_token'])
         ->and($client->redirect_uris)->toBe(['https://app.example.com/callback', 'https://app.example.com/other-callback'])
         ->and($client->scopes)->toBe(['openid', 'profile', 'email'])
-        ->and($client->community_uid)->toBeNull()
+        ->and($client->community_uid)->toBe($community->getShortCode())
         ->and($client->revoked)->toBeFalse();
 });
 
 test('blank lines in the redirect URIs field are ignored', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', "https://app.example.com/callback\n\n\n")
         ->set('scopes', ['openid'])
@@ -40,9 +42,10 @@ test('blank lines in the redirect URIs field are ignored', function (): void {
 });
 
 test('the plaintext secret is shown once after creation', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['openid'])
@@ -52,9 +55,10 @@ test('the plaintext secret is shown once after creation', function (): void {
 });
 
 test('registering a client requires a name', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', '')
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['openid'])
@@ -63,9 +67,10 @@ test('registering a client requires a name', function (): void {
 });
 
 test('registering a client requires at least one redirect URI', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', "\n\n")
         ->set('scopes', ['openid'])
@@ -74,9 +79,10 @@ test('registering a client requires at least one redirect URI', function (): voi
 });
 
 test('registering a client rejects a redirect URI that is not a valid URL', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', 'not-a-url')
         ->set('scopes', ['openid'])
@@ -85,9 +91,10 @@ test('registering a client rejects a redirect URI that is not a valid URL', func
 });
 
 test('registering a client requires at least one scope', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', [])
@@ -96,9 +103,10 @@ test('registering a client requires at least one scope', function (): void {
 });
 
 test('registering a client accepts the iban scope', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['iban'])
@@ -111,9 +119,10 @@ test('registering a client accepts the iban scope', function (): void {
 });
 
 test('registering a client accepts the address scope', function (): void {
-    actingAsSuperAdmin();
+    $community = newCommunity();
+    actingAsAdmin($community);
 
-    Livewire::test(NewOidcClient::class)
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['address'])
@@ -125,9 +134,15 @@ test('registering a client accepts the address scope', function (): void {
     expect($client->scopes)->toBe(['address']);
 });
 
-test('a non-superadmin cannot register an OIDC client', function (): void {
+test('a non-admin cannot register an OIDC client', function (): void {
     $community = newCommunity();
-    actingAsAdmin($community);
+    actingAsModerator($community);
 
-    $this->get(route('oidc-clients.new'))->assertForbidden();
+    $this->get(route('realms.oidc-clients.new', ['realm' => $community->getShortCode()]))->assertForbidden();
+});
+
+test('the admin realm has no OIDC clients feature', function (): void {
+    actingAsSuperAdmin();
+
+    $this->get(route('realms.oidc-clients.new', ['realm' => 'admin']))->assertNotFound();
 });

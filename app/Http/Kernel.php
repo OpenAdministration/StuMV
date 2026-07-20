@@ -6,8 +6,10 @@ use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CommunityAdmin;
 use App\Http\Middleware\CommunityMember;
 use App\Http\Middleware\CommunityModerator;
+use App\Http\Middleware\DenyAdminRealm;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnsureAccountIsNotLocked;
+use App\Http\Middleware\EnsureOidcClientMatchesRealm;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SuperAdminMiddleware;
@@ -99,6 +101,8 @@ class Kernel extends HttpKernel
         'communityAdmin' => CommunityAdmin::class,
         'communityMod' => CommunityModerator::class,
         'communityMember' => CommunityMember::class,
+        'denyAdminRealm' => DenyAdminRealm::class,
+        'oidcClientMatchesRealm' => EnsureOidcClientMatchesRealm::class,
         'scopes' => CheckToken::class,
         'scope' => CheckTokenForAnyScope::class,
         // Rejects any token that has a human resource owner (i.e. a normal

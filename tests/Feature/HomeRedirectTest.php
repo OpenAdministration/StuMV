@@ -1,37 +1,24 @@
 <?php
 
-use App\Ldap\SuperUserGroup;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
-test('a member of a single community visiting / is redirected straight to its dashboard, skipping the picker', function (): void {
+test('a member of a community visiting / is redirected straight to its dashboard, skipping the picker', function (): void {
     $community = newCommunity();
     actingAsMember($community);
 
     $this->get('/')->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 });
 
-test('a member of several communities visiting / is redirected to the picker', function (): void {
-    $communityA = newCommunity();
-    $communityB = newCommunity();
-    $ldapUser = TestLdap::makeUser();
-    TestLdap::attach($communityA->membersGroup(), $ldapUser);
-    TestLdap::attach($communityB->membersGroup(), $ldapUser);
-    $this->actingAs(TestLdap::databaseUser($ldapUser));
-
-    $this->get('/')->assertRedirect(route('realms.pick'));
-});
-
-test('a superadmin visiting / is redirected to the picker even with a single membership', function (): void {
-    $community = newCommunity();
-    $ldapUser = TestLdap::makeUser();
-    TestLdap::attach(SuperUserGroup::group(), $ldapUser);
-    TestLdap::attach($community->membersGroup(), $ldapUser);
-    $this->actingAs(TestLdap::databaseUser($ldapUser));
+test('a superadmin visiting / is redirected to the picker', function (): void {
+    // Superadmin status is realm membership (the dedicated "admin" realm),
+    // not a separate group - home() special-cases it to the picker
+    // regardless of the "realm" column, since a superadmin is meant to
+    // choose which OTHER realm to administer next.
+    actingAsSuperAdmin();
 
     $this->get('/')->assertRedirect(route('realms.pick'));
 });

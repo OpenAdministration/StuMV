@@ -28,7 +28,7 @@ class NewModerator extends Component
     public function render(): Factory|View|Application
     {
         $c = Community::findOrFailByUid($this->realm_uid);
-        $userList = $c->membersGroup()->members()->get();
+        $userList = User::query()->in($c->peopleDn())->get();
         $moderators = $c->moderatorsGroup()->members()->get();
         // baseCollection does like strings in contains, ldapCollection does not...
         $moderatorDns = $moderators->modelDns()->toBase();

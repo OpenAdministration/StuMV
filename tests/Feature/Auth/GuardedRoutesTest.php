@@ -7,12 +7,11 @@
  */
 dataset('guarded routes', [
     'realm picker' => '/pick-realm',
-    'profile' => '/profile/admin',
-    'profile memberships' => '/profile/admin/memberships',
+    'profile' => '/testcom/profile/admin',
+    'profile memberships' => '/testcom/profile/admin/memberships',
     'community dashboard' => '/testcom/dashboard',
     'community members' => '/testcom/members/',
     'committee tree' => '/testcom/committees',
-    'superadmin list' => '/superadmins',
     'new realm' => '/new-realm',
 ]);
 
@@ -24,6 +23,9 @@ test('guest-only routes are reachable without authentication', function (string 
     $this->get($route)->assertStatus(200);
 })->with([
     'login' => '/login',
-    'register' => '/register',
-    'forgot password' => '/forgot-password',
+    'forgot password' => '/testcom/forgot-password',
 ]);
+
+test('the register picker redirects rather than 404s or requires auth', function (): void {
+    $this->get('/register')->assertRedirect('/login');
+});

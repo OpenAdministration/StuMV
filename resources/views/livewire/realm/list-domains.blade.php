@@ -39,7 +39,7 @@
                             <flux:button
                                 size="sm"
                                 variant="danger"
-                                icon="trash"
+                                icon="trash-2"
                                 wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
                             >
                                 {{ __('common.delete') }}

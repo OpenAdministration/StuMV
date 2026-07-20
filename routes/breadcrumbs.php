@@ -56,6 +56,11 @@ Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routePa
     $trail->push('Editieren', route('realms.edit', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.branding', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('realms.branding.headline'), route('realms.branding', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
     $trail->push(__('realms.members_breadcrumb'), route('realms.members', $routeParams), ['truncate' => true]);
@@ -234,24 +239,32 @@ Breadcrumbs::for('tools.unused-roles', function (BreadcrumbTrail $trail, array $
     $trail->push(__('tools.unused_roles_headline'), route('tools.unused-roles', $routeParams), ['truncate' => true]);
 });
 
-Breadcrumbs::for('superadmins.list', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->push(__('Superusers'), route('superadmins.list' /* none */), ['truncate' => true]);
+Breadcrumbs::for('realms.oidc-clients', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('oidc_clients.list_title'), route('realms.oidc-clients', $routeParams), ['truncate' => true]);
 });
 
-Breadcrumbs::for('superadmins.add', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->push(__('common.new'), route('superadmins.add' /* none */), ['truncate' => true]);
+Breadcrumbs::for('realms.oidc-clients.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.oidc-clients', $routeParams);
+    $trail->push(__('oidc_clients.new'), route('realms.oidc-clients.new', $routeParams), ['truncate' => true]);
 });
 
-Breadcrumbs::for('oidc-clients.list', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->push(__('oidc_clients.list_title'), route('oidc-clients.list' /* none */), ['truncate' => true]);
+Breadcrumbs::for('realms.oidc-clients.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.oidc-clients', $routeParams);
+    $trail->push(__('common.edit'), route('realms.oidc-clients.edit', $routeParams), ['truncate' => true]);
 });
 
-Breadcrumbs::for('oidc-clients.new', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('oidc-clients.list', $routeParams);
-    $trail->push(__('oidc_clients.new'), route('oidc-clients.new' /* none */), ['truncate' => true]);
+Breadcrumbs::for('realms.sso-providers', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('sso_providers.list_title'), route('realms.sso-providers', $routeParams), ['truncate' => true]);
 });
 
-Breadcrumbs::for('oidc-clients.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('oidc-clients.list', $routeParams);
-    $trail->push(__('common.edit'), route('oidc-clients.edit', $routeParams), ['truncate' => true]);
+Breadcrumbs::for('realms.sso-providers.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.sso-providers', $routeParams);
+    $trail->push(__('sso_providers.new'), route('realms.sso-providers.new', $routeParams), ['truncate' => true]);
+});
+
+Breadcrumbs::for('realms.sso-providers.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.sso-providers', $routeParams);
+    $trail->push(__('common.edit'), route('realms.sso-providers.edit', $routeParams), ['truncate' => true]);
 });
