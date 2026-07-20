@@ -28,3 +28,18 @@ test('matches are rendered as cards', function (): void {
 
     expect($section[0] ?? '')->not->toContain($ldapUser->getFirstAttribute('mail'));
 });
+
+test('a member of a different realm sharing the same email is not reported as a match', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $otherMember = TestLdap::member($otherCommunity);
+    actingAsModerator($community);
+
+    $ldapUser = User::findByUsername($otherMember->username);
+
+    Livewire::test(CompareEmailList::class, ['realm' => $community])
+        ->set('emailAddressesInput', $ldapUser->getFirstAttribute('mail'))
+        ->call('compareEmailAddressesWithLdap')
+        ->assertSet('matches', [])
+        ->assertSet('noMatches', true);
+});

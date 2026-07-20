@@ -36,10 +36,15 @@ class CompareEmailList extends Component
         $this->noMatches = false;
         $this->matches = [];
 
+        // User::findByEmail() searches the whole directory, not just this
+        // realm's People branch - a member of a different community sharing
+        // this email would otherwise show up as a false "match" here.
+        $community = Community::findOrFailByUid($this->uid);
+
         $emailAddresses = preg_split("/\r\n|\n|\r/", $this->emailAddressesInput);
 
         foreach ($emailAddresses as $email) {
-            $user = User::findByEmail($email);
+            $user = User::query()->in($community->peopleDn())->where('mail', '=', $email)->first();
             if ($user !== null) {
                 $this->matches[] = [
                     'uid' => $user->getFirstAttribute('uid'),
