@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'list_title' => 'Externe Identity Provider',
-    'headline' => 'Externe Identity Provider',
+    'list_title' => 'Identity Provider',
+    'headline' => 'Identity Provider',
     'explanation' => 'Hier hinterlegte Identity Provider ermöglichen Mitgliedern deiner Studierendenschaft den Login mit einem externen Konto (z. B. dem Hochschul-Login).',
     'new' => 'Neuer Identity Provider',
     'new_title' => 'Neuen Identity Provider hinzufügen',

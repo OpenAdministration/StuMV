@@ -91,6 +91,13 @@
                 >
                     {{ __('oidc_clients.list_title') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item
+                    icon="git-pull-request-create-arrow"
+                    wire:navigate
+                    :href="route('realms.sso-providers', ['realm' => $realm])"
+                >
+                    {{ __('sso_providers.list_title') }}
+                </flux:sidebar.item>
             @endif
             @if(! $currentCommunity->isAdminRealm() && auth()->user()->can('tools', $currentCommunity))
                 <flux:separator class="my-2" />

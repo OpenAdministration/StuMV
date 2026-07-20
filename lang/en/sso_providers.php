@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'list_title' => 'External Identity Providers',
-    'headline' => 'External Identity Providers',
+    'list_title' => 'Identity Providers',
+    'headline' => 'Identity Providers',
     'explanation' => 'Identity providers configured here let members of your student body log in with an external account (e.g. their university login) instead of a StuMV password. If an account with the returned email address already exists, the person is logged in directly - otherwise they can create a new account.',
     'new' => 'New identity provider',
     'new_title' => 'Add a new identity provider',
