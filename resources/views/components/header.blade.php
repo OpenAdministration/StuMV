@@ -67,10 +67,11 @@
                     {{ __('common.footer_privacy') }}
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
-                <form method="POST" action="{{ route('logout') }}">
+                @php($currentRealm = request()->route('realm'))
+                <form method="POST" action="{{ $currentRealm ? route('realm.logout', ['realm' => $currentRealm->getShortCode()]) : route('logout') }}">
                     @csrf
                     <flux:navmenu.item
-                        :href="route('logout')"
+                        :href="$currentRealm ? route('realm.logout', ['realm' => $currentRealm->getShortCode()]) : route('logout')"
                         onclick="event.preventDefault(); this.closest('form').submit();"
                         icon="log-out"
                     >

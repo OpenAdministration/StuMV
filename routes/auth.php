@@ -82,6 +82,15 @@ Route::middleware('auth')->group(function (): void {
 
     Route::any('{realm}/profile/{username}/password', ChangePassword::class)->name('password.change');
 
+    // Realm-scoped like login - lets logout redirect back to the same
+    // realm's own login page rather than the one on the account's own
+    // record, which matters e.g. for a superadmin logging out of a
+    // different realm than their own. Still coupled with the plain,
+    // realm-agnostic routes below for the rare page with no {realm} segment
+    // at all (e.g. /pick-realm).
+    Route::post('{realm}/logout', [AuthenticatedSessionController::class, 'destroy'])->name('realm.logout');
+    Route::get('{realm}/logout', [AuthenticatedSessionController::class, 'confirmLogout'])->name('realm.logout.confirm');
+
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('logout', [AuthenticatedSessionController::class, 'confirmLogout'])->name('logout.confirm');
 });

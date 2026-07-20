@@ -14,7 +14,7 @@
             <p>
                 {{ __('auth.logout_confirmation', ['user' => $shown_username]) }}
             </p>
-            <form method="POST" action="{{ route('logout', ['redirect_uri' => $redirect_uri]) }}">
+            <form method="POST" action="{{ $realm ? route('realm.logout', ['realm' => $realm->getShortCode(), 'redirect_uri' => $redirect_uri]) : route('logout', ['redirect_uri' => $redirect_uri]) }}">
                 @csrf
                 <div class="flex flex-wrap gap-3 items-center justify-end">
                     <flux:button icon="ban" href="/">{{ __('common.cancel') }}</flux:button>

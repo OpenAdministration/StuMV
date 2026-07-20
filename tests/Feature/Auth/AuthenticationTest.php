@@ -28,7 +28,29 @@ test('login validation requires a uid and password', function (): void {
     $this->assertGuest();
 });
 
-test('logging out redirects to that users own realm login page', function (): void {
+test('logging out through {realm}/logout redirects to that same realm\'s login page', function (): void {
+    $community = newCommunity();
+    // A superadmin's own account realm is "admin" - proves the redirect
+    // follows the URL's realm, not the account's own record.
+    actingAsSuperAdmin();
+
+    $this->post('/'.$community->getShortCode().'/logout')
+        ->assertRedirect(route('realm.login', ['realm' => $community->getShortCode()]));
+
+    $this->assertGuest();
+});
+
+test('the {realm}/logout confirmation page defaults its redirect to that same realm\'s login page', function (): void {
+    $community = newCommunity();
+    actingAsMember($community);
+
+    $this->get('/'.$community->getShortCode().'/logout')->assertSee(
+        urlencode(route('realm.login', ['realm' => $community->getShortCode()])),
+        false,
+    );
+});
+
+test('logging out through the realm-less route redirects to that user\'s own realm login page', function (): void {
     $community = newCommunity();
     actingAsMember($community);
 
@@ -37,7 +59,7 @@ test('logging out redirects to that users own realm login page', function (): vo
     $this->assertGuest();
 });
 
-test('the logout confirmation page defaults its redirect to that users own realm login page', function (): void {
+test('the realm-less logout confirmation page defaults its redirect to that user\'s own realm login page', function (): void {
     $community = newCommunity();
     actingAsMember($community);
 

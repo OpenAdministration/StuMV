@@ -12,7 +12,7 @@
             <div>{{ __('auth.verification_text') }}</div>
 
             <div class="flex flex-wrap gap-2 items-center justify-end">
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('realm.logout', ['realm' => $realm->getShortCode()]) }}">
                     @csrf
                     <flux:button
                         type="submit"

@@ -89,9 +89,9 @@ class AuthenticatedSessionController extends Controller
      *
      * @return RedirectResponse
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, ?Community $realm = null)
     {
-        $realmLoginUrl = $this->realmLoginUrl(Auth::user());
+        $realmLoginUrl = $this->realmLoginUrl($realm, Auth::user());
 
         Auth::guard('web')->logout();
 
@@ -102,24 +102,27 @@ class AuthenticatedSessionController extends Controller
         return redirect($request->input('redirect_uri', $realmLoginUrl));
     }
 
-    public function confirmLogout(Request $request)
+    public function confirmLogout(Request $request, ?Community $realm = null)
     {
         $user = Auth::user();
 
         return view('auth.logout-confirm', [
-            'redirect_uri' => $request->input('redirect_uri', $this->realmLoginUrl($user)),
+            'realm' => $realm,
+            'redirect_uri' => $request->input('redirect_uri', $this->realmLoginUrl($realm, $user)),
             'shown_username' => "$user?->full_name ($user?->username)",
         ]);
     }
 
     /**
-     * Where to send the user after logging out - their own realm's login
-     * page rather than the generic picker, so they don't have to re-pick
-     * their community. Falls back to the picker if the user has no realm on
-     * record, or it no longer exists.
+     * Where to send the user after logging out - the realm they were just
+     * browsing (the {realm} this route was hit through, e.g. relevant for a
+     * superadmin logging out of a different realm than their own), falling
+     * back to their own account's realm for the rare realm-less logout route
+     * (e.g. from /pick-realm). Falls back further still to the generic
+     * picker if neither is known, or the realm no longer exists.
      */
-    private function realmLoginUrl(mixed $user): string
+    private function realmLoginUrl(?Community $realm, mixed $user): string
     {
-        return Community::loginUrlFor($user?->realm);
+        return Community::loginUrlFor($realm?->getShortCode() ?? $user?->realm);
     }
 }
