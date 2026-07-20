@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Oidc;
 
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
+use App\Livewire\Oidc\NewOidcClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Laravel\Passport\Passport;
@@ -61,18 +62,25 @@ class RealmDiscoveryController extends Controller
     }
 
     /**
-     * Same list config('openid.passport.tokens_can') exposes globally - OIDC
-     * clients aren't currently scoped to a subset of these per realm.
+     * config('openid.passport.tokens_can') also registers scopes that only
+     * ever apply to the separate Directory API (client-credentials) clients
+     * - e.g. "committees" - which this discovery document, aimed at
+     * interactive OIDC clients, shouldn't advertise. Narrowed down to
+     * NewOidcClient::AVAILABLE_SCOPES, the same list an admin can actually
+     * grant an OIDC client through its registration form.
      */
     private function getSupportedScopes(): array
     {
-        $scopes = array_keys(config('openid.passport.tokens_can'));
+        $scopes = array_values(array_intersect(
+            array_keys(config('openid.passport.tokens_can')),
+            NewOidcClient::AVAILABLE_SCOPES
+        ));
 
         if (! config('openid.discovery.hide_scopes', false)) {
             return $scopes;
         }
 
-        return array_intersect($scopes, ['openid', 'profile', 'email', 'address', 'phone']);
+        return array_values(array_intersect($scopes, ['openid', 'profile', 'email', 'address', 'phone']));
     }
 
     private function getSupportedGrantTypes(): array

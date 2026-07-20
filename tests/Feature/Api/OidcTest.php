@@ -61,7 +61,7 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
 
     $this->getJson("/$uid/.well-known/openid-configuration")
         ->assertOk()
-        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users']])
+        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'groups', 'users']])
         ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri'])
         ->assertJsonFragment(['authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid])])
         ->assertJsonFragment(['token_endpoint' => route('realm.passport.token', ['realm' => $uid])])
