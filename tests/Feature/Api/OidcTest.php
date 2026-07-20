@@ -124,6 +124,21 @@ test('granting the profile and phone scopes includes their claims', function ():
         ->assertJsonMissing(['email' => $user->email]);
 });
 
+test('granting the phone scope alone includes the phone_number claim', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    $user->ldap()->fill([
+        'telephoneNumber' => '+49 123 456',
+    ])->save();
+
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'phone']);
+
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
+        ->assertOk()
+        ->assertJson(['phone_number' => '+49 123 456'])
+        ->assertJsonMissing(['email' => $user->email]);
+});
+
 test('granting the address scope includes the address claim', function (): void {
     $community = newCommunity();
     $user = TestLdap::member($community);
