@@ -142,21 +142,19 @@ test('authorizing against a client bound to a different realm is rejected', func
     ]))->assertForbidden();
 });
 
-test('an authenticated user hitting authorize completes the code flow without a consent prompt', function (): void {
-    // App\Models\PassportClient::skipsAuthorization() always returns true in
-    // this app ("no App needs a confirmation dialog after login") - so the
-    // consent screen is never actually shown; authorize redirects straight
-    // back to the client with a code. See the next test for the consent
-    // view itself (unreachable via this flow, but still wired up via
-    // Passport::authorizationView() and worth protecting against regressing
-    // back to the old, now-removed global route names).
+test('a client configured to skip consent completes the code flow without a prompt', function (): void {
+    // requires_consent defaults to true (see the next test for that default
+    // path) - this client explicitly opts out via
+    // App\Models\PassportClient::skipsAuthorization(), so authorize redirects
+    // straight back to the client with a code instead of showing the
+    // consent screen.
     $community = newCommunity();
     $uid = $community->getShortCode();
     $user = TestLdap::member($community);
     $this->actingAs($user);
 
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Test SSO Client', ['https://example.test/callback']);
-    $client->forceFill(['community_uid' => $uid])->save();
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
 
     $response = $this->get(route('realm.passport.authorizations.authorize', [
         'realm' => $uid,
@@ -170,14 +168,46 @@ test('an authenticated user hitting authorize completes the code flow without a 
     expect($response->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
 });
 
+test('a client left at its default configuration shows the consent prompt, and approving it completes the code flow', function (): void {
+    // requires_consent defaults to true - every client shows the consent
+    // screen (resources/views/auth/oauth/authorize.blade.php, registered via
+    // Passport::authorizationView()) unless explicitly opted out, as in the
+    // previous test.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Consent Required Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertOk()->assertSee($client->name);
+
+    $approve = $this->post(route('realm.passport.authorizations.approve', ['realm' => $uid]), [
+        'auth_token' => session('authToken'),
+    ]);
+
+    $approve->assertRedirect();
+    expect($approve->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
+});
+
 test('the oauth consent view points its approve/deny forms at this realm\'s own routes', function (): void {
-    // The consent view is unreachable via the normal authorize flow in this
-    // app (PassportClient::skipsAuthorization() always returns true), but
-    // it's still wired up via Passport::authorizationView() and needs its
-    // {realm} route parameter bound the same way a real {realm}/oauth/*
-    // request would - so render it through an ad-hoc real route rather than
-    // hand-building a Request/Route pair (route model binding is otherwise
-    // easy to get subtly wrong in a way that doesn't match production).
+    // Rendered directly here via an ad-hoc route (rather than driving the
+    // full authorize flow, covered by the previous test) specifically to pin
+    // the approve/deny route names independent of the skip/consent branch,
+    // with its {realm} route parameter bound the same way a real
+    // {realm}/oauth/* request would - so render it through an ad-hoc real
+    // route rather than hand-building a Request/Route pair (route model
+    // binding is otherwise easy to get subtly wrong in a way that doesn't
+    // match production).
     $community = newCommunity();
     $uid = $community->getShortCode();
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Consent View Client', ['https://example.test/callback']);

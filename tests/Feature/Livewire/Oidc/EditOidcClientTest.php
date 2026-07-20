@@ -11,6 +11,11 @@ test('the edit form is pre-filled with the client\'s current values', function (
     $community = newCommunity();
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
     $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid', 'profile']])->save();
+    // requires_consent is only set by a DB-level default (see the migration),
+    // never by ClientRepository::create() - refresh() is needed so this
+    // in-memory instance actually reflects it, matching what a real request
+    // gets via route-model binding.
+    $client->refresh();
     actingAsAdmin($community);
 
     Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
@@ -23,6 +28,7 @@ test('a client\'s name, redirect URIs and scopes can be updated', function (): v
     $community = newCommunity();
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
     $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
     actingAsAdmin($community);
 
     Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
@@ -38,10 +44,37 @@ test('a client\'s name, redirect URIs and scopes can be updated', function (): v
         ->and($client->scopes)->toBe(['openid', 'email']);
 });
 
+test('the edit form is pre-filled with the client\'s requires-consent setting', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid'], 'requires_consent' => false])->save();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->assertSet('requiresConsent', false);
+});
+
+test('a client\'s requires-consent setting can be updated', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('requiresConsent', false)
+        ->call('save');
+
+    $client->refresh();
+
+    expect($client->requires_consent)->toBeFalse();
+});
+
 test('editing a client requires at least one scope', function (): void {
     $community = newCommunity();
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
     $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
     actingAsAdmin($community);
 
     Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])

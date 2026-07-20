@@ -23,6 +23,8 @@ class EditOidcClient extends Component
 
     public array $scopes = [];
 
+    public bool $requiresConsent = false;
+
     public function mount(Community $realm, PassportClient $client): void
     {
         abort_if($realm->isAdminRealm(), 404);
@@ -34,6 +36,7 @@ class EditOidcClient extends Component
         $this->name = $client->name;
         $this->redirectUris = implode("\n", $client->redirect_uris ?? []);
         $this->scopes = $client->scopes ?? [];
+        $this->requiresConsent = $client->requires_consent;
     }
 
     protected function redirectUriList(): array
@@ -66,6 +69,7 @@ class EditOidcClient extends Component
             }],
             'scopes' => 'required|array|min:1',
             'scopes.*' => Rule::in(NewOidcClient::AVAILABLE_SCOPES),
+            'requiresConsent' => 'boolean',
         ];
     }
 
@@ -83,6 +87,7 @@ class EditOidcClient extends Component
         $clients->update($client, $this->name, $this->redirectUriList());
         $client->forceFill([
             'scopes' => array_values($this->scopes),
+            'requires_consent' => $this->requiresConsent,
         ])->save();
 
         Flux::toast(variant: 'success', text: __('oidc_clients.edit_success'));

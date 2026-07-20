@@ -45,11 +45,16 @@
                             </div>
                         </flux:table.cell>
                         <flux:table.cell>
-                            @if($client->revoked)
-                                <flux:badge color="red" variant="solid">{{ __('oidc_clients.status_revoked') }}</flux:badge>
-                            @else
-                                <flux:badge color="green" variant="solid">{{ __('oidc_clients.status_active') }}</flux:badge>
-                            @endif
+                            <div class="flex flex-col items-start gap-1">
+                                @if($client->revoked)
+                                    <flux:badge color="red" variant="solid">{{ __('oidc_clients.status_revoked') }}</flux:badge>
+                                @else
+                                    <flux:badge color="green" variant="solid">{{ __('oidc_clients.status_active') }}</flux:badge>
+                                @endif
+                                @unless($client->requires_consent)
+                                    <flux:badge size="sm">{{ __('oidc_clients.auto_approved_badge') }}</flux:badge>
+                                @endunless
+                            </div>
                         </flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">

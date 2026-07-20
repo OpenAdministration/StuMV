@@ -31,6 +31,12 @@
             </flux:pillbox>
         </flux:field>
 
+        <flux:switch
+            wire:model="requiresConsent"
+            label="{{ __('oidc_clients.requires_consent') }}"
+            description="{{ __('oidc_clients.requires_consent_description') }}"
+        />
+
         <x-slot:abort_route>
             {{ route('realms.oidc-clients', ['realm' => $uid]) }}
         </x-slot:abort_route>

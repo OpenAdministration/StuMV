@@ -134,6 +134,37 @@ test('registering a client accepts the address scope', function (): void {
     expect($client->scopes)->toBe(['address']);
 });
 
+test('a new client defaults to requiring authorization consent', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->call('save');
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->requires_consent)->toBeTrue();
+});
+
+test('a client can be registered to skip the authorization prompt', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->set('requiresConsent', false)
+        ->call('save');
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->requires_consent)->toBeFalse();
+});
+
 test('a non-admin cannot register an OIDC client', function (): void {
     $community = newCommunity();
     actingAsModerator($community);
