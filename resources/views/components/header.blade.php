@@ -39,7 +39,10 @@
                     wire:navigate
                     :href="route('profile', ['realm' => auth()->user()->realm, 'username' => auth()->user()->username])"
                 >
-                    {{ __('profile.breadcrumb') }}
+                    <div class="flex flex-col items-start">
+                        <span>{{ auth()->user()->full_name }}</span>
+                        <span class="text-xs opacity-50">{{ auth()->user()->email }}</span>
+                    </div>
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
                 <x-info />
