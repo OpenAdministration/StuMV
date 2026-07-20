@@ -25,7 +25,7 @@
                 wire:navigate
                 :href="route('profile', ['realm' => $realm, 'username' => auth()->user()->username])"
             >
-                {{ __('realms.dashboard.profile_heading') }}
+                {{ __('profile.breadcrumb') }}
             </flux:sidebar.item>
             @php($currentCommunity = \Illuminate\Support\Facades\Route::current()->parameter('realm'))
             @unless($currentCommunity->isAdminRealm())
@@ -77,6 +77,7 @@
                 >
                     {{ __('realms.dashboard.domains_headline') }}
                 </flux:sidebar.item>
+                <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="unplug"
                     wire:navigate
@@ -97,6 +98,16 @@
                     :href="route('realms.sso-providers', ['realm' => $realm])"
                 >
                     {{ __('sso_providers.list_title') }}
+                </flux:sidebar.item>
+            @endif
+            @if(auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+                <flux:separator class="my-2" />
+                <flux:sidebar.item
+                    icon="palette"
+                    wire:navigate
+                    :href="route('realms.branding', ['realm' => $realm])"
+                >
+                    {{ __('realms.dashboard.branding_headline') }}
                 </flux:sidebar.item>
             @endif
             @if(! $currentCommunity->isAdminRealm() && auth()->user()->can('tools', $currentCommunity))

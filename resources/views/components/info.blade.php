@@ -27,7 +27,7 @@
                         <span>{{ __('common.footer_code_with') }}</span>
                         <flux:icon name="heart" class="size-4 text-red-600" />
                         <span>{{ __('common.footer_by') }}</span>
-                        <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration</flux:link>
+                        <flux:link href="https://open-administration.de" target="_blank" rel="noopener noreferrer">Open Administration GmbH</flux:link>
                     </div>
                 </div>
             </div>
