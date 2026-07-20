@@ -102,7 +102,9 @@ test('registering a client requires at least one scope', function (): void {
         ->assertHasErrors(['scopes' => 'required']);
 });
 
-test('registering a client accepts the iban scope', function (): void {
+test('registering a client rejects the iban scope', function (): void {
+    // No IBAN data is stored anywhere in this app (LDAP or DB) - the scope
+    // was removed rather than ever exposing a permanently-null claim.
     $community = newCommunity();
     actingAsAdmin($community);
 
@@ -111,11 +113,7 @@ test('registering a client accepts the iban scope', function (): void {
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['iban'])
         ->call('save')
-        ->assertHasNoErrors();
-
-    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
-
-    expect($client->scopes)->toBe(['iban']);
+        ->assertHasErrors(['scopes.0']);
 });
 
 test('registering a client accepts the address scope', function (): void {

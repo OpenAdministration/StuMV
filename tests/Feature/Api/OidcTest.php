@@ -61,7 +61,7 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
 
     $this->getJson("/$uid/.well-known/openid-configuration")
         ->assertOk()
-        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users', 'iban']])
+        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users']])
         ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri'])
         ->assertJsonFragment(['authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid])])
         ->assertJsonFragment(['token_endpoint' => route('realm.passport.token', ['realm' => $uid])])
@@ -122,6 +122,45 @@ test('granting the profile and phone scopes includes their claims', function ():
             'phone_number' => '+49 123 456',
         ])
         ->assertJsonMissing(['email' => $user->email]);
+});
+
+test('granting the address scope includes the address claim', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    $user->ldap()->fill([
+        'street' => 'Hauptstraße 1',
+        'postalCode' => '98693',
+        'l' => 'Ilmenau',
+    ])->save();
+
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'address']);
+
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
+        ->assertOk()
+        ->assertJson([
+            'address' => [
+                'street_address' => 'Hauptstraße 1',
+                'postal_code' => '98693',
+                'locality' => 'Ilmenau',
+            ],
+        ])
+        ->assertJsonMissing(['email' => $user->email]);
+});
+
+test('the address claim is omitted without the address scope', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    $user->ldap()->fill([
+        'street' => 'Hauptstraße 1',
+        'postalCode' => '98693',
+        'l' => 'Ilmenau',
+    ])->save();
+
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'email']);
+
+    $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
+        ->assertOk()
+        ->assertJsonMissingPath('address');
 });
 
 test('granting the groups scope includes the groups claim', function (): void {

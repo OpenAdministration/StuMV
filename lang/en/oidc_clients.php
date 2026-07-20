@@ -24,7 +24,6 @@ return [
     'scope_committees' => 'Committees & roles',
     'scope_groups' => 'Groups',
     'scope_users' => 'Users',
-    'scope_iban' => 'IBAN',
     'requires_consent' => 'Ask for authorization',
     'requires_consent_description' => 'If enabled (default), users must confirm access every time they log in. If disabled, they are logged in automatically without being asked.',
     'auto_approved_badge' => 'Logs in automatically',

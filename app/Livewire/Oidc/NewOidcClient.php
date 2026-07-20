@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class NewOidcClient extends Component
 {
-    public const AVAILABLE_SCOPES = ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users', 'iban'];
+    public const AVAILABLE_SCOPES = ['openid', 'profile', 'email', 'phone', 'address', 'committees', 'groups', 'users'];
 
     public string $name = '';
 

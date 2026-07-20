@@ -19,7 +19,6 @@ return [
             'committees' => 'Information about your committees and roles',
             'groups' => 'Information about your groups',
             'users' => 'Information about users',
-            'iban' => 'Information about your IBAN',
             // 'login' => 'See your login information',
         ],
     ],
