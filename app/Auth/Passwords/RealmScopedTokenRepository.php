@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  */
 class RealmScopedTokenRepository extends DatabaseTokenRepository
 {
+    #[\Override]
     public function create(CanResetPasswordContract $user)
     {
         $email = $user->getEmailForPasswordReset();
@@ -36,6 +37,7 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
         return $token;
     }
 
+    #[\Override]
     protected function deleteExisting(CanResetPasswordContract $user)
     {
         return $this->getTable()
@@ -44,6 +46,7 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
             ->delete();
     }
 
+    #[\Override]
     public function exists(CanResetPasswordContract $user, #[\SensitiveParameter] $token)
     {
         $record = (array) $this->getTable()
@@ -56,6 +59,7 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
             && $this->hasher->check($token, $record['token']);
     }
 
+    #[\Override]
     public function recentlyCreatedToken(CanResetPasswordContract $user)
     {
         $record = (array) $this->getTable()

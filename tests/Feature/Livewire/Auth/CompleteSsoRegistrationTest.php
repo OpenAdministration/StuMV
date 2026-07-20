@@ -1,7 +1,7 @@
 <?php
 
-use App\Livewire\Auth\CompleteSsoRegistration;
 use App\Ldap\User as LdapUser;
+use App\Livewire\Auth\CompleteSsoRegistration;
 use App\Models\RoleMembership;
 use App\Models\User as DbUser;
 use Livewire\Livewire;

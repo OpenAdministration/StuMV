@@ -1,7 +1,9 @@
 <?php
 
+use App\Ldap\Community;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Passport\AccessToken;
@@ -180,14 +182,12 @@ test('the oauth consent view points its approve/deny forms at this realm\'s own 
     $uid = $community->getShortCode();
     $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Consent View Client', ['https://example.test/callback']);
 
-    Route::middleware('web')->get('{realm}/_test-render-oauth-consent', function (\App\Ldap\Community $realm, Illuminate\Http\Request $request) use ($client) {
-        return view('auth.oauth.authorize', [
-            'client' => $client,
-            'scopes' => [],
-            'request' => $request,
-            'authToken' => 'test-token',
-        ]);
-    });
+    Route::middleware('web')->get('{realm}/_test-render-oauth-consent', fn (Community $realm, Request $request) => view('auth.oauth.authorize', [
+        'client' => $client,
+        'scopes' => [],
+        'request' => $request,
+        'authToken' => 'test-token',
+    ]));
 
     $html = $this->get("/$uid/_test-render-oauth-consent")->assertOk()->getContent();
 

@@ -2,6 +2,7 @@
 
 use App\Livewire\Realm\ListSsoProviders;
 use App\Models\RealmSsoProvider;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -39,7 +40,7 @@ test('an admin cannot delete another realm\'s identity provider', function (): v
 
     Livewire::test(ListSsoProviders::class, ['realm' => $community])
         ->call('deletePrepare', $provider->id);
-})->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+})->throws(ModelNotFoundException::class);
 
 test('a non-admin cannot view the identity provider list', function (): void {
     $community = newCommunity();

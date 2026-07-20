@@ -2,6 +2,7 @@
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
+use App\Ldap\User;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -25,7 +26,7 @@ test('findOrFailByUid aborts with a 404 for an unknown community', function (): 
 })->throws(NotFoundHttpException::class);
 
 test('membership is the location itself - testcom People branch exposes its members', function (): void {
-    $members = \App\Ldap\User::query()->in(Community::findByUid('testcom')->peopleDn())->get();
+    $members = User::query()->in(Community::findByUid('testcom')->peopleDn())->get();
 
     $uids = $members->map(fn ($m) => $m->getFirstAttribute('uid'));
 

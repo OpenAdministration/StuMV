@@ -92,7 +92,7 @@ class CompleteSsoRegistration extends Component
             $user->save();
             $user->refresh();
 
-            app(RealmContext::class)->set($community);
+            resolve(RealmContext::class)->set($community);
             Auth::validate(['uid' => $this->username, 'password' => $randomPassword]);
 
             $eloquentUser = \App\Models\User::where('uid', $user->getConvertedGuid())->first();
@@ -107,7 +107,7 @@ class CompleteSsoRegistration extends Component
 
             $provider = RealmSsoProvider::find($pending['provider_id']);
             if ($provider) {
-                app(SsoGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
+                resolve(SsoGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
             }
 
             return redirect()->intended(RouteServiceProvider::home($this->realm_uid));

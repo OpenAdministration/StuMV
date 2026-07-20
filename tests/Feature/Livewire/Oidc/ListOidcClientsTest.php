@@ -2,6 +2,7 @@
 
 use App\Livewire\Oidc\ListOidcClients;
 use App\Models\PassportClient;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\ClientRepository;
 use Livewire\Livewire;
@@ -63,7 +64,7 @@ test('an admin cannot revoke another realm\'s OIDC client', function (): void {
 
     Livewire::test(ListOidcClients::class, ['realm' => $community])
         ->call('revokePrepare', $client->id);
-})->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+})->throws(ModelNotFoundException::class);
 
 test('a non-admin cannot view the OIDC client list', function (): void {
     $community = newCommunity();

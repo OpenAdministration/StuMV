@@ -14,7 +14,7 @@ test('a locked user is logged out on their very next request', function (): void
     $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldap->save();
 
-    $this->get("/$uid/profile/".$user->username)->assertRedirect(route('login'));
+    $this->get("/$uid/profile/".$user->username)->assertRedirect(route('realm.login', ['realm' => $uid]));
 
     $this->assertGuest();
 });

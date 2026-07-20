@@ -84,7 +84,7 @@ class OidcLoginController extends Controller
             Auth::login($existing);
             $request->session()->regenerate();
 
-            app(SsoGroupRoleSync::class)->apply($provider, $existing->username, $claims);
+            resolve(SsoGroupRoleSync::class)->apply($provider, $existing->username, $claims);
 
             return redirect()->intended(RouteServiceProvider::home($realm->getShortCode()));
         }
@@ -98,7 +98,7 @@ class OidcLoginController extends Controller
             'claims' => $claims,
         ]]);
 
-        return redirect()->route('sso.register', ['realm' => $realm->getShortCode()]);
+        return to_route('sso.register', ['realm' => $realm->getShortCode()]);
     }
 
     private function authorizeProvider(Community $realm, RealmSsoProvider $provider): void
@@ -122,8 +122,6 @@ class OidcLoginController extends Controller
 
     private function discover(string $issuer): array
     {
-        return Cache::remember('sso-discovery:'.md5($issuer), now()->addHour(), function () use ($issuer): array {
-            return Http::get(rtrim($issuer, '/').'/.well-known/openid-configuration')->throw()->json();
-        });
+        return Cache::remember('sso-discovery:'.md5($issuer), now()->addHour(), fn (): array => Http::get(rtrim($issuer, '/').'/.well-known/openid-configuration')->throw()->json());
     }
 }

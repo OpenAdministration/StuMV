@@ -30,7 +30,7 @@ class ScopedToRealmPeople implements Scope
         $realm = request()->route('realm');
 
         if (! $realm instanceof Community) {
-            $realm = app(RealmContext::class)->get();
+            $realm = resolve(RealmContext::class)->get();
         }
 
         if (! $realm instanceof Community && ($user = Auth::user()) && $user->realm) {

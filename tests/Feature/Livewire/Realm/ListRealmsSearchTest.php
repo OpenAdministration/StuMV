@@ -1,8 +1,10 @@
 <?php
 
+use App\Ldap\Community;
 use App\Livewire\Realm\ListRealms;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
@@ -114,8 +116,8 @@ test('the "only mine" switch hides every community for a user who belongs to non
     $notMine = newCommunity('notm'.bin2hex(random_bytes(3)));
     // An LDAP entry that exists but isn't placed under any community's
     // People branch (e.g. left "unassigned" by the realm-split migration).
-    $ldapUser = Tests\Support\TestLdap::makeUser();
-    $this->actingAs(Tests\Support\TestLdap::databaseUser($ldapUser));
+    $ldapUser = TestLdap::makeUser();
+    $this->actingAs(TestLdap::databaseUser($ldapUser));
 
     Livewire::test(ListRealms::class)
         ->assertSee($notMine->getShortCode())
@@ -133,7 +135,7 @@ test('the "only mine" switch shows just the admin realm for a super admin', func
 
     Livewire::test(ListRealms::class)
         ->set('showOnlyMine', true)
-        ->assertSee(\App\Ldap\Community::ADMIN_REALM_UID)
+        ->assertSee(Community::ADMIN_REALM_UID)
         ->assertDontSee($notMine->getShortCode());
 });
 

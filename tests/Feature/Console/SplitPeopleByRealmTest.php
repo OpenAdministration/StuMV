@@ -57,7 +57,7 @@ function legacySuperAdminGroup(): Group
 
     if ($group === null) {
         $connection = config('ldap.connections.default');
-        $conn = ldap_connect($connection['hosts'][0], $connection['port']);
+        $conn = ldap_connect("{$connection['hosts'][0]}:{$connection['port']}");
         ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_bind($conn, 'cn=Administration,'.$connection['base_dn'], 'admin-not-production');
         ldap_add($conn, $dn, [

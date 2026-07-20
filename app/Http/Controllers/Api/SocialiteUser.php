@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Ldap\User;
 use App\Models\ProfilePicture;
 use Illuminate\Http\Request;
 

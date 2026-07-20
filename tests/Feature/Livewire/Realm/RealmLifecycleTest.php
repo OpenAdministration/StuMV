@@ -7,6 +7,7 @@ use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\NewDomain;
 use App\Livewire\Realm\NewRealm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
@@ -26,7 +27,7 @@ test('a super admin can create a realm with the full skeleton', function (): voi
     TestLdap::track($community); // hand the component-created community to teardown
 
     expect($community)->not->toBeNull()
-        ->and(\LdapRecord\Models\OpenLDAP\OrganizationalUnit::query()->find($community->peopleDn()))->not->toBeNull()
+        ->and(OrganizationalUnit::query()->find($community->peopleDn()))->not->toBeNull()
         ->and($community->adminsGroup())->not->toBeNull();
 });
 

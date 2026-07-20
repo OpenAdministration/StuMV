@@ -8,6 +8,7 @@ use App\Ldap\Community;
 use App\Models\RealmBranding;
 use App\Models\RealmSsoProvider;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -20,7 +21,7 @@ class AuthenticatedSessionController extends Controller
      * involved - showing which realms exist is fine, showing which realm a
      * given username exists in would not be).
      *
-     * @return Redirector|RedirectResponse|\Illuminate\Contracts\View\View
+     * @return Redirector|RedirectResponse|View
      */
     public function pickRealm()
     {
@@ -41,13 +42,13 @@ class AuthenticatedSessionController extends Controller
     {
         $request->validate(['realm' => ['required', 'string']]);
 
-        return redirect()->route('realm.login', ['realm' => $request->string('realm')]);
+        return to_route('realm.login', ['realm' => $request->string('realm')]);
     }
 
     /**
      * Display the login view for a specific realm.
      *
-     * @return Redirector|RedirectResponse|\Illuminate\Contracts\View\View
+     * @return Redirector|RedirectResponse|View
      */
     public function create(Community $realm)
     {
@@ -119,10 +120,6 @@ class AuthenticatedSessionController extends Controller
      */
     private function realmLoginUrl(mixed $user): string
     {
-        if ($user?->realm && Community::findByUid($user->realm)) {
-            return route('realm.login', ['realm' => $user->realm]);
-        }
-
-        return route('login');
+        return Community::loginUrlFor($user?->realm);
     }
 }

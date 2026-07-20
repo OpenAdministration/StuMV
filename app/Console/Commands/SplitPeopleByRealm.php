@@ -32,7 +32,7 @@ class SplitPeopleByRealm extends Command
      * entry belongs to any group, and rejected outright by the server if
      * ever included in an add.
      */
-    private const OPERATIONAL_ATTRIBUTES = [
+    private const array OPERATIONAL_ATTRIBUTES = [
         'entryuuid', 'entrycsn', 'creatorsname', 'createtimestamp',
         'modifiersname', 'modifytimestamp', 'structuralobjectclass',
         'subschemasubentry', 'hassubordinates', 'pwdchangedtime',

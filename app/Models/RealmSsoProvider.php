@@ -23,6 +23,7 @@ class RealmSsoProvider extends Model
         'enabled',
     ];
 
+    #[\Override]
     protected function casts(): array
     {
         return [

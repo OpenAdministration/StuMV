@@ -146,7 +146,7 @@ class RegisterUser extends Component
             // ScopedToRealmPeople to read (unlike a real controller action
             // bound directly to that route, e.g. AuthenticatedSessionController::store()),
             // so it has to be told explicitly here.
-            app(RealmContext::class)->set($community);
+            resolve(RealmContext::class)->set($community);
             Auth::validate(['uid' => $this->username, 'password' => $this->password]);
 
             // Resolve by the fresh LDAP entry's own GUID, not by username -

@@ -48,6 +48,22 @@ class Community extends OrganizationalUnit implements LdapImportable
         return self::findByUid($uid) ?? abort(404);
     }
 
+    /**
+     * Resolves the login URL for a realm uid, falling back to the generic
+     * realm picker if it's absent or no longer exists - shared by every
+     * place that sends a user back to a login page (post-logout, session
+     * timeout, forced logout) without necessarily having an Authenticatable
+     * to hand.
+     */
+    public static function loginUrlFor(?string $uid): string
+    {
+        if ($uid && self::findByUid($uid)) {
+            return route('realm.login', ['realm' => $uid]);
+        }
+
+        return route('login');
+    }
+
     public function getShortCode()
     {
         return $this->ou[0];
@@ -80,7 +96,7 @@ class Community extends OrganizationalUnit implements LdapImportable
      * isn't (yet) placed under any community's People branch (e.g. still in
      * the flat legacy ou=People, or the superadmin-only "admin" realm).
      */
-    public static function membershipFor(\App\Ldap\User $ldapUser): ?string
+    public static function membershipFor(User $ldapUser): ?string
     {
         if (preg_match('/^uid=[^,]+,ou=People,ou=([0-9A-Za-z_\-]+),'.self::rootDn().'$/', (string) $ldapUser->getDn(), $matches)) {
             return $matches[1];

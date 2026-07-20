@@ -30,7 +30,7 @@ Route::middleware('guest')->group(function (): void {
     // login page it lands on links onward to {realm}/register). The admin
     // realm is never offered there and denyAdminRealm blocks it outright if
     // {realm}/register is visited directly.
-    Route::get('register', fn () => redirect()->route('login'))->name('register');
+    Route::get('register', fn () => to_route('login'))->name('register');
 
     Route::livewire('{realm}/register', RegisterUser::class)->name('realm.register')
         ->middleware('denyAdminRealm');

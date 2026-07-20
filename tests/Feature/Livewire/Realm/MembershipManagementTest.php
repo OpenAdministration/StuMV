@@ -6,6 +6,7 @@ use App\Livewire\Realm\ListAdmins;
 use App\Livewire\Realm\NewAdmin;
 use App\Livewire\Realm\NewMember;
 use App\Livewire\Realm\NewModerator;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
@@ -83,5 +84,5 @@ test('a super admin can add a community member', function (): void {
 
     expect($ldapUser)->not->toBeNull()
         ->and($ldapUser->getDn())->toEndWith(','.$community->peopleDn())
-        ->and(\App\Models\User::where('username', $username)->value('realm'))->toBe($community->getShortCode());
+        ->and(User::where('username', $username)->value('realm'))->toBe($community->getShortCode());
 });

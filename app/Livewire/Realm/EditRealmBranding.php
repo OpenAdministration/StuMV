@@ -62,7 +62,7 @@ class EditRealmBranding extends Component
         // SVG logos are stored as-is - Intervention/GD can only rasterize
         // bitmap formats, and a logo is commonly a vector graphic (the app's
         // own default logo is SVG too).
-        if (strtolower($this->logo->getClientOriginalExtension()) === 'svg') {
+        if (strtolower((string) $this->logo->getClientOriginalExtension()) === 'svg') {
             $filename = Str::uuid().'.svg';
             $this->logo->storePubliclyAs('realm-branding', $filename, 'public');
         } else {

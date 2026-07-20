@@ -14,12 +14,13 @@ use Illuminate\Auth\Passwords\PasswordBrokerManager;
  */
 class RealmScopedPasswordBrokerManager extends PasswordBrokerManager
 {
+    #[\Override]
     protected function createTokenRepository(array $config)
     {
         $key = $this->app['config']['app.key'];
 
-        if (str_starts_with($key, 'base64:')) {
-            $key = base64_decode(substr($key, 7));
+        if (str_starts_with((string) $key, 'base64:')) {
+            $key = base64_decode(substr((string) $key, 7));
         }
 
         return new RealmScopedTokenRepository(

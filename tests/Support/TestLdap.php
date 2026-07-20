@@ -43,13 +43,13 @@ class TestLdap
      * Create a fresh LDAP person with a unique uid.
      *
      * @param  Community|null  $community  Where to place the entry - a
-     *                                      specific realm's People branch, or
-     *                                      (default) the flat legacy
-     *                                      ou=People branch, which is never
-     *                                      in scope for any realm - the
-     *                                      right place for a deliberate
-     *                                      "outsider"/"not a member of this
-     *                                      realm" test fixture.
+     *                                     specific realm's People branch, or
+     *                                     (default) the flat legacy
+     *                                     ou=People branch, which is never
+     *                                     in scope for any realm - the
+     *                                     right place for a deliberate
+     *                                     "outsider"/"not a member of this
+     *                                     realm" test fixture.
      */
     public static function makeUser(?string $uid = null, ?Community $community = null): LdapUser
     {

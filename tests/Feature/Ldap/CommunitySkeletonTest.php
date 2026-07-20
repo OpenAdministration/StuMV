@@ -2,6 +2,7 @@
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Tests\Support\TestLdap;
 
 /**
@@ -17,7 +18,7 @@ test('a freshly built community has the full group skeleton', function (): void 
     $found = Community::findByUid($community->getShortCode());
 
     expect($found)->not->toBeNull()
-        ->and(\LdapRecord\Models\OpenLDAP\OrganizationalUnit::query()->find($found->peopleDn()))->not->toBeNull()
+        ->and(OrganizationalUnit::query()->find($found->peopleDn()))->not->toBeNull()
         ->and($found->moderatorsGroup())->not->toBeNull()
         ->and($found->adminsGroup())->not->toBeNull();
 });

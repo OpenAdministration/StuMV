@@ -1,8 +1,8 @@
 <?php
 
 use App\Livewire\Realm\EditSsoProvider;
-use App\Models\RealmSsoProvider;
 use App\Models\SsoProviderRoleMapping;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
@@ -126,4 +126,4 @@ test('a role mapping is scoped to its own provider - another provider\'s mapping
 
     Livewire::test(EditSsoProvider::class, ['realm' => $community, 'provider' => $provider])
         ->call('deleteMappingPrepare', $mapping->id);
-})->throws(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+})->throws(ModelNotFoundException::class);
