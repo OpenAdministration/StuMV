@@ -155,7 +155,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     });
 
     // fine grained permissions
-    Route::livewire('{realm}/new-mod', NewModerator::class)->name('realms.mods.new')
+    Route::livewire('{realm}/new-moderator', NewModerator::class)->name('realms.mods.new')
         ->can('add_moderator', 'realm');
 
     Route::middleware([SuperAdminMiddleware::class])->group(function (): void {
