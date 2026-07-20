@@ -21,7 +21,6 @@ return [
     'scope_email' => 'Email address',
     'scope_phone' => 'Phone number',
     'scope_address' => 'Address',
-    'scope_committees' => 'Committees & roles',
     'scope_groups' => 'Groups',
     'scope_users' => 'Users',
     'requires_consent' => 'Ask for authorization',
