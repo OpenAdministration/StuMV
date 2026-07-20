@@ -199,6 +199,44 @@ test('a client left at its default configuration shows the consent prompt, and a
     expect($approve->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
 });
 
+test('a user who already holds an active token covering the requested scopes is not re-prompted', function (): void {
+    // Laravel\Passport\Http\Controllers\AuthorizationController::hasGrantedScopes()
+    // is what remembers a prior approval - it runs regardless of
+    // skipsAuthorization(), so this is stock Passport behaviour, not
+    // something this app added. What this app's PassportClient does add is
+    // making that memory expire: EditOidcClient::save() revokes a client's
+    // tokens as soon as its scopes actually change (see EditOidcClientTest),
+    // and hasGrantedScopes() only ever considers non-revoked tokens - so a
+    // scope change forces this same user back through the prompt next time.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Consent Required Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    Token::create([
+        'id' => Str::random(80),
+        'user_id' => $user->id,
+        'client_id' => $client->id,
+        'scopes' => ['openid'],
+        'revoked' => false,
+        'expires_at' => now()->addHour(),
+    ]);
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertRedirect();
+    expect($response->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
+});
+
 test('the oauth consent view points its approve/deny forms at this realm\'s own routes', function (): void {
     // Rendered directly here via an ad-hoc route (rather than driving the
     // full authorize flow, covered by the previous test) specifically to pin

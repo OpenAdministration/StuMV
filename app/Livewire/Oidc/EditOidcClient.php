@@ -3,6 +3,7 @@
 namespace App\Livewire\Oidc;
 
 use App\Ldap\Community;
+use App\Models\OidcClientConsent;
 use App\Models\PassportClient;
 use Flux\Flux;
 use Illuminate\Validation\Rule;
@@ -83,12 +84,27 @@ class EditOidcClient extends Component
         $this->validate();
 
         $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->clientId);
+        $scopesChanged = collect($client->scopes ?? [])->sort()->values()->all() !== collect($this->scopes)->sort()->values()->all();
 
         $clients->update($client, $this->name, $this->redirectUriList());
         $client->forceFill([
             'scopes' => array_values($this->scopes),
             'requires_consent' => $this->requiresConsent,
         ])->save();
+
+        // A user's prior approval is remembered two ways: standing consent
+        // in oauth_client_consents (App\Models\PassportClient::skipsAuthorization()),
+        // and Passport's own active-token check
+        // (AuthorizationController::hasGrantedScopes()). Both need clearing
+        // here, or either one alone could let a stale approval survive a
+        // scope change and let someone skip the prompt they should now see.
+        if ($scopesChanged) {
+            $client->tokens()->with('refreshToken')->each(function ($token): void {
+                $token->refreshToken?->revoke();
+                $token->revoke();
+            });
+            OidcClientConsent::where('client_id', $client->id)->delete();
+        }
 
         Flux::toast(variant: 'success', text: __('oidc_clients.edit_success'));
 

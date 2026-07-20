@@ -2,10 +2,25 @@
 
 use App\Livewire\Oidc\EditOidcClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Laravel\Passport\ClientRepository;
+use Laravel\Passport\Token;
 use Livewire\Livewire;
+use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
+
+function grantToken(string $clientId, string $userId, array $scopes): Token
+{
+    return Token::create([
+        'id' => Str::random(80),
+        'user_id' => $userId,
+        'client_id' => $clientId,
+        'scopes' => $scopes,
+        'revoked' => false,
+        'expires_at' => now()->addHour(),
+    ]);
+}
 
 test('the edit form is pre-filled with the client\'s current values', function (): void {
     $community = newCommunity();
@@ -68,6 +83,51 @@ test('a client\'s requires-consent setting can be updated', function (): void {
     $client->refresh();
 
     expect($client->requires_consent)->toBeFalse();
+});
+
+test('changing a client\'s scopes revokes its existing tokens, so users must re-consent', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid', 'profile']])->save();
+    $client->refresh();
+    $token = grantToken($client->id, TestLdap::member($community)->id, ['openid', 'profile']);
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('scopes', ['openid', 'profile', 'email'])
+        ->call('save');
+
+    expect($token->fresh()->revoked)->toBeTrue();
+});
+
+test('reordering a client\'s scopes without actually changing the set does not revoke its tokens', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid', 'profile']])->save();
+    $client->refresh();
+    $token = grantToken($client->id, TestLdap::member($community)->id, ['openid', 'profile']);
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('scopes', ['profile', 'openid'])
+        ->call('save');
+
+    expect($token->fresh()->revoked)->toBeFalse();
+});
+
+test('editing a client without changing its scopes leaves its existing tokens untouched', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid', 'profile']])->save();
+    $client->refresh();
+    $token = grantToken($client->id, TestLdap::member($community)->id, ['openid', 'profile']);
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('name', 'Renamed App')
+        ->call('save');
+
+    expect($token->fresh()->revoked)->toBeFalse();
 });
 
 test('editing a client requires at least one scope', function (): void {
