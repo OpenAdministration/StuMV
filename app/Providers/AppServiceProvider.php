@@ -5,8 +5,11 @@ namespace App\Providers;
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
 use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Passport;
@@ -76,6 +79,20 @@ class AppServiceProvider extends ServiceProvider
             // the {realm} segment actually expects.
             return $realm ? route('realm.login', ['realm' => $realm->getShortCode()]) : route('login');
         });
+
+        // verification.verify is realm-scoped ({realm}/verify-email/{id}/{hash})
+        // like every other auth route - the stock signed-URL builder only
+        // knows about id/hash, so it has to be told about the extra segment
+        // here or the signature it produces won't match the route at all.
+        VerifyEmail::createUrlUsing(static fn ($notifiable) => URL::temporarySignedRoute(
+            'verification.verify',
+            Carbon::now()->addMinutes(config('auth.verification.expire', 60)),
+            [
+                'realm' => $notifiable->realm,
+                'id' => $notifiable->getKey(),
+                'hash' => sha1($notifiable->getEmailForVerification()),
+            ]
+        ));
 
         Password::defaults(static fn () => Password::min(12)
             ->letters()
