@@ -141,13 +141,16 @@ document.addEventListener('alpine:init', () => {
             // derive the size from their difference. Rounding x and width
             // separately can add up to 1px more than the natural image size
             // when the selection sits flush against the image's edge - and
-            // Intervention Image pads that overshoot with a solid background
-            // color instead of clamping it, leaving a visible white sliver
-            // on the cropped result.
+            // Intervention Image pads that overshoot (in either direction,
+            // i.e. also a negative x/y) with a solid background color
+            // instead of clamping it, leaving a visible white sliver on the
+            // cropped result. Subpixel drift between the getBoundingClientRect()
+            // read during dragging and the one here is enough to round a
+            // flush-left/top edge to -1, so clamp x1/y1 to 0 too.
             const naturalWidth = image.$image.naturalWidth;
             const naturalHeight = image.$image.naturalHeight;
-            const x1 = Math.round((selection.x - offsetX) * scaleX);
-            const y1 = Math.round((selection.y - offsetY) * scaleY);
+            const x1 = Math.max(Math.round((selection.x - offsetX) * scaleX), 0);
+            const y1 = Math.max(Math.round((selection.y - offsetY) * scaleY), 0);
             const x2 = Math.min(Math.round((selection.x - offsetX + selection.width) * scaleX), naturalWidth);
             const y2 = Math.min(Math.round((selection.y - offsetY + selection.height) * scaleY), naturalHeight);
 
