@@ -66,7 +66,9 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
         ->assertJsonFragment(['authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid])])
         ->assertJsonFragment(['token_endpoint' => route('realm.passport.token', ['realm' => $uid])])
         ->assertJsonFragment(['userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid])])
-        ->assertJsonFragment(['jwks_uri' => route('realm.openid.jwks', ['realm' => $uid])]);
+        ->assertJsonFragment(['jwks_uri' => route('realm.openid.jwks', ['realm' => $uid])])
+        ->assertJsonFragment(['backchannel_logout_supported' => true])
+        ->assertJsonFragment(['backchannel_logout_session_supported' => false]);
 });
 
 test('the global discovery/jwks endpoints no longer resolve', function (): void {

@@ -25,6 +25,8 @@ return [
     'scope_users' => 'Nutzer:innen',
     'requires_consent' => 'Um Erlaubnis fragen',
     'requires_consent_description' => 'Wenn aktiviert (Standard), müssen Nutzer:innen bei jedem Login den Zugriff bestätigen. Wenn deaktiviert, werden sie automatisch eingeloggt, ohne gefragt zu werden.',
+    'back_channel_logout_uri' => 'Back-Channel-Logout-URL',
+    'back_channel_logout_uri_description' => 'Optional. Wenn gesetzt, wird an diese URL eine signierte Logout-Benachrichtigung (logout_token) gesendet, sobald sich ein Nutzer bei StuMV abmeldet, der bei diesem Client eingeloggt ist - so kann der Client seine eigene Sitzung ebenfalls beenden.',
     'auto_approved_badge' => 'Loggt automatisch ein',
     'no_clients_found' => 'Noch keine OIDC-Clients registriert.',
     'status' => 'Status',

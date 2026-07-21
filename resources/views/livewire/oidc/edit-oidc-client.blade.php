@@ -35,6 +35,12 @@
             description="{{ __('oidc_clients.requires_consent_description') }}"
         />
 
+        <flux:field>
+            <flux:label>{{ __('oidc_clients.back_channel_logout_uri') }}</flux:label>
+            <flux:description>{{ __('oidc_clients.back_channel_logout_uri_description') }}</flux:description>
+            <flux:input wire:model="backChannelLogoutUri" placeholder="https://app.example.com/logout-callback" />
+        </flux:field>
+
         <x-slot:abort_route>
             {{ route('realms.oidc-clients', ['realm' => $uid]) }}
         </x-slot:abort_route>

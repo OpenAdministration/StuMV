@@ -25,6 +25,8 @@ return [
     'scope_users' => 'Users',
     'requires_consent' => 'Ask for authorization',
     'requires_consent_description' => 'If enabled (default), users must confirm access every time they log in. If disabled, they are logged in automatically without being asked.',
+    'back_channel_logout_uri' => 'Back-channel logout URL',
+    'back_channel_logout_uri_description' => 'Optional. If set, a signed logout notification (logout_token) is sent to this URL whenever a user logged in to this client logs out of StuMV - so the client can end its own session for them too.',
     'auto_approved_badge' => 'Logs in automatically',
     'no_clients_found' => 'No OIDC clients registered yet.',
     'status' => 'Status',

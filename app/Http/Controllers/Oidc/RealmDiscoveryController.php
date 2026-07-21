@@ -51,6 +51,13 @@ class RealmDiscoveryController extends Controller
                 'plain',
                 'S256',
             ],
+            // See App\Services\Oidc\BackChannelLogoutTokenBuilder /
+            // App\Jobs\Oidc\SendBackChannelLogoutNotification. No `sid`
+            // claim in the logout_token (StuMV doesn't track a per-browser
+            // session id separate from the token rows themselves), hence
+            // false rather than true.
+            'backchannel_logout_supported' => true,
+            'backchannel_logout_session_supported' => false,
         ];
 
         return response()->json($response, 200, [], JSON_PRETTY_PRINT);

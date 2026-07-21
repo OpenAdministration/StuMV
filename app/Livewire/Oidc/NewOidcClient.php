@@ -20,6 +20,8 @@ class NewOidcClient extends Component
 
     public bool $requiresConsent = true;
 
+    public string $backChannelLogoutUri = '';
+
     public string $uid = '';
 
     public ?string $createdClientId = null;
@@ -63,6 +65,7 @@ class NewOidcClient extends Component
             'scopes' => 'required|array|min:1',
             'scopes.*' => Rule::in(self::AVAILABLE_SCOPES),
             'requiresConsent' => 'boolean',
+            'backChannelLogoutUri' => 'nullable|url',
         ];
     }
 
@@ -81,6 +84,7 @@ class NewOidcClient extends Component
             'community_uid' => $this->uid,
             'scopes' => array_values($this->scopes),
             'requires_consent' => $this->requiresConsent,
+            'back_channel_logout_uri' => $this->backChannelLogoutUri ?: null,
         ])->save();
 
         $this->createdClientId = $client->id;

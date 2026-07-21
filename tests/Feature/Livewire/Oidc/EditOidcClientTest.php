@@ -143,6 +143,41 @@ test('editing a client requires at least one scope', function (): void {
         ->assertHasErrors(['scopes' => 'required']);
 });
 
+test('the edit form is pre-filled with the client\'s back-channel logout URI', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill([
+        'community_uid' => $community->getShortCode(),
+        'scopes' => ['openid'],
+        'back_channel_logout_uri' => 'https://app.example.com/backchannel-logout',
+    ])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->assertSet('backChannelLogoutUri', 'https://app.example.com/backchannel-logout');
+});
+
+test('a client\'s back-channel logout URI can be set and cleared', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('backChannelLogoutUri', 'https://app.example.com/backchannel-logout')
+        ->call('save');
+
+    expect($client->fresh()->back_channel_logout_uri)->toBe('https://app.example.com/backchannel-logout');
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('backChannelLogoutUri', '')
+        ->call('save');
+
+    expect($client->fresh()->back_channel_logout_uri)->toBeNull();
+});
+
 test('a directory API client cannot be opened through this edit page', function (): void {
     $community = newCommunity();
     $client = resolve(ClientRepository::class)->createClientCredentialsGrantClient('Directory API Client');

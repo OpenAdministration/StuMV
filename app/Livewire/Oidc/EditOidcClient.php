@@ -25,6 +25,8 @@ class EditOidcClient extends Component
 
     public bool $requiresConsent = false;
 
+    public string $backChannelLogoutUri = '';
+
     public function mount(Community $realm, PassportClient $client): void
     {
         abort_if($realm->isAdminRealm(), 404);
@@ -37,6 +39,7 @@ class EditOidcClient extends Component
         $this->redirectUris = implode("\n", $client->redirect_uris ?? []);
         $this->scopes = $client->scopes ?? [];
         $this->requiresConsent = $client->requires_consent;
+        $this->backChannelLogoutUri = $client->back_channel_logout_uri ?? '';
     }
 
     protected function redirectUriList(): array
@@ -70,6 +73,7 @@ class EditOidcClient extends Component
             'scopes' => 'required|array|min:1',
             'scopes.*' => Rule::in(NewOidcClient::AVAILABLE_SCOPES),
             'requiresConsent' => 'boolean',
+            'backChannelLogoutUri' => 'nullable|url',
         ];
     }
 
@@ -89,6 +93,7 @@ class EditOidcClient extends Component
         $client->forceFill([
             'scopes' => array_values($this->scopes),
             'requires_consent' => $this->requiresConsent,
+            'back_channel_logout_uri' => $this->backChannelLogoutUri ?: null,
         ])->save();
 
         // A user's prior approval is remembered for as long as they hold a

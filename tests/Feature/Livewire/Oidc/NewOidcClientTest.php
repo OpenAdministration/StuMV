@@ -163,6 +163,52 @@ test('a client can be registered to skip the authorization prompt', function ():
     expect($client->requires_consent)->toBeFalse();
 });
 
+test('a client can be registered with a back-channel logout URI', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->set('backChannelLogoutUri', 'https://app.example.com/backchannel-logout')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->back_channel_logout_uri)->toBe('https://app.example.com/backchannel-logout');
+});
+
+test('the back-channel logout URI is optional', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->back_channel_logout_uri)->toBeNull();
+});
+
+test('registering a client rejects a back-channel logout URI that is not a valid URL', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->set('backChannelLogoutUri', 'not-a-url')
+        ->call('save')
+        ->assertHasErrors(['backChannelLogoutUri']);
+});
+
 test('a non-admin cannot register an OIDC client', function (): void {
     $community = newCommunity();
     actingAsModerator($community);
