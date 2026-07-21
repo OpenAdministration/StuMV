@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
 {
-    private const AVAILABLE_LOCALES = ['de', 'en'];
+    private const array AVAILABLE_LOCALES = ['de', 'en'];
 
     /**
      * This used to live as top-level code in routes/web.php, run once when

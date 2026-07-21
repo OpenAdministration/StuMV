@@ -27,11 +27,7 @@
 
     <div
         class="flex items-center gap-3 mb-8"
-        x-data="{ showOnlyMine: $persist(false).as('realms.showOnlyMine') }"
-        x-init="
-            $wire.showOnlyMine = showOnlyMine;
-            $watch('$wire.showOnlyMine', value => showOnlyMine = value);
-        "
+        x-data="persistedToggle('showOnlyMine', 'realms.showOnlyMine', false)"
     >
         <flux:switch wire:model.live="showOnlyMine" label="{{ __('realms.show_only_mine') }}" align="left" />
     </div>

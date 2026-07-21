@@ -8,7 +8,7 @@
         <title>{{ isset($title) ? $title . ' | ' . config('app.name') : config('app.name') }}</title>
 
         @livewireStyles
-        @fluxAppearance
+        @fluxAppearance(['nonce' => \Illuminate\Support\Facades\Vite::cspNonce()])
         @vite('resources/css/app.css')
         @vite('resources/css/theme.css')
         @vite('resources/js/app.js')

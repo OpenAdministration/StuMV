@@ -30,7 +30,7 @@ test('a browser preferring English sees English text, not the German config defa
 
     $response->assertOk();
     expect(app()->getLocale())->toBe('en');
-    expect(app('translator')->getLocale())->toBe('en');
+    expect(resolve('translator')->getLocale())->toBe('en');
     $response->assertSee(__('realms.nav_dashboard'))
         ->assertDontSee('Übersicht');
 });

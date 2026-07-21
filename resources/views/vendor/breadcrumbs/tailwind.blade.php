@@ -27,57 +27,7 @@
     <div
         class="relative w-full overflow-hidden"
         x-bind:class="{ 'stumv-breadcrumbs-last-collapsed': lastCollapsed }"
-        x-data="{
-            collapsedCount: 0,
-            lastCollapsed: false,
-            _ro: null,
-            _onNavigated: null,
-            init() {
-                this.recalculate();
-                this._ro = new ResizeObserver(() => this.recalculate());
-                this._ro.observe(this.$el);
-                this._onNavigated = () => this.recalculate();
-                document.addEventListener('livewire:navigated', this._onNavigated);
-            },
-            destroy() {
-                this._ro?.disconnect();
-                if (this._onNavigated) document.removeEventListener('livewire:navigated', this._onNavigated);
-            },
-            itemWidth(ref) {
-                // The Flux breadcrumb item component forwards x-ref onto
-                // its INNER link/text element, not the item's own outer
-                // box - which excludes the separator chevron (a sibling
-                // of that inner element). Walk up to the real item box.
-                return ref.closest('[data-flux-breadcrumbs-item]').offsetWidth;
-            },
-            recalculate() {
-                const available = this.$el.clientWidth;
-                const home = this.itemWidth(this.$refs.measureHome);
-                const last = this.itemWidth(this.$refs.measureLast);
-                const dropdown = this.itemWidth(this.$refs.measureDropdown);
-                const collapsibles = [];
-                for (let i = 0; this.$refs['measureCollapsible' + i]; i++) {
-                    collapsibles.push(this.itemWidth(this.$refs['measureCollapsible' + i]));
-                }
-
-                for (let collapsed = 0; collapsed <= collapsibles.length; collapsed++) {
-                    const shown = collapsibles.slice(collapsed).reduce((a, b) => a + b, 0);
-                    const reserve = collapsed > 0 ? dropdown : 0;
-                    if (home + last + reserve + shown <= available) {
-                        this.collapsedCount = collapsed;
-                        this.lastCollapsed = false;
-                        return;
-                    }
-                }
-
-                // Not even home + the current page + dropdown fits with
-                // everything else already collapsed - fold the current
-                // page into the dropdown too, as a last resort, leaving
-                // just home + '...'.
-                this.collapsedCount = collapsibles.length;
-                this.lastCollapsed = true;
-            },
-        }"
+        x-data="breadcrumbs"
     >
         <flux:breadcrumbs>
             <flux:breadcrumbs.item icon="house" href="/" />

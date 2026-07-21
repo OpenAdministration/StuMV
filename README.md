@@ -20,6 +20,7 @@ npm run build
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
+php artisan storage:link
 ```
 
 Zur Aktivierung von [Flux Pro](https://fluxui.dev/) ist die Eingabe eines Lizenzschlüssels nötig.

@@ -36,11 +36,7 @@
 
     <div
         class="flex items-center gap-3"
-        x-data="{ showOnlyActive: $persist(true).as('roleMembers.showOnlyActive') }"
-        x-init="
-            $wire.showOnlyActive = showOnlyActive;
-            $watch('$wire.showOnlyActive', value => showOnlyActive = value);
-        "
+        x-data="persistedToggle('showOnlyActive', 'roleMembers.showOnlyActive', true)"
     >
         <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.show_only_active_memberships') }}" align="left" />
     </div>

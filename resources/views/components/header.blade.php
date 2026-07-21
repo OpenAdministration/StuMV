@@ -91,7 +91,7 @@
                     @csrf
                     <flux:navmenu.item
                         :href="$currentRealm ? route('realm.logout', ['realm' => $currentRealm->getShortCode()]) : route('logout')"
-                        onclick="event.preventDefault(); this.closest('form').submit();"
+                        x-on:click.prevent="$el.closest('form').submit()"
                         icon="log-out"
                     >
                         {{ __('auth.log_out') }}

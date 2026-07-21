@@ -29,6 +29,10 @@ php artisan migrate --force
 # emails. Idempotent (keyed on username), so it is safe on every start.
 php artisan db:seed --class=DemoUsersSeeder --force
 
+# Make uploaded files (avatars, realm branding) reachable over HTTP. Exits 0
+# even when the link already exists, so this is safe on every start.
+php artisan storage:link
+
 # Clear configurations to avoid caching issues in development
 echo "Clearing configurations..."
 php artisan config:clear

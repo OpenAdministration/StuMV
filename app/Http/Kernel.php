@@ -13,6 +13,7 @@ use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureOidcClientMatchesRealm;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\SetContentSecurityPolicy;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Http\Middleware\TrimStrings;
@@ -63,6 +64,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
+            SetContentSecurityPolicy::class,
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
             StartSession::class,

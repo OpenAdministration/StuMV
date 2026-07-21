@@ -36,11 +36,7 @@
 
     <div
         class="flex items-center"
-        x-data="{ showOnlyActive: $persist(false).as('committees.showOnlyActive') }"
-        x-init="
-            $wire.showOnlyActive = showOnlyActive;
-            $watch('$wire.showOnlyActive', value => showOnlyActive = value);
-        "
+        x-data="persistedToggle('showOnlyActive', 'committees.showOnlyActive', false)"
     >
         <flux:switch wire:model.live="showOnlyActive" label="{{ __('committees.show_only_active_roles') }}" align="left" />
     </div>
