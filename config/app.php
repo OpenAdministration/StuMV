@@ -247,7 +247,7 @@ return [
     ])->toArray(),
 
     // app specific custom config
-    'about_url' => env('ABOUT_URL', ''),
+    'imprint_url' => env('IMPRINT_URL', ''),
     'privacy_url' => env('PRIVACY_URL', ''),
     'terms_url' => env('TERMS_URL', ''),
     'source_code_url' => env('SOURCE_CODE_URL', 'https://github.com/openadministration/stumv'),

@@ -24,7 +24,7 @@ return [
     'contact_us' => 'Schreib uns',
     'footer_code_with' => 'Code mit',
     'footer_by' => 'von',
-    'footer_about' => 'Impressum',
+    'footer_imprint' => 'Impressum',
     'footer_terms' => 'Nutzungsbedingungen',
     'footer_privacy' => 'Datenschutz',
     'footer_license' => 'Lizenz',

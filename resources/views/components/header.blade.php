@@ -40,8 +40,8 @@
                     :href="route('profile', ['realm' => auth()->user()->realm, 'username' => auth()->user()->username])"
                 >
                     <div class="flex flex-col items-start">
-                        <span>{{ auth()->user()->full_name }}</span>
-                        <span class="text-xs opacity-50">{{ auth()->user()->email }}</span>
+                        <span class="font-bold">{{ auth()->user()->full_name }}</span>
+                        <span class="text-xs opacity-70">{{ auth()->user()->email }}</span>
                     </div>
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
@@ -55,22 +55,36 @@
                     {{ __('common.footer_documentation') }}
                 </flux:navmenu.item>
                 <flux:navmenu.separator />
-                <flux:navmenu.item
-                    icon="badge-info"
-                    :href="route('about')"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {{ __('common.footer_about') }}
-                </flux:navmenu.item>
-                <flux:navmenu.item
-                    icon="hat-glasses"
-                    :href="route('privacy')"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {{ __('common.footer_privacy') }}
-                </flux:navmenu.item>
+                @if(config('app.imprint_url') !== '')
+                    <flux:navmenu.item
+                        icon="badge-info"
+                        :href="route('imprint')"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ __('common.footer_imprint') }}
+                    </flux:navmenu.item>
+                @endif
+                @if(config('app.terms_url') !== '')
+                    <flux:navmenu.item
+                        icon="section"
+                        :href="route('terms')"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ __('common.footer_terms') }}
+                    </flux:navmenu.item>
+                @endif
+                @if(config('app.privacy_url') !== '')
+                    <flux:navmenu.item
+                        icon="hat-glasses"
+                        :href="route('privacy')"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ __('common.footer_privacy') }}
+                    </flux:navmenu.item>
+                @endif
                 <flux:navmenu.separator />
                 @php($currentRealm = request()->route('realm'))
                 <form method="POST" action="{{ $currentRealm ? route('realm.logout', ['realm' => $currentRealm->getShortCode()]) : route('logout') }}">

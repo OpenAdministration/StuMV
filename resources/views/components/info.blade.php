@@ -16,8 +16,18 @@
                     </div>
                 @endif
                 <div class="mt-6">
-                    <p>&copy; 2020 &ndash; {{ date("Y") }} Open Administration GmbH</p>
-                    <p class="mt-2"><span class="font-semibold">{{ __('common.footer_license') }}:</span> <flux:link href="https://www.gnu.org/licenses/agpl-3.0.txt" target="_blank" rel="noopener noreferrer">AGPLv3</flux:link></p>
+                    <p>&copy; 2020&ndash;{{ date("Y") }} Open Administration GmbH</p>
+                    <p class="mt-2">
+                        <span class="font-semibold">{{ __('common.footer_license') }}:</span> <flux:link href="https://www.gnu.org/licenses/agpl-3.0.txt" target="_blank" rel="noopener noreferrer">AGPLv3</flux:link>
+                        &nbsp;&middot;&nbsp;
+                        <flux:link
+                            href="{{ route('source-code') }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ __('common.footer_source_code') }}
+                        </flux:link>
+                    </p>
                 </div>
                 <div class="mt-6">
                     @if(config('app.name') !== 'StuMV')

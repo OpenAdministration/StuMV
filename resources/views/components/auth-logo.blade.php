@@ -3,7 +3,7 @@
 @endphp
 <div class="flex items-center justify-center space-x-6 mb-2">
     @if($logoID)
-        <img src="{{ asset('storage/realm-branding/' . $logoID) }}" alt="{{ config('app.name') }}" class="w-full h-20 object-contain">
+        <img src="{{ asset('storage/realm-branding/' . $logoID) }}" alt="{{ config('app.name') }}" class="w-full h-22 object-contain">
     @else
         <x-application-logo class="w-20 h-20"/>
         <div class="flex flex-col gap-y-1">

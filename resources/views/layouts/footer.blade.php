@@ -35,14 +35,14 @@
     </div>
     <div class="flex justify-center lg:justify-end">
         <span class="flex flex-wrap justify-center lg:justify-end gap-2">
-            @if (Config::get('app.about_url') != '')
-            <flux:button size="sm" target="_blank" icon="external-link" :href="route('about')">{{ __('common.footer_about') }}</flux:button>
+            @if(config('app.imprint_url') !== '')
+                <flux:button size="sm" target="_blank" icon="external-link" :href="route('imprint')">{{ __('common.footer_imprint') }}</flux:button>
             @endif
-            @if (Config::get('app.terms_url') != '')
-            <flux:button size="sm" target="_blank" icon="external-link" :href="route('terms')">{{ __('common.footer_terms') }}</flux:button>
+            @if(config('app.terms_url') !== '')
+                <flux:button size="sm" target="_blank" icon="external-link" :href="route('terms')">{{ __('common.footer_terms') }}</flux:button>
             @endif
-            @if (Config::get('app.privacy_url') != '')
-            <flux:button size="sm" target="_blank" icon="external-link" :href="route('privacy')">{{ __('common.footer_privacy') }}</flux:button>
+            @if(config('app.privacy_url') !== '')
+                <flux:button size="sm" target="_blank" icon="external-link" :href="route('privacy')">{{ __('common.footer_privacy') }}</flux:button>
             @endif
         </span>
     </div>

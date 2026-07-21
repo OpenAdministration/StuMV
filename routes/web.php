@@ -189,7 +189,7 @@ Route::get('{realm}/oauth/userinfo', UserInfoController::class)->middleware('aut
 Route::get('{realm}/.well-known/openid-configuration', RealmDiscoveryController::class)->name('realm.openid.discovery');
 
 // guest routes
-Route::get('about', fn () => redirect(config('app.about_url')))->name('about');
+Route::get('imprint', fn () => redirect(config('app.imprint_url')))->name('imprint');
 Route::get('privacy', fn () => redirect(config('app.privacy_url')))->name('privacy');
 Route::get('terms', fn () => redirect(config('app.terms_url')))->name('terms');
 
@@ -197,3 +197,4 @@ Route::get('documentation', fn () => redirect('https://www.stufis.de/stumv'))->n
 Route::get('source-code', fn () => redirect('https://github.com/openadministration/stumv'))->name('source-code');
 
 require __DIR__.'/auth.php';
+Route::get('_debug-navmenu', fn () => view('_debug_navmenu'));
