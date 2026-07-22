@@ -2,11 +2,11 @@
 
 namespace App\Providers\Oidc;
 
-use Laravel\Passport\Bridge\ScopeRepository;
 use App\Services\Oidc\IdTokenResponse;
 use Illuminate\Encryption\Encrypter;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Bridge\ClientRepository;
+use Laravel\Passport\Bridge\ScopeRepository;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use League\OAuth2\Server\AuthorizationServer;
