@@ -68,6 +68,8 @@ return [
     'dashboard.branding_explanation' => 'Upload a logo and a background image shown on your student body\'s login and registration page.',
     'dashboard.groups_headline' => 'Rights',
     'dashboard.groups_explanation' => 'This does not mean the opposite of left, but rather allows admins to assign access rights to roles here. These rights can then be communicated to other applications, such as the StuFiS.',
+    'dashboard.group_mailman_lists_headline' => 'Mailing lists',
+    'dashboard.group_mailman_lists_explanation' => 'Map rights groups to Mailman 3 mailing lists, so their members can be synced onto the mailing list via a command.',
     'dashboard.domains_headline' => 'Domains',
     'dashboard.domains_explanation' => 'Admins can store domains here that are assigned to the student body. This can be used to control the automatic assignment of new users.',
     'dashboard.committee_headline' => 'Committees',

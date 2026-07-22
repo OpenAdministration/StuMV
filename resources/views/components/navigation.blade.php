@@ -77,6 +77,13 @@
                 >
                     {{ __('realms.dashboard.domains_headline') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item
+                    icon="mail"
+                    wire:navigate
+                    :href="route('realms.group-mailman-lists', ['realm' => $realm])"
+                >
+                    {{ __('realms.dashboard.group_mailman_lists_headline') }}
+                </flux:sidebar.item>
                 <flux:separator class="my-2" />
                 <flux:sidebar.item
                     icon="unplug"

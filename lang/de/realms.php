@@ -68,6 +68,8 @@ return [
     'dashboard.branding_explanation' => 'Hinterlege ein Logo und ein Hintergrundbild, die auf der Login- und Registrierungsseite eurer Studierendenschaft angezeigt werden.',
     'dashboard.groups_headline' => 'Rechte',
     'dashboard.groups_explanation' => 'Hiermit ist nicht das Gegenteil von links gemeint, sondern können hier durch Administrator:innen z. B. Zugriffsrechte an Rollen vergeben werden. Diese Rechte können dann an andere Anwendungen, wie das StuFiS kommuniziert werden',
+    'dashboard.group_mailman_lists_headline' => 'Mailinglisten',
+    'dashboard.group_mailman_lists_explanation' => 'Ordne Rechtegruppen Mailman-3-Mailinglisten zu, damit ihre Mitglieder per Command auf die Mailingliste synchronisiert werden können.',
     'dashboard.domains_headline' => 'Domains',
     'dashboard.domains_explanation' => 'Administrator:innen können hier Domains hinterlegen, die der Studierendenschaft zuzuordnen sind. Hierüber können automatische Zuordnungen von neuen Nutzer:innen gesteuert werden.',
     'dashboard.committee_headline' => 'Gremien',

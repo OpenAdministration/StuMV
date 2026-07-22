@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
+use App\Support\MailmanClient;
 use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -25,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(RealmContext::class);
+
+        $this->app->singleton(MailmanClient::class, fn (): MailmanClient => new MailmanClient(
+            (string) config('services.mailman.url'),
+            (string) config('services.mailman.api_user'),
+            (string) config('services.mailman.api_key'),
+        ));
 
         // 'auth.password' is a deferred service (PasswordResetServiceProvider) -
         // container::extend() is the only override style that survives being

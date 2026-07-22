@@ -255,6 +255,21 @@ Breadcrumbs::for('realms.oidc-clients.edit', function (BreadcrumbTrail $trail, a
     $trail->push(__('common.edit'), route('realms.oidc-clients.edit', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.group-mailman-lists', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('group_mailman_lists.list_title'), route('realms.group-mailman-lists', $routeParams), ['truncate' => true]);
+});
+
+Breadcrumbs::for('realms.group-mailman-lists.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.group-mailman-lists', $routeParams);
+    $trail->push(__('group_mailman_lists.new'), route('realms.group-mailman-lists.new', $routeParams), ['truncate' => true]);
+});
+
+Breadcrumbs::for('realms.group-mailman-lists.members', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.group-mailman-lists', $routeParams);
+    $trail->push($routeParams['listId'], route('realms.group-mailman-lists.members', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.sso-providers', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
     $trail->push(__('sso_providers.list_title'), route('realms.sso-providers', $routeParams), ['truncate' => true]);

@@ -31,4 +31,12 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'mailman' => [
+        // Mailman 3 Core's own REST API root, e.g. http://localhost:8001/3.1
+        // - not the public web UI (Postorius/Hyperkitty).
+        'url' => env('MAILMAN_URL'),
+        'api_user' => env('MAILMAN_API_USER', 'restadmin'),
+        'api_key' => env('MAILMAN_API_KEY'),
+    ],
+
 ];

@@ -112,6 +112,22 @@
                 </flux:card>
             </a>
         @endif
+        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
+            <a
+                wire:navigate
+                href="{{ route('realms.group-mailman-lists', $uid) }}"
+                aria-label="{{ __('realms.dashboard.group_mailman_lists_headline', ['name' => $name]) }}"
+                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
+            >
+                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
+                    <flux:icon.mail class="size-5" />
+                </div>
+                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
+                    <flux:heading size="lg">{{ __('realms.dashboard.group_mailman_lists_headline', ['name' => $name]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('realms.dashboard.group_mailman_lists_explanation', ['name' => $name]) }}</flux:text>
+                </flux:card>
+            </a>
+        @endif
         @can('edit', $community)
             <a
                 wire:navigate
