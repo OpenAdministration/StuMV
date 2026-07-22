@@ -3,6 +3,7 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use App\Support\RealmDataPurger;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -156,7 +157,12 @@ class ListRealms extends Component
             return;
         }
 
+        // DB-side data first, inside a transaction: if it fails, nothing is
+        // lost and the realm can simply be deleted again. Only irreversible
+        // once the LDAP subtree itself comes down.
+        RealmDataPurger::purge($this->deleteRealmName);
         $community->delete(recursive: true);
+
         // reset everything to prevent a 404 modal
         unset($this->deleteRealmName);
         Flux::modal('delete')->close();

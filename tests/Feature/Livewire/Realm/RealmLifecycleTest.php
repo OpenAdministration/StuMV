@@ -6,6 +6,9 @@ use App\Livewire\Realm\EditRealm;
 use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\NewDomain;
 use App\Livewire\Realm\NewRealm;
+use App\Models\GroupMailmanList;
+use App\Models\GroupMembership;
+use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Livewire\Livewire;
@@ -55,6 +58,37 @@ test('a super admin can delete a realm once the shortcode is confirmed', functio
         ->call('deleteCommit');
 
     expect(Community::findByUid($uid))->toBeNull();
+});
+
+test('deleting a realm also purges its DB-side data', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $member = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    RoleMembership::create([
+        'realm' => $uid,
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today()->subMonth(),
+    ]);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+
+    actingAsSuperAdmin();
+
+    Livewire::test(ListRealms::class)
+        ->call('deletePrepare', $uid)
+        ->set('deleteConfirmText', $uid)
+        ->call('deleteCommit');
+
+    expect(Community::findByUid($uid))->toBeNull()
+        ->and(RoleMembership::where('realm', $uid)->exists())->toBeFalse()
+        ->and(GroupMembership::where('group_dn', $group->getDn())->exists())->toBeFalse()
+        ->and(GroupMailmanList::where('realm', $uid)->exists())->toBeFalse();
 });
 
 test('deleting a realm is rejected if the typed shortcode does not match', function (): void {
