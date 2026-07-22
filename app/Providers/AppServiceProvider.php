@@ -3,12 +3,15 @@
 namespace App\Providers;
 
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
+use App\Http\Middleware\SetContentSecurityPolicy;
 use App\Support\MailmanClient;
 use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -109,6 +112,13 @@ class AppServiceProvider extends ServiceProvider
             ->uncompromised());
 
         Builder::macro('search', fn ($field, $string) => $string ? $this->orWhere($field, 'like', '%'.$string.'%') : $this);
+
+        // RequestHandled (not SetContentSecurityPolicy::handle() itself)
+        // fires for every response, including one rendered by the exception
+        // handler for a URL that matched no route at all - see
+        // SetContentSecurityPolicy::apply()'s doc comment for why that case
+        // can't be covered from inside the middleware.
+        Event::listen(fn (RequestHandled $event) => SetContentSecurityPolicy::apply($event->response));
 
         if ($this->app->hasDebugModeEnabled()) {
             Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {

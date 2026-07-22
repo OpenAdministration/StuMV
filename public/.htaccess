@@ -25,4 +25,9 @@ Header always set X-Content-Type-Options "nosniff"
 Header set X-XSS-Protection "1; mode=block"
 Header set X-Frame-Options "DENY"
 
-Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;"
+# Content-Security-Policy is set by the app itself (see
+# App\Http\Middleware\SetContentSecurityPolicy) with a per-request nonce -
+# a static header here would silently overwrite it with this much looser,
+# 'unsafe-inline'/'unsafe-eval' policy on every response actually served
+# through Apache (irrelevant under this app's real nginx deployment, but
+# still a footgun for any Apache-based environment).
