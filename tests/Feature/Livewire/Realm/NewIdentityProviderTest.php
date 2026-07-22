@@ -1,7 +1,7 @@
 <?php
 
-use App\Livewire\Realm\NewSsoProvider;
-use App\Models\RealmSsoProvider;
+use App\Livewire\Realm\NewIdentityProvider;
+use App\Models\RealmIdentityProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -11,7 +11,7 @@ test('a new identity provider can be registered', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewSsoProvider::class, ['realm' => $community])
+    Livewire::test(NewIdentityProvider::class, ['realm' => $community])
         ->set('name', 'My University')
         ->set('issuer', 'https://idp.example.test/')
         ->set('client_id', 'client-id')
@@ -20,9 +20,9 @@ test('a new identity provider can be registered', function (): void {
         ->set('enabled', true)
         ->call('save')
         ->assertHasNoErrors()
-        ->assertRedirect(route('realms.sso-providers', ['realm' => $community->getShortCode()]));
+        ->assertRedirect(route('realms.identity-providers', ['realm' => $community->getShortCode()]));
 
-    $provider = RealmSsoProvider::where('name', 'My University')->firstOrFail();
+    $provider = RealmIdentityProvider::where('name', 'My University')->firstOrFail();
 
     expect($provider->realm)->toBe($community->getShortCode())
         ->and($provider->issuer)->toBe('https://idp.example.test') // trailing slash trimmed
@@ -36,7 +36,7 @@ test('registering an identity provider requires a name', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewSsoProvider::class, ['realm' => $community])
+    Livewire::test(NewIdentityProvider::class, ['realm' => $community])
         ->set('issuer', 'https://idp.example.test')
         ->set('client_id', 'client-id')
         ->set('client_secret', 'client-secret')
@@ -48,7 +48,7 @@ test('registering an identity provider requires a valid issuer URL', function ()
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(NewSsoProvider::class, ['realm' => $community])
+    Livewire::test(NewIdentityProvider::class, ['realm' => $community])
         ->set('name', 'My University')
         ->set('issuer', 'not-a-url')
         ->set('client_id', 'client-id')
@@ -61,11 +61,11 @@ test('a non-admin cannot register an identity provider', function (): void {
     $community = newCommunity();
     actingAsModerator($community);
 
-    $this->get(route('realms.sso-providers.new', ['realm' => $community->getShortCode()]))->assertForbidden();
+    $this->get(route('realms.identity-providers.new', ['realm' => $community->getShortCode()]))->assertForbidden();
 });
 
 test('the admin realm has no identity provider feature', function (): void {
     actingAsSuperAdmin();
 
-    $this->get(route('realms.sso-providers.new', ['realm' => 'admin']))->assertNotFound();
+    $this->get(route('realms.identity-providers.new', ['realm' => 'admin']))->assertNotFound();
 });

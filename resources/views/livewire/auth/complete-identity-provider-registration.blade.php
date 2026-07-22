@@ -1,8 +1,8 @@
 <x-auth-card>
     <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-800 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-xs">
         <x-auth-logo :branding="$branding" />
-        <flux:heading size="xl">{{ __('sso_providers.complete_registration_title') }}</flux:heading>
-        <flux:text>{{ __('sso_providers.complete_registration_explanation', ['email' => $email]) }}</flux:text>
+        <flux:heading size="xl">{{ __('identity_providers.complete_registration_title') }}</flux:heading>
+        <flux:text>{{ __('identity_providers.complete_registration_explanation', ['email' => $email]) }}</flux:text>
         <x-livewire-form>
             <div class="flex flex-col gap-4">
                 <flux:field>
@@ -26,7 +26,7 @@
             </div>
 
             <x-slot:abort_route>{{ route('realm.login', ['realm' => $realm_uid]) }}</x-slot:abort_route>
-            <x-slot:submit_label>{{ __('sso_providers.complete_registration_submit') }}</x-slot:submit_label>
+            <x-slot:submit_label>{{ __('identity_providers.complete_registration_submit') }}</x-slot:submit_label>
             <x-slot:submit_icon>user-plus</x-slot:submit_icon>
         </x-livewire-form>
     </flux:card>

@@ -7,7 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Jobs\Oidc\SendBackChannelLogoutNotification;
 use App\Ldap\Community;
 use App\Models\RealmBranding;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Contracts\View\View;
@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login', [
             'realm' => $realm,
             'branding' => RealmBranding::forRealm($realm->getShortCode()),
-            'ssoProviders' => RealmSsoProvider::where('realm', $realm->getShortCode())->where('enabled', true)->get(),
+            'identityProviders' => RealmIdentityProvider::where('realm', $realm->getShortCode())->where('enabled', true)->get(),
         ]);
     }
 

@@ -4,12 +4,12 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
-class EditSsoProvider extends Component
+class EditIdentityProvider extends Component
 {
     #[Locked]
     public int $providerId;
@@ -39,7 +39,7 @@ class EditSsoProvider extends Component
 
     public string $deleteMappingLabel = '';
 
-    public function mount(Community $realm, RealmSsoProvider $provider): void
+    public function mount(Community $realm, RealmIdentityProvider $provider): void
     {
         abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getShortCode();
@@ -67,9 +67,9 @@ class EditSsoProvider extends Component
         ];
     }
 
-    private function provider(): RealmSsoProvider
+    private function provider(): RealmIdentityProvider
     {
-        return RealmSsoProvider::where('realm', $this->uid)->findOrFail($this->providerId);
+        return RealmIdentityProvider::where('realm', $this->uid)->findOrFail($this->providerId);
     }
 
     public function render()
@@ -82,11 +82,11 @@ class EditSsoProvider extends Component
             $roles = $committee->roles()->get();
         }
 
-        return view('livewire.realm.edit-sso-provider', [
+        return view('livewire.realm.edit-identity-provider', [
             'mappings' => $this->provider()->roleMappings()->orderBy('external_group')->get(),
             'committees' => $committees,
             'roles' => $roles,
-        ])->title(__('sso_providers.edit_title'));
+        ])->title(__('identity_providers.edit_title'));
     }
 
     public function save()
@@ -102,9 +102,9 @@ class EditSsoProvider extends Component
             'enabled' => $this->enabled,
         ]);
 
-        Flux::toast(variant: 'success', text: __('sso_providers.edit_success'));
+        Flux::toast(variant: 'success', text: __('identity_providers.edit_success'));
 
-        return to_route('realms.sso-providers', ['realm' => $this->uid]);
+        return to_route('realms.identity-providers', ['realm' => $this->uid]);
     }
 
     public function addMapping(): void
@@ -123,7 +123,7 @@ class EditSsoProvider extends Component
 
         $this->reset('new_external_group', 'new_committee_dn', 'new_role_cn');
 
-        Flux::toast(variant: 'success', text: __('sso_providers.mapping_added_success'));
+        Flux::toast(variant: 'success', text: __('identity_providers.mapping_added_success'));
     }
 
     public function deleteMappingPrepare(int $mappingId): void
@@ -138,7 +138,7 @@ class EditSsoProvider extends Component
     {
         $this->provider()->roleMappings()->findOrFail($this->deleteMappingId)->delete();
 
-        Flux::toast(variant: 'success', text: __('sso_providers.mapping_deleted_success'));
+        Flux::toast(variant: 'success', text: __('identity_providers.mapping_deleted_success'));
         $this->closeDeleteMapping();
     }
 

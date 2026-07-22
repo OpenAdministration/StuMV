@@ -31,13 +31,13 @@
 
                 <flux:button variant="primary" icon="log-in" type="submit">{{ __('auth.log_in') }}</flux:button>
 
-                @if($ssoProviders->isNotEmpty())
+                @if($identityProviders->isNotEmpty())
                     <flux:separator text="{{ __('auth.or_log_in_with') }}" />
 
                     <div class="flex flex-col gap-2">
-                        @foreach($ssoProviders as $ssoProvider)
-                            <flux:button href="{{ route('sso.redirect', ['realm' => $realm->getShortCode(), 'provider' => $ssoProvider->id]) }}">
-                                {{ __('sso_providers.login_button', ['name' => $ssoProvider->name]) }}
+                        @foreach($identityProviders as $identityProvider)
+                            <flux:button href="{{ route('identity-provider.redirect', ['realm' => $realm->getShortCode(), 'provider' => $identityProvider->id]) }}">
+                                {{ __('identity_providers.login_button', ['name' => $identityProvider->name]) }}
                             </flux:button>
                         @endforeach
                     </div>

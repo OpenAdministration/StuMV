@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class RealmSsoProvider extends Model
+class RealmIdentityProvider extends Model
 {
     use HasFactory;
 
@@ -34,6 +34,6 @@ class RealmSsoProvider extends Model
 
     public function roleMappings(): HasMany
     {
-        return $this->hasMany(SsoProviderRoleMapping::class, 'provider_id');
+        return $this->hasMany(IdentityProviderRoleMapping::class, 'provider_id');
     }
 }

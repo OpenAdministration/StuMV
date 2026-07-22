@@ -5,10 +5,10 @@ namespace App\Livewire\Auth;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\RealmBranding;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use App\Providers\RouteServiceProvider;
 use App\Support\RealmContext;
-use App\Support\SsoGroupRoleSync;
+use App\Support\IdentityProviderGroupRoleSync;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
@@ -16,7 +16,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-class CompleteSsoRegistration extends Component
+class CompleteIdentityProviderRegistration extends Component
 {
     #[Locked]
     public string $realm_uid;
@@ -51,7 +51,7 @@ class CompleteSsoRegistration extends Component
 
     protected function pending(): array
     {
-        $pending = session('sso_pending');
+        $pending = session('identity_provider_pending');
 
         abort_unless(
             is_array($pending) && ($pending['realm'] ?? null) === $this->realm_uid,
@@ -65,9 +65,9 @@ class CompleteSsoRegistration extends Component
     {
         $branding = RealmBranding::forRealm($this->realm_uid);
 
-        return view('livewire.auth.complete-sso-registration', ['branding' => $branding])
+        return view('livewire.auth.complete-identity-provider-registration', ['branding' => $branding])
             ->layout('layouts.guest', ['branding' => $branding])
-            ->title(__('sso_providers.complete_registration_title'));
+            ->title(__('identity_providers.complete_registration_title'));
     }
 
     public function save()
@@ -103,11 +103,11 @@ class CompleteSsoRegistration extends Component
 
             Auth::login($eloquentUser);
             session()->regenerate();
-            session()->forget('sso_pending');
+            session()->forget('identity_provider_pending');
 
-            $provider = RealmSsoProvider::find($pending['provider_id']);
+            $provider = RealmIdentityProvider::find($pending['provider_id']);
             if ($provider) {
-                resolve(SsoGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
+                resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
             }
 
             return redirect()->intended(RouteServiceProvider::home($this->realm_uid));

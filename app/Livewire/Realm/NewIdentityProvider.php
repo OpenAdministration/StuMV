@@ -3,11 +3,11 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use Flux\Flux;
 use Livewire\Component;
 
-class NewSsoProvider extends Component
+class NewIdentityProvider extends Component
 {
     public string $uid = '';
 
@@ -43,14 +43,14 @@ class NewSsoProvider extends Component
 
     public function render()
     {
-        return view('livewire.realm.new-sso-provider')->title(__('sso_providers.new_title'));
+        return view('livewire.realm.new-identity-provider')->title(__('identity_providers.new_title'));
     }
 
     public function save()
     {
         $this->validate();
 
-        RealmSsoProvider::create([
+        RealmIdentityProvider::create([
             'realm' => $this->uid,
             'name' => $this->name,
             'issuer' => rtrim($this->issuer, '/'),
@@ -60,8 +60,8 @@ class NewSsoProvider extends Component
             'enabled' => $this->enabled,
         ]);
 
-        Flux::toast(variant: 'success', text: __('sso_providers.created_success'));
+        Flux::toast(variant: 'success', text: __('identity_providers.created_success'));
 
-        return to_route('realms.sso-providers', ['realm' => $this->uid]);
+        return to_route('realms.identity-providers', ['realm' => $this->uid]);
     }
 }

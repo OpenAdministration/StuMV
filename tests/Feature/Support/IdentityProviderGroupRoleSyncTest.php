@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\RoleMembership;
-use App\Support\SsoGroupRoleSync;
+use App\Support\IdentityProviderGroupRoleSync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\TestLdap;
 
@@ -12,14 +12,14 @@ test('a mapped external group grants the corresponding role', function (): void 
     $user = TestLdap::member($community);
     $committee = TestLdap::makeCommittee($community);
     $role = TestLdap::makeRole($committee);
-    $provider = makeSsoProvider($community->getShortCode());
+    $provider = makeIdentityProvider($community->getShortCode());
     $provider->roleMappings()->create([
         'external_group' => 'stura-member',
         'committee_dn' => $committee->getDn(),
         'role_cn' => $role->getFirstAttribute('cn'),
     ]);
 
-    resolve(SsoGroupRoleSync::class)->apply($provider, $user->username, ['groups' => ['stura-member']]);
+    resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $user->username, ['groups' => ['stura-member']]);
 
     expect(RoleMembership::where('username', $user->username)
         ->where('role_cn', $role->getFirstAttribute('cn'))
@@ -32,14 +32,14 @@ test('an unmapped external group is ignored', function (): void {
     $user = TestLdap::member($community);
     $committee = TestLdap::makeCommittee($community);
     $role = TestLdap::makeRole($committee);
-    $provider = makeSsoProvider($community->getShortCode());
+    $provider = makeIdentityProvider($community->getShortCode());
     $provider->roleMappings()->create([
         'external_group' => 'stura-member',
         'committee_dn' => $committee->getDn(),
         'role_cn' => $role->getFirstAttribute('cn'),
     ]);
 
-    resolve(SsoGroupRoleSync::class)->apply($provider, $user->username, ['groups' => ['some-other-group']]);
+    resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $user->username, ['groups' => ['some-other-group']]);
 
     expect(RoleMembership::where('username', $user->username)->count())->toBe(0);
 });
@@ -49,14 +49,14 @@ test('applying the same groups twice does not create a duplicate membership', fu
     $user = TestLdap::member($community);
     $committee = TestLdap::makeCommittee($community);
     $role = TestLdap::makeRole($committee);
-    $provider = makeSsoProvider($community->getShortCode());
+    $provider = makeIdentityProvider($community->getShortCode());
     $provider->roleMappings()->create([
         'external_group' => 'stura-member',
         'committee_dn' => $committee->getDn(),
         'role_cn' => $role->getFirstAttribute('cn'),
     ]);
 
-    $sync = resolve(SsoGroupRoleSync::class);
+    $sync = resolve(IdentityProviderGroupRoleSync::class);
     $sync->apply($provider, $user->username, ['groups' => ['stura-member']]);
     $sync->apply($provider, $user->username, ['groups' => ['stura-member']]);
 
@@ -66,9 +66,9 @@ test('applying the same groups twice does not create a duplicate membership', fu
 test('a missing groups claim is a no-op', function (): void {
     $community = newCommunity();
     $user = TestLdap::member($community);
-    $provider = makeSsoProvider($community->getShortCode());
+    $provider = makeIdentityProvider($community->getShortCode());
 
-    resolve(SsoGroupRoleSync::class)->apply($provider, $user->username, []);
+    resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $user->username, []);
 
     expect(RoleMembership::where('username', $user->username)->count())->toBe(0);
 });
@@ -78,7 +78,7 @@ test('a custom groups_claim name is honoured', function (): void {
     $user = TestLdap::member($community);
     $committee = TestLdap::makeCommittee($community);
     $role = TestLdap::makeRole($committee);
-    $provider = makeSsoProvider($community->getShortCode());
+    $provider = makeIdentityProvider($community->getShortCode());
     $provider->update(['groups_claim' => 'memberOf']);
     $provider->roleMappings()->create([
         'external_group' => 'stura-member',
@@ -86,7 +86,7 @@ test('a custom groups_claim name is honoured', function (): void {
         'role_cn' => $role->getFirstAttribute('cn'),
     ]);
 
-    resolve(SsoGroupRoleSync::class)->apply($provider, $user->username, ['memberOf' => ['stura-member']]);
+    resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $user->username, ['memberOf' => ['stura-member']]);
 
     expect(RoleMembership::where('username', $user->username)->count())->toBe(1);
 });

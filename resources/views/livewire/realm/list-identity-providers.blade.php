@@ -1,17 +1,17 @@
 <div class="flex-col">
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1 space-y-4">
-            <flux:heading size="xl">{{ __('sso_providers.headline') }}</flux:heading>
-            <flux:text class="text-base">{{ __('sso_providers.explanation') }}</flux:text>
+            <flux:heading size="xl">{{ __('identity_providers.headline') }}</flux:heading>
+            <flux:text class="text-base">{{ __('identity_providers.explanation') }}</flux:text>
         </div>
         <div>
             <flux:button
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="route('realms.sso-providers.new', ['realm' => $uid])"
+                :href="route('realms.identity-providers.new', ['realm' => $uid])"
             >
-                {{ __('sso_providers.new') }}
+                {{ __('identity_providers.new') }}
             </flux:button>
         </div>
     </div>
@@ -20,9 +20,9 @@
         @if(count($providers) > 0)
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>{{ __('sso_providers.name') }}</flux:table.column>
-                    <flux:table.column>{{ __('sso_providers.issuer') }}</flux:table.column>
-                    <flux:table.column>{{ __('sso_providers.status') }}</flux:table.column>
+                    <flux:table.column>{{ __('identity_providers.name') }}</flux:table.column>
+                    <flux:table.column>{{ __('identity_providers.issuer') }}</flux:table.column>
+                    <flux:table.column>{{ __('identity_providers.status') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -36,9 +36,9 @@
                         </flux:table.cell>
                         <flux:table.cell>
                             @if($provider->enabled)
-                                <flux:badge color="green" variant="solid">{{ __('sso_providers.status_enabled') }}</flux:badge>
+                                <flux:badge color="green" variant="solid">{{ __('identity_providers.status_enabled') }}</flux:badge>
                             @else
-                                <flux:badge color="red" variant="solid">{{ __('sso_providers.status_disabled') }}</flux:badge>
+                                <flux:badge color="red" variant="solid">{{ __('identity_providers.status_disabled') }}</flux:badge>
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>
@@ -47,7 +47,7 @@
                                     size="sm"
                                     icon="pencil"
                                     wire:navigate
-                                    href="{{ route('realms.sso-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
+                                    href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
                                 >
                                     {{ __('common.edit') }}
                                 </flux:button>
@@ -57,7 +57,7 @@
                                     icon="trash-2"
                                     wire:click="deletePrepare('{{ $provider->id }}')"
                                 >
-                                    {{ __('sso_providers.delete') }}
+                                    {{ __('identity_providers.delete') }}
                                 </flux:button>
                             </div>
                         </flux:table.cell>
@@ -66,7 +66,7 @@
                 </flux:table.rows>
             </flux:table>
         @else
-            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('sso_providers.no_providers_found') }}" />
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('identity_providers.no_providers_found') }}" />
         @endif
     </div>
 
@@ -74,12 +74,12 @@
         <flux:modal name="delete">
             <div class="space-y-6">
                 <div>
-                    <flux:heading size="lg" class="modal-header">{{ __('sso_providers.delete_title', ['name' => $deleteProviderName]) }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('sso_providers.delete_warning', ['name' => $deleteProviderName]) }}</flux:text>
+                    <flux:heading size="lg" class="modal-header">{{ __('identity_providers.delete_title', ['name' => $deleteProviderName]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('identity_providers.delete_warning', ['name' => $deleteProviderName]) }}</flux:text>
                 </div>
                 <div class="flex justify-end gap-4">
                     <flux:button wire:click="closeDelete()">{{ __('common.cancel') }}</flux:button>
-                    <flux:button variant="danger" type="submit">{{ __('sso_providers.delete') }}</flux:button>
+                    <flux:button variant="danger" type="submit">{{ __('identity_providers.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

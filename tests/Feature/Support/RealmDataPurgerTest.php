@@ -2,12 +2,12 @@
 
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
+use App\Models\IdentityProviderRoleMapping;
 use App\Models\PassportClient;
 use App\Models\ProfilePicture;
 use App\Models\RealmBranding;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
-use App\Models\SsoProviderRoleMapping;
 use App\Models\User;
 use App\Support\RealmDataPurger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -46,7 +46,7 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
     Storage::disk('public')->put('realm-branding/bg.webp', 'fake-bg');
     RealmBranding::create(['realm' => $uid, 'logo_id' => 'logo.webp', 'background_id' => 'bg.webp']);
 
-    $provider = makeSsoProvider($uid);
+    $provider = makeIdentityProvider($uid);
     $mapping = $provider->roleMappings()->create([
         'external_group' => 'stura-member',
         'committee_dn' => $committee->getDn(),
@@ -105,8 +105,8 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         ->and(RealmBranding::where('realm', $uid)->exists())->toBeFalse()
         ->and(Storage::disk('public')->exists('realm-branding/logo.webp'))->toBeFalse()
         ->and(Storage::disk('public')->exists('realm-branding/bg.webp'))->toBeFalse()
-        ->and(RealmSsoProvider::find($provider->id))->toBeNull()
-        ->and(SsoProviderRoleMapping::find($mapping->id))->toBeNull()
+        ->and(RealmIdentityProvider::find($provider->id))->toBeNull()
+        ->and(IdentityProviderRoleMapping::find($mapping->id))->toBeNull()
         ->and(PassportClient::find($client->id))->toBeNull()
         ->and($client->tokens()->find($token->id))->toBeNull()
         ->and($client->authCodes()->find($authCode->id))->toBeNull()

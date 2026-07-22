@@ -102,9 +102,9 @@
                 <flux:sidebar.item
                     icon="git-pull-request-create-arrow"
                     wire:navigate
-                    :href="route('realms.sso-providers', ['realm' => $realm])"
+                    :href="route('realms.identity-providers', ['realm' => $realm])"
                 >
-                    {{ __('sso_providers.list_title') }}
+                    {{ __('identity_providers.list_title') }}
                 </flux:sidebar.item>
             @endif
             @if(auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))

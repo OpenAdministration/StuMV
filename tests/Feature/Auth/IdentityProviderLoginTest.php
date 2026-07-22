@@ -1,7 +1,7 @@
 <?php
 
 use App\Ldap\User as LdapUser;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
 use App\Support\OidcProviderFactory;
 use GuzzleHttp\Client;
@@ -25,7 +25,7 @@ uses(RefreshDatabase::class);
  * see - so that part is mocked via a Guzzle MockHandler injected through
  * OidcProviderFactory instead.
  */
-function fakeSsoIdp(string $issuer, array $userinfo): void
+function fakeIdentityProvider(string $issuer, array $userinfo): void
 {
     Http::fake([
         $issuer.'/.well-known/openid-configuration' => Http::response([
@@ -56,15 +56,15 @@ function fakeSsoIdp(string $issuer, array $userinfo): void
     });
 }
 
-/** Hits sso.redirect, pulls the state it generated out of the redirect URL, and returns the matching sso.callback URL. */
-function ssoCallbackUrl(string $realmUid, RealmSsoProvider $provider, string $code = 'fake-code'): string
+/** Hits identity-provider.redirect, pulls the state it generated out of the redirect URL, and returns the matching identity-provider.callback URL. */
+function identityProviderCallbackUrl(string $realmUid, RealmIdentityProvider $provider, string $code = 'fake-code'): string
 {
-    $redirect = test()->get(route('sso.redirect', ['realm' => $realmUid, 'provider' => $provider->id]));
+    $redirect = test()->get(route('identity-provider.redirect', ['realm' => $realmUid, 'provider' => $provider->id]));
     $redirect->assertStatus(302);
 
     parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $query);
 
-    return route('sso.callback', [
+    return route('identity-provider.callback', [
         'realm' => $realmUid,
         'provider' => $provider->id,
         'state' => $query['state'],
@@ -72,11 +72,11 @@ function ssoCallbackUrl(string $realmUid, RealmSsoProvider $provider, string $co
     ]);
 }
 
-test('logging in via SSO with a matching email logs the existing account in directly', function (): void {
+test('logging in via the identity provider with a matching email logs the existing account in directly', function (): void {
     $community = newCommunity();
     $existingUser = TestLdap::member($community);
-    $provider = makeSsoProvider($community->getShortCode());
-    fakeSsoIdp($provider->issuer, [
+    $provider = makeIdentityProvider($community->getShortCode());
+    fakeIdentityProvider($provider->issuer, [
         'sub' => 'external-123',
         'email' => $existingUser->email,
         'given_name' => 'Ignored',
@@ -85,31 +85,31 @@ test('logging in via SSO with a matching email logs the existing account in dire
 
     $this->assertGuest();
 
-    $this->get(ssoCallbackUrl($community->getShortCode(), $provider))
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider))
         ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 
     $this->assertAuthenticatedAs($existingUser->fresh());
 });
 
-test('logging in via SSO with no matching account redirects to the registration-completion step', function (): void {
+test('logging in via the identity provider with no matching account redirects to the registration-completion step', function (): void {
     $community = newCommunity();
-    $provider = makeSsoProvider($community->getShortCode());
-    fakeSsoIdp($provider->issuer, [
+    $provider = makeIdentityProvider($community->getShortCode());
+    fakeIdentityProvider($provider->issuer, [
         'sub' => 'external-999',
         'email' => 'not-yet-registered@example.test',
     ]);
 
-    $this->get(ssoCallbackUrl($community->getShortCode(), $provider))
-        ->assertRedirect(route('sso.register', ['realm' => $community->getShortCode()]));
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider))
+        ->assertRedirect(route('identity-provider.register', ['realm' => $community->getShortCode()]));
 
     $this->assertGuest();
 });
 
-test('a locked account cannot log in via SSO even with a matching email', function (): void {
+test('a locked account cannot log in via the identity provider even with a matching email', function (): void {
     $community = newCommunity();
     $existingUser = TestLdap::member($community);
-    $provider = makeSsoProvider($community->getShortCode());
-    fakeSsoIdp($provider->issuer, [
+    $provider = makeIdentityProvider($community->getShortCode());
+    fakeIdentityProvider($provider->issuer, [
         'sub' => 'external-123',
         'email' => $existingUser->email,
     ]);
@@ -118,7 +118,7 @@ test('a locked account cannot log in via SSO even with a matching email', functi
     $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldap->save();
 
-    $this->get(ssoCallbackUrl($community->getShortCode(), $provider))->assertForbidden();
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider))->assertForbidden();
 
     $this->assertGuest();
 });
@@ -128,19 +128,19 @@ test('a matching login grants roles mapped from the returned groups claim', func
     $existingUser = TestLdap::member($community);
     $committee = TestLdap::makeCommittee($community);
     $role = TestLdap::makeRole($committee);
-    $provider = makeSsoProvider($community->getShortCode());
+    $provider = makeIdentityProvider($community->getShortCode());
     $provider->roleMappings()->create([
         'external_group' => 'stura-member',
         'committee_dn' => $committee->getDn(),
         'role_cn' => $role->getFirstAttribute('cn'),
     ]);
-    fakeSsoIdp($provider->issuer, [
+    fakeIdentityProvider($provider->issuer, [
         'sub' => 'external-123',
         'email' => $existingUser->email,
         'groups' => ['stura-member', 'some-unmapped-group'],
     ]);
 
-    $this->get(ssoCallbackUrl($community->getShortCode(), $provider));
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider));
 
     expect(RoleMembership::where('username', $existingUser->username)
         ->where('role_cn', $role->getFirstAttribute('cn'))
@@ -150,10 +150,10 @@ test('a matching login grants roles mapped from the returned groups claim', func
 
 test('an invalid or replayed state is rejected', function (): void {
     $community = newCommunity();
-    $provider = makeSsoProvider($community->getShortCode());
-    fakeSsoIdp($provider->issuer, ['sub' => 'x', 'email' => 'someone@example.test']);
+    $provider = makeIdentityProvider($community->getShortCode());
+    fakeIdentityProvider($provider->issuer, ['sub' => 'x', 'email' => 'someone@example.test']);
 
-    $this->get(route('sso.callback', [
+    $this->get(route('identity-provider.callback', [
         'realm' => $community->getShortCode(),
         'provider' => $provider->id,
         'state' => 'not-the-real-state',
@@ -165,17 +165,17 @@ test('an invalid or replayed state is rejected', function (): void {
 
 test('a disabled identity provider cannot be used to log in', function (): void {
     $community = newCommunity();
-    $provider = makeSsoProvider($community->getShortCode(), enabled: false);
+    $provider = makeIdentityProvider($community->getShortCode(), enabled: false);
 
-    $this->get(route('sso.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]))
+    $this->get(route('identity-provider.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]))
         ->assertNotFound();
 });
 
 test('another realm\'s identity provider cannot be used to log in through this realm', function (): void {
     $community = newCommunity();
     $otherCommunity = newCommunity();
-    $provider = makeSsoProvider($otherCommunity->getShortCode());
+    $provider = makeIdentityProvider($otherCommunity->getShortCode());
 
-    $this->get(route('sso.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]))
+    $this->get(route('identity-provider.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]))
         ->assertNotFound();
 });

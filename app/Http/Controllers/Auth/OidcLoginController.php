@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
-use App\Models\RealmSsoProvider;
+use App\Models\RealmIdentityProvider;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Support\IdentityProviderGroupRoleSync;
 use App\Support\OidcProviderFactory;
-use App\Support\SsoGroupRoleSync;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +24,7 @@ class OidcLoginController extends Controller
     /**
      * Send the visitor to the external identity provider's own login page.
      */
-    public function redirect(Community $realm, RealmSsoProvider $provider): RedirectResponse
+    public function redirect(Community $realm, RealmIdentityProvider $provider): RedirectResponse
     {
         $this->authorizeProvider($realm, $provider);
 
@@ -33,8 +33,8 @@ class OidcLoginController extends Controller
         $authorizationUrl = $oauthProvider->getAuthorizationUrl(['scope' => 'openid email profile']);
 
         session([
-            'sso_state' => $oauthProvider->getState(),
-            'sso_provider_id' => $provider->id,
+            'identity_provider_state' => $oauthProvider->getState(),
+            'identity_provider_id' => $provider->id,
         ]);
 
         return redirect($authorizationUrl);
@@ -47,16 +47,16 @@ class OidcLoginController extends Controller
      * LDAP bind is needed here), or hands off to the "pick a username"
      * completion step for a brand-new account.
      */
-    public function callback(Community $realm, RealmSsoProvider $provider, Request $request)
+    public function callback(Community $realm, RealmIdentityProvider $provider, Request $request)
     {
         $this->authorizeProvider($realm, $provider);
 
         $state = $request->query('state');
         $validState = $state
-            && $state === session('sso_state')
-            && session('sso_provider_id') === $provider->id;
+            && $state === session('identity_provider_state')
+            && session('identity_provider_id') === $provider->id;
 
-        session()->forget(['sso_state', 'sso_provider_id']);
+        session()->forget(['identity_provider_state', 'identity_provider_id']);
 
         abort_unless($validState, 400, 'Invalid or expired SSO login attempt.');
         abort_if($request->has('error'), 400, (string) $request->query('error_description', 'The identity provider reported an error.'));
@@ -84,12 +84,12 @@ class OidcLoginController extends Controller
             Auth::login($existing);
             $request->session()->regenerate();
 
-            resolve(SsoGroupRoleSync::class)->apply($provider, $existing->username, $claims);
+            resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $existing->username, $claims);
 
             return redirect()->intended(RouteServiceProvider::home($realm->getShortCode()));
         }
 
-        session(['sso_pending' => [
+        session(['identity_provider_pending' => [
             'realm' => $realm->getShortCode(),
             'provider_id' => $provider->id,
             'email' => $email,
@@ -98,22 +98,22 @@ class OidcLoginController extends Controller
             'claims' => $claims,
         ]]);
 
-        return to_route('sso.register', ['realm' => $realm->getShortCode()]);
+        return to_route('identity-provider.register', ['realm' => $realm->getShortCode()]);
     }
 
-    private function authorizeProvider(Community $realm, RealmSsoProvider $provider): void
+    private function authorizeProvider(Community $realm, RealmIdentityProvider $provider): void
     {
         abort_unless($provider->enabled && $provider->realm === $realm->getShortCode(), 404);
     }
 
-    private function buildProvider(Community $realm, RealmSsoProvider $provider): GenericProvider
+    private function buildProvider(Community $realm, RealmIdentityProvider $provider): GenericProvider
     {
         $discovery = $this->discover($provider->issuer);
 
         return $this->providerFactory->make([
             'clientId' => $provider->client_id,
             'clientSecret' => $provider->client_secret,
-            'redirectUri' => route('sso.callback', ['realm' => $realm->getShortCode(), 'provider' => $provider->id]),
+            'redirectUri' => route('identity-provider.callback', ['realm' => $realm->getShortCode(), 'provider' => $provider->id]),
             'urlAuthorize' => $discovery['authorization_endpoint'],
             'urlAccessToken' => $discovery['token_endpoint'],
             'urlResourceOwnerDetails' => $discovery['userinfo_endpoint'],
@@ -122,6 +122,6 @@ class OidcLoginController extends Controller
 
     private function discover(string $issuer): array
     {
-        return Cache::remember('sso-discovery:'.md5($issuer), now()->addHour(), fn (): array => Http::get(rtrim($issuer, '/').'/.well-known/openid-configuration')->throw()->json());
+        return Cache::remember('identity-provider-discovery:'.md5($issuer), now()->addHour(), fn (): array => Http::get(rtrim($issuer, '/').'/.well-known/openid-configuration')->throw()->json());
     }
 }

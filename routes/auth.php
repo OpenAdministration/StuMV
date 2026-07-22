@@ -8,7 +8,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\OidcLoginController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Livewire\Auth\CompleteSsoRegistration;
+use App\Livewire\Auth\CompleteIdentityProviderRegistration;
 use App\Livewire\Profile\ChangePassword;
 use App\Livewire\RegisterUser;
 use Illuminate\Support\Facades\Route;
@@ -58,9 +58,9 @@ Route::middleware('guest')->group(function (): void {
     // like registration itself. The literal "register" route must be
     // registered before the "{provider}" wildcard below, or the wildcard
     // would greedily match "register" as a provider id first.
-    Route::livewire('{realm}/login/sso/register', CompleteSsoRegistration::class)->name('sso.register');
-    Route::get('{realm}/login/sso/{provider}', [OidcLoginController::class, 'redirect'])->name('sso.redirect');
-    Route::get('{realm}/login/sso/{provider}/callback', [OidcLoginController::class, 'callback'])->name('sso.callback');
+    Route::livewire('{realm}/login/identity-provider/register', CompleteIdentityProviderRegistration::class)->name('identity-provider.register');
+    Route::get('{realm}/login/identity-provider/{provider}', [OidcLoginController::class, 'redirect'])->name('identity-provider.redirect');
+    Route::get('{realm}/login/identity-provider/{provider}/callback', [OidcLoginController::class, 'callback'])->name('identity-provider.callback');
 });
 
 Route::middleware('auth')->group(function (): void {
