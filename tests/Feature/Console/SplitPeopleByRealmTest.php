@@ -4,6 +4,7 @@ use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LdapRecord\Models\OpenLDAP\Group;
+use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Tests\Support\TestLdap;
 
 /**
@@ -123,6 +124,38 @@ test('an account that is a member of two realms becomes two independent accounts
     expect($guids)->toContain($originalGuid);
 });
 
+test('a stale entry already sitting at the clone destination is overwritten instead of causing an error', function (): void {
+    $communityA = newCommunity();
+    $communityB = newCommunity();
+    $shared = legacyPerson('legacystale'.bin2hex(random_bytes(3)));
+    $uid = $shared->getFirstAttribute('uid');
+
+    attachLegacyMembers($communityA, [$shared]);
+    attachLegacyMembers($communityB, [$shared]);
+
+    // A leftover from e.g. an interrupted prior run - same uid, different
+    // attributes, already sitting exactly where this run's clone into
+    // communityB needs to write.
+    $stale = new LdapUser([
+        'uid' => $uid,
+        'cn' => 'Stale Leftover',
+        'sn' => 'Leftover',
+        'givenName' => 'Stale',
+        'mail' => $uid.'@stale.test',
+        'userPassword' => '{ARGON2}'.password_hash('Aa1!'.bin2hex(random_bytes(6)), PASSWORD_ARGON2ID),
+    ]);
+    $stale->setDn('uid='.$uid.','.$communityB->peopleDn());
+    $stale->save();
+    TestLdap::track($stale);
+
+    $this->artisan('app:split-people-by-realm')->assertExitCode(0);
+
+    $inB = LdapUser::query()->in($communityB->peopleDn())->where('uid', '=', $uid)->first();
+
+    expect($inB)->not->toBeNull()
+        ->and($inB->getFirstAttribute('cn'))->toBe($shared->getFirstAttribute('cn'));
+});
+
 test('admins/moderators uniqueMember values are rewritten to the new location', function (): void {
     $community = newCommunity();
     $admin = legacyPerson('legacyadmin'.bin2hex(random_bytes(3)));
@@ -180,6 +213,22 @@ test('a superadmin who is also a community member ends up as two independent acc
     expect($inAdminRealm)->not->toBeNull()
         ->and($inCommunity)->not->toBeNull()
         ->and($inAdminRealm->getConvertedGuid())->not->toBe($inCommunity->getConvertedGuid());
+});
+
+test('a community predating the per-realm People branch gets one created before members are moved into it', function (): void {
+    $community = newCommunity();
+    OrganizationalUnit::query()->find($community->peopleDn())->delete();
+
+    $single = legacyPerson('legacynopeople'.bin2hex(random_bytes(3)));
+    attachLegacyMembers($community, [$single]);
+
+    $this->artisan('app:split-people-by-realm')->assertExitCode(0);
+
+    expect(OrganizationalUnit::query()->find($community->peopleDn()))->not->toBeNull();
+
+    $moved = LdapUser::findByUsername($single->getFirstAttribute('uid'));
+    expect($moved)->not->toBeNull()
+        ->and($moved->getDn())->toEndWith(','.$community->peopleDn());
 });
 
 test('an account in no community\'s members group is left unassigned in the flat branch', function (): void {

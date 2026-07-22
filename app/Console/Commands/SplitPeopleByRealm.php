@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use Illuminate\Console\Command;
 use LdapRecord\Models\OpenLDAP\Group;
+use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 
 class SplitPeopleByRealm extends Command
 {
@@ -122,6 +123,31 @@ class SplitPeopleByRealm extends Command
     }
 
     /**
+     * A community created before this per-realm restructuring only ever had
+     * Groups/Committees/Domains (see Community::generateSkeleton()) - all its
+     * people still lived in the one flat ou=People this command is moving
+     * everyone out of, so its own People branch was never created. Without
+     * this, moveOrCloneUid() would move()/save() into a parent OU that
+     * doesn't exist yet and fail.
+     */
+    private function ensurePeopleBranchExists(Community $community, bool $dryRun): void
+    {
+        if (OrganizationalUnit::query()->find($community->peopleDn()) !== null) {
+            return;
+        }
+
+        $this->comment("  |-> {$community->getShortCode()} has no People branch yet, creating it");
+
+        if ($dryRun) {
+            return;
+        }
+
+        $people = new OrganizationalUnit(['ou' => 'People', 'description' => 'The People']);
+        $people->setDn($community->peopleDn());
+        $people->save();
+    }
+
+    /**
      * Walks the super-admins group and every (non-admin) community's members
      * group exactly once, before mutating anything - a move() changes a DN a
      * later group might still reference otherwise.
@@ -129,6 +155,10 @@ class SplitPeopleByRealm extends Command
     private function buildPersonIndex($communities): void
     {
         $superAdminGroup = Group::query()->find($this->superAdminGroupDn());
+
+        if ($superAdminGroup === null) {
+            $this->comment('> cn=super-admins no longer exists, skipping');
+        }
 
         foreach ($superAdminGroup?->members()->get() ?? [] as $superAdmin) {
             $this->realmsByUid[$superAdmin->getFirstAttribute('uid')][] = Community::ADMIN_REALM_UID;
@@ -144,6 +174,10 @@ class SplitPeopleByRealm extends Command
     private function processRealm(string $realmUid, ?Community $community, bool $dryRun): void
     {
         $this->comment("> $realmUid");
+
+        if ($community !== null) {
+            $this->ensurePeopleBranchExists($community, $dryRun);
+        }
 
         $uids = $this->uidsAssignedTo($realmUid);
 
@@ -194,16 +228,22 @@ class SplitPeopleByRealm extends Command
         $this->dnUpdatesByRealm[$realmUid][$original['dn']] = $newDn;
 
         if ($isFirstRealmForUid) {
-            $this->comment("  |-> moving $uid: {$original['dn']} -> $newDn");
+            if ($newDn === $original['dn']) {
+                $this->comment("  |-> $uid already in place: $newDn");
+            } else {
+                $this->overwriteIfExists($newDn, $dryRun);
+                $this->comment("  |-> moving $uid: {$original['dn']} -> $newDn");
 
-            if (! $dryRun) {
-                // move() takes the target *parent* container, not the full
-                // new DN - it keeps the entry's own RDN (uid=...) as-is.
-                User::findOrFailByUsername($uid)->move($newPeopleDn);
+                if (! $dryRun) {
+                    // move() takes the target *parent* container, not the full
+                    // new DN - it keeps the entry's own RDN (uid=...) as-is.
+                    User::findOrFailByUsername($uid)->move($newPeopleDn);
+                }
             }
 
             $this->movedCount++;
         } else {
+            $this->overwriteIfExists($newDn, $dryRun);
             $this->comment("  |-> cloning $uid into an independent account: $newDn");
 
             if (! $dryRun) {
@@ -213,6 +253,29 @@ class SplitPeopleByRealm extends Command
             }
 
             $this->clonedInto[$uid][] = $realmUid;
+        }
+    }
+
+    /**
+     * Makes moving/cloning into $dn idempotent: a rerun (e.g. after a prior
+     * attempt was interrupted, or a target realm was seeded manually in the
+     * meantime) would otherwise fail outright - move()/save() both reject
+     * writing onto a DN that's already occupied. Never called with
+     * $original['dn'] itself (see the two call sites) - overwriting the
+     * physical entry a move is about to read from would destroy it first.
+     */
+    private function overwriteIfExists(string $dn, bool $dryRun): void
+    {
+        $existing = User::query()->find($dn);
+
+        if ($existing === null) {
+            return;
+        }
+
+        $this->comment("  |-> $dn already exists, overwriting");
+
+        if (! $dryRun) {
+            $existing->delete();
         }
     }
 
