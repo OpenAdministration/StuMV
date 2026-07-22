@@ -29,6 +29,7 @@ Breadcrumbs::for('realms.dashboard', function (BreadcrumbTrail $trail, array $ro
 });
 
 Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
     $trail->push(__('profile.breadcrumb'), route('profile', array_merge(['username' => auth()->user()->username], $routeParams)), ['truncate' => true]);
 });
 
