@@ -23,6 +23,7 @@ class SendBackChannelLogoutNotification implements ShouldQueue
     public function __construct(
         public PassportClient $client,
         public string $userId,
+        public string $sid,
     ) {}
 
     /**
@@ -33,7 +34,7 @@ class SendBackChannelLogoutNotification implements ShouldQueue
      */
     public function handle(BackChannelLogoutTokenBuilder $tokenBuilder): void
     {
-        $logoutToken = $tokenBuilder->build($this->client, $this->userId);
+        $logoutToken = $tokenBuilder->build($this->client, $this->userId, $this->sid);
 
         try {
             Http::asForm()

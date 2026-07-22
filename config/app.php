@@ -2,6 +2,7 @@
 
 use App\Providers\AppServiceProvider;
 use App\Providers\EventServiceProvider;
+use App\Providers\Oidc\PassportServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\AuthServiceProvider;
 use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
@@ -27,7 +28,6 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Translation\TranslationServiceProvider;
 use Illuminate\Validation\ValidationServiceProvider;
 use Illuminate\View\ViewServiceProvider;
-use OpenIDConnect\Laravel\PassportServiceProvider;
 
 return [
 
@@ -216,6 +216,10 @@ return [
         // Registered in place of Laravel\Passport\PassportServiceProvider
         // (disabled via composer.json's dont-discover) - this extends it to
         // also wire up OpenID Connect (id_token, discovery, JWKS, userinfo).
+        // App\Providers\Oidc\PassportServiceProvider further extends the
+        // vendor package's own provider (OpenIDConnect\Laravel\PassportServiceProvider)
+        // just to mint ID tokens carrying a `sid` claim - see
+        // App\Services\Oidc\IdTokenResponse.
         PassportServiceProvider::class,
 
         /*

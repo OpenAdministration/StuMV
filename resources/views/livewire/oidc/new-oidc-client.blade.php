@@ -51,7 +51,6 @@
                     <flux:pillbox.option value="phone">{{ __('oidc_clients.scope_phone') }}</flux:pillbox.option>
                     <flux:pillbox.option value="address">{{ __('oidc_clients.scope_address') }}</flux:pillbox.option>
                     <flux:pillbox.option value="groups">{{ __('oidc_clients.scope_groups') }}</flux:pillbox.option>
-                    <flux:pillbox.option value="users">{{ __('oidc_clients.scope_users') }}</flux:pillbox.option>
                 </flux:pillbox>
             </flux:field>
 
@@ -65,6 +64,12 @@
                 <flux:label>{{ __('oidc_clients.back_channel_logout_uri') }}</flux:label>
                 <flux:description>{{ __('oidc_clients.back_channel_logout_uri_description') }}</flux:description>
                 <flux:input wire:model="backChannelLogoutUri" placeholder="https://app.example.com/logout-callback" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.post_logout_redirect_uris') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.post_logout_redirect_uris_description') }}</flux:description>
+                <flux:textarea wire:model="postLogoutRedirectUris" rows="4" placeholder="https://app.example.com/logged-out" />
             </flux:field>
 
             <x-slot:abort_route>

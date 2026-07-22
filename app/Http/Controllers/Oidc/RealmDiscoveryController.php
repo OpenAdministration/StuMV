@@ -38,6 +38,7 @@ class RealmDiscoveryController extends Controller
             'token_endpoint' => route('realm.passport.token', ['realm' => $uid]),
             'userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid]),
             'jwks_uri' => route('realm.openid.jwks', ['realm' => $uid]),
+            'end_session_endpoint' => route('realm.openid.end_session', ['realm' => $uid]),
             'grant_types_supported' => $this->getSupportedGrantTypes(),
             'response_types_supported' => $this->getSupportedResponseTypes(),
             'subject_types_supported' => ['public'],
@@ -52,12 +53,12 @@ class RealmDiscoveryController extends Controller
                 'S256',
             ],
             // See App\Services\Oidc\BackChannelLogoutTokenBuilder /
-            // App\Jobs\Oidc\SendBackChannelLogoutNotification. No `sid`
-            // claim in the logout_token (StuMV doesn't track a per-browser
-            // session id separate from the token rows themselves), hence
-            // false rather than true.
+            // App\Jobs\Oidc\SendBackChannelLogoutNotification: the
+            // logout_token's `sid` claim is the same Passport Token::id
+            // App\Services\Oidc\IdTokenResponse already put in that
+            // session's id_token, so a client can tell which session ended.
             'backchannel_logout_supported' => true,
-            'backchannel_logout_session_supported' => false,
+            'backchannel_logout_session_supported' => true,
         ];
 
         return response()->json($response, 200, [], JSON_PRETTY_PRINT);

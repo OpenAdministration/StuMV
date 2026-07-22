@@ -19,6 +19,7 @@ class PassportClient extends Client
     {
         return [
             'requires_consent' => 'bool',
+            'post_logout_redirect_uris' => 'array',
         ];
     }
 

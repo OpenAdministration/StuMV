@@ -19,16 +19,18 @@ class BackChannelLogoutTokenBuilder
 {
     /**
      * Signed with the same RSA key pair Passport already uses for id_tokens
-     * (see OpenIDConnect\Laravel\PassportServiceProvider::makeAuthorizationServer()),
+     * (see App\Providers\Oidc\PassportServiceProvider::makeAuthorizationServer()),
      * so it verifies against the same JWKS StuMV already publishes at
      * {realm}/oauth/jwks.
      *
-     * No `sid` claim: StuMV doesn't track a per-browser-session identifier
-     * separate from the access/refresh token rows themselves, so `sub` is
-     * the only claim identifying which end-user's session ended - the spec
-     * only requires that sub or sid be present, not both.
+     * $sid is the Laravel\Passport\Token::id of the specific token/grant that
+     * ended - the same value App\Services\Oidc\IdTokenResponse put in the
+     * `sid` claim of the id_token that client originally received for this
+     * session (both derive from the access token's identifier, which Passport
+     * persists as the token row's own primary key), so the client can tell
+     * which of a user's sessions this logout_token is for.
      */
-    public function build(PassportClient $client, string $userId): Plain
+    public function build(PassportClient $client, string $userId, string $sid): Plain
     {
         $config = Configuration::forSymmetricSigner(
             resolve(config('openid.signer')),
@@ -41,6 +43,7 @@ class BackChannelLogoutTokenBuilder
             ->relatedTo($userId)
             ->issuedAt(new DateTimeImmutable)
             ->identifiedBy((string) Str::uuid())
+            ->withClaim('sid', $sid)
             ->withClaim('events', [
                 'http://schemas.openid.net/event/backchannel-logout' => new \stdClass,
             ])

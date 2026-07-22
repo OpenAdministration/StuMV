@@ -4,18 +4,16 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Jobs\Oidc\SendBackChannelLogoutNotification;
 use App\Ldap\Community;
 use App\Models\RealmBranding;
 use App\Models\RealmIdentityProvider;
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Support\EndsAuthenticatedSession;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
-use Laravel\Passport\Token as PassportToken;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -92,49 +90,13 @@ class AuthenticatedSessionController extends Controller
      *
      * @return RedirectResponse
      */
-    public function destroy(Request $request, ?Community $realm = null)
+    public function destroy(Request $request, EndsAuthenticatedSession $endsSession, ?Community $realm = null)
     {
-        $user = Auth::user();
-        $realmLoginUrl = $this->realmLoginUrl($realm, $user);
+        $realmLoginUrl = $this->realmLoginUrl($realm, Auth::user());
 
-        $this->notifyOidcClientsOfLogout($user);
-
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
+        $endsSession->end($request);
 
         return redirect($request->input('redirect_uri', $realmLoginUrl));
-    }
-
-    /**
-     * OIDC Back-Channel Logout: tell every client the user currently holds a
-     * non-revoked token for - and that has registered a
-     * back_channel_logout_uri - that this SSO session has ended, so it can
-     * invalidate its own session for them. See
-     * App\Services\Oidc\BackChannelLogoutTokenBuilder and
-     * App\Jobs\Oidc\SendBackChannelLogoutNotification.
-     *
-     * Queries Token directly rather than $user->tokens() - that helper's
-     * getProviderName() only resolves providers configured with the
-     * 'eloquent' driver, but this app's users provider uses 'ldap' (see
-     * config/auth.php), so it always throws here.
-     */
-    private function notifyOidcClientsOfLogout(?User $user): void
-    {
-        if (! $user) {
-            return;
-        }
-
-        PassportToken::where('user_id', $user->getAuthIdentifier())
-            ->where('revoked', false)
-            ->with('client')
-            ->get()
-            ->pluck('client')
-            ->filter(fn ($client) => filled($client?->back_channel_logout_uri))
-            ->unique('id')
-            ->each(fn ($client) => dispatch(new SendBackChannelLogoutNotification($client, (string) $user->getAuthIdentifier())));
     }
 
     public function confirmLogout(Request $request, ?Community $realm = null)

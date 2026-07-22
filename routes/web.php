@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Oidc\EndSessionController;
 use App\Http\Controllers\Oidc\RealmDiscoveryController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Livewire\Api\EditApiClient;
@@ -193,6 +194,10 @@ Route::getRoutes()->getByName('realm.passport.token')?->middleware('oidcClientMa
 Route::get('{realm}/oauth/jwks', JwksController::class)->name('realm.openid.jwks');
 Route::get('{realm}/oauth/userinfo', UserInfoController::class)->middleware('auth:api')->name('realm.openid.userinfo');
 Route::get('{realm}/.well-known/openid-configuration', RealmDiscoveryController::class)->name('realm.openid.discovery');
+// RP-Initiated Logout 1.0 - see App\Http\Controllers\Oidc\EndSessionController.
+// GET and POST: the spec allows either (some clients redirect via a form
+// POST instead of a GET navigation).
+Route::match(['get', 'post'], '{realm}/oauth/end-session', EndSessionController::class)->name('realm.openid.end_session');
 
 // guest routes
 Route::get('imprint', fn () => redirect(config('app.imprint_url')))->name('imprint');
@@ -205,6 +210,38 @@ Route::get('source-code', fn () => redirect('https://github.com/openadministrati
 require __DIR__.'/auth.php';
 Route::get('_debug-navmenu', fn () => view('_debug_navmenu'));
 
+// A realm-scoped fallback. Existing only so the {realm} segment resolves to
+// a real Community for URLs like "{realm}/memberss" (a typo, not a bad
+// realm slug) - that gives the 404 page's <x-navigation>/breadcrumbs (which
+// key off Route::current()'s own "realm" parameter, not the visitor's
+// account) the same realm context a real {realm}/... route would have.
+//
+// No "auth"/"verified" middleware here on purpose: auth()->check() already
+// reflects the real session regardless (the "web" group still runs), and
+// requiring auth would turn a guest hitting this into a redirect/401
+// instead of the plain 404 every other genuinely-unmatched URL gets -
+// which is exactly what broke a non-realm global path like
+// ".well-known/openid-configuration" (2 segments, structurally matches
+// {realm}/{any} even though it isn't realm-prefixed at all) into a 401.
+//
+// Marked ->fallback() rather than registered as an ordinary route:
+// RouteCollection::matchAgainstRoutes() then tries it only once nothing
+// registered later matches either, so it can no longer shadow a route
+// registered afterwards - e.g. an ad-hoc route a test registers at runtime
+// for its own URL under {realm}/... - and no longer needs to be the literal
+// last route in this file.
+//
+// Registered BEFORE the bare fallback() below: when two fallback routes
+// both match (any {realm}/... 2+ segment path also matches the bare
+// wildcard), matchAgainstRoutes() keeps only the FIRST fallback it sees
+// (`$fallbackRoute ??= $route`) - this one needs to win so Route::current()
+// carries the "realm" parameter and the "realms.fallback" name (for
+// breadcrumbs) instead of the bare fallback's nameless, realm-less route.
+Route::get('{realm}/{any}', fn () => abort(404))
+    ->where('any', '.*')
+    ->fallback()
+    ->name('realms.fallback');
+
 // Without this, a URL that matches no route at all never enters the "web"
 // group at all (StartSession/auth included) - the router bails out before
 // any group middleware runs - so auth()->check() is always false by the
@@ -212,24 +249,7 @@ Route::get('_debug-navmenu', fn () => view('_debug_navmenu'));
 // even for an actually-logged-in visitor. A fallback route is itself a
 // real matched route in the "web" group (this file is already wrapped in
 // it - see RouteServiceProvider::boot()), so session/auth work normally
-// when the 404 it throws gets rendered.
+// when the 404 it throws gets rendered. Only actually reached for paths
+// that don't even structurally match {realm}/{any} above (e.g. a single
+// path segment).
 Route::fallback(fn () => abort(404));
-
-// A realm-scoped counterpart to the fallback above, registered as an
-// ordinary (non-fallback) route so it must come dead last, after every
-// other {realm}/... route in this file and in auth.php - otherwise its
-// {any} wildcard would shadow them (Laravel tries routes in registration
-// order; Route::fallback() is exempt from that and always yields to a
-// normal route regardless of where it's declared, which is why the plain
-// fallback() above didn't need this same care). Existing only so the
-// {realm} segment resolves to a real Community for URLs like
-// "{realm}/memberss" (a typo, not a bad realm slug) - that gives the 404
-// page's <x-navigation>/breadcrumbs (which key off Route::current()'s own
-// "realm" parameter, not the visitor's account) the same realm context a
-// real {realm}/... route would have. Guests hitting this still redirect to
-// that realm's login page via the "auth" middleware, same as every sibling
-// {realm}/... route.
-Route::middleware(['auth', 'verified'])
-    ->get('{realm}/{any}', fn () => abort(404))
-    ->where('any', '.*')
-    ->name('realms.fallback');

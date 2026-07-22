@@ -38,11 +38,11 @@ test('logging out sends a signed back-channel logout notification to a client th
         'community_uid' => $uid,
         'back_channel_logout_uri' => 'https://app.example.com/backchannel-logout',
     ])->save();
-    grantOidcToken($client->id, $user);
+    $grantedToken = grantOidcToken($client->id, $user);
 
     $this->post(route('realm.logout', ['realm' => $uid]))->assertRedirect();
 
-    Http::assertSent(function ($request) use ($client, $user, $uid) {
+    Http::assertSent(function ($request) use ($client, $user, $uid, $grantedToken) {
         if ($request->url() !== 'https://app.example.com/backchannel-logout') {
             return false;
         }
@@ -60,11 +60,50 @@ test('logging out sends a signed back-channel logout notification to a client th
         expect((string) $claims->get('iss'))->toBe(rtrim(url('/'.$uid), '/'))
             ->and($claims->get('aud'))->toBe([$client->id])
             ->and($claims->get('sub'))->toBe((string) $user->id)
+            ->and($claims->get('sid'))->toBe($grantedToken->id)
             ->and($claims->has('nonce'))->toBeFalse()
             ->and((array) $claims->get('events'))->toHaveKey('http://schemas.openid.net/event/backchannel-logout');
 
         return true;
     });
+});
+
+test('a user with two live tokens for the same client gets one logout notification per token, each with its own sid', function (): void {
+    Http::fake();
+
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = actingAsMember($community);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill([
+        'community_uid' => $uid,
+        'back_channel_logout_uri' => 'https://app.example.com/backchannel-logout',
+    ])->save();
+    $firstToken = grantOidcToken($client->id, $user);
+    $secondToken = grantOidcToken($client->id, $user);
+
+    $this->post(route('realm.logout', ['realm' => $uid]))->assertRedirect();
+
+    $sidsSent = [];
+    Http::assertSentCount(2);
+    Http::assertSent(function ($request) use (&$sidsSent) {
+        if ($request->url() !== 'https://app.example.com/backchannel-logout') {
+            return false;
+        }
+
+        $config = Configuration::forAsymmetricSigner(
+            new Sha256,
+            InMemory::file(Passport::keyPath('oauth-private.key')),
+            InMemory::file(Passport::keyPath('oauth-public.key')),
+        );
+
+        $sidsSent[] = (string) $config->parser()->parse($request['logout_token'])->claims()->get('sid');
+
+        return true;
+    });
+
+    expect($sidsSent)->toEqualCanonicalizing([$firstToken->id, $secondToken->id]);
 });
 
 test('a client without a configured back-channel logout URI is not notified', function (): void {

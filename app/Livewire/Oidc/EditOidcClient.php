@@ -27,6 +27,8 @@ class EditOidcClient extends Component
 
     public string $backChannelLogoutUri = '';
 
+    public string $postLogoutRedirectUris = '';
+
     public function mount(Community $realm, PassportClient $client): void
     {
         abort_if($realm->isAdminRealm(), 404);
@@ -40,15 +42,40 @@ class EditOidcClient extends Component
         $this->scopes = $client->scopes ?? [];
         $this->requiresConsent = $client->requires_consent;
         $this->backChannelLogoutUri = $client->back_channel_logout_uri ?? '';
+        $this->postLogoutRedirectUris = implode("\n", $client->post_logout_redirect_uris ?? []);
     }
 
     protected function redirectUriList(): array
     {
-        return collect(preg_split('/\r\n|\r|\n/', $this->redirectUris))
+        return self::splitUriList($this->redirectUris);
+    }
+
+    protected function postLogoutRedirectUriList(): array
+    {
+        return self::splitUriList($this->postLogoutRedirectUris);
+    }
+
+    private static function splitUriList(string $value): array
+    {
+        return collect(preg_split('/\r\n|\r|\n/', $value))
             ->map(fn ($uri) => trim($uri))
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  array<int, string>  $uris
+     */
+    private static function validateUriList(array $uris, callable $fail): void
+    {
+        foreach ($uris as $uri) {
+            if (! filter_var($uri, FILTER_VALIDATE_URL)) {
+                $fail(__('oidc_clients.redirect_uri_invalid', ['uri' => $uri]));
+
+                return;
+            }
+        }
     }
 
     protected function rules(): array
@@ -62,18 +89,15 @@ class EditOidcClient extends Component
 
                     return;
                 }
-                foreach ($uris as $uri) {
-                    if (! filter_var($uri, FILTER_VALIDATE_URL)) {
-                        $fail(__('oidc_clients.redirect_uri_invalid', ['uri' => $uri]));
-
-                        return;
-                    }
-                }
+                self::validateUriList($uris, $fail);
             }],
             'scopes' => 'required|array|min:1',
             'scopes.*' => Rule::in(NewOidcClient::AVAILABLE_SCOPES),
             'requiresConsent' => 'boolean',
             'backChannelLogoutUri' => 'nullable|url',
+            'postLogoutRedirectUris' => [function ($attribute, $value, $fail): void {
+                self::validateUriList($this->postLogoutRedirectUriList(), $fail);
+            }],
         ];
     }
 
@@ -94,6 +118,7 @@ class EditOidcClient extends Component
             'scopes' => array_values($this->scopes),
             'requires_consent' => $this->requiresConsent,
             'back_channel_logout_uri' => $this->backChannelLogoutUri ?: null,
+            'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
         ])->save();
 
         // A user's prior approval is remembered for as long as they hold a

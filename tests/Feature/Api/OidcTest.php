@@ -61,14 +61,15 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
 
     $this->getJson("/$uid/.well-known/openid-configuration")
         ->assertOk()
-        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'groups', 'users']])
-        ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri'])
+        ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'groups']])
+        ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri', 'end_session_endpoint'])
         ->assertJsonFragment(['authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid])])
         ->assertJsonFragment(['token_endpoint' => route('realm.passport.token', ['realm' => $uid])])
         ->assertJsonFragment(['userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid])])
         ->assertJsonFragment(['jwks_uri' => route('realm.openid.jwks', ['realm' => $uid])])
+        ->assertJsonFragment(['end_session_endpoint' => route('realm.openid.end_session', ['realm' => $uid])])
         ->assertJsonFragment(['backchannel_logout_supported' => true])
-        ->assertJsonFragment(['backchannel_logout_session_supported' => false]);
+        ->assertJsonFragment(['backchannel_logout_session_supported' => true]);
 });
 
 test('the global discovery/jwks endpoints no longer resolve', function (): void {
