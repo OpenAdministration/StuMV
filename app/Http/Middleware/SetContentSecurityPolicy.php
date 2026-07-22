@@ -27,9 +27,18 @@ class SetContentSecurityPolicy
      * refactor for its own components in v2.11.0 (see
      * https://github.com/livewire/flux/pull/2277); this app is on v2.15.0.
      *
-     * style-src needs 'unsafe-inline': cropperjs (profile picture cropping)
-     * and the breadcrumbs bar inject their own <style> elements/shadow-DOM
-     * stylesheets that this app doesn't control and can't attach a nonce to.
+     * style-src needs neither 'unsafe-inline' nor a broad style nonce
+     * exemption: cropperjs (profile picture cropping) injects its shadow-DOM
+     * styles via adoptedStyleSheets (see $addStyles() in cropperjs's source),
+     * which isn't subject to style-src at all - only the legacy <style>
+     * element/style attribute fallback path would be, and every evergreen
+     * browser supports Constructible Stylesheets. The breadcrumbs bar's own
+     * <style> block is static and nonced directly
+     * (resources/views/vendor/breadcrumbs/tailwind.blade.php). The guest
+     * layout's per-realm branding background image is a nonced <style> block
+     * too, not an inline style="" attribute (nonces don't cover the style
+     * attribute, only <style>/<script> elements) - see
+     * resources/views/layouts/guest.blade.php.
      *
      * The nonce is generated here via Vite::useCspNonce() (Laravel's own
      * mechanism), because Flux's @fluxAppearance directive (dark-mode
@@ -49,7 +58,7 @@ class SetContentSecurityPolicy
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}'",
-            "style-src 'self' 'unsafe-inline'",
+            "style-src 'self' 'nonce-{$nonce}'",
             "img-src 'self' data:",
             "font-src 'self'",
             "connect-src 'self'",

@@ -12,13 +12,19 @@
         @vite('resources/css/app.css')
         @vite('resources/css/theme.css')
         @vite('resources/js/app.js')
-    </head>
-    <body
-        class="flex flex-col h-full bg-zinc-100! dark:bg-zinc-900! bg-cover bg-center bg-fixed overflow-y-auto"
         @if(($branding ?? null)?->background_id)
-            style="background-image: url('{{ asset('storage/realm-branding/' . $branding->background_id) }}')"
+            {{-- A nonced <style> block, not an inline style="" attribute: CSP
+                 nonces only validate <style>/<script> elements, not the
+                 style attribute, so this is what lets the CSP drop
+                 'unsafe-inline' for style-src. --}}
+            <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+                body {
+                    background-image: url('{{ asset('storage/realm-branding/'.$branding->background_id) }}');
+                }
+            </style>
         @endif
-    >
+    </head>
+    <body class="flex flex-col h-full bg-zinc-100! dark:bg-zinc-900! bg-cover bg-center bg-fixed overflow-y-auto">
         <main class="flex-1 flex flex-col my-auto py-8 overflow-y-visible">
             {{ $slot }}
         </main>

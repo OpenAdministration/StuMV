@@ -112,7 +112,7 @@
             would make it trivially "last child" of that 1-item wrapper,
             permanently hiding its separator instead of only when needed.
         --}}
-        <style>
+        <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
             .stumv-breadcrumbs-last-collapsed [data-flux-breadcrumbs-item]:has([data-flux-dropdown]) > svg {
                 display: none;
             }
