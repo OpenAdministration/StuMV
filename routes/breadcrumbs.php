@@ -28,6 +28,14 @@ Breadcrumbs::for('realms.dashboard', function (BreadcrumbTrail $trail, array $ro
     $trail->parent('realms', $routeParams);
 });
 
+// The realm-scoped 404 catch-all (routes/web.php) - same trail as the
+// dashboard. The "404" crumb itself isn't pushed here: components/header.
+// blade.php appends it generically for every error page (404/403/500),
+// via App\View\Components\AppLayout's $errorCode.
+Breadcrumbs::for('realms.fallback', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+});
+
 Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
     $trail->push(__('profile.breadcrumb'), route('profile', array_merge(['username' => auth()->user()->username], $routeParams)), ['truncate' => true]);

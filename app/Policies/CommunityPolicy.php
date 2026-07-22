@@ -15,7 +15,10 @@ class CommunityPolicy
 
     public function picked(): bool
     {
-        return Route::current()?->hasParameter('realm');
+        // The nullsafe operator short-circuits the whole expression to null
+        // (not false) when there's no current route at all - Route::current()
+        // is null - which this method's strict bool return type rejects.
+        return Route::current()?->hasParameter('realm') ?? false;
         // return session()->exists('realm_uid');
     }
 

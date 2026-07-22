@@ -187,5 +187,5 @@ test('mailman:sync-lists can be limited to a single realm, leaving other realms 
     $this->artisan('mailman:sync-lists', ['realm' => $communityA->getShortCode()])->assertExitCode(0);
 
     Http::assertSentCount(1);
-    Http::assertSent(fn ($request): bool => str_contains($request->url(), 'a.lists.example.org'));
+    Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), 'a.lists.example.org'));
 });

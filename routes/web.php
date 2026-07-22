@@ -204,3 +204,32 @@ Route::get('source-code', fn () => redirect('https://github.com/openadministrati
 
 require __DIR__.'/auth.php';
 Route::get('_debug-navmenu', fn () => view('_debug_navmenu'));
+
+// Without this, a URL that matches no route at all never enters the "web"
+// group at all (StartSession/auth included) - the router bails out before
+// any group middleware runs - so auth()->check() is always false by the
+// time resources/views/errors/404.blade.php decides which layout to use,
+// even for an actually-logged-in visitor. A fallback route is itself a
+// real matched route in the "web" group (this file is already wrapped in
+// it - see RouteServiceProvider::boot()), so session/auth work normally
+// when the 404 it throws gets rendered.
+Route::fallback(fn () => abort(404));
+
+// A realm-scoped counterpart to the fallback above, registered as an
+// ordinary (non-fallback) route so it must come dead last, after every
+// other {realm}/... route in this file and in auth.php - otherwise its
+// {any} wildcard would shadow them (Laravel tries routes in registration
+// order; Route::fallback() is exempt from that and always yields to a
+// normal route regardless of where it's declared, which is why the plain
+// fallback() above didn't need this same care). Existing only so the
+// {realm} segment resolves to a real Community for URLs like
+// "{realm}/memberss" (a typo, not a bad realm slug) - that gives the 404
+// page's <x-navigation>/breadcrumbs (which key off Route::current()'s own
+// "realm" parameter, not the visitor's account) the same realm context a
+// real {realm}/... route would have. Guests hitting this still redirect to
+// that realm's login page via the "auth" middleware, same as every sibling
+// {realm}/... route.
+Route::middleware(['auth', 'verified'])
+    ->get('{realm}/{any}', fn () => abort(404))
+    ->where('any', '.*')
+    ->name('realms.fallback');

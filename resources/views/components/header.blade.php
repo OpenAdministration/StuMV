@@ -12,7 +12,40 @@
                 ->all();
             $currentRealm = request()->route('realm');
         @endphp
-        {{ Breadcrumbs::render(Route::current()->getName(), $routeParams) }}
+        {{-- Route::current() is null for a URL that matched no route at all
+             (see App\View\Components\AppLayout's own null-guard), and the
+             catch-all Route::fallback() in routes/web.php is deliberately
+             unnamed (its getName() is null) - neither has a breadcrumb
+             trail to render, so both are skipped rather than crashing on
+             ->getName() or on Breadcrumbs::generate(null, ...). A route that
+             IS named can still have no registered trail at all - e.g.
+             Livewire's own internal ".../update" AJAX endpoint, reached when
+             this layout renders for an error response to one of its calls
+             (config/breadcrumbs.php makes that throw outside production) -
+             so this falls back to an empty trail rather than crashing there
+             too. --}}
+        @if(Route::current()?->getName())
+            @php
+                // generate() (not render()) so an error page's status code
+                // ($errorCode, set only by resources/views/errors/{404,403,
+                // 500}.blade.php via <x-app-layout :error-code="...">) can be
+                // appended as one extra crumb, on top of whatever trail the
+                // route being rendered for already has - that route's own
+                // breadcrumb closure has no way to know an exception is what
+                // actually produced this response.
+                try {
+                    $breadcrumbs = Breadcrumbs::generate(Route::current()->getName(), $routeParams);
+                } catch (\Diglactic\Breadcrumbs\Exceptions\InvalidBreadcrumbException) {
+                    $breadcrumbs = collect();
+                }
+                if ($errorCode ?? null) {
+                    $breadcrumbs->push((object) ['title' => (string) $errorCode, 'url' => null]);
+                }
+            @endphp
+            @if($breadcrumbs->isNotEmpty())
+                {{ view(config('breadcrumbs.view'), ['breadcrumbs' => $breadcrumbs]) }}
+            @endif
+        @endif
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
