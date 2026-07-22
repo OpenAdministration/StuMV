@@ -59,6 +59,10 @@ class LdapSyncGroups extends Command
             ->list()
             ->get();
 
+        if ($this->argument('community') !== null) {
+            $realms = $realms->filter(fn (Community $realm): bool => $realm->getFirstAttribute('ou') === $this->argument('community'))->values();
+        }
+
         foreach ($realms as $realm) {
             $realmUid = $realm->getFirstAttribute('ou');
             $this->comment('> '.$realmUid);

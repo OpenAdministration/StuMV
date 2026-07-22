@@ -10,14 +10,15 @@
                     ? $p->getFirstAttribute($p->getRouteKeyName())
                     : $p)
                 ->all();
+            $currentRealm = request()->route('realm');
         @endphp
         {{ Breadcrumbs::render(Route::current()->getName(), $routeParams) }}
     </div>
 
     <div class="ml-auto flex justify-end items-center gap-2">
-        @can('superadmin', \App\Models\User::class)
-            <livewire:sync-ldap />
-        @endcan
+        @if($currentRealm && auth()->user()->can('admin', $currentRealm))
+            <livewire:sync-ldap :uid="$currentRealm->getShortCode()" />
+        @endif
         
         <flux:dropdown align="end">
             @php
@@ -86,7 +87,6 @@
                     </flux:navmenu.item>
                 @endif
                 <flux:navmenu.separator />
-                @php($currentRealm = request()->route('realm'))
                 <form method="POST" action="{{ $currentRealm ? route('realm.logout', ['realm' => $currentRealm->getShortCode()]) : route('logout') }}">
                     @csrf
                     <flux:navmenu.item

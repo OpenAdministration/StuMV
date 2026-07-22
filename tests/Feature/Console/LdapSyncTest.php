@@ -234,6 +234,75 @@ test('ldap:sync-roles logs member additions at the role\'s own tree depth', func
         ->and($lines)->toContain('  |   |   |-> Add: '.$active->ldap()->getDn());
 });
 
+test('ldap:sync-roles scoped to one community leaves other communities\' roles untouched', function (): void {
+    $communityA = newCommunity();
+    $communityB = newCommunity();
+
+    $committeeA = TestLdap::makeCommittee($communityA, 'fsr'.bin2hex(random_bytes(3)));
+    TestLdap::makeRole($committeeA, 'mitglied');
+    $activeA = TestLdap::member($communityA);
+    RoleMembership::create([
+        'realm' => $communityA->getShortCode(),
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committeeA->getDn(),
+        'username' => $activeA->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $committeeB = TestLdap::makeCommittee($communityB, 'fsr'.bin2hex(random_bytes(3)));
+    $roleB = TestLdap::makeRole($committeeB, 'mitglied');
+    $staleB = TestLdap::makeUser();
+    // Stale member with no backing active DB membership - a sync covering
+    // community B would remove them; this proves scoping to community A left
+    // community B's role alone.
+    $roleB->members()->attach($staleB);
+
+    $this->artisan('ldap:sync-roles', ['community' => $communityA->getShortCode()])->assertExitCode(0);
+
+    $membersA = $committeeA->roles()->where('cn', 'mitglied')->first()->members()->get()
+        ->map(fn ($m) => $m->getFirstAttribute('uid'));
+    $membersB = Role::find($roleB->getDn())->members()->get()
+        ->map(fn ($m) => $m->getFirstAttribute('uid'));
+
+    expect($membersA)->toContain($activeA->username)
+        ->and($membersB)->toContain($staleB->getFirstAttribute('uid'));
+});
+
+test('ldap:sync-groups scoped to one community leaves other communities\' groups untouched', function (): void {
+    $communityA = newCommunity();
+    $communityB = newCommunity();
+
+    $committeeA = TestLdap::makeCommittee($communityA, 'fsr'.bin2hex(random_bytes(3)));
+    $roleA = TestLdap::makeRole($committeeA, 'mitglied');
+    $groupA = TestLdap::makeGroup($communityA, 'grp'.bin2hex(random_bytes(3)));
+    $activeA = TestLdap::member($communityA);
+    GroupMembership::create(['group_dn' => $groupA->getDn(), 'role_dn' => $roleA->getDn()]);
+    RoleMembership::create([
+        'realm' => $communityA->getShortCode(),
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committeeA->getDn(),
+        'username' => $activeA->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    $groupB = TestLdap::makeGroup($communityB, 'grp'.bin2hex(random_bytes(3)));
+    $staleB = TestLdap::makeUser();
+    // Stale member with no backing role/group mapping - a sync covering
+    // community B would remove them; this proves scoping to community A left
+    // community B's group alone.
+    $groupB->users()->attach($staleB);
+
+    $this->artisan('ldap:sync-groups', ['community' => $communityA->getShortCode()])->assertExitCode(0);
+
+    $membersA = Group::find($groupA->getDn())->members()->get()
+        ->map(fn ($m) => $m->getFirstAttribute('uid'));
+    $membersB = Group::find($groupB->getDn())->members()->get()
+        ->map(fn ($m) => $m->getFirstAttribute('uid'));
+
+    expect($membersA)->toContain($activeA->username)
+        ->and($membersB)->toContain($staleB->getFirstAttribute('uid'));
+});
+
 test('app:move-group-roles-from-ldap-to-database imports LDAP group roles into the DB', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');
