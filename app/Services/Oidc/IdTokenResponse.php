@@ -20,6 +20,7 @@ use OpenIDConnect\Interfaces\IdentityEntityInterface;
  */
 class IdTokenResponse extends BaseIdTokenResponse
 {
+    #[\Override]
     protected function getBuilder(
         AccessTokenEntityInterface $accessToken,
         IdentityEntityInterface $userEntity

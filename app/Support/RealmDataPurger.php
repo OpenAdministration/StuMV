@@ -51,8 +51,7 @@ class RealmDataPurger
             }
 
             // Child identity_provider_role_mappings rows cascade via their own
-            // FK (see 2026_07_20_000007_create_sso_provider_role_mappings_table,
-            // renamed by 2026_07_22_000002_rename_sso_provider_tables_to_identity_provider).
+            // FK (see 2026_07_20_000006_create_realm_identity_providers_table).
             RealmIdentityProvider::where('realm', $uid)->delete();
 
             // Same manual authCodes()/tokens() cleanup ListOidcClients::deleteCommit()

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('realm_sso_providers', function (Blueprint $table) {
+        Schema::create('realm_identity_providers', function (Blueprint $table) {
             $table->id();
             $table->string('realm')->index();
             $table->string('name');
@@ -22,6 +22,15 @@ return new class extends Migration
             $table->boolean('enabled')->default(true);
             $table->timestamps();
         });
+
+        Schema::create('identity_provider_role_mappings', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('provider_id')->constrained('realm_identity_providers')->cascadeOnDelete();
+            $table->string('external_group');
+            $table->string('committee_dn');
+            $table->string('role_cn');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -29,6 +38,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('realm_sso_providers');
+        Schema::dropIfExists('identity_provider_role_mappings');
+        Schema::dropIfExists('realm_identity_providers');
     }
 };

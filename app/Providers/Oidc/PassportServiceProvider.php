@@ -2,9 +2,9 @@
 
 namespace App\Providers\Oidc;
 
+use Laravel\Passport\Bridge\ScopeRepository;
 use App\Services\Oidc\IdTokenResponse;
 use Illuminate\Encryption\Encrypter;
-use Laravel\Passport;
 use Laravel\Passport\Bridge\AccessTokenRepository;
 use Laravel\Passport\Bridge\ClientRepository;
 use Lcobucci\JWT\Configuration;
@@ -25,10 +25,11 @@ use OpenIDConnect\Laravel\PassportServiceProvider as BasePassportServiceProvider
  */
 class PassportServiceProvider extends BasePassportServiceProvider
 {
+    #[\Override]
     public function makeAuthorizationServer(?ResponseTypeInterface $responseType = null): AuthorizationServer
     {
         $cryptKey = $this->makeCryptKey('private');
-        $encryptionKey = $this->getEncryptionKey(app(Encrypter::class)->getKey());
+        $encryptionKey = $this->getEncryptionKey(resolve(Encrypter::class)->getKey());
 
         $customClaimSets = config('openid.custom_claim_sets');
 
@@ -39,23 +40,23 @@ class PassportServiceProvider extends BasePassportServiceProvider
         );
 
         $responseType = new IdTokenResponse(
-            app(config('openid.repositories.identity')),
+            resolve(config('openid.repositories.identity')),
             new ClaimExtractor(...$claimSets),
             Configuration::forSymmetricSigner(
-                app(config('openid.signer')),
+                resolve(config('openid.signer')),
                 InMemory::plainText($cryptKey->getKeyContents(), $cryptKey->getPassPhrase() ?? ''),
             ),
             config('openid.token_headers'),
             config('openid.use_microseconds'),
-            app(LaravelCurrentRequestService::class),
+            resolve(LaravelCurrentRequestService::class),
             $encryptionKey,
             config('openid.issuedBy', 'laravel'),
         );
 
         return new AuthorizationServer(
-            app(ClientRepository::class),
-            app(AccessTokenRepository::class),
-            app(Passport\Bridge\ScopeRepository::class),
+            resolve(ClientRepository::class),
+            resolve(AccessTokenRepository::class),
+            resolve(ScopeRepository::class),
             $cryptKey,
             $encryptionKey,
             $responseType,

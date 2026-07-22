@@ -1,5 +1,7 @@
 <?php
 
+use Laravel\Passport\Token;
+use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -158,8 +160,8 @@ test('ending a session via end_session also notifies other clients via back-chan
         'community_uid' => $uid,
         'back_channel_logout_uri' => 'https://other.example.com/backchannel-logout',
     ])->save();
-    \Laravel\Passport\Token::create([
-        'id' => \Illuminate\Support\Str::random(80),
+    Token::create([
+        'id' => Str::random(80),
         'user_id' => $user->id,
         'client_id' => $otherClient->id,
         'scopes' => ['openid'],
