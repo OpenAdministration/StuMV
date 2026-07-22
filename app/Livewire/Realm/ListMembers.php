@@ -4,8 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
-use App\Livewire\Profile\Memberships;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Support\MembershipCertificate;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
@@ -149,16 +148,12 @@ class ListMembers extends Component
     public function exportPdf($username)
     {
         $community = Community::findOrFailByUid($this->community_name);
-        $memberships = resolve(Memberships::class)->getMemberships($this->community_name, $username, false);
-        $user = User::query()->in($community->peopleDn())->where('uid', '=', $username)->first() ?? abort(404);
-        $pdf = Pdf::loadView('pdfs.memberships', [
-            'fullName' => $user->cn[0],
-            'community' => $community->description[0],
-            'memberships' => $memberships,
-        ]);
 
-        return response()->streamDownload(function () use ($pdf): void {
-            echo $pdf->stream();
-        }, 'memberships-'.$username.'.pdf');
+        return MembershipCertificate::download(
+            $this->community_name,
+            $username,
+            $community->description[0],
+            'memberships-'.$username.'.pdf'
+        );
     }
 }
