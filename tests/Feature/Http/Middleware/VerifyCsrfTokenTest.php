@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
  * deliberately registers /token et al. with only 'throttle', not 'web'.
  */
 test('the OIDC/OAuth machine endpoints are exempt from CSRF verification', function (): void {
-    $excluded = (new VerifyCsrfToken(app(), app('encrypter')))->getExcludedPaths();
+    $excluded = new VerifyCsrfToken(app(), resolve('encrypter'))->getExcludedPaths();
 
     foreach ([
         'demo/oauth/token',
@@ -30,7 +30,7 @@ test('the OIDC/OAuth machine endpoints are exempt from CSRF verification', funct
 });
 
 test('the browser-facing OAuth authorization endpoints still require CSRF verification', function (): void {
-    $excluded = (new VerifyCsrfToken(app(), app('encrypter')))->getExcludedPaths();
+    $excluded = new VerifyCsrfToken(app(), resolve('encrypter'))->getExcludedPaths();
 
     foreach ([
         'demo/oauth/authorize',
