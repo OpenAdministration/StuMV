@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\Route;
 
 uses(RefreshDatabase::class);
 
+test('Livewire\'s CSP-safe Alpine build follows CSP_ENABLED, not a hardcoded true', function (): void {
+    // config/livewire.php's csp_safe: the restricted, eval-free directive
+    // parser that build uses (and its inability to handle arrow-function/
+    // method-object literals in inline x-data) only matters while CSP is
+    // actually being enforced.
+    expect(config('livewire.csp_safe'))->toBe(config('app.csp_enabled'));
+});
+
 test('CSP_ENABLED=false (the default in .env.docker right now) turns the header off entirely', function (): void {
     config(['app.csp_enabled' => false]);
 

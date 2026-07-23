@@ -157,6 +157,14 @@ return [
 
     'render_on_redirect' => false,
 
-    /* CSP build of Alpine */
-    'csp_safe' => true,
+    /*
+     * CSP build of Alpine - tied to CSP_ENABLED (config/app.php's
+     * csp_enabled), since the restricted, eval-free directive parser this
+     * build uses only matters while CSP is actually enforced. It also can't
+     * handle arrow-function/method-object literals in inline x-data or
+     * Livewire's @script blocks (see
+     * App\Http\Middleware\SetContentSecurityPolicy's script-src doc
+     * comment) - with CSP off there's no reason to keep paying that cost.
+     */
+    'csp_safe' => (bool) env('CSP_ENABLED', true),
 ];
