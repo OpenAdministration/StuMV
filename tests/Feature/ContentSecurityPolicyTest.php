@@ -17,9 +17,13 @@ test('responses carry a same-origin content security policy header', function ()
         ->toContain("default-src 'self'")
         ->toContain("script-src 'self'")
         ->toMatch('/script-src[^;]*\'nonce-[^\']+\'/')
-        ->toMatch('/style-src[^;]*\'nonce-[^\']+\'/')
-        ->not->toContain('unsafe-eval')
-        ->not->toContain('unsafe-inline');
+        ->toContain("style-src 'self' 'unsafe-inline'")
+        ->not->toContain('unsafe-eval');
+
+    // script-src stays nonce-only, no 'unsafe-inline' - only style-src needs
+    // it (see SetContentSecurityPolicy's doc comment for why).
+    [$scriptSrc] = explode(';', substr((string) $csp, strpos((string) $csp, 'script-src')));
+    expect($scriptSrc)->not->toContain('unsafe-inline');
 });
 
 test('a realm\'s branding background image is applied via a nonced style block, not an inline style attribute', function (): void {
@@ -31,7 +35,7 @@ test('a realm\'s branding background image is applied via a nonced style block, 
 
     $response->assertOk();
     $csp = $response->headers->get('Content-Security-Policy');
-    preg_match('/style-src[^;]*\'nonce-([^\']+)\'/', (string) $csp, $match);
+    preg_match('/script-src[^;]*\'nonce-([^\']+)\'/', (string) $csp, $match);
     $nonce = $match[1] ?? null;
 
     expect($nonce)->not->toBeNull()
@@ -47,7 +51,7 @@ test('a 404 for a url matching no route at all still carries a matching nonced c
     $response->assertNotFound();
 
     $csp = $response->headers->get('Content-Security-Policy');
-    preg_match('/style-src[^;]*\'nonce-([^\']+)\'/', (string) $csp, $match);
+    preg_match('/script-src[^;]*\'nonce-([^\']+)\'/', (string) $csp, $match);
     $nonce = $match[1] ?? null;
 
     expect($csp)->not->toBeNull()
@@ -76,7 +80,7 @@ test('a 403 raised from within a matched route still carries a matching nonced c
     $response->assertForbidden();
 
     $csp = $response->headers->get('Content-Security-Policy');
-    preg_match('/style-src[^;]*\'nonce-([^\']+)\'/', (string) $csp, $match);
+    preg_match('/script-src[^;]*\'nonce-([^\']+)\'/', (string) $csp, $match);
     $nonce = $match[1] ?? null;
 
     expect($csp)->not->toBeNull()

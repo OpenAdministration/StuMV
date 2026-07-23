@@ -27,20 +27,34 @@ class SetContentSecurityPolicy
      * refactor for its own components in v2.11.0 (see
      * https://github.com/livewire/flux/pull/2277); this app is on v2.15.0.
      *
-     * style-src needs neither 'unsafe-inline' nor a broad style nonce
-     * exemption: cropperjs (profile picture cropping) injects its shadow-DOM
-     * styles via adoptedStyleSheets (see $addStyles() in cropperjs's source),
-     * which isn't subject to style-src at all - only the legacy <style>
-     * element/style attribute fallback path would be, and every evergreen
-     * browser supports Constructible Stylesheets. The breadcrumbs bar's own
-     * <style> block is static and nonced directly
-     * (resources/views/vendor/breadcrumbs/tailwind.blade.php). The guest
-     * layout's per-realm branding background image is a nonced <style> block
-     * too, not an inline style="" attribute (nonces don't cover the style
-     * attribute, only <style>/<script> elements) - see
-     * resources/views/layouts/guest.blade.php. Laravel's own error pages
+     * style-src DOES need 'unsafe-inline' - confirmed live (Playwright +
+     * a `securitypolicyviolation` listener) against a strict nonce-only
+     * policy: opening any Flux modal (e.g. the delete-confirmation modal on
+     * {realm}/domains) silently failed with a style-src-attr violation,
+     * `el.style.display = ...` in Livewire's bundled Alpine core (its
+     * wire:loading/wire:dirty/x-show toggle machinery, livewire.js -
+     * directive("dirty")/toggleBooleanStateDirective and friends). That's
+     * not something cropperjs's adoptedStyleSheets or a nonced <style> block
+     * touches - it's Alpine's own show/hide mechanism directly mutating the
+     * style *attribute* via JS on arbitrary elements, which no nonce can
+     * cover (nonces only ever apply to <style>/<script> elements present at
+     * parse time, never to attribute mutations performed later by script) -
+     * there's no CSP-safe Alpine build that avoids this, unlike the
+     * eval-free directive-expression parser referenced above. A nonce
+     * source and 'unsafe-inline' can't coexist in the same directive either
+     * (CSP2+: user agents that understand nonces ignore 'unsafe-inline'
+     * once any nonce/hash source is present) - so unlike script-src, this
+     * directive carries no nonce at all, just 'unsafe-inline' outright. The
+     * nonced <style> blocks mentioned below still work fine under
+     * 'unsafe-inline' (a browser new enough to enforce CSP always honors
+     * 'unsafe-inline' when there's no competing nonce/hash in the same
+     * directive) - they just no longer strictly need the nonce to do so:
+     * the breadcrumbs bar's own <style> block
+     * (resources/views/vendor/breadcrumbs/tailwind.blade.php), the guest
+     * layout's per-realm branding background image
+     * (resources/views/layouts/guest.blade.php), and Laravel's error pages
      * (resources/views/errors/minimal.blade.php, overriding the vendor
-     * default) get the same treatment for their two <style> blocks.
+     * default).
      *
      * The nonce is generated here via Vite::useCspNonce() (Laravel's own
      * mechanism), because Flux's @fluxAppearance directive (dark-mode
@@ -97,7 +111,7 @@ class SetContentSecurityPolicy
         $response->headers->set('Content-Security-Policy', implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'nonce-".Vite::cspNonce()."'",
-            "style-src 'self' 'nonce-".Vite::cspNonce()."'",
+            "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data:",
             "font-src 'self'",
             "connect-src 'self'",
