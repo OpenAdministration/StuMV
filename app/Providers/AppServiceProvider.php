@@ -117,7 +117,11 @@ class AppServiceProvider extends ServiceProvider
         // fires for every response, including one rendered by the exception
         // handler for a URL that matched no route at all - see
         // SetContentSecurityPolicy::apply()'s doc comment for why that case
-        // can't be covered from inside the middleware.
+        // can't be covered from inside the middleware. apply() itself checks
+        // config('app.csp_enabled') (CSP_ENABLED in .env) first and no-ops
+        // if it's off - checked here rather than by conditionally
+        // registering this listener, so toggling it takes effect on the
+        // next request, not just the next full restart.
         Event::listen(fn (RequestHandled $event) => SetContentSecurityPolicy::apply($event->response));
 
         if ($this->app->hasDebugModeEnabled()) {

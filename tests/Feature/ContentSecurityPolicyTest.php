@@ -6,7 +6,17 @@ use Illuminate\Support\Facades\Route;
 
 uses(RefreshDatabase::class);
 
-test('responses carry a same-origin content security policy header', function (): void {
+test('CSP_ENABLED=false (the default in .env.docker right now) turns the header off entirely', function (): void {
+    config(['app.csp_enabled' => false]);
+
+    $response = $this->get(route('login'));
+
+    expect($response->headers->get('Content-Security-Policy'))->toBeNull();
+});
+
+test('responses carry a same-origin content security policy header when enabled', function (): void {
+    config(['app.csp_enabled' => true]);
+
     $response = $this->get(route('login'));
 
     $response->assertHeader('Content-Security-Policy');
@@ -27,6 +37,8 @@ test('responses carry a same-origin content security policy header', function ()
 });
 
 test('a realm\'s branding background image is applied via a nonced style block, not an inline style attribute', function (): void {
+    config(['app.csp_enabled' => true]);
+
     $community = newCommunity();
     $uid = $community->getShortCode();
     RealmBranding::create(['realm' => $uid, 'background_id' => 'test-bg.webp']);
@@ -46,6 +58,8 @@ test('a realm\'s branding background image is applied via a nonced style block, 
 });
 
 test('a 404 for a url matching no route at all still carries a matching nonced content security policy', function (): void {
+    config(['app.csp_enabled' => true]);
+
     $response = $this->get('/this-route-does-not-exist-anywhere');
 
     $response->assertNotFound();
@@ -60,7 +74,7 @@ test('a 404 for a url matching no route at all still carries a matching nonced c
 });
 
 test('laravel\'s interactive debug renderer for a genuine uncaught exception is exempted from CSP, since it can\'t be nonced', function (): void {
-    config(['app.debug' => true]);
+    config(['app.csp_enabled' => true, 'app.debug' => true]);
     Route::get('/__csp_test_uncaught_exception', function (): void {
         throw new RuntimeException('boom');
     })->middleware('web');
@@ -72,6 +86,8 @@ test('laravel\'s interactive debug renderer for a genuine uncaught exception is 
 });
 
 test('a 403 raised from within a matched route still carries a matching nonced content security policy', function (): void {
+    config(['app.csp_enabled' => true]);
+
     $community = newCommunity();
     actingAsMember($community);
 

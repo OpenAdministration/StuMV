@@ -95,6 +95,15 @@ class SetContentSecurityPolicy
      */
     public static function apply(Response $response): void
     {
+        // CSP_ENABLED in .env (config/app.php's csp_enabled) - checked fresh
+        // on every call rather than by conditionally registering the
+        // RequestHandled listener in AppServiceProvider::boot(), so toggling
+        // it takes effect on the very next request instead of needing a
+        // full restart.
+        if (! config('app.csp_enabled')) {
+            return;
+        }
+
         // Laravel's own interactive debug renderer (Illuminate\Foundation\
         // Exceptions\Renderer\Renderer, used locally whenever APP_DEBUG is on
         // and a genuine non-HTTP exception occurs - always a 500) inlines its

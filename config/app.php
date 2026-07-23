@@ -257,4 +257,10 @@ return [
     'source_code_url' => env('SOURCE_CODE_URL', 'https://github.com/openadministration/stumv'),
     'help_contact_mail' => env('HELP_CONTACT_MAIL', 'stumv@open-administration.de'),
 
+    // See App\Providers\AppServiceProvider::boot() /
+    // App\Http\Middleware\SetContentSecurityPolicy - defaults on (secure by
+    // default); set CSP_ENABLED=false to turn the header off entirely, e.g.
+    // while diagnosing whether it's the cause of some UI misbehaving.
+    'csp_enabled' => (bool) env('CSP_ENABLED', true),
+
 ];
