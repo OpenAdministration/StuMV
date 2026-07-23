@@ -107,7 +107,13 @@ test('a user who is not a member of the community cannot be added to a role', fu
         ->call('save')
         ->assertHasErrors('usernames.0');
 
-    expect(RoleMembership::count())->toBe(0);
+    // Scoped to this test's own committee/role/username, not a bare global
+    // count - a stray row anywhere else in the table (e.g. from an unrelated
+    // test elsewhere in the suite) isn't this test's concern.
+    expect(RoleMembership::where('committee_dn', $committee->getDn())
+        ->where('role_cn', 'mitglied')
+        ->where('username', $outsider->getFirstAttribute('uid'))
+        ->count())->toBe(0);
 });
 
 test('an unknown username is rejected with a validation error, not a crash', function (): void {
@@ -118,11 +124,19 @@ test('an unknown username is rejected with a validation error, not a crash', fun
 
     // Regression: previously UserIsMember let unknown usernames through and the
     // RoleMembership insert then hit the username foreign key (500).
+    $ghostUsername = 'ghost-'.uniqid();
+
     Livewire::test(AddUserToRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
-        ->set('usernames', ['ghost-'.uniqid()])
+        ->set('usernames', [$ghostUsername])
         ->set('start_date', today()->format('Y-m-d'))
         ->call('save')
         ->assertHasErrors('usernames.0');
 
-    expect(RoleMembership::count())->toBe(0);
+    // Scoped to this test's own committee/role/username, not a bare global
+    // count - a stray row anywhere else in the table (e.g. from an unrelated
+    // test elsewhere in the suite) isn't this test's concern.
+    expect(RoleMembership::where('committee_dn', $committee->getDn())
+        ->where('role_cn', 'mitglied')
+        ->where('username', $ghostUsername)
+        ->count())->toBe(0);
 });
