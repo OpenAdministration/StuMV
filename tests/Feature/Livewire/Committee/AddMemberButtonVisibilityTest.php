@@ -16,7 +16,7 @@ test('a moderator sees the add member button', function (): void {
     Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
-        ->assertSeeHtml('Add Member');
+        ->assertSeeHtml(__('common.add_member'));
 });
 
 test('a super admin sees the add member button', function (): void {
@@ -28,7 +28,7 @@ test('a super admin sees the add member button', function (): void {
     Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
-        ->assertSeeHtml('Add Member');
+        ->assertSeeHtml(__('common.add_member'));
 });
 
 test('a plain member does not see the add member button', function (): void {
@@ -40,5 +40,5 @@ test('a plain member does not see the add member button', function (): void {
     Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])
         ->call('loadRoles')
         ->set('showOnlyActive', false)
-        ->assertDontSeeHtml('Add Member');
+        ->assertDontSeeHtml(__('common.add_member'));
 });
