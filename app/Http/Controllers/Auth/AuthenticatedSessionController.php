@@ -105,6 +105,7 @@ class AuthenticatedSessionController extends Controller
 
         return view('auth.logout-confirm', [
             'realm' => $realm,
+            'branding' => RealmBranding::forRealm($realm?->getShortCode() ?? $user?->realm),
             'redirect_uri' => $request->input('redirect_uri', $this->realmLoginUrl($realm, $user)),
             'shown_username' => "$user?->full_name ($user?->username)",
         ]);
