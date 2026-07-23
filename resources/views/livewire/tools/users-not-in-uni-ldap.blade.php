@@ -25,7 +25,7 @@
                     <flux:legend class="w-full flex py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
                         {{ __('tools.matches') }} <flux:badge class="ml-auto">{{ count($filteredResults) }}</flux:badge>
                     </flux:legend>
-                    <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700">
+                    <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700 px-4">
                         @foreach($filteredResults as $user)
                             <div class="flex items-center py-3">
                                 <div class="flex-1">
