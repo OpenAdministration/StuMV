@@ -56,6 +56,12 @@ test('logging out sends a signed back-channel logout notification to a client th
         $token = $config->parser()->parse($request['logout_token']);
         expect($config->validator()->validate($token, new SignedWith($config->signer(), $config->verificationKey())))->toBeTrue();
 
+        // Matches the 'kid' the JWKS endpoint publishes (see
+        // App\Services\Oidc\BackChannelLogoutTokenBuilder) - a relying party
+        // that requires an exact 'kid' match to select a signing key can't
+        // verify this token's signature without it.
+        expect($token->headers()->get('kid'))->toBe(config('openid.token_headers.kid'));
+
         $claims = $token->claims();
         expect((string) $claims->get('iss'))->toBe(rtrim(url('/'.$uid), '/'))
             ->and($claims->get('aud'))->toBe([$client->id])

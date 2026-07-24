@@ -81,9 +81,21 @@ return [
     'signer' => Sha256::class,
 
     /**
-     * Optional associative array that will be used to set headers on the JWT
+     * Optional associative array that will be used to set headers on the JWT.
+     *
+     * A stable 'kid' matters more than it looks: without one, id_tokens are
+     * signed with no key identifier at all, and OpenIDConnect\Laravel\JwksController
+     * only publishes a 'kid' on the JWKS key if this is set (see its `if
+     * ($kid = config('openid.token_headers.kid', false))` check) - some
+     * relying parties' JWT/JWKS libraries (e.g. Nextcloud user_oidc, built on
+     * web-token/jwt-framework) require an exact 'kid' match to select a
+     * signing key at all and fail outright ("unable to lookup correct key")
+     * rather than falling back to "the only key in the set", even though
+     * StuMV only ever publishes one. App\Services\Oidc\BackChannelLogoutTokenBuilder
+     * reads this same value so a client's back-channel logout_token verifies
+     * against the same kid its id_tokens do.
      */
-    'token_headers' => [],
+    'token_headers' => ['kid' => 'stumv-oidc-1'],
 
     /**
      * By default, microseconds are included.

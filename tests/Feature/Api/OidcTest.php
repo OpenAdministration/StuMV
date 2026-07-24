@@ -80,9 +80,17 @@ test('the global discovery/jwks endpoints no longer resolve', function (): void 
 test('the jwks endpoint exposes the signing key', function (): void {
     $community = newCommunity();
 
-    $this->getJson('/'.$community->getShortCode().'/oauth/jwks')
+    $response = $this->getJson('/'.$community->getShortCode().'/oauth/jwks')
         ->assertOk()
-        ->assertJsonStructure(['keys' => [['kty', 'use', 'alg', 'n', 'e']]]);
+        ->assertJsonStructure(['keys' => [['kty', 'use', 'alg', 'n', 'e', 'kid']]]);
+
+    // A relying party's JWT/JWKS library can require an exact 'kid' match to
+    // select a signing key at all (e.g. Nextcloud user_oidc, built on
+    // web-token/jwt-framework) - config('openid.token_headers.kid') has to
+    // actually be set for OpenIDConnect\Laravel\JwksController to publish
+    // one here, matching what id_tokens/logout_tokens are stamped with.
+    expect($response->json('keys.0.kid'))->toBe(config('openid.token_headers.kid'))
+        ->and($response->json('keys.0.kid'))->not->toBeEmpty();
 });
 
 test('the userinfo endpoint returns claims filtered by the granted scopes', function (): void {

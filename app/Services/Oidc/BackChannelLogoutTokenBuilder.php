@@ -37,7 +37,19 @@ class BackChannelLogoutTokenBuilder
             InMemory::file(Passport::keyPath('oauth-private.key')),
         );
 
-        return $config->builder()
+        $builder = $config->builder();
+
+        // Matches the 'kid' OpenIDConnect\Laravel\JwksController publishes on
+        // the JWKS key and OpenIDConnect\IdTokenResponse stamps onto id_tokens
+        // (both read the same config('openid.token_headers')) - without it,
+        // a relying party whose JWT/JWKS library requires an exact 'kid'
+        // match to select a signing key (rather than falling back to "the
+        // only key in the set") can't verify this token's signature at all.
+        foreach (config('openid.token_headers', []) as $key => $value) {
+            $builder = $builder->withHeader($key, $value);
+        }
+
+        return $builder
             ->issuedBy($this->issuer($client))
             ->permittedFor($client->getKey())
             ->relatedTo($userId)
