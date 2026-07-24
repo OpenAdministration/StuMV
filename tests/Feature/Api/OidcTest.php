@@ -267,6 +267,49 @@ test('a client configured to skip consent completes the code flow without a prom
     expect($response->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
 });
 
+test('the id_token\'s iss claim matches the discovery document\'s issuer exactly', function (): void {
+    // Regression: App\Ldap\Community::issuerFor() is the single source of
+    // truth for this across RealmDiscoveryController, IdTokenResponse and
+    // BackChannelLogoutTokenBuilder - it used to just be the base package's
+    // generic, non-realm-aware IssuedByGetter (scheme+host, no realm path
+    // suffix, and not forced to https). A spec-compliant relying party (e.g.
+    // Nextcloud's user_oidc) that validates iss against the discovery
+    // document rejects the token outright on any mismatch, with nothing
+    // logged on this end since nothing here ever throws.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Issuer Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $authorize = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    parse_str(parse_url($authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    [, $payload] = explode('.', $token->json('id_token'));
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+
+    $discovery = $this->getJson("/$uid/.well-known/openid-configuration")->json();
+
+    expect($claims['iss'])->toBe($discovery['issuer']);
+});
+
 test('a client left at its default configuration shows the consent prompt, and approving it completes the code flow', function (): void {
     // requires_consent defaults to true - every client shows the consent
     // screen (resources/views/auth/oauth/authorize.blade.php, registered via

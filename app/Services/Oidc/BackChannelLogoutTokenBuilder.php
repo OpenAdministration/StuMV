@@ -2,9 +2,9 @@
 
 namespace App\Services\Oidc;
 
+use App\Ldap\Community;
 use App\Models\PassportClient;
 use DateTimeImmutable;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 use Lcobucci\JWT\Configuration;
@@ -50,7 +50,7 @@ class BackChannelLogoutTokenBuilder
         }
 
         return $builder
-            ->issuedBy($this->issuer($client))
+            ->issuedBy(Community::issuerFor($client->community_uid))
             ->permittedFor($client->getKey())
             ->relatedTo($userId)
             ->issuedAt(new DateTimeImmutable)
@@ -60,15 +60,5 @@ class BackChannelLogoutTokenBuilder
                 'http://schemas.openid.net/event/backchannel-logout' => new \stdClass,
             ])
             ->getToken($config->signer(), $config->signingKey());
-    }
-
-    /**
-     * Matches App\Http\Controllers\Oidc\RealmDiscoveryController::issuer() -
-     * clients validate a logout_token's `iss` claim against the same
-     * realm-prefixed issuer their discovery document advertises.
-     */
-    private function issuer(PassportClient $client): string
-    {
-        return rtrim(URL::to('/'.$client->community_uid), '/');
     }
 }

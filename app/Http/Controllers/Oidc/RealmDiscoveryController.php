@@ -33,7 +33,7 @@ class RealmDiscoveryController extends Controller
         $uid = $realm->getShortCode();
 
         $response = [
-            'issuer' => $this->issuer($realm),
+            'issuer' => Community::issuerFor($uid),
             'authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid]),
             'token_endpoint' => route('realm.passport.token', ['realm' => $uid]),
             'userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid]),
@@ -74,11 +74,6 @@ class RealmDiscoveryController extends Controller
         ];
 
         return response()->json($response, 200, [], JSON_PRETTY_PRINT);
-    }
-
-    private function issuer(Community $realm): string
-    {
-        return rtrim(URL::to('/'.$realm->getShortCode()), '/');
     }
 
     /**

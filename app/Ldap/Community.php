@@ -4,6 +4,7 @@ namespace App\Ldap;
 
 use App\Ldap\Traits\HasRelationships;
 use App\Ldap\Traits\SearchScopeTrait;
+use Illuminate\Support\Facades\URL;
 use LdapRecord\Laravel\ImportableFromLdap;
 use LdapRecord\Laravel\LdapImportable;
 use LdapRecord\Models\OpenLDAP\Group;
@@ -62,6 +63,29 @@ class Community extends OrganizationalUnit implements LdapImportable
         }
 
         return route('login');
+    }
+
+    /**
+     * The OpenID Connect `iss` value for a realm - every id_token, the
+     * discovery document's own `issuer`, and every logout_token's `iss` must
+     * agree on this exact string (App\Http\Controllers\Oidc\RealmDiscoveryController,
+     * App\Services\Oidc\IdTokenResponse, App\Services\Oidc\BackChannelLogoutTokenBuilder) -
+     * a relying party that validates the issuer (as spec-compliant OIDC
+     * clients are expected to) rejects the token outright otherwise. Forces
+     * https the same way for all three callers too (config('openid.forceHttps'),
+     * default true) - the discovery document and the id_token/logout_token
+     * are built from entirely different requests (the discovery GET vs. the
+     * token POST vs. a queued logout job with no request at all), so without
+     * forcing it here centrally, whichever one happened not to be accessed
+     * over https would disagree with the other two on scheme alone.
+     */
+    public static function issuerFor(string $uid): string
+    {
+        if (config('openid.forceHttps', true)) {
+            URL::forceScheme('https');
+        }
+
+        return rtrim(URL::to('/'.$uid), '/');
     }
 
     public function getShortCode()
