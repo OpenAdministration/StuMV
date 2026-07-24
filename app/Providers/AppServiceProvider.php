@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
 use App\Http\Middleware\SetContentSecurityPolicy;
+use App\Services\Oidc\LoggingClientRepository;
 use App\Support\MailmanClient;
 use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Passport\Bridge\ClientRepository;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,6 +31,12 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(RealmContext::class);
+
+        // Logs *why* an OIDC client failed to authenticate at the token
+        // endpoint - League OAuth2 Server's own invalid_client response is a
+        // deliberate, well-formed OAuth error, never an uncaught exception,
+        // so it otherwise never reaches storage/logs/laravel.log at all.
+        $this->app->bind(ClientRepository::class, LoggingClientRepository::class);
 
         $this->app->singleton(MailmanClient::class, fn (): MailmanClient => new MailmanClient(
             (string) config('services.mailman.url'),
