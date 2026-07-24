@@ -44,8 +44,20 @@ class RealmDiscoveryController extends Controller
             'subject_types_supported' => ['public'],
             'id_token_signing_alg_values_supported' => ['RS256'],
             'scopes_supported' => $this->getSupportedScopes(),
+            // client_secret_basic (Authorization: Basic ...) deliberately
+            // isn't advertised, even though League OAuth2 Server's
+            // AbstractGrant::getClientCredentials() still accepts it fine if
+            // a client sends it anyway - it depends on whatever's in front of
+            // PHP (nginx, Apache, a reverse proxy, ...) actually forwarding
+            // the Authorization header at all, which is a well-known, easy
+            // to silently misconfigure gap (PHP-FPM doesn't get it by
+            // default without an explicit fastcgi_param/RewriteRule). A
+            // conformant client that picks its auth method from this list
+            // (e.g. Nextcloud's user_oidc) uses client_secret_post instead,
+            // sidestepping that whole class of infrastructure-dependent
+            // failure ("invalid_client"/"Client authentication failed" with
+            // no client_secret ever reaching the token endpoint).
             'token_endpoint_auth_methods_supported' => [
-                'client_secret_basic',
                 'client_secret_post',
             ],
             'code_challenge_methods_supported' => [

@@ -69,7 +69,15 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
         ->assertJsonFragment(['jwks_uri' => route('realm.openid.jwks', ['realm' => $uid])])
         ->assertJsonFragment(['end_session_endpoint' => route('realm.openid.end_session', ['realm' => $uid])])
         ->assertJsonFragment(['backchannel_logout_supported' => true])
-        ->assertJsonFragment(['backchannel_logout_session_supported' => true]);
+        ->assertJsonFragment(['backchannel_logout_session_supported' => true])
+        // client_secret_basic is deliberately not advertised - relies on
+        // whatever's in front of PHP actually forwarding the Authorization
+        // header, which is an easy, silent misconfiguration (see
+        // RealmDiscoveryController's doc comment on this field). A
+        // conformant client picks client_secret_post instead, which League
+        // OAuth2 Server's AbstractGrant::getClientCredentials() already
+        // reads from the request body regardless.
+        ->assertJsonFragment(['token_endpoint_auth_methods_supported' => ['client_secret_post']]);
 });
 
 test('the global discovery/jwks endpoints no longer resolve', function (): void {
