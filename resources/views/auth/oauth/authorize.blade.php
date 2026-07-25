@@ -17,11 +17,11 @@
 
             @if(count($scopes) > 0)
                 <div class="space-y-2">
-                    <flux:text class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</flux:text>
+                    <p class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</p>
                     <ul class="space-y-2">
                         @foreach ($scopes as $scope)
                             <li>
-                                {{ __('auth.scope_' . $scope->id) }}
+                                <span class="mb-1">{{ __('auth.scope_' . $scope->id) }}</span>
                                 @if(count($scopeData[$scope->id] ?? []) > 0)
                                     <ul class="text-sm text-zinc-500 dark:text-white/60 space-y-1">
                                         @foreach ($scopeData[$scope->id] as $line)
