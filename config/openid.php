@@ -9,16 +9,23 @@ return [
         /**
          * Place your Passport and OpenID Connect scopes here.
          * To receive an `id_token, you should at least provide the openid scope.
+         *
+         * These descriptions are only used internally by Passport (e.g. for
+         * scope validation) - they are never shown to users. The consent
+         * screen instead translates each scope key via 'auth.scope_<key>'
+         * (see resources/views/auth/oauth/authorize.blade.php and
+         * lang/*\/auth.php), so add a matching translation there for any
+         * scope added here.
          */
         'tokens_can' => [
-            'openid' => 'Enable OpenID Connect',
-            'profile' => 'Information about your profile',
-            'email' => 'Information about your email address',
-            'phone' => 'Information about your phone numbers',
-            'address' => 'Information about your address',
-            'committees' => 'Information about your committees and roles',
-            'groups' => 'Information about your groups',
-            'users' => 'Information about users',
+            'openid' => 'OpenID Connect',
+            'profile' => 'Profile',
+            'email' => 'Email address',
+            'phone' => 'Phone number',
+            'address' => 'Address',
+            'committees' => 'Committees and roles',
+            'groups' => 'Groups',
+            'users' => 'Users',
             // 'login' => 'See your login information',
         ],
     ],

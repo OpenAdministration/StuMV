@@ -4,40 +4,39 @@
 @endphp
 <x-guest-layout :branding="$branding">
     <x-auth-card>
-        <x-slot:slot class="space-y-5">
+        <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-800 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
             <x-auth-logo :branding="$branding" />
 
-            <h2 class="font-bold text-gray-900 sm:truncate sm:tracking-tight">{{ __('Authorization Request') }}</h2>
+            <flux:heading size="xl">{{ __('') }}</flux:heading>
 
-            <p>
-                {{ __(':client is requesting permission to access your account.', ['client' => $client->name]) }}
-            </p>
+            <flux:text>{{ __('auth.authorize_access_notice') }}</flux:text>
+            <flux:text>{{ $client->name }}</flux:text>
 
-            @if (count($scopes) > 0)
+            @if(count($scopes) > 0)
                 <div class="space-y-2">
-                    <p class="font-semibold">{{ __('This application will be able to:') }}</p>
+                    <p class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</p>
                     <ul class="list-disc list-inside space-y-1">
                         @foreach ($scopes as $scope)
-                            <li>{{ $scope->description }}</li>
+                            <li>{{ __('auth.scope_' . $scope->id) }}</li>
                         @endforeach
                     </ul>
                 </div>
             @endif
 
-            <div class="flex justify-evenly">
+            <div class="flex justify-end gap-2">
                 <form method="POST" action="{{ route('realm.passport.authorizations.deny', ['realm' => $realm]) }}">
                     @csrf
                     @method('DELETE')
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
-                    <flux:button icon="ban" type="submit">{{ __('common.cancel') }}</flux:button>
+                    <flux:button icon="ban" type="submit">{{ __('auth.authorize_reject') }}</flux:button>
                 </form>
 
                 <form method="POST" action="{{ route('realm.passport.authorizations.approve', ['realm' => $realm]) }}">
                     @csrf
                     <input type="hidden" name="auth_token" value="{{ $authToken }}">
-                    <flux:button variant="primary" icon="check" type="submit">{{ __('Authorize') }}</flux:button>
+                    <flux:button variant="primary" icon="check" type="submit">{{ __('auth.authorize_accept') }}</flux:button>
                 </form>
             </div>
-        </x-slot:slot>
+        </flux:card>
     </x-auth-card>
 </x-guest-layout>

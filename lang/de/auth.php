@@ -43,4 +43,18 @@ return [
     'pick_realm_label' => 'Studierendenschaft',
     'pick_realm_placeholder' => 'Studierendenschaft auswählen',
     'pick_realm_continue' => 'Weiter',
+
+    'authorize_access_notice' => 'Du greifst gleich auf diesen Dienst zu:',
+    'authorize_permissions_notice' => 'Dieser Dienst kann auf folgende Informationen zugreifen:',
+    'authorize_reject' => 'Ablehnen',
+    'authorize_accept' => 'Zulassen',
+
+    'scope_openid' => 'OpenID Connect',
+    'scope_profile' => 'Profil-Informationen',
+    'scope_email' => 'E-Mail-Adresse',
+    'scope_phone' => 'Telefonnummer',
+    'scope_address' => 'Adresse',
+    'scope_committees' => 'Gremien und Rollen',
+    'scope_groups' => 'Gruppen',
+    'scope_users' => 'Konten',
 ];

@@ -43,4 +43,18 @@ return [
     'pick_realm_label' => 'Community',
     'pick_realm_placeholder' => 'Select a community',
     'pick_realm_continue' => 'Continue',
+
+    'authorize_access_notice' => 'You are about to access this service:',
+    'authorize_permissions_notice' => 'This service can access the following information:',
+    'authorize_reject' => 'Reject',
+    'authorize_accept' => 'Accept',
+
+    'scope_openid' => 'OpenID Connect',
+    'scope_profile' => 'Profile information',
+    'scope_email' => 'Email address',
+    'scope_phone' => 'Phone number',
+    'scope_address' => 'Address',
+    'scope_committees' => 'Committees and roles',
+    'scope_groups' => 'Groups',
+    'scope_users' => 'Accounts',
 ];
