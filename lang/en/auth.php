@@ -44,6 +44,7 @@ return [
     'pick_realm_placeholder' => 'Select a community',
     'pick_realm_continue' => 'Continue',
 
+    'authorize_heading' => 'Information Sharing',
     'authorize_access_notice' => 'You are about to access this service:',
     'authorize_permissions_notice' => 'This service can access the following information:',
     'authorize_reject' => 'Reject',

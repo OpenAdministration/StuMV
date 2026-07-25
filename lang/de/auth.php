@@ -44,6 +44,7 @@ return [
     'pick_realm_placeholder' => 'Studierendenschaft auswählen',
     'pick_realm_continue' => 'Weiter',
 
+    'authorize_heading' => 'Informationsweitergabe',
     'authorize_access_notice' => 'Du greifst gleich auf diesen Dienst zu:',
     'authorize_permissions_notice' => 'Dieser Dienst kann auf folgende Informationen zugreifen:',
     'authorize_reject' => 'Ablehnen',

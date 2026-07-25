@@ -7,7 +7,7 @@
         <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-800 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
             <x-auth-logo :branding="$branding" />
 
-            <flux:heading size="xl">{{ __('') }}</flux:heading>
+            <flux:heading size="xl">{{ __('auth.authorize_heading') }}</flux:heading>
 
             <flux:text>{{ __('auth.authorize_access_notice') }}</flux:text>
             <flux:text>{{ $client->name }}</flux:text>
