@@ -21,7 +21,7 @@
                     <ul class="space-y-2">
                         @foreach ($scopes as $scope)
                             <li>
-                                <span class="mb-1">{{ __('auth.scope_' . $scope->id) }}</span>
+                                <span class="mb-2">{{ __('auth.scope_' . $scope->id) }}</span>
                                 @if(count($scopeData[$scope->id] ?? []) > 0)
                                     <ul class="text-sm text-zinc-500 dark:text-white/60 space-y-1">
                                         @foreach ($scopeData[$scope->id] as $line)
