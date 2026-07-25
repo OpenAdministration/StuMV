@@ -11,25 +11,25 @@
             <flux:heading size="xl">{{ __('auth.authorize_heading') }}</flux:heading>
 
             <div class="space-y-2">
-                <flux:text>{{ __('auth.authorize_access_notice') }}</flux:text>
-                <flux:text class="font-semibold">{{ $client->name }}</flux:text>
+                <p>{{ __('auth.authorize_access_notice') }}</p>
+                <p class="font-semibold">{{ $client->name }}</p>
             </div>
 
             @if(count($scopes) > 0)
                 <div class="space-y-2">
                     <flux:text class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</flux:text>
-                    <ul class="list-disc list-inside space-y-2 ml-2">
+                    <ul class="space-y-2">
                         @foreach ($scopes as $scope)
-                            <li class="[:where(&)]:text-sm">
-                                <span class="text-zinc-700 dark:text-zinc-200">{{ __('auth.scope_' . $scope->id) }}</span>
+                            <li>
+                                {{ __('auth.scope_' . $scope->id) }}
                                 @if(count($scopeData[$scope->id] ?? []) > 0)
-                                    <ul class="ml-4 text-xs text-zinc-500 dark:text-white/60 list-['\2013'] space-y-0.5">
+                                    <ul class="text-sm text-zinc-500 dark:text-white/60 space-y-1">
                                         @foreach ($scopeData[$scope->id] as $line)
-                                            <li class="pl-1">{{ $line }}</li>
+                                            <li>{{ $line }}</li>
                                         @endforeach
                                     </ul>
                                 @else
-                                    <div class="ml-4 text-xs text-zinc-500 dark:text-white/60">{{ __('auth.scope_' . $scope->id . '_detail') }}</div>
+                                    <div class="text-sm text-zinc-500 dark:text-white/60">{{ __('auth.scope_' . $scope->id . '_detail') }}</div>
                                 @endif
                             </li>
                         @endforeach
