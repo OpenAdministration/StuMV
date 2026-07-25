@@ -24,7 +24,7 @@
             </style>
         @endif
     </head>
-    <body class="flex flex-col h-full bg-zinc-100! dark:bg-zinc-900! bg-cover bg-center bg-fixed overflow-y-auto">
+    <body class="flex flex-col h-full sm:bg-zinc-100! dark:sm:bg-zinc-900! bg-cover bg-center bg-fixed overflow-y-auto">
         <main class="flex-1 flex flex-col my-auto py-8 overflow-y-visible">
             {{ $slot }}
         </main>
