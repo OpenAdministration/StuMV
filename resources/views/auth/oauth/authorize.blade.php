@@ -16,13 +16,13 @@
             </div>
 
             @if(count($scopes) > 0)
-                <div class="space-y-2">
+                <div class="space-y-4">
                     <p class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</p>
-                    <div class="space-y-2">
+                    <div class="space-y-4">
                         @foreach ($scopes as $scope)
                             <flux:fieldset>
                                 <legend>{{ __('auth.scope_' . $scope->id) }}</legend>
-                                <div class="p-4 text-sm text-zinc-500 dark:text-white/60">
+                                <div class="p-4">
                                     @if(count($scopeData[$scope->id] ?? []) > 0)
                                         <ul class="space-y-1">
                                             @foreach ($scopeData[$scope->id] as $line)
