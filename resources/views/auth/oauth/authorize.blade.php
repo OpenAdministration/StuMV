@@ -1,6 +1,7 @@
 @php
     $realm = $request->route('realm')->getShortCode();
     $branding = \App\Models\RealmBranding::forRealm($realm);
+    $scopeData = app(\App\Services\Oidc\ConsentScopeSummary::class)->forScopes($user, $scopes);
 @endphp
 <x-guest-layout :branding="$branding">
     <x-auth-card>
@@ -17,9 +18,20 @@
             @if(count($scopes) > 0)
                 <div class="space-y-2">
                     <flux:text class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</flux:text>
-                    <ul class="list-disc list-inside space-y-1 ml-2">
+                    <ul class="list-disc list-inside space-y-2 ml-2">
                         @foreach ($scopes as $scope)
-                            <li class="[:where(&)]:text-sm [:where(&)]:text-zinc-500 [:where(&)]:dark:text-white/70">{{ __('auth.scope_' . $scope->id) }}</li>
+                            <li class="[:where(&)]:text-sm">
+                                <span class="text-zinc-700 dark:text-zinc-200">{{ __('auth.scope_' . $scope->id) }}</span>
+                                @if(count($scopeData[$scope->id] ?? []) > 0)
+                                    <ul class="ml-4 text-xs text-zinc-500 dark:text-white/60 list-['\2013'] space-y-0.5">
+                                        @foreach ($scopeData[$scope->id] as $line)
+                                            <li class="pl-1">{{ $line }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <div class="ml-4 text-xs text-zinc-500 dark:text-white/60">{{ __('auth.scope_' . $scope->id . '_detail') }}</div>
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 </div>
