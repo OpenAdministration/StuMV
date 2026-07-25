@@ -9,13 +9,15 @@
 
             <flux:heading size="xl">{{ __('auth.authorize_heading') }}</flux:heading>
 
-            <flux:text>{{ __('auth.authorize_access_notice') }}</flux:text>
-            <flux:text>{{ $client->name }}</flux:text>
+            <div class="space-y-2">
+                <flux:text>{{ __('auth.authorize_access_notice') }}</flux:text>
+                <flux:text class="font-semibold">{{ $client->name }}</flux:text>
+            </div>
 
             @if(count($scopes) > 0)
                 <div class="space-y-2">
-                    <p class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</p>
-                    <ul class="list-disc list-inside space-y-1">
+                    <flux:text class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</flux:text>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
                         @foreach ($scopes as $scope)
                             <li>{{ __('auth.scope_' . $scope->id) }}</li>
                         @endforeach
