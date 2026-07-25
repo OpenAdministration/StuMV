@@ -20,8 +20,8 @@
                     <p class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</p>
                     <ul class="space-y-2">
                         @foreach ($scopes as $scope)
-                            <li>
-                                <span class="mb-2">{{ __('auth.scope_' . $scope->id) }}</span>
+                            <li class="space-y-1">
+                                <span>{{ __('auth.scope_' . $scope->id) }}</span>
                                 @if(count($scopeData[$scope->id] ?? []) > 0)
                                     <ul class="text-sm text-zinc-500 dark:text-white/60 space-y-1">
                                         @foreach ($scopeData[$scope->id] as $line)
