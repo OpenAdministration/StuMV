@@ -45,7 +45,7 @@ return [
     'pick_realm_continue' => 'Weiter',
 
     'authorize_heading' => 'Informationsweitergabe',
-    'authorize_access_notice' => 'Du greifst gleich auf diesen Dienst zu:',
+    'authorize_access_notice' => 'Du bist dabei, auf folgenden Dienst zuzugreifen:',
     'authorize_permissions_notice' => 'Dieser Dienst kann auf folgende Informationen zugreifen:',
     'authorize_reject' => 'Ablehnen',
     'authorize_accept' => 'Zulassen',
