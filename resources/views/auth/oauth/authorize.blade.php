@@ -18,22 +18,24 @@
             @if(count($scopes) > 0)
                 <div class="space-y-2">
                     <p class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</p>
-                    <ul class="space-y-2">
+                    <div class="space-y-2">
                         @foreach ($scopes as $scope)
-                            <li class="space-y-1">
-                                <span>{{ __('auth.scope_' . $scope->id) }}</span>
-                                @if(count($scopeData[$scope->id] ?? []) > 0)
-                                    <ul class="text-sm text-zinc-500 dark:text-white/60 space-y-1">
-                                        @foreach ($scopeData[$scope->id] as $line)
-                                            <li>{{ $line }}</li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    <div class="text-sm text-zinc-500 dark:text-white/60">{{ __('auth.scope_' . $scope->id . '_detail') }}</div>
-                                @endif
-                            </li>
+                            <flux:fieldset>
+                                <legend>{{ __('auth.scope_' . $scope->id) }}</legend>
+                                <div class="p-4 text-sm text-zinc-500 dark:text-white/60">
+                                    @if(count($scopeData[$scope->id] ?? []) > 0)
+                                        <ul class="space-y-1">
+                                            @foreach ($scopeData[$scope->id] as $line)
+                                                <li>{{ $line }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        {{ __('auth.scope_' . $scope->id . '_detail') }}
+                                    @endif
+                                </div>
+                            </flux:fieldset>
                         @endforeach
-                    </ul>
+                    </div>
                 </div>
             @endif
 
