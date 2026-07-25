@@ -18,6 +18,7 @@ use Laravel\Passport\Bridge\ClientRepository as BaseClientRepository;
  */
 class LoggingClientRepository extends BaseClientRepository
 {
+    #[\Override]
     public function validateClient(string $clientIdentifier, ?string $clientSecret, ?string $grantType): bool
     {
         $record = $this->clients->findActive($clientIdentifier);

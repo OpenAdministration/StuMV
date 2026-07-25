@@ -58,6 +58,50 @@ test('a valid id_token_hint and registered post_logout_redirect_uri end the sess
     $this->assertGuest();
 });
 
+test('a wildcard post_logout_redirect_uri matches any suffix', function (): void {
+    Http::fake();
+
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = actingAsMember($community);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill([
+        'community_uid' => $uid,
+        'post_logout_redirect_uris' => ['https://app.example.com/*'],
+    ])->save();
+
+    $response = $this->get(route('realm.openid.end_session', [
+        'realm' => $uid,
+        'id_token_hint' => makeIdTokenHint($client->id, $user),
+        'post_logout_redirect_uri' => 'https://app.example.com/any/nested/path',
+    ]));
+
+    $response->assertRedirect('https://app.example.com/any/nested/path');
+    $this->assertGuest();
+});
+
+test('a wildcard post_logout_redirect_uri does not match a different host', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = actingAsMember($community);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill([
+        'community_uid' => $uid,
+        'post_logout_redirect_uris' => ['https://app.example.com/*'],
+    ])->save();
+
+    $response = $this->get(route('realm.openid.end_session', [
+        'realm' => $uid,
+        'id_token_hint' => makeIdTokenHint($client->id, $user),
+        'post_logout_redirect_uri' => 'https://evil.example.com/steal-me',
+    ]));
+
+    $response->assertRedirect(route('realm.login', ['realm' => $uid]));
+    $this->assertGuest();
+});
+
 test('a post_logout_redirect_uri the client never registered is never honored', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

@@ -9,6 +9,7 @@ use App\Support\EndsAuthenticatedSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
@@ -98,12 +99,15 @@ class EndSessionController extends Controller
     }
 
     /**
-     * Only ever returns a URI the resolved client itself registered
-     * (App\Models\PassportClient::post_logout_redirect_uris) - an unknown
-     * client, no client at all, or any URI not an exact match means falling
-     * back to the realm's own login page instead (see __invoke()), since
-     * honoring an arbitrary post_logout_redirect_uri would be an open
-     * redirect.
+     * Only ever returns a URI matching one the resolved client itself
+     * registered (App\Models\PassportClient::post_logout_redirect_uris) - an
+     * unknown client, no client at all, or any URI matching nothing means
+     * falling back to the realm's own login page instead (see __invoke()),
+     * since honoring an arbitrary post_logout_redirect_uri would be an open
+     * redirect. Unlike the OAuth redirect_uri (exact match only, enforced by
+     * league/oauth2-server itself), a registered entry may use `*` as a
+     * wildcard - Str::is() - since this comparison is entirely our own code,
+     * not governed by the OAuth2 spec's stricter redirect_uri rules.
      */
     private function validatedRedirectUri(Request $request, ?PassportClient $client): ?string
     {
@@ -113,7 +117,7 @@ class EndSessionController extends Controller
             return null;
         }
 
-        if (! in_array($requested, $client->post_logout_redirect_uris ?? [], true)) {
+        if (! Str::is($client->post_logout_redirect_uris ?? [], $requested)) {
             return null;
         }
 

@@ -58,9 +58,15 @@ class NewOidcClient extends Component
     /**
      * @param  array<int, string>  $uris
      */
-    private static function validateUriList(array $uris, callable $fail): void
+    private static function validateUriList(array $uris, callable $fail, bool $allowWildcard = false): void
     {
         foreach ($uris as $uri) {
+            if (! $allowWildcard && str_contains($uri, '*')) {
+                $fail(__('oidc_clients.redirect_uri_wildcard', ['uri' => $uri]));
+
+                return;
+            }
+
             if (! filter_var($uri, FILTER_VALIDATE_URL)) {
                 $fail(__('oidc_clients.redirect_uri_invalid', ['uri' => $uri]));
 
@@ -87,7 +93,7 @@ class NewOidcClient extends Component
             'requiresConsent' => 'boolean',
             'backChannelLogoutUri' => 'nullable|url',
             'postLogoutRedirectUris' => [function ($attribute, $value, $fail): void {
-                self::validateUriList($this->postLogoutRedirectUriList(), $fail);
+                self::validateUriList($this->postLogoutRedirectUriList(), $fail, allowWildcard: true);
             }],
         ];
     }

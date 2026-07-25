@@ -292,7 +292,7 @@ test('the id_token\'s iss claim matches the discovery document\'s issuer exactly
         'scope' => 'openid',
     ]));
 
-    parse_str(parse_url($authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
 
     $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
         'grant_type' => 'authorization_code',
@@ -302,7 +302,7 @@ test('the id_token\'s iss claim matches the discovery document\'s issuer exactly
         'code' => $query['code'],
     ]);
 
-    [, $payload] = explode('.', $token->json('id_token'));
+    [, $payload] = explode('.', (string) $token->json('id_token'));
     $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
 
     $discovery = $this->getJson("/$uid/.well-known/openid-configuration")->json();

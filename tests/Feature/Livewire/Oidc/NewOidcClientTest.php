@@ -90,6 +90,35 @@ test('registering a client rejects a redirect URI that is not a valid URL', func
         ->assertHasErrors(['redirectUris']);
 });
 
+test('registering a client rejects a redirect URI containing a wildcard', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/*')
+        ->set('scopes', ['openid'])
+        ->call('save')
+        ->assertHasErrors(['redirectUris']);
+});
+
+test('registering a client accepts a post-logout redirect URI containing a wildcard', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('postLogoutRedirectUris', 'https://app.example.com/*')
+        ->set('scopes', ['openid'])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->post_logout_redirect_uris)->toBe(['https://app.example.com/*']);
+});
+
 test('registering a client requires at least one scope', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);

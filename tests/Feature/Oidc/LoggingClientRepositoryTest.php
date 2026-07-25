@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('an unknown client_id is logged', function (): void {
     Log::spy();
 
-    $repository = app(ClientRepository::class);
+    $repository = resolve(ClientRepository::class);
 
     expect($repository->validateClient('does-not-exist', 'whatever', 'authorization_code'))->toBeFalse();
 
@@ -27,7 +27,7 @@ test('a missing client_secret is logged', function (): void {
 
     Log::spy();
 
-    $repository = app(ClientRepository::class);
+    $repository = resolve(ClientRepository::class);
 
     expect($repository->validateClient($client->id, null, 'authorization_code'))->toBeFalse();
 
@@ -44,7 +44,7 @@ test('a mismatched client_secret is logged, without logging the secret itself', 
 
     Log::spy();
 
-    $repository = app(ClientRepository::class);
+    $repository = resolve(ClientRepository::class);
 
     expect($repository->validateClient($client->id, 'the-wrong-secret', 'authorization_code'))->toBeFalse();
 
@@ -66,7 +66,7 @@ test('a correct client_secret is not logged at all', function (): void {
 
     Log::spy();
 
-    $repository = app(ClientRepository::class);
+    $repository = resolve(ClientRepository::class);
 
     expect($repository->validateClient($client->id, $client->plainSecret, 'authorization_code'))->toBeTrue();
 
