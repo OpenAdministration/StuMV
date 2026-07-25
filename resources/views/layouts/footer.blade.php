@@ -13,7 +13,7 @@
                     href="https://open-administration.de"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="{{ (($branding ?? null)?->background_id) ? text-zinc-800 dark:text-white : '' }}"
+                    class="{{ (($branding ?? null)?->background_id) ? 'text-zinc-800 dark:text-white' : '' }}"
                 >
                     Open Administration GmbH
                 </flux:link>
@@ -24,7 +24,7 @@
                     href="https://www.stufis.de/stumv"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="{{ (($branding ?? null)?->background_id) ? text-zinc-800 dark:text-white : '' }}"
+                    class="{{ (($branding ?? null)?->background_id) ? 'text-zinc-800 dark:text-white' : '' }}"
                 >StuMV</flux:link>.
             </span>
             @endif
