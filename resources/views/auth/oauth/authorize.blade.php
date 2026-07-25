@@ -19,7 +19,7 @@
                     <flux:text class="font-semibold">{{ __('auth.authorize_permissions_notice') }}</flux:text>
                     <ul class="list-disc list-inside space-y-1 ml-2">
                         @foreach ($scopes as $scope)
-                            <li>{{ __('auth.scope_' . $scope->id) }}</li>
+                            <li class="[:where(&)]:text-sm [:where(&)]:text-zinc-500 [:where(&)]:dark:text-white/70">{{ __('auth.scope_' . $scope->id) }}</li>
                         @endforeach
                     </ul>
                 </div>
