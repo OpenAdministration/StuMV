@@ -20,11 +20,15 @@ class NewOidcClient extends Component
 
     public bool $requiresConsent = true;
 
+    public bool $disableClientAuthentication = false;
+
     public string $backChannelLogoutUri = '';
 
     public string $postLogoutRedirectUris = '';
 
     public string $uid = '';
+
+    public bool $created = false;
 
     public ?string $createdClientId = null;
 
@@ -91,6 +95,7 @@ class NewOidcClient extends Component
             'scopes' => 'required|array|min:1',
             'scopes.*' => Rule::in(self::AVAILABLE_SCOPES),
             'requiresConsent' => 'boolean',
+            'disableClientAuthentication' => 'boolean',
             'backChannelLogoutUri' => 'nullable|url',
             'postLogoutRedirectUris' => [function ($attribute, $value, $fail): void {
                 self::validateUriList($this->postLogoutRedirectUriList(), $fail, allowWildcard: true);
@@ -108,7 +113,11 @@ class NewOidcClient extends Component
         $this->validate();
 
         /** @var PassportClient $client */
-        $client = $clients->createAuthorizationCodeGrantClient($this->name, $this->redirectUriList());
+        $client = $clients->createAuthorizationCodeGrantClient(
+            $this->name,
+            $this->redirectUriList(),
+            confidential: ! $this->disableClientAuthentication,
+        );
         $client->forceFill([
             'community_uid' => $this->uid,
             'scopes' => array_values($this->scopes),
@@ -117,6 +126,7 @@ class NewOidcClient extends Component
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
         ])->save();
 
+        $this->created = true;
         $this->createdClientId = $client->id;
         $this->createdClientSecret = $client->plainSecret;
     }

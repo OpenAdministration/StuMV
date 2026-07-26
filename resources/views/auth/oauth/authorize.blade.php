@@ -1,7 +1,6 @@
 @php
     $realm = $request->route('realm')->getShortCode();
     $branding = \App\Models\RealmBranding::forRealm($realm);
-    $scopeData = app(\App\Services\Oidc\ConsentScopeSummary::class)->forScopes($user, $scopes);
 @endphp
 <x-guest-layout :branding="$branding">
     <x-auth-card>
@@ -16,6 +15,9 @@
             </div>
 
             @if(count($scopes) > 0)
+                @php
+                    $scopeData = app(\App\Services\Oidc\ConsentScopeSummary::class)->forScopes($user, $scopes);
+                @endphp
                 <div class="space-y-4">
                     <p>{{ __('auth.authorize_permissions_notice') }}</p>
                     <div class="space-y-4">

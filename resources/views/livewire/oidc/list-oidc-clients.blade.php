@@ -54,6 +54,9 @@
                                 @unless($client->requires_consent)
                                     <flux:badge size="sm">{{ __('oidc_clients.auto_approved_badge') }}</flux:badge>
                                 @endunless
+                                @unless($client->confidential())
+                                    <flux:badge size="sm">{{ __('oidc_clients.public_client_badge') }}</flux:badge>
+                                @endunless
                             </div>
                         </flux:table.cell>
                         <flux:table.cell>

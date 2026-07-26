@@ -1,4 +1,4 @@
-@if($createdClientSecret)
+@if($created)
     <div class="space-y-8">
         <div>
             <flux:heading size="xl" class="mb-4">{{ __('oidc_clients.new_title') }}</flux:heading>
@@ -10,12 +10,16 @@
             <flux:input readonly copyable value="{{ $createdClientId }}" />
         </flux:field>
 
-        <flux:field>
-            <flux:label>{{ __('oidc_clients.client_secret') }}</flux:label>
-            <flux:input readonly copyable value="{{ $createdClientSecret }}" />
-        </flux:field>
+        @if($createdClientSecret)
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.client_secret') }}</flux:label>
+                <flux:input readonly copyable value="{{ $createdClientSecret }}" />
+            </flux:field>
 
-        <flux:callout variant="warning" icon="triangle-alert" heading="{{ __('oidc_clients.client_secret_warning') }}" />
+            <flux:callout variant="warning" icon="triangle-alert" heading="{{ __('oidc_clients.client_secret_warning') }}" />
+        @else
+            <flux:callout variant="warning" icon="triangle-alert" heading="{{ __('oidc_clients.no_client_secret_warning') }}" />
+        @endif
 
         <div class="flex justify-end">
             <flux:button variant="primary" wire:navigate href="{{ route('realms.oidc-clients', ['realm' => $uid]) }}">
@@ -58,6 +62,12 @@
                 wire:model="requiresConsent"
                 label="{{ __('oidc_clients.requires_consent') }}"
                 description="{{ __('oidc_clients.requires_consent_description') }}"
+            />
+
+            <flux:switch
+                wire:model="disableClientAuthentication"
+                label="{{ __('oidc_clients.disable_client_authentication') }}"
+                description="{{ __('oidc_clients.disable_client_authentication_description') }}"
             />
 
             <flux:field>
