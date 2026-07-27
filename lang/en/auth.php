@@ -37,7 +37,7 @@ return [
     'username_or_mail' => 'Username or Mail',
     'reset_password' => 'Reset Password',
     'send_reset_link' => 'Send Reset Link',
-    'sign_up_prompt' => 'Sign up and get started!',
+    'sign_up_prompt' => 'Sign up',
     'log_out_button' => 'Log Out',
     'confirm_logout_title' => 'Confirm logout',
     'pick_realm_label' => 'Community',
