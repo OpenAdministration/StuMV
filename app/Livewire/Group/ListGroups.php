@@ -83,7 +83,12 @@ class ListGroups extends Component
 
     public function deletePrepare($uid, $cn): void
     {
-        $this->deleteGroupDn = Group::dnFrom($uid, $cn);
+        // $uid is only ever the realm this page is already scoped to (see
+        // list-group.blade.php) - always deriving the DN from realm_uid
+        // instead of the passed-in argument stops a client from pointing
+        // this at an arbitrary other realm's group via a crafted Livewire
+        // call.
+        $this->deleteGroupDn = Group::dnFrom($this->realm_uid, $cn);
         $this->deleteGroupName = $cn;
         $this->deleteConfirmText = '';
         Flux::modal('delete')->show();
@@ -93,6 +98,11 @@ class ListGroups extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
+
+        // $deleteGroupDn has no #[Locked], so it must be re-checked here too
+        // (not just in deletePrepare()) before deleting - otherwise a client
+        // could set it directly to a DN in a different realm.
+        abort_unless(str_ends_with($this->deleteGroupDn, ','.Group::dnRoot($this->realm_uid)), 404);
 
         if ($this->deleteConfirmText !== $this->deleteGroupName) {
             $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteGroupName]));

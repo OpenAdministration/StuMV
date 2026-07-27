@@ -152,6 +152,13 @@ class ListRolesInGroup extends Component
         $this->authorize('delete', [Group::class, $community]);
 
         $groupRole = GroupMembership::findOrFail($groupRoleId);
+
+        // $groupRoleId is a raw, sequential, enumerable primary key - without
+        // this check, authorizing purely against $community (this realm)
+        // would let an admin delete a role-group binding belonging to a
+        // completely different realm's group.
+        abort_unless($groupRole->group_dn === $this->group_dn, 404);
+
         $role = Role::findOrFail($groupRole->role_dn);
 
         $this->deleteGroupRoleId = $groupRoleId;
@@ -164,6 +171,12 @@ class ListRolesInGroup extends Component
     {
         $community = Community::findByUid($this->realm_uid);
         $this->authorize('delete', [Group::class, $community]);
+
+        // $deleteGroupRoleId has no #[Locked] (it's re-set via Livewire
+        // between prepare/commit), so it must be re-checked here too - not
+        // just in deletePrepare() - before deleting.
+        $groupRole = GroupMembership::findOrFail($this->deleteGroupRoleId);
+        abort_unless($groupRole->group_dn === $this->group_dn, 404);
 
         GroupMembership::whereKey($this->deleteGroupRoleId)->delete();
 

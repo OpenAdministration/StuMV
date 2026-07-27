@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Committee;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\RoleMembership;
 use Flux\Flux;
@@ -45,6 +46,8 @@ class EditRoleMembership extends Component
         $this->cn = $cn;
         $this->id = $id;
         $membership = RoleMembership::findOrFail($id);
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $this->authorize('edit', [$membership, $committee, $realm]);
         $this->username = $membership->username;
         $this->start_date = $membership->from?->format('Y-m-d');
         $this->end_date = $membership->until?->format('Y-m-d');
@@ -62,6 +65,9 @@ class EditRoleMembership extends Component
     {
         $this->validate();
         $membership = RoleMembership::findOrFail($this->id);
+        $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findOrFailByUid($this->uid);
+        $this->authorize('edit', [$membership, $committee, $community]);
         $membership->update([
             'from' => $this->start_date,
             'until' => ! empty($this->end_date) ? $this->end_date : null,
