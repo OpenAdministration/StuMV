@@ -1,5 +1,5 @@
 @if(($branding ?? null)?->background_id)
-    <footer class="grid lg:grid-cols-2 items-center lg:justify-between px-6 py-4 gap-6 mt-auto text-sm border-t bg-zinc-50/90 dark:bg-zinc-900/90 border-black/20 dark:border-white/20 shadow-sm">
+    <footer class="grid lg:grid-cols-2 items-center lg:justify-between px-6 py-4 gap-6 mt-auto text-sm border-t bg-zinc-50/75 dark:bg-zinc-900/75 border-black/20 dark:border-white/20 backdrop-blur-xs shadow-sm">
 @else
     <footer class="grid lg:grid-cols-2 items-center lg:justify-between px-6 py-4 gap-6 mt-auto text-sm border-t bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
 @endif
