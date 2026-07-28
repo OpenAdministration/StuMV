@@ -41,6 +41,30 @@
             </flux:field>
 
             <flux:field>
+                <flux:label>{{ __('oidc_clients.description') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.description_description') }}</flux:description>
+                <flux:textarea wire:model="description" rows="3" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.service_provider') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.service_provider_description') }}</flux:description>
+                <flux:input wire:model="serviceProvider" placeholder="{{ __('oidc_clients.service_provider_placeholder') }}" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.logo') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.logo_description') }}</flux:description>
+                <flux:file-upload wire:model="logo" accept="image/*">
+                    <flux:file-upload.dropzone
+                        :heading="__('common.drop_file_here')"
+                        text="JPEG, PNG, WebP, SVG"
+                    />
+                </flux:file-upload>
+                <flux:error name="logo" />
+            </flux:field>
+
+            <flux:field>
                 <flux:label>{{ __('oidc_clients.redirect_uris') }}</flux:label>
                 <flux:description>{{ __('oidc_clients.redirect_uris_description') }}</flux:description>
                 <flux:textarea wire:model="redirectUris" rows="4" placeholder="https://app.example.com/auth/callback" />

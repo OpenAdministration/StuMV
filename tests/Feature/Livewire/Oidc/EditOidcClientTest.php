@@ -2,6 +2,8 @@
 
 use App\Livewire\Oidc\EditOidcClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Token;
@@ -176,6 +178,121 @@ test('a client\'s back-channel logout URI can be set and cleared', function (): 
         ->call('save');
 
     expect($client->fresh()->back_channel_logout_uri)->toBeNull();
+});
+
+test('the edit form is pre-filled with the client\'s description, service provider and logo', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill([
+        'community_uid' => $community->getShortCode(),
+        'description' => 'A tool for managing student union finances.',
+        'service_provider' => 'Student Union of Example University',
+        'logo_id' => 'existing-logo.webp',
+    ])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->assertSet('description', 'A tool for managing student union finances.')
+        ->assertSet('serviceProvider', 'Student Union of Example University')
+        ->assertSet('logoId', 'existing-logo.webp');
+});
+
+test('a client\'s description and service provider can be updated', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('description', 'Updated description.')
+        ->set('serviceProvider', 'Updated Provider')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client->refresh();
+
+    expect($client->description)->toBe('Updated description.')
+        ->and($client->service_provider)->toBe('Updated Provider');
+});
+
+test('an admin can upload a logo for an existing client', function (): void {
+    Storage::fake('public');
+
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('logo', UploadedFile::fake()->image('logo.png', 100, 100))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client->refresh();
+
+    expect($client->logo_id)->not->toBeNull();
+    Storage::disk('public')->assertExists('oidc-client-logos/'.$client->logo_id);
+});
+
+test('uploading a new logo replaces and deletes the old one', function (): void {
+    Storage::fake('public');
+    Storage::disk('public')->put('oidc-client-logos/old-logo.webp', 'fake-bytes');
+
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid'], 'logo_id' => 'old-logo.webp'])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('logo', UploadedFile::fake()->image('logo.png', 100, 100))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client->refresh();
+
+    expect($client->logo_id)->not->toBe('old-logo.webp');
+    Storage::disk('public')->assertMissing('oidc-client-logos/old-logo.webp');
+    Storage::disk('public')->assertExists('oidc-client-logos/'.$client->logo_id);
+});
+
+test('a client\'s logo can be removed', function (): void {
+    Storage::fake('public');
+    Storage::disk('public')->put('oidc-client-logos/existing-logo.webp', 'fake-bytes');
+
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'logo_id' => 'existing-logo.webp'])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->call('removeLogo')
+        ->assertSet('logoId', null);
+
+    expect($client->fresh()->logo_id)->toBeNull();
+    Storage::disk('public')->assertMissing('oidc-client-logos/existing-logo.webp');
+});
+
+test('an invalid logo file type is rejected and never reaches storage', function (): void {
+    Storage::fake('public');
+
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('logo', UploadedFile::fake()->create('not-an-image.pdf', 10))
+        ->call('save')
+        ->assertHasErrors(['logo']);
+
+    expect($client->fresh()->logo_id)->toBeNull();
+    Storage::disk('public')->assertDirectoryEmpty('oidc-client-logos');
 });
 
 test('a directory API client cannot be opened through this edit page', function (): void {

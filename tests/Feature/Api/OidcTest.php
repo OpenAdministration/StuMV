@@ -424,6 +424,57 @@ test('a client left at its default configuration shows the consent prompt, and a
     expect($approve->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
 });
 
+test('the consent screen shows the client\'s description, service provider and logo when set', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Branded Client', ['https://example.test/callback']);
+    $client->forceFill([
+        'community_uid' => $uid,
+        'description' => 'A tool for managing student union finances.',
+        'service_provider' => 'Student Union of Example University',
+        'logo_id' => 'test-logo.svg',
+    ])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertOk()
+        ->assertSee($client->name)
+        ->assertSee('A tool for managing student union finances.')
+        ->assertSee('Student Union of Example University')
+        ->assertSee('oidc-client-logos/test-logo.svg', escape: false);
+});
+
+test('the consent screen omits description, service provider and logo when not set', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Plain Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertOk()
+        ->assertSee($client->name)
+        ->assertDontSee('oidc-client-logos', escape: false);
+});
+
 test('a user who already holds a granted token covering the requested scopes is not re-prompted', function (): void {
     // App\Models\PassportClient::skipsAuthorization() mirrors Passport's own
     // AuthorizationController::hasGrantedScopes() - EditOidcClient::save()
