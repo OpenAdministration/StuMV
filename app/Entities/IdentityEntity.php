@@ -20,8 +20,14 @@ class IdentityEntity implements IdentityEntityInterface
 
     public function setIdentifier(string $identifier): void
     {
-        $this->identifier = $identifier;
         $this->user = User::findOrFail($identifier);
+
+        // `sub` should identify the physical LDAP entry, not this row's own
+        // local auto-increment id - $this->user->uid holds the LDAP
+        // entryUUID (see User::getLdapGuidColumn()/User::ldap()), stable
+        // across e.g. a MoveUserToRealm relocation. App\Http\Controllers\Oidc\UserInfoController
+        // must agree with this same value for the userinfo endpoint's `sub`.
+        $this->identifier = $this->user->uid;
 
         // The local `user` table only holds full_name/email/username (synced
         // from LDAP on login) - the rest of the standard OIDC claims live

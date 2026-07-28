@@ -65,7 +65,7 @@ test('logging out sends a signed back-channel logout notification to a client th
         $claims = $token->claims();
         expect((string) $claims->get('iss'))->toBe(rtrim(url('/'.$uid), '/'))
             ->and($claims->get('aud'))->toBe([$client->id])
-            ->and($claims->get('sub'))->toBe((string) $user->id)
+            ->and($claims->get('sub'))->toBe((string) $user->uid)
             ->and($claims->get('sid'))->toBe($grantedToken->id)
             ->and($claims->has('nonce'))->toBeFalse()
             ->and((array) $claims->get('events'))->toHaveKey('http://schemas.openid.net/event/backchannel-logout');

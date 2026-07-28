@@ -115,7 +115,7 @@ test('the userinfo endpoint returns claims filtered by the granted scopes', func
     $this->getJson('/'.$community->getShortCode().'/oauth/userinfo')
         ->assertOk()
         ->assertJson([
-            'sub' => (string) $user->id,
+            'sub' => (string) $user->uid,
             'email' => $user->email,
         ])
         ->assertJsonMissing(['given_name' => 'Jane'])
@@ -308,6 +308,48 @@ test('the id_token\'s iss claim matches the discovery document\'s issuer exactly
     $discovery = $this->getJson("/$uid/.well-known/openid-configuration")->json();
 
     expect($claims['iss'])->toBe($discovery['issuer']);
+});
+
+test('the id_token\'s sub claim is the LDAP entryUUID, and matches the userinfo endpoint', function (): void {
+    // Regression: sub must identify the physical LDAP entry (App\Models\User::$uid,
+    // see App\Entities\IdentityEntity::setIdentifier()), not the local
+    // user.id primary key, and both the id_token and /oauth/userinfo (App\Http\Controllers\Oidc\UserInfoController)
+    // must agree on it.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Sub Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $authorize = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    [, $payload] = explode('.', (string) $token->json('id_token'));
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+
+    $userinfo = $this->getJson("/$uid/oauth/userinfo", [
+        'Authorization' => 'Bearer '.$token->json('access_token'),
+    ])->json();
+
+    expect($claims['sub'])->toBe((string) $user->uid)
+        ->and($userinfo['sub'])->toBe((string) $user->uid);
 });
 
 test('a client left at its default configuration shows the consent prompt, and approving it completes the code flow', function (): void {

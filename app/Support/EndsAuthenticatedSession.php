@@ -56,7 +56,7 @@ class EndsAuthenticatedSession
             ->filter(fn (PassportToken $token) => filled($token->client?->back_channel_logout_uri))
             ->each(fn (PassportToken $token) => dispatch(new SendBackChannelLogoutNotification(
                 $token->client,
-                (string) $user->getAuthIdentifier(),
+                (string) $user->uid,
                 $token->getKey(),
             )));
     }

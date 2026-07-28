@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Oidc\EndSessionController;
 use App\Http\Controllers\Oidc\RealmDiscoveryController;
+use App\Http\Controllers\Oidc\UserInfoController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Livewire\Api\EditApiClient;
 use App\Livewire\Api\ListApiClients;
@@ -57,7 +58,6 @@ use App\Livewire\Tools\UsersNotInUniLdap;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Route;
 use OpenIDConnect\Laravel\JwksController;
-use OpenIDConnect\Laravel\UserInfoController;
 
 /*
 |--------------------------------------------------------------------------
