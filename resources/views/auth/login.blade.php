@@ -9,8 +9,6 @@
 
         <form method="POST" action="{{ route('realm.login', ['realm' => $realm->getShortCode()]) }}" class="w-full flex">
             @csrf
-            @if(($branding ?? null)?->background_id)
-            @else
                 <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
                 <x-auth-logo :branding="$branding" />
 
