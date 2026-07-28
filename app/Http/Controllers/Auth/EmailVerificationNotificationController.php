@@ -21,7 +21,14 @@ class EmailVerificationNotificationController extends Controller
             return redirect()->intended(RouteServiceProvider::home($realm->getShortCode()));
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        // ->afterResponse(): neither the notification nor any listener here
+        // is queued, so without this, the redirect would wait on a real SMTP
+        // round-trip (same reasoning as App\Support\EndsAuthenticatedSession
+        // and App\Livewire\RegisterUser).
+        $user = $request->user();
+        dispatch(function () use ($user): void {
+            $user->sendEmailVerificationNotification();
+        })->afterResponse();
 
         return back()->with('status', 'verification-link-sent');
     }

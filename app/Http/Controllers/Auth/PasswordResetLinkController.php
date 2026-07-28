@@ -45,8 +45,19 @@ class PasswordResetLinkController extends Controller
         // ScopedToRealmPeople (applied to the LDAP guard's provider) resolves
         // the realm from this request's {realm} route parameter, so the link
         // is only sent if an account with this email exists in this realm.
+        //
+        // The token lookup/creation stays synchronous (its outcome decides
+        // $status below), but the actual notification - a real SMTP
+        // round-trip, since neither it nor any listener here is queued - is
+        // deferred past the response via this callback, same reasoning as
+        // App\Support\EndsAuthenticatedSession and App\Livewire\RegisterUser.
         $status = Password::sendResetLink(
-            $request->only('mail')
+            $request->only('mail'),
+            function ($user, string $token): void {
+                dispatch(function () use ($user, $token): void {
+                    $user->sendPasswordResetNotification($token);
+                })->afterResponse();
+            }
         );
 
         return $status == Password::RESET_LINK_SENT
