@@ -20,12 +20,12 @@
 
                 <flux:field>
                     <flux:label>{{ __('common.password') }}</flux:label>
-                    <flux:checkbox type="password" name="password" id="password" required />
+                    <flux:input type="password" name="password" id="password" required />
                     <flux:error name="password" />
                 </flux:field>
 
                 <flux:field variant="inline" class="items-center">
-                    <flux:switch name="remember" />
+                    <flux:checkbox name="remember" />
                     <flux:label class="mb-0!">{{ __('auth.remember_me') }}</flux:label>
                 </flux:field>
 
