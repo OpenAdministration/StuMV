@@ -352,6 +352,47 @@ test('the id_token\'s sub claim is the LDAP entryUUID, and matches the userinfo 
         ->and($userinfo['sub'])->toBe((string) $user->uid);
 });
 
+test('the id_token\'s iat/exp claims are whole-second integers, not fractional-second floats', function (): void {
+    // Regression: config('openid.use_microseconds') used to be true, which
+    // made App\Services\Oidc\IdTokenResponse::getBuilder() stamp iat/exp
+    // from a fractional-second DateTimeImmutable - lcobucci/jwt's default
+    // ChainedFormatter (Encoding\MicrosecondBasedDateConversion) then
+    // serializes that as a JSON float (e.g. 1737990000.123456) instead of a
+    // plain integer, which some relying-party JWT libraries (e.g.
+    // jumbojett/openid-connect-php) fail to validate at all.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Timestamp Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $authorize = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    [, $payload] = explode('.', (string) $token->json('id_token'));
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+
+    expect($claims['iat'])->toBeInt()
+        ->and($claims['exp'])->toBeInt();
+});
+
 test('a client left at its default configuration shows the consent prompt, and approving it completes the code flow', function (): void {
     // requires_consent defaults to true - every client shows the consent
     // screen (resources/views/auth/oauth/authorize.blade.php, registered via

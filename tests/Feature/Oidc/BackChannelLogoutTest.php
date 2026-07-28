@@ -70,6 +70,17 @@ test('logging out sends a signed back-channel logout notification to a client th
             ->and($claims->has('nonce'))->toBeFalse()
             ->and((array) $claims->get('events'))->toHaveKey('http://schemas.openid.net/event/backchannel-logout');
 
+        // Regression: lcobucci's Parser always reconstructs date claims as
+        // DateTimeImmutable (so $claims->get('iat') above wouldn't reveal
+        // this), but App\Services\Oidc\BackChannelLogoutTokenBuilder used to
+        // stamp `iat` from `new DateTimeImmutable` (which carries
+        // microseconds) - the raw JWT payload must still be a plain integer,
+        // not a JSON float, for the same reason as the id_token (see
+        // config('openid.use_microseconds')'s doc comment).
+        [, $rawPayload] = explode('.', (string) $request['logout_token']);
+        $rawClaims = json_decode(base64_decode(strtr($rawPayload, '-_', '+/')), true);
+        expect($rawClaims['iat'])->toBeInt();
+
         return true;
     });
 });

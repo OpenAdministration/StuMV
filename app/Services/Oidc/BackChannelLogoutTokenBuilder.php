@@ -53,7 +53,12 @@ class BackChannelLogoutTokenBuilder
             ->issuedBy(Community::issuerFor($client->community_uid))
             ->permittedFor($client->getKey())
             ->relatedTo($userId)
-            ->issuedAt(new DateTimeImmutable)
+            // Whole seconds, not `new DateTimeImmutable` (which carries
+            // microseconds) - lcobucci/jwt's default ChainedFormatter
+            // serializes a fractional-second claim as a JSON float, which
+            // some relying-party JWT libraries fail to validate at all (see
+            // config('openid.use_microseconds')'s doc comment).
+            ->issuedAt(DateTimeImmutable::createFromFormat('U', (string) time()))
             ->identifiedBy((string) Str::uuid())
             ->withClaim('sid', $sid)
             ->withClaim('events', [

@@ -105,9 +105,18 @@ return [
     'token_headers' => ['kid' => 'stumv-oidc-1'],
 
     /**
-     * By default, microseconds are included.
+     * With microseconds, App\Services\Oidc\IdTokenResponse::getBuilder()
+     * stamps iat/exp from a fractional-second DateTimeImmutable, and
+     * lcobucci/jwt's default ChainedFormatter (Encoding\MicrosecondBasedDateConversion)
+     * then serializes those claims as JSON floats (e.g. 1737990000.123456)
+     * instead of plain integers. RFC 7519's NumericDate technically allows
+     * non-integer values, but several relying-party libraries (e.g.
+     * jumbojett/openid-connect-php) don't handle that and fail to validate
+     * the token's claims at all - false avoids the issue entirely by keeping
+     * iat/exp whole seconds (MicrosecondBasedDateConversion itself already
+     * emits a plain int whenever there's no fractional part).
      */
-    'use_microseconds' => true,
+    'use_microseconds' => false,
 
     /**
      * Value for the issuedBy params. By default: laravel to get the scheme and host from the $_SERVER variable.
