@@ -13,13 +13,11 @@
         @vite('resources/css/theme.css')
         @vite('resources/js/app.js')
         @if(($branding ?? null)?->background_id)
-            {{-- A nonced <style> block, not an inline style="" attribute: CSP
-                 nonces only validate <style>/<script> elements, not the
-                 style attribute, so this is what lets the CSP drop
-                 'unsafe-inline' for style-src. --}}
             <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
-                body {
-                    background-image: url('{{ asset('storage/realm-branding/'.$branding->background_id) }}');
+                @media (min-width: 40rem) {
+                    body {
+                        background-image: url('{{ asset('storage/realm-branding/'.$branding->background_id) }}');
+                    }
                 }
             </style>
         @endif
