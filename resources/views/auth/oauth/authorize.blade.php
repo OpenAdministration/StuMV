@@ -9,7 +9,7 @@
 
             <flux:heading size="xl">{{ __('auth.authorize_heading') }}</flux:heading>
 
-            <div class="space-y-4">
+            <flux:card class="space-y-4">
                 <p>{{ __('auth.authorize_access_notice') }}</p>
                 @if($client->logo_id)
                     <img class="w-full h-12 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
@@ -23,7 +23,7 @@
                 @if($client->description)
                     <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ $client->description }}</p>
                 @endif
-            </div>
+            </flux:card>
 
             @if(count($scopes) > 0)
                 @php
