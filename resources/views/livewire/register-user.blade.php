@@ -1,5 +1,5 @@
 <x-auth-card>
-    <flux:card class="grid gap-6 w-full bg-zinc-50 dark:bg-zinc-800 sm:bg-white sm:dark-bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
+    <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
         <x-auth-logo :branding="$branding" />
         <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
         <x-livewire-form>
