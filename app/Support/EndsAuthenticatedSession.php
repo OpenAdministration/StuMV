@@ -42,6 +42,12 @@ class EndsAuthenticatedSession
      * the same client (e.g. two devices) needs one logout_token per token,
      * each carrying its own sid - otherwise the client can't tell which
      * session actually ended.
+     *
+     * ->afterResponse() defers each dispatch past the redirect response
+     * instead of running inline: QUEUE_CONNECTION is "sync" everywhere (see
+     * .env*) and nothing runs a queue worker, so without this, logging out
+     * would block on an up-to-5s HTTP call (SendBackChannelLogoutNotification)
+     * per live client before the browser gets its redirect.
      */
     private function notifyOidcClientsOfLogout(?User $user): void
     {
@@ -58,6 +64,6 @@ class EndsAuthenticatedSession
                 $token->client,
                 (string) $user->uid,
                 $token->getKey(),
-            )));
+            ))->afterResponse());
     }
 }

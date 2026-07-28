@@ -213,10 +213,18 @@ test('ending a session via end_session also notifies other clients via back-chan
         'expires_at' => now()->addHour(),
     ]);
 
+    // Captured before the request, not inline as assertRedirect()'s argument -
+    // the back-channel job (deferred via ->afterResponse(), see
+    // App\Support\EndsAuthenticatedSession) calls Community::issuerFor(),
+    // which forces the URL generator to https as a side effect; evaluating
+    // route() after the request would pick that up and no longer match the
+    // response's own (unforced, plain http in this test) redirect.
+    $expectedRedirect = route('realm.login', ['realm' => $uid]);
+
     $this->get(route('realm.openid.end_session', [
         'realm' => $uid,
         'id_token_hint' => makeIdTokenHint($rpClient->id, $user),
-    ]))->assertRedirect(route('realm.login', ['realm' => $uid]));
+    ]))->assertRedirect($expectedRedirect);
 
     Http::assertSent(fn ($request): bool => $request->url() === 'https://other.example.com/backchannel-logout');
 });
