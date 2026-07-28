@@ -424,6 +424,53 @@ test('a client left at its default configuration shows the consent prompt, and a
     expect($approve->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
 });
 
+test('the consent screen hides the openid scope itself but still shows other requested scopes', function (): void {
+    // "openid" carries no user-facing permission on its own (it's the base
+    // scope every request needs, not a claim grant) - showing it as its own
+    // "permission" line was just noise.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Scope Display Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid profile',
+    ]));
+
+    $response->assertOk()
+        ->assertDontSee(__('auth.scope_openid'))
+        ->assertSee(__('auth.scope_profile'));
+});
+
+test('the consent screen omits the permissions section entirely when only the openid scope is requested', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Openid Only Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertOk()
+        ->assertDontSee(__('auth.scope_openid'))
+        ->assertDontSee(__('auth.authorize_permissions_notice'));
+});
+
 test('the consent screen shows the client\'s description, service provider and logo when set', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

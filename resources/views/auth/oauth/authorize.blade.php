@@ -11,7 +11,7 @@
 
             <p>{{ __('auth.authorize_access_notice') }}</p>
 
-            <flux:card class="p-4 bg-zinc-100 dark:bg-zinc-900 space-y-4">
+            <flux:card class="p-4 bg-zinc-50 dark:bg-zinc-900 shadow-xs space-y-4">
                 @if($client->logo_id)
                     <img class="w-full h-12 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
                 @endif
@@ -26,27 +26,33 @@
                 @endif
             </flux:card>
 
-            @if(count($scopes) > 0)
+            @php
+                // Do not show openid scope
+                $visibleScopes = collect($scopes)->reject(fn ($scope) => $scope->id === 'openid')->values();
+            @endphp
+            @if($visibleScopes->count() > 0)
                 @php
-                    $scopeData = app(\App\Services\Oidc\ConsentScopeSummary::class)->forScopes($user, $scopes);
+                    $scopeData = app(\App\Services\Oidc\ConsentScopeSummary::class)->forScopes($user, $visibleScopes->all());
                 @endphp
-                <div class="space-y-4">
+                <div class="space-y-4 mt-2">
                     <p>{{ __('auth.authorize_permissions_notice') }}</p>
                     <div class="space-y-4">
-                        @foreach ($scopes as $scope)
+                        @foreach ($visibleScopes as $scope)
                             <flux:fieldset>
                                 <legend>{{ __('auth.scope_' . $scope->id) }}</legend>
                                 <div class="p-4">
                                     @if(count($scopeData[$scope->id] ?? []) > 0)
-                                        <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-center">
+                                        <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                                             @foreach ($scopeData[$scope->id] as $row)
-                                                <div class="font-semibold whitespace-nowrap">{{ $row['label'] }}</div>
-                                                <div>
-                                                    @if($row['image'])
-                                                        <flux:avatar size="lg" src="{{ $row['value'] }}" alt="{{ $row['label'] }}" />
-                                                    @else
-                                                        {{ $row['value'] }}
-                                                    @endif
+                                                <div class="grid grid-cols-[8rem_1fr] gap-x-4 items-center py-2 first:pt-0 last:pb-0">
+                                                    <div class="font-semibold whitespace-nowrap">{{ $row['label'] }}</div>
+                                                    <div>
+                                                        @if($row['image'])
+                                                            <flux:avatar size="lg" src="{{ $row['value'] }}" alt="{{ $row['label'] }}" />
+                                                        @else
+                                                            {{ $row['value'] }}
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             @endforeach
                                         </div>
