@@ -15,14 +15,14 @@
                 @if($client->logo_id)
                     <img class="w-full h-12 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
                 @endif
-                <div class="space-y-2">
+                <div class="space-y-1">
                     <p class="font-semibold text-xl">{{ $client->name }}</p>
-                    @if($client->service_provider)
-                        <p class="text-sm">{{ $client->service_provider }}</p>
+                    @if($client->description)
+                        <p class="text-sm">{{ $client->description }}</p>
                     @endif
                 </div>
-                @if($client->description)
-                    <p class="text-sm text-zinc-600 dark:text-zinc-300">{{ $client->description }}</p>
+                @if($client->service_provider)
+                    <p>{{ $client->service_provider }}</p>
                 @endif
             </flux:card>
 
