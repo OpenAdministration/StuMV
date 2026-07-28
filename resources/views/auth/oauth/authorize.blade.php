@@ -37,11 +37,18 @@
                                 <legend>{{ __('auth.scope_' . $scope->id) }}</legend>
                                 <div class="p-4">
                                     @if(count($scopeData[$scope->id] ?? []) > 0)
-                                        <ul class="space-y-1">
-                                            @foreach ($scopeData[$scope->id] as $line)
-                                                <li>{{ $line }}</li>
+                                        <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-center">
+                                            @foreach ($scopeData[$scope->id] as $row)
+                                                <div class="text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{{ $row['label'] }}</div>
+                                                <div>
+                                                    @if($row['image'])
+                                                        <flux:avatar size="lg" src="{{ $row['value'] }}" alt="{{ $row['label'] }}" />
+                                                    @else
+                                                        {{ $row['value'] }}
+                                                    @endif
+                                                </div>
                                             @endforeach
-                                        </ul>
+                                        </div>
                                     @else
                                         {{ __('auth.scope_' . $scope->id . '_detail') }}
                                     @endif
