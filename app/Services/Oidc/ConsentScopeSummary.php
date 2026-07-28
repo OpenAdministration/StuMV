@@ -3,6 +3,7 @@
 namespace App\Services\Oidc;
 
 use Illuminate\Contracts\Auth\Authenticatable;
+use Laravel\Passport\Scope;
 use OpenIDConnect\ClaimExtractor;
 
 /**
@@ -18,11 +19,10 @@ class ConsentScopeSummary
 {
     public function __construct(
         private readonly ClaimExtractor $claimExtractor,
-    ) {
-    }
+    ) {}
 
     /**
-     * @param  \Laravel\Passport\Scope[]  $scopes
+     * @param  Scope[]  $scopes
      * @return array<string, string[]> scope id => "Label: value" lines that will be shared
      */
     public function forScopes(Authenticatable $user, array $scopes): array
@@ -50,17 +50,17 @@ class ConsentScopeSummary
         $lines = [];
 
         foreach (['name', 'given_name', 'family_name', 'preferred_username', 'picture'] as $key) {
-            if (!empty($claims[$key])) {
+            if (! empty($claims[$key])) {
                 $lines[] = __("auth.claim_$key").': '.$claims[$key];
             }
         }
 
-        if (!empty($claims['email'])) {
-            $suffix = !empty($claims['email_verified']) ? ' ('.__('auth.claim_email_verified_suffix').')' : '';
+        if (! empty($claims['email'])) {
+            $suffix = ! empty($claims['email_verified']) ? ' ('.__('auth.claim_email_verified_suffix').')' : '';
             $lines[] = __('auth.claim_email').': '.$claims['email'].$suffix;
         }
 
-        if (!empty($claims['phone_number'])) {
+        if (! empty($claims['phone_number'])) {
             $lines[] = __('auth.claim_phone_number').': '.$claims['phone_number'];
         }
 
@@ -76,7 +76,7 @@ class ConsentScopeSummary
             }
         }
 
-        if (!empty($claims['groups'])) {
+        if (! empty($claims['groups'])) {
             $lines[] = __('auth.claim_groups').': '.implode(', ', $claims['groups']);
         }
 

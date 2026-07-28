@@ -21,7 +21,7 @@ class UserInfoController extends Controller
     {
         $token = $request->user()->token();
 
-        $identity = app(config('openid.repositories.identity'))
+        $identity = resolve(config('openid.repositories.identity'))
             ->getByIdentifier((string) $request->user()->getAuthIdentifier());
 
         $claims = $claimExtractor->extract($token->scopes, $identity->getClaims());

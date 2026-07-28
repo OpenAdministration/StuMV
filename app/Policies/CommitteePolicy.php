@@ -51,6 +51,6 @@ class CommitteePolicy
      */
     protected function belongsToCommunity(Committee $committee, Community $community): bool
     {
-        return str_ends_with($committee->getDn(), ','.Committee::dnRootResolved($community->getShortCode()));
+        return str_ends_with((string) $committee->getDn(), ','.Committee::dnRootResolved($community->getShortCode()));
     }
 }
