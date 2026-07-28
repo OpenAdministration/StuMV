@@ -24,6 +24,12 @@ class EditOidcClient extends Component
 
     public string $serviceProvider = '';
 
+    public string $imprintUrl = '';
+
+    public string $termsUrl = '';
+
+    public string $privacyPolicyUrl = '';
+
     public string $redirectUris = '';
 
     public array $scopes = [];
@@ -49,6 +55,9 @@ class EditOidcClient extends Component
         $this->name = $client->name;
         $this->description = $client->description ?? '';
         $this->serviceProvider = $client->service_provider ?? '';
+        $this->imprintUrl = $client->imprint_url ?? '';
+        $this->termsUrl = $client->terms_url ?? '';
+        $this->privacyPolicyUrl = $client->privacy_policy_url ?? '';
         $this->redirectUris = implode("\n", $client->redirect_uris ?? []);
         $this->scopes = $client->scopes ?? [];
         $this->requiresConsent = $client->requires_consent;
@@ -102,6 +111,9 @@ class EditOidcClient extends Component
             'name' => 'required|string|min:3|max:255',
             'description' => 'nullable|string|max:1000',
             'serviceProvider' => 'nullable|string|max:255',
+            'imprintUrl' => 'nullable|url',
+            'termsUrl' => 'nullable|url',
+            'privacyPolicyUrl' => 'nullable|url',
             'redirectUris' => ['required', function ($attribute, $value, $fail): void {
                 $uris = $this->redirectUriList();
                 if (empty($uris)) {
@@ -145,6 +157,9 @@ class EditOidcClient extends Component
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
             'description' => $this->description ?: null,
             'service_provider' => $this->serviceProvider ?: null,
+            'imprint_url' => $this->imprintUrl ?: null,
+            'terms_url' => $this->termsUrl ?: null,
+            'privacy_policy_url' => $this->privacyPolicyUrl ?: null,
         ]);
 
         // A hashed secret can't be recovered to show again if client

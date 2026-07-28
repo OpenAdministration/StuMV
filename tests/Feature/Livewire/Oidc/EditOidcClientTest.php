@@ -213,6 +213,58 @@ test('a client\'s description and service provider can be updated', function ():
         ->and($client->service_provider)->toBe('Updated Provider');
 });
 
+test('the edit form is pre-filled with the client\'s imprint, terms of service and privacy policy links', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill([
+        'community_uid' => $community->getShortCode(),
+        'imprint_url' => 'https://app.example.com/imprint',
+        'terms_url' => 'https://app.example.com/terms',
+        'privacy_policy_url' => 'https://app.example.com/privacy',
+    ])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->assertSet('imprintUrl', 'https://app.example.com/imprint')
+        ->assertSet('termsUrl', 'https://app.example.com/terms')
+        ->assertSet('privacyPolicyUrl', 'https://app.example.com/privacy');
+});
+
+test('a client\'s imprint, terms of service and privacy policy links can be updated', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('imprintUrl', 'https://app.example.com/imprint')
+        ->set('termsUrl', 'https://app.example.com/terms')
+        ->set('privacyPolicyUrl', 'https://app.example.com/privacy')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client->refresh();
+
+    expect($client->imprint_url)->toBe('https://app.example.com/imprint')
+        ->and($client->terms_url)->toBe('https://app.example.com/terms')
+        ->and($client->privacy_policy_url)->toBe('https://app.example.com/privacy');
+});
+
+test('editing a client rejects an invalid imprint URL', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode(), 'scopes' => ['openid']])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->set('imprintUrl', 'not-a-url')
+        ->call('save')
+        ->assertHasErrors(['imprintUrl']);
+});
+
 test('a directory API client cannot be opened through this edit page', function (): void {
     $community = newCommunity();
     $client = resolve(ClientRepository::class)->createClientCredentialsGrantClient('Directory API Client');

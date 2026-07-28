@@ -13,7 +13,7 @@
 
             <flux:card class="p-4 bg-zinc-50 dark:bg-zinc-900 shadow-xs space-y-4">
                 @if($client->logo_id)
-                    <img class="w-full h-12 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
+                    <img class="w-full h-18 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
                 @endif
                 <div class="space-y-1">
                     <p class="font-semibold text-xl">{{ $client->name }}</p>
@@ -23,6 +23,19 @@
                 </div>
                 @if($client->service_provider)
                     <p>{{ $client->service_provider }}</p>
+                @endif
+                @if($client->imprint_url || $client->terms_url || $client->privacy_policy_url)
+                    <div class="flex flex-wrap gap-2">
+                        @if($client->imprint_url)
+                            <flux:button size="sm" target="_blank" icon="external-link" :href="$client->imprint_url">{{ __('oidc_clients.imprint_url') }}</flux:button>
+                        @endif
+                        @if($client->terms_url)
+                            <flux:button size="sm" target="_blank" icon="external-link" :href="$client->terms_url">{{ __('oidc_clients.terms_url') }}</flux:button>
+                        @endif
+                        @if($client->privacy_policy_url)
+                            <flux:button size="sm" target="_blank" icon="external-link" :href="$client->privacy_policy_url">{{ __('oidc_clients.privacy_policy_url') }}</flux:button>
+                        @endif
+                    </div>
                 @endif
             </flux:card>
 

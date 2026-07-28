@@ -43,6 +43,24 @@
                 <flux:input wire:model="serviceProvider" placeholder="{{ __('oidc_clients.service_provider_placeholder') }}" />
             </flux:field>
 
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.imprint_url') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.imprint_url_description') }}</flux:description>
+                <flux:input wire:model="imprintUrl" placeholder="https://example.com/imprint" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.terms_url') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.terms_url_description') }}</flux:description>
+                <flux:input wire:model="termsUrl" placeholder="https://example.com/terms" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.privacy_policy_url') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.privacy_policy_url_description') }}</flux:description>
+                <flux:input wire:model="privacyPolicyUrl" placeholder="https://example.com/privacy" />
+            </flux:field>
+
             <livewire:oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
 
             <flux:field>

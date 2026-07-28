@@ -500,6 +500,60 @@ test('the consent screen shows the client\'s description, service provider and l
         ->assertSee('oidc-client-logos/test-logo.svg', escape: false);
 });
 
+test('the consent screen shows the client\'s imprint, terms of service and privacy policy links when set', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Legal Links Client', ['https://example.test/callback']);
+    $client->forceFill([
+        'community_uid' => $uid,
+        'imprint_url' => 'https://app.example.com/imprint',
+        'terms_url' => 'https://app.example.com/terms',
+        'privacy_policy_url' => 'https://app.example.com/privacy',
+    ])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertOk()
+        ->assertSee('https://app.example.com/imprint', escape: false)
+        ->assertSee('https://app.example.com/terms', escape: false)
+        ->assertSee('https://app.example.com/privacy', escape: false)
+        ->assertSee(__('oidc_clients.imprint_url'))
+        ->assertSee(__('oidc_clients.terms_url'))
+        ->assertSee(__('oidc_clients.privacy_policy_url'));
+});
+
+test('the consent screen omits the legal links block when none are set', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('No Legal Links Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    $response->assertOk()
+        ->assertDontSee(__('oidc_clients.imprint_url'))
+        ->assertDontSee(__('oidc_clients.terms_url'))
+        ->assertDontSee(__('oidc_clients.privacy_policy_url'));
+});
+
 test('the consent screen omits description, service provider and logo when not set', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

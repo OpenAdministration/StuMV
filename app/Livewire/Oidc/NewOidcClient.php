@@ -18,6 +18,12 @@ class NewOidcClient extends Component
 
     public string $serviceProvider = '';
 
+    public string $imprintUrl = '';
+
+    public string $termsUrl = '';
+
+    public string $privacyPolicyUrl = '';
+
     public string $redirectUris = '';
 
     public array $scopes = ['openid', 'profile', 'email', 'groups'];
@@ -89,6 +95,9 @@ class NewOidcClient extends Component
             'name' => 'required|string|min:3|max:255',
             'description' => 'nullable|string|max:1000',
             'serviceProvider' => 'nullable|string|max:255',
+            'imprintUrl' => 'nullable|url',
+            'termsUrl' => 'nullable|url',
+            'privacyPolicyUrl' => 'nullable|url',
             'redirectUris' => ['required', function ($attribute, $value, $fail): void {
                 $uris = $this->redirectUriList();
                 if (empty($uris)) {
@@ -132,6 +141,9 @@ class NewOidcClient extends Component
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
             'description' => $this->description ?: null,
             'service_provider' => $this->serviceProvider ?: null,
+            'imprint_url' => $this->imprintUrl ?: null,
+            'terms_url' => $this->termsUrl ?: null,
+            'privacy_policy_url' => $this->privacyPolicyUrl ?: null,
         ])->save();
 
         $this->created = true;

@@ -278,6 +278,58 @@ test('description and service provider are optional', function (): void {
         ->and($client->logo_id)->toBeNull();
 });
 
+test('a client can be registered with imprint, terms of service and privacy policy links', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('imprintUrl', 'https://app.example.com/imprint')
+        ->set('termsUrl', 'https://app.example.com/terms')
+        ->set('privacyPolicyUrl', 'https://app.example.com/privacy')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->imprint_url)->toBe('https://app.example.com/imprint')
+        ->and($client->terms_url)->toBe('https://app.example.com/terms')
+        ->and($client->privacy_policy_url)->toBe('https://app.example.com/privacy');
+});
+
+test('imprint, terms of service and privacy policy links are optional', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
+
+    expect($client->imprint_url)->toBeNull()
+        ->and($client->terms_url)->toBeNull()
+        ->and($client->privacy_policy_url)->toBeNull();
+});
+
+test('registering a client rejects an invalid privacy policy URL', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewOidcClient::class, ['realm' => $community])
+        ->set('name', 'My SSO App')
+        ->set('privacyPolicyUrl', 'not-a-url')
+        ->set('redirectUris', 'https://app.example.com/callback')
+        ->set('scopes', ['openid'])
+        ->call('save')
+        ->assertHasErrors(['privacyPolicyUrl']);
+});
+
 test('a non-admin cannot register an OIDC client', function (): void {
     $community = newCommunity();
     actingAsModerator($community);

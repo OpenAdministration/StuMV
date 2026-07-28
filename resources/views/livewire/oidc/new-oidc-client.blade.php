@@ -58,6 +58,24 @@
             </flux:field>
 
             <flux:field>
+                <flux:label>{{ __('oidc_clients.imprint_url') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.imprint_url_description') }}</flux:description>
+                <flux:input wire:model="imprintUrl" placeholder="https://example.com/imprint" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.terms_url') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.terms_url_description') }}</flux:description>
+                <flux:input wire:model="termsUrl" placeholder="https://example.com/terms" />
+            </flux:field>
+
+            <flux:field>
+                <flux:label>{{ __('oidc_clients.privacy_policy_url') }}</flux:label>
+                <flux:description>{{ __('oidc_clients.privacy_policy_url_description') }}</flux:description>
+                <flux:input wire:model="privacyPolicyUrl" placeholder="https://example.com/privacy" />
+            </flux:field>
+
+            <flux:field>
                 <flux:label>{{ __('oidc_clients.redirect_uris') }}</flux:label>
                 <flux:description>{{ __('oidc_clients.redirect_uris_description') }}</flux:description>
                 <flux:textarea wire:model="redirectUris" rows="4" placeholder="https://app.example.com/auth/callback" />
