@@ -4,14 +4,14 @@
 @endphp
 <x-guest-layout :branding="$branding">
     <x-auth-card>
-        <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
+        <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[40rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
             <x-auth-logo :branding="$branding" />
 
             <flux:heading size="xl">{{ __('auth.authorize_heading') }}</flux:heading>
 
             <p>{{ __('auth.authorize_access_notice') }}</p>
 
-            <flux:card class="space-y-4">
+            <flux:card class="p-4 bg-zinc-100 dark:bg-zinc-900 space-y-4">
                 @if($client->logo_id)
                     <img class="w-full h-12 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
                 @endif
