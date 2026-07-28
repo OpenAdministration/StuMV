@@ -57,7 +57,7 @@
                                     @if(count($scopeData[$scope->id] ?? []) > 0)
                                         <div class="divide-y divide-zinc-200 dark:divide-zinc-700">
                                             @foreach ($scopeData[$scope->id] as $row)
-                                                <div class="grid grid-cols-[8rem_1fr] gap-x-4 items-center py-2 first:pt-0 last:pb-0">
+                                                <div class="grid sm:grid-cols-[8rem_1fr] gap-x-4 gap-y-1 items-center py-2 first:pt-0 last:pb-0">
                                                     <div class="font-semibold whitespace-nowrap">{{ $row['label'] }}</div>
                                                     <div>
                                                         @if($row['image'])
