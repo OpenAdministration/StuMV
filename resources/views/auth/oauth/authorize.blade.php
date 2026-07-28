@@ -9,8 +9,9 @@
 
             <flux:heading size="xl">{{ __('auth.authorize_heading') }}</flux:heading>
 
+            <p>{{ __('auth.authorize_access_notice') }}</p>
+
             <flux:card class="space-y-4">
-                <p>{{ __('auth.authorize_access_notice') }}</p>
                 @if($client->logo_id)
                     <img class="w-full h-12 shrink-0 object-contain object-center" src="{{ asset('storage/oidc-client-logos/'.$client->logo_id) }}" alt="{{ $client->name }}">
                 @endif
