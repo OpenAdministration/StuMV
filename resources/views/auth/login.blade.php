@@ -20,7 +20,7 @@
 
                 <flux:field>
                     <flux:label>{{ __('common.password') }}</flux:label>
-                    <flux:input type="password" name="password" id="password" required />
+                    <flux:checkbox type="password" name="password" id="password" required />
                     <flux:error name="password" />
                 </flux:field>
 
