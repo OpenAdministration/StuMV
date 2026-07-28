@@ -160,7 +160,15 @@ class RegisterUser extends Component
             // Fired with the Eloquent user (not the LDAP one) since only it
             // implements MustVerifyEmail/Notifiable, which the
             // SendEmailVerificationNotification listener requires to send.
-            event(new Registered($eloquentUser));
+            //
+            // ->afterResponse(): neither that listener nor the VerifyEmail
+            // notification is queued, so without this, the redirect below
+            // would wait on a real SMTP round-trip (MAIL_MAILER=smtp) -
+            // QUEUE_CONNECTION is "sync" everywhere with no worker running
+            // (same reasoning as App\Support\EndsAuthenticatedSession).
+            dispatch(function () use ($eloquentUser): void {
+                event(new Registered($eloquentUser));
+            })->afterResponse();
 
             return to_route('realm.login', ['realm' => $this->realm_uid])->with('status', __('user.registration_successful_verify_email'));
 
