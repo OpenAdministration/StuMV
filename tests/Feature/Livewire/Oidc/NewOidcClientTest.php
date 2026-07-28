@@ -3,8 +3,6 @@
 use App\Livewire\Oidc\NewOidcClient;
 use App\Models\PassportClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -240,9 +238,10 @@ test('registering a client rejects a back-channel logout URI that is not a valid
         ->assertHasErrors(['backChannelLogoutUri']);
 });
 
-test('a client can be registered with a description, service provider and logo', function (): void {
-    Storage::fake('public');
-
+test('a client can be registered with a description and service provider', function (): void {
+    // Logo upload is deliberately not part of this form - see
+    // App\Livewire\Oidc\EditOidcClientLogo's doc comment for why it's a
+    // separate, edit-only step.
     $community = newCommunity();
     actingAsAdmin($community);
 
@@ -250,7 +249,6 @@ test('a client can be registered with a description, service provider and logo',
         ->set('name', 'My SSO App')
         ->set('description', 'A tool for managing student union finances.')
         ->set('serviceProvider', 'Student Union of Example University')
-        ->set('logo', UploadedFile::fake()->image('logo.png', 100, 100))
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['openid'])
         ->call('save')
@@ -259,13 +257,10 @@ test('a client can be registered with a description, service provider and logo',
     $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
 
     expect($client->description)->toBe('A tool for managing student union finances.')
-        ->and($client->service_provider)->toBe('Student Union of Example University')
-        ->and($client->logo_id)->not->toBeNull();
-
-    Storage::disk('public')->assertExists('oidc-client-logos/'.$client->logo_id);
+        ->and($client->service_provider)->toBe('Student Union of Example University');
 });
 
-test('description, service provider and logo are optional', function (): void {
+test('description and service provider are optional', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
@@ -281,24 +276,6 @@ test('description, service provider and logo are optional', function (): void {
     expect($client->description)->toBeNull()
         ->and($client->service_provider)->toBeNull()
         ->and($client->logo_id)->toBeNull();
-});
-
-test('an invalid logo file type is rejected and never reaches storage', function (): void {
-    Storage::fake('public');
-
-    $community = newCommunity();
-    actingAsAdmin($community);
-
-    Livewire::test(NewOidcClient::class, ['realm' => $community])
-        ->set('name', 'My SSO App')
-        ->set('logo', UploadedFile::fake()->create('not-an-image.pdf', 10))
-        ->set('redirectUris', 'https://app.example.com/callback')
-        ->set('scopes', ['openid'])
-        ->call('save')
-        ->assertHasErrors(['logo']);
-
-    expect(PassportClient::where('name', 'My SSO App')->exists())->toBeFalse();
-    Storage::disk('public')->assertDirectoryEmpty('oidc-client-logos');
 });
 
 test('a non-admin cannot register an OIDC client', function (): void {

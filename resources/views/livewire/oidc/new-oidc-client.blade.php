@@ -21,7 +21,12 @@
             <flux:callout variant="warning" icon="triangle-alert" heading="{{ __('oidc_clients.no_client_secret_warning') }}" />
         @endif
 
-        <div class="flex justify-end">
+        <flux:text class="text-base">{{ __('oidc_clients.logo_after_creation_notice') }}</flux:text>
+
+        <div class="flex justify-end gap-2">
+            <flux:button wire:navigate href="{{ route('realms.oidc-clients.edit', ['realm' => $uid, 'client' => $createdClientId]) }}">
+                {{ __('oidc_clients.edit_now') }}
+            </flux:button>
             <flux:button variant="primary" wire:navigate href="{{ route('realms.oidc-clients', ['realm' => $uid]) }}">
                 {{ __('oidc_clients.done') }}
             </flux:button>
@@ -50,18 +55,6 @@
                 <flux:label>{{ __('oidc_clients.service_provider') }}</flux:label>
                 <flux:description>{{ __('oidc_clients.service_provider_description') }}</flux:description>
                 <flux:input wire:model="serviceProvider" placeholder="{{ __('oidc_clients.service_provider_placeholder') }}" />
-            </flux:field>
-
-            <flux:field>
-                <flux:label>{{ __('oidc_clients.logo') }}</flux:label>
-                <flux:description>{{ __('oidc_clients.logo_description') }}</flux:description>
-                <flux:file-upload wire:model="logo" accept="image/*">
-                    <flux:file-upload.dropzone
-                        :heading="__('common.drop_file_here')"
-                        text="JPEG, PNG, WebP, SVG"
-                    />
-                </flux:file-upload>
-                <flux:error name="logo" />
             </flux:field>
 
             <flux:field>

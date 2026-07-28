@@ -3,7 +3,6 @@
 namespace App\Livewire\Oidc;
 
 use App\Ldap\Community;
-use App\Livewire\Concerns\StoresOidcClientLogo;
 use App\Models\PassportClient;
 use Flux\Flux;
 use Illuminate\Support\Str;
@@ -11,13 +10,9 @@ use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class EditOidcClient extends Component
 {
-    use StoresOidcClientLogo;
-    use WithFileUploads;
-
     #[Locked]
     public string $clientId;
 
@@ -28,10 +23,6 @@ class EditOidcClient extends Component
     public string $description = '';
 
     public string $serviceProvider = '';
-
-    public ?string $logoId = null;
-
-    public $logo = null;
 
     public string $redirectUris = '';
 
@@ -58,7 +49,6 @@ class EditOidcClient extends Component
         $this->name = $client->name;
         $this->description = $client->description ?? '';
         $this->serviceProvider = $client->service_provider ?? '';
-        $this->logoId = $client->logo_id;
         $this->redirectUris = implode("\n", $client->redirect_uris ?? []);
         $this->scopes = $client->scopes ?? [];
         $this->requiresConsent = $client->requires_consent;
@@ -112,7 +102,6 @@ class EditOidcClient extends Component
             'name' => 'required|string|min:3|max:255',
             'description' => 'nullable|string|max:1000',
             'serviceProvider' => 'nullable|string|max:255',
-            'logo' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:5120'],
             'redirectUris' => ['required', function ($attribute, $value, $fail): void {
                 $uris = $this->redirectUriList();
                 if (empty($uris)) {
@@ -138,22 +127,6 @@ class EditOidcClient extends Component
         return view('livewire.oidc.edit-oidc-client')->title(__('oidc_clients.edit_title'));
     }
 
-    /**
-     * Removed immediately (unlike every other field, only committed via
-     * save()) - mirrors App\Livewire\Realm\EditRealmBranding's own logo
-     * removal, which is likewise a standalone action rather than part of a
-     * larger form submit.
-     */
-    public function removeLogo(): void
-    {
-        $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->clientId);
-        $this->deleteOidcClientLogo($client->logo_id);
-        $client->forceFill(['logo_id' => null])->save();
-        $this->logoId = null;
-
-        Flux::toast(variant: 'success', text: __('oidc_clients.logo_removed'));
-    }
-
     public function save(ClientRepository $clients)
     {
         $this->validate();
@@ -165,12 +138,6 @@ class EditOidcClient extends Component
 
         $clients->update($client, $this->name, $this->redirectUriList());
 
-        if ($this->logo) {
-            $this->deleteOidcClientLogo($this->logoId);
-            $this->logoId = $this->storeOidcClientLogo($this->logo);
-            $this->reset('logo');
-        }
-
         $client->forceFill([
             'scopes' => array_values($this->scopes),
             'requires_consent' => $this->requiresConsent,
@@ -178,7 +145,6 @@ class EditOidcClient extends Component
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
             'description' => $this->description ?: null,
             'service_provider' => $this->serviceProvider ?: null,
-            'logo_id' => $this->logoId,
         ]);
 
         // A hashed secret can't be recovered to show again if client

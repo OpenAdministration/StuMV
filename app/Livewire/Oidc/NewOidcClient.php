@@ -3,18 +3,13 @@
 namespace App\Livewire\Oidc;
 
 use App\Ldap\Community;
-use App\Livewire\Concerns\StoresOidcClientLogo;
 use App\Models\PassportClient;
 use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class NewOidcClient extends Component
 {
-    use StoresOidcClientLogo;
-    use WithFileUploads;
-
     public const AVAILABLE_SCOPES = ['openid', 'profile', 'email', 'phone', 'address', 'groups'];
 
     public string $name = '';
@@ -22,13 +17,6 @@ class NewOidcClient extends Component
     public string $description = '';
 
     public string $serviceProvider = '';
-
-    // Explicit raster whitelist rather than the 'image' rule - it accepts
-    // formats (e.g. avif) that aren't necessarily previewable via Livewire's
-    // temporaryUrl() (see config/livewire.php's preview_mimes) - must stay in
-    // sync with that list. Matches App\Livewire\Realm\EditRealmBranding's
-    // logo upload.
-    public $logo = null;
 
     public string $redirectUris = '';
 
@@ -101,7 +89,6 @@ class NewOidcClient extends Component
             'name' => 'required|string|min:3|max:255',
             'description' => 'nullable|string|max:1000',
             'serviceProvider' => 'nullable|string|max:255',
-            'logo' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:5120'],
             'redirectUris' => ['required', function ($attribute, $value, $fail): void {
                 $uris = $this->redirectUriList();
                 if (empty($uris)) {
@@ -145,7 +132,6 @@ class NewOidcClient extends Component
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
             'description' => $this->description ?: null,
             'service_provider' => $this->serviceProvider ?: null,
-            'logo_id' => $this->logo ? $this->storeOidcClientLogo($this->logo) : null,
         ])->save();
 
         $this->created = true;
