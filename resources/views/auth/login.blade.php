@@ -47,7 +47,7 @@
                     @endif
                 </div>
 
-                <div class="p-6 grid grid-cols-2 gap-2">
+                <div class="p-6 grid sm:grid-cols-2 gap-2">
                     <flux:button wire:navigate href="{{ route('password.request', ['realm' => $realm->getShortCode()]) }}">{{ __('auth.forgot_password') }}</flux:button>
                     <flux:button wire:navigate href="{{ route('realm.register', ['realm' => $realm->getShortCode()]) }}">{{ __('auth.sign_up_prompt') }}</flux:button>
                 </div>
