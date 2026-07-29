@@ -111,7 +111,7 @@ function newCommunity(?string $uid = null): Community
 |
 */
 
-function makeIdentityProvider(string $realmUid, string $name = 'Test IdP', bool $enabled = true): RealmIdentityProvider
+function makeIdentityProvider(string $realmUid, string $name = 'Test IdP', bool $enabled = true, array $extraAuthorizeParams = []): RealmIdentityProvider
 {
     return RealmIdentityProvider::create([
         'realm' => $realmUid,
@@ -120,6 +120,7 @@ function makeIdentityProvider(string $realmUid, string $name = 'Test IdP', bool 
         'client_id' => 'client-id',
         'client_secret' => 'client-secret',
         'groups_claim' => 'groups',
+        'extra_authorize_params' => $extraAuthorizeParams,
         'enabled' => $enabled,
     ]);
 }

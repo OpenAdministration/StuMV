@@ -30,7 +30,10 @@ class OidcLoginController extends Controller
 
         $oauthProvider = $this->buildProvider($realm, $provider);
 
-        $authorizationUrl = $oauthProvider->getAuthorizationUrl(['scope' => 'openid email profile']);
+        $authorizationUrl = $oauthProvider->getAuthorizationUrl([
+            'scope' => 'openid email profile',
+            ...$provider->extra_authorize_params ?? [],
+        ]);
 
         session([
             'identity_provider_state' => $oauthProvider->getState(),

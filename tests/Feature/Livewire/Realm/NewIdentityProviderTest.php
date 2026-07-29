@@ -32,6 +32,42 @@ test('a new identity provider can be registered', function (): void {
         ->and($provider->enabled)->toBeTrue();
 });
 
+test('extra authorize params can be entered as key=value lines and are stored as an array', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewIdentityProvider::class, ['realm' => $community])
+        ->set('name', 'My University')
+        ->set('issuer', 'https://idp.example.test')
+        ->set('client_id', 'client-id')
+        ->set('client_secret', 'client-secret')
+        ->set('groups_claim', 'groups')
+        ->set('extra_authorize_params_input', "kc_idp_hint=my-upstream-idp\nprompt=login")
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $provider = RealmIdentityProvider::where('name', 'My University')->firstOrFail();
+
+    expect($provider->extra_authorize_params)->toBe([
+        'kc_idp_hint' => 'my-upstream-idp',
+        'prompt' => 'login',
+    ]);
+});
+
+test('a malformed extra authorize params line is rejected', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(NewIdentityProvider::class, ['realm' => $community])
+        ->set('name', 'My University')
+        ->set('issuer', 'https://idp.example.test')
+        ->set('client_id', 'client-id')
+        ->set('client_secret', 'client-secret')
+        ->set('extra_authorize_params_input', 'not-a-key-value-line')
+        ->call('save')
+        ->assertHasErrors(['extra_authorize_params_input']);
+});
+
 test('registering an identity provider requires a name', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
