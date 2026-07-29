@@ -6,12 +6,16 @@
             </div>
         @endif
 
-        <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
-            <x-auth-logo :branding="$branding" />
+        <flux:card class="p-0 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
+            <div class="p-6">
+                <x-auth-logo :branding="$branding" />
+            </div>
 
-            <div>{{ __('auth.verification_text') }}</div>
+            <div class="p-6">
+                <div>{{ __('auth.verification_text') }}</div>
+            </div>
 
-            <div class="flex flex-wrap gap-2 items-center justify-end">
+            <div class="p-6 flex flex-wrap gap-2 items-center justify-end">
                 <form method="POST" action="{{ route('realm.logout', ['realm' => $realm->getShortCode()]) }}">
                     @csrf
                     <flux:button
