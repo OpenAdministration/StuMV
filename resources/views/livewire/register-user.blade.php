@@ -54,6 +54,6 @@
                 <x-slot:submit_label>{{ __('user.register') }}</x-slot:submit_label>
                 <x-slot:submit_icon>user-plus</x-slot:submit_icon>
             </div>
-        </x-livewire-form>
-    </flux:card>
+        </flux:card>
+    </x-livewire-form>
 </x-auth-card>
