@@ -1,11 +1,11 @@
 <x-auth-card>
-    <x-livewire-form>
-        <flux:card class="p-0 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
-            <div class="p-6">
-                <x-auth-logo :branding="$branding" />
-            </div>
+    <flux:card class="p-0 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
+        <div class="p-6">
+            <x-auth-logo :branding="$branding" />
+        </div>
 
-            <div class="p-6 flex flex-col gap-4 pb-6">
+        <x-livewire-form class="p-6 divide-y divide-zinc-200 dark:divide-zinc-700">
+            <div class="flex flex-col gap-4 pb-6">
                 <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
 
                 <flux:field>
@@ -49,11 +49,9 @@
                 </flux:field>
             </div>
 
-            <div class="p-6">
-                <x-slot:abort_route>{{ route('realm.login', ['realm' => $realm_uid]) }}</x-slot:abort_route>
-                <x-slot:submit_label>{{ __('user.register') }}</x-slot:submit_label>
-                <x-slot:submit_icon>user-plus</x-slot:submit_icon>
-            </div>
-        </flux:card>
-    </x-livewire-form>
+            <x-slot:abort_route>{{ route('realm.login', ['realm' => $realm_uid]) }}</x-slot:abort_route>
+            <x-slot:submit_label>{{ __('user.register') }}</x-slot:submit_label>
+            <x-slot:submit_icon>user-plus</x-slot:submit_icon>
+        </x-livewire-form>
+    </flux:card>
 </x-auth-card>
