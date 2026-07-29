@@ -7,6 +7,8 @@ return [
     'new' => 'Neuer Identity Provider',
     'new_title' => 'Neuen Identity Provider hinzufügen',
     'edit_title' => 'Identity Provider bearbeiten',
+    'tab_general' => 'Allgemein',
+    'tab_mappings' => 'Rollenzuordnungen',
     'edit_success' => 'Der Identity Provider wurde aktualisiert.',
     'created_success' => 'Der Identity Provider wurde hinzugefügt.',
     'name' => 'Name',

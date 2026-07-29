@@ -7,6 +7,8 @@ return [
     'new' => 'New identity provider',
     'new_title' => 'Add a new identity provider',
     'edit_title' => 'Edit identity provider',
+    'tab_general' => 'General',
+    'tab_mappings' => 'Role mappings',
     'edit_success' => 'The identity provider was updated.',
     'created_success' => 'The identity provider was added.',
     'name' => 'Name',
