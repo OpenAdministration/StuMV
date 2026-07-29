@@ -26,7 +26,8 @@
 
         <flux:field>
             <flux:label>{{ __('identity_providers.client_secret') }}</flux:label>
-            <flux:input type="password" wire:model="client_secret" />
+            <flux:description>{{ __('identity_providers.client_secret_edit_description') }}</flux:description>
+            <flux:input type="password" wire:model="client_secret" placeholder="••••••••" />
             <flux:error name="client_secret" />
         </flux:field>
 

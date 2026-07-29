@@ -50,7 +50,6 @@ class EditIdentityProvider extends Component
         $this->name = $provider->name;
         $this->issuer = $provider->issuer;
         $this->client_id = $provider->client_id;
-        $this->client_secret = $provider->client_secret;
         $this->groups_claim = $provider->groups_claim;
         $this->enabled = $provider->enabled;
     }
@@ -61,7 +60,10 @@ class EditIdentityProvider extends Component
             'name' => 'required|string|min:2|max:255',
             'issuer' => 'required|url|max:255',
             'client_id' => 'required|string|max:255',
-            'client_secret' => 'required|string|max:255',
+            // Left blank on mount (see mount()) so the stored secret's length
+            // never leaks through the password field's dot count - nullable
+            // here means "leave the current secret unchanged".
+            'client_secret' => 'nullable|string|max:255',
             'groups_claim' => 'required|string|max:255',
             'enabled' => 'boolean',
         ];
@@ -93,14 +95,14 @@ class EditIdentityProvider extends Component
     {
         $this->validate();
 
-        $this->provider()->update([
+        $this->provider()->update(array_filter([
             'name' => $this->name,
             'issuer' => rtrim($this->issuer, '/'),
             'client_id' => $this->client_id,
-            'client_secret' => $this->client_secret,
+            'client_secret' => $this->client_secret !== '' ? $this->client_secret : null,
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
-        ]);
+        ], fn ($value) => $value !== null));
 
         Flux::toast(variant: 'success', text: __('identity_providers.edit_success'));
 

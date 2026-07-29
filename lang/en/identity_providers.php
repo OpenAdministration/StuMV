@@ -15,6 +15,7 @@ return [
     'issuer_description' => 'The identity provider\'s base URL. Its configuration is fetched automatically from {issuer}/.well-known/openid-configuration.',
     'client_id' => 'Client ID',
     'client_secret' => 'Client secret',
+    'client_secret_edit_description' => 'Leave blank to keep the currently stored secret.',
     'groups_claim' => 'Groups claim',
     'groups_claim_description' => 'Name of the claim the identity provider uses to send the person\'s group memberships (default: "groups").',
     'enabled' => 'Enabled',

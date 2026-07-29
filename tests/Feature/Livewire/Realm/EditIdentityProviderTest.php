@@ -9,7 +9,7 @@ use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
-test('the edit form is pre-filled with the provider\'s current values', function (): void {
+test('the edit form is pre-filled with the provider\'s current values, but never the client secret', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode(), 'My University');
     actingAsAdmin($community);
@@ -18,7 +18,7 @@ test('the edit form is pre-filled with the provider\'s current values', function
         ->assertSet('name', 'My University')
         ->assertSet('issuer', 'https://idp.example.test')
         ->assertSet('client_id', 'client-id')
-        ->assertSet('client_secret', 'client-secret')
+        ->assertSet('client_secret', '')
         ->assertSet('groups_claim', 'groups')
         ->assertSet('enabled', true);
 });
@@ -41,6 +41,22 @@ test('a provider\'s settings can be updated', function (): void {
     expect($provider->name)->toBe('Renamed IdP')
         ->and($provider->client_secret)->toBe('new-secret')
         ->and($provider->enabled)->toBeFalse();
+});
+
+test('leaving the client secret blank keeps the current secret unchanged', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    actingAsAdmin($community);
+
+    Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
+        ->set('name', 'Renamed IdP')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $provider->refresh();
+
+    expect($provider->name)->toBe('Renamed IdP')
+        ->and($provider->client_secret)->toBe('client-secret');
 });
 
 test('another realm\'s identity provider cannot be opened through this edit page', function (): void {

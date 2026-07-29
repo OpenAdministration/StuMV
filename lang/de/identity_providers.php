@@ -15,6 +15,7 @@ return [
     'issuer_description' => 'Die Basis-URL des Identity Providers. Die Konfiguration wird automatisch unter {issuer}/.well-known/openid-configuration abgerufen.',
     'client_id' => 'Client-ID',
     'client_secret' => 'Client-Secret',
+    'client_secret_edit_description' => 'Leer lassen, um das aktuell hinterlegte Secret beizubehalten.',
     'groups_claim' => 'Gruppen-Claim',
     'groups_claim_description' => 'Name des Claims, in dem der Identity Provider die Gruppenzugehörigkeiten der Person übermittelt (Standard: "groups").',
     'enabled' => 'Aktiviert',
