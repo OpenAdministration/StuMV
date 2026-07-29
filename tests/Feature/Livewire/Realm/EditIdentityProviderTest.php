@@ -1,5 +1,6 @@
 <?php
 
+use App\Ldap\Committee;
 use App\Livewire\Realm\EditIdentityProvider;
 use App\Models\IdentityProviderRoleMapping;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -75,6 +76,40 @@ test('a non-admin cannot edit an identity provider', function (): void {
     actingAsModerator($community);
 
     $this->get(route('realms.identity-providers.edit', ['realm' => $community->getShortCode(), 'provider' => $provider->id]))->assertForbidden();
+});
+
+test('an existing mapping shows the committee/role LDAP descriptions, linked to their respective pages', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $provider->roleMappings()->create([
+        'external_group' => 'stura-member',
+        'committee_dn' => $committee->getDn(),
+        'role_cn' => $role->getFirstAttribute('cn'),
+    ]);
+    actingAsAdmin($community);
+
+    Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
+        ->assertSee($committee->getFirstAttribute('description'))
+        ->assertSee($role->getFirstAttribute('description'))
+        ->assertSeeHtml(route('committees.roles', ['realm' => $community->getShortCode(), 'ou' => $committee->getFirstAttribute('ou')]))
+        ->assertSeeHtml(route('committees.roles.members', ['realm' => $community->getShortCode(), 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]));
+});
+
+test('a mapping whose committee no longer exists in LDAP falls back to showing the raw DN, without a link', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    $provider->roleMappings()->create([
+        'external_group' => 'stura-member',
+        'committee_dn' => Committee::dnFrom($community->getShortCode(), 'gone'),
+        'role_cn' => 'gone-role',
+    ]);
+    actingAsAdmin($community);
+
+    Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
+        ->assertSee('gone-role')
+        ->assertHasNoErrors();
 });
 
 test('a role mapping can be added and lists the committee/role it targets', function (): void {

@@ -4,6 +4,8 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Role;
+use App\Models\IdentityProviderRoleMapping;
 use App\Models\RealmIdentityProvider;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
@@ -84,8 +86,19 @@ class EditIdentityProvider extends Component
             $roles = $committee->roles()->get();
         }
 
+        $mappingRows = $this->provider()->roleMappings()->orderBy('external_group')->get()
+            ->map(function (IdentityProviderRoleMapping $mapping): array {
+                $committee = Committee::find($mapping->committee_dn);
+
+                return [
+                    'mapping' => $mapping,
+                    'committee' => $committee,
+                    'role' => $committee ? Role::find('cn='.$mapping->role_cn.','.$mapping->committee_dn) : null,
+                ];
+            });
+
         return view('livewire.realm.edit-identity-provider', [
-            'mappings' => $this->provider()->roleMappings()->orderBy('external_group')->get(),
+            'mappingRows' => $mappingRows,
             'committees' => $committees,
             'roles' => $roles,
         ])->title(__('identity_providers.edit_title'));

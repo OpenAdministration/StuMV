@@ -60,7 +60,7 @@
                     <flux:text class="mt-2">{{ __('identity_providers.mappings_explanation') }}</flux:text>
                 </div>
 
-                @if(count($mappings) > 0)
+                @if(count($mappingRows) > 0)
                     <flux:table>
                         <flux:table.columns>
                             <flux:table.column>{{ __('identity_providers.mappings_external_group') }}</flux:table.column>
@@ -69,13 +69,36 @@
                             <flux:table.column></flux:table.column>
                         </flux:table.columns>
                         <flux:table.rows>
-                        @foreach($mappings as $mapping)
+                        @foreach($mappingRows as $row)
+                            @php($mapping = $row['mapping'])
+                            @php($committee = $row['committee'])
+                            @php($role = $row['role'])
                             <flux:table.row>
                                 <flux:table.cell>{{ $mapping->external_group }}</flux:table.cell>
                                 <flux:table.cell>
-                                    <div class="text-xs text-zinc-500">{{ $mapping->committee_dn }}</div>
+                                    @if($committee)
+                                        <flux:link
+                                            wire:navigate
+                                            href="{{ route('committees.roles', ['realm' => $uid, 'ou' => $committee->getFirstAttribute('ou')]) }}"
+                                        >
+                                            {{ $committee->getFirstAttribute('description') }}
+                                        </flux:link>
+                                    @else
+                                        <div class="text-xs text-zinc-500">{{ $mapping->committee_dn }}</div>
+                                    @endif
                                 </flux:table.cell>
-                                <flux:table.cell>{{ $mapping->role_cn }}</flux:table.cell>
+                                <flux:table.cell>
+                                    @if($committee && $role)
+                                        <flux:link
+                                            wire:navigate
+                                            href="{{ route('committees.roles.members', ['realm' => $uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $role->getFirstAttribute('cn')]) }}"
+                                        >
+                                            {{ $role->getFirstAttribute('description') }}
+                                        </flux:link>
+                                    @else
+                                        <div class="text-xs text-zinc-500">{{ $mapping->role_cn }}</div>
+                                    @endif
+                                </flux:table.cell>
                                 <flux:table.cell>
                                     <div class="flex justify-end">
                                         <flux:button
