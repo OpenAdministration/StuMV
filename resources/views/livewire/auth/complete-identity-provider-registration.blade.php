@@ -1,5 +1,5 @@
 <x-auth-card>
-    <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
+    <flux:card class="grid gap-4 w-full bg-white dark:bg-zinc-800 max-w-[28rem]! mx-auto border-1 shadow-sm">
         <x-auth-logo :branding="$branding" />
         <flux:heading size="xl">{{ __('identity_providers.complete_registration_title') }}</flux:heading>
         <flux:text>{{ __('identity_providers.complete_registration_explanation', ['email' => $email]) }}</flux:text>
