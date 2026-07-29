@@ -1,7 +1,7 @@
 @php
     $logoID = ($branding ?? null)?->logo_id;
 @endphp
-<div class="flex items-center justify-center space-x-6 mb-4">
+<div class="flex items-center justify-center space-x-6">
     @if($logoID)
         <img src="{{ asset('storage/realm-branding/' . $logoID) }}" alt="{{ config('app.name') }}" class="w-full h-22 object-contain">
     @else
