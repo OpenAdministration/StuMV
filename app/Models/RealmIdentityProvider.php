@@ -20,7 +20,6 @@ class RealmIdentityProvider extends Model
         'client_id',
         'client_secret',
         'groups_claim',
-        'extra_authorize_params',
         'enabled',
     ];
 
@@ -29,7 +28,6 @@ class RealmIdentityProvider extends Model
     {
         return [
             'client_secret' => 'encrypted',
-            'extra_authorize_params' => 'array',
             'enabled' => 'boolean',
         ];
     }

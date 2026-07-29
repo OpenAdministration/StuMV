@@ -23,30 +23,6 @@ test('the edit form is pre-filled with the provider\'s current values', function
         ->assertSet('enabled', true);
 });
 
-test('the edit form is pre-filled with the provider\'s extra authorize params as key=value lines', function (): void {
-    $community = newCommunity();
-    $provider = makeIdentityProvider($community->getShortCode(), extraAuthorizeParams: ['kc_idp_hint' => 'my-upstream-idp']);
-    actingAsAdmin($community);
-
-    Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
-        ->assertSet('extra_authorize_params_input', 'kc_idp_hint=my-upstream-idp');
-});
-
-test('a provider\'s extra authorize params can be updated', function (): void {
-    $community = newCommunity();
-    $provider = makeIdentityProvider($community->getShortCode());
-    actingAsAdmin($community);
-
-    Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
-        ->set('extra_authorize_params_input', 'kc_idp_hint=my-upstream-idp')
-        ->call('save')
-        ->assertHasNoErrors();
-
-    $provider->refresh();
-
-    expect($provider->extra_authorize_params)->toBe(['kc_idp_hint' => 'my-upstream-idp']);
-});
-
 test('a provider\'s settings can be updated', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());

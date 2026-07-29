@@ -37,13 +37,6 @@
             <flux:error name="groups_claim" />
         </flux:field>
 
-        <flux:field>
-            <flux:label>{{ __('identity_providers.extra_authorize_params') }}</flux:label>
-            <flux:description>{{ __('identity_providers.extra_authorize_params_description') }}</flux:description>
-            <flux:textarea wire:model="extra_authorize_params_input" rows="3" placeholder="kc_idp_hint=my-upstream-idp" />
-            <flux:error name="extra_authorize_params_input" />
-        </flux:field>
-
         <flux:switch wire:model="enabled" label="{{ __('identity_providers.enabled') }}" />
 
         <x-slot:abort_route>

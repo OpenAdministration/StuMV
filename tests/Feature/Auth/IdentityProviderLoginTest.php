@@ -163,18 +163,6 @@ test('an invalid or replayed state is rejected', function (): void {
     $this->assertGuest();
 });
 
-test('extra authorize params configured on the provider are appended to the authorize redirect', function (): void {
-    $community = newCommunity();
-    $provider = makeIdentityProvider($community->getShortCode(), extraAuthorizeParams: ['kc_idp_hint' => 'my-upstream-idp']);
-    fakeIdentityProvider($provider->issuer, ['sub' => 'x', 'email' => 'someone@example.test']);
-
-    $redirect = $this->get(route('identity-provider.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]));
-
-    parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $query);
-
-    expect($query['kc_idp_hint'] ?? null)->toBe('my-upstream-idp');
-});
-
 test('a disabled identity provider cannot be used to log in', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode(), enabled: false);

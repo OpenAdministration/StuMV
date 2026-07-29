@@ -3,15 +3,12 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
-use App\Livewire\Concerns\ParsesExtraAuthorizeParams;
 use App\Models\RealmIdentityProvider;
 use Flux\Flux;
 use Livewire\Component;
 
 class NewIdentityProvider extends Component
 {
-    use ParsesExtraAuthorizeParams;
-
     public string $uid = '';
 
     public string $name = '';
@@ -23,8 +20,6 @@ class NewIdentityProvider extends Component
     public string $client_secret = '';
 
     public string $groups_claim = 'groups';
-
-    public string $extra_authorize_params_input = '';
 
     public bool $enabled = true;
 
@@ -42,7 +37,6 @@ class NewIdentityProvider extends Component
             'client_id' => 'required|string|max:255',
             'client_secret' => 'required|string|max:255',
             'groups_claim' => 'required|string|max:255',
-            'extra_authorize_params_input' => ['nullable', 'string', $this->validateExtraAuthorizeParamsLine(...)],
             'enabled' => 'boolean',
         ];
     }
@@ -63,7 +57,6 @@ class NewIdentityProvider extends Component
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
             'groups_claim' => $this->groups_claim,
-            'extra_authorize_params' => $this->parseExtraAuthorizeParams($this->extra_authorize_params_input),
             'enabled' => $this->enabled,
         ]);
 
