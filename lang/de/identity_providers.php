@@ -39,7 +39,6 @@ return [
     'mapping_delete_warning' => 'Soll die Zuordnung für die Gruppe :name wirklich gelöscht werden?',
     'mapping_deleted_success' => 'Die Zuordnung wurde gelöscht.',
     'auto_assigned_comment' => 'Automatisch zugeordnet über den Identity Provider „:provider“.',
-    'login_button' => 'Login mit :name',
     'complete_registration_title' => 'Fast geschafft',
     'complete_registration_explanation' => 'Es existiert noch kein Konto mit der E-Mail-Adresse :email. Wähle einen Benutzernamen, um eines anzulegen.',
     'complete_registration_submit' => 'Konto anlegen',

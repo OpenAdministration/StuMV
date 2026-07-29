@@ -40,7 +40,7 @@
                         <div class="flex flex-col gap-2">
                             @foreach($identityProviders as $identityProvider)
                                 <flux:button href="{{ route('identity-provider.redirect', ['realm' => $realm->getShortCode(), 'provider' => $identityProvider->id]) }}">
-                                    {{ __('identity_providers.login_button', ['name' => $identityProvider->name]) }}
+                                    {{ $identityProvider->name }}
                                 </flux:button>
                             @endforeach
                         </div>

@@ -39,7 +39,6 @@ return [
     'mapping_delete_warning' => 'Should the mapping for the group :name really be deleted?',
     'mapping_deleted_success' => 'The mapping was deleted.',
     'auto_assigned_comment' => 'Automatically assigned via the identity provider ":provider".',
-    'login_button' => 'Log in with :name',
     'complete_registration_title' => 'Almost done',
     'complete_registration_explanation' => 'No account with the email address :email exists yet. Pick a username to create one.',
     'complete_registration_submit' => 'Create account',
