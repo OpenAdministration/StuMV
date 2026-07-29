@@ -35,7 +35,7 @@
                     <flux:button variant="primary" icon="log-in" type="submit">{{ __('auth.log_in') }}</flux:button>
 
                     @if($identityProviders->isNotEmpty())
-                        <flux:separator text="{{ __('auth.or_log_in_with') }}" class="my-3" />
+                        <flux:separator text="{{ __('auth.or_log_in_with') }}" class="my-6" />
 
                         <div class="flex flex-col gap-2">
                             @foreach($identityProviders as $identityProvider)
