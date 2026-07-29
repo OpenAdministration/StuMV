@@ -28,7 +28,7 @@ function purgeIdentityProviderRegisteredUser(string $username): void
 }
 
 /** Stash an "identity_provider_pending" session payload the same way OidcLoginController::callback does for a brand-new account. */
-function stashIdentityProviderPending(string $realmUid, ?int $providerId, string $email, array $overrides = []): void
+function stashIdentityProviderPending(string $realmUid, ?string $providerId, string $email, array $overrides = []): void
 {
     test()->withSession(['identity_provider_pending' => array_merge([
         'realm' => $realmUid,

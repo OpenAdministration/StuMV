@@ -11,7 +11,7 @@ class ListIdentityProviders extends Component
 {
     public string $uid;
 
-    public ?int $deleteProviderId = null;
+    public ?string $deleteProviderId = null;
 
     public string $deleteProviderName = '';
 
@@ -29,7 +29,7 @@ class ListIdentityProviders extends Component
             ->title(__('identity_providers.list_title'));
     }
 
-    public function deletePrepare(int $providerId): void
+    public function deletePrepare(string $providerId): void
     {
         $provider = RealmIdentityProvider::where('realm', $this->uid)->findOrFail($providerId);
         $this->deleteProviderId = $provider->id;

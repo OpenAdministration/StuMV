@@ -22,7 +22,7 @@ class CompleteIdentityProviderRegistration extends Component
     public string $realm_uid;
 
     #[Locked]
-    public ?int $provider_id = null;
+    public ?string $provider_id = null;
 
     #[Locked]
     public string $email = '';

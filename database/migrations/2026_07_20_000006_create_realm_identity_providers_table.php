@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('realm_identity_providers', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->string('realm')->index();
             $table->string('name');
             $table->string('issuer');
@@ -25,7 +25,7 @@ return new class extends Migration
 
         Schema::create('identity_provider_role_mappings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('provider_id')->constrained('realm_identity_providers')->cascadeOnDelete();
+            $table->foreignUuid('provider_id')->constrained('realm_identity_providers')->cascadeOnDelete();
             $table->string('external_group');
             $table->string('committee_dn');
             $table->string('role_cn');

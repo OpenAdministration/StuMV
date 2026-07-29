@@ -12,7 +12,7 @@ use Livewire\Component;
 class EditIdentityProvider extends Component
 {
     #[Locked]
-    public int $providerId;
+    public string $providerId;
 
     public string $uid = '';
 
