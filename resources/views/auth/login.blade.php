@@ -14,7 +14,7 @@
                     <x-auth-logo :branding="$branding" />
                 </div>
 
-                <div class="p-6 space-y-4">
+                <div class="p-6 flex flex-col space-y-4">
                     <flux:field>
                         <flux:label>{{ __('auth.username_or_mail') }}</flux:label>
                         <flux:input type="text" name="uid" id="uid" :value="old('uid')" required autofocus />

@@ -1,15 +1,19 @@
 <x-auth-card>
-    <flux:card class="grid gap-4 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm">
-        <x-auth-logo :branding="$branding" />
-        <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
-        <x-livewire-form>
-            <div class="flex flex-col gap-4">
+    <flux:card class="p-0 w-full bg-zinc-50 dark:bg-zinc-900 sm:bg-white sm:dark:bg-zinc-800 max-w-[28rem]! mx-auto border-0 sm:border-1 sm:shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
+        <div class="p-6">
+            <x-auth-logo :branding="$branding" />
+        </div>
+
+        <x-livewire-form class="p-6 divide-y divide-zinc-200 dark:divide-zinc-700">
+            <div class="flex flex-col gap-4 pb-6">
+                <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
+
                 <flux:field>
                     <flux:label>{{ __('common.email') }}</flux:label>
                     <flux:input wire:model.live="email" type="email" autofocus />
                     <flux:error name="email" class="mb-2" />
                     <flux:error name="domain" class="mb-2" />
-                    <flux:description>{{ __('user.help.only_uni_mail') }}</flux:descripton>
+                    <flux:description>{{ __('user.help.only_uni_mail') }}</flux:description>
                 </flux:field>
 
                 <flux:field>

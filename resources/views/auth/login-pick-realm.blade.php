@@ -13,7 +13,7 @@
                     <x-auth-logo :branding="$branding ?? null" />
                 </div>
 
-                <div class="p-6 space-y-4">
+                <div class="p-6 flex flex-col space-y-4">
                     <flux:field>
                         <flux:label>{{ __('auth.pick_realm_label') }}</flux:label>
                         <flux:select
