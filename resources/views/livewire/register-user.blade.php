@@ -4,8 +4,8 @@
             <x-auth-logo :branding="$branding" />
         </div>
 
-        <x-livewire-form class="p-6 divide-y divide-zinc-200 dark:divide-zinc-700">
-            <div class="flex flex-col gap-4 pb-6">
+        <x-livewire-form class="divide-y divide-zinc-200 dark:divide-zinc-700 [&>div]:px-6 [&>div]:pb-6">
+            <div class="flex flex-col gap-4 pt-6">
                 <flux:heading size="xl">{{ __('user.register') }}</flux:heading>
 
                 <flux:field>
