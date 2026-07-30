@@ -91,7 +91,7 @@ class RevocationController extends Controller
     private function revokeRefreshToken(string $token, PassportClient $client): bool
     {
         try {
-            $payload = json_decode(Crypto::decryptWithPassword($token, Passport::tokenEncryptionKey(app('encrypter'))), true);
+            $payload = json_decode(Crypto::decryptWithPassword($token, Passport::tokenEncryptionKey(resolve('encrypter'))), true);
         } catch (Throwable) {
             return false;
         }

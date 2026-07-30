@@ -1111,7 +1111,7 @@ test('refresh tokens expire in about 30 days, not Passport\'s one-year default',
     [, , $refreshToken] = issueRealAccessTokenWithRefreshToken($community, $user);
 
     $payload = json_decode(
-        Crypto::decryptWithPassword($refreshToken, Passport::tokenEncryptionKey(app('encrypter'))),
+        Crypto::decryptWithPassword($refreshToken, Passport::tokenEncryptionKey(resolve('encrypter'))),
         true
     );
 

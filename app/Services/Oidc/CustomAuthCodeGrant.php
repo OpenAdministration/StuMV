@@ -44,7 +44,6 @@ class CustomAuthCodeGrant extends BaseAuthCodeGrant
         parent::__construct(...$args);
 
         $property = new ReflectionProperty(LeagueAuthCodeGrant::class, 'codeChallengeVerifiers');
-        $property->setAccessible(true);
 
         $verifiers = $property->getValue($this);
         unset($verifiers['plain']);

@@ -169,7 +169,7 @@ test('an authorize request with an expired max_age forces re-authentication, the
 
     $resumed->assertRedirect();
     $expected = parse_url($authorizeUrl);
-    $actual = parse_url($resumed->headers->get('Location'));
+    $actual = parse_url((string) $resumed->headers->get('Location'));
     parse_str($expected['query'], $expectedQuery);
     parse_str($actual['query'], $actualQuery);
     ksort($expectedQuery);

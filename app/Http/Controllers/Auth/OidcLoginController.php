@@ -143,7 +143,7 @@ class OidcLoginController extends Controller
             ->get();
 
         foreach ($sessions as $session) {
-            app('session')->getHandler()->destroy($session->session_id);
+            resolve('session')->getHandler()->destroy($session->session_id);
         }
 
         IdentityProviderSession::where('provider_id', $provider->id)
