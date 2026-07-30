@@ -32,7 +32,7 @@
                     @foreach($sessions as $session)
                         <flux:table.row>
                             <flux:table.cell>
-                                <div class="flex gap-4">
+                                <div class="flex gap-4 items-center">
                                     <div class="max-w-md truncate" title="{{ $session->user_agent }}">{{ $session->device_description }}</div>
                                     @if($session->id === $currentSessionId)
                                         <flux:badge>{{ __('profile.sessions_current_device') }}</flux:badge>
