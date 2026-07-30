@@ -294,3 +294,37 @@ test('a non-admin cannot edit an OIDC client', function (): void {
 
     $this->get(route('realms.oidc-clients.edit', ['realm' => $community->getShortCode(), 'client' => $client->id]))->assertForbidden();
 });
+
+test('regenerating a confidential client\'s secret issues a new one without revoking existing tokens', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('My SSO App', ['https://app.example.com/callback']);
+    $client->forceFill(['community_uid' => $community->getShortCode()])->save();
+    $client->refresh();
+    $oldSecretHash = $client->getAttributes()['secret'];
+    $token = grantToken($client->id, TestLdap::member($community)->id, ['openid']);
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->call('regenerateSecret')
+        ->assertSet('regeneratedSecretReason', 'rotated')
+        ->assertSee(__('oidc_clients.secret_rotated_success'))
+        ->assertSet('regeneratedSecret', fn (?string $secret) => is_string($secret) && strlen($secret) === 40);
+
+    $client->refresh();
+    $token->refresh();
+
+    expect($client->getAttributes()['secret'])->not->toBe($oldSecretHash)
+        ->and($token->revoked)->toBeFalse();
+});
+
+test('regenerating the secret of a public client is rejected', function (): void {
+    $community = newCommunity();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Public SSO App', ['https://app.example.com/callback'], confidential: false);
+    $client->forceFill(['community_uid' => $community->getShortCode()])->save();
+    $client->refresh();
+    actingAsAdmin($community);
+
+    Livewire::test(EditOidcClient::class, ['realm' => $community, 'client' => $client])
+        ->call('regenerateSecret')
+        ->assertStatus(400);
+});

@@ -2,7 +2,11 @@
     <div class="space-y-8">
         <div>
             <flux:heading size="xl" class="mb-4">{{ __('oidc_clients.edit_title') }}</flux:heading>
-            <flux:callout variant="success" icon="circle-check" heading="{{ __('oidc_clients.secret_regenerated_success') }}" />
+            <flux:callout
+                variant="success"
+                icon="circle-check"
+                heading="{{ $regeneratedSecretReason === 'rotated' ? __('oidc_clients.secret_rotated_success') : __('oidc_clients.secret_regenerated_success') }}"
+            />
         </div>
 
         <flux:field>
@@ -93,6 +97,18 @@
                 description="{{ __('oidc_clients.disable_client_authentication_description') }}"
             />
 
+            @if(! $disableClientAuthentication)
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <flux:label>{{ __('oidc_clients.regenerate_secret') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.regenerate_secret_description') }}</flux:description>
+                    </div>
+                    <flux:button icon="arrow-path" wire:click="confirmRegenerateSecret">
+                        {{ __('oidc_clients.regenerate_secret_button') }}
+                    </flux:button>
+                </div>
+            @endif
+
             <flux:field>
                 <flux:label>{{ __('oidc_clients.back_channel_logout_uri') }}</flux:label>
                 <flux:description>{{ __('oidc_clients.back_channel_logout_uri_description') }}</flux:description>
@@ -109,5 +125,20 @@
                 {{ route('realms.oidc-clients', ['realm' => $uid]) }}
             </x-slot:abort_route>
         </x-livewire-form>
+
+        <form wire:submit="regenerateSecret">
+            <flux:modal name="regenerate-secret">
+                <div class="space-y-6">
+                    <div>
+                        <flux:heading size="lg" class="modal-header">{{ __('oidc_clients.regenerate_secret_confirm_title') }}</flux:heading>
+                        <flux:text class="mt-2">{{ __('oidc_clients.regenerate_secret_confirm_warning') }}</flux:text>
+                    </div>
+                    <div class="flex justify-end gap-4">
+                        <flux:button wire:click="closeRegenerateSecretModal">{{ __('common.cancel') }}</flux:button>
+                        <flux:button variant="danger" type="submit">{{ __('oidc_clients.regenerate_secret_button') }}</flux:button>
+                    </div>
+                </div>
+            </flux:modal>
+        </form>
     </div>
 @endif

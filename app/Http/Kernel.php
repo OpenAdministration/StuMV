@@ -11,6 +11,7 @@ use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\EnsureAccountIsNotLocked;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureOidcClientMatchesRealm;
+use App\Http\Middleware\LogOidcConsentDecision;
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SetContentSecurityPolicy;
@@ -107,6 +108,7 @@ class Kernel extends HttpKernel
         'communityMember' => CommunityMember::class,
         'denyAdminRealm' => DenyAdminRealm::class,
         'oidcClientMatchesRealm' => EnsureOidcClientMatchesRealm::class,
+        'logOidcConsentDecision' => LogOidcConsentDecision::class,
         'scopes' => CheckToken::class,
         'scope' => CheckTokenForAnyScope::class,
         // Rejects any token that has a human resource owner (i.e. a normal

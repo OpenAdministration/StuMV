@@ -3,12 +3,14 @@
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use App\Models\User;
+use Defuse\Crypto\Crypto;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Laravel\Passport\AccessToken;
 use Laravel\Passport\ClientRepository;
+use Laravel\Passport\Passport;
 use Laravel\Passport\Token;
 use Tests\Support\TestLdap;
 
@@ -1090,4 +1092,62 @@ test('revocation rejects a wrong client_secret', function (): void {
         'client_secret' => 'wrong-secret',
         'token' => $accessToken,
     ])->assertStatus(401)->assertJson(['error' => 'invalid_client']);
+});
+
+test('access tokens expire in about one hour, not Passport\'s one-year default', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    [, $accessToken] = issueRealAccessToken($community, $user);
+
+    [, $payload] = explode('.', $accessToken);
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+
+    expect($claims['exp'] - $claims['iat'])->toBeGreaterThan(3500)->toBeLessThan(3700);
+});
+
+test('refresh tokens expire in about 30 days, not Passport\'s one-year default', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    [, , $refreshToken] = issueRealAccessTokenWithRefreshToken($community, $user);
+
+    $payload = json_decode(
+        Crypto::decryptWithPassword($refreshToken, Passport::tokenEncryptionKey(app('encrypter'))),
+        true
+    );
+
+    expect($payload['expire_time'] - time())->toBeGreaterThan(29 * 86400)->toBeLessThan(31 * 86400);
+});
+
+test('replaying an already-rotated refresh token revokes every token for that user/client', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, , $firstRefreshToken] = issueRealAccessTokenWithRefreshToken($community, $user);
+
+    // Legit rotation: redeem the refresh token once, exactly as a real
+    // client would on its own schedule.
+    $rotated = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'refresh_token',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'refresh_token' => $firstRefreshToken,
+    ]);
+    $secondAccessToken = (string) $rotated->json('access_token');
+
+    // Replay: the same, now-already-used refresh token is presented again -
+    // either a client that lost the response and retried, or theft.
+    $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'refresh_token',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'refresh_token' => $firstRefreshToken,
+    ])->assertStatus(400);
+
+    // The whole family - including the token minted by the legitimate
+    // rotation above, not just the reused one - must now be dead too.
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $secondAccessToken,
+    ])->assertOk()->assertJson(['active' => false]);
 });

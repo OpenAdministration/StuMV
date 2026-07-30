@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Models\PassportClient;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -27,12 +28,28 @@ class EnsureOidcClientMatchesRealm
         abort_unless($realm instanceof Community, 404);
 
         $clientId = $request->input('client_id') ?? $request->getUser();
-        abort_if($clientId === null, 401);
+
+        if ($clientId === null) {
+            Log::warning('OIDC request rejected: no client_id given', ['realm' => $realm->getShortCode(), 'path' => $request->path()]);
+            abort(401);
+        }
 
         $client = PassportClient::find($clientId);
-        abort_if($client === null, 401);
 
-        abort_unless($client->community_uid === $realm->getShortCode(), 403);
+        if ($client === null) {
+            Log::warning('OIDC request rejected: unknown client_id', ['realm' => $realm->getShortCode(), 'client_id' => $clientId, 'path' => $request->path()]);
+            abort(401);
+        }
+
+        if ($client->community_uid !== $realm->getShortCode()) {
+            Log::warning('OIDC request rejected: client bound to a different realm', [
+                'realm' => $realm->getShortCode(),
+                'client_id' => $clientId,
+                'client_realm' => $client->community_uid,
+                'path' => $request->path(),
+            ]);
+            abort(403);
+        }
 
         return $next($request);
     }

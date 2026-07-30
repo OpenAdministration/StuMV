@@ -5,6 +5,7 @@ namespace App\Livewire\Oidc;
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
@@ -43,6 +44,13 @@ class EditOidcClient extends Component
     public string $postLogoutRedirectUris = '';
 
     public ?string $regeneratedSecret = null;
+
+    /**
+     * Distinguishes the two ways $regeneratedSecret can end up set, so the
+     * one-time reveal screen can explain *why* to the admin instead of
+     * always claiming client authentication was just "re-enabled".
+     */
+    public string $regeneratedSecretReason = 'enabled';
 
     public function mount(Community $realm, PassportClient $client): void
     {
@@ -202,5 +210,42 @@ class EditOidcClient extends Component
         Flux::toast(variant: 'success', text: __('oidc_clients.edit_success'));
 
         $this->redirect(route('realms.oidc-clients', ['realm' => $this->uid]), navigate: true);
+    }
+
+    public function confirmRegenerateSecret(): void
+    {
+        Flux::modal('regenerate-secret')->show();
+    }
+
+    public function closeRegenerateSecretModal(): void
+    {
+        Flux::modal('regenerate-secret')->close();
+    }
+
+    /**
+     * A standalone "rotate the secret" action, independent of save() and the
+     * public/confidential toggle - unlike that toggle, this deliberately
+     * does *not* revoke existing tokens: a leaked/rotated secret only
+     * affects how the client authenticates for *future* requests (a new
+     * token grant, a call to /oauth/token, /oauth/introspect or
+     * /oauth/revoke), not the validity of access/refresh tokens already
+     * issued, which remain good until they expire or are revoked on their
+     * own terms.
+     */
+    public function regenerateSecret(): void
+    {
+        $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->clientId);
+
+        abort_unless($client->confidential(), 400);
+
+        $client->secret = $newSecret = Str::random(40);
+        $client->save();
+
+        Log::info('OIDC client secret rotated', ['client_id' => $client->id, 'realm' => $this->uid]);
+
+        $this->closeRegenerateSecretModal();
+
+        $this->regeneratedSecretReason = 'rotated';
+        $this->regeneratedSecret = $newSecret;
     }
 }

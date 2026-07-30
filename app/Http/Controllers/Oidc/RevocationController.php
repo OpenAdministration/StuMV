@@ -9,6 +9,7 @@ use App\Services\Oidc\AccessTokenVerifier;
 use Defuse\Crypto\Crypto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Bridge\ClientRepository;
 use Laravel\Passport\Passport;
 use Laravel\Passport\RefreshToken;
@@ -35,10 +36,14 @@ class RevocationController extends Controller
         $client = PassportClient::find($clientId);
 
         if (! $client || $client->community_uid !== $realm->getShortCode()) {
+            Log::warning('OIDC revocation rejected: unknown or wrong-realm client', ['client_id' => $clientId, 'realm' => $realm->getShortCode()]);
+
             return $this->invalidClient();
         }
 
         if (! $this->clientRepository->validateClient($clientId, $clientSecret, null)) {
+            Log::warning('OIDC revocation rejected: client authentication failed', ['client_id' => $clientId, 'realm' => $realm->getShortCode()]);
+
             return $this->invalidClient();
         }
 
@@ -51,11 +56,11 @@ class RevocationController extends Controller
         // §2.1: token_type_hint is only ever a hint to skip a wasted lookup -
         // if it's absent, wrong, or the token simply doesn't match that type,
         // the server MUST still try the other token type before giving up.
-        if ($request->input('token_type_hint') === 'refresh_token') {
-            $this->revokeRefreshToken($token, $client) || $this->revokeAccessToken($token, $client);
-        } else {
-            $this->revokeAccessToken($token, $client) || $this->revokeRefreshToken($token, $client);
-        }
+        $revoked = $request->input('token_type_hint') === 'refresh_token'
+            ? $this->revokeRefreshToken($token, $client) || $this->revokeAccessToken($token, $client)
+            : $this->revokeAccessToken($token, $client) || $this->revokeRefreshToken($token, $client);
+
+        Log::info('OIDC revocation processed', ['client_id' => $clientId, 'realm' => $realm->getShortCode(), 'revoked' => $revoked]);
 
         // §2.2: always 200, even for a token that was already invalid,
         // unknown, or belonged to a different client - this endpoint must

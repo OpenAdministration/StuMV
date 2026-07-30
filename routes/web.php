@@ -192,6 +192,8 @@ Route::group([
 });
 Route::getRoutes()->getByName('realm.passport.authorizations.authorize')?->middleware('oidcClientMatchesRealm');
 Route::getRoutes()->getByName('realm.passport.token')?->middleware('oidcClientMatchesRealm');
+Route::getRoutes()->getByName('realm.passport.authorizations.approve')?->middleware('logOidcConsentDecision');
+Route::getRoutes()->getByName('realm.passport.authorizations.deny')?->middleware('logOidcConsentDecision');
 
 Route::get('{realm}/oauth/jwks', JwksController::class)->name('realm.openid.jwks');
 Route::get('{realm}/oauth/userinfo', UserInfoController::class)->middleware('auth:api')->name('realm.openid.userinfo');

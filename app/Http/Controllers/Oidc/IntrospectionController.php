@@ -8,6 +8,7 @@ use App\Models\PassportClient;
 use App\Services\Oidc\AccessTokenVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\AccessToken;
 use Laravel\Passport\Bridge\ClientRepository;
 
@@ -29,10 +30,14 @@ class IntrospectionController extends Controller
         $client = PassportClient::find($clientId);
 
         if (! $client || $client->community_uid !== $realm->getShortCode()) {
+            Log::warning('OIDC introspection rejected: unknown or wrong-realm client', ['client_id' => $clientId, 'realm' => $realm->getShortCode()]);
+
             return $this->invalidClient();
         }
 
         if (! $this->clientRepository->validateClient($clientId, $clientSecret, null)) {
+            Log::warning('OIDC introspection rejected: client authentication failed', ['client_id' => $clientId, 'realm' => $realm->getShortCode()]);
+
             return $this->invalidClient();
         }
 
@@ -49,8 +54,12 @@ class IntrospectionController extends Controller
             // different realm must not be distinguishable from one that's
             // simply invalid/expired/revoked - anything else would leak
             // cross-realm information about which token strings are "real".
+            Log::info('OIDC introspection: token inactive', ['client_id' => $clientId, 'realm' => $realm->getShortCode()]);
+
             return response()->json(['active' => false]);
         }
+
+        Log::info('OIDC introspection: token active', ['client_id' => $clientId, 'token_client_id' => $accessToken->oauth_client_id, 'realm' => $realm->getShortCode()]);
 
         return response()->json($this->activeResponse($accessToken, $realm));
     }

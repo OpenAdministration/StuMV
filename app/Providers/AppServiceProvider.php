@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
 use App\Http\Middleware\SetContentSecurityPolicy;
 use App\Services\Oidc\LoggingClientRepository;
+use App\Services\Oidc\ReuseDetectingRefreshTokenRepository;
 use App\Support\MailmanClient;
 use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
@@ -14,10 +15,15 @@ use Illuminate\Foundation\Http\Events\RequestHandled;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Passport\Bridge\ClientRepository;
+use Laravel\Passport\Bridge\RefreshTokenRepository;
+use Laravel\Passport\Events\AccessTokenCreated;
+use Laravel\Passport\Events\AccessTokenRevoked;
+use Laravel\Passport\Events\RefreshTokenCreated;
 use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +43,11 @@ class AppServiceProvider extends ServiceProvider
         // deliberate, well-formed OAuth error, never an uncaught exception,
         // so it otherwise never reaches storage/logs/laravel.log at all.
         $this->app->bind(ClientRepository::class, LoggingClientRepository::class);
+
+        // See App\Services\Oidc\ReuseDetectingRefreshTokenRepository - a
+        // replayed (already-rotated) refresh token revokes every token for
+        // that user/client instead of just failing the one request.
+        $this->app->bind(RefreshTokenRepository::class, ReuseDetectingRefreshTokenRepository::class);
 
         $this->app->singleton(MailmanClient::class, fn (): MailmanClient => new MailmanClient(
             (string) config('services.mailman.url'),
@@ -74,6 +85,26 @@ class AppServiceProvider extends ServiceProvider
         Passport::tokensCan(config('openid.passport.tokens_can'));
 
         Passport::setDefaultScope(['profile']);
+
+        // Neither was ever set, which silently left Passport on its own
+        // one-year default for both - a stolen access token would stay
+        // usable for a year even though refreshing is cheap and automatic
+        // for any real client.
+        Passport::tokensExpireIn(now()->addHour());
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+
+        // Token issuance/revocation otherwise leaves no trace at all -
+        // these are Passport's own events (Bridge\AccessTokenRepository,
+        // Bridge\RefreshTokenRepository), not anything this app dispatches.
+        Event::listen(function (AccessTokenCreated $event): void {
+            Log::info('OIDC access token issued', ['client_id' => $event->clientId, 'user_id' => $event->userId]);
+        });
+        Event::listen(function (RefreshTokenCreated $event): void {
+            Log::info('OIDC refresh token issued', ['access_token_id' => $event->accessTokenId]);
+        });
+        Event::listen(function (AccessTokenRevoked $event): void {
+            Log::info('OIDC access token revoked', ['token_id' => $event->tokenId]);
+        });
 
         // Passport 13 ships no authorization/consent screen and does not bind
         // AuthorizationViewResponse by default, so register our own consent view.
