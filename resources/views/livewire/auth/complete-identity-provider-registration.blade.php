@@ -1,10 +1,14 @@
 <x-auth-card>
-    <flux:card class="grid gap-4 w-full bg-white dark:bg-zinc-800 max-w-[28rem]! mx-auto border-1 shadow-sm">
-        <x-auth-logo :branding="$branding" />
-        <flux:heading size="xl">{{ __('identity_providers.complete_registration_title') }}</flux:heading>
-        <flux:text>{{ __('identity_providers.complete_registration_explanation', ['email' => $email]) }}</flux:text>
-        <x-livewire-form>
-            <div class="flex flex-col gap-4">
+    <flux:card class="p-0 w-full bg-white dark:bg-zinc-800 max-w-[28rem]! mx-auto border-1 shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
+        <div class="p-6">
+            <x-auth-logo :branding="$branding" />
+        </div>
+
+        <x-livewire-form class="divide-y divide-zinc-200 dark:divide-zinc-700 [&>div]:px-6 [&>div]:pb-6">
+            <div class="flex flex-col gap-4 pt-6">
+                <flux:heading size="xl">{{ __('identity_providers.complete_registration_title') }}</flux:heading>
+                <flux:text>{{ __('identity_providers.complete_registration_explanation', ['email' => $email]) }}</flux:text>
+
                 <flux:field>
                     <flux:label>{{ __('common.username') }}</flux:label>
                     <flux:input wire:model.live="username" type="text" autofocus />
