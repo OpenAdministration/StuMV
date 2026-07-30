@@ -31,6 +31,10 @@ class VerifyCsrfToken extends Middleware
      * logout_token here directly, server-to-server, when its own user logs
      * out - there's no browser/session/form involved on this end at all.
      *
+     * oauth/introspect is the same server-to-server story as oauth/token: a
+     * resource server calls it directly with client credentials, never via a
+     * form this app rendered.
+     *
      * @var array<int, string>
      */
     protected $except = [
@@ -38,6 +42,7 @@ class VerifyCsrfToken extends Middleware
         '*/oauth/token/refresh',
         '*/oauth/device/code',
         '*/oauth/end-session',
+        '*/oauth/introspect',
         '*/identity-provider/*/backchannel-logout',
     ];
 }

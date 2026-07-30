@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Community;
+use App\Models\PassportClient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -62,12 +63,13 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
     $this->getJson("/$uid/.well-known/openid-configuration")
         ->assertOk()
         ->assertJsonFragment(['scopes_supported' => ['openid', 'profile', 'email', 'phone', 'address', 'groups']])
-        ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri', 'end_session_endpoint'])
+        ->assertJsonStructure(['issuer', 'authorization_endpoint', 'token_endpoint', 'userinfo_endpoint', 'jwks_uri', 'end_session_endpoint', 'introspection_endpoint'])
         ->assertJsonFragment(['authorization_endpoint' => route('realm.passport.authorizations.authorize', ['realm' => $uid])])
         ->assertJsonFragment(['token_endpoint' => route('realm.passport.token', ['realm' => $uid])])
         ->assertJsonFragment(['userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid])])
         ->assertJsonFragment(['jwks_uri' => route('realm.openid.jwks', ['realm' => $uid])])
         ->assertJsonFragment(['end_session_endpoint' => route('realm.openid.end_session', ['realm' => $uid])])
+        ->assertJsonFragment(['introspection_endpoint' => route('realm.openid.introspection', ['realm' => $uid])])
         ->assertJsonFragment(['backchannel_logout_supported' => true])
         ->assertJsonFragment(['backchannel_logout_session_supported' => true])
         // client_secret_basic is deliberately not advertised - relies on
@@ -77,7 +79,8 @@ test('the discovery document advertises the openid scopes and realm-prefixed end
         // conformant client picks client_secret_post instead, which League
         // OAuth2 Server's AbstractGrant::getClientCredentials() already
         // reads from the request body regardless.
-        ->assertJsonFragment(['token_endpoint_auth_methods_supported' => ['client_secret_post']]);
+        ->assertJsonFragment(['token_endpoint_auth_methods_supported' => ['client_secret_post']])
+        ->assertJsonFragment(['introspection_endpoint_auth_methods_supported' => ['client_secret_post']]);
 });
 
 test('the global discovery/jwks endpoints no longer resolve', function (): void {
@@ -702,4 +705,146 @@ test('the oauth consent view points its approve/deny forms at this realm\'s own 
     // have thrown a RouteNotFoundException above.
     expect($html)->toContain(route('realm.passport.authorizations.approve', ['realm' => $uid]))
         ->toContain(route('realm.passport.authorizations.deny', ['realm' => $uid]));
+});
+
+/**
+ * Runs a real authorization_code grant through /oauth/authorize + /oauth/token,
+ * so IntrospectionController's ResourceServer::validateAuthenticatedRequest()
+ * call has a genuinely signed access_token JWT to verify - unlike
+ * actingWithRealAccessToken() above (which fakes the guard's user directly
+ * and never produces a real bearer token), this exercises the exact string a
+ * real client would present to /oauth/introspect.
+ *
+ * @return array{0: PassportClient, 1: string}
+ */
+function issueRealAccessToken(Community $community, User $user, string $scope = 'openid'): array
+{
+    $uid = $community->getShortCode();
+    test()->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Introspection Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $authorize = test()->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => $scope,
+    ]));
+
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = test()->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    return [$client, (string) $token->json('access_token')];
+}
+
+test('introspecting a valid access token returns active=true with the expected claims', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user, 'openid profile');
+
+    $response = $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ]);
+
+    $response->assertOk()->assertJson([
+        'active' => true,
+        'client_id' => $client->id,
+        'token_type' => 'Bearer',
+    ]);
+
+    expect($response->json('scope'))->toContain('openid')->toContain('profile')
+        ->and($response->json('sub'))->toBe((string) $user->uid)
+        ->and($response->json('exp'))->toBeInt()
+        ->and($response->json('iat'))->toBeInt();
+});
+
+test('introspecting a revoked access token returns active=false', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user);
+
+    [, $payload] = explode('.', $accessToken);
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+    Token::whereKey($claims['jti'])->update(['revoked' => true]);
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ])->assertOk()->assertJson(['active' => false]);
+});
+
+test('introspecting a malformed token returns active=false rather than erroring', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Garbage Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => 'not-a-real-token',
+    ])->assertOk()->assertJson(['active' => false]);
+});
+
+test('introspection requires a token parameter', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('No Token Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+    ])->assertStatus(400)->assertJson(['error' => 'invalid_request']);
+});
+
+test('introspection rejects a wrong client_secret', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user);
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => 'wrong-secret',
+        'token' => $accessToken,
+    ])->assertStatus(401)->assertJson(['error' => 'invalid_client']);
+});
+
+test('introspection rejects an unknown client_id', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => (string) Str::uuid(),
+        'client_secret' => 'whatever',
+        'token' => 'irrelevant',
+    ])->assertStatus(401);
+});
+
+test('a client cannot introspect through a realm it is not bound to', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user);
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $otherCommunity->getShortCode()]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ])->assertForbidden();
 });

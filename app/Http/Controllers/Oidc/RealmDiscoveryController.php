@@ -39,6 +39,7 @@ class RealmDiscoveryController extends Controller
             'userinfo_endpoint' => route('realm.openid.userinfo', ['realm' => $uid]),
             'jwks_uri' => route('realm.openid.jwks', ['realm' => $uid]),
             'end_session_endpoint' => route('realm.openid.end_session', ['realm' => $uid]),
+            'introspection_endpoint' => route('realm.openid.introspection', ['realm' => $uid]),
             'grant_types_supported' => $this->getSupportedGrantTypes(),
             'response_types_supported' => $this->getSupportedResponseTypes(),
             'subject_types_supported' => ['public'],
@@ -58,6 +59,10 @@ class RealmDiscoveryController extends Controller
             // failure ("invalid_client"/"Client authentication failed" with
             // no client_secret ever reaching the token endpoint).
             'token_endpoint_auth_methods_supported' => [
+                'client_secret_post',
+            ],
+            // Same client_secret_post-only rationale as token_endpoint above.
+            'introspection_endpoint_auth_methods_supported' => [
                 'client_secret_post',
             ],
             'code_challenge_methods_supported' => [

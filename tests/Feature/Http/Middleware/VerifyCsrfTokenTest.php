@@ -23,6 +23,8 @@ test('the OIDC/OAuth machine endpoints are exempt from CSRF verification', funct
         'demo/oauth/token/refresh',
         'demo/oauth/device/code',
         'demo/oauth/end-session',
+        'demo/oauth/introspect',
+        'demo/identity-provider/some-provider-id/backchannel-logout',
     ] as $path) {
         expect(collect($excluded)->contains(fn (string $pattern): bool => Str::is($pattern, $path)))
             ->toBeTrue("$path should be CSRF-exempt");

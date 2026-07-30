@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Oidc\EndSessionController;
+use App\Http\Controllers\Oidc\IntrospectionController;
 use App\Http\Controllers\Oidc\RealmDiscoveryController;
 use App\Http\Controllers\Oidc\UserInfoController;
 use App\Http\Middleware\SuperAdminMiddleware;
@@ -198,6 +199,17 @@ Route::get('{realm}/.well-known/openid-configuration', RealmDiscoveryController:
 // GET and POST: the spec allows either (some clients redirect via a form
 // POST instead of a GET navigation).
 Route::match(['get', 'post'], '{realm}/oauth/end-session', EndSessionController::class)->name('realm.openid.end_session');
+// RFC 7662 Token Introspection - see App\Http\Controllers\Oidc\IntrospectionController.
+// Client-authenticated like the token endpoint, so it needs the same realm
+// check (a client from realm A must not be able to introspect - or even
+// learn anything about - a token by posing as realm B). Middleware is
+// chained directly (unlike the authorize/token routes above, which are
+// required in from Passport's own routes/web.php and can only be reached
+// afterward via Route::getRoutes()->getByName()) since this route is
+// defined right here.
+Route::post('{realm}/oauth/introspect', IntrospectionController::class)
+    ->middleware('oidcClientMatchesRealm')
+    ->name('realm.openid.introspection');
 
 // guest routes
 Route::get('imprint', fn () => redirect(config('app.imprint_url')))->name('imprint');
