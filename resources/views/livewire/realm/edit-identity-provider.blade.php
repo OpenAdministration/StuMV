@@ -64,8 +64,7 @@
             <flux:tab.panel name="role-mappings" class="pt-8 space-y-8">
                 <div class="space-y-4">
                     <div>
-                        <flux:heading size="lg">{{ __('identity_providers.mappings_headline') }}</flux:heading>
-                        <flux:text class="mt-2">{{ __('identity_providers.mappings_explanation') }}</flux:text>
+                        <p>{{ __('identity_providers.mappings_explanation') }}</p>
                     </div>
 
                     @if(count($mappingRows) > 0)
@@ -164,8 +163,7 @@
             <flux:tab.panel name="group-mappings" class="pt-8 space-y-8">
                 <div class="space-y-4">
                     <div>
-                        <flux:heading size="lg">{{ __('identity_providers.group_mappings_headline') }}</flux:heading>
-                        <flux:text class="mt-2">{{ __('identity_providers.group_mappings_explanation') }}</flux:text>
+                        <p>{{ __('identity_providers.group_mappings_explanation') }}</p>
                     </div>
 
                     @if(count($groupMappingRows) > 0)
