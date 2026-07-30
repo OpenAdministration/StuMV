@@ -32,14 +32,18 @@
                     @foreach($sessions as $session)
                         <flux:table.row>
                             <flux:table.cell>
-                                <div class="max-w-md truncate" title="{{ $session->user_agent }}">{{ $session->device_description }}</div>
+                                <div class="flex gap-4">
+                                    <div class="max-w-md truncate" title="{{ $session->user_agent }}">{{ $session->device_description }}</div>
+                                    @if($session->id === $currentSessionId)
+                                        <flux:badge>{{ __('profile.sessions_current_device') }}</flux:badge>
+                                    @endif
+                                </div>
                             </flux:table.cell>
                             <flux:table.cell>{{ $session->ip_address ?: '—' }}</flux:table.cell>
                             <flux:table.cell>{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}</flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex justify-end items-center gap-2">
                                     @if($session->id === $currentSessionId)
-                                        <flux:badge color="green">{{ __('profile.sessions_current_device') }}</flux:badge>
                                         <flux:button
                                             size="sm"
                                             variant="danger"
