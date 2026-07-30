@@ -56,6 +56,11 @@ Breadcrumbs::for('password.change', function (BreadcrumbTrail $trail, array $rou
     $trail->push(__('profile.change_password_title'), route('password.change', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('profile.sessions', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('profile', $routeParams);
+    $trail->push(__('profile.sessions'), route('profile.sessions', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('pick-realm', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->push('Wähle Realm', route('pick-realm' /* no route params! */), ['truncate' => true]);
 });

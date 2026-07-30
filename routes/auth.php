@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Livewire\Auth\CompleteIdentityProviderRegistration;
 use App\Livewire\Profile\ChangePassword;
+use App\Livewire\Profile\Sessions;
 use App\Livewire\RegisterUser;
 use Illuminate\Support\Facades\Route;
 
@@ -80,6 +81,7 @@ Route::middleware('auth')->group(function (): void {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::any('{realm}/profile/{username}/password', ChangePassword::class)->name('password.change');
+    Route::livewire('{realm}/profile/{username}/sessions', Sessions::class)->name('profile.sessions');
 
     // Realm-scoped like login - lets logout redirect back to the same
     // realm's own login page rather than the one on the account's own
