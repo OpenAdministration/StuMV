@@ -5,6 +5,7 @@ namespace App\Livewire\Profile;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\User as EloquentUser;
+use App\Support\UserAgentParser;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
@@ -42,7 +43,12 @@ class Sessions extends Component
         $sessions = DB::table('sessions')
             ->where('user_id', $this->eloquentUser()->id)
             ->orderByDesc('last_activity')
-            ->get();
+            ->get()
+            ->map(function ($session) {
+                $session->device_description = UserAgentParser::describe($session->user_agent) ?? '—';
+
+                return $session;
+            });
 
         return view('livewire.profile.sessions', [
             'sessions' => $sessions,
