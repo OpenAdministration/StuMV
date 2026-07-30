@@ -38,6 +38,7 @@ class RoleMembership extends Model
         'until',
         'decided',
         'comment',
+        'identity_provider_id',
     ];
 
     /**
@@ -46,6 +47,11 @@ class RoleMembership extends Model
     public function role(): Relation
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function identityProvider(): BelongsTo
+    {
+        return $this->belongsTo(RealmIdentityProvider::class, 'identity_provider_id');
     }
 
     public function isActive(): bool
