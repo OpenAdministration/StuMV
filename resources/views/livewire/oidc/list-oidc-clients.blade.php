@@ -41,7 +41,7 @@
                             <div class="text-xs text-zinc-500">{{ $client->id }}</div>
                         </flux:table.cell>
                         <flux:table.cell>
-                            <div class="flex lg:flex-wrap gap-2">
+                            <div class="flex gap-2">
                                 @foreach($client->scopes ?? [] as $scope)
                                     <flux:badge>{{ $scope }}</flux:badge>
                                 @endforeach
