@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\IdentityProviderGroupGrant;
 use App\Support\IdentityProviderGroupSync;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\TestLdap;
@@ -105,7 +106,7 @@ test('a membership this sync granted is detached once its external group is no l
 
     $group->refresh();
     expect($group->members()->get())->toBeEmpty();
-    expect(App\Models\IdentityProviderGroupGrant::where('provider_id', $provider->id)->where('username', $user->username)->count())->toBe(0);
+    expect(IdentityProviderGroupGrant::where('provider_id', $provider->id)->where('username', $user->username)->count())->toBe(0);
 });
 
 test('re-granting after a detach re-attaches the membership', function (): void {
@@ -146,7 +147,7 @@ test('a membership that pre-dates this sync is never detached, even after its ex
 
     // No grant row should have been recorded for a membership we didn't
     // ourselves establish.
-    expect(App\Models\IdentityProviderGroupGrant::where('provider_id', $provider->id)->where('username', $user->username)->count())->toBe(0);
+    expect(IdentityProviderGroupGrant::where('provider_id', $provider->id)->where('username', $user->username)->count())->toBe(0);
 
     $sync->apply($provider, $user->username, ['groups' => []]);
 
