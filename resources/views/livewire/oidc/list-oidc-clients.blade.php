@@ -29,7 +29,8 @@
                     <flux:table.column>{{ __('oidc_clients.scopes') }}</flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'revoked'" :direction="$sortDirection" wire:click="sortBy('revoked')">{{ __('oidc_clients.status') }}</flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'requires_consent'" :direction="$sortDirection" wire:click="sortBy('requires_consent')">{{ __('oidc_clients.auto_login_column') }}</flux:table.column>
-                    <flux:table.column>{{ __('oidc_clients.client_secret') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'secret'" :direction="$sortDirection" wire:click="sortBy('secret')">{{ __('oidc_clients.client_secret') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'back_channel_logout_uri'" :direction="$sortDirection" wire:click="sortBy('back_channel_logout_uri')">{{ __('oidc_clients.back_channel_logout_column') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -69,6 +70,15 @@
                             @else
                                 <flux:icon name="x-mark" class="text-red-600 dark:text-red-300" />
                                 <span class="sr-only">{{ __('oidc_clients.public_client_badge') }}</span>
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            @if($client->back_channel_logout_uri)
+                                <flux:icon name="check" class="text-green-600 dark:text-green-500" />
+                                <span class="sr-only">{{ __('oidc_clients.has_back_channel_logout') }}</span>
+                            @else
+                                <flux:icon name="x-mark" class="text-red-600 dark:text-red-300" />
+                                <span class="sr-only">{{ __('oidc_clients.no_back_channel_logout') }}</span>
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>
