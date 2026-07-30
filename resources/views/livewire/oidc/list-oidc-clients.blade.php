@@ -28,6 +28,8 @@
                     <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('oidc_clients.name') }}</flux:table.column>
                     <flux:table.column>{{ __('oidc_clients.scopes') }}</flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'revoked'" :direction="$sortDirection" wire:click="sortBy('revoked')">{{ __('oidc_clients.status') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'requires_consent'" :direction="$sortDirection" wire:click="sortBy('requires_consent')">{{ __('oidc_clients.auto_login_column') }}</flux:table.column>
+                    <flux:table.column>{{ __('oidc_clients.client_secret') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -45,19 +47,21 @@
                             </div>
                         </flux:table.cell>
                         <flux:table.cell>
-                            <div class="flex flex-col items-start gap-1">
-                                @if($client->revoked)
-                                    <flux:badge color="red" variant="solid">{{ __('oidc_clients.status_revoked') }}</flux:badge>
-                                @else
-                                    <flux:badge color="green" variant="solid">{{ __('oidc_clients.status_active') }}</flux:badge>
-                                @endif
-                                @unless($client->requires_consent)
-                                    <flux:badge size="sm">{{ __('oidc_clients.auto_approved_badge') }}</flux:badge>
-                                @endunless
-                                @unless($client->confidential())
-                                    <flux:badge size="sm">{{ __('oidc_clients.public_client_badge') }}</flux:badge>
-                                @endunless
-                            </div>
+                            @if($client->revoked)
+                                <flux:badge color="red" variant="solid">{{ __('oidc_clients.status_revoked') }}</flux:badge>
+                            @else
+                                <flux:badge color="green" variant="solid">{{ __('oidc_clients.status_active') }}</flux:badge>
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            @unless($client->requires_consent)
+                                <flux:badge size="sm">{{ __('oidc_clients.auto_approved_badge') }}</flux:badge>
+                            @endunless
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            @unless($client->confidential())
+                                <flux:badge size="sm">{{ __('oidc_clients.public_client_badge') }}</flux:badge>
+                            @endunless
                         </flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">

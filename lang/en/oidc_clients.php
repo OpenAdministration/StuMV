@@ -55,6 +55,7 @@ return [
     'status' => 'Status',
     'status_active' => 'Active',
     'status_revoked' => 'Revoked',
+    'auto_login_column' => 'Automatic login',
     'revoke' => 'Revoke',
     'revoke_title' => 'Revoke client :name',
     'revoke_warning' => 'Should the client :name really be revoked? It will immediately lose access and this cannot be undone.',

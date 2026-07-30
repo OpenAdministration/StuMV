@@ -55,6 +55,7 @@ return [
     'status' => 'Status',
     'status_active' => 'Aktiv',
     'status_revoked' => 'Widerrufen',
+    'auto_login_column' => 'Automatische Anmeldung',
     'revoke' => 'Widerrufen',
     'revoke_title' => 'Client :name widerrufen',
     'revoke_warning' => 'Soll der Client :name wirklich widerrufen werden? Er verliert damit sofort den Zugriff und dies kann nicht rückgängig gemacht werden.',
