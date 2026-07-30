@@ -22,6 +22,16 @@ objectClass: organizationalUnit
 objectClass: top
 ou: Policies
 
+# Referenced by the ppolicy overlay's olcPPolicyDefault (config.ldif) - lockout
+# stays off here (see that entry's comment), so this exists purely to let the
+# overlay attach and start tracking pwdLastSuccess on every bind.
+dn: cn=default,ou=Policies,dc=stumv,dc=de
+objectClass: pwdPolicy
+objectClass: device
+cn: default
+pwdAttribute: userPassword
+pwdLockout: FALSE
+
 dn: ou=Services,dc=stumv,dc=de
 objectClass: organizationalUnit
 objectClass: top

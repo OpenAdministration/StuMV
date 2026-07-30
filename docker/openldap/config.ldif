@@ -60,6 +60,12 @@ olcRootPW: admin-not-production
 olcDbDirectory: /opt/symas/var/openldap-data
 olcDbMaxSize: 1073741824
 olcDbIndex: objectClass eq
+# Core (not ppolicy-overlay) last-bind tracking, added in OpenLDAP 2.6 -
+# maintains pwdLastSuccess on every entry after a successful bind, throttled
+# to at most once per olcLastBindPrecision seconds so busy accounts don't
+# write on every single request.
+olcLastBind: TRUE
+olcLastBindPrecision: 60
 olcAccess: {0}to dn.one="ou=Services,dc=stumv,dc=de"
   by anonymous auth
 olcAccess: {1}to dn.one="ou=People,dc=stumv,dc=de" attrs=userPassword
@@ -124,3 +130,18 @@ objectClass: olcOverlayConfig
 objectClass: olcDynListConfig
 olcOverlay: dynlist
 olcDynListAttrSet: groupOfURLs memberURL uniqueMember+memberOf@groupOfUniqueNames
+
+# ppolicy overlay: tracks pwdLastSuccess (last successful bind) on every user
+# entry, exactly as in prod. olcPPolicyDefault points at the pwdPolicy entry
+# bootstrapped in 00-base.ldif; olcPPolicyHashCleartext/olcPPolicyForwardUpdates
+# match prod's settings. Lockout itself stays off in the referenced policy
+# (pwdLockout: FALSE) - App\Ldap\User::isLockedByUsername() already manages
+# pwdAccountLockedTime as an explicit admin action, and this overlay enforcing
+# its own automatic lockout too would fight that.
+dn: olcOverlay=ppolicy,olcDatabase={1}mdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcPPolicyConfig
+olcOverlay: ppolicy
+olcPPolicyDefault: cn=default,ou=Policies,dc=stumv,dc=de
+olcPPolicyHashCleartext: TRUE
+olcPPolicyForwardUpdates: FALSE

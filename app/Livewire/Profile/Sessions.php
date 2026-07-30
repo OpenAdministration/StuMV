@@ -19,11 +19,25 @@ class Sessions extends Component
     #[Locked]
     public $currentUsername;
 
+    public string $sortField = 'last_activity';
+
+    public string $sortDirection = 'desc';
+
     public function mount(Community $realm, $username): void
     {
         $this->authorize('manageProfile', [User::class, $realm, $username]);
         $this->realm_uid = $realm->getShortCode();
         $this->currentUsername = $username;
+    }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+            $this->sortField = $field;
+        }
     }
 
     private function eloquentUser(): EloquentUser
@@ -35,14 +49,24 @@ class Sessions extends Component
 
     public function render()
     {
+        $peopleDn = Community::findOrFailByUid($this->realm_uid)->peopleDn();
+
         $ldapUser = User::query()
-            ->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())
+            ->in($peopleDn)
             ->where('uid', '=', $this->currentUsername)
             ->first() ?? abort(404);
 
+        $lastLogin = User::lastSuccessfulLoginByUsername($this->currentUsername, $peopleDn);
+
+        // The "device" column is displayed as a parsed description
+        // (UserAgentParser), but sorted by the raw user_agent column it's
+        // derived from - same grouping in practice, without needing to sort
+        // the collection in PHP after the map() below.
+        $sortColumn = $this->sortField === 'device' ? 'user_agent' : $this->sortField;
+
         $sessions = DB::table('sessions')
             ->where('user_id', $this->eloquentUser()->id)
-            ->orderByDesc('last_activity')
+            ->orderBy($sortColumn, $this->sortDirection)
             ->get()
             ->map(function ($session) {
                 $session->device_description = UserAgentParser::describe($session->user_agent) ?? '—';
@@ -55,6 +79,7 @@ class Sessions extends Component
             'currentSessionId' => session()->getId(),
             'givenName' => $ldapUser->getFirstAttribute('givenName'),
             'sn' => $ldapUser->getFirstAttribute('sn'),
+            'lastLogin' => $lastLogin,
         ])->title(__('profile.sessions'));
     }
 

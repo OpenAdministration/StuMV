@@ -35,6 +35,7 @@ return [
     'remove_picture' => 'Entfernen',
     'sessions' => 'Sitzungen',
     'sessions_explanation' => 'Hier findest du alle mit diesem Konto angemeldeten Geräte bzw. Browser.',
+    'sessions_last_login' => 'Letzte Anmeldung: :datetime',
     'sessions_device' => 'Gerät',
     'sessions_ip_address' => 'IP-Adresse',
     'sessions_last_active' => 'Zuletzt aktiv',

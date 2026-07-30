@@ -8,7 +8,12 @@
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row gap-6">
-                <flux:text class="flex-1 text-base">{{ __('profile.sessions_explanation') }}</flux:text>
+                <div class="flex-1 space-y-1">
+                    <flux:text class="text-base">{{ __('profile.sessions_explanation') }}</flux:text>
+                    @if($lastLogin)
+                        <flux:text class="block text-sm text-zinc-500">{{ __('profile.sessions_last_login', ['datetime' => $lastLogin->format('Y-m-d H:i')]) }}</flux:text>
+                    @endif
+                </div>
                 @if($sessions->contains(fn ($session) => $session->id !== $currentSessionId))
                     <div>
                         <flux:modal.trigger name="logout-other-sessions">
@@ -23,9 +28,9 @@
             @if(count($sessions) > 0)
                 <flux:table>
                     <flux:table.columns>
-                        <flux:table.column>{{ __('profile.sessions_device') }}</flux:table.column>
-                        <flux:table.column>{{ __('profile.sessions_ip_address') }}</flux:table.column>
-                        <flux:table.column>{{ __('profile.sessions_last_active') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'device'" :direction="$sortDirection" wire:click="sortBy('device')">{{ __('profile.sessions_device') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'ip_address'" :direction="$sortDirection" wire:click="sortBy('ip_address')">{{ __('profile.sessions_ip_address') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'last_activity'" :direction="$sortDirection" wire:click="sortBy('last_activity')">{{ __('profile.sessions_last_active') }}</flux:table.column>
                         <flux:table.column></flux:table.column>
                     </flux:table.columns>
                     <flux:table.rows>

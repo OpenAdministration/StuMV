@@ -4,6 +4,8 @@ namespace App\Ldap;
 
 use App\Ldap\Scopes\AddMemberOfAttributeScope;
 use App\Ldap\Traits\SearchScopeTrait;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Date;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\Relations\HasMany;
 
@@ -56,6 +58,25 @@ class User extends \LdapRecord\Models\OpenLDAP\User
             ->first();
 
         return (bool) $fresh?->hasAttribute('pwdAccountLockedTime');
+    }
+
+    /**
+     * pwdLastSuccess is maintained by slapd's core last-bind tracking
+     * (olcLastBind/olcLastBindPrecision, OpenLDAP 2.6+ - not the ppolicy
+     * overlay), and like pwdAccountLockedTime above is an operational
+     * attribute only ever returned via an explicit select().
+     */
+    public static function lastSuccessfulLoginByUsername(string $username, string $peopleDn): ?Carbon
+    {
+        $fresh = self::query()
+            ->in($peopleDn)
+            ->select(['*', 'pwdLastSuccess'])
+            ->where('uid', '=', $username)
+            ->first();
+
+        $value = $fresh?->getFirstAttribute('pwdLastSuccess');
+
+        return $value ? Date::createFromFormat('YmdHis\Z', $value, 'UTC') : null;
     }
 
     #[\Override]
