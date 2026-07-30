@@ -54,14 +54,22 @@
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>
-                            @unless($client->requires_consent)
-                                <flux:badge size="sm">{{ __('oidc_clients.auto_approved_badge') }}</flux:badge>
-                            @endunless
+                            @if($client->requires_consent)
+                                <flux:icon name="x-mark" class="text-red-600 dark:text-red-300" />
+                                <span class="sr-only">{{ __('oidc_clients.auto_login_no') }}</span>
+                            @else
+                                <flux:icon name="check" class="text-green-600 dark:text-green-500" />
+                                <span class="sr-only">{{ __('oidc_clients.auto_approved_badge') }}</span>
+                            @endif
                         </flux:table.cell>
                         <flux:table.cell>
-                            @unless($client->confidential())
-                                <flux:badge size="sm">{{ __('oidc_clients.public_client_badge') }}</flux:badge>
-                            @endunless
+                            @if($client->confidential())
+                                <flux:icon name="check" class="text-green-600 dark:text-green-500" />
+                                <span class="sr-only">{{ __('oidc_clients.has_client_secret') }}</span>
+                            @else
+                                <flux:icon name="x-mark" class="text-red-600 dark:text-red-300" />
+                                <span class="sr-only">{{ __('oidc_clients.public_client_badge') }}</span>
+                            @endif
                         </flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">
