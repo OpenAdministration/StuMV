@@ -8,6 +8,7 @@ use App\Http\Middleware\CommunityMember;
 use App\Http\Middleware\CommunityModerator;
 use App\Http\Middleware\DenyAdminRealm;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnforceMaxAge;
 use App\Http\Middleware\EnsureAccountIsNotLocked;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureOidcClientMatchesRealm;
@@ -109,6 +110,7 @@ class Kernel extends HttpKernel
         'denyAdminRealm' => DenyAdminRealm::class,
         'oidcClientMatchesRealm' => EnsureOidcClientMatchesRealm::class,
         'logOidcConsentDecision' => LogOidcConsentDecision::class,
+        'enforceMaxAge' => EnforceMaxAge::class,
         'scopes' => CheckToken::class,
         'scope' => CheckTokenForAnyScope::class,
         // Rejects any token that has a human resource owner (i.e. a normal

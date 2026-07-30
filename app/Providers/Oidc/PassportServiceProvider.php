@@ -2,15 +2,19 @@
 
 namespace App\Providers\Oidc;
 
+use App\Services\Oidc\CustomAuthCodeGrant;
 use App\Services\Oidc\IdTokenResponse;
 use Illuminate\Encryption\Encrypter;
 use Laravel\Passport\Bridge\AccessTokenRepository;
+use Laravel\Passport\Bridge\AuthCodeRepository;
 use Laravel\Passport\Bridge\ClientRepository;
+use Laravel\Passport\Bridge\RefreshTokenRepository;
 use Laravel\Passport\Bridge\ScopeRepository;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
+use Nyholm\Psr7\Response;
 use OpenIDConnect\ClaimExtractor;
 use OpenIDConnect\Claims\ClaimSet;
 use OpenIDConnect\Laravel\LaravelCurrentRequestService;
@@ -60,6 +64,24 @@ class PassportServiceProvider extends BasePassportServiceProvider
             $cryptKey,
             $encryptionKey,
             $responseType,
+        );
+    }
+
+    /**
+     * See App\Services\Oidc\CustomAuthCodeGrant - otherwise identical to the
+     * vendor package's own buildAuthCodeGrant()
+     * (OpenIDConnect\Laravel\PassportServiceProvider), just minting that
+     * class instead of OpenIDConnect\Grant\AuthCodeGrant directly.
+     */
+    #[\Override]
+    protected function buildAuthCodeGrant(): CustomAuthCodeGrant
+    {
+        return new CustomAuthCodeGrant(
+            resolve(AuthCodeRepository::class),
+            resolve(RefreshTokenRepository::class),
+            new \DateInterval('PT10M'),
+            new Response,
+            resolve(LaravelCurrentRequestService::class),
         );
     }
 }

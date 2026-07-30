@@ -82,6 +82,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // The OIDC `auth_time` claim / `max_age` request parameter (see
+        // App\Http\Middleware\EnforceMaxAge, App\Services\Oidc\CustomAuthCodeGrant)
+        // need to know when this session's actual authentication happened -
+        // Laravel's own session store has no such marker (only a
+        // continuously-refreshed "last activity" timestamp), so every login
+        // path stamps this explicitly.
+        $request->session()->put('auth_time', time());
+
         return redirect()->intended(RouteServiceProvider::home());
     }
 

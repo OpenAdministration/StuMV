@@ -190,7 +190,7 @@ Route::group([
 ], function (): void {
     require base_path('vendor/laravel/passport/routes/web.php');
 });
-Route::getRoutes()->getByName('realm.passport.authorizations.authorize')?->middleware('oidcClientMatchesRealm');
+Route::getRoutes()->getByName('realm.passport.authorizations.authorize')?->middleware(['oidcClientMatchesRealm', 'enforceMaxAge']);
 Route::getRoutes()->getByName('realm.passport.token')?->middleware('oidcClientMatchesRealm');
 Route::getRoutes()->getByName('realm.passport.authorizations.approve')?->middleware('logOidcConsentDecision');
 Route::getRoutes()->getByName('realm.passport.authorizations.deny')?->middleware('logOidcConsentDecision');

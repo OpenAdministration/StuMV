@@ -89,6 +89,7 @@ class OidcLoginController extends Controller
 
             Auth::login($existing);
             $request->session()->regenerate();
+            $request->session()->put('auth_time', time());
 
             resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $existing->username, $claims);
             $this->rememberSession($provider, $claims, $request->session()->getId());

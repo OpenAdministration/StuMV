@@ -1151,3 +1151,74 @@ test('replaying an already-rotated refresh token revokes every token for that us
         'token' => $secondAccessToken,
     ])->assertOk()->assertJson(['active' => false]);
 });
+
+test('the discovery document only advertises S256 for PKCE, not plain', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $this->getJson("/$uid/.well-known/openid-configuration")
+        ->assertOk()
+        ->assertJsonFragment(['code_challenge_methods_supported' => ['S256']]);
+});
+
+test('an authorize request with code_challenge_method=plain is rejected', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('PKCE Plain Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+        'code_challenge' => str_repeat('a', 43),
+        'code_challenge_method' => 'plain',
+    ]));
+
+    $response->assertStatus(400)->assertJson([
+        'error' => 'invalid_request',
+        'hint' => 'Code challenge method must be one of `S256`',
+    ]);
+});
+
+test('an authorize request with code_challenge_method=S256 still completes the code flow', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('PKCE S256 Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $verifier = Str::random(64);
+    $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
+
+    $authorize = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+        'code_challenge' => $challenge,
+        'code_challenge_method' => 'S256',
+    ]));
+
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+        'code_verifier' => $verifier,
+    ]);
+
+    $token->assertOk();
+    expect($token->json('access_token'))->not->toBeEmpty();
+});

@@ -104,6 +104,7 @@ class CompleteIdentityProviderRegistration extends Component
 
             Auth::login($eloquentUser);
             session()->regenerate();
+            session()->put('auth_time', time());
             session()->forget('identity_provider_pending');
 
             $provider = RealmIdentityProvider::find($pending['provider_id']);

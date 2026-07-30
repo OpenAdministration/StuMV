@@ -69,8 +69,12 @@ class RealmDiscoveryController extends Controller
             'revocation_endpoint_auth_methods_supported' => [
                 'client_secret_post',
             ],
+            // "plain" is actively rejected now (see App\Services\Oidc\CustomAuthCodeGrant) -
+            // it just echoes the verifier back as-is, defeating the point of
+            // PKCE (protecting the auth code from interception, e.g. by a
+            // malicious app registering the same custom URI scheme on a
+            // mobile device).
             'code_challenge_methods_supported' => [
-                'plain',
                 'S256',
             ],
             // See App\Services\Oidc\BackChannelLogoutTokenBuilder /

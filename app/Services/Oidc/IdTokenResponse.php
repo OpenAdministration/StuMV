@@ -8,9 +8,12 @@ use Lcobucci\JWT\Builder;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use OpenIDConnect\IdTokenResponse as BaseIdTokenResponse;
 use OpenIDConnect\Interfaces\IdentityEntityInterface;
+use OpenIDConnect\Laravel\LaravelCurrentRequestService;
+use Throwable;
 
 /**
- * Overrides two things the base package gets wrong for a realm-scoped OP:
+ * Overrides what the base package gets wrong for a realm-scoped OP, plus
+ * adds the `auth_time` claim it doesn't support at all:
  *
  * - `iss`: the base package's IssuedByGetter (config('openid.issuedBy'),
  *   defaulting to 'laravel') stamps just the app's scheme+host - it has no
@@ -30,6 +33,15 @@ use OpenIDConnect\Interfaces\IdentityEntityInterface;
  *   (Laravel\Passport\Bridge\AccessTokenRepository::persistNewAccessToken()
  *   saves it as the row's primary key before this response is built), which is
  *   exactly the value BackChannelLogoutTokenBuilder is given at logout time.
+ * - `auth_time`: required by spec whenever `max_age` was requested (see
+ *   App\Http\Middleware\EnforceMaxAge) and useful even when it wasn't.
+ *   App\Services\Oidc\CustomAuthCodeGrant stashed it into the auth code
+ *   payload at /authorize time (this class's own instance-level session()
+ *   read wouldn't work here - /oauth/token, where this builder actually
+ *   runs, is normally called server-to-server by the client's own backend,
+ *   with no user session/cookie attached at all), so this reads it back the
+ *   same way the base class's own getExtraParams() already reads `nonce`
+ *   back out of that same payload.
  */
 class IdTokenResponse extends BaseIdTokenResponse
 {
@@ -47,6 +59,27 @@ class IdTokenResponse extends BaseIdTokenResponse
             $builder = $builder->issuedBy(Community::issuerFor($client->community_uid));
         }
 
+        if ($authTime = $this->authTimeFromAuthCode()) {
+            $builder = $builder->withClaim('auth_time', $authTime);
+        }
+
         return $builder;
+    }
+
+    private function authTimeFromAuthCode(): ?int
+    {
+        $body = resolve(LaravelCurrentRequestService::class)->getRequest()->getParsedBody();
+
+        if (! isset($body['code'])) {
+            return null;
+        }
+
+        try {
+            $payload = json_decode($this->decrypt($body['code']), true, 512, JSON_THROW_ON_ERROR);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $payload['auth_time'] ?? null;
     }
 }
