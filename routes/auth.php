@@ -51,17 +51,15 @@ Route::middleware('guest')->group(function (): void {
     Route::post('{realm}/reset-password', [NewPasswordController::class, 'store'])
         ->name('password.update');
 
-    // External OIDC ("Login with X") - redirect/callback are plain
-    // controller actions (no session established yet on the way out, and the
-    // way back in needs to read the "code"/"state" query params), while the
-    // "pick a username" step for brand-new accounts is a Livewire component
-    // like registration itself. The literal "register" route must be
-    // registered before the "{provider}" wildcard below, or the wildcard
-    // would greedily match "register" as a provider id first.
-    Route::livewire('{realm}/login/identity-provider/register', CompleteIdentityProviderRegistration::class)->name('identity-provider.register');
-    Route::get('{realm}/login/identity-provider/{provider}', [OidcLoginController::class, 'redirect'])->name('identity-provider.redirect');
-    Route::get('{realm}/login/identity-provider/{provider}/callback', [OidcLoginController::class, 'callback'])->name('identity-provider.callback');
+    // External OIDC ("Login with X")
+    Route::livewire('{realm}/identity-provider/register', CompleteIdentityProviderRegistration::class)->name('identity-provider.register');
+    Route::get('{realm}/identity-provider/{provider}', [OidcLoginController::class, 'redirect'])->name('identity-provider.redirect');
+    Route::get('{realm}/identity-provider/{provider}/callback', [OidcLoginController::class, 'callback'])->name('identity-provider.callback');
 });
+
+// OpenID Connect Back-Channel Logout 1.0
+Route::post('{realm}/identity-provider/{provider}/backchannel-logout', [OidcLoginController::class, 'backChannelLogout'])
+    ->name('identity-provider.backchannel-logout');
 
 Route::middleware('auth')->group(function (): void {
     Route::get('{realm}/verify-email', [EmailVerificationPromptController::class, '__invoke'])

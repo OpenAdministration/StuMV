@@ -15,6 +15,8 @@ return [
     'name_placeholder' => 'e.g. TU Ilmenau',
     'issuer' => 'Issuer URL',
     'issuer_description' => 'The identity provider\'s base URL. Its configuration is fetched automatically from {issuer}/.well-known/openid-configuration.',
+    'backchannel_logout_url' => 'Back-channel logout URL',
+    'backchannel_logout_url_description' => 'Register this URL with the identity provider as its back-channel logout endpoint, so logging out there also ends the matching StuMV session.',
     'client_id' => 'Client ID',
     'client_secret' => 'Client secret',
     'client_secret_edit_description' => 'Leave blank to keep the currently stored secret.',

@@ -26,6 +26,12 @@
                 </flux:field>
 
                 <flux:field>
+                    <flux:label>{{ __('identity_providers.backchannel_logout_url') }}</flux:label>
+                    <flux:description>{{ __('identity_providers.backchannel_logout_url_description') }}</flux:description>
+                    <flux:input readonly copyable value="{{ route('identity-provider.backchannel-logout', ['realm' => $uid, 'provider' => $providerId]) }}" />
+                </flux:field>
+
+                <flux:field>
                     <flux:label>{{ __('identity_providers.client_id') }}</flux:label>
                     <flux:input wire:model="client_id" />
                     <flux:error name="client_id" />

@@ -26,6 +26,11 @@ class VerifyCsrfToken extends Middleware
      * but that form lives on the *client's* page, not one this app rendered
      * with a matching _token.
      *
+     * identity-provider/*\/backchannel-logout is StuMV acting as an OIDC
+     * *client* to an external identity provider: that provider posts a
+     * logout_token here directly, server-to-server, when its own user logs
+     * out - there's no browser/session/form involved on this end at all.
+     *
      * @var array<int, string>
      */
     protected $except = [
@@ -33,5 +38,6 @@ class VerifyCsrfToken extends Middleware
         '*/oauth/token/refresh',
         '*/oauth/device/code',
         '*/oauth/end-session',
+        '*/identity-provider/*/backchannel-logout',
     ];
 }

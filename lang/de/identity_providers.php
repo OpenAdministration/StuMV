@@ -15,6 +15,8 @@ return [
     'name_placeholder' => 'z. B. TU Ilmenau',
     'issuer' => 'Issuer-URL',
     'issuer_description' => 'Die Basis-URL des Identity Providers. Die Konfiguration wird automatisch unter {issuer}/.well-known/openid-configuration abgerufen.',
+    'backchannel_logout_url' => 'Back-Channel-Logout-URL',
+    'backchannel_logout_url_description' => 'Trage diese URL beim Identity Provider als Back-Channel-Logout-Endpunkt ein, damit sich Nutzer:innen dort automatisch auch aus StuMV abmelden.',
     'client_id' => 'Client-ID',
     'client_secret' => 'Client-Secret',
     'client_secret_edit_description' => 'Leer lassen, um das aktuell hinterlegte Secret beizubehalten.',

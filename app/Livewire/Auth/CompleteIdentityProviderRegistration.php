@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Models\IdentityProviderSession;
 use App\Models\RealmBranding;
 use App\Models\RealmIdentityProvider;
 use App\Providers\RouteServiceProvider;
@@ -108,6 +109,14 @@ class CompleteIdentityProviderRegistration extends Component
             $provider = RealmIdentityProvider::find($pending['provider_id']);
             if ($provider) {
                 resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
+
+                if (! empty($pending['claims']['sub'])) {
+                    IdentityProviderSession::create([
+                        'provider_id' => $provider->id,
+                        'external_sub' => $pending['claims']['sub'],
+                        'session_id' => session()->getId(),
+                    ]);
+                }
             }
 
             return redirect()->intended(RouteServiceProvider::home($this->realm_uid));

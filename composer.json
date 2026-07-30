@@ -15,6 +15,7 @@
         "diglactic/laravel-breadcrumbs": "^10.0",
         "directorytree/ldaprecord": "^4.0",
         "directorytree/ldaprecord-laravel": "^4.0",
+        "firebase/php-jwt": "^7.1",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^4.0",
         "jeremy379/laravel-openid-connect": "^3.3",

@@ -2,6 +2,7 @@
 
 use App\Ldap\User as LdapUser;
 use App\Livewire\Auth\CompleteIdentityProviderRegistration;
+use App\Models\IdentityProviderSession;
 use App\Models\RoleMembership;
 use App\Models\User as DbUser;
 use Livewire\Livewire;
@@ -106,6 +107,27 @@ test('completing registration also applies role mappings from the stashed claims
         ->where('role_cn', $role->getFirstAttribute('cn'))
         ->where('committee_dn', $committee->getDn())
         ->count())->toBe(1);
+});
+
+test('completing registration records the sub->session mapping used for back-channel logout', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    $email = $this->username.'@example.test';
+    stashIdentityProviderPending($community->getShortCode(), $provider->id, $email, [
+        'claims' => ['email' => $email, 'sub' => 'external-123'],
+    ]);
+
+    Livewire::test(CompleteIdentityProviderRegistration::class, ['realm' => $community])
+        ->set('username', $this->username)
+        ->set('first_name', 'Ada')
+        ->set('last_name', 'Lovelace')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $mapping = IdentityProviderSession::where('provider_id', $provider->id)->where('external_sub', 'external-123')->first();
+
+    expect($mapping)->not->toBeNull()
+        ->and($mapping->session_id)->toBe(session()->getId());
 });
 
 test('the completion form requires a username, first and last name', function (): void {

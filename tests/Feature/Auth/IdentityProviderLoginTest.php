@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\User as LdapUser;
+use App\Models\IdentityProviderSession;
 use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
 use App\Support\OidcProviderFactory;
@@ -89,6 +90,23 @@ test('logging in via the identity provider with a matching email logs the existi
         ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 
     $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('logging in via the identity provider records the sub->session mapping used for back-channel logout', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    fakeIdentityProvider($provider->issuer, [
+        'sub' => 'external-123',
+        'email' => $existingUser->email,
+    ]);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider));
+
+    $mapping = IdentityProviderSession::where('provider_id', $provider->id)->where('external_sub', 'external-123')->first();
+
+    expect($mapping)->not->toBeNull()
+        ->and($mapping->session_id)->toBe(session()->getId());
 });
 
 test('logging in via the identity provider with no matching account redirects to the registration-completion step', function (): void {
