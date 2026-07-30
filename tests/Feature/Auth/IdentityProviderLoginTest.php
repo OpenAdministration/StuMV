@@ -5,43 +5,81 @@ use App\Models\IdentityProviderSession;
 use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
 use App\Support\OidcProviderFactory;
+use Firebase\JWT\JWT;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
 /**
- * Stubs the external identity provider's discovery/token/userinfo endpoints so
- * OidcLoginController can run its real authorization-code exchange (via
- * league/oauth2-client) against fake, deterministic responses instead of a
- * real IdP. The discovery document is fetched via Laravel's Http facade
- * (faked normally), but the token/userinfo exchange happens through
- * league/oauth2-client's own internal Guzzle client, which Http::fake() can't
- * see - so that part is mocked via a Guzzle MockHandler injected through
- * OidcProviderFactory instead.
+ * Fakes the discovery+jwks endpoints (reusing makeRsaKeyPairAndJwks() and
+ * fakeIdentityProviderJwks() from IdentityProviderBackChannelLogoutTest.php,
+ * both loaded globally in the same test run) and drives
+ * identity-provider.redirect, returning the state/nonce the controller
+ * actually generated plus the RSA key backing the faked JWKS. The nonce and
+ * PKCE verifier are only known after this redirect response, so callers use
+ * the return value to sign a matching (or deliberately mismatched, for
+ * negative tests) id_token before completing the login via
+ * identityProviderCallbackUrl().
+ *
+ * @return array{state: string, nonce: string, privateKey: string}
  */
-function fakeIdentityProvider(string $issuer, array $userinfo): void
+function startIdentityProviderLogin(string $realmUid, RealmIdentityProvider $provider): array
 {
-    Http::fake([
-        $issuer.'/.well-known/openid-configuration' => Http::response([
-            'authorization_endpoint' => $issuer.'/authorize',
-            'token_endpoint' => $issuer.'/token',
-            'userinfo_endpoint' => $issuer.'/userinfo',
-        ]),
-    ]);
+    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
+    fakeIdentityProviderJwks($provider->issuer, $jwks);
+
+    $redirect = test()->get(route('identity-provider.redirect', ['realm' => $realmUid, 'provider' => $provider->id]));
+    $redirect->assertStatus(302);
+
+    parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    return ['state' => $query['state'], 'nonce' => $query['nonce'], 'privateKey' => $privateKey];
+}
+
+function validIdTokenClaims(RealmIdentityProvider $provider, string $nonce, string $sub): array
+{
+    return [
+        'iss' => $provider->issuer,
+        'aud' => $provider->client_id,
+        'sub' => $sub,
+        'nonce' => $nonce,
+        'iat' => time(),
+        'exp' => time() + 300,
+    ];
+}
+
+function signIdToken(string $privateKey, array $claims, string $kid = 'test-key'): string
+{
+    return JWT::encode($claims, $privateKey, 'RS256', $kid);
+}
+
+/**
+ * Wires up the token/userinfo exchange (via a mocked Guzzle client injected
+ * through OidcProviderFactory - league/oauth2-client uses its own internal
+ * HTTP client, which Http::fake() can't see) and returns the ready-to-GET
+ * callback URL. $idToken is nullable so tests can exercise the
+ * missing-id_token rejection path.
+ */
+function identityProviderCallbackUrl(string $realmUid, RealmIdentityProvider $provider, array $login, array $userinfo, ?string $idToken, string $code = 'fake-code'): string
+{
+    $tokenResponse = [
+        'access_token' => 'fake-access-token',
+        'token_type' => 'bearer',
+        'expires_in' => 3600,
+    ];
+
+    if ($idToken !== null) {
+        $tokenResponse['id_token'] = $idToken;
+    }
 
     $mockHandler = new MockHandler([
-        new Response(200, ['Content-Type' => 'application/json'], json_encode([
-            'access_token' => 'fake-access-token',
-            'token_type' => 'bearer',
-            'expires_in' => 3600,
-        ])),
+        new Response(200, ['Content-Type' => 'application/json'], json_encode($tokenResponse)),
         new Response(200, ['Content-Type' => 'application/json'], json_encode($userinfo)),
     ]);
     $guzzle = new Client(['handler' => HandlerStack::create($mockHandler)]);
@@ -55,38 +93,38 @@ function fakeIdentityProvider(string $issuer, array $userinfo): void
             return new GenericProvider($options, ['httpClient' => $this->guzzle]);
         }
     });
-}
-
-/** Hits identity-provider.redirect, pulls the state it generated out of the redirect URL, and returns the matching identity-provider.callback URL. */
-function identityProviderCallbackUrl(string $realmUid, RealmIdentityProvider $provider, string $code = 'fake-code'): string
-{
-    $redirect = test()->get(route('identity-provider.redirect', ['realm' => $realmUid, 'provider' => $provider->id]));
-    $redirect->assertStatus(302);
-
-    parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $query);
 
     return route('identity-provider.callback', [
         'realm' => $realmUid,
         'provider' => $provider->id,
-        'state' => $query['state'],
+        'state' => $login['state'],
         'code' => $code,
     ]);
+}
+
+/** Happy-path helper: drives a full login with a validly-signed id_token and returns the callback URL. */
+function loginViaIdentityProvider(string $realmUid, RealmIdentityProvider $provider, array $userinfo): string
+{
+    $login = startIdentityProviderLogin($realmUid, $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+
+    return identityProviderCallbackUrl($realmUid, $provider, $login, $userinfo, $idToken);
 }
 
 test('logging in via the identity provider with a matching email logs the existing account in directly', function (): void {
     $community = newCommunity();
     $existingUser = TestLdap::member($community);
     $provider = makeIdentityProvider($community->getShortCode());
-    fakeIdentityProvider($provider->issuer, [
+    $userinfo = [
         'sub' => 'external-123',
         'email' => $existingUser->email,
         'given_name' => 'Ignored',
         'family_name' => 'Ignored',
-    ]);
+    ];
 
     $this->assertGuest();
 
-    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider))
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
         ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 
     $this->assertAuthenticatedAs($existingUser->fresh());
@@ -96,12 +134,9 @@ test('logging in via the identity provider records the sub->session mapping used
     $community = newCommunity();
     $existingUser = TestLdap::member($community);
     $provider = makeIdentityProvider($community->getShortCode());
-    fakeIdentityProvider($provider->issuer, [
-        'sub' => 'external-123',
-        'email' => $existingUser->email,
-    ]);
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
 
-    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider));
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo));
 
     $mapping = IdentityProviderSession::where('provider_id', $provider->id)->where('external_sub', 'external-123')->first();
 
@@ -112,12 +147,9 @@ test('logging in via the identity provider records the sub->session mapping used
 test('logging in via the identity provider with no matching account redirects to the registration-completion step', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
-    fakeIdentityProvider($provider->issuer, [
-        'sub' => 'external-999',
-        'email' => 'not-yet-registered@example.test',
-    ]);
+    $userinfo = ['sub' => 'external-999', 'email' => 'not-yet-registered@example.test'];
 
-    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider))
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
         ->assertRedirect(route('identity-provider.register', ['realm' => $community->getShortCode()]));
 
     $this->assertGuest();
@@ -127,16 +159,13 @@ test('a locked account cannot log in via the identity provider even with a match
     $community = newCommunity();
     $existingUser = TestLdap::member($community);
     $provider = makeIdentityProvider($community->getShortCode());
-    fakeIdentityProvider($provider->issuer, [
-        'sub' => 'external-123',
-        'email' => $existingUser->email,
-    ]);
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
 
     $ldap = LdapUser::findByUsername($existingUser->username);
     $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
     $ldap->save();
 
-    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider))->assertForbidden();
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))->assertForbidden();
 
     $this->assertGuest();
 });
@@ -152,13 +181,13 @@ test('a matching login grants roles mapped from the returned groups claim', func
         'committee_dn' => $committee->getDn(),
         'role_cn' => $role->getFirstAttribute('cn'),
     ]);
-    fakeIdentityProvider($provider->issuer, [
+    $userinfo = [
         'sub' => 'external-123',
         'email' => $existingUser->email,
         'groups' => ['stura-member', 'some-unmapped-group'],
-    ]);
+    ];
 
-    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider));
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo));
 
     expect(RoleMembership::where('username', $existingUser->username)
         ->where('role_cn', $role->getFirstAttribute('cn'))
@@ -169,7 +198,6 @@ test('a matching login grants roles mapped from the returned groups claim', func
 test('an invalid or replayed state is rejected', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
-    fakeIdentityProvider($provider->issuer, ['sub' => 'x', 'email' => 'someone@example.test']);
 
     $this->get(route('identity-provider.callback', [
         'realm' => $community->getShortCode(),
@@ -196,4 +224,98 @@ test('another realm\'s identity provider cannot be used to log in through this r
 
     $this->get(route('identity-provider.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]))
         ->assertNotFound();
+});
+
+test('a login with no id_token in the token response is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, null);
+
+    $this->get($callbackUrl)->assertStatus(422);
+
+    $this->assertGuest();
+});
+
+test('an id_token with a mismatched nonce is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, 'not-the-real-nonce', $userinfo['sub']));
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken);
+
+    $this->get($callbackUrl)->assertStatus(400);
+
+    $this->assertGuest();
+});
+
+test('an id_token with the wrong issuer is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['iss'] = 'https://not-the-issuer.test';
+    $idToken = signIdToken($login['privateKey'], $claims);
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken);
+
+    $this->get($callbackUrl)->assertStatus(400);
+
+    $this->assertGuest();
+});
+
+test('an id_token with the wrong audience is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['aud'] = 'someone-elses-client-id';
+    $idToken = signIdToken($login['privateKey'], $claims);
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken);
+
+    $this->get($callbackUrl)->assertStatus(400);
+
+    $this->assertGuest();
+});
+
+test('an id_token signed by the wrong key is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    [$otherPrivateKey] = makeRsaKeyPairAndJwks('other-key');
+    $idToken = signIdToken($otherPrivateKey, validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']), 'other-key');
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken);
+
+    $this->get($callbackUrl)->assertStatus(400);
+
+    $this->assertGuest();
+});
+
+test('a userinfo response whose sub does not match the id_token is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'a-different-subject', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], 'external-123'));
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken);
+
+    $this->get($callbackUrl)->assertStatus(422);
+
+    $this->assertGuest();
 });

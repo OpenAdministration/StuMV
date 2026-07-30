@@ -93,6 +93,15 @@ class AppServiceProvider extends ServiceProvider
         Passport::tokensExpireIn(now()->addHour());
         Passport::refreshTokensExpireIn(now()->addDays(30));
 
+        // App\Services\Oidc\ReuseDetectingRefreshTokenRepository's reuse
+        // detection only means anything if a used refresh token actually
+        // gets revoked - otherwise a stolen token could be replayed
+        // indefinitely instead of tripping the family-revoke on its second
+        // use. This is already Passport's own default, but a security
+        // invariant this load-bearing shouldn't depend on an undocumented
+        // vendor default silently changing under us.
+        Passport::$revokeRefreshTokenAfterUse = true;
+
         // Token issuance/revocation otherwise leaves no trace at all -
         // these are Passport's own events (Bridge\AccessTokenRepository,
         // Bridge\RefreshTokenRepository), not anything this app dispatches.

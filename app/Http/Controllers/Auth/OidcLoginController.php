@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use League\OAuth2\Client\Provider\GenericProvider;
 use RuntimeException;
 use Throwable;
@@ -35,13 +36,27 @@ class OidcLoginController extends Controller
     {
         $this->authorizeProvider($realm, $provider);
 
-        $oauthProvider = $this->buildProvider($realm, $provider);
+        $discovery = $this->discover($provider->issuer);
+        $oauthProvider = $this->buildProvider($realm, $provider, $discovery);
 
-        $authorizationUrl = $oauthProvider->getAuthorizationUrl(['scope' => 'openid email profile']);
+        // The nonce ties the id_token we'll later receive back to this
+        // specific login attempt (replay protection distinct from `state`,
+        // which only protects the redirect itself) - verified in
+        // verifyIdToken(). getAuthorizationUrl() must run before
+        // getPkceCode(), which only has a value once PKCE_METHOD_S256
+        // makes getAuthorizationParameters() generate one as a side effect.
+        $nonce = Str::random(32);
+
+        $authorizationUrl = $oauthProvider->getAuthorizationUrl([
+            'scope' => 'openid email profile',
+            'nonce' => $nonce,
+        ]);
 
         session([
             'identity_provider_state' => $oauthProvider->getState(),
             'identity_provider_id' => $provider->id,
+            'identity_provider_nonce' => $nonce,
+            'identity_provider_pkce_verifier' => $oauthProvider->getPkceCode(),
         ]);
 
         return redirect($authorizationUrl);
@@ -63,18 +78,43 @@ class OidcLoginController extends Controller
             && $state === session('identity_provider_state')
             && session('identity_provider_id') === $provider->id;
 
-        session()->forget(['identity_provider_state', 'identity_provider_id']);
+        $nonce = session('identity_provider_nonce');
+        $pkceVerifier = session('identity_provider_pkce_verifier');
+
+        session()->forget([
+            'identity_provider_state',
+            'identity_provider_id',
+            'identity_provider_nonce',
+            'identity_provider_pkce_verifier',
+        ]);
 
         abort_unless($validState, 400, 'Invalid or expired SSO login attempt.');
         abort_if($request->has('error'), 400, (string) $request->query('error_description', 'The identity provider reported an error.'));
 
-        $oauthProvider = $this->buildProvider($realm, $provider);
+        $discovery = $this->discover($provider->issuer);
+        $oauthProvider = $this->buildProvider($realm, $provider, $discovery);
+        $oauthProvider->setPkceCode($pkceVerifier);
 
         $token = $oauthProvider->getAccessToken('authorization_code', [
             'code' => $request->query('code'),
         ]);
 
+        $idToken = $token->getValues()['id_token'] ?? null;
+        abort_if($idToken === null, 422, 'The identity provider did not return an ID token.');
+
+        try {
+            $idTokenClaims = $this->verifyIdToken($idToken, $provider, $nonce, $discovery);
+        } catch (RuntimeException $runtimeException) {
+            abort(400, $runtimeException->getMessage());
+        }
+
         $claims = $oauthProvider->getResourceOwner($token)->toArray();
+
+        // OIDC Core 1.0 5.3.2: the userinfo response's sub must match the
+        // id_token's - otherwise a malicious/compromised userinfo endpoint
+        // could hand back claims for a different subject than the one that
+        // was actually authenticated.
+        abort_unless(($claims['sub'] ?? null) === $idTokenClaims['sub'], 422, 'The identity provider returned mismatched subject claims.');
 
         $email = $claims['email'] ?? null;
         abort_unless($email, 422, 'The identity provider did not return an email address.');
@@ -172,23 +212,7 @@ class OidcLoginController extends Controller
     private function verifyLogoutToken(string $logoutToken, RealmIdentityProvider $provider): array
     {
         $discovery = $this->discover($provider->issuer);
-
-        if (empty($discovery['jwks_uri'])) {
-            throw new RuntimeException('The identity provider does not advertise a JWKS endpoint.');
-        }
-
-        $jwks = Cache::remember(
-            'identity-provider-jwks:'.md5($provider->issuer),
-            now()->addHour(),
-            fn (): array => Http::get($discovery['jwks_uri'])->throw()->json()
-        );
-
-        try {
-            $keys = JWK::parseKeySet($jwks);
-            $decoded = json_decode(json_encode(JWT::decode($logoutToken, $keys)), true);
-        } catch (Throwable) {
-            throw new RuntimeException('The logout_token signature could not be verified.');
-        }
+        $decoded = $this->verifySignedJwt($logoutToken, $provider, $discovery);
 
         if (($decoded['iss'] ?? null) !== rtrim($provider->issuer, '/')) {
             throw new RuntimeException('Unexpected issuer in logout_token.');
@@ -216,6 +240,83 @@ class OidcLoginController extends Controller
     }
 
     /**
+     * OpenID Connect Core 1.0 3.1.3.7 requires validating the id_token
+     * returned alongside the access token, not just trusting whatever the
+     * userinfo endpoint later hands back over TLS: signature against the
+     * provider's own JWKS, expected issuer/audience, and the nonce this app
+     * generated for this specific login attempt (replay protection distinct
+     * from `state`, which only covers the redirect itself). exp/nbf are
+     * checked automatically by JWT::decode().
+     *
+     * @return array<string, mixed>
+     */
+    private function verifyIdToken(string $idToken, RealmIdentityProvider $provider, ?string $expectedNonce, array $discovery): array
+    {
+        $decoded = $this->verifySignedJwt($idToken, $provider, $discovery);
+
+        if (($decoded['iss'] ?? null) !== rtrim($provider->issuer, '/')) {
+            throw new RuntimeException('Unexpected issuer in id_token.');
+        }
+
+        $audience = (array) ($decoded['aud'] ?? []);
+        if (! in_array($provider->client_id, $audience, true)) {
+            throw new RuntimeException('Unexpected audience in id_token.');
+        }
+
+        if ($expectedNonce === null || ($decoded['nonce'] ?? null) !== $expectedNonce) {
+            throw new RuntimeException('Unexpected or missing nonce in id_token.');
+        }
+
+        if (empty($decoded['sub'])) {
+            throw new RuntimeException('id_token is missing a sub claim.');
+        }
+
+        return $decoded;
+    }
+
+    /**
+     * Decodes and verifies a JWT's signature against the provider's
+     * published JWKS, shared by both the id_token (login) and logout_token
+     * (back-channel logout) verification paths. Retries once with a forced
+     * cache-bust before giving up: the JWKS is cached for an hour (see
+     * fetchJwks()), so a provider that rotates its signing keys - e.g.
+     * reacting to a compromise - would otherwise have every token it signs
+     * with the new key rejected here for up to an hour.
+     *
+     * @return array<string, mixed>
+     */
+    private function verifySignedJwt(string $jwt, RealmIdentityProvider $provider, array $discovery): array
+    {
+        if (empty($discovery['jwks_uri'])) {
+            throw new RuntimeException('The identity provider does not advertise a JWKS endpoint.');
+        }
+
+        foreach ([false, true] as $forceRefresh) {
+            try {
+                $keys = JWK::parseKeySet($this->fetchJwks($provider->issuer, $discovery['jwks_uri'], $forceRefresh));
+
+                return json_decode(json_encode(JWT::decode($jwt, $keys)), true);
+            } catch (Throwable) {
+                continue;
+            }
+        }
+
+        throw new RuntimeException('The token signature could not be verified.');
+    }
+
+    /** @return array<string, mixed> */
+    private function fetchJwks(string $issuer, string $jwksUri, bool $forceRefresh): array
+    {
+        $cacheKey = 'identity-provider-jwks:'.md5($issuer);
+
+        if ($forceRefresh) {
+            Cache::forget($cacheKey);
+        }
+
+        return Cache::remember($cacheKey, now()->addHour(), fn (): array => Http::get($jwksUri)->throw()->json());
+    }
+
+    /**
      * Records which StuMV session a login via this provider/sub established,
      * so a later logout_token for that sub can find and end it. Skipped
      * silently if the provider didn't return a sub - back-channel logout
@@ -240,10 +341,8 @@ class OidcLoginController extends Controller
         abort_unless($provider->enabled && $provider->realm === $realm->getShortCode(), 404);
     }
 
-    private function buildProvider(Community $realm, RealmIdentityProvider $provider): GenericProvider
+    private function buildProvider(Community $realm, RealmIdentityProvider $provider, array $discovery): GenericProvider
     {
-        $discovery = $this->discover($provider->issuer);
-
         return $this->providerFactory->make([
             'clientId' => $provider->client_id,
             'clientSecret' => $provider->client_secret,
@@ -251,6 +350,7 @@ class OidcLoginController extends Controller
             'urlAuthorize' => $discovery['authorization_endpoint'],
             'urlAccessToken' => $discovery['token_endpoint'],
             'urlResourceOwnerDetails' => $discovery['userinfo_endpoint'],
+            'pkceMethod' => GenericProvider::PKCE_METHOD_S256,
         ]);
     }
 
