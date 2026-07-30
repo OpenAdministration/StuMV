@@ -34,7 +34,7 @@ return [
     'phone_label' => 'Phone',
     'remove_picture' => 'Remove',
     'sessions' => 'Sessions',
-    'sessions_explanation' => 'Devices/browsers that have recently accessed this account.',
+    'sessions_explanation' => 'Here you can find all devices and browsers signed in to this account.',
     'sessions_device' => 'Device',
     'sessions_ip_address' => 'IP address',
     'sessions_last_active' => 'Last active',
