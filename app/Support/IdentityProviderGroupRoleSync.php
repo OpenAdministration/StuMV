@@ -11,14 +11,11 @@ use Illuminate\Support\Collection;
  * provider sends back, per an admin-configured mapping
  * (IdentityProviderRoleMapping: external group -> committee + role), and
  * reconciles them on every subsequent login: a role this sync itself granted
- * (RoleMembership.identity_provider_id = this provider) is revoked once its
- * mapped external group is no longer in the claim, and reactivated (until
- * cleared) if it later reappears. Revocation sets `until` to today, the same
- * "active through the end of this day" convention
- * App\Livewire\Committee\TerminateRoleMemberships uses for a manual
- * termination - isActive() (and the ldap:sync-roles command that eventually
- * removes the LDAP-side effect) treat it as inactive starting the next day.
- * A role that was already
+ * (RoleMembership.identity_provider_id = this provider) is revoked, effective
+ * the day before this login (`until` = yesterday, so it's already inactive
+ * today - the access is gone at the IdP now, not as of some future effective
+ * date), once its mapped external group is no longer in the claim, and
+ * reactivated (until cleared) if it later reappears. A role that was already
  * there for some other reason - manually granted, or granted by a different
  * provider - is never touched, since it's never stamped with this provider's
  * id in the first place. Safe to run on every login (idempotent either way).
@@ -57,7 +54,16 @@ class IdentityProviderGroupRoleSync
             );
 
             if (! $stillMapped) {
-                $membership->update(['until' => now()->toDateString()]);
+                if ($membership->from->isToday()) {
+                    // "Ended the day before" would mean until < from here,
+                    // which Carbon's isActive()/betweenIncluded() treats as a
+                    // reversed range and reads as still active (it swaps the
+                    // bounds) - a grant that never saw a single active day
+                    // has no history worth keeping, so just remove it.
+                    $membership->delete();
+                } else {
+                    $membership->update(['until' => now()->subDay()->toDateString()]);
+                }
             }
         }
     }
@@ -84,12 +90,10 @@ class IdentityProviderGroupRoleSync
                 continue;
             }
 
-            // Clear a scheduled/already-past expiry whenever the mapping is
-            // reconfirmed - checking `until !== null` rather than
-            // `! isActive()`, since a same-day revoke's `until` (today) keeps
-            // isActive() true through the rest of today (see
-            // revokeStaleGrants()) but should still be cleared here rather
-            // than left to lapse tomorrow now that the group is back.
+            // Clear a previous revoke's `until` whenever the mapping is
+            // reconfirmed, regardless of isActive() - a membership revoked
+            // moments ago on an earlier day is already inactive, but should
+            // still reactivate here rather than staying revoked forever.
             if ($membership->identity_provider_id === $provider->id && $membership->until !== null) {
                 $membership->update(['until' => null]);
             }

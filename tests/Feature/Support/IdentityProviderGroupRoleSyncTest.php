@@ -91,7 +91,7 @@ test('a custom groups_claim name is honoured', function (): void {
     expect(RoleMembership::where('username', $user->username)->count())->toBe(1);
 });
 
-test('a role this sync granted is revoked once its external group is no longer claimed', function (): void {
+test('a role this sync granted today is removed outright if revoked the same day', function (): void {
     $community = newCommunity();
     $user = TestLdap::member($community);
     $committee = TestLdap::makeCommittee($community);
@@ -107,16 +107,50 @@ test('a role this sync granted is revoked once its external group is no longer c
     $sync->apply($provider, $user->username, ['groups' => ['stura-member']]);
     $sync->apply($provider, $user->username, ['groups' => ['some-other-group']]);
 
+    // "Ended the day before" would mean until < from for a grant made today -
+    // a reversed range isActive() reads as still active (see the sync's doc
+    // comment) - so a same-day grant-then-revoke has no valid historical
+    // window to record and is deleted outright instead.
+    expect(RoleMembership::where('username', $user->username)
+        ->where('role_cn', $role->getFirstAttribute('cn'))
+        ->where('committee_dn', $committee->getDn())
+        ->count())->toBe(0);
+});
+
+test('a role this sync granted on an earlier day is revoked effective the day before this login', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $provider->roleMappings()->create([
+        'external_group' => 'stura-member',
+        'committee_dn' => $committee->getDn(),
+        'role_cn' => $role->getFirstAttribute('cn'),
+    ]);
+
+    RoleMembership::create([
+        'role_cn' => $role->getFirstAttribute('cn'),
+        'committee_dn' => $committee->getDn(),
+        'realm' => $community->getShortCode(),
+        'username' => $user->username,
+        'from' => now()->subDays(10)->toDateString(),
+        'until' => null,
+        'decided' => now()->subDays(10)->toDateString(),
+        'comment' => __('identity_providers.auto_assigned_comment', ['provider' => $provider->name]),
+        'identity_provider_id' => $provider->id,
+    ]);
+
+    resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $user->username, ['groups' => ['some-other-group']]);
+
     $membership = RoleMembership::where('username', $user->username)
         ->where('role_cn', $role->getFirstAttribute('cn'))
         ->where('committee_dn', $committee->getDn())
         ->first();
 
-    // Same "active through the end of this day" convention as a manual
-    // termination (TerminateRoleMemberships) - isActive() only turns false
-    // starting the next day.
     expect($membership)->not->toBeNull()
-        ->and($membership->until->toDateString())->toBe(now()->toDateString());
+        ->and($membership->until->toDateString())->toBe(now()->subDay()->toDateString())
+        ->and($membership->isActive())->toBeFalse();
 });
 
 test('a revoked role is reactivated once its external group reappears in the claim', function (): void {
