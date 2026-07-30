@@ -37,4 +37,9 @@ class RealmIdentityProvider extends Model
     {
         return $this->hasMany(IdentityProviderRoleMapping::class, 'provider_id');
     }
+
+    public function groupMappings(): HasMany
+    {
+        return $this->hasMany(IdentityProviderGroupMapping::class, 'provider_id');
+    }
 }

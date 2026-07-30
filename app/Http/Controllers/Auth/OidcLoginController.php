@@ -10,6 +10,7 @@ use App\Models\RealmIdentityProvider;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use App\Support\IdentityProviderGroupRoleSync;
+use App\Support\IdentityProviderGroupSync;
 use App\Support\OidcProviderFactory;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
@@ -92,6 +93,7 @@ class OidcLoginController extends Controller
             $request->session()->put('auth_time', time());
 
             resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $existing->username, $claims);
+            resolve(IdentityProviderGroupSync::class)->apply($provider, $existing->username, $claims);
             $this->rememberSession($provider, $claims, $request->session()->getId());
 
             return redirect()->intended(RouteServiceProvider::home($realm->getShortCode()));

@@ -7,7 +7,8 @@
     <flux:tab.group>
         <flux:tabs>
             <flux:tab name="general">{{ __('identity_providers.tab_general') }}</flux:tab>
-            <flux:tab name="mappings">{{ __('identity_providers.tab_mappings') }}</flux:tab>
+            <flux:tab name="role-mappings">{{ __('identity_providers.tab_mappings') }}</flux:tab>
+            <flux:tab name="group-mappings">{{ __('identity_providers.tab_group_mappings') }}</flux:tab>
         </flux:tabs>
 
         <flux:tab.panel name="general" class="pt-8">
@@ -59,7 +60,7 @@
             </x-livewire-form>
         </flux:tab.panel>
 
-        <flux:tab.panel name="mappings" class="pt-8 space-y-8">
+        <flux:tab.panel name="role-mappings" class="pt-8 space-y-8">
             <div class="space-y-4">
                 <div>
                     <flux:heading size="lg">{{ __('identity_providers.mappings_headline') }}</flux:heading>
@@ -158,6 +159,82 @@
                 </form>
             </div>
         </flux:tab.panel>
+
+        <flux:tab.panel name="group-mappings" class="pt-8 space-y-8">
+            <div class="space-y-4">
+                <div>
+                    <flux:heading size="lg">{{ __('identity_providers.group_mappings_headline') }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('identity_providers.group_mappings_explanation') }}</flux:text>
+                </div>
+
+                @if(count($groupMappingRows) > 0)
+                    <flux:table>
+                        <flux:table.columns>
+                            <flux:table.column>{{ __('identity_providers.mappings_external_group') }}</flux:table.column>
+                            <flux:table.column>{{ __('identity_providers.group_mappings_group') }}</flux:table.column>
+                            <flux:table.column></flux:table.column>
+                        </flux:table.columns>
+                        <flux:table.rows>
+                        @foreach($groupMappingRows as $row)
+                            @php($mapping = $row['mapping'])
+                            @php($group = $row['group'])
+                            <flux:table.row>
+                                <flux:table.cell>{{ $mapping->external_group }}</flux:table.cell>
+                                <flux:table.cell>
+                                    @if($group)
+                                        <flux:link
+                                            wire:navigate
+                                            href="{{ route('realms.groups.members', ['realm' => $uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                        >
+                                            {{ $group->getFirstAttribute('description') }}
+                                        </flux:link>
+                                    @else
+                                        <div class="text-xs text-zinc-500">{{ $mapping->group_dn }}</div>
+                                    @endif
+                                </flux:table.cell>
+                                <flux:table.cell>
+                                    <div class="flex justify-end">
+                                        <flux:button
+                                            size="sm"
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="deleteGroupMappingPrepare('{{ $mapping->id }}')"
+                                        >
+                                            {{ __('common.delete') }}
+                                        </flux:button>
+                                    </div>
+                                </flux:table.cell>
+                            </flux:table.row>
+                        @endforeach
+                        </flux:table.rows>
+                    </flux:table>
+                @else
+                    <flux:callout variant="warning" icon="circle-alert" heading="{{ __('identity_providers.no_group_mappings_found') }}" />
+                @endif
+
+                <form wire:submit="addGroupMapping" class="grid sm:grid-cols-2 gap-4 items-start">
+                    <flux:field>
+                        <flux:label>{{ __('identity_providers.mappings_external_group') }}</flux:label>
+                        <flux:input wire:model="new_group_external_group" placeholder="{{ __('identity_providers.mappings_external_group_placeholder') }}" />
+                        <flux:error name="new_group_external_group" />
+                    </flux:field>
+
+                    <flux:field>
+                        <flux:label>{{ __('identity_providers.group_mappings_group') }}</flux:label>
+                        <flux:select variant="listbox" searchable wire:model="new_group_dn">
+                            @foreach($groups as $group)
+                                <flux:select.option value="{{ $group->getDn() }}">{{ $group->getFirstAttribute('description') }} ({{ $group->getFirstAttribute('cn') }})</flux:select.option>
+                            @endforeach
+                        </flux:select>
+                        <flux:error name="new_group_dn" />
+                    </flux:field>
+
+                    <div class="sm:col-span-2 flex justify-end">
+                        <flux:button type="submit" icon="plus">{{ __('identity_providers.mappings_add') }}</flux:button>
+                    </div>
+                </form>
+            </div>
+        </flux:tab.panel>
     </flux:tab.group>
 
     <form wire:submit="deleteMappingCommit">
@@ -169,6 +246,21 @@
                 </div>
                 <div class="flex justify-end gap-4">
                     <flux:button wire:click="closeDeleteMapping()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="danger" type="submit">{{ __('common.delete') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
+    </form>
+
+    <form wire:submit="deleteGroupMappingCommit">
+        <flux:modal name="delete-group-mapping">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('identity_providers.mapping_delete_title', ['name' => $deleteGroupMappingLabel]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('identity_providers.mapping_delete_warning', ['name' => $deleteGroupMappingLabel]) }}</flux:text>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <flux:button wire:click="closeDeleteGroupMapping()">{{ __('common.cancel') }}</flux:button>
                     <flux:button variant="danger" type="submit">{{ __('common.delete') }}</flux:button>
                 </div>
             </div>

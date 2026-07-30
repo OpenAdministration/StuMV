@@ -4,7 +4,9 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Group;
 use App\Ldap\Role;
+use App\Models\IdentityProviderGroupMapping;
 use App\Models\IdentityProviderRoleMapping;
 use App\Models\RealmIdentityProvider;
 use Flux\Flux;
@@ -40,6 +42,15 @@ class EditIdentityProvider extends Component
     public ?int $deleteMappingId = null;
 
     public string $deleteMappingLabel = '';
+
+    // "Add group mapping" mini-form.
+    public string $new_group_external_group = '';
+
+    public string $new_group_dn = '';
+
+    public ?int $deleteGroupMappingId = null;
+
+    public string $deleteGroupMappingLabel = '';
 
     public function mount(Community $realm, RealmIdentityProvider $provider): void
     {
@@ -97,10 +108,20 @@ class EditIdentityProvider extends Component
                 ];
             });
 
+        $groups = Group::fromCommunity($this->uid)->get();
+
+        $groupMappingRows = $this->provider()->groupMappings()->orderBy('external_group')->get()
+            ->map(fn (IdentityProviderGroupMapping $mapping): array => [
+                'mapping' => $mapping,
+                'group' => Group::find($mapping->group_dn),
+            ]);
+
         return view('livewire.realm.edit-identity-provider', [
             'mappingRows' => $mappingRows,
             'committees' => $committees,
             'roles' => $roles,
+            'groups' => $groups,
+            'groupMappingRows' => $groupMappingRows,
         ])->title(__('identity_providers.edit_title'));
     }
 
@@ -161,5 +182,44 @@ class EditIdentityProvider extends Component
     {
         Flux::modal('delete-mapping')->close();
         unset($this->deleteMappingId, $this->deleteMappingLabel);
+    }
+
+    public function addGroupMapping(): void
+    {
+        $this->validate([
+            'new_group_external_group' => 'required|string|max:255',
+            'new_group_dn' => 'required|string',
+        ]);
+
+        $this->provider()->groupMappings()->create([
+            'external_group' => $this->new_group_external_group,
+            'group_dn' => $this->new_group_dn,
+        ]);
+
+        $this->reset('new_group_external_group', 'new_group_dn');
+
+        Flux::toast(variant: 'success', text: __('identity_providers.group_mapping_added_success'));
+    }
+
+    public function deleteGroupMappingPrepare(int $mappingId): void
+    {
+        $mapping = $this->provider()->groupMappings()->findOrFail($mappingId);
+        $this->deleteGroupMappingId = $mapping->id;
+        $this->deleteGroupMappingLabel = $mapping->external_group;
+        Flux::modal('delete-group-mapping')->show();
+    }
+
+    public function deleteGroupMappingCommit(): void
+    {
+        $this->provider()->groupMappings()->findOrFail($this->deleteGroupMappingId)->delete();
+
+        Flux::toast(variant: 'success', text: __('identity_providers.group_mapping_deleted_success'));
+        $this->closeDeleteGroupMapping();
+    }
+
+    public function closeDeleteGroupMapping(): void
+    {
+        Flux::modal('delete-group-mapping')->close();
+        unset($this->deleteGroupMappingId, $this->deleteGroupMappingLabel);
     }
 }

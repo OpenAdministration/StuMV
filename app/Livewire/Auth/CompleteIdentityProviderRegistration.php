@@ -9,6 +9,7 @@ use App\Models\RealmBranding;
 use App\Models\RealmIdentityProvider;
 use App\Providers\RouteServiceProvider;
 use App\Support\IdentityProviderGroupRoleSync;
+use App\Support\IdentityProviderGroupSync;
 use App\Support\RealmContext;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -110,6 +111,7 @@ class CompleteIdentityProviderRegistration extends Component
             $provider = RealmIdentityProvider::find($pending['provider_id']);
             if ($provider) {
                 resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
+                resolve(IdentityProviderGroupSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
 
                 if (! empty($pending['claims']['sub'])) {
                     IdentityProviderSession::create([
