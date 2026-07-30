@@ -120,3 +120,21 @@ fieldset legend {
 .pagination > div > div:last-of-type div[aria-current="page"] {
     @apply bg-zinc-100 dark:bg-zinc-800;
 }
+
+/* Tabs */
+
+ui-tab-group {
+    @apply border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-xs overflow-hidden;
+}
+
+ui-tab-group > div {
+    @apply p-4;
+}
+
+ui-tabs {
+    @apply h-12 px-4 bg-zinc-100 dark:bg-zinc-800;
+}
+
+ui-tabs button {
+    @apply h-12; 
+}
