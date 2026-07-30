@@ -3,6 +3,7 @@
 use App\Http\Controllers\Oidc\EndSessionController;
 use App\Http\Controllers\Oidc\IntrospectionController;
 use App\Http\Controllers\Oidc\RealmDiscoveryController;
+use App\Http\Controllers\Oidc\RevocationController;
 use App\Http\Controllers\Oidc\UserInfoController;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Livewire\Api\EditApiClient;
@@ -206,10 +207,17 @@ Route::match(['get', 'post'], '{realm}/oauth/end-session', EndSessionController:
 // chained directly (unlike the authorize/token routes above, which are
 // required in from Passport's own routes/web.php and can only be reached
 // afterward via Route::getRoutes()->getByName()) since this route is
-// defined right here.
+// defined right here. Throttled per client_id (see RouteServiceProvider's
+// "oidc-client" limiter) - without it this endpoint would be an unlimited
+// oracle for guessing a client_secret or probing whether a token is valid.
 Route::post('{realm}/oauth/introspect', IntrospectionController::class)
-    ->middleware('oidcClientMatchesRealm')
+    ->middleware(['oidcClientMatchesRealm', 'throttle:oidc-client'])
     ->name('realm.openid.introspection');
+// RFC 7009 Token Revocation - see App\Http\Controllers\Oidc\RevocationController.
+// Same client-auth/realm/throttling story as introspection above.
+Route::post('{realm}/oauth/revoke', RevocationController::class)
+    ->middleware(['oidcClientMatchesRealm', 'throttle:oidc-client'])
+    ->name('realm.openid.revocation');
 
 // guest routes
 Route::get('imprint', fn () => redirect(config('app.imprint_url')))->name('imprint');

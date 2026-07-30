@@ -5,27 +5,19 @@ namespace App\Http\Controllers\Oidc;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Models\PassportClient;
+use App\Services\Oidc\AccessTokenVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Passport\AccessToken;
 use Laravel\Passport\Bridge\ClientRepository;
-use League\OAuth2\Server\Exception\OAuthServerException;
-use League\OAuth2\Server\ResourceServer;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 
 /**
- * RFC 7662 OAuth 2.0 Token Introspection. Rather than re-implementing JWT
- * signature/expiry/revocation checks here, this builds a throwaway PSR-7
- * request carrying the token-to-introspect as its own Bearer header and
- * hands it to the same ResourceServer that every other authenticated API
- * request already goes through (see
- * Laravel\Passport\Guards\TokenGuard::getPsrRequestViaBearerToken()) - if
- * that succeeds, the token is currently valid; if it throws, it isn't.
+ * RFC 7662 OAuth 2.0 Token Introspection.
  */
 class IntrospectionController extends Controller
 {
     public function __construct(
-        private readonly ResourceServer $resourceServer,
+        private readonly AccessTokenVerifier $accessTokenVerifier,
         private readonly ClientRepository $clientRepository,
     ) {}
 
@@ -50,26 +42,33 @@ class IntrospectionController extends Controller
             return response()->json(['error' => 'invalid_request'], 400);
         }
 
-        $accessToken = $this->introspect($token);
+        $accessToken = $this->accessTokenVerifier->verify($token);
 
-        if ($accessToken === null) {
+        if ($accessToken === null || ! $this->belongsToRealm($accessToken, $realm)) {
+            // Same response either way: a token whose own client lives in a
+            // different realm must not be distinguishable from one that's
+            // simply invalid/expired/revoked - anything else would leak
+            // cross-realm information about which token strings are "real".
             return response()->json(['active' => false]);
         }
 
         return response()->json($this->activeResponse($accessToken, $realm));
     }
 
-    private function introspect(string $token): ?AccessToken
+    /**
+     * The calling client is already realm-checked above, but that only
+     * proves the *caller* may use this realm's introspection endpoint - it
+     * says nothing about which realm actually issued the token being
+     * introspected. Without this check, a realm B client could learn that a
+     * token belonging to a realm A client is active, its scopes, its user,
+     * etc., since access tokens are all signed with the same server-wide
+     * key regardless of realm.
+     */
+    private function belongsToRealm(AccessToken $accessToken, Community $realm): bool
     {
-        $psrRequest = (new PsrHttpFactory)->createRequest(
-            Request::create('/', 'GET', server: ['HTTP_AUTHORIZATION' => 'Bearer '.$token])
-        );
+        $tokenClient = PassportClient::find($accessToken->oauth_client_id);
 
-        try {
-            return AccessToken::fromPsrRequest($this->resourceServer->validateAuthenticatedRequest($psrRequest));
-        } catch (OAuthServerException) {
-            return null;
-        }
+        return $tokenClient !== null && $tokenClient->community_uid === $realm->getShortCode();
     }
 
     /**

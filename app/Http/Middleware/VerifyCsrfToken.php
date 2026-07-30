@@ -31,9 +31,9 @@ class VerifyCsrfToken extends Middleware
      * logout_token here directly, server-to-server, when its own user logs
      * out - there's no browser/session/form involved on this end at all.
      *
-     * oauth/introspect is the same server-to-server story as oauth/token: a
-     * resource server calls it directly with client credentials, never via a
-     * form this app rendered.
+     * oauth/introspect and oauth/revoke are the same server-to-server story
+     * as oauth/token: a resource server (or the client itself) calls them
+     * directly with client credentials, never via a form this app rendered.
      *
      * @var array<int, string>
      */
@@ -43,6 +43,7 @@ class VerifyCsrfToken extends Middleware
         '*/oauth/device/code',
         '*/oauth/end-session',
         '*/oauth/introspect',
+        '*/oauth/revoke',
         '*/identity-provider/*/backchannel-logout',
     ];
 }

@@ -47,6 +47,16 @@ class RouteServiceProvider extends ServiceProvider
     protected function configureRateLimiting()
     {
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
+
+        // Introspection and revocation authenticate a *client*, not a user -
+        // keyed by client_id (falling back to IP only if it's missing
+        // entirely) so one resource server's traffic can't exhaust another's
+        // allowance just for sharing a NAT/gateway, and so this can't be used
+        // as an unlimited oracle for guessing a client_secret or probing
+        // whether a given token string is currently valid.
+        RateLimiter::for('oidc-client', fn (Request $request) => Limit::perMinute(60)->by(
+            (string) ($request->input('client_id') ?? $request->getUser() ?? $request->ip())
+        ));
     }
 
     public static function home($uid = null)

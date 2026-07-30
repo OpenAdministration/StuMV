@@ -125,6 +125,20 @@ test('the userinfo endpoint returns claims filtered by the granted scopes', func
         ->assertJsonMissing(['phone_number' => '+49 123 456']);
 });
 
+test('a token issued under one realm is rejected at another realm\'s userinfo endpoint', function (): void {
+    // Regression: every access token is signed with the same server-wide
+    // key regardless of realm, so 'auth:api' alone (which only checks the
+    // token's own signature/expiry/revocation) isn't enough - the token's
+    // owning client must also be checked against the {realm} in the URL.
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $user = TestLdap::member($community);
+
+    actingWithRealAccessToken($user, $community->getShortCode(), ['openid', 'email']);
+
+    $this->getJson('/'.$otherCommunity->getShortCode().'/oauth/userinfo')->assertForbidden();
+});
+
 test('granting the profile and phone scopes includes their claims', function (): void {
     $community = newCommunity();
     $user = TestLdap::member($community);
@@ -746,6 +760,42 @@ function issueRealAccessToken(Community $community, User $user, string $scope = 
     return [$client, (string) $token->json('access_token')];
 }
 
+/**
+ * Same as issueRealAccessToken(), but also returns the refresh_token - kept
+ * separate rather than changing that function's return shape and having to
+ * touch every existing caller.
+ *
+ * @return array{0: PassportClient, 1: string, 2: string}
+ */
+function issueRealAccessTokenWithRefreshToken(Community $community, User $user, string $scope = 'openid'): array
+{
+    $uid = $community->getShortCode();
+    test()->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Revocation Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    $authorize = test()->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => $scope,
+    ]));
+
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = test()->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    return [$client, (string) $token->json('access_token'), (string) $token->json('refresh_token')];
+}
+
 test('introspecting a valid access token returns active=true with the expected claims', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
@@ -847,4 +897,197 @@ test('a client cannot introspect through a realm it is not bound to', function (
         'client_secret' => $client->plainSecret,
         'token' => $accessToken,
     ])->assertForbidden();
+});
+
+test('introspecting a token whose own client belongs to a different realm returns active=false', function (): void {
+    // Regression: unlike the previous test (the *calling* client is bound to
+    // the wrong realm, caught by EnsureOidcClientMatchesRealm before the
+    // controller even runs), this is the *introspected token's* client
+    // being wrong - the caller itself is perfectly legitimate for its own
+    // realm. Every access token is signed with the same server-wide key
+    // regardless of realm, so without an explicit check a legitimate realm B
+    // client could learn that a realm A token is active, its scopes, its
+    // user, etc.
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $userInOtherRealm = TestLdap::member($otherCommunity);
+    [, $tokenFromOtherRealm] = issueRealAccessToken($otherCommunity, $userInOtherRealm);
+
+    $legitimateClient = resolve(ClientRepository::class)
+        ->createAuthorizationCodeGrantClient('Legit Client In This Realm', ['https://example.test/callback']);
+    $legitimateClient->forceFill(['community_uid' => $community->getShortCode()])->save();
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $community->getShortCode()]), [
+        'client_id' => $legitimateClient->id,
+        'client_secret' => $legitimateClient->plainSecret,
+        'token' => $tokenFromOtherRealm,
+    ])->assertOk()->assertJson(['active' => false]);
+});
+
+test('introspection is rate-limited per client_id', function (): void {
+    $community = newCommunity();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user);
+
+    $payload = [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ];
+
+    for ($i = 0; $i < 60; $i++) {
+        $this->postJson(route('realm.openid.introspection', ['realm' => $community->getShortCode()]), $payload)
+            ->assertOk();
+    }
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $community->getShortCode()]), $payload)
+        ->assertStatus(429);
+});
+
+test('the discovery document advertises the revocation endpoint', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $this->getJson("/$uid/.well-known/openid-configuration")
+        ->assertOk()
+        ->assertJsonFragment(['revocation_endpoint' => route('realm.openid.revocation', ['realm' => $uid])])
+        ->assertJsonFragment(['revocation_endpoint_auth_methods_supported' => ['client_secret_post']]);
+});
+
+test('revoking an access token makes it fail introspection immediately', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user);
+
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ])->assertOk();
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ])->assertOk()->assertJson(['active' => false]);
+});
+
+test('revoking a refresh token also revokes its associated access token', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, $accessToken, $refreshToken] = issueRealAccessTokenWithRefreshToken($community, $user);
+
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $refreshToken,
+        'token_type_hint' => 'refresh_token',
+    ])->assertOk();
+
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $accessToken,
+    ])->assertOk()->assertJson(['active' => false]);
+
+    // The refresh token itself must also be dead, not just the access token.
+    $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'refresh_token',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'refresh_token' => $refreshToken,
+    ])->assertStatus(400); // League OAuth2 Server's invalid_grant, not 401
+});
+
+test('revocation ignores a missing token_type_hint and still finds the right token type', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, , $refreshToken] = issueRealAccessTokenWithRefreshToken($community, $user);
+
+    // No token_type_hint at all, and the token is a refresh token, not an
+    // access token - RFC 7009 §2.1 requires the server to still try the
+    // other type rather than giving up.
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => $refreshToken,
+    ])->assertOk();
+
+    $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'refresh_token',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'refresh_token' => $refreshToken,
+    ])->assertStatus(400); // League OAuth2 Server's invalid_grant, not 401
+});
+
+test('revoking a token that belongs to a different client still returns 200, per RFC 7009', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [, $accessToken] = issueRealAccessToken($community, $user);
+
+    $otherClient = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Other Client', ['https://example.test/callback']);
+    $otherClient->forceFill(['community_uid' => $uid])->save();
+
+    // Must not leak whether the token exists/belongs to someone else - the
+    // response is identical either way, and (checked below) the token is
+    // actually untouched: RevocationController::revokeAccessToken() checks
+    // ownership and silently no-ops instead of revoking it.
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $otherClient->id,
+        'client_secret' => $otherClient->plainSecret,
+        'token' => $accessToken,
+    ])->assertOk();
+
+    // Introspection itself doesn't require the caller to *own* the token
+    // (any authenticated same-realm client may check any realm token, the
+    // usual resource-server pattern) - still active proves the revoke call
+    // above was a no-op, not that introspection is scoped per-client too.
+    $this->postJson(route('realm.openid.introspection', ['realm' => $uid]), [
+        'client_id' => $otherClient->id,
+        'client_secret' => $otherClient->plainSecret,
+        'token' => $accessToken,
+    ])->assertOk()->assertJson(['active' => true]);
+});
+
+test('revoking an unknown/garbage token still returns 200, per RFC 7009', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Garbage Revoke Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'token' => 'garbage-token-value',
+    ])->assertOk();
+});
+
+test('revocation requires a token parameter', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('No Token Revoke Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+    ])->assertStatus(400)->assertJson(['error' => 'invalid_request']);
+});
+
+test('revocation rejects a wrong client_secret', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    [$client, $accessToken] = issueRealAccessToken($community, $user);
+
+    $this->postJson(route('realm.openid.revocation', ['realm' => $uid]), [
+        'client_id' => $client->id,
+        'client_secret' => 'wrong-secret',
+        'token' => $accessToken,
+    ])->assertStatus(401)->assertJson(['error' => 'invalid_client']);
 });
