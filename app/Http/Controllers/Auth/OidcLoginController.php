@@ -68,6 +68,14 @@ class OidcLoginController extends Controller
      * directly - the external IdP already vouched for the address, so no
      * LDAP bind is needed here), or hands off to the "pick a username"
      * completion step for a brand-new account.
+     *
+     * Not restricted to guests (see routes/auth.php): group/role sync only
+     * ever runs as a side effect of this method, so an already-authenticated
+     * user has no way to pick up a mapping an admin added after their last
+     * login short of this same flow - logging out first only to immediately
+     * log back in as themselves. If someone else is already signed in,
+     * though, this must never silently switch the session to a different
+     * account, so that case is rejected instead.
      */
     public function callback(Community $realm, RealmIdentityProvider $provider, Request $request)
     {
@@ -128,9 +136,13 @@ class OidcLoginController extends Controller
                 'This account has been locked.'
             );
 
-            Auth::login($existing);
-            $request->session()->regenerate();
-            $request->session()->put('auth_time', time());
+            if (Auth::check()) {
+                abort_unless(Auth::id() === $existing->id, 409, 'You are already signed in as a different account. Log out first to switch accounts via this identity provider.');
+            } else {
+                Auth::login($existing);
+                $request->session()->regenerate();
+                $request->session()->put('auth_time', time());
+            }
 
             resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $existing->username, $claims);
             resolve(IdentityProviderGroupSync::class)->apply($provider, $existing->username, $claims);
@@ -138,6 +150,14 @@ class OidcLoginController extends Controller
 
             return redirect()->intended(RouteServiceProvider::home($realm->getShortCode()));
         }
+
+        // Same reasoning as the abort_unless() above: an already-authenticated
+        // visitor must never be steered toward creating/claiming a different
+        // account through this flow. identity-provider.register is a guest
+        // route anyway, so without this they'd just be silently bounced back
+        // to their own dashboard by RedirectIfAuthenticated, losing the
+        // pending registration state with no explanation.
+        abort_if(Auth::check(), 409, 'You are already signed in as a different account. Log out first to register a new account via this identity provider.');
 
         session(['identity_provider_pending' => [
             'realm' => $realm->getShortCode(),
@@ -321,7 +341,11 @@ class OidcLoginController extends Controller
      * so a later logout_token for that sub can find and end it. Skipped
      * silently if the provider didn't return a sub - back-channel logout
      * simply won't be able to reach that session, everything else about the
-     * login still works.
+     * login still works. Keyed on session_id (unique in the schema) via
+     * updateOrCreate rather than create(), since an already-authenticated
+     * user re-running this flow to pick up a new mapping (see callback()'s
+     * doc comment) keeps their existing session_id - a plain create() would
+     * hit that unique constraint on every such re-sync.
      */
     private function rememberSession(RealmIdentityProvider $provider, array $claims, string $sessionId): void
     {
@@ -329,11 +353,10 @@ class OidcLoginController extends Controller
             return;
         }
 
-        IdentityProviderSession::create([
-            'provider_id' => $provider->id,
-            'external_sub' => $claims['sub'],
-            'session_id' => $sessionId,
-        ]);
+        IdentityProviderSession::updateOrCreate(
+            ['session_id' => $sessionId],
+            ['provider_id' => $provider->id, 'external_sub' => $claims['sub']]
+        );
     }
 
     private function authorizeProvider(Community $realm, RealmIdentityProvider $provider): void

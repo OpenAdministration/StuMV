@@ -53,9 +53,10 @@ Route::middleware('guest')->group(function (): void {
 
     // External OIDC ("Login with X")
     Route::livewire('{realm}/identity-provider/register', CompleteIdentityProviderRegistration::class)->name('identity-provider.register');
-    Route::get('{realm}/identity-provider/{provider}', [OidcLoginController::class, 'redirect'])->name('identity-provider.redirect');
-    Route::get('{realm}/identity-provider/{provider}/callback', [OidcLoginController::class, 'callback'])->name('identity-provider.callback');
 });
+
+Route::get('{realm}/identity-provider/{provider}', [OidcLoginController::class, 'redirect'])->name('identity-provider.redirect');
+Route::get('{realm}/identity-provider/{provider}/callback', [OidcLoginController::class, 'callback'])->name('identity-provider.callback');
 
 // OpenID Connect Back-Channel Logout 1.0
 Route::post('{realm}/identity-provider/{provider}/backchannel-logout', [OidcLoginController::class, 'backChannelLogout'])

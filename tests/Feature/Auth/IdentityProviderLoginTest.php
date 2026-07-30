@@ -195,6 +195,64 @@ test('a matching login grants roles mapped from the returned groups claim', func
         ->count())->toBe(1);
 });
 
+test('an already-authenticated user completing the identity-provider flow as themselves re-syncs a role mapping added since their last login', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $provider = makeIdentityProvider($community->getShortCode());
+    // The mapping is created *before* the round-trip below runs, standing in
+    // for "an admin added this after the user's last login" - what matters
+    // for this test is that the user is already signed in when they
+    // (re-)complete the flow, not when the mapping itself was created.
+    $provider->roleMappings()->create([
+        'external_group' => 'stura-member',
+        'committee_dn' => $committee->getDn(),
+        'role_cn' => $role->getFirstAttribute('cn'),
+    ]);
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email, 'groups' => ['stura-member']];
+
+    $this->actingAs($existingUser);
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+    expect(RoleMembership::where('username', $existingUser->username)
+        ->where('role_cn', $role->getFirstAttribute('cn'))
+        ->where('committee_dn', $committee->getDn())
+        ->count())->toBe(1);
+});
+
+test('an already-authenticated user cannot use the identity-provider flow to switch to a different account', function (): void {
+    $community = newCommunity();
+    $signedInUser = TestLdap::member($community);
+    $otherUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $otherUser->email];
+
+    $this->actingAs($signedInUser);
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertStatus(409);
+
+    $this->assertAuthenticatedAs($signedInUser->fresh());
+});
+
+test('an already-authenticated user cannot use the identity-provider flow to register a new, unrelated account', function (): void {
+    $community = newCommunity();
+    $signedInUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-999', 'email' => 'not-yet-registered@example.test'];
+
+    $this->actingAs($signedInUser);
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertStatus(409);
+
+    $this->assertAuthenticatedAs($signedInUser->fresh());
+});
+
 test('an invalid or replayed state is rejected', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
