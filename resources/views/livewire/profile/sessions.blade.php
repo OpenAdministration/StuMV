@@ -8,10 +8,10 @@
     <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row gap-6">
-                <div class="flex-1 space-y-1">
+                <div class="flex-1 space-y-4">
                     <flux:text class="text-base">{{ __('profile.sessions_explanation') }}</flux:text>
                     @if($lastLogin)
-                        <flux:text class="block text-sm text-zinc-500">{{ __('profile.sessions_last_login', ['datetime' => $lastLogin->format('Y-m-d H:i')]) }}</flux:text>
+                        <flux:text class="block text-base">{{ __('profile.sessions_last_login', ['datetime' => $lastLogin->format('Y-m-d H:i')]) }}</flux:text>
                     @endif
                 </div>
                 @if($sessions->contains(fn ($session) => $session->id !== $currentSessionId))
