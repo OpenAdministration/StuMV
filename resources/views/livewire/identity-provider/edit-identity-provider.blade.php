@@ -77,9 +77,7 @@
 
             <flux:tab.panel name="role-mappings" class="pt-8 space-y-8">
                 <div class="space-y-4">
-                    <div>
-                        <p>{{ __('identity_providers.mappings_explanation') }}</p>
-                    </div>
+                    <flux:text class="text-base">{{ __('identity_providers.mappings_explanation') }}</flux:text>
 
                     @if(count($mappingRows) > 0)
                         <flux:table>
@@ -178,9 +176,7 @@
 
             <flux:tab.panel name="group-mappings" class="pt-8 space-y-8">
                 <div class="space-y-4">
-                    <div>
-                        <p>{{ __('identity_providers.group_mappings_explanation') }}</p>
-                    </div>
+                    <flux:text class="text-base">{{ __('identity_providers.group_mappings_explanation') }}</flux:text>
 
                     @if(count($groupMappingRows) > 0)
                         <flux:table>
