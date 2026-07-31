@@ -13,7 +13,7 @@
                     @if($lastLogin)
                         <flux:text class="block text-base">
                             <strong>{{ __('profile.sessions_last_login_label') }}</strong>
-                            <span x-data="localDateTime('{{ $lastLogin->toIso8601String() }}')">{{ $lastLogin->format('Y-m-d H:i') }} UTC</span>
+                            <span wire:ignore x-data="localDateTime('{{ $lastLogin->toIso8601String() }}')">{{ $lastLogin->format('Y-m-d H:i') }} UTC</span>
                         </flux:text>
                     @endif
                 </div>
@@ -38,7 +38,7 @@
                     </flux:table.columns>
                     <flux:table.rows>
                     @foreach($sessions as $session)
-                        <flux:table.row>
+                        <flux:table.row wire:key="session-{{ $session->id }}">
                             <flux:table.cell>
                                 <div class="flex gap-4 items-center">
                                     <div class="max-w-md truncate" title="{{ $session->user_agent }}">{{ $session->device_description }}</div>
@@ -49,11 +49,7 @@
                             </flux:table.cell>
                             <flux:table.cell>{{ $session->ip_address ?: '—' }}</flux:table.cell>
                             <flux:table.cell>
-                                {{-- The relative "X ago" text is timezone-invariant (it's a diff
-                                     between two instants), so it needs no client-side conversion -
-                                     only the absolute-time tooltip does (localDateTimeTooltip,
-                                     resources/js/app.js - same CSP reasoning as localDateTime above). --}}
-                                <span x-data="localDateTimeTooltip('{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->toIso8601String() }}')">{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}</span>
+                                <span wire:ignore.self x-data="localDateTimeTooltip('{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->toIso8601String() }}')">{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}</span>
                             </flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex justify-end items-center gap-2">
