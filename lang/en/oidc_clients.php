@@ -9,6 +9,8 @@ return [
     'edit_title' => 'Edit OIDC client',
     'edit_success' => 'The client was updated.',
     'tab_general' => 'General',
+    'tab_uris' => 'URIs',
+    'tab_security' => 'Security',
     'tab_service_provider' => 'Service provider',
     'search' => 'Search OIDC clients',
     'name' => 'Name',

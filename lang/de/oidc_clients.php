@@ -9,6 +9,8 @@ return [
     'edit_title' => 'OIDC-Client bearbeiten',
     'edit_success' => 'Der Client wurde aktualisiert.',
     'tab_general' => 'Allgemein',
+    'tab_uris' => 'URIs',
+    'tab_security' => 'Sicherheit',
     'tab_service_provider' => 'Dienstanbieter',
     'search' => 'Durchsuche OIDC-Clients',
     'name' => 'Name',
