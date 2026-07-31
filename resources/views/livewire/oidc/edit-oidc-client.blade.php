@@ -38,7 +38,7 @@
                     <flux:tab name="service-provider">{{ __('oidc_clients.tab_service_provider') }}</flux:tab>
                 </flux:tabs>
 
-                <flux:tab.panel name="general" class="pt-8 space-y-6">
+                <flux:tab.panel name="general" class="pt-8 space-y-4">
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.name') }}</flux:label>
                         <flux:input wire:model="name" placeholder="{{ __('oidc_clients.name_placeholder') }}" />
@@ -57,7 +57,7 @@
                     <livewire:oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
                 </flux:tab.panel>
 
-                <flux:tab.panel name="uris" class="pt-8 space-y-6">
+                <flux:tab.panel name="uris" class="pt-8 space-y-4">
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.redirect_uris') }}</flux:label>
                         <flux:description>{{ __('oidc_clients.redirect_uris_description') }}</flux:description>
@@ -81,7 +81,7 @@
                     </flux:field>
                 </flux:tab.panel>
 
-                <flux:tab.panel name="security" class="pt-8 space-y-6">
+                <flux:tab.panel name="security" class="pt-8 space-y-4">
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.scopes') }}</flux:label>
                         <flux:pillbox multiple wire:model="scopes">
@@ -125,7 +125,7 @@
                     @endif
                 </flux:tab.panel>
 
-                <flux:tab.panel name="service-provider" class="pt-8 space-y-6">
+                <flux:tab.panel name="service-provider" class="pt-8 space-y-4">
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.service_provider') }}</flux:label>
                         <flux:description>{{ __('oidc_clients.service_provider_description') }}</flux:description>
