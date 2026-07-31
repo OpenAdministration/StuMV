@@ -35,7 +35,7 @@ return [
     'remove_picture' => 'Remove',
     'sessions' => 'Sessions',
     'sessions_explanation' => 'Here you can find all devices and browsers signed in to this account.',
-    'sessions_last_login' => 'Last login: :datetime',
+    'sessions_last_login_label' => 'Last login:',
     'sessions_device' => 'Device',
     'sessions_ip_address' => 'IP address',
     'sessions_last_active' => 'Last active',

@@ -68,6 +68,29 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    // Renders an ISO 8601 UTC datetime (server-rendered as a no-JS/pre-hydration
+    // fallback in the element's own markup) in the browser's local timezone -
+    // see App\Http\Middleware\SetContentSecurityPolicy's doc comment for why
+    // this can't just be an inline `x-text="new Date(...).toLocaleString()"`
+    // expression: the CSP-safe Alpine build's restricted expression parser
+    // can't evaluate a `new Date(...)` call inline, only a literal-argument
+    // Alpine.data() call like this one.
+    Alpine.data('localDateTime', (iso) => ({
+        init() {
+            this.$el.textContent = new Date(iso).toLocaleString();
+        },
+    }));
+
+    // Same restriction, applied to a hover tooltip instead of the element's
+    // own text - used where the visible text is already timezone-invariant
+    // (a relative "x ago" duration) and only the absolute-time tooltip needs
+    // localizing.
+    Alpine.data('localDateTimeTooltip', (iso) => ({
+        init() {
+            this.$el.title = new Date(iso).toLocaleString();
+        },
+    }));
+
     Alpine.data('cropper', () => ({
         saving: false,
         initCropper() {

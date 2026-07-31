@@ -11,7 +11,10 @@
                 <div class="flex-1 space-y-4">
                     <flux:text class="text-base">{{ __('profile.sessions_explanation') }}</flux:text>
                     @if($lastLogin)
-                        <flux:text class="block text-base">{{ __('profile.sessions_last_login', ['datetime' => $lastLogin->format('Y-m-d H:i')]) }}</flux:text>
+                        <flux:text class="block text-base">
+                            <strong>{{ __('profile.sessions_last_login_label') }}</strong>
+                            <span x-data="localDateTime('{{ $lastLogin->toIso8601String() }}')">{{ $lastLogin->format('Y-m-d H:i') }} UTC</span>
+                        </flux:text>
                     @endif
                 </div>
                 @if($sessions->contains(fn ($session) => $session->id !== $currentSessionId))
@@ -45,7 +48,13 @@
                                 </div>
                             </flux:table.cell>
                             <flux:table.cell>{{ $session->ip_address ?: '—' }}</flux:table.cell>
-                            <flux:table.cell>{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}</flux:table.cell>
+                            <flux:table.cell>
+                                {{-- The relative "X ago" text is timezone-invariant (it's a diff
+                                     between two instants), so it needs no client-side conversion -
+                                     only the absolute-time tooltip does (localDateTimeTooltip,
+                                     resources/js/app.js - same CSP reasoning as localDateTime above). --}}
+                                <span x-data="localDateTimeTooltip('{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->toIso8601String() }}')">{{ \Illuminate\Support\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}</span>
+                            </flux:table.cell>
                             <flux:table.cell>
                                 <div class="flex justify-end items-center gap-2">
                                     @if($session->id === $currentSessionId)
