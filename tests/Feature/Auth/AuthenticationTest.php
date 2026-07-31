@@ -8,6 +8,18 @@ test('login screen can be rendered', function (): void {
     $this->get('/login')->assertStatus(200);
 });
 
+test('a regular realm\'s login page links to registration', function (): void {
+    $community = newCommunity();
+
+    $this->get(route('realm.login', ['realm' => $community->getShortCode()]))
+        ->assertSee(__('auth.sign_up_prompt'));
+});
+
+test('the admin realm\'s login page has no registration link', function (): void {
+    $this->get(route('realm.login', ['realm' => 'admin']))
+        ->assertDontSee(__('auth.sign_up_prompt'));
+});
+
 test('login is rejected for an unknown user', function (): void {
     $community = newCommunity();
 
