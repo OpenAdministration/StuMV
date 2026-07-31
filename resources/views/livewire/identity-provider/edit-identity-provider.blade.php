@@ -13,7 +13,7 @@
             </flux:tabs>
 
             <flux:tab.panel name="general" class="pt-8">
-                <x-livewire-form class="space-y-4">
+                <form wire:submit="save" class="space-y-4">
                     <flux:field>
                         <flux:label>{{ __('identity_providers.name') }}</flux:label>
                         <flux:input wire:model="name" placeholder="{{ __('identity_providers.name_placeholder') }}" />
@@ -68,8 +68,11 @@
                     <flux:switch wire:model="enabled" label="{{ __('identity_providers.enabled') }}" />
 
                     <flux:separator />
-            
-                </x-livewire-form>
+
+                    <div class="flex items-center justify-end">
+                        <flux:button variant="primary" icon="save" type="submit">{{ __('common.save') }}</flux:button>
+                    </div>
+                </form>
             </flux:tab.panel>
 
             <flux:tab.panel name="role-mappings" class="pt-8 space-y-8">
