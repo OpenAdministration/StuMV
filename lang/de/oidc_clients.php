@@ -8,6 +8,8 @@ return [
     'new_title' => 'Neuen OIDC-Client registrieren',
     'edit_title' => 'OIDC-Client bearbeiten',
     'edit_success' => 'Der Client wurde aktualisiert.',
+    'tab_general' => 'Allgemein',
+    'tab_service_provider' => 'Dienstanbieter',
     'search' => 'Durchsuche OIDC-Clients',
     'name' => 'Name',
     'name_placeholder' => 'z. B. StuFiS',

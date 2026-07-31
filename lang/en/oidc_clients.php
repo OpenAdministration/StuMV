@@ -8,6 +8,8 @@ return [
     'new_title' => 'Register a new OIDC client',
     'edit_title' => 'Edit OIDC client',
     'edit_success' => 'The client was updated.',
+    'tab_general' => 'General',
+    'tab_service_provider' => 'Service provider',
     'search' => 'Search OIDC clients',
     'name' => 'Name',
     'name_placeholder' => 'e.g. StuFiS',
