@@ -44,11 +44,15 @@
                         <flux:input wire:model="name" placeholder="{{ __('oidc_clients.name_placeholder') }}" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.description') }}</flux:label>
                         <flux:description>{{ __('oidc_clients.description_description') }}</flux:description>
                         <flux:textarea wire:model="description" rows="3" />
                     </flux:field>
+
+                    <flux:separator />
 
                     <livewire:oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
                 </flux:tab.panel>
@@ -60,11 +64,15 @@
                         <flux:textarea wire:model="redirectUris" rows="4" placeholder="https://app.example.com/auth/callback" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.back_channel_logout_uri') }}</flux:label>
                         <flux:description>{{ __('oidc_clients.back_channel_logout_uri_description') }}</flux:description>
                         <flux:input wire:model="backChannelLogoutUri" placeholder="https://app.example.com/logout-callback" />
                     </flux:field>
+
+                    <flux:separator />
 
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.post_logout_redirect_uris') }}</flux:label>
@@ -86,11 +94,15 @@
                         </flux:pillbox>
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:switch
                         wire:model="requiresConsent"
                         label="{{ __('oidc_clients.requires_consent') }}"
                         description="{{ __('oidc_clients.requires_consent_description') }}"
                     />
+
+                    <flux:separator />
 
                     <flux:switch
                         wire:model="disableClientAuthentication"
@@ -99,6 +111,8 @@
                     />
 
                     @if(! $disableClientAuthentication)
+                        <flux:separator />
+
                         <div class="flex items-center justify-between gap-4">
                             <div>
                                 <flux:label>{{ __('oidc_clients.regenerate_secret') }}</flux:label>
@@ -118,17 +132,23 @@
                         <flux:input wire:model="serviceProvider" placeholder="{{ __('oidc_clients.service_provider_placeholder') }}" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.imprint_url') }}</flux:label>
                         <flux:description>{{ __('oidc_clients.imprint_url_description') }}</flux:description>
                         <flux:input wire:model="imprintUrl" placeholder="https://example.com/imprint" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.terms_url') }}</flux:label>
                         <flux:description>{{ __('oidc_clients.terms_url_description') }}</flux:description>
                         <flux:input wire:model="termsUrl" placeholder="https://example.com/terms" />
                     </flux:field>
+
+                    <flux:separator />
 
                     <flux:field>
                         <flux:label>{{ __('oidc_clients.privacy_policy_url') }}</flux:label>
