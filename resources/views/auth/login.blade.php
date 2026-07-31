@@ -9,7 +9,7 @@
 
         <form method="POST" action="{{ route('realm.login', ['realm' => $realm->getShortCode()]) }}" class="w-full flex">
             @csrf
-                <flux:card class="p-0 w-full bg-white dark:bg-zinc-800 max-w-[28rem]! mx-auto border-1 shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
+                <flux:card class="p-0 w-full bg-zinc-50 dark:bg-zinc-800 max-w-[28rem]! mx-auto border-1 shadow-sm divide-y divide-zinc-200 dark:divide-zinc-700">
                 <div class="p-6">
                     <x-auth-logo :branding="$branding" />
                 </div>
