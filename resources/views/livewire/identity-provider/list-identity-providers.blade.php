@@ -20,8 +20,8 @@
         @if(count($providers) > 0)
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column>{{ __('identity_providers.name') }}</flux:table.column>
-                    <flux:table.column>{{ __('identity_providers.status') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'name'" :direction="$sortDirection" wire:click="sortBy('name')">{{ __('identity_providers.name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'enabled'" :direction="$sortDirection" wire:click="sortBy('enabled')">{{ __('identity_providers.status') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -72,6 +72,10 @@
                 @endforeach
                 </flux:table.rows>
             </flux:table>
+
+            <div class="pagination">
+                <flux:pagination :paginator="$providers" />
+            </div>
         @else
             <flux:callout variant="warning" icon="circle-alert" heading="{{ __('identity_providers.no_providers_found') }}" />
         @endif

@@ -20,6 +20,24 @@ test('only this realm\'s identity providers are listed, not another realm\'s', f
         ->assertDontSee('Other Realm IdP');
 });
 
+test('sortBy toggles direction and re-sorts providers descending', function (): void {
+    $community = newCommunity();
+    makeIdentityProvider($community->getShortCode(), 'Zebra IdP');
+    makeIdentityProvider($community->getShortCode(), 'Apple IdP');
+    actingAsAdmin($community);
+
+    $component = Livewire::test(ListIdentityProviders::class, ['realm' => $community])
+        ->assertSet('sortDirection', 'asc');
+
+    $names = $component->viewData('providers')->pluck('name')->all();
+    expect($names)->toBe(['Apple IdP', 'Zebra IdP']);
+
+    $component->call('sortBy', 'name')->assertSet('sortDirection', 'desc');
+
+    $names = $component->viewData('providers')->pluck('name')->all();
+    expect($names)->toBe(['Zebra IdP', 'Apple IdP']);
+});
+
 test('a provider can be deleted', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
