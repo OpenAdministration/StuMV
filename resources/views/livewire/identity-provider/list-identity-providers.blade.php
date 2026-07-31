@@ -28,13 +28,15 @@
                 @foreach($providers as $provider)
                     <flux:table.row>
                         <flux:table.cell>
-                            <flux:link
-                                wire:navigate
-                                href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
-                            >
-                                {{ $provider->name }}
-                            </flux:link>
-                            <div class="text-xs text-zinc-500">{{ $provider->id }}</div>
+                            <div class="space-y-1">
+                                <flux:link
+                                    wire:navigate
+                                    href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
+                                >
+                                    {{ $provider->name }}
+                                </flux:link>
+                                <div class="text-xs text-zinc-500">{{ $provider->id }}</div>
+                            </div>
                         </flux:table.cell>
                         <flux:table.cell>
                             @if($provider->enabled)
