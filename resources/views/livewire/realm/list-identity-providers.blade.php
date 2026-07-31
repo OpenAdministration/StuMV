@@ -21,19 +21,13 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column>{{ __('identity_providers.name') }}</flux:table.column>
-                    <flux:table.column>{{ __('identity_providers.issuer') }}</flux:table.column>
                     <flux:table.column>{{ __('identity_providers.status') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
                 @foreach($providers as $provider)
                     <flux:table.row>
-                        <flux:table.cell>
-                            <div class="font-medium">{{ $provider->name }}</div>
-                        </flux:table.cell>
-                        <flux:table.cell>
-                            <div class="text-xs text-zinc-500">{{ $provider->issuer }}</div>
-                        </flux:table.cell>
+                        <flux:table.cell>{{ $provider->name }}</flux:table.cell>
                         <flux:table.cell>
                             @if($provider->enabled)
                                 <flux:badge color="green" variant="solid">{{ __('identity_providers.status_enabled') }}</flux:badge>
@@ -43,22 +37,25 @@
                         </flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">
-                                <flux:button
-                                    size="sm"
-                                    icon="pencil"
-                                    wire:navigate
-                                    href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
-                                >
-                                    {{ __('common.edit') }}
-                                </flux:button>
-                                <flux:button
-                                    size="sm"
-                                    variant="danger"
-                                    icon="trash-2"
-                                    wire:click="deletePrepare('{{ $provider->id }}')"
-                                >
-                                    {{ __('identity_providers.delete') }}
-                                </flux:button>
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            icon="pencil"
+                                            wire:navigate
+                                            href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
+                                        >
+                                            {{ __('common.edit') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="deletePrepare('{{ $provider->id }}')"
+                                        >
+                                            {{ __('identity_providers.delete') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
                             </div>
                         </flux:table.cell>
                     </flux:table.row>
