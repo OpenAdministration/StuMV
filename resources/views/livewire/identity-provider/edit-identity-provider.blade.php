@@ -140,6 +140,8 @@
                         <flux:callout variant="warning" icon="circle-alert" heading="{{ __('identity_providers.no_mappings_found') }}" />
                     @endif
 
+                    <flux:separator />
+
                     <form wire:submit="addMapping" class="grid sm:grid-cols-3 gap-4 items-start">
                         <flux:field>
                             <flux:label>{{ __('identity_providers.mappings_external_group') }}</flux:label>
@@ -224,6 +226,8 @@
                     @else
                         <flux:callout variant="warning" icon="circle-alert" heading="{{ __('identity_providers.no_group_mappings_found') }}" />
                     @endif
+
+                    <flux:separator />
 
                     <form wire:submit="addGroupMapping" class="grid sm:grid-cols-2 gap-4 items-start">
                         <flux:field>
