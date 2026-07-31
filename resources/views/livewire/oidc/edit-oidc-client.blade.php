@@ -24,125 +24,123 @@
     </div>
 @else
     <div>
-        <x-livewire-form class="space-y-8">
+        <x-livewire-form class="space-y-8 pb-8">
             <div>
                 <flux:heading size="xl" class="mb-4">{{ __('oidc_clients.edit_title') }}</flux:heading>
                 <flux:text class="text-base">{{ __('oidc_clients.explanation') }}</flux:text>
             </div>
-            
-            <div class="pb-8">
-                <flux:tab.group>
-                    <flux:tabs>
-                        <flux:tab name="general">{{ __('oidc_clients.tab_general') }}</flux:tab>
-                        <flux:tab name="uris">{{ __('oidc_clients.tab_uris') }}</flux:tab>
-                        <flux:tab name="security">{{ __('oidc_clients.tab_security') }}</flux:tab>
-                        <flux:tab name="service-provider">{{ __('oidc_clients.tab_service_provider') }}</flux:tab>
-                    </flux:tabs>
 
-                    <flux:tab.panel name="general" class="pt-8 space-y-8">
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.name') }}</flux:label>
-                            <flux:input wire:model="name" placeholder="{{ __('oidc_clients.name_placeholder') }}" />
-                        </flux:field>
+            <flux:tab.group>
+                <flux:tabs>
+                    <flux:tab name="general">{{ __('oidc_clients.tab_general') }}</flux:tab>
+                    <flux:tab name="uris">{{ __('oidc_clients.tab_uris') }}</flux:tab>
+                    <flux:tab name="security">{{ __('oidc_clients.tab_security') }}</flux:tab>
+                    <flux:tab name="service-provider">{{ __('oidc_clients.tab_service_provider') }}</flux:tab>
+                </flux:tabs>
 
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.description') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.description_description') }}</flux:description>
-                            <flux:textarea wire:model="description" rows="3" />
-                        </flux:field>
+                <flux:tab.panel name="general" class="pt-8 space-y-8">
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.name') }}</flux:label>
+                        <flux:input wire:model="name" placeholder="{{ __('oidc_clients.name_placeholder') }}" />
+                    </flux:field>
 
-                        <livewire:oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
-                    </flux:tab.panel>
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.description') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.description_description') }}</flux:description>
+                        <flux:textarea wire:model="description" rows="3" />
+                    </flux:field>
 
-                    <flux:tab.panel name="uris" class="pt-8 space-y-8">
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.redirect_uris') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.redirect_uris_description') }}</flux:description>
-                            <flux:textarea wire:model="redirectUris" rows="4" placeholder="https://app.example.com/auth/callback" />
-                        </flux:field>
+                    <livewire:oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
+                </flux:tab.panel>
 
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.back_channel_logout_uri') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.back_channel_logout_uri_description') }}</flux:description>
-                            <flux:input wire:model="backChannelLogoutUri" placeholder="https://app.example.com/logout-callback" />
-                        </flux:field>
+                <flux:tab.panel name="uris" class="pt-8 space-y-8">
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.redirect_uris') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.redirect_uris_description') }}</flux:description>
+                        <flux:textarea wire:model="redirectUris" rows="4" placeholder="https://app.example.com/auth/callback" />
+                    </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.post_logout_redirect_uris') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.post_logout_redirect_uris_description') }}</flux:description>
-                            <flux:textarea wire:model="postLogoutRedirectUris" rows="4" placeholder="https://app.example.com/logged-out" />
-                        </flux:field>
-                    </flux:tab.panel>
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.back_channel_logout_uri') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.back_channel_logout_uri_description') }}</flux:description>
+                        <flux:input wire:model="backChannelLogoutUri" placeholder="https://app.example.com/logout-callback" />
+                    </flux:field>
 
-                    <flux:tab.panel name="security" class="pt-8 space-y-8">
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.scopes') }}</flux:label>
-                            <flux:pillbox multiple wire:model="scopes">
-                                <flux:pillbox.option value="openid">{{ __('oidc_clients.scope_openid') }}</flux:pillbox.option>
-                                <flux:pillbox.option value="profile">{{ __('oidc_clients.scope_profile') }}</flux:pillbox.option>
-                                <flux:pillbox.option value="email">{{ __('oidc_clients.scope_email') }}</flux:pillbox.option>
-                                <flux:pillbox.option value="phone">{{ __('oidc_clients.scope_phone') }}</flux:pillbox.option>
-                                <flux:pillbox.option value="address">{{ __('oidc_clients.scope_address') }}</flux:pillbox.option>
-                                <flux:pillbox.option value="groups">{{ __('oidc_clients.scope_groups') }}</flux:pillbox.option>
-                            </flux:pillbox>
-                        </flux:field>
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.post_logout_redirect_uris') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.post_logout_redirect_uris_description') }}</flux:description>
+                        <flux:textarea wire:model="postLogoutRedirectUris" rows="4" placeholder="https://app.example.com/logged-out" />
+                    </flux:field>
+                </flux:tab.panel>
 
-                        <flux:switch
-                            wire:model="requiresConsent"
-                            label="{{ __('oidc_clients.requires_consent') }}"
-                            description="{{ __('oidc_clients.requires_consent_description') }}"
-                        />
+                <flux:tab.panel name="security" class="pt-8 space-y-8">
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.scopes') }}</flux:label>
+                        <flux:pillbox multiple wire:model="scopes">
+                            <flux:pillbox.option value="openid">{{ __('oidc_clients.scope_openid') }}</flux:pillbox.option>
+                            <flux:pillbox.option value="profile">{{ __('oidc_clients.scope_profile') }}</flux:pillbox.option>
+                            <flux:pillbox.option value="email">{{ __('oidc_clients.scope_email') }}</flux:pillbox.option>
+                            <flux:pillbox.option value="phone">{{ __('oidc_clients.scope_phone') }}</flux:pillbox.option>
+                            <flux:pillbox.option value="address">{{ __('oidc_clients.scope_address') }}</flux:pillbox.option>
+                            <flux:pillbox.option value="groups">{{ __('oidc_clients.scope_groups') }}</flux:pillbox.option>
+                        </flux:pillbox>
+                    </flux:field>
 
-                        <flux:switch
-                            wire:model="disableClientAuthentication"
-                            label="{{ __('oidc_clients.disable_client_authentication') }}"
-                            description="{{ __('oidc_clients.disable_client_authentication_description') }}"
-                        />
+                    <flux:switch
+                        wire:model="requiresConsent"
+                        label="{{ __('oidc_clients.requires_consent') }}"
+                        description="{{ __('oidc_clients.requires_consent_description') }}"
+                    />
 
-                        @if(! $disableClientAuthentication)
-                            <div class="flex items-center justify-between gap-4">
-                                <div>
-                                    <flux:label>{{ __('oidc_clients.regenerate_secret') }}</flux:label>
-                                    <flux:description>{{ __('oidc_clients.regenerate_secret_description') }}</flux:description>
-                                </div>
-                                <flux:button icon="arrow-path" wire:click="confirmRegenerateSecret">
-                                    {{ __('oidc_clients.regenerate_secret_button') }}
-                                </flux:button>
+                    <flux:switch
+                        wire:model="disableClientAuthentication"
+                        label="{{ __('oidc_clients.disable_client_authentication') }}"
+                        description="{{ __('oidc_clients.disable_client_authentication_description') }}"
+                    />
+
+                    @if(! $disableClientAuthentication)
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <flux:label>{{ __('oidc_clients.regenerate_secret') }}</flux:label>
+                                <flux:description>{{ __('oidc_clients.regenerate_secret_description') }}</flux:description>
                             </div>
-                        @endif
-                    </flux:tab.panel>
+                            <flux:button icon="arrow-path" wire:click="confirmRegenerateSecret">
+                                {{ __('oidc_clients.regenerate_secret_button') }}
+                            </flux:button>
+                        </div>
+                    @endif
+                </flux:tab.panel>
 
-                    <flux:tab.panel name="service-provider" class="pt-8 space-y-8">
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.service_provider') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.service_provider_description') }}</flux:description>
-                            <flux:input wire:model="serviceProvider" placeholder="{{ __('oidc_clients.service_provider_placeholder') }}" />
-                        </flux:field>
+                <flux:tab.panel name="service-provider" class="pt-8 space-y-8">
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.service_provider') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.service_provider_description') }}</flux:description>
+                        <flux:input wire:model="serviceProvider" placeholder="{{ __('oidc_clients.service_provider_placeholder') }}" />
+                    </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.imprint_url') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.imprint_url_description') }}</flux:description>
-                            <flux:input wire:model="imprintUrl" placeholder="https://example.com/imprint" />
-                        </flux:field>
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.imprint_url') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.imprint_url_description') }}</flux:description>
+                        <flux:input wire:model="imprintUrl" placeholder="https://example.com/imprint" />
+                    </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.terms_url') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.terms_url_description') }}</flux:description>
-                            <flux:input wire:model="termsUrl" placeholder="https://example.com/terms" />
-                        </flux:field>
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.terms_url') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.terms_url_description') }}</flux:description>
+                        <flux:input wire:model="termsUrl" placeholder="https://example.com/terms" />
+                    </flux:field>
 
-                        <flux:field>
-                            <flux:label>{{ __('oidc_clients.privacy_policy_url') }}</flux:label>
-                            <flux:description>{{ __('oidc_clients.privacy_policy_url_description') }}</flux:description>
-                            <flux:input wire:model="privacyPolicyUrl" placeholder="https://example.com/privacy" />
-                        </flux:field>
-                    </flux:tab.panel>
-                </flux:tab.group>
+                    <flux:field>
+                        <flux:label>{{ __('oidc_clients.privacy_policy_url') }}</flux:label>
+                        <flux:description>{{ __('oidc_clients.privacy_policy_url_description') }}</flux:description>
+                        <flux:input wire:model="privacyPolicyUrl" placeholder="https://example.com/privacy" />
+                    </flux:field>
+                </flux:tab.panel>
+            </flux:tab.group>
 
-                <x-slot:abort_route>
-                    {{ route('realms.oidc-clients', ['realm' => $uid]) }}
-                </x-slot:abort_route>
-            </div>
+            <x-slot:abort_route>
+                {{ route('realms.oidc-clients', ['realm' => $uid]) }}
+            </x-slot:abort_route>
         </x-livewire-form>
 
         <form wire:submit="regenerateSecret">
