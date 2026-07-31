@@ -28,7 +28,7 @@
                 @foreach($providers as $provider)
                     <flux:table.row>
                         <flux:table.cell>
-                            <div class="space-y-1">
+                            <div class="flex flex-col gap-2">
                                 <flux:link
                                     wire:navigate
                                     href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
