@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Realm\NewIdentityProvider;
+use App\Livewire\IdentityProvider\NewIdentityProvider;
 use App\Models\RealmIdentityProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\IdentityProvider;
 
 use App\Ldap\Community;
 use App\Models\RealmIdentityProvider;
@@ -43,7 +43,7 @@ class NewIdentityProvider extends Component
 
     public function render()
     {
-        return view('livewire.realm.new-identity-provider')->title(__('identity_providers.new_title'));
+        return view('livewire.identity-provider.new-identity-provider')->title(__('identity_providers.new_title'));
     }
 
     public function save()

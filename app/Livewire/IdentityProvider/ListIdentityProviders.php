@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\IdentityProvider;
 
 use App\Ldap\Community;
 use App\Models\RealmIdentityProvider;
@@ -25,7 +25,7 @@ class ListIdentityProviders extends Component
     {
         $providers = RealmIdentityProvider::where('realm', $this->uid)->orderBy('name')->get();
 
-        return view('livewire.realm.list-identity-providers', ['providers' => $providers])
+        return view('livewire.identity-provider.list-identity-providers', ['providers' => $providers])
             ->title(__('identity_providers.list_title'));
     }
 

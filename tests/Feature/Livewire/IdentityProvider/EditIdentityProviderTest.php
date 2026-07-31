@@ -2,7 +2,7 @@
 
 use App\Ldap\Committee;
 use App\Ldap\Group;
-use App\Livewire\Realm\EditIdentityProvider;
+use App\Livewire\IdentityProvider\EditIdentityProvider;
 use App\Models\IdentityProviderGroupMapping;
 use App\Models\IdentityProviderRoleMapping;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
