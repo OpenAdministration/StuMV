@@ -37,8 +37,19 @@
                 @foreach($clients as $client)
                     <flux:table.row>
                         <flux:table.cell>
-                            <div class="font-medium">{{ $client->name }}</div>
-                            <div class="text-xs text-zinc-500">{{ $client->id }}</div>
+                            <div class="flex flex-col gap-2">
+                                @unless($client->revoked)
+                                    <flux:link
+                                        wire:navigate
+                                        href="{{ route('realms.oidc-clients.edit', ['realm' => $uid, 'client' => $client->id]) }}"
+                                    >
+                                        {{ $client->name }}
+                                    </flux:link>
+                                @else
+                                    {{ $client->name }}
+                                @endunless
+                                <div class="text-xs text-zinc-500">{{ $client->id }}</div>
+                            </div>
                         </flux:table.cell>
                         <flux:table.cell>
                             <div class="flex gap-2">
