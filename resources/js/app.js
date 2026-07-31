@@ -2,6 +2,17 @@ import './bootstrap';
 
 import 'cropperjs';
 
+// yyyy-mm-dd HH:MM in the browser's own local timezone, no seconds - built
+// from Date's local getters rather than toLocaleString()/Intl.DateTimeFormat
+// so the format stays the same, unambiguous shape regardless of the visitor's
+// browser/OS locale (toLocaleString() would e.g. render mm/dd/yyyy for an
+// en-US browser even on the German-language pages).
+function formatLocalDateTime(date) {
+    const pad = (n) => String(n).padStart(2, '0');
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('breadcrumbs', () => ({
         collapsedCount: 0,
@@ -77,7 +88,7 @@ document.addEventListener('alpine:init', () => {
     // Alpine.data() call like this one.
     Alpine.data('localDateTime', (iso) => ({
         init() {
-            this.$el.textContent = new Date(iso).toLocaleString();
+            this.$el.textContent = formatLocalDateTime(new Date(iso));
         },
     }));
 
@@ -87,7 +98,7 @@ document.addEventListener('alpine:init', () => {
     // localizing.
     Alpine.data('localDateTimeTooltip', (iso) => ({
         init() {
-            this.$el.title = new Date(iso).toLocaleString();
+            this.$el.title = formatLocalDateTime(new Date(iso));
         },
     }));
 
