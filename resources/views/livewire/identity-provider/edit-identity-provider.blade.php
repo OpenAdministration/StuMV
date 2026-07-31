@@ -197,7 +197,7 @@
                                                 wire:navigate
                                                 href="{{ route('realms.groups.members', ['realm' => $uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
                                             >
-                                                {{ $group->getFirstAttribute('description') }}
+                                                {{ $group->getFirstAttribute('cn') }}
                                             </flux:link>
                                         @else
                                             <div class="text-xs text-zinc-500">{{ $mapping->group_dn }}</div>
@@ -236,7 +236,7 @@
                             <flux:label>{{ __('identity_providers.group_mappings_group') }}</flux:label>
                             <flux:select variant="listbox" searchable wire:model="new_group_dn">
                                 @foreach($groups as $group)
-                                    <flux:select.option value="{{ $group->getDn() }}">{{ $group->getFirstAttribute('description') }} ({{ $group->getFirstAttribute('cn') }})</flux:select.option>
+                                    <flux:select.option value="{{ $group->getDn() }}">{{ $group->getFirstAttribute('cn') }}{{ $group->getFirstAttribute('description') ? ' ('.$group->getFirstAttribute('description').')' : '' }}</flux:select.option>
                                 @endforeach
                             </flux:select>
                             <flux:error name="new_group_dn" />

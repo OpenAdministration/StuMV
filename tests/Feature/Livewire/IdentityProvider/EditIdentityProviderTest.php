@@ -227,7 +227,7 @@ test('adding a group mapping requires an external group and a group', function (
         ->assertHasErrors(['new_group_external_group' => 'required', 'new_group_dn' => 'required']);
 });
 
-test('an existing group mapping shows the group\'s LDAP description, linked to its members page', function (): void {
+test('an existing group mapping shows the group\'s cn, linked to its members page', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     $group = TestLdap::makeGroup($community);
@@ -238,8 +238,18 @@ test('an existing group mapping shows the group\'s LDAP description, linked to i
     actingAsAdmin($community);
 
     Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
-        ->assertSee($group->getFirstAttribute('description'))
+        ->assertSee($group->getFirstAttribute('cn'))
         ->assertSeeHtml(route('realms.groups.members', ['realm' => $community->getShortCode(), 'cn' => $group->getFirstAttribute('cn')]));
+});
+
+test('the group select for group mappings shows the cn with the description in parentheses', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    $group = TestLdap::makeGroup($community);
+    actingAsAdmin($community);
+
+    Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
+        ->assertSeeHtml($group->getFirstAttribute('cn').' ('.$group->getFirstAttribute('description').')');
 });
 
 test('a group mapping whose group no longer exists in LDAP falls back to showing the raw DN, without a link', function (): void {
