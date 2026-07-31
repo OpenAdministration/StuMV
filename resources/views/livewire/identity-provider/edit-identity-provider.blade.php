@@ -13,12 +13,14 @@
             </flux:tabs>
 
             <flux:tab.panel name="general" class="pt-8">
-                <x-livewire-form class="space-y-8">
+                <x-livewire-form class="space-y-4">
                     <flux:field>
                         <flux:label>{{ __('identity_providers.name') }}</flux:label>
                         <flux:input wire:model="name" placeholder="{{ __('identity_providers.name_placeholder') }}" />
                         <flux:error name="name" />
                     </flux:field>
+
+                    <flux:separator />
 
                     <flux:field>
                         <flux:label>{{ __('identity_providers.issuer') }}</flux:label>
@@ -27,17 +29,23 @@
                         <flux:error name="issuer" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('identity_providers.backchannel_logout_url') }}</flux:label>
                         <flux:description>{{ __('identity_providers.backchannel_logout_url_description') }}</flux:description>
                         <flux:input readonly copyable value="{{ route('identity-provider.backchannel-logout', ['realm' => $uid, 'provider' => $providerId]) }}" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('identity_providers.client_id') }}</flux:label>
                         <flux:input wire:model="client_id" />
                         <flux:error name="client_id" />
                     </flux:field>
+
+                    <flux:separator />
 
                     <flux:field>
                         <flux:label>{{ __('identity_providers.client_secret') }}</flux:label>
@@ -46,6 +54,8 @@
                         <flux:error name="client_secret" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:field>
                         <flux:label>{{ __('identity_providers.groups_claim') }}</flux:label>
                         <flux:description>{{ __('identity_providers.groups_claim_description') }}</flux:description>
@@ -53,8 +63,12 @@
                         <flux:error name="groups_claim" />
                     </flux:field>
 
+                    <flux:separator />
+
                     <flux:switch wire:model="enabled" label="{{ __('identity_providers.enabled') }}" />
 
+                    <flux:separator />
+                    
                     <x-slot:abort_route>
                         {{ route('realms.identity-providers', ['realm' => $uid]) }}
                     </x-slot:abort_route>
