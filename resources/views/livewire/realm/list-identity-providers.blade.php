@@ -27,7 +27,14 @@
                 <flux:table.rows>
                 @foreach($providers as $provider)
                     <flux:table.row>
-                        <flux:table.cell>{{ $provider->name }}</flux:table.cell>
+                        <flux:table.cell>
+                            <flux:link
+                                wire:navigate
+                                href="{{ route('realms.identity-providers.edit', ['realm' => $uid, 'provider' => $provider->id]) }}"
+                            >
+                                {{ $provider->name }}
+                            </flux:link>
+                        </flux:table.cell>
                         <flux:table.cell>
                             @if($provider->enabled)
                                 <flux:badge color="green" variant="solid">{{ __('identity_providers.status_enabled') }}</flux:badge>
