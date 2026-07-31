@@ -34,6 +34,7 @@
                             >
                                 {{ $provider->name }}
                             </flux:link>
+                            <div class="text-xs text-zinc-500">{{ $provider->id }}</div>
                         </flux:table.cell>
                         <flux:table.cell>
                             @if($provider->enabled)
