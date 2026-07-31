@@ -89,7 +89,8 @@ class EditIdentityProvider extends Component
 
     public function render()
     {
-        $committees = Committee::fromCommunity($this->uid)->recursive()->get();
+        $committees = Committee::fromCommunity($this->uid)->recursive()->get()
+            ->filter(fn (Committee $committee): bool => $committee->roles()->exists());
         $roles = collect();
 
         if (! empty($this->new_committee_dn)) {

@@ -135,6 +135,24 @@ test('a role mapping can be added and lists the committee/role it targets', func
         ->and($mapping->role_cn)->toBe($role->getFirstAttribute('cn'));
 });
 
+test('the committee select for role mappings only offers committees that have at least one role', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    $committeeWithRole = TestLdap::makeCommittee($community);
+    TestLdap::makeRole($committeeWithRole);
+    $committeeWithoutRole = TestLdap::makeCommittee($community);
+    actingAsAdmin($community);
+
+    $committees = Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
+        ->viewData('committees');
+
+    $committeeDns = $committees->map(fn (Committee $committee): string => $committee->getDn());
+
+    expect($committeeDns)
+        ->toContain($committeeWithRole->getDn())
+        ->not->toContain($committeeWithoutRole->getDn());
+});
+
 test('adding a mapping requires an external group, committee and role', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
