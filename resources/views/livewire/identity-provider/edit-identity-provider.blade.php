@@ -68,10 +68,7 @@
                     <flux:switch wire:model="enabled" label="{{ __('identity_providers.enabled') }}" />
 
                     <flux:separator />
-                    
-                    <x-slot:abort_route>
-                        {{ route('realms.identity-providers', ['realm' => $uid]) }}
-                    </x-slot:abort_route>
+            
                 </x-livewire-form>
             </flux:tab.panel>
 
