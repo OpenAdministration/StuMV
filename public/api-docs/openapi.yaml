@@ -127,7 +127,7 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
 
   /{realm}/members:
-    get:
+    post:
       tags: [Committees]
       summary: List the members holding the role of one or more given committee/role pairs
       description: |
@@ -138,22 +138,27 @@ paths:
         naming an unknown committee or role is silently ignored rather than
         causing an error.
 
-        Example: `pairs[0][ou]=FSR&pairs[0][cn]=mitglied&pairs[1][ou]=StuRa&pairs[1][cn]=vorsitz`
+        A POST carrying the pairs in the request body rather than a GET with
+        query parameters, since this is a query with potentially many
+        combinations rather than a lookup of a single resource.
       security: [{ oauth2: [committees] }]
       parameters:
         - $ref: '#/components/parameters/Realm'
-        - name: pairs
-          in: query
-          required: true
-          description: One or more `{ou, cn}` committee/role pairs to match.
-          schema:
-            type: array
-            items: { $ref: '#/components/schemas/CommitteeRolePair' }
-          style: deepObject
-          explode: true
-          example:
-            - { ou: FSR, cn: mitglied }
-            - { ou: StuRa, cn: vorsitz }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pairs]
+              properties:
+                pairs:
+                  type: array
+                  items: { $ref: '#/components/schemas/CommitteeRolePair' }
+              example:
+                pairs:
+                  - { ou: FSR, cn: mitglied }
+                  - { ou: StuRa, cn: vorsitz }
       responses:
         '200':
           description: OK

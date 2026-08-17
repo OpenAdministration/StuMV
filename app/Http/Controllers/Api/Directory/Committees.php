@@ -96,7 +96,7 @@ class Committees extends Controller
     {
         $this->authorizeClientForCommunity($realm);
 
-        $pairs = collect((array) $request->query('pairs', []))
+        $pairs = collect((array) $request->input('pairs', []))
             ->filter(fn ($pair): bool => is_array($pair) && filled($pair['ou'] ?? null) && filled($pair['cn'] ?? null));
 
         abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role pair is required.');

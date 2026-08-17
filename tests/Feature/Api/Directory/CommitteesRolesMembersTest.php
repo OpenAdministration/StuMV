@@ -8,13 +8,6 @@ use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
-function committeeRolePairsQuery(array $pairs): string
-{
-    return collect($pairs)
-        ->map(fn (array $pair, int $i): string => "pairs[$i][ou]={$pair['ou']}&pairs[$i][cn]={$pair['cn']}")
-        ->implode('&');
-}
-
 test('a registered client can list the members holding a given committee/role pair', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
@@ -25,8 +18,9 @@ test('a registered client can list the members holding a given committee/role pa
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $response = $this->getJson("/api/$uid/members?$query");
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ]);
 
     $response->assertOk()->assertJsonFragment([
         'name' => $member->getFirstAttribute('cn'),
@@ -51,11 +45,12 @@ test('members are the union across multiple pairs', function (): void {
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $query = committeeRolePairsQuery([
-        ['ou' => 'fsr', 'cn' => 'mitglied'],
-        ['ou' => 'stura', 'cn' => 'vorsitz'],
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [
+            ['ou' => 'fsr', 'cn' => 'mitglied'],
+            ['ou' => 'stura', 'cn' => 'vorsitz'],
+        ],
     ]);
-    $response = $this->getJson("/api/$uid/members?$query");
 
     $names = collect($response->assertOk()->json())->pluck('name');
 
@@ -78,11 +73,12 @@ test('a committee/role pair only matches that exact combination, not a cross pro
 
     // "stura" has no "vorsitz" role, so this pair should match nobody -
     // only the exact fsr/mitglied pair should contribute a member.
-    $query = committeeRolePairsQuery([
-        ['ou' => 'fsr', 'cn' => 'mitglied'],
-        ['ou' => 'stura', 'cn' => 'vorsitz'],
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [
+            ['ou' => 'fsr', 'cn' => 'mitglied'],
+            ['ou' => 'stura', 'cn' => 'vorsitz'],
+        ],
     ]);
-    $response = $this->getJson("/api/$uid/members?$query");
 
     $response->assertOk();
     expect($response->json())->toHaveCount(1);
@@ -101,11 +97,12 @@ test('a person matching multiple pairs is only listed once', function (): void {
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $query = committeeRolePairsQuery([
-        ['ou' => 'fsr', 'cn' => 'mitglied'],
-        ['ou' => 'fsr', 'cn' => 'vorsitz'],
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [
+            ['ou' => 'fsr', 'cn' => 'mitglied'],
+            ['ou' => 'fsr', 'cn' => 'vorsitz'],
+        ],
     ]);
-    $response = $this->getJson("/api/$uid/members?$query");
 
     $response->assertOk();
     expect($response->json())->toHaveCount(1);
@@ -121,12 +118,13 @@ test('pairs naming an unknown committee or role are silently ignored', function 
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $query = committeeRolePairsQuery([
-        ['ou' => 'fsr', 'cn' => 'mitglied'],
-        ['ou' => 'unknown', 'cn' => 'mitglied'],
-        ['ou' => 'fsr', 'cn' => 'unknown'],
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [
+            ['ou' => 'fsr', 'cn' => 'mitglied'],
+            ['ou' => 'unknown', 'cn' => 'mitglied'],
+            ['ou' => 'fsr', 'cn' => 'unknown'],
+        ],
     ]);
-    $response = $this->getJson("/api/$uid/members?$query");
 
     $response->assertOk();
     expect($response->json())->toHaveCount(1);
@@ -138,7 +136,7 @@ test('requesting members without any pairs returns 422', function (): void {
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $this->getJson("/api/$uid/members")->assertStatus(422);
+    $this->postJson("/api/$uid/members", [])->assertStatus(422);
 });
 
 test('the response includes the course of study (Studiengang)', function (): void {
@@ -152,8 +150,9 @@ test('the response includes the course of study (Studiengang)', function (): voi
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $response = $this->getJson("/api/$uid/members?$query");
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ]);
 
     $response->assertOk()->assertJsonFragment(['course' => 'Informatik']);
 });
@@ -176,8 +175,9 @@ test('a member with a profile picture gets its URL in the response', function ()
 
     actingAsDirectoryClient($community, ['committees']);
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $response = $this->getJson("/api/$uid/members?$query");
+    $response = $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ]);
 
     $response->assertOk()->assertJsonFragment([
         'picture' => asset('storage/avatars/some-file-id.webp'),
@@ -191,16 +191,18 @@ test('requesting members requires the committees scope', function (): void {
 
     actingAsDirectoryClient($community, ['groups']);
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $this->getJson("/api/$uid/members?$query")->assertForbidden();
+    $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ])->assertForbidden();
 });
 
 test('requesting members requires authentication', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $this->getJson("/api/$uid/members?$query")->assertUnauthorized();
+    $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ])->assertUnauthorized();
 });
 
 test('a normal delegated end-user token is rejected, even with the right scope', function (): void {
@@ -210,8 +212,9 @@ test('a normal delegated end-user token is rejected, even with the right scope',
 
     Passport::actingAs($user, ['committees']);
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $this->getJson("/api/$uid/members?$query")->assertUnauthorized();
+    $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ])->assertUnauthorized();
 });
 
 test('a client registered for a different community cannot request this community\'s members', function (): void {
@@ -222,6 +225,7 @@ test('a client registered for a different community cannot request this communit
 
     actingAsDirectoryClient($otherCommunity, ['committees']);
 
-    $query = committeeRolePairsQuery([['ou' => 'fsr', 'cn' => 'mitglied']]);
-    $this->getJson("/api/$uid/members?$query")->assertForbidden();
+    $this->postJson("/api/$uid/members", [
+        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ])->assertForbidden();
 });
