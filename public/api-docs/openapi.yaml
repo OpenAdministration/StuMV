@@ -129,17 +129,17 @@ paths:
   /{realm}/members:
     post:
       tags: [Committees]
-      summary: List the members holding the role of one or more given committee/role pairs
+      summary: List the members holding the role of one or more given committee/role entries
       description: |
-        Give one or more `{ou, cn}` pairs, each naming an exact committee and
-        role within it; the response is the union of that role's members
-        across all given pairs, deduplicated by person - each matching
-        person is listed once even if they match several pairs. A pair
+        Give one or more `{ou, cn}` entries, each naming an exact committee
+        and role within it; the response is the union of that role's members
+        across all given entries, deduplicated by person - each matching
+        person is listed once even if they match several entries. An entry
         naming an unknown committee or role is silently ignored rather than
         causing an error.
 
-        A POST carrying the pairs in the request body rather than a GET with
-        query parameters, since this is a query with potentially many
+        A POST carrying the entries in the request body rather than a GET
+        with query parameters, since this is a query with potentially many
         combinations rather than a lookup of a single resource.
       security: [{ oauth2: [committees] }]
       parameters:
@@ -150,13 +150,13 @@ paths:
           application/json:
             schema:
               type: object
-              required: [pairs]
+              required: [roles]
               properties:
-                pairs:
+                roles:
                   type: array
                   items: { $ref: '#/components/schemas/CommitteeRolePair' }
               example:
-                pairs:
+                roles:
                   - { ou: FSR, cn: mitglied }
                   - { ou: StuRa, cn: vorsitz }
       responses:
@@ -436,4 +436,4 @@ components:
     NotFound:
       description: The community, committee, role, group or user does not exist (or the user is not a member of this community).
     UnprocessableEntity:
-      description: At least one `{ou, cn}` committee/role pair must be given.
+      description: At least one `{ou, cn}` committee/role entry must be given.

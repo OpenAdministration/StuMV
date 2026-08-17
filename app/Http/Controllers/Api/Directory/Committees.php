@@ -83,23 +83,23 @@ class Committees extends Controller
     }
 
     /**
-     * Members holding the role given by each {ou, cn} pair, deduplicated by
-     * person. Reads the same LDAP uniqueMember source of truth as
-     * roleMembers() above (not RoleMembership - see Users::userRoles()'s doc
-     * comment for why), and returns the same name/course/picture fields as
-     * Users::show() for each matched person. Pairs naming an unknown
-     * committee or role are silently skipped rather than 404ing, since this
-     * is a filter over many possible values rather than a lookup of one
-     * specific resource.
+     * Members holding the role given by each {ou, cn} entry in "roles",
+     * deduplicated by person. Reads the same LDAP uniqueMember source of
+     * truth as roleMembers() above (not RoleMembership - see
+     * Users::userRoles()'s doc comment for why), and returns the same
+     * name/course/picture fields as Users::show() for each matched person.
+     * An entry naming an unknown committee or role is silently skipped
+     * rather than 404ing, since this is a filter over many possible values
+     * rather than a lookup of one specific resource.
      */
     public function rolesMembers(Request $request, Community $realm)
     {
         $this->authorizeClientForCommunity($realm);
 
-        $pairs = collect((array) $request->input('pairs', []))
+        $pairs = collect((array) $request->input('roles', []))
             ->filter(fn ($pair): bool => is_array($pair) && filled($pair['ou'] ?? null) && filled($pair['cn'] ?? null));
 
-        abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role pair is required.');
+        abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role entry is required.');
 
         $members = $pairs
             ->map(function (array $pair) use ($realm): ?Role {

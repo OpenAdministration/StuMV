@@ -19,7 +19,7 @@ test('a registered client can list the members holding a given committee/role pa
     actingAsDirectoryClient($community, ['committees']);
 
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ]);
 
     $response->assertOk()->assertJsonFragment([
@@ -46,7 +46,7 @@ test('members are the union across multiple pairs', function (): void {
     actingAsDirectoryClient($community, ['committees']);
 
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [
+        'roles' => [
             ['ou' => 'fsr', 'cn' => 'mitglied'],
             ['ou' => 'stura', 'cn' => 'vorsitz'],
         ],
@@ -74,7 +74,7 @@ test('a committee/role pair only matches that exact combination, not a cross pro
     // "stura" has no "vorsitz" role, so this pair should match nobody -
     // only the exact fsr/mitglied pair should contribute a member.
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [
+        'roles' => [
             ['ou' => 'fsr', 'cn' => 'mitglied'],
             ['ou' => 'stura', 'cn' => 'vorsitz'],
         ],
@@ -98,7 +98,7 @@ test('a person matching multiple pairs is only listed once', function (): void {
     actingAsDirectoryClient($community, ['committees']);
 
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [
+        'roles' => [
             ['ou' => 'fsr', 'cn' => 'mitglied'],
             ['ou' => 'fsr', 'cn' => 'vorsitz'],
         ],
@@ -119,7 +119,7 @@ test('pairs naming an unknown committee or role are silently ignored', function 
     actingAsDirectoryClient($community, ['committees']);
 
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [
+        'roles' => [
             ['ou' => 'fsr', 'cn' => 'mitglied'],
             ['ou' => 'unknown', 'cn' => 'mitglied'],
             ['ou' => 'fsr', 'cn' => 'unknown'],
@@ -151,7 +151,7 @@ test('the response includes the course of study (Studiengang)', function (): voi
     actingAsDirectoryClient($community, ['committees']);
 
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ]);
 
     $response->assertOk()->assertJsonFragment(['course' => 'Informatik']);
@@ -176,7 +176,7 @@ test('a member with a profile picture gets its URL in the response', function ()
     actingAsDirectoryClient($community, ['committees']);
 
     $response = $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ]);
 
     $response->assertOk()->assertJsonFragment([
@@ -192,7 +192,7 @@ test('requesting members requires the committees scope', function (): void {
     actingAsDirectoryClient($community, ['groups']);
 
     $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ])->assertForbidden();
 });
 
@@ -201,7 +201,7 @@ test('requesting members requires authentication', function (): void {
     $uid = $community->getShortCode();
 
     $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ])->assertUnauthorized();
 });
 
@@ -213,7 +213,7 @@ test('a normal delegated end-user token is rejected, even with the right scope',
     Passport::actingAs($user, ['committees']);
 
     $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ])->assertUnauthorized();
 });
 
@@ -226,6 +226,6 @@ test('a client registered for a different community cannot request this communit
     actingAsDirectoryClient($otherCommunity, ['committees']);
 
     $this->postJson("/api/$uid/members", [
-        'pairs' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ])->assertForbidden();
 });
