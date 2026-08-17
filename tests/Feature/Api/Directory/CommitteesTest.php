@@ -137,3 +137,54 @@ test('requesting members of an unknown role returns 404', function (): void {
 
     $this->getJson("/api/$uid/committees/fsr/roles/unknown/members")->assertNotFound();
 });
+
+test('committees are sorted alphabetically by description', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeCommittee($community, 'zzz')->fill(['description' => 'Zeta committee'])->save();
+    TestLdap::makeCommittee($community, 'aaa')->fill(['description' => 'Alpha committee'])->save();
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->getJson("/api/$uid/committees");
+
+    expect(collect($response->assertOk()->json())->pluck('ou')->all())->toBe(['aaa', 'zzz']);
+});
+
+test('roles of a committee are sorted alphabetically by description', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'zzz')->fill(['description' => 'Zeta role'])->save();
+    TestLdap::makeRole($committee, 'aaa')->fill(['description' => 'Alpha role'])->save();
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->getJson("/api/$uid/committees/fsr/roles");
+
+    expect(collect($response->assertOk()->json())->pluck('cn')->all())->toBe(['aaa', 'zzz']);
+});
+
+test('role members are sorted alphabetically by name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+
+    $zeta = TestLdap::makeUser();
+    $zeta->fill(['cn' => 'Zeta Person'])->save();
+    TestLdap::attach($role, $zeta);
+
+    $alpha = TestLdap::makeUser();
+    $alpha->fill(['cn' => 'Alpha Person'])->save();
+    TestLdap::attach($role, $alpha);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->getJson("/api/$uid/committees/fsr/roles/mitglied/members");
+
+    expect($response->assertOk()->json())->toBe([
+        $alpha->getFirstAttribute('uid'),
+        $zeta->getFirstAttribute('uid'),
+    ]);
+});

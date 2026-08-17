@@ -88,3 +88,39 @@ test('requesting members of an unknown group returns 404', function (): void {
 
     $this->getJson("/api/$uid/groups/unknown/members")->assertNotFound();
 });
+
+test('groups are sorted alphabetically by cn', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeGroup($community, 'zzz');
+    TestLdap::makeGroup($community, 'aaa');
+
+    actingAsDirectoryClient($community, ['groups']);
+
+    $response = $this->getJson("/api/$uid/groups");
+
+    expect(collect($response->assertOk()->json())->pluck('cn')->all())->toBe(['aaa', 'zzz']);
+});
+
+test('group members are sorted alphabetically by name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $group = TestLdap::makeGroup($community, 'lecturers');
+
+    $zeta = TestLdap::makeUser();
+    $zeta->fill(['cn' => 'Zeta Person'])->save();
+    TestLdap::attach($group, $zeta);
+
+    $alpha = TestLdap::makeUser();
+    $alpha->fill(['cn' => 'Alpha Person'])->save();
+    TestLdap::attach($group, $alpha);
+
+    actingAsDirectoryClient($community, ['groups']);
+
+    $response = $this->getJson("/api/$uid/groups/lecturers/members");
+
+    expect($response->assertOk()->json())->toBe([
+        $alpha->getFirstAttribute('uid'),
+        $zeta->getFirstAttribute('uid'),
+    ]);
+});

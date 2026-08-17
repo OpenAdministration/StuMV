@@ -20,7 +20,8 @@ class Committees extends Controller
     {
         $this->authorizeClientForCommunity($realm);
 
-        $committees = Committee::fromCommunity($realm->getShortCode())->get();
+        $committees = Committee::fromCommunity($realm->getShortCode())->get()
+            ->sortBy(fn (Committee $committee): string => mb_strtolower((string) $committee->getFirstAttribute('description')), SORT_NATURAL);
 
         return response()->json($committees->map(fn (Committee $committee): array => [
             'ou' => $committee->getFirstAttribute('ou'),
@@ -45,7 +46,8 @@ class Committees extends Controller
         $this->authorizeClientForCommunity($realm);
 
         $committee = Committee::findByNameOrFail($realm, $ou);
-        $roles = $committee->roles()->get();
+        $roles = $committee->roles()->get()
+            ->sortBy(fn (Role $role): string => mb_strtolower((string) $role->getFirstAttribute('description')), SORT_NATURAL);
 
         return response()->json($roles->map(fn (Role $role): array => [
             'cn' => $role->getFirstAttribute('cn'),
@@ -76,8 +78,9 @@ class Committees extends Controller
         // uniqueMember entries resolve to either Role or User entries -
         // filter down to the actual people (entries carrying a uid).
         $usernames = $role->members()->get()
+            ->filter(fn ($member) => $member->getFirstAttribute('uid'))
+            ->sortBy(fn ($member) => mb_strtolower((string) $member->getFirstAttribute('cn')), SORT_NATURAL)
             ->map(fn ($member) => $member->getFirstAttribute('uid'))
-            ->filter()
             ->values();
 
         return response()->json($usernames);
@@ -96,6 +99,12 @@ class Committees extends Controller
      * If "include_roles" is truthy, each member additionally lists which of
      * the requested {ou, cn} roles they actually hold (a person can match
      * more than one), including the role's human-readable name (role_name).
+     *
+     * Unlike every other Directory API list endpoint (which always sort
+     * alphabetically ascending), this one accepts "sort_by"
+     * (given_name/family_name) and "sort_direction" (asc/desc, default asc)
+     * to sort the returned members - the only endpoint where a caller needs
+     * that choice.
      */
     public function rolesMembers(Request $request, Community $realm)
     {
@@ -105,6 +114,13 @@ class Committees extends Controller
             ->filter(fn ($pair): bool => is_array($pair) && filled($pair['ou'] ?? null) && filled($pair['cn'] ?? null));
 
         abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role entry is required.');
+
+        $sortAttributes = ['given_name' => 'givenName', 'family_name' => 'sn'];
+        $sortBy = $request->input('sort_by', 'family_name');
+        $sortDirection = $request->input('sort_direction', 'asc');
+
+        abort_unless(array_key_exists($sortBy, $sortAttributes), 422, 'sort_by must be one of: '.implode(', ', array_keys($sortAttributes)).'.');
+        abort_unless(in_array($sortDirection, ['asc', 'desc'], true), 422, 'sort_direction must be "asc" or "desc".');
 
         $includeRoles = $request->boolean('include_roles');
 
@@ -135,7 +151,15 @@ class Committees extends Controller
                     ->values(),
             ]);
 
-        return response()->json($members
+        $sortAttribute = $sortAttributes[$sortBy];
+
+        $sorted = $members->sortBy(
+            fn (array $entry): string => mb_strtolower((string) $entry['member']->getFirstAttribute($sortAttribute)),
+            SORT_NATURAL,
+            $sortDirection === 'desc',
+        );
+
+        return response()->json($sorted
             ->map(fn (array $entry): array => $this->formatMember($entry['member'], $includeRoles ? $entry['roles'] : null))
             ->values());
     }

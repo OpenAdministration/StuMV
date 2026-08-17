@@ -16,7 +16,8 @@ class Groups extends Controller
     {
         $this->authorizeClientForCommunity($realm);
 
-        $groups = Group::query()->in(Group::dnRoot($realm->getShortCode()))->get();
+        $groups = Group::query()->in(Group::dnRoot($realm->getShortCode()))->get()
+            ->sortBy(fn (Group $group): string => mb_strtolower((string) $group->getFirstAttribute('cn')), SORT_NATURAL);
 
         return response()->json($groups->map(fn (Group $group): array => [
             'cn' => $group->getFirstAttribute('cn'),
@@ -45,8 +46,9 @@ class Groups extends Controller
         // uniqueMember entries resolve to either Role or User entries -
         // filter down to the actual people (entries carrying a uid).
         $usernames = $group->members()->get()
+            ->filter(fn ($member) => $member->getFirstAttribute('uid'))
+            ->sortBy(fn ($member) => mb_strtolower((string) $member->getFirstAttribute('cn')), SORT_NATURAL)
             ->map(fn ($member) => $member->getFirstAttribute('uid'))
-            ->filter()
             ->values();
 
         return response()->json($usernames);

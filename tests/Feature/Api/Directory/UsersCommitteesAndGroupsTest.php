@@ -186,3 +186,55 @@ test('a client registered for a different community cannot query this community\
     $this->getJson("/api/$uid/users/{$target->username}/committees")->assertForbidden();
     $this->getJson("/api/$uid/users/{$target->username}/groups")->assertForbidden();
 });
+
+test('a user\'s roles are sorted alphabetically', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $zeta = TestLdap::makeRole($committee, 'zzz');
+    $alpha = TestLdap::makeRole($committee, 'aaa');
+    $target = TestLdap::member($community);
+    TestLdap::attach($zeta, $target->ldap());
+    TestLdap::attach($alpha, $target->ldap());
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}/roles");
+
+    $response->assertOk()->assertExactJson([
+        ['ou' => 'fsr', 'cn' => 'aaa'],
+        ['ou' => 'fsr', 'cn' => 'zzz'],
+    ]);
+});
+
+test('a user\'s committees are sorted alphabetically', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $zeta = TestLdap::makeCommittee($community, 'zzz');
+    $alpha = TestLdap::makeCommittee($community, 'aaa');
+    $target = TestLdap::member($community);
+    TestLdap::attach(TestLdap::makeRole($zeta), $target->ldap());
+    TestLdap::attach(TestLdap::makeRole($alpha), $target->ldap());
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}/committees");
+
+    $response->assertOk()->assertExactJson(['aaa', 'zzz']);
+});
+
+test('a user\'s groups are sorted alphabetically', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $zeta = TestLdap::makeGroup($community, 'zzz');
+    $alpha = TestLdap::makeGroup($community, 'aaa');
+    $target = TestLdap::member($community);
+    TestLdap::attach($zeta, $target->ldap());
+    TestLdap::attach($alpha, $target->ldap());
+
+    actingAsDirectoryClient($community, ['users']);
+
+    $response = $this->getJson("/api/$uid/users/{$target->username}/groups");
+
+    $response->assertOk()->assertExactJson(['aaa', 'zzz']);
+});

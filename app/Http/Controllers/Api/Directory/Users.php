@@ -40,16 +40,18 @@ class Users extends Controller
 
         $user = $this->findMemberOrFail($realm, $uid);
 
-        $roles = $this->userRoles($realm, $user);
+        $roles = $this->userRoles($realm, $user)
+            ->map(function (Role $role): array {
+                $committee = $role->committee();
 
-        return response()->json($roles->map(function (Role $role): array {
-            $committee = $role->committee();
+                return [
+                    'ou' => $committee?->getFirstAttribute('ou'),
+                    'cn' => $role->getFirstAttribute('cn'),
+                ];
+            })
+            ->sortBy(fn (array $role): string => mb_strtolower($role['ou'].'|'.$role['cn']), SORT_NATURAL);
 
-            return [
-                'ou' => $committee?->getFirstAttribute('ou'),
-                'cn' => $role->getFirstAttribute('cn'),
-            ];
-        })->values());
+        return response()->json($roles->values());
     }
 
     public function committees(Request $request, Community $realm, string $uid)
@@ -61,9 +63,11 @@ class Users extends Controller
         $committees = $this->userRoles($realm, $user)
             ->map(fn (Role $role): ?Committee => $role->committee())
             ->filter()
-            ->unique(fn (Committee $committee): string => $committee->getDn());
+            ->unique(fn (Committee $committee): string => $committee->getDn())
+            ->map(fn (Committee $committee): string => $committee->getFirstAttribute('ou'))
+            ->sortBy(fn (string $ou): string => mb_strtolower($ou), SORT_NATURAL);
 
-        return response()->json($committees->map(fn (Committee $committee): string => $committee->getFirstAttribute('ou'))->values());
+        return response()->json($committees->values());
     }
 
     /**
@@ -88,9 +92,11 @@ class Users extends Controller
 
         $groups = Group::query()->in(Group::dnRoot($realm->getShortCode()))
             ->where('uniqueMember', '=', $user->getDn())
-            ->get();
+            ->get()
+            ->map(fn (Group $group): string => $group->getFirstAttribute('cn'))
+            ->sortBy(fn (string $cn): string => mb_strtolower($cn), SORT_NATURAL);
 
-        return response()->json($groups->map(fn (Group $group): string => $group->getFirstAttribute('cn'))->values());
+        return response()->json($groups->values());
     }
 
     /**

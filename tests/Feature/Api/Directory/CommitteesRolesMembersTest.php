@@ -293,3 +293,106 @@ test('include_roles lists every requested role a member holds, deduplicated', fu
 
     expect($roles)->toHaveCount(2)->and($roles)->toContain('mitglied', 'vorsitz');
 });
+
+test('members are sorted by family name ascending by default', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+
+    $zeta = TestLdap::makeUser();
+    $zeta->fill(['sn' => 'Zeta', 'givenName' => 'Bob'])->save();
+    TestLdap::attach($role, $zeta);
+
+    $adams = TestLdap::makeUser();
+    $adams->fill(['sn' => 'Adams', 'givenName' => 'Anna'])->save();
+    TestLdap::attach($role, $adams);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ]);
+
+    $names = collect($response->assertOk()->json())->pluck('name');
+
+    expect($names->all())->toBe([$adams->getFirstAttribute('cn'), $zeta->getFirstAttribute('cn')]);
+});
+
+test('members can be sorted by given name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+
+    $bob = TestLdap::makeUser();
+    $bob->fill(['sn' => 'Adams', 'givenName' => 'Bob'])->save();
+    TestLdap::attach($role, $bob);
+
+    $anna = TestLdap::makeUser();
+    $anna->fill(['sn' => 'Zeta', 'givenName' => 'Anna'])->save();
+    TestLdap::attach($role, $anna);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'sort_by' => 'given_name',
+    ]);
+
+    $names = collect($response->assertOk()->json())->pluck('name');
+
+    expect($names->all())->toBe([$anna->getFirstAttribute('cn'), $bob->getFirstAttribute('cn')]);
+});
+
+test('members can be sorted descending', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+
+    $zeta = TestLdap::makeUser();
+    $zeta->fill(['sn' => 'Zeta', 'givenName' => 'Bob'])->save();
+    TestLdap::attach($role, $zeta);
+
+    $adams = TestLdap::makeUser();
+    $adams->fill(['sn' => 'Adams', 'givenName' => 'Anna'])->save();
+    TestLdap::attach($role, $adams);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'sort_direction' => 'desc',
+    ]);
+
+    $names = collect($response->assertOk()->json())->pluck('name');
+
+    expect($names->all())->toBe([$zeta->getFirstAttribute('cn'), $adams->getFirstAttribute('cn')]);
+});
+
+test('an invalid sort_by is rejected', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeCommittee($community, 'fsr');
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'sort_by' => 'role_name',
+    ])->assertStatus(422);
+});
+
+test('an invalid sort_direction is rejected', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeCommittee($community, 'fsr');
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'sort_direction' => 'sideways',
+    ])->assertStatus(422);
+});

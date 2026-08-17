@@ -18,6 +18,10 @@ info:
     ```
 
     Then send it as `Authorization: Bearer <token>` on every request below.
+
+    Every list endpoint sorts alphabetically ascending, except
+    `POST /{realm}/members`, which lets the caller choose the sort field and
+    direction (see that endpoint's description).
   version: "1.0.0"
 servers:
   - url: /api
@@ -141,6 +145,12 @@ paths:
         A POST carrying the entries in the request body rather than a GET
         with query parameters, since this is a query with potentially many
         combinations rather than a lookup of a single resource.
+
+        Unlike every other Directory API list endpoint (which always sorts
+        alphabetically ascending), this is the one endpoint where a caller
+        needs a choice of sort field: `sort_by` (`given_name` or
+        `family_name`, default `family_name`) and `sort_direction` (`asc` or
+        `desc`, default `asc`).
       security: [{ oauth2: [committees] }]
       parameters:
         - $ref: '#/components/parameters/Realm'
@@ -161,11 +171,22 @@ paths:
                   description: |
                     If true, each returned member additionally lists which of
                     the requested roles they actually hold (see `Member.roles`).
+                sort_by:
+                  type: string
+                  enum: [given_name, family_name]
+                  default: family_name
+                  description: Which name to sort the returned members by.
+                sort_direction:
+                  type: string
+                  enum: [asc, desc]
+                  default: asc
               example:
                 roles:
                   - { ou: FSR, cn: mitglied }
                   - { ou: StuRa, cn: vorsitz }
                 include_roles: true
+                sort_by: given_name
+                sort_direction: desc
       responses:
         '200':
           description: OK
@@ -458,4 +479,6 @@ components:
     NotFound:
       description: The community, committee, role, group or user does not exist (or the user is not a member of this community).
     UnprocessableEntity:
-      description: At least one `{ou, cn}` committee/role entry must be given.
+      description: |
+        Either no `{ou, cn}` committee/role entry was given, or `sort_by`/
+        `sort_direction` holds a value outside its allowed enum.
