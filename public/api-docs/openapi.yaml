@@ -126,6 +126,42 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
 
+  /{realm}/members:
+    get:
+      tags: [Committees]
+      summary: List the members holding any of the given roles in any of the given committees
+      description: |
+        A many-committees x many-roles union, deduplicated by person - each
+        matching person is listed once even if they hold several of the
+        requested roles. Unknown committee or role names are silently
+        ignored rather than causing an error.
+      security: [{ oauth2: [committees] }]
+      parameters:
+        - $ref: '#/components/parameters/Realm'
+        - name: committees[]
+          in: query
+          required: true
+          description: One or more committee short names (ou) to search in.
+          schema: { type: array, items: { type: string } }
+          example: [FSR]
+        - name: roles[]
+          in: query
+          required: true
+          description: One or more role short names (cn) to match.
+          schema: { type: array, items: { type: string } }
+          example: [mitglied]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Member' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/UnprocessableEntity' }
+
   /{realm}/groups:
     get:
       tags: [Groups]
@@ -363,6 +399,20 @@ components:
       properties:
         ou: { type: string, nullable: true, example: FSR }
         cn: { type: string, example: mitglied }
+    Member:
+      type: object
+      properties:
+        name: { type: string, example: Jane Doe }
+        course:
+          type: string
+          nullable: true
+          description: Studiengang (course of study).
+          example: Informatik
+        picture:
+          type: string
+          nullable: true
+          format: uri
+          example: https://stumv.example/storage/avatars/abc123.jpg
 
   responses:
     Unauthorized:
@@ -371,3 +421,5 @@ components:
       description: The token's client is not registered for this community, or lacks the required scope.
     NotFound:
       description: The community, committee, role, group or user does not exist (or the user is not a member of this community).
+    UnprocessableEntity:
+      description: At least one committee and one role must be given.

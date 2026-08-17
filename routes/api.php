@@ -17,6 +17,7 @@ Route::middleware('client')->group(function (): void {
         Route::get('{realm}/committees/{ou}/roles', [Committees::class, 'roles']);
         Route::get('{realm}/committees/{ou}/roles/{cn}', [Committees::class, 'role']);
         Route::get('{realm}/committees/{ou}/roles/{cn}/members', [Committees::class, 'roleMembers']);
+        Route::get('{realm}/members', [Committees::class, 'rolesMembers']);
     });
 
     Route::middleware('scope:groups')->group(function (): void {
