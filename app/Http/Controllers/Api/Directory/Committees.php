@@ -83,30 +83,31 @@ class Committees extends Controller
     }
 
     /**
-     * Members holding any of the given roles in any of the given committees -
-     * a many-committees x many-roles union, deduplicated by person. Reads the
-     * same LDAP uniqueMember source of truth as roleMembers() above (not
-     * RoleMembership - see Users::userRoles()'s doc comment for why), and
-     * returns the same name/course/picture fields as Users::show() for each
-     * matched person. Unknown committee/role names are silently skipped
-     * rather than 404ing, since this is a filter over many possible values
-     * rather than a lookup of one specific resource.
+     * Members holding the role given by each {ou, cn} pair, deduplicated by
+     * person. Reads the same LDAP uniqueMember source of truth as
+     * roleMembers() above (not RoleMembership - see Users::userRoles()'s doc
+     * comment for why), and returns the same name/course/picture fields as
+     * Users::show() for each matched person. Pairs naming an unknown
+     * committee or role are silently skipped rather than 404ing, since this
+     * is a filter over many possible values rather than a lookup of one
+     * specific resource.
      */
     public function rolesMembers(Request $request, Community $realm)
     {
         $this->authorizeClientForCommunity($realm);
 
-        $committeeNames = array_filter((array) $request->query('committees', []));
-        $roleNames = array_filter((array) $request->query('roles', []));
+        $pairs = collect((array) $request->query('pairs', []))
+            ->filter(fn ($pair): bool => is_array($pair) && filled($pair['ou'] ?? null) && filled($pair['cn'] ?? null));
 
-        abort_if(empty($committeeNames) || empty($roleNames), 422, 'At least one committee and one role are required.');
+        abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role pair is required.');
 
-        $committees = collect($committeeNames)
-            ->map(fn (string $ou): ?Committee => Committee::findByName($realm->getShortCode(), $ou))
-            ->filter();
+        $members = $pairs
+            ->map(function (array $pair) use ($realm): ?Role {
+                $committee = Committee::findByName($realm->getShortCode(), $pair['ou']);
 
-        $members = $committees
-            ->flatMap(fn (Committee $committee) => $committee->roles()->whereIn('cn', $roleNames)->get())
+                return $committee?->roles()->where('cn', $pair['cn'])->first();
+            })
+            ->filter()
             ->flatMap(fn (Role $role) => $role->members()->get())
             ->filter(fn ($member) => $member->getFirstAttribute('uid'))
             ->unique(fn ($member) => $member->getDn());

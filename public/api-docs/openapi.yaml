@@ -129,27 +129,31 @@ paths:
   /{realm}/members:
     get:
       tags: [Committees]
-      summary: List the members holding any of the given roles in any of the given committees
+      summary: List the members holding the role of one or more given committee/role pairs
       description: |
-        A many-committees x many-roles union, deduplicated by person - each
-        matching person is listed once even if they hold several of the
-        requested roles. Unknown committee or role names are silently
-        ignored rather than causing an error.
+        Give one or more `{ou, cn}` pairs, each naming an exact committee and
+        role within it; the response is the union of that role's members
+        across all given pairs, deduplicated by person - each matching
+        person is listed once even if they match several pairs. A pair
+        naming an unknown committee or role is silently ignored rather than
+        causing an error.
+
+        Example: `pairs[0][ou]=FSR&pairs[0][cn]=mitglied&pairs[1][ou]=StuRa&pairs[1][cn]=vorsitz`
       security: [{ oauth2: [committees] }]
       parameters:
         - $ref: '#/components/parameters/Realm'
-        - name: committees[]
+        - name: pairs
           in: query
           required: true
-          description: One or more committee short names (ou) to search in.
-          schema: { type: array, items: { type: string } }
-          example: [FSR]
-        - name: roles[]
-          in: query
-          required: true
-          description: One or more role short names (cn) to match.
-          schema: { type: array, items: { type: string } }
-          example: [mitglied]
+          description: One or more `{ou, cn}` committee/role pairs to match.
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/CommitteeRolePair' }
+          style: deepObject
+          explode: true
+          example:
+            - { ou: FSR, cn: mitglied }
+            - { ou: StuRa, cn: vorsitz }
       responses:
         '200':
           description: OK
@@ -413,6 +417,11 @@ components:
           nullable: true
           format: uri
           example: https://stumv.example/storage/avatars/abc123.jpg
+    CommitteeRolePair:
+      type: object
+      properties:
+        ou: { type: string, description: The committee's short name (ou)., example: FSR }
+        cn: { type: string, description: The role's short name (cn)., example: mitglied }
 
   responses:
     Unauthorized:
@@ -422,4 +431,4 @@ components:
     NotFound:
       description: The community, committee, role, group or user does not exist (or the user is not a member of this community).
     UnprocessableEntity:
-      description: At least one committee and one role must be given.
+      description: At least one `{ou, cn}` committee/role pair must be given.
