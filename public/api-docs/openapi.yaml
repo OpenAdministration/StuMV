@@ -155,10 +155,17 @@ paths:
                 roles:
                   type: array
                   items: { $ref: '#/components/schemas/CommitteeRolePair' }
+                include_roles:
+                  type: boolean
+                  default: false
+                  description: |
+                    If true, each returned member additionally lists which of
+                    the requested roles they actually hold (see `Member.roles`).
               example:
                 roles:
                   - { ou: FSR, cn: mitglied }
                   - { ou: StuRa, cn: vorsitz }
+                include_roles: true
       responses:
         '200':
           description: OK
@@ -422,11 +429,26 @@ components:
           nullable: true
           format: uri
           example: https://stumv.example/storage/avatars/abc123.jpg
+        roles:
+          type: array
+          description: |
+            Only present when the request set `include_roles: true`. The
+            requested roles this member actually holds - can be more than
+            one if they matched several of the request's `roles` entries.
+          items: { $ref: '#/components/schemas/CommitteeRolePair' }
     CommitteeRolePair:
       type: object
       properties:
         ou: { type: string, description: The committee's short name (ou)., example: FSR }
         cn: { type: string, description: The role's short name (cn)., example: mitglied }
+        role_name:
+          type: string
+          nullable: true
+          description: |
+            The role's human-readable name. Only present on `Member.roles`
+            entries (an input `CommitteeRolePair` never includes it, since
+            it's an output-only field there).
+          example: Mitglied
 
   responses:
     Unauthorized:

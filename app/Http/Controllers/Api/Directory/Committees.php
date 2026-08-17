@@ -9,6 +9,7 @@ use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Models\ProfilePicture;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use LdapRecord\Models\Model as LdapModel;
 
 class Committees extends Controller
@@ -91,6 +92,10 @@ class Committees extends Controller
      * An entry naming an unknown committee or role is silently skipped
      * rather than 404ing, since this is a filter over many possible values
      * rather than a lookup of one specific resource.
+     *
+     * If "include_roles" is truthy, each member additionally lists which of
+     * the requested {ou, cn} roles they actually hold (a person can match
+     * more than one), including the role's human-readable name (role_name).
      */
     public function rolesMembers(Request $request, Community $realm)
     {
@@ -101,28 +106,54 @@ class Committees extends Controller
 
         abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role entry is required.');
 
-        $members = $pairs
-            ->map(function (array $pair) use ($realm): ?Role {
+        $includeRoles = $request->boolean('include_roles');
+
+        $roleEntries = $pairs
+            ->map(function (array $pair) use ($realm): ?array {
                 $committee = Committee::findByName($realm->getShortCode(), $pair['ou']);
+                $role = $committee?->roles()->where('cn', $pair['cn'])->first();
 
-                return $committee?->roles()->where('cn', $pair['cn'])->first();
+                return $role ? ['ou' => $pair['ou'], 'role' => $role] : null;
             })
-            ->filter()
-            ->flatMap(fn (Role $role) => $role->members()->get())
-            ->filter(fn ($member) => $member->getFirstAttribute('uid'))
-            ->unique(fn ($member) => $member->getDn());
+            ->filter();
 
-        return response()->json($members->map(fn (LdapModel $member): array => $this->formatMember($member))->values());
+        $memberEntries = $roleEntries->flatMap(fn (array $entry) => $entry['role']->members()->get()
+            ->filter(fn ($member) => $member->getFirstAttribute('uid'))
+            ->map(fn ($member) => ['member' => $member, 'ou' => $entry['ou'], 'role' => $entry['role']]));
+
+        $members = $memberEntries
+            ->groupBy(fn (array $entry) => $entry['member']->getDn())
+            ->map(fn (Collection $group): array => [
+                'member' => $group->first()['member'],
+                'roles' => $group
+                    ->map(fn (array $entry): array => [
+                        'ou' => $entry['ou'],
+                        'cn' => $entry['role']->getFirstAttribute('cn'),
+                        'role_name' => $entry['role']->getFirstAttribute('description'),
+                    ])
+                    ->unique(fn (array $r): string => $r['ou'].'|'.$r['cn'])
+                    ->values(),
+            ]);
+
+        return response()->json($members
+            ->map(fn (array $entry): array => $this->formatMember($entry['member'], $includeRoles ? $entry['roles'] : null))
+            ->values());
     }
 
-    private function formatMember(LdapModel $user): array
+    private function formatMember(LdapModel $user, ?Collection $roles = null): array
     {
         $picture = ProfilePicture::where('user', $user->getFirstAttribute('uid'))->first();
 
-        return [
+        $data = [
             'name' => $user->getFirstAttribute('cn'),
             'course' => $user->getFirstAttribute('description'),
             'picture' => $picture ? asset('storage/avatars/'.$picture->file_id.'.webp') : null,
         ];
+
+        if ($roles !== null) {
+            $data['roles'] = $roles->values()->all();
+        }
+
+        return $data;
     }
 }

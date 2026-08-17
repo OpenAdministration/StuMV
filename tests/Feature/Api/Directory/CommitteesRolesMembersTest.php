@@ -229,3 +229,67 @@ test('a client registered for a different community cannot request this communit
         'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
     ])->assertForbidden();
 });
+
+test('the roles a member holds are omitted by default', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $member = TestLdap::makeUser();
+    TestLdap::attach($role, $member);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+    ]);
+
+    expect($response->assertOk()->json()[0])->not->toHaveKey('roles');
+});
+
+test('include_roles lists which requested role(s) a member holds, with a human-readable name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $role->fill(['description' => 'Mitglied'])->save();
+    $member = TestLdap::makeUser();
+    TestLdap::attach($role, $member);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->postJson("/api/$uid/members", [
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
+        'include_roles' => true,
+    ]);
+
+    $response->assertOk()->assertJsonFragment([
+        'roles' => [['ou' => 'fsr', 'cn' => 'mitglied', 'role_name' => 'Mitglied']],
+    ]);
+});
+
+test('include_roles lists every requested role a member holds, deduplicated', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $roleA = TestLdap::makeRole($committee, 'mitglied');
+    $roleB = TestLdap::makeRole($committee, 'vorsitz');
+    $member = TestLdap::makeUser();
+    TestLdap::attach($roleA, $member);
+    TestLdap::attach($roleB, $member);
+
+    actingAsDirectoryClient($community, ['committees']);
+
+    $response = $this->postJson("/api/$uid/members", [
+        'roles' => [
+            ['ou' => 'fsr', 'cn' => 'mitglied'],
+            ['ou' => 'fsr', 'cn' => 'vorsitz'],
+        ],
+        'include_roles' => true,
+    ]);
+
+    $response->assertOk();
+    $roles = collect($response->json()[0]['roles'])->pluck('cn');
+
+    expect($roles)->toHaveCount(2)->and($roles)->toContain('mitglied', 'vorsitz');
+});
