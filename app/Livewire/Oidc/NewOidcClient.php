@@ -16,14 +16,6 @@ class NewOidcClient extends Component
 
     public string $description = '';
 
-    public string $serviceProvider = '';
-
-    public string $imprintUrl = '';
-
-    public string $termsUrl = '';
-
-    public string $privacyPolicyUrl = '';
-
     public string $redirectUris = '';
 
     public array $scopes = ['openid', 'profile', 'email', 'groups'];
@@ -94,10 +86,6 @@ class NewOidcClient extends Component
         return [
             'name' => 'required|string|min:3|max:255',
             'description' => 'nullable|string|max:1000',
-            'serviceProvider' => 'nullable|string|max:255',
-            'imprintUrl' => 'nullable|url',
-            'termsUrl' => 'nullable|url',
-            'privacyPolicyUrl' => 'nullable|url',
             'redirectUris' => ['required', function ($attribute, $value, $fail): void {
                 $uris = $this->redirectUriList();
                 if (empty($uris)) {
@@ -133,6 +121,10 @@ class NewOidcClient extends Component
             $this->redirectUriList(),
             confidential: ! $this->disableClientAuthentication,
         );
+        // Service provider/imprint/terms/privacy links are deliberately not
+        // part of this form - like the logo (see EditOidcClientLogo's doc
+        // comment), they're set-up-later, edit-only fields rather than
+        // required at creation time.
         $client->forceFill([
             'community_uid' => $this->uid,
             'scopes' => array_values($this->scopes),
@@ -140,10 +132,6 @@ class NewOidcClient extends Component
             'back_channel_logout_uri' => $this->backChannelLogoutUri ?: null,
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
             'description' => $this->description ?: null,
-            'service_provider' => $this->serviceProvider ?: null,
-            'imprint_url' => $this->imprintUrl ?: null,
-            'terms_url' => $this->termsUrl ?: null,
-            'privacy_policy_url' => $this->privacyPolicyUrl ?: null,
         ])->save();
 
         $this->created = true;

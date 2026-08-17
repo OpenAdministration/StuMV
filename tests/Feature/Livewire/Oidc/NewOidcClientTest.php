@@ -238,17 +238,17 @@ test('registering a client rejects a back-channel logout URI that is not a valid
         ->assertHasErrors(['backChannelLogoutUri']);
 });
 
-test('a client can be registered with a description and service provider', function (): void {
-    // Logo upload is deliberately not part of this form - see
-    // App\Livewire\Oidc\EditOidcClientLogo's doc comment for why it's a
-    // separate, edit-only step.
+test('a client can be registered with a description', function (): void {
+    // Logo upload, service provider, imprint/terms/privacy links are
+    // deliberately not part of this form - see App\Livewire\Oidc\EditOidcClientLogo's
+    // doc comment and NewOidcClient::save()'s own comment for why they're
+    // separate, edit-only fields instead.
     $community = newCommunity();
     actingAsAdmin($community);
 
     Livewire::test(NewOidcClient::class, ['realm' => $community])
         ->set('name', 'My SSO App')
         ->set('description', 'A tool for managing student union finances.')
-        ->set('serviceProvider', 'Student Union of Example University')
         ->set('redirectUris', 'https://app.example.com/callback')
         ->set('scopes', ['openid'])
         ->call('save')
@@ -256,11 +256,10 @@ test('a client can be registered with a description and service provider', funct
 
     $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
 
-    expect($client->description)->toBe('A tool for managing student union finances.')
-        ->and($client->service_provider)->toBe('Student Union of Example University');
+    expect($client->description)->toBe('A tool for managing student union finances.');
 });
 
-test('description and service provider are optional', function (): void {
+test('the description, service provider, and imprint/terms/privacy links are optional and edit-only', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
@@ -275,59 +274,10 @@ test('description and service provider are optional', function (): void {
 
     expect($client->description)->toBeNull()
         ->and($client->service_provider)->toBeNull()
-        ->and($client->logo_id)->toBeNull();
-});
-
-test('a client can be registered with imprint, terms of service and privacy policy links', function (): void {
-    $community = newCommunity();
-    actingAsAdmin($community);
-
-    Livewire::test(NewOidcClient::class, ['realm' => $community])
-        ->set('name', 'My SSO App')
-        ->set('imprintUrl', 'https://app.example.com/imprint')
-        ->set('termsUrl', 'https://app.example.com/terms')
-        ->set('privacyPolicyUrl', 'https://app.example.com/privacy')
-        ->set('redirectUris', 'https://app.example.com/callback')
-        ->set('scopes', ['openid'])
-        ->call('save')
-        ->assertHasNoErrors();
-
-    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
-
-    expect($client->imprint_url)->toBe('https://app.example.com/imprint')
-        ->and($client->terms_url)->toBe('https://app.example.com/terms')
-        ->and($client->privacy_policy_url)->toBe('https://app.example.com/privacy');
-});
-
-test('imprint, terms of service and privacy policy links are optional', function (): void {
-    $community = newCommunity();
-    actingAsAdmin($community);
-
-    Livewire::test(NewOidcClient::class, ['realm' => $community])
-        ->set('name', 'My SSO App')
-        ->set('redirectUris', 'https://app.example.com/callback')
-        ->set('scopes', ['openid'])
-        ->call('save')
-        ->assertHasNoErrors();
-
-    $client = PassportClient::where('name', 'My SSO App')->firstOrFail();
-
-    expect($client->imprint_url)->toBeNull()
+        ->and($client->imprint_url)->toBeNull()
         ->and($client->terms_url)->toBeNull()
-        ->and($client->privacy_policy_url)->toBeNull();
-});
-
-test('registering a client rejects an invalid privacy policy URL', function (): void {
-    $community = newCommunity();
-    actingAsAdmin($community);
-
-    Livewire::test(NewOidcClient::class, ['realm' => $community])
-        ->set('name', 'My SSO App')
-        ->set('privacyPolicyUrl', 'not-a-url')
-        ->set('redirectUris', 'https://app.example.com/callback')
-        ->set('scopes', ['openid'])
-        ->call('save')
-        ->assertHasErrors(['privacyPolicyUrl']);
+        ->and($client->privacy_policy_url)->toBeNull()
+        ->and($client->logo_id)->toBeNull();
 });
 
 test('a non-admin cannot register an OIDC client', function (): void {
