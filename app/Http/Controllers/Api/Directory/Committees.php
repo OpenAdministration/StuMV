@@ -102,9 +102,9 @@ class Committees extends Controller
      *
      * Unlike every other Directory API list endpoint (which always sort
      * alphabetically ascending), this one accepts "sort_by"
-     * (given_name/family_name) and "sort_direction" (asc/desc, default asc)
-     * to sort the returned members - the only endpoint where a caller needs
-     * that choice.
+     * (given_name/family_name, default given_name) and "sort_direction"
+     * (asc/desc, default asc) to sort the returned members - the only
+     * endpoint where a caller needs that choice.
      */
     public function rolesMembers(Request $request, Community $realm)
     {
@@ -116,7 +116,7 @@ class Committees extends Controller
         abort_if($pairs->isEmpty(), 422, 'At least one {ou, cn} committee/role entry is required.');
 
         $sortAttributes = ['given_name' => 'givenName', 'family_name' => 'sn'];
-        $sortBy = $request->input('sort_by', 'family_name');
+        $sortBy = $request->input('sort_by', 'given_name');
         $sortDirection = $request->input('sort_direction', 'asc');
 
         abort_unless(array_key_exists($sortBy, $sortAttributes), 422, 'sort_by must be one of: '.implode(', ', array_keys($sortAttributes)).'.');

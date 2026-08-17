@@ -149,7 +149,7 @@ paths:
         Unlike every other Directory API list endpoint (which always sorts
         alphabetically ascending), this is the one endpoint where a caller
         needs a choice of sort field: `sort_by` (`given_name` or
-        `family_name`, default `family_name`) and `sort_direction` (`asc` or
+        `family_name`, default `given_name`) and `sort_direction` (`asc` or
         `desc`, default `asc`).
       security: [{ oauth2: [committees] }]
       parameters:
@@ -174,7 +174,7 @@ paths:
                 sort_by:
                   type: string
                   enum: [given_name, family_name]
-                  default: family_name
+                  default: given_name
                   description: Which name to sort the returned members by.
                 sort_direction:
                   type: string

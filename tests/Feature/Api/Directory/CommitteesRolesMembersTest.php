@@ -294,19 +294,21 @@ test('include_roles lists every requested role a member holds, deduplicated', fu
     expect($roles)->toHaveCount(2)->and($roles)->toContain('mitglied', 'vorsitz');
 });
 
-test('members are sorted by family name ascending by default', function (): void {
+test('members are sorted by given name ascending by default', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $committee = TestLdap::makeCommittee($community, 'fsr');
     $role = TestLdap::makeRole($committee, 'mitglied');
 
-    $zeta = TestLdap::makeUser();
-    $zeta->fill(['sn' => 'Zeta', 'givenName' => 'Bob'])->save();
-    TestLdap::attach($role, $zeta);
+    // Family/given name order deliberately diverge, so the default only
+    // matches "given name" and not "family name".
+    $bob = TestLdap::makeUser();
+    $bob->fill(['sn' => 'Zeta', 'givenName' => 'Anna'])->save();
+    TestLdap::attach($role, $bob);
 
-    $adams = TestLdap::makeUser();
-    $adams->fill(['sn' => 'Adams', 'givenName' => 'Anna'])->save();
-    TestLdap::attach($role, $adams);
+    $anna = TestLdap::makeUser();
+    $anna->fill(['sn' => 'Adams', 'givenName' => 'Bob'])->save();
+    TestLdap::attach($role, $anna);
 
     actingAsDirectoryClient($community, ['committees']);
 
@@ -316,10 +318,10 @@ test('members are sorted by family name ascending by default', function (): void
 
     $names = collect($response->assertOk()->json())->pluck('name');
 
-    expect($names->all())->toBe([$adams->getFirstAttribute('cn'), $zeta->getFirstAttribute('cn')]);
+    expect($names->all())->toBe([$bob->getFirstAttribute('cn'), $anna->getFirstAttribute('cn')]);
 });
 
-test('members can be sorted by given name', function (): void {
+test('members can be sorted by family name', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $committee = TestLdap::makeCommittee($community, 'fsr');
@@ -337,12 +339,12 @@ test('members can be sorted by given name', function (): void {
 
     $response = $this->postJson("/api/$uid/members", [
         'roles' => [['ou' => 'fsr', 'cn' => 'mitglied']],
-        'sort_by' => 'given_name',
+        'sort_by' => 'family_name',
     ]);
 
     $names = collect($response->assertOk()->json())->pluck('name');
 
-    expect($names->all())->toBe([$anna->getFirstAttribute('cn'), $bob->getFirstAttribute('cn')]);
+    expect($names->all())->toBe([$bob->getFirstAttribute('cn'), $anna->getFirstAttribute('cn')]);
 });
 
 test('members can be sorted descending', function (): void {
