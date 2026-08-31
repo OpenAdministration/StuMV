@@ -267,6 +267,16 @@ test('an invalid or replayed state is rejected', function (): void {
     $this->assertGuest();
 });
 
+test('identity providers on the login page are listed alphabetically by name, regardless of creation order', function (): void {
+    $community = newCommunity();
+    makeIdentityProvider($community->getShortCode(), name: 'Zorro SSO');
+    makeIdentityProvider($community->getShortCode(), name: 'Apollo Login');
+    makeIdentityProvider($community->getShortCode(), name: 'Mercury Auth');
+
+    $this->get(route('realm.login', ['realm' => $community->getShortCode()]))
+        ->assertSeeTextInOrder(['Apollo Login', 'Mercury Auth', 'Zorro SSO']);
+});
+
 test('a disabled identity provider cannot be used to log in', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode(), enabled: false);

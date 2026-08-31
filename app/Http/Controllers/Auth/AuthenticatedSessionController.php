@@ -60,7 +60,7 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login', [
             'realm' => $realm,
             'branding' => RealmBranding::forRealm($realm->getShortCode()),
-            'identityProviders' => RealmIdentityProvider::where('realm', $realm->getShortCode())->where('enabled', true)->get(),
+            'identityProviders' => RealmIdentityProvider::where('realm', $realm->getShortCode())->where('enabled', true)->orderBy('name')->get(),
         ]);
     }
 
