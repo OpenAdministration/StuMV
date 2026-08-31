@@ -36,9 +36,7 @@ class ImportCommittees extends Command
         $realms = [];
         $committees = [];
         foreach ($gremien as $gremium) {
-            if (! isset($realms[$gremium->realm_uid])) {
-                $realms[$gremium->realm_uid] = Community::findByUid($gremium->realm_uid);
-            }
+            $realms[$gremium->realm_uid] ??= Community::findByUid($gremium->realm_uid);
             $this->comment('Importing Com '.$gremium->name.' to Realm '.$gremium->realm_uid.' ...');
             $d = Committee::findByName($gremium->realm_uid, $gremium->short);
             if (! $d?->exists()) {

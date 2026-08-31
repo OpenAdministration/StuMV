@@ -33,9 +33,7 @@ class ImportDomains extends Command
             ->get();
         $realms = [];
         foreach ($domains as $domain) {
-            if (! isset($realms[$domain->realm_uid])) {
-                $realms[$domain->realm_uid] = Community::findByUid($domain->realm_uid);
-            }
+            $realms[$domain->realm_uid] ??= Community::findByUid($domain->realm_uid);
             $this->comment('Importing Domain '.$domain->name.' to Realm '.$domain->realm_uid.' ...');
             $d = Domain::make([
                 'dc' => $domain->name,

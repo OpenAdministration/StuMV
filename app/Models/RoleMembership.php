@@ -69,9 +69,7 @@ class RoleMembership extends Model
     #[Scope]
     protected function active(Builder $query, ?Carbon $date = null)
     {
-        if (is_null($date)) {
-            $date = today();
-        }
+        $date ??= today();
         $query->whereDate('from', '<=', $date)
             ->where(function ($query) use ($date): void {
                 $query->whereDate('until', '>=', $date)

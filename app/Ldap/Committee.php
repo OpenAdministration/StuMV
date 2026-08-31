@@ -22,9 +22,7 @@ class Committee extends OrganizationalUnit
             return "ou=$ou,".$parentDn;
         }
         // standardize input
-        if (is_null($parent_ous)) {
-            $parent_ous = [];
-        }
+        $parent_ous ??= [];
         $parents = implode(',ou=', $parent_ous);
 
         return "ou=$ou,".$parents.self::dnRoot($uid);

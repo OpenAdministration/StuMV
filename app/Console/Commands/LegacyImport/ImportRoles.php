@@ -45,9 +45,7 @@ class ImportRoles extends Command
         $realms = [];
         $committees = [];
         foreach ($roles as $role) {
-            if (! isset($realms[$role->realm_uid])) {
-                $realms[$role->realm_uid] = Community::findByUid($role->realm_uid);
-            }
+            $realms[$role->realm_uid] ??= Community::findByUid($role->realm_uid);
             $this->comment('Importing Com-Role '.$role->name.' to Realm '.$role->realm_uid.' ...');
 
             $c = Committee::findByName($role->realm_uid, $role->gshort);
