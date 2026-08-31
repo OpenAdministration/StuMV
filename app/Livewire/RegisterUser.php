@@ -3,13 +3,11 @@
 namespace App\Livewire;
 
 use App\Ldap\Community;
-use App\Ldap\User;
 use App\Models\RealmBranding;
 use App\Rules\DomainRegistrationRule;
 use App\Rules\UniqueEmail;
-use App\Support\RealmContext;
+use App\Support\LdapAccountRegistrar;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -117,45 +115,16 @@ class RegisterUser extends Component
         $this->validateDomain();
         $this->validate();
         $community = Community::findOrFailByUid($this->realm_uid);
-        $user = new User([
-            'uid' => $this->username,
-            'cn' => $this->first_name.' '.$this->last_name,
-            'sn' => $this->last_name,
-            'givenName' => $this->first_name,
-            'mail' => $this->email,
-            'userPassword' => '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID),
-            // usually ldap SHOULD hash it itself - did not work
-        ]);
-        $user->setDn("uid=$this->username,".$community->peopleDn());
+
         try {
-            $user->save();
-            // Membership is the location itself now - no group to attach to.
-
-            // entryUUID is server-assigned and not part of the in-memory
-            // model right after an insert - refresh so getConvertedGuid()
-            // below actually returns it.
-            $user->refresh();
-
-            // Credentials must be keyed for the LDAP guard (see LoginRequest);
-            // a positional array does not validate.
-            // Auth::validate (not attempt) syncs the LDAP user into the
-            // database without logging the freshly registered user in. This
-            // component's save() runs through Livewire's own update
-            // mechanism, not a plain request to {realm}/register - the
-            // current request has no bound {realm} route parameter for
-            // ScopedToRealmPeople to read (unlike a real controller action
-            // bound directly to that route, e.g. AuthenticatedSessionController::store()),
-            // so it has to be told explicitly here.
-            resolve(RealmContext::class)->set($community);
-            Auth::validate(['uid' => $this->username, 'password' => $this->password]);
-
-            // Resolve by the fresh LDAP entry's own GUID, not by username -
-            // a username search could now match a different realm's existing
-            // account sharing the same username.
-            $eloquentUser = \App\Models\User::where('uid', $user->getConvertedGuid())->first();
-            $eloquentUser->update([
-                'realm' => $community->getFirstAttribute('ou'),
-            ]);
+            $eloquentUser = resolve(LdapAccountRegistrar::class)->register(
+                $community,
+                $this->username,
+                $this->first_name,
+                $this->last_name,
+                $this->email,
+                $this->password,
+            );
 
             // Fired with the Eloquent user (not the LDAP one) since only it
             // implements MustVerifyEmail/Notifiable, which the

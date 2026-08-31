@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\IdentityProvider\OidcLoginController;
+use App\Livewire\AcceptInvitation;
 use App\Livewire\Auth\CompleteIdentityProviderRegistration;
 use App\Livewire\Profile\ChangePassword;
 use App\Livewire\Profile\Sessions;
@@ -35,6 +36,13 @@ Route::middleware('guest')->group(function (): void {
 
     Route::livewire('{realm}/register', RegisterUser::class)->name('realm.register')
         ->middleware('denyAdminRealm');
+
+    // The signed link a realm admin/moderator sends via App\Livewire\Tools\InviteUser
+    // - realm, invitation, and hash are all part of the signature, so a
+    // tampered id/realm combination or an expired link never reaches
+    // AcceptInvitation::mount() at all (see the "signed" middleware).
+    Route::livewire('{realm}/invitation/{invitation}/{hash}', AcceptInvitation::class)->name('invitation.accept')
+        ->middleware(['signed', 'throttle:6,1', 'denyAdminRealm']);
 
     // Realm-scoped like login/register: LDAP auth queries always go through
     // ScopedToRealmPeople, which resolves the realm from this {realm} route
