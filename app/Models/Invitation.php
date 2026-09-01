@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Invitation extends Model
 {
@@ -28,7 +29,7 @@ class Invitation extends Model
         return $this->hasMany(InvitationRoleSelection::class);
     }
 
-    public static function freshExpiry(): \Illuminate\Support\Carbon
+    public static function freshExpiry(): Carbon
     {
         return now()->addDays(7);
     }
