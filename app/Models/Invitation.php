@@ -27,4 +27,9 @@ class Invitation extends Model
     {
         return $this->hasMany(InvitationRoleSelection::class);
     }
+
+    public static function freshExpiry(): \Illuminate\Support\Carbon
+    {
+        return now()->addDays(7);
+    }
 }

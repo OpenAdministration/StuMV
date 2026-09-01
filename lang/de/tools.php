@@ -18,6 +18,8 @@ return [
     'import_users_from_uni_ldap_explanation' => 'Lege neue Nutzer:innen auf Basis der Daten aus der Mitgliederverwaltung der Universität an.',
     'invalid_role_selection' => 'Diese Auswahl ist ungültig.',
     'invitation_expires' => 'Gültig bis',
+    'invitation_resend' => 'Erneut senden',
+    'invitation_resent' => 'Die Einladung wurde erneut an :email versandt.',
     'invitation_revoke' => 'Widerrufen',
     'invitation_revoked' => 'Die Einladung wurde widerrufen.',
     'invitation_sent' => 'Die Einladung wurde an :email versandt.',

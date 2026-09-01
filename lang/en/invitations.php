@@ -2,7 +2,7 @@
 
 return [
     'mail_subject' => 'Invitation to :community',
-    'mail_line_between_greeting_and_action' => 'You have been invited to register with :community. Click the button to complete your registration - even if your email address doesn\'t belong to an otherwise approved domain.',
+    'mail_line_between_greeting_and_action' => 'You have been invited to register with :community. Click the button to complete your registration.',
     'mail_button_action' => 'Complete registration',
     'mail_expire_notice' => 'This link is valid until :date.',
 

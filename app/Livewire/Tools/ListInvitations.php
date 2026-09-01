@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
+use App\Support\InvitationMailer;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -65,5 +66,26 @@ class ListInvitations extends Component
         Invitation::where('id', $invitationId)->where('realm', $this->uid)->delete();
 
         Flux::toast(variant: 'success', text: __('tools.invitation_revoked'));
+    }
+
+    public function resend(int $invitationId): void
+    {
+        $community = Community::findOrFailByUid($this->uid);
+        $this->authorize('tools', $community);
+
+        $invitation = Invitation::where('id', $invitationId)
+            ->where('realm', $this->uid)
+            ->whereNull('accepted_at')
+            ->first();
+
+        if (! $invitation) {
+            return;
+        }
+
+        $invitation->update(['expires_at' => Invitation::freshExpiry()]);
+
+        resolve(InvitationMailer::class)->send($invitation, $community);
+
+        Flux::toast(variant: 'success', text: __('tools.invitation_resent', ['email' => $invitation->email]));
     }
 }

@@ -18,6 +18,8 @@ return [
     'import_users_from_uni_ldap_explanation' => 'Create new users based on the data from the university\'s membership management.',
     'invalid_role_selection' => 'This selection is invalid.',
     'invitation_expires' => 'Valid until',
+    'invitation_resend' => 'Resend',
+    'invitation_resent' => 'The invitation was resent to :email.',
     'invitation_revoke' => 'Revoke',
     'invitation_revoked' => 'The invitation was revoked.',
     'invitation_sent' => 'The invitation was sent to :email.',

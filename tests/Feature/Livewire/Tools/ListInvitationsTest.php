@@ -3,7 +3,9 @@
 use App\Livewire\Tools\ListInvitations;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
+use App\Notifications\UserInvitation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
@@ -77,4 +79,60 @@ test('revoking an invitation belonging to the acting realm deletes it', function
         ->call('revoke', $invitation->id);
 
     expect(Invitation::find($invitation->id))->toBeNull();
+});
+
+test('resending an invitation refreshes its expiry and re-sends the notification', function (): void {
+    Notification::fake();
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    $invitation = Invitation::create([
+        'realm' => $community->getShortCode(),
+        'email' => 'invitee@not-a-registerable-domain.invalid',
+        'expires_at' => now()->subDay(),
+    ]);
+
+    Livewire::test(ListInvitations::class, ['realm' => $community])
+        ->call('resend', $invitation->id);
+
+    expect($invitation->fresh()->expires_at->isFuture())->toBeTrue();
+    Notification::assertSentOnDemand(UserInvitation::class);
+});
+
+test('resending an invitation belonging to a different realm does nothing', function (): void {
+    Notification::fake();
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    actingAsAdmin($community);
+
+    $foreignInvitation = Invitation::create([
+        'realm' => $otherCommunity->getShortCode(),
+        'email' => 'foreign@not-a-registerable-domain.invalid',
+        'expires_at' => now()->addDays(7),
+    ]);
+    $originalExpiry = $foreignInvitation->expires_at;
+
+    Livewire::test(ListInvitations::class, ['realm' => $community])
+        ->call('resend', $foreignInvitation->id);
+
+    expect($foreignInvitation->fresh()->expires_at->equalTo($originalExpiry))->toBeTrue();
+    Notification::assertNothingSent();
+});
+
+test('resending an already-accepted invitation does nothing', function (): void {
+    Notification::fake();
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    $invitation = Invitation::create([
+        'realm' => $community->getShortCode(),
+        'email' => 'accepted@not-a-registerable-domain.invalid',
+        'expires_at' => now()->addDays(7),
+        'accepted_at' => now(),
+    ]);
+
+    Livewire::test(ListInvitations::class, ['realm' => $community])
+        ->call('resend', $invitation->id);
+
+    Notification::assertNothingSent();
 });

@@ -32,7 +32,14 @@
                         <flux:table.cell>{{ $invitation->email }}</flux:table.cell>
                         <flux:table.cell>{{ implode(', ', $this->roleLabelsFor($invitation)) ?: '—' }}</flux:table.cell>
                         <flux:table.cell>{{ $invitation->expires_at->translatedFormat('d.m.Y') }}</flux:table.cell>
-                        <flux:table.cell class="flex justify-end">
+                        <flux:table.cell class="flex justify-end gap-2">
+                            <flux:button
+                                size="sm"
+                                icon="refresh-ccw"
+                                wire:click="resend({{ $invitation->id }})"
+                            >
+                                {{ __('tools.invitation_resend') }}
+                            </flux:button>
                             <flux:button
                                 size="sm"
                                 variant="danger"

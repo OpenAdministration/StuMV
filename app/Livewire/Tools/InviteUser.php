@@ -6,11 +6,9 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
-use App\Notifications\UserInvitation;
 use App\Rules\UniqueEmail;
+use App\Support\InvitationMailer;
 use Flux\Flux;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -152,7 +150,7 @@ class InviteUser extends Component
             'realm' => $this->uid,
             'email' => $this->email,
             'invited_by_username' => auth()->user()->username,
-            'expires_at' => now()->addDays(7),
+            'expires_at' => Invitation::freshExpiry(),
         ]);
 
         foreach ($this->queuedRoleSelections as $selection) {
@@ -163,20 +161,7 @@ class InviteUser extends Component
             ]);
         }
 
-        $url = URL::temporarySignedRoute('invitation.accept', $invitation->expires_at, [
-            'realm' => $this->uid,
-            'invitation' => $invitation->id,
-            'hash' => sha1($invitation->email),
-        ]);
-
-        // Deferred like every other outbound mail in this app -
-        // QUEUE_CONNECTION is "sync" with no worker, so sending inline would
-        // block the response on a real SMTP round-trip (same reasoning as
-        // App\Livewire\RegisterUser::save()'s Registered event).
-        dispatch(function () use ($invitation, $url, $community): void {
-            Notification::route('mail', $invitation->email)
-                ->notify(new UserInvitation($invitation, $url, $community->getLongName()));
-        })->afterResponse();
+        resolve(InvitationMailer::class)->send($invitation, $community);
 
         Flux::toast(variant: 'success', text: __('tools.invitation_sent', ['email' => $invitation->email]));
 
