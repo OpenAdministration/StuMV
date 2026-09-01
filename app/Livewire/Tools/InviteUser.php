@@ -7,7 +7,6 @@ use App\Ldap\Community;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
 use App\Notifications\UserInvitation;
-use App\Rules\CommitteeRoleSelection;
 use App\Rules\UniqueEmail;
 use Flux\Flux;
 use Illuminate\Support\Facades\Notification;
@@ -24,8 +23,12 @@ class InviteUser extends Component
     #[Validate]
     public string $email = '';
 
-    /** @var list<string> "{committee_dn}|{role_cn}" pillbox values */
-    public array $roleSelections = [];
+    public string $selected_committee_dn = '';
+
+    public string $selected_role_dn = '';
+
+    /** @var array<string, array{committee_dn: string, role_cn: string, label: string}> keyed by "{committee_dn}|{role_cn}" */
+    public array $queuedRoleSelections = [];
 
     public function mount(Community $realm): void
     {
@@ -42,59 +45,104 @@ class InviteUser extends Component
                 'email',
                 new UniqueEmail($community),
             ],
-            'roleSelections.*' => [
-                new CommitteeRoleSelection($this->uid),
-            ],
         ];
     }
 
     public function render()
     {
-        $pending = Invitation::where('realm', $this->uid)
-            ->whereNull('accepted_at')
-            ->with('roleSelections')
-            ->orderByDesc('created_at')
-            ->get();
+        $committees = Committee::fromCommunity($this->uid)->recursive()->get();
+
+        $roles = collect();
+        if (! empty($this->selected_committee_dn)) {
+            $roles = $this->findRealmCommittee($this->selected_committee_dn)?->roles()->get() ?? collect();
+        }
 
         return view('livewire.tools.invite-user', [
-            'roleOptions' => $this->roleOptions(),
-            'pending' => $pending,
+            'committees' => $committees,
+            'roles' => $roles,
         ])->title(__('tools.invite_user_headline'));
     }
 
-    /**
-     * @return array<string, string> "{committee_dn}|{role_cn}" => "Committee › Role"
-     */
-    protected function roleOptions(): array
+    public function updatedSelectedCommitteeDn(): void
     {
-        $options = [];
+        $this->reset('selected_role_dn');
+    }
 
-        foreach (Committee::fromCommunity($this->uid)->list()->get() as $committee) {
-            $committeeLabel = $committee->getFirstAttribute('description') ?: $committee->getFirstAttribute('ou');
-
-            foreach ($committee->roles()->get() as $role) {
-                $roleLabel = $role->getFirstAttribute('description') ?: $role->getFirstAttribute('cn');
-                $options[$committee->getDn().'|'.$role->getFirstAttribute('cn')] = "{$committeeLabel} › {$roleLabel}";
-            }
+    /**
+     * Adds the currently selected committee+role pair to the queue that
+     * save() will turn into InvitationRoleSelection rows - lets the admin
+     * build up any number of Gremien/Rollen combinations (not just roles
+     * within a single committee) before sending the invitation.
+     */
+    public function addRoleSelection(): void
+    {
+        if (empty($this->selected_committee_dn) || empty($this->selected_role_dn)) {
+            return;
         }
 
-        return $options;
+        $committee = $this->findRealmCommittee($this->selected_committee_dn);
+
+        if (! $committee) {
+            $this->reset('selected_committee_dn', 'selected_role_dn');
+
+            return;
+        }
+
+        // The role select is only ever populated from this exact committee's
+        // own roles() (see render()), but the submitted value is still
+        // client-controlled - confirm it actually resolves to one of them
+        // rather than trusting the DN string as-is.
+        $role = $committee->roles()->get()->first(fn ($role) => $role->getDn() === $this->selected_role_dn);
+
+        if (! $role) {
+            $this->addError('selected_role_dn', __('tools.invalid_role_selection'));
+
+            return;
+        }
+
+        $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
+
+        if (isset($this->queuedRoleSelections[$key])) {
+            $this->addError('selected_role_dn', __('tools.role_already_added'));
+
+            return;
+        }
+
+        $committeeLabel = $committee->getFirstAttribute('description') ?: $committee->getFirstAttribute('ou');
+        $roleLabel = $role->getFirstAttribute('description') ?: $role->getFirstAttribute('cn');
+
+        $this->queuedRoleSelections[$key] = [
+            'committee_dn' => $committee->getDn(),
+            'role_cn' => $role->getFirstAttribute('cn'),
+            'label' => "{$committeeLabel} › {$roleLabel}",
+        ];
+
+        $this->reset('selected_role_dn');
+    }
+
+    public function removeRoleSelection(string $key): void
+    {
+        unset($this->queuedRoleSelections[$key]);
     }
 
     /**
-     * @return array<int, string> "Committee › Role" labels for one invitation's staged selections
+     * Resolves a committee DN submitted from the form. The DN suffix check
+     * has to happen before Committee::find() is ever called with it -
+     * Committee has no global scope limiting reads to one realm's own
+     * branch (unlike App\Ldap\Community), so find() would otherwise happily
+     * resolve a DN belonging to a different realm's committees, or an
+     * unrelated LDAP entry entirely, if a tampered value were trusted as-is.
      */
-    public function roleLabelsFor(Invitation $invitation): array
+    private function findRealmCommittee(string $committeeDn): ?Committee
     {
-        $options = $this->roleOptions();
+        if (! str_ends_with($committeeDn, ','.Committee::dnRootResolved($this->uid))) {
+            return null;
+        }
 
-        return $invitation->roleSelections
-            ->map(fn (InvitationRoleSelection $selection): string => $options[$selection->committee_dn.'|'.$selection->role_cn]
-                ?? $selection->committee_dn.' | '.$selection->role_cn)
-            ->all();
+        return Committee::find($committeeDn);
     }
 
-    public function save(): void
+    public function save()
     {
         $this->validate();
 
@@ -107,12 +155,11 @@ class InviteUser extends Component
             'expires_at' => now()->addDays(7),
         ]);
 
-        foreach ($this->roleSelections as $selection) {
-            [$committeeDn, $roleCn] = explode('|', $selection, 2);
+        foreach ($this->queuedRoleSelections as $selection) {
             InvitationRoleSelection::create([
                 'invitation_id' => $invitation->id,
-                'committee_dn' => $committeeDn,
-                'role_cn' => $roleCn,
+                'committee_dn' => $selection['committee_dn'],
+                'role_cn' => $selection['role_cn'],
             ]);
         }
 
@@ -131,20 +178,8 @@ class InviteUser extends Component
                 ->notify(new UserInvitation($invitation, $url, $community->getLongName()));
         })->afterResponse();
 
-        $this->reset('email', 'roleSelections');
-
         Flux::toast(variant: 'success', text: __('tools.invitation_sent', ['email' => $invitation->email]));
-    }
 
-    public function revoke(int $invitationId): void
-    {
-        $community = Community::findOrFailByUid($this->uid);
-        $this->authorize('tools', $community);
-
-        // Scoped by realm, not just id - an invitation id alone must never
-        // be enough to revoke another realm's invitation.
-        Invitation::where('id', $invitationId)->where('realm', $this->uid)->delete();
-
-        Flux::toast(variant: 'success', text: __('tools.invitation_revoked'));
+        return to_route('tools.invitations', ['realm' => $this->uid]);
     }
 }

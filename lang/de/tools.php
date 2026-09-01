@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'add_role_selection_button' => 'Hinzufügen',
     'check_for_matches' => 'Prüfe auf Treffer',
     'committee' => 'Gremium',
     'committees' => 'Gremien',
@@ -26,14 +27,18 @@ return [
     'lastname' => 'Nachname',
     'matches' => 'Treffer',
     'no_matches_found' => 'Der Abgleich ergab keine Treffer.',
+    'new_invitation_button' => 'Neue Einladung',
     'no_pending_invitations' => 'Aktuell gibt es keine ausstehenden Einladungen.',
+    'pending_invitations_explanation' => 'Verwalte versandte Einladungen, die noch nicht angenommen wurden.',
     'pending_invitations_headline' => 'Ausstehende Einladungen',
     'role' => 'Rolle',
+    'role_already_added' => 'Diese Rolle wurde bereits hinzugefügt.',
     'roles' => 'Rollen',
-    'roles_to_grant' => 'Gremien und Rollen',
+    'roles_to_grant' => 'Gremien und Rollen (optional)',
     'roles_to_grant_description' => 'Die eingeladene Person wird nach erfolgreicher Registrierung diesen Rollen zugeordnet.',
-    'roles_to_grant_placeholder' => 'Keine Auswahl (optional)',
     'search' => 'Durchsuche Nutzer:innen',
+    'select_committee_placeholder' => 'Gremium auswählen',
+    'select_role_placeholder' => 'Rolle auswählen',
     'start_search' => 'Starte die Suche',
     'tools' => 'Hilfsmittel',
     'unused_roles_headline' => 'Nicht verwendete Gremien und Rollen',

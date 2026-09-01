@@ -8,7 +8,106 @@ use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
 
-test('sending an invitation persists it with the staged role selections, scoped to the acting realm', function (): void {
+test('the role select only offers roles that belong to the selected committee', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $committeeA = TestLdap::makeCommittee($community);
+    $roleA = TestLdap::makeRole($committeeA);
+    $committeeB = TestLdap::makeCommittee($community);
+    $roleB = TestLdap::makeRole($committeeB);
+
+    Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('selected_committee_dn', $committeeA->getDn())
+        ->assertSee($roleA->getFirstAttribute('cn'))
+        ->assertDontSee($roleB->getFirstAttribute('cn'));
+});
+
+test('adding a role selection queues it and clears the role select for the next pick', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
+
+    $component = Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('addRoleSelection')
+        ->assertSet('selected_role_dn', '');
+
+    $queued = $component->get('queuedRoleSelections');
+
+    expect($queued)->toHaveKey($key)
+        ->and($queued[$key]['committee_dn'])->toBe($committee->getDn())
+        ->and($queued[$key]['role_cn'])->toBe($role->getFirstAttribute('cn'));
+});
+
+test('a role belonging to a different committee than currently selected is rejected', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $committeeA = TestLdap::makeCommittee($community);
+    $committeeB = TestLdap::makeCommittee($community);
+    $roleB = TestLdap::makeRole($committeeB);
+
+    $component = Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('selected_committee_dn', $committeeA->getDn())
+        ->set('selected_role_dn', $roleB->getDn())
+        ->call('addRoleSelection')
+        ->assertHasErrors('selected_role_dn');
+
+    expect($component->get('queuedRoleSelections'))->toBe([]);
+});
+
+test('a committee belonging to a different realm is rejected', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    actingAsAdmin($community);
+    $otherCommittee = TestLdap::makeCommittee($otherCommunity);
+    $otherRole = TestLdap::makeRole($otherCommittee);
+
+    $component = Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('selected_committee_dn', $otherCommittee->getDn())
+        ->set('selected_role_dn', $otherRole->getDn())
+        ->call('addRoleSelection');
+
+    expect($component->get('queuedRoleSelections'))->toBe([]);
+});
+
+test('adding the same role twice is rejected and only queued once', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+
+    $component = Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('addRoleSelection')
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('addRoleSelection')
+        ->assertHasErrors('selected_role_dn');
+
+    expect($component->get('queuedRoleSelections'))->toHaveCount(1);
+});
+
+test('removing a queued role selection removes it', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
+
+    $component = Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('addRoleSelection')
+        ->call('removeRoleSelection', $key);
+
+    expect($component->get('queuedRoleSelections'))->toBe([]);
+});
+
+test('sending an invitation persists it with the queued role selections, scoped to the acting realm, and redirects to the pending list', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
     $committee = TestLdap::makeCommittee($community);
@@ -17,9 +116,12 @@ test('sending an invitation persists it with the staged role selections, scoped 
 
     Livewire::test(InviteUser::class, ['realm' => $community])
         ->set('email', $email)
-        ->set('roleSelections', [$committee->getDn().'|'.$role->getFirstAttribute('cn')])
+        ->set('selected_committee_dn', $committee->getDn())
+        ->set('selected_role_dn', $role->getDn())
+        ->call('addRoleSelection')
         ->call('save')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertRedirect(route('tools.invitations', ['realm' => $community->getShortCode()]));
 
     $invitation = Invitation::where('email', $email)->where('realm', $community->getShortCode())->first();
 
@@ -31,66 +133,18 @@ test('sending an invitation persists it with the staged role selections, scoped 
         ->and($invitation->roleSelections->first()->role_cn)->toBe($role->getFirstAttribute('cn'));
 });
 
-test('a committee/role belonging to a different realm is rejected and nothing is persisted', function (): void {
+test('sending an invitation with no role selections at all is allowed', function (): void {
     $community = newCommunity();
-    $otherCommunity = newCommunity();
     actingAsAdmin($community);
-    $otherCommittee = TestLdap::makeCommittee($otherCommunity);
-    $otherRole = TestLdap::makeRole($otherCommittee);
+    $email = 'invitee-'.uniqid().'@not-a-registerable-domain.invalid';
 
     Livewire::test(InviteUser::class, ['realm' => $community])
-        ->set('email', 'invitee-'.uniqid().'@not-a-registerable-domain.invalid')
-        ->set('roleSelections', [$otherCommittee->getDn().'|'.$otherRole->getFirstAttribute('cn')])
+        ->set('email', $email)
         ->call('save')
-        ->assertHasErrors('roleSelections.0');
+        ->assertHasNoErrors();
 
-    expect(Invitation::count())->toBe(0);
-});
+    $invitation = Invitation::where('email', $email)->first();
 
-test('revoking an invitation only deletes it when it belongs to the acting realm', function (): void {
-    $community = newCommunity();
-    $otherCommunity = newCommunity();
-    actingAsAdmin($community);
-
-    $foreignInvitation = Invitation::create([
-        'realm' => $otherCommunity->getShortCode(),
-        'email' => 'foreign@not-a-registerable-domain.invalid',
-        'expires_at' => now()->addDays(7),
-    ]);
-
-    Livewire::test(InviteUser::class, ['realm' => $community])
-        ->call('revoke', $foreignInvitation->id);
-
-    expect(Invitation::find($foreignInvitation->id))->not->toBeNull();
-});
-
-test('revoking an invitation belonging to the acting realm deletes it', function (): void {
-    $community = newCommunity();
-    actingAsAdmin($community);
-
-    $invitation = Invitation::create([
-        'realm' => $community->getShortCode(),
-        'email' => 'own@not-a-registerable-domain.invalid',
-        'expires_at' => now()->addDays(7),
-    ]);
-
-    Livewire::test(InviteUser::class, ['realm' => $community])
-        ->call('revoke', $invitation->id);
-
-    expect(Invitation::find($invitation->id))->toBeNull();
-});
-
-test('the pending invitations list only shows this realm\'s own unaccepted invitations', function (): void {
-    $community = newCommunity();
-    $otherCommunity = newCommunity();
-    actingAsAdmin($community);
-
-    Invitation::create(['realm' => $community->getShortCode(), 'email' => 'own@not-a-registerable-domain.invalid', 'expires_at' => now()->addDays(7)]);
-    Invitation::create(['realm' => $otherCommunity->getShortCode(), 'email' => 'foreign@not-a-registerable-domain.invalid', 'expires_at' => now()->addDays(7)]);
-    Invitation::create(['realm' => $community->getShortCode(), 'email' => 'accepted@not-a-registerable-domain.invalid', 'expires_at' => now()->addDays(7), 'accepted_at' => now()]);
-
-    Livewire::test(InviteUser::class, ['realm' => $community])
-        ->assertSee('own@not-a-registerable-domain.invalid')
-        ->assertDontSee('foreign@not-a-registerable-domain.invalid')
-        ->assertDontSee('accepted@not-a-registerable-domain.invalid');
+    expect($invitation)->not->toBeNull()
+        ->and($invitation->roleSelections)->toHaveCount(0);
 });

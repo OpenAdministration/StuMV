@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'add_role_selection_button' => 'Add',
     'check_for_matches' => 'Check for matches',
     'committee' => 'Committee',
     'committees' => 'Committees',
@@ -26,14 +27,18 @@ return [
     'lastname' => 'Last name',
     'matches' => 'Matches',
     'no_matches_found' => 'The comparison found no matches.',
+    'new_invitation_button' => 'New invitation',
     'no_pending_invitations' => 'There are currently no pending invitations.',
+    'pending_invitations_explanation' => 'Manage sent invitations that have not been accepted yet.',
     'pending_invitations_headline' => 'Pending invitations',
     'role' => 'Role',
+    'role_already_added' => 'This role has already been added.',
     'roles' => 'Roles',
-    'roles_to_grant' => 'Committees and roles',
+    'roles_to_grant' => 'Committees and roles (optional)',
     'roles_to_grant_description' => 'The invited person will be assigned to these roles once they successfully register.',
-    'roles_to_grant_placeholder' => 'No selection (optional)',
     'search' => 'Search users',
+    'select_committee_placeholder' => 'Select a committee',
+    'select_role_placeholder' => 'Select a role',
     'start_search' => 'Start the search',
     'tools' => 'Tools',
     'unused_roles_headline' => 'Unused committees and roles',

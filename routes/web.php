@@ -55,6 +55,7 @@ use App\Livewire\Realm\NewRealm;
 use App\Livewire\Tools\CompareEmailList;
 use App\Livewire\Tools\ImportUsersFromUniLdap;
 use App\Livewire\Tools\InviteUser;
+use App\Livewire\Tools\ListInvitations;
 use App\Livewire\Tools\ToolsDashboard;
 use App\Livewire\Tools\UnusedRoles;
 use App\Livewire\Tools\UsersNotInUniLdap;
@@ -131,6 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{realm}/tools/users-not-in-uni-ldap', UsersNotInUniLdap::class)->name('tools.users-not-in-uni-ldap');
         Route::livewire('{realm}/tools/unused-roles', UnusedRoles::class)->name('tools.unused-roles');
         Route::livewire('{realm}/tools/invite-user', InviteUser::class)->name('tools.invite-user');
+        Route::livewire('{realm}/tools/invitations', ListInvitations::class)->name('tools.invitations');
     });
 
     Route::middleware(['communityAdmin'])->group(function (): void {
