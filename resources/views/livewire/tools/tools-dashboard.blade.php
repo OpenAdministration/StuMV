@@ -67,7 +67,7 @@
                 <flux:icon.mail class="size-5" />
             </div>
             <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('tools.pending_invitations_headline') }}</flux:heading>
+                <flux:heading size="lg">{{ __('tools.invite_user_headline') }}</flux:heading>
                 <flux:text class="mt-2">{{ __('tools.invite_user_explanation') }}</flux:text>
             </flux:card>
         </a>
