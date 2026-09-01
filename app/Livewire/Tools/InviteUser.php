@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
+use App\Rules\NoPendingInvitation;
 use App\Rules\UniqueEmail;
 use App\Support\InvitationMailer;
 use Flux\Flux;
@@ -42,6 +43,7 @@ class InviteUser extends Component
                 'required',
                 'email',
                 new UniqueEmail($community),
+                new NoPendingInvitation($this->uid),
             ],
         ];
     }

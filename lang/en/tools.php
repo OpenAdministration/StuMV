@@ -30,6 +30,7 @@ return [
     'matches' => 'Matches',
     'no_matches_found' => 'The comparison found no matches.',
     'new_invitation_button' => 'New invitation',
+    'pending_invitation_exists' => 'There is already a pending invitation for this email address. Use "Resend" instead.',
     'no_pending_invitations' => 'There are currently no pending invitations.',
     'pending_invitations_explanation' => 'Manage sent invitations that have not been accepted yet.',
     'pending_invitations_headline' => 'Pending invitations',

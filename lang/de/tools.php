@@ -30,6 +30,7 @@ return [
     'matches' => 'Treffer',
     'no_matches_found' => 'Der Abgleich ergab keine Treffer.',
     'new_invitation_button' => 'Neue Einladung',
+    'pending_invitation_exists' => 'Für diese E-Mail-Adresse gibt es bereits eine ausstehende Einladung. Nutze stattdessen "Erneut senden".',
     'no_pending_invitations' => 'Aktuell gibt es keine ausstehenden Einladungen.',
     'pending_invitations_explanation' => 'Verwalte versandte Einladungen, die noch nicht angenommen wurden.',
     'pending_invitations_headline' => 'Ausstehende Einladungen',

@@ -12,6 +12,7 @@
                 <flux:field>
                     <flux:label>{{ __('common.email') }}</flux:label>
                     <flux:input value="{{ $email }}" type="email" disabled />
+                    <flux:error name="email" />
                 </flux:field>
 
                 <flux:field>

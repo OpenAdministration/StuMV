@@ -9,6 +9,7 @@ use App\Models\GroupMembership;
 use App\Models\Invitation;
 use App\Models\RealmBranding;
 use App\Models\RoleMembership;
+use App\Rules\UniqueEmail;
 use App\Support\LdapAccountRegistrar;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
@@ -68,6 +69,9 @@ class AcceptInvitation extends Component
     protected function rules(): array
     {
         return [
+            'email' => [
+                new UniqueEmail(Community::findOrFailByUid($this->realm_uid)),
+            ],
             'password' => [
                 'required',
                 Password::default(),

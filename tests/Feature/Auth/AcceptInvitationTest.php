@@ -183,6 +183,33 @@ test('accepting an invitation also adds the user to any realm group the granted 
     expect($groupMembers)->toContain($this->username);
 });
 
+test('an invitation cannot be accepted if an account with this email already exists in the realm', function (): void {
+    $community = newCommunity();
+    $existingMember = TestLdap::member($community);
+
+    $invitation = Invitation::create([
+        'realm' => $community->getShortCode(),
+        'email' => $existingMember->email,
+        'expires_at' => now()->addDays(7),
+    ]);
+
+    Livewire::test('accept-invitation', [
+        'realm' => $community,
+        'invitation' => $invitation,
+        'hash' => sha1($existingMember->email),
+    ])
+        ->set('first_name', 'Invited')
+        ->set('last_name', 'Person')
+        ->set('username', $this->username)
+        ->set('password', $this->password)
+        ->set('password_confirmation', $this->password)
+        ->call('save')
+        ->assertHasErrors('email');
+
+    expect(LdapUser::findByUsername($this->username))->toBeNull();
+    expect($invitation->fresh()->accepted_at)->toBeNull();
+});
+
 test('a tampered hash is rejected even though the signature itself is valid', function (): void {
     $community = newCommunity();
     $invitation = Invitation::create([

@@ -148,3 +148,44 @@ test('sending an invitation with no role selections at all is allowed', function
     expect($invitation)->not->toBeNull()
         ->and($invitation->roleSelections)->toHaveCount(0);
 });
+
+test('inviting an email that already has a pending invitation in this realm is rejected', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $email = 'invitee-'.uniqid().'@not-a-registerable-domain.invalid';
+    Invitation::create(['realm' => $community->getShortCode(), 'email' => $email, 'expires_at' => now()->addDays(7)]);
+
+    Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('email', $email)
+        ->call('save')
+        ->assertHasErrors('email');
+
+    expect(Invitation::where('email', $email)->count())->toBe(1);
+});
+
+test('an already-accepted invitation does not block a new invite to the same email', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+    $email = 'invitee-'.uniqid().'@not-a-registerable-domain.invalid';
+    Invitation::create(['realm' => $community->getShortCode(), 'email' => $email, 'expires_at' => now()->addDays(7), 'accepted_at' => now()]);
+
+    Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('email', $email)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Invitation::where('email', $email)->count())->toBe(2);
+});
+
+test('a pending invitation in a different realm does not block inviting the same email here', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    actingAsAdmin($community);
+    $email = 'invitee-'.uniqid().'@not-a-registerable-domain.invalid';
+    Invitation::create(['realm' => $otherCommunity->getShortCode(), 'email' => $email, 'expires_at' => now()->addDays(7)]);
+
+    Livewire::test(InviteUser::class, ['realm' => $community])
+        ->set('email', $email)
+        ->call('save')
+        ->assertHasNoErrors();
+});
