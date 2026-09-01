@@ -1,7 +1,9 @@
 <?php
 
 use App\Ldap\Community;
+use App\Ldap\Group as LdapGroup;
 use App\Ldap\User as LdapUser;
+use App\Models\GroupMembership;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
 use App\Models\RoleMembership;
@@ -106,6 +108,79 @@ test('accepting an invitation registers the account outside the domain whitelist
         ->exists())->toBeTrue();
 
     expect($invitation->fresh()->accepted_at)->not->toBeNull();
+});
+
+test('accepting an invitation with a pre-selected role also adds the user to the actual LDAP role, not just the DB', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $email = $this->username.'@not-a-registerable-domain.invalid';
+
+    $invitation = Invitation::create([
+        'realm' => $community->getShortCode(),
+        'email' => $email,
+        'expires_at' => now()->addDays(7),
+    ]);
+    InvitationRoleSelection::create([
+        'invitation_id' => $invitation->id,
+        'committee_dn' => $committee->getDn(),
+        'role_cn' => $role->getFirstAttribute('cn'),
+    ]);
+
+    Livewire::test('accept-invitation', [
+        'realm' => $community,
+        'invitation' => $invitation,
+        'hash' => sha1($email),
+    ])
+        ->set('first_name', 'Invited')
+        ->set('last_name', 'Person')
+        ->set('username', $this->username)
+        ->set('password', $this->password)
+        ->set('password_confirmation', $this->password)
+        ->call('save');
+
+    $ldapMembers = $committee->roles()->where('cn', $role->getFirstAttribute('cn'))->first()
+        ->members()->get()
+        ->map(fn ($user) => $user->getFirstAttribute('uid'));
+
+    expect($ldapMembers)->toContain($this->username);
+});
+
+test('accepting an invitation also adds the user to any realm group the granted role is mapped into', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $group = TestLdap::makeGroup($community);
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    $email = $this->username.'@not-a-registerable-domain.invalid';
+
+    $invitation = Invitation::create([
+        'realm' => $community->getShortCode(),
+        'email' => $email,
+        'expires_at' => now()->addDays(7),
+    ]);
+    InvitationRoleSelection::create([
+        'invitation_id' => $invitation->id,
+        'committee_dn' => $committee->getDn(),
+        'role_cn' => $role->getFirstAttribute('cn'),
+    ]);
+
+    Livewire::test('accept-invitation', [
+        'realm' => $community,
+        'invitation' => $invitation,
+        'hash' => sha1($email),
+    ])
+        ->set('first_name', 'Invited')
+        ->set('last_name', 'Person')
+        ->set('username', $this->username)
+        ->set('password', $this->password)
+        ->set('password_confirmation', $this->password)
+        ->call('save');
+
+    $groupMembers = LdapGroup::findOrFail($group->getDn())->members()->get()
+        ->map(fn ($user) => $user->getFirstAttribute('uid'));
+
+    expect($groupMembers)->toContain($this->username);
 });
 
 test('a tampered hash is rejected even though the signature itself is valid', function (): void {

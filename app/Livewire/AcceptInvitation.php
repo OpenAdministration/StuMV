@@ -2,7 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Group as LdapGroup;
+use App\Models\GroupMembership;
 use App\Models\Invitation;
 use App\Models\RealmBranding;
 use App\Models\RoleMembership;
@@ -107,15 +110,9 @@ class AcceptInvitation extends Component
                 $this->password,
             );
 
-            // The invitee just proved control of this mailbox by following a
-            // signed, address-specific, time-limited link - stronger proof
-            // than App\Livewire\Realm\NewMember's unconditional
-            // email_verified_at, which has none at all. No further
-            // verification round-trip (and no Registered event) needed.
-            // markEmailAsVerified() (Illuminate\Auth\MustVerifyEmail) is
-            // required rather than a plain update() - email_verified_at is
-            // deliberately not mass-assignable.
             $eloquentUser->markEmailAsVerified();
+
+            $ldapUser = $eloquentUser->ldap();
 
             foreach ($invitation->roleSelections as $selection) {
                 RoleMembership::create([
@@ -124,9 +121,14 @@ class AcceptInvitation extends Component
                     'realm' => $this->realm_uid,
                     'username' => $this->username,
                     'from' => today(),
-                    'decided' => today(),
-                    'comment' => __('invitations.role_membership_comment'),
                 ]);
+
+                $role = Committee::find($selection->committee_dn)?->roles()->where('cn', $selection->role_cn)->first();
+                $role?->members()->attach($ldapUser);
+
+                foreach (GroupMembership::where('role_dn', $role?->getDn())->pluck('group_dn') as $groupDn) {
+                    LdapGroup::find($groupDn)?->members()->attach($ldapUser);
+                }
             }
 
             $invitation->update(['accepted_at' => now()]);

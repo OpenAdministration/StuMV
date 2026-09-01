@@ -10,6 +10,4 @@ return [
     'accept_explanation' => 'You have been invited. Fill in your details to create your account.',
     'accept_button' => 'Complete registration',
     'accept_success' => 'Registration successful! You can now log in.',
-
-    'role_membership_comment' => 'Assigned via a registration invitation.',
 ];

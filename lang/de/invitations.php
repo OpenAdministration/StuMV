@@ -10,6 +10,4 @@ return [
     'accept_explanation' => 'Du wurdest eingeladen. Vervollständige deine Angaben, um deinen Account anzulegen.',
     'accept_button' => 'Registrierung abschließen',
     'accept_success' => 'Registrierung erfolgreich! Du kannst dich jetzt anmelden.',
-
-    'role_membership_comment' => 'Zugewiesen über eine Registrierungs-Einladung.',
 ];
