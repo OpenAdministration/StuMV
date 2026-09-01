@@ -33,7 +33,7 @@ return [
     'pending_invitation_exists' => 'There is already a pending invitation for this email address. Use "Resend" instead.',
     'no_pending_invitations' => 'There are currently no pending invitations.',
     'pending_invitations_explanation' => 'Manage sent invitations that have not been accepted yet.',
-    'pending_invitations_headline' => 'Pending invitations',
+    'pending_invitations_headline' => 'Invitations',
     'role' => 'Role',
     'role_already_added' => 'This role has already been added.',
     'roles' => 'Roles',
