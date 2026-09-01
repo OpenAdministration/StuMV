@@ -443,6 +443,103 @@ test('a client left at its default configuration shows the consent prompt, and a
     expect($approve->headers->get('Location'))->toStartWith('https://example.test/callback?code=');
 });
 
+test('the nonce survives the consent screen and ends up in the id_token, even though the approve POST never carries it', function (): void {
+    // Regression: OpenIDConnect\Grant\AuthCodeGrant (vendor) only manages to
+    // patch `nonce` into the auth code when completeAuthorizationRequest()
+    // runs during the *original* GET .../authorize request (still carrying
+    // ?nonce=...). Whenever consent is shown first (as here - requires_consent
+    // defaults to true), that call instead happens during the later POST to
+    // .../approve, whose body is only auth_token + CSRF
+    // (resources/views/auth/oauth/authorize.blade.php) - with no fix, the
+    // vendor's own check silently finds nothing and the id_token ends up
+    // with no `nonce` claim at all, no error anywhere. See
+    // App\Http\Middleware\StashOidcNonce + App\Services\Oidc\CustomAuthCodeGrant.
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Nonce Test Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid])->save();
+
+    $response = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+        'nonce' => 'expected-nonce-value',
+    ]));
+
+    $response->assertOk();
+
+    $approve = $this->post(route('realm.passport.authorizations.approve', ['realm' => $uid]), [
+        'auth_token' => session('authToken'),
+    ]);
+
+    $approve->assertRedirect();
+    parse_str(parse_url((string) $approve->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    [, $payload] = explode('.', (string) $token->json('id_token'));
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+
+    expect($claims['nonce'])->toBe('expected-nonce-value');
+});
+
+test('a stale nonce from an earlier authorization does not leak into a later one that sends none', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $user = TestLdap::member($community);
+    $this->actingAs($user);
+
+    $client = resolve(ClientRepository::class)->createAuthorizationCodeGrantClient('Nonce Leak Client', ['https://example.test/callback']);
+    $client->forceFill(['community_uid' => $uid, 'requires_consent' => false])->save();
+
+    // First authorization stashes a nonce into session (consent skipped, so
+    // it's consumed immediately and would already be gone - but this also
+    // covers a client that abandons the flow after the redirect).
+    $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+        'nonce' => 'first-flows-nonce',
+    ]));
+
+    // Second, unrelated authorization sends no nonce at all.
+    $authorize = $this->get(route('realm.passport.authorizations.authorize', [
+        'realm' => $uid,
+        'client_id' => $client->id,
+        'redirect_uri' => 'https://example.test/callback',
+        'response_type' => 'code',
+        'scope' => 'openid',
+    ]));
+
+    parse_str(parse_url((string) $authorize->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = $this->post(route('realm.passport.token', ['realm' => $uid]), [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->id,
+        'client_secret' => $client->plainSecret,
+        'redirect_uri' => 'https://example.test/callback',
+        'code' => $query['code'],
+    ]);
+
+    [, $payload] = explode('.', (string) $token->json('id_token'));
+    $claims = json_decode(base64_decode(strtr($payload, '-_', '+/')), true);
+
+    expect($claims)->not->toHaveKey('nonce');
+});
+
 test('the consent screen hides the openid scope itself but still shows other requested scopes', function (): void {
     // "openid" carries no user-facing permission on its own (it's the base
     // scope every request needs, not a claim grant) - showing it as its own

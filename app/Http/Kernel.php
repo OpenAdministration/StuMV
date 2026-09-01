@@ -17,6 +17,7 @@ use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SetContentSecurityPolicy;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\StashOidcNonce;
 use App\Http\Middleware\SuperAdminMiddleware;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
@@ -111,6 +112,7 @@ class Kernel extends HttpKernel
         'oidcClientMatchesRealm' => EnsureOidcClientMatchesRealm::class,
         'logOidcConsentDecision' => LogOidcConsentDecision::class,
         'enforceMaxAge' => EnforceMaxAge::class,
+        'stashOidcNonce' => StashOidcNonce::class,
         'scopes' => CheckToken::class,
         'scope' => CheckTokenForAnyScope::class,
         // Rejects any token that has a human resource owner (i.e. a normal
