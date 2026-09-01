@@ -48,17 +48,30 @@
                     <flux:error name="selected_role_dn" />
                 </flux:field>
 
-                {{-- :disabled is computed server-side at render time, so the role
-                     select above must be wire:model.live too (like the committee
-                     select) - a deferred model would never round-trip on its own,
-                     leaving this button stuck disabled from the last render. --}}
-                <flux:button
-                    icon="plus"
-                    wire:click="addRoleSelection"
-                    :disabled="empty($selected_committee_dn) || empty($selected_role_dn)"
-                >
-                    {{ __('tools.add_role_selection_button') }}
-                </flux:button>
+                {{-- The invisible label matches the two flux:field labels above
+                     so the button lines up with the selects themselves, not
+                     with whatever sits above them - flux:field isn't used here
+                     since this button has no error slot to reserve space for.
+                     The button itself still renders ~3px shorter than a
+                     flux:select trigger despite matching outer height (a Flux
+                     component box-model quirk, not a spacing one) - nudged
+                     down to actually sit level with the selects. --}}
+                <div class="flex flex-col">
+                    <flux:label class="invisible">{{ __('tools.add_role_selection_button') }}</flux:label>
+                    {{-- :disabled is computed server-side at render time, so the
+                         role select above must be wire:model.live too (like the
+                         committee select) - a deferred model would never
+                         round-trip on its own, leaving this button stuck
+                         disabled from the last render. --}}
+                    <flux:button
+                        class="mt-[3px]"
+                        icon="plus"
+                        wire:click="addRoleSelection"
+                        :disabled="empty($selected_committee_dn) || empty($selected_role_dn)"
+                    >
+                        {{ __('tools.add_role_selection_button') }}
+                    </flux:button>
+                </div>
             </div>
 
             @if(count($queuedRoleSelections) > 0)
