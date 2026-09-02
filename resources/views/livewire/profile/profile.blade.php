@@ -39,7 +39,6 @@
                                     </div>
                                     <flux:button
                                         type="button"
-                                        variant="subtle"
                                         icon="minus"
                                         wire:click="removeEmailRow({{ $index }})"
                                         aria-label="{{ __('profile.emails_remove') }}"
