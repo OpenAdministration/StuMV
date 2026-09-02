@@ -23,6 +23,8 @@ return [
     'client_secret_edit_description' => 'Leave blank to keep the currently stored secret.',
     'scopes' => 'Scopes',
     'scopes_description' => 'Space-separated list of the scopes to request. "openid" is always included. Some identity providers only release group memberships behind an additional scope (e.g. "groups" on Okta).',
+    'enforce_email_verified' => 'Honour email verification',
+    'enforce_email_verified_description' => 'Reject the login if the identity provider explicitly reports an email address as unverified ("email_verified": false). Turn this off for providers that track no verification state and therefore report every address as unverified.',
     'groups_claim' => 'Groups claim',
     'groups_claim_description' => 'Name of the claim the identity provider uses to send the person\'s group memberships (default: "groups").',
     'enabled' => 'Enabled',

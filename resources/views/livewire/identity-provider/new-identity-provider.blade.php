@@ -44,6 +44,10 @@
             <flux:error name="groups_claim" />
         </flux:field>
 
+        <flux:switch wire:model="enforce_email_verified"
+            label="{{ __('identity_providers.enforce_email_verified') }}"
+            description="{{ __('identity_providers.enforce_email_verified_description') }}" />
+
         <flux:switch wire:model="enabled" label="{{ __('identity_providers.enabled') }}" />
 
         <x-slot:abort_route>

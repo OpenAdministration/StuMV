@@ -23,6 +23,8 @@ return [
     'client_secret_edit_description' => 'Leer lassen, um das aktuell hinterlegte Secret beizubehalten.',
     'scopes' => 'Scopes',
     'scopes_description' => 'Leerzeichengetrennte Liste der angeforderten Scopes. "openid" wird immer mitgesendet. Manche Identity Provider geben die Gruppenzugehörigkeiten erst mit einem zusätzlichen Scope heraus (z. B. "groups" bei Okta).',
+    'enforce_email_verified' => 'E-Mail-Verifizierung beachten',
+    'enforce_email_verified_description' => 'Meldet der Identity Provider eine E-Mail-Adresse ausdrücklich als nicht verifiziert ("email_verified": false), wird die Anmeldung abgelehnt. Abschalten, wenn der Identity Provider keine Verifizierung führt und deshalb jede Adresse als nicht verifiziert meldet.',
     'groups_claim' => 'Gruppen-Claim',
     'groups_claim_description' => 'Name des Claims, in dem der Identity Provider die Gruppenzugehörigkeiten der Person übermittelt (Standard: "groups").',
     'enabled' => 'Aktiviert',

@@ -157,10 +157,14 @@ class OidcLoginController extends Controller
 
         // Accounts are matched by email below, so an address the provider
         // itself doesn't vouch for would let anyone able to set one at the
-        // IdP claim an existing account. A provider that omits the claim
-        // entirely is taken at its word, as before.
+        // IdP claim an existing account. Only an explicit "false" counts: a
+        // provider that omits the claim is taken at its word. Providers that
+        // track no verification state and report every address as unverified
+        // are handled by turning enforce_email_verified off for them.
         abort_if(
-            isset($claims['email_verified']) && ! filter_var($claims['email_verified'], FILTER_VALIDATE_BOOLEAN),
+            $provider->enforce_email_verified
+                && isset($claims['email_verified'])
+                && ! filter_var($claims['email_verified'], FILTER_VALIDATE_BOOLEAN),
             422,
             'The identity provider reports this email address as unverified.'
         );

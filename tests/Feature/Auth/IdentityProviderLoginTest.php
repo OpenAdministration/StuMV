@@ -530,6 +530,19 @@ test('a login whose email the provider reports as unverified is rejected', funct
     $this->assertGuest();
 });
 
+test('a provider with email verification disabled accepts an unverified address', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $provider->update(['enforce_email_verified' => false]);
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email, 'email_verified' => false];
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
 test('a login whose email the provider confirms as verified is accepted', function (): void {
     $community = newCommunity();
     $existingUser = TestLdap::member($community);

@@ -21,6 +21,8 @@ class NewIdentityProvider extends Component
 
     public string $scopes = 'openid email profile';
 
+    public bool $enforce_email_verified = true;
+
     public string $groups_claim = 'groups';
 
     public bool $enabled = true;
@@ -39,6 +41,7 @@ class NewIdentityProvider extends Component
             'client_id' => 'required|string|max:255',
             'client_secret' => 'required|string|max:255',
             'scopes' => 'required|string|max:255',
+            'enforce_email_verified' => 'boolean',
             'groups_claim' => 'required|string|max:255',
             'enabled' => 'boolean',
         ];
@@ -60,6 +63,7 @@ class NewIdentityProvider extends Component
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
             'scopes' => $this->scopes,
+            'enforce_email_verified' => $this->enforce_email_verified,
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
         ]);

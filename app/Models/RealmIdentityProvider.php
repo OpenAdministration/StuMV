@@ -21,6 +21,7 @@ class RealmIdentityProvider extends Model
         'client_id',
         'client_secret',
         'scopes',
+        'enforce_email_verified',
         'groups_claim',
         'enabled',
     ];
@@ -33,6 +34,7 @@ class RealmIdentityProvider extends Model
      */
     protected $attributes = [
         'scopes' => 'openid email profile',
+        'enforce_email_verified' => true,
         'groups_claim' => 'groups',
     ];
 
@@ -41,6 +43,7 @@ class RealmIdentityProvider extends Model
     {
         return [
             'client_secret' => 'encrypted',
+            'enforce_email_verified' => 'boolean',
             'enabled' => 'boolean',
         ];
     }

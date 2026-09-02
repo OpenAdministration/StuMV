@@ -30,6 +30,8 @@ class EditIdentityProvider extends Component
 
     public string $scopes = 'openid email profile';
 
+    public bool $enforce_email_verified = true;
+
     public string $groups_claim = 'groups';
 
     public bool $enabled = true;
@@ -66,6 +68,7 @@ class EditIdentityProvider extends Component
         $this->issuer = $provider->issuer;
         $this->client_id = $provider->client_id;
         $this->scopes = $provider->scopes;
+        $this->enforce_email_verified = $provider->enforce_email_verified;
         $this->groups_claim = $provider->groups_claim;
         $this->enabled = $provider->enabled;
     }
@@ -81,6 +84,7 @@ class EditIdentityProvider extends Component
             // here means "leave the current secret unchanged".
             'client_secret' => 'nullable|string|max:255',
             'scopes' => 'required|string|max:255',
+            'enforce_email_verified' => 'boolean',
             'groups_claim' => 'required|string|max:255',
             'enabled' => 'boolean',
         ];
@@ -140,6 +144,7 @@ class EditIdentityProvider extends Component
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret !== '' ? $this->client_secret : null,
             'scopes' => $this->scopes,
+            'enforce_email_verified' => $this->enforce_email_verified,
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
         ], fn ($value) => $value !== null));
