@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\VerifyAdditionalEmailController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\IdentityProvider\OidcLoginController;
 use App\Livewire\AcceptInvitation;
@@ -103,3 +104,12 @@ Route::middleware('auth')->group(function (): void {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('logout', [AuthenticatedSessionController::class, 'confirmLogout'])->name('logout.confirm');
 });
+
+// Deliberately in neither the "guest" nor the "auth" group: the link is sent
+// to the address being confirmed and reading that mailbox is the whole proof,
+// so it has to work both for someone already signed in and for someone
+// opening it on a device they aren't signed in on. The signature and the
+// address hash are what protect it.
+Route::get('{realm}/profile/emails/{additionalEmail}/verify/{hash}', VerifyAdditionalEmailController::class)
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('profile.emails.verify');

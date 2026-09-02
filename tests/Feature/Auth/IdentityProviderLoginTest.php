@@ -154,6 +154,55 @@ test('logging in via the identity provider records the sub->session mapping used
         ->and($mapping->session_id)->toBe(session()->getId());
 });
 
+test('a login asserting one of the account\'s additional email addresses finds that account', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+
+    $ldapUser = LdapUser::query()->in($community->peopleDn())->where('uid', '=', $existingUser->username)->first();
+    $ldapUser->addAdditionalEmail('alias@example.test');
+    $ldapUser->save();
+
+    $userinfo = ['sub' => 'external-123', 'email' => 'alias@example.test'];
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('adding an additional address leaves the primary one matching as before', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+
+    $ldapUser = LdapUser::query()->in($community->peopleDn())->where('uid', '=', $existingUser->username)->first();
+    $ldapUser->addAdditionalEmail('alias@example.test');
+    $ldapUser->save();
+
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('a login for an address held by an account that has never signed in is rejected, not turned into a second account', function (): void {
+    $community = newCommunity();
+    // LDAP entry only, no database row - that row is what a first sign-in
+    // creates, and without it the account cannot be matched.
+    $ldapUser = TestLdap::makeUser(community: $community);
+    $provider = makeIdentityProvider($community->getShortCode());
+
+    $userinfo = ['sub' => 'external-123', 'email' => $ldapUser->getFirstAttribute('mail')];
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertStatus(409);
+
+    $this->assertGuest();
+});
+
 test('logging in via the identity provider with no matching account redirects to the registration-completion step', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());

@@ -169,7 +169,8 @@ class OidcLoginController extends Controller
             'The identity provider reports this email address as unverified.'
         );
 
-        $existing = User::where('email', $email)->where('realm', $realm->getShortCode())->first();
+        $existing = User::where('email', $email)->where('realm', $realm->getShortCode())->first()
+            ?? $this->userByAdditionalEmail($email, $realm);
 
         if ($existing) {
             abort_if(
@@ -475,6 +476,35 @@ class OidcLoginController extends Controller
         }
 
         return Cache::remember($cacheKey, now()->addHour(), fn (): array => Http::get($jwksUri)->throw()->json());
+    }
+
+    /**
+     * Looks the account up by one of its additional email addresses, for when
+     * the provider asserts an address that isn't anyone's primary. Those are
+     * further values of the same LDAP "mail" attribute (see App\Ldap\User),
+     * so one query covers them - the primary is only reached here if the
+     * database lookup above already missed it, which means the account has no
+     * database row yet.
+     *
+     * That case is rejected rather than falling through to the "create a new
+     * account" path: the address demonstrably belongs to an existing LDAP
+     * entry, and registering a second account for it would leave two entries
+     * claiming the same address. It resolves itself as soon as the account
+     * has signed in once with its password, which is what creates the row.
+     */
+    private function userByAdditionalEmail(string $email, Community $realm): ?User
+    {
+        $ldapUser = LdapUser::query()->in($realm->peopleDn())->where('mail', '=', $email)->first();
+
+        if ($ldapUser === null) {
+            return null;
+        }
+
+        $existing = User::where('uid', $ldapUser->getConvertedGuid())->first();
+
+        abort_if($existing === null, 409, 'This email address belongs to an account that has not signed in yet. Please sign in with your password once first.');
+
+        return $existing;
     }
 
     /**

@@ -15,7 +15,16 @@ class UniqueEmail implements ValidationRule
      * to independent accounts in different realms (each account is clearly
      * assigned to one realm), so uniqueness is only meaningful within one.
      */
-    public function __construct(private readonly ?Community $realm = null) {}
+    /**
+     * $ignoreUsername exempts one account's own entry, so re-saving addresses
+     * it already holds doesn't collide with itself. "mail" is multi-valued
+     * (see App\Ldap\User), so this covers primary and additional addresses
+     * alike, in both directions.
+     */
+    public function __construct(
+        private readonly ?Community $realm = null,
+        private readonly ?string $ignoreUsername = null,
+    ) {}
 
     /**
      * Run the validation rule.
@@ -30,9 +39,9 @@ class UniqueEmail implements ValidationRule
             return;
         }
 
-        $mailTaken = User::query()->in($this->realm->peopleDn())->where('mail', '=', $value)->exists();
+        $holder = User::query()->in($this->realm->peopleDn())->where('mail', '=', $value)->first();
 
-        if ($mailTaken) {
+        if ($holder && $holder->getFirstAttribute('uid') !== $this->ignoreUsername) {
             $fail(__('user.error.email_in_use'));
         }
     }

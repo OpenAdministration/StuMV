@@ -15,7 +15,38 @@
                     </flux:field>
                     <flux:field>
                         <flux:label>{{ __('common.email') }}</flux:label>
-                        <flux:input wire:model="email" disabled />
+                        <div class="space-y-2">
+                            <div class="flex gap-2 items-center">
+                                <flux:input wire:model="email" disabled class="flex-1" />
+                                <flux:button
+                                    type="button"
+                                    icon="plus"
+                                    wire:click="addEmailRow"
+                                    aria-label="{{ __('profile.emails_add') }}"
+                                />
+                            </div>
+                            @foreach($additionalEmails as $index => $address)
+                                <div class="flex gap-2 items-start" wire:key="additional-email-{{ $index }}">
+                                    <div class="flex-1">
+                                        <flux:input wire:model="additionalEmails.{{ $index }}" type="email">
+                                            @if($address !== '' && ! in_array($address, $verifiedAddresses, true))
+                                                <x-slot:iconTrailing>
+                                                    <flux:badge size="sm" color="amber">{{ __('profile.emails_unverified') }}</flux:badge>
+                                                </x-slot:iconTrailing>
+                                            @endif
+                                        </flux:input>
+                                        <flux:error name="additionalEmails.{{ $index }}" />
+                                    </div>
+                                    <flux:button
+                                        type="button"
+                                        variant="subtle"
+                                        icon="minus"
+                                        wire:click="removeEmailRow({{ $index }})"
+                                        aria-label="{{ __('profile.emails_remove') }}"
+                                    />
+                                </div>
+                            @endforeach
+                        </div>
                     </flux:field>
                 </div>
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">

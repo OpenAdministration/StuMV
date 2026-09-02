@@ -40,6 +40,64 @@ class User extends \LdapRecord\Models\OpenLDAP\User
     }
 
     /**
+     * "mail" is multi-valued in inetOrgPerson. The first value is this
+     * account's primary address - the immutable one everything outside
+     * identity-provider account matching reads (the account dropdown,
+     * notifications, password resets, Mailman) via getFirstAttribute('mail')
+     * and the "email" column synced from it. Any further values are
+     * additional addresses, which exist purely so a login through an external
+     * identity provider can find the right account when the provider asserts
+     * one of them instead of the primary.
+     *
+     * LDAP itself gives an attribute's values no defined order, so that
+     * "first value" convention only holds because every write here puts the
+     * primary back in front - which is why additional addresses must be
+     * changed through the two methods below rather than by setting "mail"
+     * directly.
+     *
+     * @return array<int, string>
+     */
+    public function additionalEmails(): array
+    {
+        return array_values(array_slice($this->emailValues(), 1));
+    }
+
+    public function addAdditionalEmail(string $address): void
+    {
+        $values = $this->emailValues();
+
+        if (in_array($address, $values, true)) {
+            return;
+        }
+
+        $this->setAttribute('mail', [...$values, $address]);
+    }
+
+    /**
+     * Removes an additional address. The primary is never touched - it stays
+     * in first position even if it is passed in here.
+     */
+    public function removeAdditionalEmail(string $address): void
+    {
+        $values = $this->emailValues();
+        $primary = array_shift($values);
+
+        if ($primary === null) {
+            return;
+        }
+
+        $remaining = array_values(array_filter($values, fn (string $value): bool => $value !== $address));
+
+        $this->setAttribute('mail', [$primary, ...$remaining]);
+    }
+
+    /** @return array<int, string> */
+    private function emailValues(): array
+    {
+        return array_values(array_filter((array) $this->getAttribute('mail'), fn ($value): bool => is_string($value) && $value !== ''));
+    }
+
+    /**
      * pwdAccountLockedTime is an operational attribute: the LDAP server only
      * returns it when explicitly named in a select (never via a plain "*"
      * fetch, and not even via a base-scoped find() by DN), so it must always
