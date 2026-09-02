@@ -3,57 +3,8 @@
 use App\Models\IdentityProviderSession;
 use Firebase\JWT\JWT;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
-
-/**
- * Generates a fresh RSA keypair and the matching JWKS document, so a test can
- * sign a logout_token the same way a real identity provider would and have
- * OidcLoginController::backChannelLogout() verify it against that JWKS -
- * mirrors fakeIdentityProvider()'s role for the login flow in
- * IdentityProviderLoginTest.php, just for the reverse (inbound) direction.
- *
- * @return array{0: string, 1: array}
- */
-function makeRsaKeyPairAndJwks(string $kid = 'test-key'): array
-{
-    $resource = openssl_pkey_new([
-        'private_key_bits' => 2048,
-        'private_key_type' => OPENSSL_KEYTYPE_RSA,
-    ]);
-    openssl_pkey_export($resource, $privateKeyPem);
-    $details = openssl_pkey_get_details($resource);
-
-    $base64Url = fn (string $bin): string => rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
-
-    $jwks = [
-        'keys' => [[
-            'kty' => 'RSA',
-            'use' => 'sig',
-            'alg' => 'RS256',
-            'kid' => $kid,
-            'n' => $base64Url($details['rsa']['n']),
-            'e' => $base64Url($details['rsa']['e']),
-        ]],
-    ];
-
-    return [$privateKeyPem, $jwks];
-}
-
-/** Fakes the discovery document (including jwks_uri) and the JWKS endpoint itself. */
-function fakeIdentityProviderJwks(string $issuer, array $jwks): void
-{
-    Http::fake([
-        $issuer.'/.well-known/openid-configuration' => Http::response([
-            'authorization_endpoint' => $issuer.'/authorize',
-            'token_endpoint' => $issuer.'/token',
-            'userinfo_endpoint' => $issuer.'/userinfo',
-            'jwks_uri' => $issuer.'/jwks',
-        ]),
-        $issuer.'/jwks' => Http::response($jwks),
-    ]);
-}
 
 function makeSignedLogoutToken(string $privateKeyPem, array $claims, string $kid = 'test-key'): string
 {
@@ -105,8 +56,8 @@ test('a logout_token destroys every session recorded for that sub, not just one'
 
     $sessionIdA = 'test-session-a-'.bin2hex(random_bytes(8));
     $sessionIdB = 'test-session-b-'.bin2hex(random_bytes(8));
-    session()->getHandler()->write($sessionIdA, serialize(['device' => 'phone']));
-    session()->getHandler()->write($sessionIdB, serialize(['device' => 'laptop']));
+    writeTestSession($sessionIdA, ['device' => 'phone']);
+    writeTestSession($sessionIdB, ['device' => 'laptop']);
 
     IdentityProviderSession::create(['provider_id' => $provider->id, 'external_sub' => 'external-123', 'session_id' => $sessionIdA]);
     IdentityProviderSession::create(['provider_id' => $provider->id, 'external_sub' => 'external-123', 'session_id' => $sessionIdB]);
@@ -221,7 +172,7 @@ test('a logout_token containing a nonce claim is rejected', function (): void {
     ])->assertStatus(400)->assertJson(['error' => 'invalid_request']);
 });
 
-test('a logout_token without a sub claim is rejected', function (): void {
+test('a logout_token with neither a sub nor a sid claim is rejected', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
@@ -234,6 +185,88 @@ test('a logout_token without a sub claim is rejected', function (): void {
     $this->postJson(route('identity-provider.backchannel-logout', ['realm' => $community->getShortCode(), 'provider' => $provider->id]), [
         'logout_token' => $logoutToken,
     ])->assertStatus(400)->assertJson(['error' => 'invalid_request']);
+});
+
+test('a logout_token identifying the session by sid alone ends exactly that session', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
+    fakeIdentityProviderJwks($provider->issuer, $jwks);
+
+    $sessionId = 'test-session-'.bin2hex(random_bytes(8));
+    session()->getHandler()->write($sessionId, serialize(['foo' => 'bar']));
+
+    IdentityProviderSession::create([
+        'provider_id' => $provider->id,
+        'external_sub' => 'external-123',
+        'external_sid' => 'session-abc',
+        'session_id' => $sessionId,
+    ]);
+
+    $claims = validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123');
+    unset($claims['sub']);
+    $claims['sid'] = 'session-abc';
+    $logoutToken = makeSignedLogoutToken($privateKey, $claims);
+
+    $this->postJson(route('identity-provider.backchannel-logout', ['realm' => $community->getShortCode(), 'provider' => $provider->id]), [
+        'logout_token' => $logoutToken,
+    ])->assertStatus(200);
+
+    expect(session()->getHandler()->read($sessionId))->toBe('')
+        ->and(IdentityProviderSession::where('external_sid', 'session-abc')->count())->toBe(0);
+});
+
+test('a logout_token carrying a sid leaves the same user\'s other sessions signed in', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
+    fakeIdentityProviderJwks($provider->issuer, $jwks);
+
+    $endedSessionId = 'test-session-ended-'.bin2hex(random_bytes(8));
+    $otherSessionId = 'test-session-other-'.bin2hex(random_bytes(8));
+    writeTestSession($endedSessionId, ['device' => 'phone']);
+    writeTestSession($otherSessionId, ['device' => 'laptop']);
+
+    IdentityProviderSession::create(['provider_id' => $provider->id, 'external_sub' => 'external-123', 'external_sid' => 'session-phone', 'session_id' => $endedSessionId]);
+    IdentityProviderSession::create(['provider_id' => $provider->id, 'external_sub' => 'external-123', 'external_sid' => 'session-laptop', 'session_id' => $otherSessionId]);
+
+    $claims = validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123');
+    $claims['sid'] = 'session-phone';
+    $logoutToken = makeSignedLogoutToken($privateKey, $claims);
+
+    $this->postJson(route('identity-provider.backchannel-logout', ['realm' => $community->getShortCode(), 'provider' => $provider->id]), [
+        'logout_token' => $logoutToken,
+    ])->assertStatus(200);
+
+    expect(session()->getHandler()->read($endedSessionId))->toBe('')
+        ->and(session()->getHandler()->read($otherSessionId))->not->toBe('')
+        ->and(IdentityProviderSession::where('external_sid', 'session-laptop')->count())->toBe(1);
+});
+
+test('a logout_token carrying a sid still ends sessions recorded before the provider sent one', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
+    fakeIdentityProviderJwks($provider->issuer, $jwks);
+
+    $legacySessionId = 'test-session-legacy-'.bin2hex(random_bytes(8));
+    session()->getHandler()->write($legacySessionId, serialize(['foo' => 'bar']));
+
+    IdentityProviderSession::create([
+        'provider_id' => $provider->id,
+        'external_sub' => 'external-123',
+        'session_id' => $legacySessionId,
+    ]);
+
+    $claims = validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123');
+    $claims['sid'] = 'session-abc';
+    $logoutToken = makeSignedLogoutToken($privateKey, $claims);
+
+    $this->postJson(route('identity-provider.backchannel-logout', ['realm' => $community->getShortCode(), 'provider' => $provider->id]), [
+        'logout_token' => $logoutToken,
+    ])->assertStatus(200);
+
+    expect(session()->getHandler()->read($legacySessionId))->toBe('');
 });
 
 test('a disabled identity provider rejects back-channel logout', function (): void {

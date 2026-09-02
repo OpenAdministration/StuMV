@@ -57,6 +57,15 @@
                     <flux:separator />
 
                     <flux:field>
+                        <flux:label>{{ __('identity_providers.scopes') }}</flux:label>
+                        <flux:description>{{ __('identity_providers.scopes_description') }}</flux:description>
+                        <flux:input wire:model="scopes" />
+                        <flux:error name="scopes" />
+                    </flux:field>
+
+                    <flux:separator />
+
+                    <flux:field>
                         <flux:label>{{ __('identity_providers.groups_claim') }}</flux:label>
                         <flux:description>{{ __('identity_providers.groups_claim_description') }}</flux:description>
                         <flux:input wire:model="groups_claim" />

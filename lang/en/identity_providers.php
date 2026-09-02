@@ -21,6 +21,8 @@ return [
     'client_id' => 'Client ID',
     'client_secret' => 'Client secret',
     'client_secret_edit_description' => 'Leave blank to keep the currently stored secret.',
+    'scopes' => 'Scopes',
+    'scopes_description' => 'Space-separated list of the scopes to request. "openid" is always included. Some identity providers only release group memberships behind an additional scope (e.g. "groups" on Okta).',
     'groups_claim' => 'Groups claim',
     'groups_claim_description' => 'Name of the claim the identity provider uses to send the person\'s group memberships (default: "groups").',
     'enabled' => 'Enabled',
@@ -54,4 +56,5 @@ return [
     'complete_registration_title' => 'Almost done',
     'complete_registration_explanation' => 'No account with the email address :email exists yet. Pick a username to create one.',
     'complete_registration_submit' => 'Create account',
+    'login_cancelled' => 'The login via the identity provider was cancelled.',
 ];

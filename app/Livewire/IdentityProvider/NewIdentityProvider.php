@@ -19,6 +19,8 @@ class NewIdentityProvider extends Component
 
     public string $client_secret = '';
 
+    public string $scopes = 'openid email profile';
+
     public string $groups_claim = 'groups';
 
     public bool $enabled = true;
@@ -36,6 +38,7 @@ class NewIdentityProvider extends Component
             'issuer' => 'required|url|max:255',
             'client_id' => 'required|string|max:255',
             'client_secret' => 'required|string|max:255',
+            'scopes' => 'required|string|max:255',
             'groups_claim' => 'required|string|max:255',
             'enabled' => 'boolean',
         ];
@@ -56,6 +59,7 @@ class NewIdentityProvider extends Component
             'issuer' => rtrim($this->issuer, '/'),
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
+            'scopes' => $this->scopes,
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
         ]);

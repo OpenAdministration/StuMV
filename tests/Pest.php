@@ -4,6 +4,8 @@ use App\Ldap\Community;
 use App\Models\PassportClient;
 use App\Models\RealmIdentityProvider;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Tests\Support\TestLdap;
@@ -121,6 +123,75 @@ function makeIdentityProvider(string $realmUid, string $name = 'Test IdP', bool 
         'client_secret' => 'client-secret',
         'groups_claim' => 'groups',
         'enabled' => $enabled,
+    ]);
+}
+
+/**
+ * Generates a fresh RSA keypair and the matching JWKS document, so a test can
+ * sign an id_token/logout_token the way a real identity provider would and
+ * have OidcLoginController verify it against that JWKS.
+ *
+ * @return array{0: string, 1: array}
+ */
+function makeRsaKeyPairAndJwks(string $kid = 'test-key'): array
+{
+    $resource = openssl_pkey_new([
+        'private_key_bits' => 2048,
+        'private_key_type' => OPENSSL_KEYTYPE_RSA,
+    ]);
+    openssl_pkey_export($resource, $privateKeyPem);
+    $details = openssl_pkey_get_details($resource);
+
+    $base64Url = fn (string $bin): string => rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
+
+    $jwks = [
+        'keys' => [[
+            'kty' => 'RSA',
+            'use' => 'sig',
+            'alg' => 'RS256',
+            'kid' => $kid,
+            'n' => $base64Url($details['rsa']['n']),
+            'e' => $base64Url($details['rsa']['e']),
+        ]],
+    ];
+
+    return [$privateKeyPem, $jwks];
+}
+
+/**
+ * Creates a session row directly, so a test can set up several at once and
+ * then assert which of them a logout ended. Going through
+ * session()->getHandler()->write() cannot do that: its `exists` flag latches
+ * true after the first write, quietly turning every later one into an update
+ * of a row that isn't there.
+ */
+function writeTestSession(string $sessionId, array $data): void
+{
+    DB::table('sessions')->insert([
+        'id' => $sessionId,
+        'payload' => base64_encode(serialize($data)),
+        'last_activity' => time(),
+    ]);
+}
+
+/**
+ * Fakes the discovery document (including jwks_uri) and the JWKS endpoint
+ * itself. $discovery overrides individual members of the document; a member
+ * set to null there is dropped from it entirely, so a test can model a
+ * provider that doesn't advertise one.
+ */
+function fakeIdentityProviderJwks(string $issuer, array $jwks, array $discovery = []): void
+{
+    $document = array_filter(array_merge([
+        'authorization_endpoint' => $issuer.'/authorize',
+        'token_endpoint' => $issuer.'/token',
+        'userinfo_endpoint' => $issuer.'/userinfo',
+        'jwks_uri' => $issuer.'/jwks',
+    ], $discovery), fn ($value): bool => $value !== null);
+
+    Http::fake([
+        $issuer.'/.well-known/openid-configuration' => Http::response($document),
+        $issuer.'/jwks' => Http::response($jwks),
     ]);
 }
 

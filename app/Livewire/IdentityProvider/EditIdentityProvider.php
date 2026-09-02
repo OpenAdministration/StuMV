@@ -28,6 +28,8 @@ class EditIdentityProvider extends Component
 
     public string $client_secret = '';
 
+    public string $scopes = 'openid email profile';
+
     public string $groups_claim = 'groups';
 
     public bool $enabled = true;
@@ -63,6 +65,7 @@ class EditIdentityProvider extends Component
         $this->name = $provider->name;
         $this->issuer = $provider->issuer;
         $this->client_id = $provider->client_id;
+        $this->scopes = $provider->scopes;
         $this->groups_claim = $provider->groups_claim;
         $this->enabled = $provider->enabled;
     }
@@ -77,6 +80,7 @@ class EditIdentityProvider extends Component
             // never leaks through the password field's dot count - nullable
             // here means "leave the current secret unchanged".
             'client_secret' => 'nullable|string|max:255',
+            'scopes' => 'required|string|max:255',
             'groups_claim' => 'required|string|max:255',
             'enabled' => 'boolean',
         ];
@@ -135,6 +139,7 @@ class EditIdentityProvider extends Component
             'issuer' => rtrim($this->issuer, '/'),
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret !== '' ? $this->client_secret : null,
+            'scopes' => $this->scopes,
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
         ], fn ($value) => $value !== null));

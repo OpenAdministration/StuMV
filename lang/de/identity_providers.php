@@ -21,6 +21,8 @@ return [
     'client_id' => 'Client-ID',
     'client_secret' => 'Client-Secret',
     'client_secret_edit_description' => 'Leer lassen, um das aktuell hinterlegte Secret beizubehalten.',
+    'scopes' => 'Scopes',
+    'scopes_description' => 'Leerzeichengetrennte Liste der angeforderten Scopes. "openid" wird immer mitgesendet. Manche Identity Provider geben die Gruppenzugehörigkeiten erst mit einem zusätzlichen Scope heraus (z. B. "groups" bei Okta).',
     'groups_claim' => 'Gruppen-Claim',
     'groups_claim_description' => 'Name des Claims, in dem der Identity Provider die Gruppenzugehörigkeiten der Person übermittelt (Standard: "groups").',
     'enabled' => 'Aktiviert',
@@ -54,4 +56,5 @@ return [
     'complete_registration_title' => 'Fast geschafft',
     'complete_registration_explanation' => 'Es existiert noch kein Konto mit der E-Mail-Adresse :email. Wähle einen Benutzernamen, um eines anzulegen.',
     'complete_registration_submit' => 'Konto anlegen',
+    'login_cancelled' => 'Die Anmeldung über den Identity Provider wurde abgebrochen.',
 ];

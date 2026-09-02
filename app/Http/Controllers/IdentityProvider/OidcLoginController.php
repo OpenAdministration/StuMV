@@ -14,12 +14,15 @@ use App\Support\IdentityProviderGroupSync;
 use App\Support\OidcProviderFactory;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use League\OAuth2\Client\Provider\GenericProvider;
 use RuntimeException;
@@ -27,6 +30,9 @@ use Throwable;
 
 class OidcLoginController extends Controller
 {
+    /** Tolerated clock difference, in seconds, between this server and the provider. */
+    private const int CLOCK_SKEW_LEEWAY = 60;
+
     public function __construct(private readonly OidcProviderFactory $providerFactory) {}
 
     /**
@@ -48,7 +54,7 @@ class OidcLoginController extends Controller
         $nonce = Str::random(32);
 
         $authorizationUrl = $oauthProvider->getAuthorizationUrl([
-            'scope' => 'openid email profile',
+            'scope' => $this->scopesFor($provider),
             'nonce' => $nonce,
         ]);
 
@@ -97,6 +103,14 @@ class OidcLoginController extends Controller
         ]);
 
         abort_unless($validState, 400, 'Invalid or expired SSO login attempt.');
+
+        // Declining the consent screen is a deliberate user action, not a
+        // fault - send them back to the login page instead of an error page.
+        if ($request->query('error') === 'access_denied') {
+            return to_route('realm.login', ['realm' => $realm->getShortCode()])
+                ->with('status', __('identity_providers.login_cancelled'));
+        }
+
         abort_if($request->has('error'), 400, (string) $request->query('error_description', 'The identity provider reported an error.'));
 
         $discovery = $this->discover($provider->issuer);
@@ -116,16 +130,40 @@ class OidcLoginController extends Controller
             abort(400, $runtimeException->getMessage());
         }
 
-        $claims = $oauthProvider->getResourceOwner($token)->toArray();
+        $userinfo = empty($discovery['userinfo_endpoint'])
+            ? null
+            : $oauthProvider->getResourceOwner($token)->toArray();
 
         // OIDC Core 1.0 5.3.2: the userinfo response's sub must match the
         // id_token's - otherwise a malicious/compromised userinfo endpoint
         // could hand back claims for a different subject than the one that
         // was actually authenticated.
-        abort_unless(($claims['sub'] ?? null) === $idTokenClaims['sub'], 422, 'The identity provider returned mismatched subject claims.');
+        abort_unless(
+            $userinfo === null || ($userinfo['sub'] ?? null) === $idTokenClaims['sub'],
+            422,
+            'The identity provider returned mismatched subject claims.'
+        );
+
+        // Both sources are trustworthy at this point (the id_token by
+        // signature, userinfo by TLS + the sub check above), but they don't
+        // carry the same claims: "groups" is commonly id_token-only (Entra ID
+        // never returns it from userinfo at all, Keycloak's mapper has a
+        // separate switch per token), while userinfo is the fresher of the
+        // two, so it overlays rather than the other way round.
+        $claims = array_merge($idTokenClaims, $userinfo ?? []);
 
         $email = $claims['email'] ?? null;
         abort_unless($email, 422, 'The identity provider did not return an email address.');
+
+        // Accounts are matched by email below, so an address the provider
+        // itself doesn't vouch for would let anyone able to set one at the
+        // IdP claim an existing account. A provider that omits the claim
+        // entirely is taken at its word, as before.
+        abort_if(
+            isset($claims['email_verified']) && ! filter_var($claims['email_verified'], FILTER_VALIDATE_BOOLEAN),
+            422,
+            'The identity provider reports this email address as unverified.'
+        );
 
         $existing = User::where('email', $email)->where('realm', $realm->getShortCode())->first();
 
@@ -198,19 +236,46 @@ class OidcLoginController extends Controller
             return $this->backChannelLogoutError('invalid_request', $runtimeException->getMessage());
         }
 
-        $sessions = IdentityProviderSession::where('provider_id', $provider->id)
-            ->where('external_sub', $claims['sub'])
-            ->get();
+        $sessions = $this->sessionsToTerminate($provider, $claims);
 
         foreach ($sessions as $session) {
             resolve('session')->getHandler()->destroy($session->session_id);
         }
 
-        IdentityProviderSession::where('provider_id', $provider->id)
-            ->where('external_sub', $claims['sub'])
-            ->delete();
+        IdentityProviderSession::whereKey($sessions->modelKeys())->delete();
 
         return response()->json([], 200)->header('Cache-Control', 'no-store');
+    }
+
+    /**
+     * Back-Channel Logout 1.0 2.4 lets a logout_token identify what ended by
+     * "sid", by "sub", or by both. sid is the precise one - it names the one
+     * session that ended, where sub would also take down this user's other
+     * sessions, which may well still be valid at the provider. So sid wins
+     * wherever it's present, with sub left to cover only those sessions
+     * recorded before the provider started sending one (external_sid null).
+     *
+     * @return Collection<int, IdentityProviderSession>
+     */
+    private function sessionsToTerminate(RealmIdentityProvider $provider, array $claims): Collection
+    {
+        if (! isset($claims['sid'])) {
+            return IdentityProviderSession::where('provider_id', $provider->id)
+                ->where('external_sub', $claims['sub'])
+                ->get();
+        }
+
+        return IdentityProviderSession::where('provider_id', $provider->id)
+            ->where(function ($query) use ($claims): void {
+                $query->where('external_sid', $claims['sid']);
+
+                if (isset($claims['sub'])) {
+                    $query->orWhere(fn ($subQuery) => $subQuery
+                        ->where('external_sub', $claims['sub'])
+                        ->whereNull('external_sid'));
+                }
+            })
+            ->get();
     }
 
     private function backChannelLogoutError(string $error, string $description): JsonResponse
@@ -234,7 +299,7 @@ class OidcLoginController extends Controller
         $discovery = $this->discover($provider->issuer);
         $decoded = $this->verifySignedJwt($logoutToken, $provider, $discovery);
 
-        if (($decoded['iss'] ?? null) !== rtrim($provider->issuer, '/')) {
+        if (($decoded['iss'] ?? null) !== $this->expectedIssuer($provider, $discovery)) {
             throw new RuntimeException('Unexpected issuer in logout_token.');
         }
 
@@ -252,8 +317,11 @@ class OidcLoginController extends Controller
             throw new RuntimeException('logout_token must not contain a nonce claim.');
         }
 
-        if (empty($decoded['sub'])) {
-            throw new RuntimeException('logout_token is missing a sub claim.');
+        // Back-Channel Logout 1.0 2.4: either identifier on its own is a valid
+        // way to say which session ended, but without one of them there's
+        // nothing to match against.
+        if (empty($decoded['sub']) && empty($decoded['sid'])) {
+            throw new RuntimeException('logout_token is missing both the sub and sid claims.');
         }
 
         return $decoded;
@@ -274,7 +342,7 @@ class OidcLoginController extends Controller
     {
         $decoded = $this->verifySignedJwt($idToken, $provider, $discovery);
 
-        if (($decoded['iss'] ?? null) !== rtrim($provider->issuer, '/')) {
+        if (($decoded['iss'] ?? null) !== $this->expectedIssuer($provider, $discovery)) {
             throw new RuntimeException('Unexpected issuer in id_token.');
         }
 
@@ -311,17 +379,86 @@ class OidcLoginController extends Controller
             throw new RuntimeException('The identity provider does not advertise a JWKS endpoint.');
         }
 
+        // RFC 7517 §4.4 makes "alg" optional on a JWK, but the library
+        // requires one per key unless a default is given - authentik, among
+        // others, publishes JWKS entries without it.
+        $defaultAlg = $discovery['id_token_signing_alg_values_supported'][0] ?? 'RS256';
+
+        // php-jwt defaults to zero tolerance on iat/nbf/exp, so a server clock
+        // a second or two ahead of the provider's rejects otherwise perfectly
+        // good tokens.
+        JWT::$leeway = self::CLOCK_SKEW_LEEWAY;
+
+        $lastError = null;
+
         foreach ([false, true] as $forceRefresh) {
             try {
-                $keys = JWK::parseKeySet($this->fetchJwks($provider->issuer, $discovery['jwks_uri'], $forceRefresh));
+                $keys = JWK::parseKeySet($this->fetchJwks($provider->issuer, $discovery['jwks_uri'], $forceRefresh), $defaultAlg);
 
-                return json_decode(json_encode(JWT::decode($jwt, $keys)), true);
-            } catch (Throwable) {
-                continue;
+                return json_decode(json_encode(JWT::decode($jwt, $this->keyFor($jwt, $keys))), true);
+            } catch (Throwable $throwable) {
+                $lastError = $throwable;
             }
         }
 
+        Log::warning('Failed to verify a JWT from an identity provider.', [
+            'provider_id' => $provider->id,
+            'issuer' => $provider->issuer,
+            'error' => $lastError?->getMessage(),
+        ]);
+
         throw new RuntimeException('The token signature could not be verified.');
+    }
+
+    /**
+     * Picks the key to verify against. php-jwt insists on a "kid" header to
+     * look one up in a key set, but that header is optional - a provider
+     * publishing a single signing key has nothing to disambiguate and may
+     * well leave it out, so resolve that case ourselves instead of failing.
+     *
+     * @param  array<string, Key>  $keys
+     * @return array<string, Key>|Key
+     */
+    private function keyFor(string $jwt, array $keys): array|Key
+    {
+        if (count($keys) !== 1) {
+            return $keys;
+        }
+
+        $header = json_decode(JWT::urlsafeB64Decode(explode('.', $jwt)[0]), true);
+
+        return isset($header['kid']) ? $keys : reset($keys);
+    }
+
+    /**
+     * The issuer an id_token/logout_token from this provider must name. OIDC
+     * Discovery 1.0 3.3 makes the discovery document's own "issuer" the
+     * authoritative spelling, and it isn't always the one an admin typed:
+     * Auth0, for instance, issues tokens with a trailing slash that the
+     * configured URL doesn't carry. Only taken over when it denotes the same
+     * issuer, so a tampered-with discovery document can't redefine who we
+     * trust; anything else falls back to the configured value.
+     */
+    private function expectedIssuer(RealmIdentityProvider $provider, array $discovery): string
+    {
+        $configured = rtrim($provider->issuer, '/');
+        $advertised = $discovery['issuer'] ?? null;
+
+        return is_string($advertised) && rtrim($advertised, '/') === $configured
+            ? $advertised
+            : $configured;
+    }
+
+    /**
+     * The scopes to request, always including "openid" - without it the
+     * provider runs a plain OAuth2 flow and returns no id_token at all,
+     * which would strand the login in verifyIdToken().
+     */
+    private function scopesFor(RealmIdentityProvider $provider): string
+    {
+        $scopes = preg_split('/\s+/', (string) $provider->scopes, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return implode(' ', array_unique(['openid', ...$scopes]));
     }
 
     /** @return array<string, mixed> */
@@ -355,7 +492,13 @@ class OidcLoginController extends Controller
 
         IdentityProviderSession::updateOrCreate(
             ['session_id' => $sessionId],
-            ['provider_id' => $provider->id, 'external_sub' => $claims['sub']]
+            [
+                'provider_id' => $provider->id,
+                'external_sub' => $claims['sub'],
+                // Only some providers issue one; it lets a later logout_token
+                // end exactly this session rather than all of the user's.
+                'external_sid' => $claims['sid'] ?? null,
+            ]
         );
     }
 
@@ -366,13 +509,22 @@ class OidcLoginController extends Controller
 
     private function buildProvider(Community $realm, RealmIdentityProvider $provider, array $discovery): GenericProvider
     {
+        abort_if(
+            empty($discovery['authorization_endpoint']) || empty($discovery['token_endpoint']),
+            502,
+            'The identity provider\'s discovery document is missing a required endpoint.'
+        );
+
         return $this->providerFactory->make([
             'clientId' => $provider->client_id,
             'clientSecret' => $provider->client_secret,
             'redirectUri' => route('identity-provider.callback', ['realm' => $realm->getShortCode(), 'provider' => $provider->id]),
             'urlAuthorize' => $discovery['authorization_endpoint'],
             'urlAccessToken' => $discovery['token_endpoint'],
-            'urlResourceOwnerDetails' => $discovery['userinfo_endpoint'],
+            // Required by GenericProvider even where the provider publishes no
+            // userinfo endpoint; callback() skips the call in that case and
+            // works off the id_token's claims alone.
+            'urlResourceOwnerDetails' => $discovery['userinfo_endpoint'] ?? '',
             'pkceMethod' => GenericProvider::PKCE_METHOD_S256,
         ]);
     }

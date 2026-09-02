@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Correlates a Laravel session with the external identity provider "sub"
- * claim it was established under - the only way an inbound OIDC
- * back-channel logout_token (which identifies the user solely by "sub",
+ * and "sid" claims it was established under - the only way an inbound OIDC
+ * back-channel logout_token (which identifies the user by those claims,
  * never by our own session id) can be mapped back to the StuMV session(s)
  * that need ending. See OidcLoginController::backChannelLogout().
  */
@@ -17,6 +17,7 @@ class IdentityProviderSession extends Model
     protected $fillable = [
         'provider_id',
         'external_sub',
+        'external_sid',
         'session_id',
     ];
 

@@ -20,8 +20,20 @@ class RealmIdentityProvider extends Model
         'issuer',
         'client_id',
         'client_secret',
+        'scopes',
         'groups_claim',
         'enabled',
+    ];
+
+    /**
+     * Mirrors the column defaults, so a freshly created instance carries them
+     * straight away rather than only after a refresh from the database.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'scopes' => 'openid email profile',
+        'groups_claim' => 'groups',
     ];
 
     #[\Override]

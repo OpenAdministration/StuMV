@@ -17,29 +17,38 @@ use Tests\Support\TestLdap;
 uses(RefreshDatabase::class);
 
 /**
- * Fakes the discovery+jwks endpoints (reusing makeRsaKeyPairAndJwks() and
- * fakeIdentityProviderJwks() from IdentityProviderBackChannelLogoutTest.php,
- * both loaded globally in the same test run) and drives
- * identity-provider.redirect, returning the state/nonce the controller
- * actually generated plus the RSA key backing the faked JWKS. The nonce and
- * PKCE verifier are only known after this redirect response, so callers use
- * the return value to sign a matching (or deliberately mismatched, for
- * negative tests) id_token before completing the login via
- * identityProviderCallbackUrl().
+ * Drives identity-provider.redirect and reads back the state/nonce the
+ * controller actually generated - neither is known before this response, so
+ * callers need them to sign a matching (or deliberately mismatched, for
+ * negative tests) id_token. Assumes the discovery/JWKS endpoints are already
+ * faked; startIdentityProviderLogin() is the usual way in, tests that need an
+ * unusual JWKS or discovery document fake it themselves and call this.
  *
- * @return array{state: string, nonce: string, privateKey: string}
+ * @return array{state: string, nonce: string}
  */
-function startIdentityProviderLogin(string $realmUid, RealmIdentityProvider $provider): array
+function driveIdentityProviderRedirect(string $realmUid, RealmIdentityProvider $provider): array
 {
-    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
-
     $redirect = test()->get(route('identity-provider.redirect', ['realm' => $realmUid, 'provider' => $provider->id]));
     $redirect->assertStatus(302);
 
     parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $query);
 
-    return ['state' => $query['state'], 'nonce' => $query['nonce'], 'privateKey' => $privateKey];
+    return ['state' => $query['state'], 'nonce' => $query['nonce']];
+}
+
+/**
+ * Fakes the discovery+jwks endpoints and drives the redirect, additionally
+ * returning the RSA key backing the faked JWKS. $discovery overrides members
+ * of the discovery document (null drops one entirely).
+ *
+ * @return array{state: string, nonce: string, privateKey: string}
+ */
+function startIdentityProviderLogin(string $realmUid, RealmIdentityProvider $provider, array $discovery = []): array
+{
+    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
+    fakeIdentityProviderJwks($provider->issuer, $jwks, $discovery);
+
+    return [...driveIdentityProviderRedirect($realmUid, $provider), 'privateKey' => $privateKey];
 }
 
 function validIdTokenClaims(RealmIdentityProvider $provider, string $nonce, string $sub): array
@@ -54,7 +63,8 @@ function validIdTokenClaims(RealmIdentityProvider $provider, string $nonce, stri
     ];
 }
 
-function signIdToken(string $privateKey, array $claims, string $kid = 'test-key'): string
+/** $kid null signs without a "kid" header, as providers with a single key may. */
+function signIdToken(string $privateKey, array $claims, ?string $kid = 'test-key'): string
 {
     return JWT::encode($claims, $privateKey, 'RS256', $kid);
 }
@@ -369,6 +379,195 @@ test('an id_token signed by the wrong key is rejected', function (): void {
     $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken);
 
     $this->get($callbackUrl)->assertStatus(400);
+
+    $this->assertGuest();
+});
+
+test('an id_token can be verified against a JWKS whose keys omit the alg parameter, as authentik does', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
+    unset($jwks['keys'][0]['alg']);
+    fakeIdentityProviderJwks($provider->issuer, $jwks);
+
+    $login = [...driveIdentityProviderRedirect($community->getShortCode(), $provider), 'privateKey' => $privateKey];
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('an id_token signed without a kid header is verified against a single-key JWKS', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']), null);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('an id_token issued a few seconds ahead of this server\'s clock is still accepted', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['iat'] = time() + 30;
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('an issuer the discovery document spells with a trailing slash is accepted, as Auth0 does', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider, [
+        'issuer' => $provider->issuer.'/',
+    ]);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['iss'] = $provider->issuer.'/';
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('a discovery document naming a different issuer than the configured one is not trusted', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider, [
+        'issuer' => 'https://attacker.example.test',
+    ]);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['iss'] = 'https://attacker.example.test';
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertStatus(400);
+
+    $this->assertGuest();
+});
+
+test('a provider that publishes no userinfo endpoint logs in on the id_token claims alone', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider, ['userinfo_endpoint' => null]);
+    $claims = validIdTokenClaims($provider, $login['nonce'], 'external-123');
+    $claims['email'] = $existingUser->email;
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    // The userinfo response passed here is never fetched - identityProviderCallbackUrl()
+    // queues it on the mock handler, but with no endpoint to call it goes unused.
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, [], $idToken))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('a groups claim carried only by the id_token still grants the mapped role', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $committee = TestLdap::makeCommittee($community);
+    $role = TestLdap::makeRole($committee);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $provider->roleMappings()->create([
+        'external_group' => 'stura-member',
+        'committee_dn' => $committee->getDn(),
+        'role_cn' => $role->getFirstAttribute('cn'),
+    ]);
+    // Entra ID never returns groups from userinfo, and Keycloak's mapper has a
+    // separate switch per token - so the claim commonly arrives id_token-only.
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['groups'] = ['stura-member'];
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken));
+
+    expect(RoleMembership::where('username', $existingUser->username)
+        ->where('role_cn', $role->getFirstAttribute('cn'))
+        ->where('committee_dn', $committee->getDn())
+        ->count())->toBe(1);
+});
+
+test('a login whose email the provider reports as unverified is rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email, 'email_verified' => false];
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertStatus(422);
+
+    $this->assertGuest();
+});
+
+test('a login whose email the provider confirms as verified is accepted', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email, 'email_verified' => true];
+
+    $this->get(loginViaIdentityProvider($community->getShortCode(), $provider, $userinfo))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('the configured scopes are requested, with openid always included', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+    $provider->update(['scopes' => 'email profile groups']);
+
+    [, $jwks] = makeRsaKeyPairAndJwks();
+    fakeIdentityProviderJwks($provider->issuer, $jwks);
+
+    $redirect = $this->get(route('identity-provider.redirect', ['realm' => $community->getShortCode(), 'provider' => $provider->id]));
+    parse_str((string) parse_url((string) $redirect->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    expect($query['scope'])->toBe('openid email profile groups');
+});
+
+test('cancelling at the identity provider returns to the login page instead of an error', function (): void {
+    $community = newCommunity();
+    $provider = makeIdentityProvider($community->getShortCode());
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+
+    $this->get(route('identity-provider.callback', [
+        'realm' => $community->getShortCode(),
+        'provider' => $provider->id,
+        'state' => $login['state'],
+        'error' => 'access_denied',
+    ]))->assertRedirect(route('realm.login', ['realm' => $community->getShortCode()]));
 
     $this->assertGuest();
 });
