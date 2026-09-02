@@ -52,25 +52,36 @@
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>
-                            <div class="flex justify-end gap-2">
-                                @unless($client->revoked)
-                                    <flux:button
-                                        size="sm"
-                                        icon="pencil"
-                                        wire:navigate
-                                        :href="route('realms.api-clients.edit', ['realm' => $uid, 'client' => $client->id])"
-                                    >
-                                        {{ __('common.edit') }}
-                                    </flux:button>
-                                    <flux:button
-                                        size="sm"
-                                        variant="danger"
-                                        icon="ban"
-                                        wire:click="revokePrepare('{{ $client->id }}')"
-                                    >
-                                        {{ __('api_clients.revoke') }}
-                                    </flux:button>
-                                @endunless
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        @unless($client->revoked)
+                                            <flux:menu.item
+                                                icon="pencil"
+                                                wire:navigate
+                                                href="{{ route('realms.api-clients.edit', ['realm' => $uid, 'client' => $client->id]) }}"
+                                            >
+                                                {{ __('common.edit') }}
+                                            </flux:menu.item>
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="ban"
+                                                wire:click="revokePrepare('{{ $client->id }}')"
+                                            >
+                                                {{ __('api_clients.revoke') }}
+                                            </flux:menu.item>
+                                        @else
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="trash-2"
+                                                wire:click="deletePrepare('{{ $client->id }}')"
+                                            >
+                                                {{ __('api_clients.delete') }}
+                                            </flux:menu.item>
+                                        @endunless
+                                    </flux:menu>
+                                </flux:dropdown>
                             </div>
                         </flux:table.cell>
                     </flux:table.row>
@@ -96,6 +107,21 @@
                 <div class="flex justify-end gap-2">
                     <flux:button wire:click="close()">{{ __('common.cancel') }}</flux:button>
                     <flux:button variant="danger" type="submit">{{ __('api_clients.revoke') }}</flux:button>
+                </div>
+            </div>
+        </flux:modal>
+    </form>
+
+    <form wire:submit="deleteCommit">
+        <flux:modal name="delete">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg" class="modal-header">{{ __('api_clients.delete_title', ['name' => $deleteClientName]) }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('api_clients.delete_warning', ['name' => $deleteClientName]) }}</flux:text>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <flux:button wire:click="closeDelete()">{{ __('common.cancel') }}</flux:button>
+                    <flux:button variant="danger" type="submit">{{ __('api_clients.delete') }}</flux:button>
                 </div>
             </div>
         </flux:modal>

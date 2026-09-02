@@ -28,6 +28,10 @@ class ListApiClients extends Component
 
     public string $revokeClientName = '';
 
+    public string $deleteClientId = '';
+
+    public string $deleteClientName = '';
+
     public function mount(Community $realm)
     {
         abort_if($realm->isAdminRealm(), 404);
@@ -98,5 +102,31 @@ class ListApiClients extends Component
     {
         Flux::modal('revoke')->close();
         unset($this->revokeClientId, $this->revokeClientName);
+    }
+
+    public function deletePrepare(string $clientId): void
+    {
+        $client = $this->scopeToRealmApiClients()->findOrFail($clientId);
+        $this->deleteClientId = $client->id;
+        $this->deleteClientName = $client->name;
+        Flux::modal('delete')->show();
+    }
+
+    public function deleteCommit(): void
+    {
+        $client = $this->scopeToRealmApiClients()->findOrFail($this->deleteClientId);
+
+        $client->authCodes()->delete();
+        $client->tokens()->delete();
+        $client->delete();
+
+        Flux::toast(variant: 'success', text: __('api_clients.deleted_success'));
+        $this->closeDelete();
+    }
+
+    public function closeDelete(): void
+    {
+        Flux::modal('delete')->close();
+        unset($this->deleteClientId, $this->deleteClientName);
     }
 }
