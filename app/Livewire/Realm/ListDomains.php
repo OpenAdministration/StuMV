@@ -6,6 +6,8 @@ use App\Ldap\Community;
 use App\Ldap\Domain;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -25,11 +27,18 @@ class ListDomains extends Component
 
     public string $deleteDomain = '';
 
+    #[Locked]
     public string $uid;
 
     public function mount(Community $realm)
     {
         $this->uid = $realm->getFirstAttribute('ou');
+    }
+
+    #[Computed]
+    public function community(): Community
+    {
+        return Community::findOrFailByUid($this->uid);
     }
 
     public function sortBy($field): void
@@ -65,12 +74,16 @@ class ListDomains extends Component
             $page,
         );
 
-        return view('livewire.realm.list-domains', ['domains' => $domains])
+        return view('livewire.realm.list-domains', [
+            'domains' => $domains,
+            'community' => $this->community(),
+        ])
             ->title(__('realms.domains.list_title'));
     }
 
     public function deletePrepare($dc): void
     {
+        $this->authorize('delete', [Domain::class, $this->community()]);
         $results = Domain::fromCommunity($this->uid)->where('dc', $dc)->get();
         if ($results->count() === 1) {
             $this->deleteDomain = $results->first()->getFirstAttribute('dc');
@@ -80,6 +93,7 @@ class ListDomains extends Component
 
     public function deleteCommit()
     {
+        $this->authorize('delete', [Domain::class, $this->community()]);
         $results = Domain::fromCommunity($this->uid)->where('dc', $this->deleteDomain)->get();
         if ($results->count() === 1) {
             $results->first()->delete();

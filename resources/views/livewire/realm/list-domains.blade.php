@@ -9,8 +9,8 @@
                 variant="primary"
                 icon="plus"
                 wire:navigate
-                :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.domains.new', ['realm' => $uid]) : null"
-                :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
+                :href="auth()->user()->can('create', [\App\Ldap\Domain::class, $community]) ? route('realms.domains.new', ['realm' => $uid]) : null"
+                :disabled="auth()->user()->cannot('create', [\App\Ldap\Domain::class, $community])"
             >
                 {{ __('domain.new_button') }}
             </flux:button>
@@ -41,6 +41,7 @@
                                 variant="danger"
                                 icon="trash-2"
                                 wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
+                                :disabled="auth()->user()->cannot('delete', [\App\Ldap\Domain::class, $community])"
                             >
                                 {{ __('common.delete') }}
                             </flux:button>

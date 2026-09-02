@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Rules\UniqueDomain;
 use dacoto\DomainValidator\Validator\Domain as DomainValidator;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -20,7 +21,14 @@ class NewDomain extends Component
 
     public function mount(Community $realm)
     {
+        $this->authorize('create', [Domain::class, $realm]);
         $this->uid = $realm->getFirstAttribute('ou');
+    }
+
+    #[Computed]
+    public function community(): Community
+    {
+        return Community::findOrFailByUid($this->uid);
     }
 
     public function rules()
@@ -41,6 +49,7 @@ class NewDomain extends Component
 
     public function save()
     {
+        $this->authorize('create', [Domain::class, $this->community()]);
         $this->validate();
 
         $d = Domain::make([
