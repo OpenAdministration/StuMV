@@ -17,12 +17,6 @@ return new class extends Migration
             // scope, a custom authentik scope mapping), so the set can't be
             // hard-coded if group mapping is to work against them at all.
             $table->string('scopes')->default('openid email profile')->after('client_secret');
-
-            // On by default: accounts are matched by email address, so a
-            // provider saying it hasn't verified one is worth heeding. Some
-            // providers track no verification state at all and report every
-            // address as unverified, though, which is what this turns off.
-            $table->boolean('enforce_email_verified')->default(true)->after('scopes');
         });
 
         Schema::table('identity_provider_sessions', function (Blueprint $table): void {
@@ -45,7 +39,7 @@ return new class extends Migration
         });
 
         Schema::table('realm_identity_providers', function (Blueprint $table): void {
-            $table->dropColumn(['scopes', 'enforce_email_verified']);
+            $table->dropColumn('scopes');
         });
     }
 };
