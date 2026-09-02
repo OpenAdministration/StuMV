@@ -9,8 +9,10 @@ use Firebase\JWT\JWT;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use League\OAuth2\Client\Provider\GenericProvider;
 use Tests\Support\TestLdap;
 
@@ -76,7 +78,7 @@ function signIdToken(string $privateKey, array $claims, ?string $kid = 'test-key
  * callback URL. $idToken is nullable so tests can exercise the
  * missing-id_token rejection path.
  */
-function identityProviderCallbackUrl(string $realmUid, RealmIdentityProvider $provider, array $login, array $userinfo, ?string $idToken, string $code = 'fake-code'): string
+function identityProviderCallbackUrl(string $realmUid, RealmIdentityProvider $provider, array $login, array $userinfo, ?string $idToken, string $code = 'fake-code', ?array &$requestHistory = null, bool $rejectFirstTokenRequest = false): string
 {
     $tokenResponse = [
         'access_token' => 'fake-access-token',
@@ -88,11 +90,30 @@ function identityProviderCallbackUrl(string $realmUid, RealmIdentityProvider $pr
         $tokenResponse['id_token'] = $idToken;
     }
 
-    $mockHandler = new MockHandler([
+    $responses = [
         new Response(200, ['Content-Type' => 'application/json'], json_encode($tokenResponse)),
         new Response(200, ['Content-Type' => 'application/json'], json_encode($userinfo)),
-    ]);
-    $guzzle = new Client(['handler' => HandlerStack::create($mockHandler)]);
+    ];
+
+    // Stands in for a provider that only accepts the other client
+    // authentication method, as Authelia does.
+    if ($rejectFirstTokenRequest) {
+        array_unshift($responses, new Response(401, ['Content-Type' => 'application/json'], json_encode([
+            'error' => 'invalid_client',
+            'error_description' => 'Client authentication failed.',
+        ])));
+    }
+
+    $mockHandler = new MockHandler($responses);
+    $stack = HandlerStack::create($mockHandler);
+
+    // Lets a test inspect what actually went to the token endpoint, e.g. how
+    // the client credentials were carried.
+    if ($requestHistory !== null) {
+        $stack->push(Middleware::history($requestHistory));
+    }
+
+    $guzzle = new Client(['handler' => $stack]);
 
     app()->bind(OidcProviderFactory::class, fn () => new class($guzzle) extends OidcProviderFactory
     {
@@ -502,6 +523,40 @@ test('an issuer the discovery document spells with a trailing slash is accepted,
     $this->assertAuthenticatedAs($existingUser->fresh());
 });
 
+test('an id_token naming the issuer without its scheme is accepted, as Google returns it', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['iss'] = preg_replace('#^https://#', '', $provider->issuer);
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('a scheme-less issuer belonging to someone else is still rejected', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']);
+    $claims['iss'] = 'attacker.example.test';
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken))
+        ->assertStatus(400);
+
+    $this->assertGuest();
+});
+
 test('a discovery document naming a different issuer than the configured one is not trusted', function (): void {
     $community = newCommunity();
     $existingUser = TestLdap::member($community);
@@ -535,6 +590,48 @@ test('a provider that publishes no userinfo endpoint logs in on the id_token cla
     // queues it on the mock handler, but with no endpoint to call it goes unused.
     $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, [], $idToken))
         ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('a failing userinfo endpoint does not lose the login, the id_token claims carry it', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $claims = validIdTokenClaims($provider, $login['nonce'], 'external-123');
+    $claims['email'] = $existingUser->email;
+    $idToken = signIdToken($login['privateKey'], $claims);
+
+    // Entra ID hosts userinfo on Microsoft Graph, which answers 401 once an
+    // extra resource scope retargets the access token.
+    $mockHandler = new MockHandler([
+        new Response(200, ['Content-Type' => 'application/json'], json_encode([
+            'access_token' => 'fake-access-token',
+            'token_type' => 'bearer',
+            'expires_in' => 3600,
+            'id_token' => $idToken,
+        ])),
+        new Response(401, ['Content-Type' => 'application/json'], json_encode(['error' => 'InvalidAuthenticationToken'])),
+    ]);
+    $guzzle = new Client(['handler' => HandlerStack::create($mockHandler)]);
+    app()->bind(OidcProviderFactory::class, fn () => new class($guzzle) extends OidcProviderFactory
+    {
+        public function __construct(private readonly Client $guzzle) {}
+
+        public function make(array $options): GenericProvider
+        {
+            return new GenericProvider($options, ['httpClient' => $this->guzzle]);
+        }
+    });
+
+    $this->get(route('identity-provider.callback', [
+        'realm' => $community->getShortCode(),
+        'provider' => $provider->id,
+        'state' => $login['state'],
+        'code' => 'fake-code',
+    ]))->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 
     $this->assertAuthenticatedAs($existingUser->fresh());
 });
@@ -602,6 +699,135 @@ test('a login whose email the provider confirms as verified is accepted', functi
         ->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
 
     $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('client credentials go in the request body by default', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+    $history = [];
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken, 'fake-code', $history);
+
+    $this->get($callbackUrl);
+
+    $tokenRequest = $history[0]['request'];
+    expect($tokenRequest->hasHeader('Authorization'))->toBeFalse()
+        ->and((string) $tokenRequest->getBody())->toContain('client_secret=client-secret');
+});
+
+test('a provider rejecting the request body with invalid_client is retried with HTTP Basic', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+    $history = [];
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken, 'fake-code', $history, rejectFirstTokenRequest: true);
+
+    $this->get($callbackUrl)->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    expect((string) $history[0]['request']->getBody())->toContain('client_secret=client-secret');
+
+    $retry = $history[1]['request'];
+    expect($retry->getHeaderLine('Authorization'))->toBe('Basic '.base64_encode('client-id:client-secret'))
+        // Sending them both ways is what strict providers reject.
+        ->and((string) $retry->getBody())->not->toContain('client_secret');
+
+    $this->assertAuthenticatedAs($existingUser->fresh());
+});
+
+test('the method that worked is remembered for the next login', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+
+    $this->get(identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken, 'fake-code', $unused, rejectFirstTokenRequest: true));
+
+    expect(Cache::get('identity-provider-auth-method:'.$provider->id))->toBe('client_secret_basic');
+});
+
+test('a remembered method is used straight away, without a wasted attempt', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    Cache::put('identity-provider-auth-method:'.$provider->id, 'client_secret_basic', now()->addHour());
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+    $history = [];
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken, 'fake-code', $history);
+
+    $this->get($callbackUrl)->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    expect($history)->toHaveCount(2)
+        ->and($history[0]['request']->getHeaderLine('Authorization'))->toStartWith('Basic ');
+});
+
+test('discovery naming a single client authentication method is used directly', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider, [
+        'token_endpoint_auth_methods_supported' => ['client_secret_basic'],
+    ]);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+    $history = [];
+    $callbackUrl = identityProviderCallbackUrl($community->getShortCode(), $provider, $login, $userinfo, $idToken, 'fake-code', $history);
+
+    $this->get($callbackUrl)->assertRedirect(route('realms.dashboard', ['realm' => $community->getShortCode()]));
+
+    // No wasted first attempt: Basic straight away.
+    expect($history)->toHaveCount(2)
+        ->and($history[0]['request']->getHeaderLine('Authorization'))->toStartWith('Basic ');
+});
+
+test('an error that is not invalid_client is not retried with another method', function (): void {
+    $community = newCommunity();
+    $existingUser = TestLdap::member($community);
+    $provider = makeIdentityProvider($community->getShortCode());
+    $userinfo = ['sub' => 'external-123', 'email' => $existingUser->email];
+
+    $login = startIdentityProviderLogin($community->getShortCode(), $provider);
+    $idToken = signIdToken($login['privateKey'], validIdTokenClaims($provider, $login['nonce'], $userinfo['sub']));
+
+    $mockHandler = new MockHandler([
+        new Response(400, ['Content-Type' => 'application/json'], json_encode(['error' => 'invalid_grant'])),
+    ]);
+    $guzzle = new Client(['handler' => HandlerStack::create($mockHandler)]);
+    app()->bind(OidcProviderFactory::class, fn () => new class($guzzle) extends OidcProviderFactory
+    {
+        public function __construct(private readonly Client $guzzle) {}
+
+        public function make(array $options): GenericProvider
+        {
+            return new GenericProvider($options, ['httpClient' => $this->guzzle]);
+        }
+    });
+
+    // A single queued response: a retry would exhaust the handler and surface
+    // as a different failure than the one we want to see propagate.
+    $this->get(route('identity-provider.callback', [
+        'realm' => $community->getShortCode(),
+        'provider' => $provider->id,
+        'state' => $login['state'],
+        'code' => 'fake-code',
+    ]))->assertStatus(500);
+
+    $this->assertGuest();
 });
 
 test('the configured scopes are requested, with openid always included', function (): void {

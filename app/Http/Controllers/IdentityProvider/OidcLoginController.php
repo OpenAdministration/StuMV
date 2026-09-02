@@ -9,6 +9,7 @@ use App\Models\IdentityProviderSession;
 use App\Models\RealmIdentityProvider;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Support\FormEncodedBasicAuthOptionProvider;
 use App\Support\IdentityProviderGroupRoleSync;
 use App\Support\IdentityProviderGroupSync;
 use App\Support\OidcProviderFactory;
@@ -24,7 +25,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use League\OAuth2\Client\OptionProvider\PostAuthOptionProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\GenericProvider;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 use RuntimeException;
 use Throwable;
 
@@ -32,6 +36,10 @@ class OidcLoginController extends Controller
 {
     /** Tolerated clock difference, in seconds, between this server and the provider. */
     private const int CLOCK_SKEW_LEEWAY = 60;
+
+    private const string AUTH_METHOD_POST = 'client_secret_post';
+
+    private const string AUTH_METHOD_BASIC = 'client_secret_basic';
 
     public function __construct(private readonly OidcProviderFactory $providerFactory) {}
 
@@ -117,9 +125,7 @@ class OidcLoginController extends Controller
         $oauthProvider = $this->buildProvider($realm, $provider, $discovery);
         $oauthProvider->setPkceCode($pkceVerifier);
 
-        $token = $oauthProvider->getAccessToken('authorization_code', [
-            'code' => $request->query('code'),
-        ]);
+        $token = $this->exchangeAuthorizationCode($oauthProvider, $provider, $discovery, (string) $request->query('code'));
 
         $idToken = $token->getValues()['id_token'] ?? null;
         abort_if($idToken === null, 422, 'The identity provider did not return an ID token.');
@@ -130,9 +136,7 @@ class OidcLoginController extends Controller
             abort(400, $runtimeException->getMessage());
         }
 
-        $userinfo = empty($discovery['userinfo_endpoint'])
-            ? null
-            : $oauthProvider->getResourceOwner($token)->toArray();
+        $userinfo = $this->fetchUserinfo($oauthProvider, $token, $provider, $discovery);
 
         // OIDC Core 1.0 5.3.2: the userinfo response's sub must match the
         // id_token's - otherwise a malicious/compromised userinfo endpoint
@@ -304,7 +308,7 @@ class OidcLoginController extends Controller
         $discovery = $this->discover($provider->issuer);
         $decoded = $this->verifySignedJwt($logoutToken, $provider, $discovery);
 
-        if (($decoded['iss'] ?? null) !== $this->expectedIssuer($provider, $discovery)) {
+        if (! $this->issuerMatches($decoded['iss'] ?? null, $this->expectedIssuer($provider, $discovery))) {
             throw new RuntimeException('Unexpected issuer in logout_token.');
         }
 
@@ -347,7 +351,7 @@ class OidcLoginController extends Controller
     {
         $decoded = $this->verifySignedJwt($idToken, $provider, $discovery);
 
-        if (($decoded['iss'] ?? null) !== $this->expectedIssuer($provider, $discovery)) {
+        if (! $this->issuerMatches($decoded['iss'] ?? null, $this->expectedIssuer($provider, $discovery))) {
             throw new RuntimeException('Unexpected issuer in id_token.');
         }
 
@@ -444,6 +448,19 @@ class OidcLoginController extends Controller
      * issuer, so a tampered-with discovery document can't redefine who we
      * trust; anything else falls back to the configured value.
      */
+    /**
+     * Google documents its issuer as either "https://accounts.google.com" or
+     * the bare "accounts.google.com", and still returns the second form for
+     * older integrations - so a plain string comparison rejects perfectly
+     * valid tokens. Allowing the scheme-less spelling of the very same issuer
+     * gives nothing away: the signature has already been checked against the
+     * JWKS that the configured issuer's own discovery document named.
+     */
+    private function issuerMatches(mixed $issuer, string $expected): bool
+    {
+        return is_string($issuer) && ($issuer === $expected || 'https://'.$issuer === $expected);
+    }
+
     private function expectedIssuer(RealmIdentityProvider $provider, array $discovery): string
     {
         $configured = rtrim($provider->issuer, '/');
@@ -476,6 +493,36 @@ class OidcLoginController extends Controller
         }
 
         return Cache::remember($cacheKey, now()->addHour(), fn (): array => Http::get($jwksUri)->throw()->json());
+    }
+
+    /**
+     * The userinfo claims, or null where there are none to be had. A failure
+     * here is not fatal: the id_token's claims are signed and already carry
+     * everything the login needs, while the endpoint itself is the most
+     * fragile part of the exchange. Entra ID hosts it on Microsoft Graph, so
+     * it answers 401 as soon as an additional resource scope retargets the
+     * access token - losing the login over claims we did not need would be
+     * the wrong trade.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function fetchUserinfo(GenericProvider $oauthProvider, AccessTokenInterface $token, RealmIdentityProvider $provider, array $discovery): ?array
+    {
+        if (empty($discovery['userinfo_endpoint'])) {
+            return null;
+        }
+
+        try {
+            return $oauthProvider->getResourceOwner($token)->toArray();
+        } catch (Throwable $throwable) {
+            Log::warning('Could not read the userinfo endpoint; continuing on the id_token claims alone.', [
+                'provider_id' => $provider->id,
+                'issuer' => $provider->issuer,
+                'error' => $throwable->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     /**
@@ -549,7 +596,7 @@ class OidcLoginController extends Controller
             'The identity provider\'s discovery document is missing a required endpoint.'
         );
 
-        return $this->providerFactory->make([
+        $oauthProvider = $this->providerFactory->make([
             'clientId' => $provider->client_id,
             'clientSecret' => $provider->client_secret,
             'redirectUri' => route('identity-provider.callback', ['realm' => $realm->getShortCode(), 'provider' => $provider->id]),
@@ -561,6 +608,96 @@ class OidcLoginController extends Controller
             'urlResourceOwnerDetails' => $discovery['userinfo_endpoint'] ?? '',
             'pkceMethod' => GenericProvider::PKCE_METHOD_S256,
         ]);
+
+        return $oauthProvider;
+    }
+
+    /**
+     * Exchanges the code, working out how this provider wants the client
+     * credentials carried. Discovery cannot answer that:
+     * token_endpoint_auth_methods_supported describes the endpoint, not this
+     * client's registration (RFC 8414 2), and providers that decide it per
+     * client - Authelia among them - still advertise every method they
+     * implement. The token endpoint does answer it, though: "invalid_client"
+     * means the credentials were carried the wrong way, where a wrong or spent
+     * code would be "invalid_grant". So try, and switch on that one error.
+     *
+     * Retrying is safe: the code is rejected before it is redeemed, and
+     * getAccessToken() keeps the PKCE verifier, so the second attempt is a
+     * complete request again. The outcome is remembered per provider, so this
+     * costs one extra request once rather than on every login.
+     */
+    private function exchangeAuthorizationCode(GenericProvider $oauthProvider, RealmIdentityProvider $provider, array $discovery, string $code): AccessTokenInterface
+    {
+        $methods = $this->authMethodCandidates($provider, $discovery);
+        $cacheKey = 'identity-provider-auth-method:'.$provider->id;
+
+        foreach ($methods as $index => $method) {
+            $oauthProvider->setOptionProvider($method === self::AUTH_METHOD_BASIC
+                ? new FormEncodedBasicAuthOptionProvider
+                : new PostAuthOptionProvider);
+
+            try {
+                $token = $oauthProvider->getAccessToken('authorization_code', ['code' => $code]);
+
+                Cache::put($cacheKey, $method, now()->addMonth());
+
+                return $token;
+            } catch (IdentityProviderException $identityProviderException) {
+                if ($index === array_key_last($methods) || ! $this->isInvalidClient($identityProviderException)) {
+                    Cache::forget($cacheKey);
+
+                    $body = $identityProviderException->getResponseBody();
+
+                    // league keeps only the "error" value; the description is
+                    // where providers put what actually went wrong (Entra ID's
+                    // AADSTS codes, for one), so it would otherwise be lost.
+                    Log::warning('The identity provider rejected the token request.', [
+                        'provider_id' => $provider->id,
+                        'issuer' => $provider->issuer,
+                        'auth_method' => $method,
+                        'error' => is_array($body) ? ($body['error'] ?? null) : null,
+                        'error_description' => is_array($body) ? ($body['error_description'] ?? null) : null,
+                    ]);
+
+                    throw $identityProviderException;
+                }
+            }
+        }
+
+        throw new RuntimeException('No token endpoint authentication method to try.');
+    }
+
+    /**
+     * The methods to try, most likely first. Once one has worked it is the
+     * only one tried; otherwise discovery narrows the field where it names
+     * exactly one of the two, and the request body goes first as that is what
+     * every currently configured provider already answers to.
+     *
+     * @return array<int, string>
+     */
+    private function authMethodCandidates(RealmIdentityProvider $provider, array $discovery): array
+    {
+        $known = Cache::get('identity-provider-auth-method:'.$provider->id);
+
+        if (is_string($known)) {
+            return [$known];
+        }
+
+        $advertised = array_values(array_intersect(
+            [self::AUTH_METHOD_POST, self::AUTH_METHOD_BASIC],
+            (array) ($discovery['token_endpoint_auth_methods_supported'] ?? [])
+        ));
+
+        return count($advertised) === 1 ? $advertised : [self::AUTH_METHOD_POST, self::AUTH_METHOD_BASIC];
+    }
+
+    private function isInvalidClient(IdentityProviderException $identityProviderException): bool
+    {
+        $body = $identityProviderException->getResponseBody();
+        $error = is_array($body) ? ($body['error'] ?? null) : null;
+
+        return $error === 'invalid_client' || $identityProviderException->getCode() === 401;
     }
 
     private function discover(string $issuer): array
