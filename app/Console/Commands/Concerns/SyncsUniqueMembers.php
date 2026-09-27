@@ -37,10 +37,10 @@ trait SyncsUniqueMembers
         }
 
         foreach ($removals as $removed) {
-            $this->comment("{$prefix}Remove: $removed");
+            $this->line("<fg=red>{$prefix}Remove: $removed</>");
         }
         foreach ($additions as $added) {
-            $this->comment("{$prefix}Add: $added");
+            $this->line("<fg=green>{$prefix}Add: $added</>");
         }
 
         $final = [...$survivors, ...$additions];
