@@ -63,7 +63,7 @@ class LdapSyncRoles extends Command
 
         foreach ($realms as $realm) {
             $realmUid = $realm->getFirstAttribute('ou');
-            $this->comment('> '.$realmUid);
+            $this->line('> '.$realmUid);
 
             $usernamesInRealm = $memberships->where('realm', $realmUid)->pluck('username')->unique()->all();
             $ldapUsersByUsername = empty($usernamesInRealm)
@@ -75,12 +75,12 @@ class LdapSyncRoles extends Command
                 ->searchFor('ou', $this->argument('committee'))
                 ->get();
             foreach ($committees as $committee) {
-                $this->comment('  |-> '.$committee->getDn());
+                $this->line('  |-> '.$committee->getDn());
                 $roles = $committee->roles()
                     ->searchFor('cn', $this->argument('role'))
                     ->get();
                 foreach ($roles as $role) {
-                    $this->comment('  |   |-> '.$role->getDn());
+                    $this->line('  |   |-> '.$role->getDn());
 
                     $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
                     $roleMemberships = $membershipsByRole->get($key, collect());

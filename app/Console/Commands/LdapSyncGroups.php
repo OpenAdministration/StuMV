@@ -65,7 +65,7 @@ class LdapSyncGroups extends Command
 
         foreach ($realms as $realm) {
             $realmUid = $realm->getFirstAttribute('ou');
-            $this->comment('> '.$realmUid);
+            $this->line('> '.$realmUid);
 
             $usernamesInRealm = $memberships->where('realm', $realmUid)->pluck('username')->unique()->all();
             $ldapUsersByUsername = empty($usernamesInRealm)
@@ -75,7 +75,7 @@ class LdapSyncGroups extends Command
 
             $groups = Group::query()->in(Group::dnRoot($realmUid))->get();
             foreach ($groups as $group) {
-                $this->comment('  |-> '.$group->getDn());
+                $this->line('  |-> '.$group->getDn());
 
                 $groupRoles = $groupRolesByGroup->get($group->getDn(), collect());
 
