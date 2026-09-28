@@ -2,9 +2,22 @@
 
 use App\Models\IdentityProviderSession;
 use Firebase\JWT\JWT;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+/**
+ * backChannelLogout() builds a Provider to verify the logout_token, which
+ * fetches discovery (to learn the JWKS URI) before the JWKS itself - both
+ * through the package's own internal Guzzle client, which Http::fake()
+ * cannot intercept (see fakeIdentityProviderHttp() in tests/Pest.php).
+ */
+function fakeIdentityProviderBackChannelLogout(string $issuer, array $jwks): void
+{
+    $http = fakeIdentityProviderHttp($issuer);
+    $http['mockHandler']->append(new Response(200, ['Content-Type' => 'application/json'], json_encode($jwks)));
+}
 
 function makeSignedLogoutToken(string $privateKeyPem, array $claims, string $kid = 'test-key'): string
 {
@@ -18,6 +31,10 @@ function validLogoutTokenClaims(string $issuer, string $clientId, string $sub): 
         'aud' => $clientId,
         'sub' => $sub,
         'iat' => time(),
+        // Back-Channel Logout 1.0 2.4 doesn't itself require exp, but the
+        // package does regardless (a logout token would otherwise never
+        // expire - see Provider::validateTimeClaims()).
+        'exp' => time() + 300,
         'jti' => bin2hex(random_bytes(8)),
         'events' => ['http://schemas.openid.net/event/backchannel-logout' => (object) []],
     ];
@@ -27,7 +44,7 @@ test('a valid logout_token destroys the matching session and clears the correlat
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $sessionId = 'test-session-'.bin2hex(random_bytes(8));
     session()->getHandler()->write($sessionId, serialize(['foo' => 'bar']));
@@ -52,7 +69,7 @@ test('a logout_token destroys every session recorded for that sub, not just one'
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $sessionIdA = 'test-session-a-'.bin2hex(random_bytes(8));
     $sessionIdB = 'test-session-b-'.bin2hex(random_bytes(8));
@@ -76,7 +93,7 @@ test('a logout_token for a different sub does not touch an unrelated session', f
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $sessionId = 'test-session-'.bin2hex(random_bytes(8));
     session()->getHandler()->write($sessionId, serialize(['foo' => 'bar']));
@@ -105,7 +122,7 @@ test('a logout_token signed by the wrong key is rejected', function (): void {
     $provider = makeIdentityProvider($community->getShortCode());
     [, $jwks] = makeRsaKeyPairAndJwks();
     [$otherPrivateKey] = makeRsaKeyPairAndJwks('other-key');
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $logoutToken = makeSignedLogoutToken($otherPrivateKey, validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123'), 'other-key');
 
@@ -118,7 +135,7 @@ test('a logout_token with the wrong issuer is rejected', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $claims = validLogoutTokenClaims('https://not-the-issuer.test', $provider->client_id, 'external-123');
     $logoutToken = makeSignedLogoutToken($privateKey, $claims);
@@ -132,7 +149,7 @@ test('a logout_token with the wrong audience is rejected', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $claims = validLogoutTokenClaims($provider->issuer, 'someone-elses-client-id', 'external-123');
     $logoutToken = makeSignedLogoutToken($privateKey, $claims);
@@ -146,7 +163,7 @@ test('a logout_token without the backchannel-logout event is rejected', function
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $claims = validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123');
     unset($claims['events']);
@@ -161,7 +178,7 @@ test('a logout_token containing a nonce claim is rejected', function (): void {
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $claims = validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123');
     $claims['nonce'] = 'should-not-be-here';
@@ -176,7 +193,7 @@ test('a logout_token with neither a sub nor a sid claim is rejected', function (
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $claims = validLogoutTokenClaims($provider->issuer, $provider->client_id, 'external-123');
     unset($claims['sub']);
@@ -191,7 +208,7 @@ test('a logout_token identifying the session by sid alone ends exactly that sess
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $sessionId = 'test-session-'.bin2hex(random_bytes(8));
     session()->getHandler()->write($sessionId, serialize(['foo' => 'bar']));
@@ -220,7 +237,7 @@ test('a logout_token carrying a sid leaves the same user\'s other sessions signe
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $endedSessionId = 'test-session-ended-'.bin2hex(random_bytes(8));
     $otherSessionId = 'test-session-other-'.bin2hex(random_bytes(8));
@@ -247,7 +264,7 @@ test('a logout_token carrying a sid still ends sessions recorded before the prov
     $community = newCommunity();
     $provider = makeIdentityProvider($community->getShortCode());
     [$privateKey, $jwks] = makeRsaKeyPairAndJwks();
-    fakeIdentityProviderJwks($provider->issuer, $jwks);
+    fakeIdentityProviderBackChannelLogout($provider->issuer, $jwks);
 
     $legacySessionId = 'test-session-legacy-'.bin2hex(random_bytes(8));
     session()->getHandler()->write($legacySessionId, serialize(['foo' => 'bar']));

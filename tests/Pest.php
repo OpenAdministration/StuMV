@@ -4,8 +4,11 @@ use App\Ldap\Community;
 use App\Models\PassportClient;
 use App\Models\RealmIdentityProvider;
 use App\Models\User;
+use App\Support\OidcProviderFactory;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Tests\Support\TestLdap;
@@ -109,7 +112,10 @@ function newCommunity(?string $uid = null): Community
 |
 | Creates a real (but never contacted in most tests) RealmIdentityProvider
 | row pointing at a fake issuer - login-flow tests stub the actual
-| discovery/token/userinfo HTTP exchange themselves via Http::fake().
+| discovery/JWKS/token/userinfo HTTP exchange themselves via
+| fakeIdentityProviderHttp() (see below): SocialiteProviders\OpenIDConnect\Provider
+| talks to the IdP through its own internal Guzzle client, which Http::fake()
+| cannot intercept.
 |
 */
 
@@ -175,12 +181,24 @@ function writeTestSession(string $sessionId, array $data): void
 }
 
 /**
- * Fakes the discovery document (including jwks_uri) and the JWKS endpoint
- * itself. $discovery overrides individual members of the document; a member
- * set to null there is dropped from it entirely, so a test can model a
- * provider that doesn't advertise one.
+ * Builds one shared mocked Guzzle handler stack for an entire identity-provider
+ * flow and binds it via OidcProviderFactory, so every Provider instance the
+ * flow builds (redirect() and callback() each build their own) draws from
+ * the same queue of responses, in the order they're actually requested:
+ * discovery first (consumed by redirect(), to learn the authorization
+ * endpoint), then whatever a test appends afterwards via the returned
+ * MockHandler - Provider::user() itself requests the token endpoint before
+ * the JWKS (only needed to verify the id_token it just got back), then
+ * userinfo last, so responses must be queued in that same order: token,
+ * jwks, userinfo.
+ *
+ * $discovery overrides individual members of the discovery document; a
+ * member set to null there is dropped from it entirely, so a test can model
+ * a provider that doesn't advertise one.
+ *
+ * @return array{mockHandler: MockHandler, handlerStack: HandlerStack}
  */
-function fakeIdentityProviderJwks(string $issuer, array $jwks, array $discovery = []): void
+function fakeIdentityProviderHttp(string $issuer, array $discovery = []): array
 {
     $document = array_filter(array_merge([
         'authorization_endpoint' => $issuer.'/authorize',
@@ -189,10 +207,17 @@ function fakeIdentityProviderJwks(string $issuer, array $jwks, array $discovery 
         'jwks_uri' => $issuer.'/jwks',
     ], $discovery), fn ($value): bool => $value !== null);
 
-    Http::fake([
-        $issuer.'/.well-known/openid-configuration' => Http::response($document),
-        $issuer.'/jwks' => Http::response($jwks),
+    $mockHandler = new MockHandler([
+        new Response(200, ['Content-Type' => 'application/json'], json_encode($document)),
     ]);
+    $handlerStack = HandlerStack::create($mockHandler);
+
+    // The real factory, just with a mocked Guzzle handler injected - so
+    // tests exercise the exact same config/issuer-validation logic
+    // production uses, instead of a hand-rolled copy that could drift from it.
+    app()->bind(OidcProviderFactory::class, fn () => new OidcProviderFactory(['handler' => $handlerStack]));
+
+    return ['mockHandler' => $mockHandler, 'handlerStack' => $handlerStack];
 }
 
 /*
