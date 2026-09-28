@@ -10,7 +10,9 @@
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg" class="modal-header">{{ __('sync.ldap_preview_heading') }}</flux:heading>
-                <flux:text class="mt-2">{{ __('sync.ldap_preview_text') }}</flux:text>
+                @if(!empty($preview['roles']) || !empty($preview['groups']))
+                    <flux:text class="mt-2">{{ __('sync.ldap_preview_text') }}</flux:text>
+                @endif
             </div>
 
             @if(empty($preview['roles']) && empty($preview['groups']))
