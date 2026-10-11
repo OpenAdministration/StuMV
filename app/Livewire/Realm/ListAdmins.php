@@ -122,7 +122,7 @@ class ListAdmins extends Component
         $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
         if (! $userIsAdmin) {
             // check if the user to delete is an admin in this realm
-            unset($this->deleteAdminUsername, $this->deleteAdminName);
+            $this->reset('deleteAdminUsername', 'deleteAdminName');
 
             return;
         }
@@ -145,7 +145,7 @@ class ListAdmins extends Component
 
     public function close(): void
     {
-        unset($this->deleteAdminUsername, $this->deleteAdminName);
+        $this->reset('deleteAdminUsername', 'deleteAdminName');
         Flux::modal('delete')->close();
     }
 

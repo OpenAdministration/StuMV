@@ -71,6 +71,6 @@ class ListIdentityProviders extends Component
     public function closeDelete(): void
     {
         Flux::modal('delete')->close();
-        unset($this->deleteProviderId, $this->deleteProviderName);
+        $this->reset('deleteProviderId', 'deleteProviderName');
     }
 }

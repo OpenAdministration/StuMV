@@ -7,6 +7,7 @@ use App\Ldap\Uni\User as UniLdapUser;
 use App\Ldap\User;
 use App\Rules\UniqueEmail;
 use Flux\Flux;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;

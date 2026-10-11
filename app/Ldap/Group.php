@@ -7,6 +7,9 @@ use LdapRecord\Models\OpenLDAP\User;
 use LdapRecord\Models\Relations\HasManyIn;
 use LdapRecord\Query\Model\Builder;
 
+/**
+ * @method static Builder fromCommunity(string $uid)
+ */
 class Group extends \LdapRecord\Models\OpenLDAP\Group
 {
     use SearchScopeTrait;

@@ -185,7 +185,7 @@ class ListRolesInGroup extends Component
 
     public function close(): void
     {
-        unset($this->deleteGroupRoleId, $this->deleteRoleName);
+        $this->reset('deleteGroupRoleId', 'deleteRoleName');
         Flux::modal('delete')->close();
     }
 }

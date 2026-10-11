@@ -26,7 +26,7 @@ class ListGroups extends Component
 
     public string $realm_uid;
 
-    public string $deleteGroupDn;
+    public string $deleteGroupDn = '';
 
     public string $deleteGroupName = '';
 
@@ -117,7 +117,7 @@ class ListGroups extends Component
         Group::query()->delete($this->deleteGroupDn);
 
         // reset everything to prevent a 404 modal
-        unset($this->deleteGroupDn);
+        $this->reset('deleteGroupDn');
         Flux::modal('delete')->close();
     }
 }

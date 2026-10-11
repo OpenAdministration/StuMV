@@ -34,9 +34,9 @@ class ListRoles extends Component
     #[Url]
     public string $sortDirection = 'asc';
 
-    public string $deleteRoleCn;
+    public string $deleteRoleCn = '';
 
-    public string $deleteRoleName;
+    public string $deleteRoleName = '';
 
     public string $deleteConfirmText = '';
 
@@ -203,6 +203,6 @@ class ListRoles extends Component
     public function close()
     {
         Flux::modal('delete')->close();
-        unset($this->deleteRoleCn, $this->deleteRoleName);
+        $this->reset('deleteRoleCn', 'deleteRoleName');
     }
 }

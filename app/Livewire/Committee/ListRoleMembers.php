@@ -35,9 +35,9 @@ class ListRoleMembers extends Component
     #[Locked]
     public string $cn;
 
-    public string $deleteUsername;
+    public string $deleteUsername = '';
 
-    public int $deleteId;
+    public int $deleteId = 0;
 
     public bool $showOnlyActive = true;
 
@@ -105,7 +105,7 @@ class ListRoleMembers extends Component
                 'isModerator' => $isModerator,
                 'isAdmin' => $isAdmin,
                 'memberStatuses' => [],
-                'deleteDisplayName' => $this->deleteUsername ?? null,
+                'deleteDisplayName' => $this->deleteUsername ?: null,
             ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
         }
 
@@ -175,7 +175,7 @@ class ListRoleMembers extends Component
             'isModerator' => $isModerator,
             'isAdmin' => $isAdmin,
             'memberStatuses' => $memberStatuses,
-            'deleteDisplayName' => isset($this->deleteUsername) ? ($userCache[$this->deleteUsername]?->getFirstAttribute('cn') ?? $this->deleteUsername) : null,
+            'deleteDisplayName' => $this->deleteUsername ? ($userCache[$this->deleteUsername]?->getFirstAttribute('cn') ?? $this->deleteUsername) : null,
         ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
     }
 
@@ -212,6 +212,6 @@ class ListRoleMembers extends Component
     public function close()
     {
         Flux::modal('delete')->close();
-        unset($this->deleteUsername, $this->deleteId);
+        $this->reset('deleteUsername', 'deleteId');
     }
 }

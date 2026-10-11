@@ -56,8 +56,10 @@ test('an admin cannot delete another realm\'s mapping', function (): void {
     $mapping = GroupMailmanList::create(['realm' => $otherCommunity->getShortCode(), 'group_dn' => $otherGroup->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
     actingAsAdmin($community);
 
+    // Called on the instance: Livewire's test harness renders
+    // ModelNotFoundException as a 404 instead of propagating it.
     Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
-        ->call('deletePrepare', $mapping->id);
+        ->instance()->deletePrepare($mapping->id);
 })->throws(ModelNotFoundException::class);
 
 test('a non-admin cannot view the mapping list', function (): void {

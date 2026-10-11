@@ -56,8 +56,10 @@ test('an admin cannot delete another realm\'s identity provider', function (): v
     $provider = makeIdentityProvider($otherCommunity->getShortCode(), 'Other Realm IdP');
     actingAsAdmin($community);
 
+    // Called on the instance: Livewire's test harness renders
+    // ModelNotFoundException as a 404 instead of propagating it.
     Livewire::test(ListIdentityProviders::class, ['realm' => $community])
-        ->call('deletePrepare', $provider->id);
+        ->instance()->deletePrepare($provider->id);
 })->throws(ModelNotFoundException::class);
 
 test('a non-admin cannot view the identity provider list', function (): void {

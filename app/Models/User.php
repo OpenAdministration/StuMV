@@ -10,6 +10,9 @@ use Laravel\Passport\HasApiTokens;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
 
+/**
+ * @property ?string $uid LDAP entryUUID; added by a loop migration Larastan cannot read.
+ */
 class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEmail
 {
     use AuthenticatesWithLdap;
@@ -17,8 +20,8 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
 
     protected $table = 'user';
 
-    /***
-     * @inheritDoc
+    /**
+     * {@inheritDoc}
      */
     public function getLdapGuidColumn(): string
     {

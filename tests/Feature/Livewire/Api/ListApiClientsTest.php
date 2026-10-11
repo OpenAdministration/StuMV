@@ -77,8 +77,10 @@ test('a client of another community cannot be deleted', function (): void {
     $client = makeApiClient($otherCommunity->getShortCode(), 'Someone Elses Client');
     actingAsAdmin($community);
 
+    // Called on the instance: Livewire's test harness renders
+    // ModelNotFoundException as a 404 instead of propagating it.
     expect(fn () => Livewire::test(ListApiClients::class, ['realm' => $community])
-        ->call('deletePrepare', $client->id))
+        ->instance()->deletePrepare($client->id))
         ->toThrow(ModelNotFoundException::class);
 
     expect(PassportClient::find($client->id))->not->toBeNull();

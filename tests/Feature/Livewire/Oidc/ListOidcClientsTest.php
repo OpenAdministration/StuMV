@@ -62,8 +62,10 @@ test('an admin cannot revoke another realm\'s OIDC client', function (): void {
     $client = makeOidcClient('Other Realm SSO App', $otherCommunity->getShortCode());
     actingAsAdmin($community);
 
+    // Called on the instance: Livewire's test harness renders
+    // ModelNotFoundException as a 404 instead of propagating it.
     Livewire::test(ListOidcClients::class, ['realm' => $community])
-        ->call('revokePrepare', $client->id);
+        ->instance()->revokePrepare($client->id);
 })->throws(ModelNotFoundException::class);
 
 test('a non-admin cannot view the OIDC client list', function (): void {

@@ -142,7 +142,7 @@ class ListMembers extends Component
     public function close(): void
     {
         Flux::modals()->close();
-        unset($this->deleteMemberName, $this->deleteMemberUsername);
+        $this->reset('deleteMemberName', 'deleteMemberUsername');
     }
 
     public function exportPdf($username)

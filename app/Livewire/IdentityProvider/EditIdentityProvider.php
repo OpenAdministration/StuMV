@@ -192,7 +192,7 @@ class EditIdentityProvider extends Component
     public function closeDeleteMapping(): void
     {
         Flux::modal('delete-mapping')->close();
-        unset($this->deleteMappingId, $this->deleteMappingLabel);
+        $this->reset('deleteMappingId', 'deleteMappingLabel');
     }
 
     public function addGroupMapping(): void
@@ -231,6 +231,6 @@ class EditIdentityProvider extends Component
     public function closeDeleteGroupMapping(): void
     {
         Flux::modal('delete-group-mapping')->close();
-        unset($this->deleteGroupMappingId, $this->deleteGroupMappingLabel);
+        $this->reset('deleteGroupMappingId', 'deleteGroupMappingLabel');
     }
 }

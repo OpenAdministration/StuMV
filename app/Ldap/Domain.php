@@ -6,7 +6,11 @@ use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\OpenLDAP\Entry;
+use LdapRecord\Query\Model\Builder;
 
+/**
+ * @method static Builder fromCommunity(string $uid)
+ */
 class Domain extends Entry
 {
     use FromCommunityScopeTrait;

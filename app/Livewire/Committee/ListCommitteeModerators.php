@@ -96,7 +96,7 @@ class ListCommitteeModerators extends Component
     public function close(): void
     {
         Flux::modal('delete')->close();
-        unset($this->deleteModeratorUsername, $this->deleteModeratorName);
+        $this->reset('deleteModeratorUsername', 'deleteModeratorName');
     }
 
     /**

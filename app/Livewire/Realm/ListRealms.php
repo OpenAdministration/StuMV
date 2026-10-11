@@ -164,7 +164,7 @@ class ListRealms extends Component
         $community->delete(recursive: true);
 
         // reset everything to prevent a 404 modal
-        unset($this->deleteRealmName);
+        $this->reset('deleteRealmName');
         Flux::modal('delete')->close();
     }
 

@@ -195,8 +195,10 @@ test('a role mapping is scoped to its own provider - another provider\'s mapping
     ]);
     actingAsAdmin($community);
 
+    // Called on the instance: Livewire's test harness renders
+    // ModelNotFoundException as a 404 instead of propagating it.
     Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
-        ->call('deleteMappingPrepare', $mapping->id);
+        ->instance()->deleteMappingPrepare($mapping->id);
 })->throws(ModelNotFoundException::class);
 
 test('a group mapping can be added and lists the group it targets', function (): void {
@@ -294,6 +296,8 @@ test('a group mapping is scoped to its own provider - another provider\'s mappin
     ]);
     actingAsAdmin($community);
 
+    // Called on the instance: Livewire's test harness renders
+    // ModelNotFoundException as a 404 instead of propagating it.
     Livewire::test(EditIdentityProvider::class, ['realm' => $community, 'provider' => $provider])
-        ->call('deleteGroupMappingPrepare', $mapping->id);
+        ->instance()->deleteGroupMappingPrepare($mapping->id);
 })->throws(ModelNotFoundException::class);

@@ -59,6 +59,6 @@ class ListGroupMailmanLists extends Component
     public function closeDelete(): void
     {
         Flux::modal('delete')->close();
-        unset($this->deleteMappingId, $this->deleteMappingLabel);
+        $this->reset('deleteMappingId', 'deleteMappingLabel');
     }
 }

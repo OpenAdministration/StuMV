@@ -6,7 +6,11 @@ use App\Ldap\Traits\FromCommunityScopeTrait;
 use App\Ldap\Traits\SearchScopeTrait;
 use App\Models\RoleMembership;
 use LdapRecord\Models\OpenLDAP\Group;
+use LdapRecord\Query\Model\Builder;
 
+/**
+ * @method static Builder fromCommunity(string $uid)
+ */
 class Role extends Group
 {
     use FromCommunityScopeTrait;

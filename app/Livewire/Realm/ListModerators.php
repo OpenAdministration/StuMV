@@ -134,7 +134,7 @@ class ListModerators extends Component
     public function close(): void
     {
         Flux::modal('delete')->close();
-        unset($this->deleteMemberUsername, $this->deleteMemberName);
+        $this->reset('deleteMemberUsername', 'deleteMemberName');
     }
 
     /**

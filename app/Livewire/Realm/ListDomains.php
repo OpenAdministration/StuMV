@@ -104,6 +104,6 @@ class ListDomains extends Component
     public function close()
     {
         Flux::modal('delete')->close();
-        unset($this->deleteDomain);
+        $this->reset('deleteDomain');
     }
 }

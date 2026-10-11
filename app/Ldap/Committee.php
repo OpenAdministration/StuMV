@@ -11,6 +11,9 @@ use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Model\Builder;
 
+/**
+ * @method static Builder fromCommunity(string $uid)
+ */
 class Committee extends OrganizationalUnit
 {
     use SearchScopeTrait;

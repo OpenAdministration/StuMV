@@ -101,7 +101,7 @@ class ListOidcClients extends Component
     public function close(): void
     {
         Flux::modal('revoke')->close();
-        unset($this->revokeClientId, $this->revokeClientName);
+        $this->reset('revokeClientId', 'revokeClientName');
     }
 
     public function deletePrepare(string $clientId): void
@@ -127,6 +127,6 @@ class ListOidcClients extends Component
     public function closeDelete(): void
     {
         Flux::modal('delete')->close();
-        unset($this->deleteClientId, $this->deleteClientName);
+        $this->reset('deleteClientId', 'deleteClientName');
     }
 }

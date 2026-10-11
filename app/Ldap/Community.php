@@ -11,9 +11,9 @@ use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Model\Builder;
 
-/***
- * @property $ou
- * @property $description
+/**
+ * @property ?array $ou
+ * @property ?array $description
  */
 class Community extends OrganizationalUnit implements LdapImportable
 {
