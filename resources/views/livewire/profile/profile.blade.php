@@ -81,10 +81,7 @@
                     </div>
                 </div>
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">
-                    <flux:field>
-                        <flux:label>{{ __('profile.phone_label') }}</flux:label>
-                        <flux:input wire:model="phone" />
-                    </flux:field>
+                    <flux:phone wire:model="phone" country="DE" :label="__('profile.phone_label')" />
                 </div>
                 @can('superadmin', \App\Models\User::class)
                     <div class="mt-6 space-y-4">

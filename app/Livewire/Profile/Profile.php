@@ -52,6 +52,7 @@ class Profile extends Component
 
     public $city;
 
+    #[Rule(['nullable', 'regex:/^\+[1-9]\d{6,14}$/'])]
     public $phone;
 
     public $currentUsername;
@@ -81,6 +82,12 @@ class Profile extends Component
         } else {
             $this->userIsActive = true;
         }
+    }
+
+    /** @return array<string, string> */
+    protected function messages(): array
+    {
+        return ['phone.regex' => __('profile.phone_invalid')];
     }
 
     public function render()

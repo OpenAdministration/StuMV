@@ -45,6 +45,7 @@ return [
     'postal_code_label' => 'Postleitzahl',
     'city_label' => 'Ort',
     'phone_label' => 'Telefon',
+    'phone_invalid' => 'Bitte gib eine gültige Telefonnummer mit Ländervorwahl an.',
     'remove_picture' => 'Entfernen',
     'sessions' => 'Sitzungen',
     'sessions_explanation' => 'Hier findest du alle mit diesem Konto angemeldeten Geräte bzw. Browser.',

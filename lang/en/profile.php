@@ -45,6 +45,7 @@ return [
     'postal_code_label' => 'Postal code',
     'city_label' => 'City',
     'phone_label' => 'Phone',
+    'phone_invalid' => 'Please enter a valid phone number including the country code.',
     'remove_picture' => 'Remove',
     'sessions' => 'Sessions',
     'sessions_explanation' => 'Here you can find all devices and browsers signed in to this account.',
