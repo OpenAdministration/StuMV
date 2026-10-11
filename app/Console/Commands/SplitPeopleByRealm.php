@@ -222,7 +222,7 @@ class SplitPeopleByRealm extends Command
             return;
         }
 
-        $newPeopleDn = $community !== null ? $community->peopleDn() : Community::peopleDnFor($realmUid);
+        $newPeopleDn = $community?->peopleDn() ?? Community::peopleDnFor($realmUid);
         $newDn = 'uid='.$uid.','.$newPeopleDn;
 
         $this->dnUpdatesByRealm[$realmUid][$original['dn']] = $newDn;
