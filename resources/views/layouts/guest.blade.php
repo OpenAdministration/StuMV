@@ -10,7 +10,6 @@
         @livewireStyles
         @fluxAppearance(['nonce' => \Illuminate\Support\Facades\Vite::cspNonce()])
         @vite('resources/css/app.css')
-        @vite('resources/css/theme.css')
         @vite('resources/js/app.js')
         @if(($branding ?? null)?->background_id)
             <style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
