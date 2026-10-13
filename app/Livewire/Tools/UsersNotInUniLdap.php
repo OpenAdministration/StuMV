@@ -25,6 +25,8 @@ class UsersNotInUniLdap extends Component
 
     public string $userToDelete = '';
 
+    public string $userToLock = '';
+
     public string $search = '';
 
     public function mount(Community $realm)
@@ -47,6 +49,9 @@ class UsersNotInUniLdap extends Component
 
         return view('livewire.tools.users-not-in-uni-ldap', [
             'filteredResults' => $filteredResults,
+            // Same check for every row - it only depends on the realm - and
+            // it hits LDAP, so it's computed once here rather than per row.
+            'isAdmin' => auth()->user()->can('admin', Community::findOrFailByUid($this->uid)),
         ]);
     }
 
@@ -56,7 +61,11 @@ class UsersNotInUniLdap extends Component
         $this->results = [];
 
         $community = Community::findOrFailByUid($this->uid);
-        $members = User::query()->in($community->peopleDn())->get();
+        // pwdAccountLockedTime is operational and only returned when named explicitly.
+        $members = User::query()
+            ->in($community->peopleDn())
+            ->select(['*', 'pwdAccountLockedTime'])
+            ->get();
 
         $domains = [];
         $domainEntries = Domain::fromCommunity($this->uid)->get();
@@ -96,6 +105,7 @@ class UsersNotInUniLdap extends Component
                 $results[] = [
                     'uid' => $member->getFirstAttribute('uid'),
                     'cn' => $member->getFirstAttribute('cn'),
+                    'locked' => $member->hasAttribute('pwdAccountLockedTime'),
                 ];
             }
         }
@@ -116,10 +126,43 @@ class UsersNotInUniLdap extends Component
         Flux::modal('confirm-delete-user')->show();
     }
 
+    public function confirmLockUser(string $username)
+    {
+        $this->userToLock = $username;
+        Flux::modal('confirm-lock-user')->show();
+    }
+
+    public function lockUser()
+    {
+        $community = Community::findByOrFail('ou', $this->uid);
+        $this->authorize('admin', $community);
+
+        $user = User::query()
+            ->in($community->peopleDn())
+            ->select(['*', 'pwdAccountLockedTime'])
+            ->where('uid', '=', $this->userToLock)
+            ->first();
+
+        if ($user && ! $user->hasAttribute('pwdAccountLockedTime')) {
+            $user->setAttribute('pwdAccountLockedTime', '00000101000000Z');
+            $user->save();
+        }
+
+        $this->results = array_map(
+            fn (array $result): array => $result['uid'] === $this->userToLock
+                ? [...$result, 'locked' => true]
+                : $result,
+            $this->results
+        );
+
+        Flux::toast(variant: 'success', text: __('tools.userLockedSuccessfully'));
+        Flux::modal('confirm-lock-user')->close();
+    }
+
     public function deleteUser()
     {
         $community = Community::findByOrFail('ou', $this->uid);
-        $this->authorize('remove_member', $community);
+        $this->authorize('admin', $community);
 
         // LDAP - scoped to this realm's People branch: the same username
         // could independently exist in another realm too, and deleting the

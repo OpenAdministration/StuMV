@@ -36,16 +36,27 @@
                                         {{ $user['cn'] }}
                                     </flux:link>
                                 </div>
-                                <div>
-                                    <flux:button
-                                        size="sm"
-                                        variant="danger"
-                                        icon="trash-2"
-                                        wire:click="confirmDeleteUser('{{ $user['uid'] }}')"
-                                    >
-                                        {{ __('tools.delete') }}
-                                    </flux:button>
-                                </div>
+                                @if($isAdmin)
+                                    <div class="flex items-center gap-2">
+                                        @unless($user['locked'])
+                                            <flux:button
+                                                size="sm"
+                                                icon="lock"
+                                                wire:click="confirmLockUser('{{ $user['uid'] }}')"
+                                            >
+                                                {{ __('tools.lock') }}
+                                            </flux:button>
+                                        @endunless
+                                        <flux:button
+                                            size="sm"
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="confirmDeleteUser('{{ $user['uid'] }}')"
+                                        >
+                                            {{ __('tools.delete') }}
+                                        </flux:button>
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -60,6 +71,18 @@
             @endif
         </div>
     </div>
+    <flux:modal name="confirm-lock-user" class="md:w-96">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('tools.lockUser') }}</flux:heading>
+                <flux:text class="mt-2">{{ __('tools.lockUserText') }}</flux:text>
+            </div>
+            <div class="flex justify-end gap-2">
+                <flux:button icon="ban" x-on:click="$flux.modal('confirm-lock-user').close()">{{ __('common.cancel') }}</flux:button>
+                <flux:button variant="primary" icon="lock" wire:click="lockUser">{{ __('tools.lockUser') }}</flux:button>
+            </div>
+        </div>
+    </flux:modal>
     <flux:modal name="confirm-delete-user" class="md:w-96">
         <div class="space-y-6">
             <div>
@@ -67,7 +90,7 @@
                 <flux:text class="mt-2">{{ __('tools.deleteUserText') }}</flux:text>
             </div>
             <div class="flex justify-end">
-                <flux:button icon="ban" x-on:click="$flux.modal('confirm-delete-user').close()">{{ __('tools.cancel') }}</flux:button>
+                <flux:button icon="ban" x-on:click="$flux.modal('confirm-delete-user').close()">{{ __('common.cancel') }}</flux:button>
                 <flux:button variant="primary" wire:click="deleteUser">{{ __('tools.deleteUser') }}</flux:button>
             </div>
         </div>

@@ -83,13 +83,13 @@
                 <div class="grid lg:grid-cols-2 gap-6 mt-6">
                     <flux:phone wire:model="phone" country="DE" :label="__('profile.phone_label')" />
                 </div>
-                @can('superadmin', \App\Models\User::class)
+                @if($canToggleActive)
                     <div class="mt-6 space-y-4">
                         <flux:separator variant="subtle" />
                         <flux:switch wire:model.live="userIsActive" label="{{ __('profile.user_is_active') }}" description="{{ __('profile.user_is_active_description') }}" />
                         <flux:separator variant="subtle" />
                     </div>
-                @endcan
+                @endif
                 <x-slot:abort_route>
                     {{ url()->previous() }}
                 </x-slot:abort_route>

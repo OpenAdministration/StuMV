@@ -238,3 +238,106 @@ test('deleting a user without a profile picture does not error', function (): vo
 
     expect(LdapUser::findByUsername($member->username))->toBeNull();
 });
+
+test('locking a user sets the LDAP lock attribute', function (): void {
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsSuperAdmin();
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->set('userToLock', $member->username)
+        ->call('lockUser')
+        ->assertOk();
+
+    expect(LdapUser::isLockedByUsername($member->username, $community->peopleDn()))->toBeTrue();
+});
+
+test('a realm admin may lock a user', function (): void {
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsAdmin($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->set('userToLock', $member->username)
+        ->call('lockUser')
+        ->assertOk();
+
+    expect(LdapUser::isLockedByUsername($member->username, $community->peopleDn()))->toBeTrue();
+});
+
+test('a realm admin may delete a user', function (): void {
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsAdmin($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->set('userToDelete', $member->username)
+        ->call('deleteUser')
+        ->assertOk();
+
+    expect(LdapUser::findByUsername($member->username))->toBeNull();
+});
+
+test('a moderator may not delete a user', function (): void {
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsModerator($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->set('userToDelete', $member->username)
+        ->call('deleteUser')
+        ->assertForbidden();
+
+    expect(LdapUser::findByUsername($member->username))->not->toBeNull();
+});
+
+test('a moderator sees neither the lock nor the delete button', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $domain = new Domain(['dc' => 'example.test']);
+    $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
+    $domain->save();
+
+    TestLdap::member($community);
+    actingAsModerator($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->call('searchForUsersNotInUniLdap')
+        ->assertDontSee(__('tools.lock'))
+        ->assertDontSee(__('tools.delete'));
+});
+
+test('a moderator may not lock a user', function (): void {
+    $community = newCommunity();
+    $member = TestLdap::member($community);
+    actingAsModerator($community);
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->set('userToLock', $member->username)
+        ->call('lockUser')
+        ->assertForbidden();
+
+    expect(LdapUser::isLockedByUsername($member->username, $community->peopleDn()))->toBeFalse();
+});
+
+test('the result list marks members that are already locked', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $domain = new Domain(['dc' => 'example.test']);
+    $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
+    $domain->save();
+
+    $member = TestLdap::member($community);
+    actingAsSuperAdmin();
+
+    Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->call('searchForUsersNotInUniLdap')
+        ->assertSee(__('tools.lock'))
+        ->set('userToLock', $member->username)
+        ->call('lockUser')
+        ->assertDontSee(__('tools.lock'))
+        ->call('searchForUsersNotInUniLdap')
+        ->assertDontSee(__('tools.lock'));
+});

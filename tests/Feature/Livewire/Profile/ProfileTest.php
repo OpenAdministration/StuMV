@@ -111,6 +111,45 @@ test('a super admin sees the account-active switch and can disable a user', func
     expect($ldap->getFirstAttribute('pwdAccountLockedTime'))->toBe('00000101000000Z');
 });
 
+test('a realm admin sees the account-active switch and can disable a user', function (): void {
+    $community = newCommunity();
+    $target = TestLdap::member($community);
+    actingAsAdmin($community);
+
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
+        ->assertSee(__('profile.user_is_active'))
+        ->set('userIsActive', false)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $ldap = LdapUser::query()
+        ->select(['*', 'pwdAccountLockedTime'])
+        ->where('uid', '=', $target->username)
+        ->first();
+    expect($ldap->getFirstAttribute('pwdAccountLockedTime'))->toBe('00000101000000Z');
+});
+
+test('a realm admin can re-enable a previously disabled user', function (): void {
+    $community = newCommunity();
+    $target = TestLdap::member($community);
+    actingAsAdmin($community);
+
+    $ldap = LdapUser::findByUsername($target->username);
+    $ldap->setAttribute('pwdAccountLockedTime', '00000101000000Z');
+    $ldap->save();
+
+    Livewire::test(Profile::class, ['realm' => $community, 'username' => $target->username])
+        ->set('userIsActive', true)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $fresh = LdapUser::query()
+        ->select(['*', 'pwdAccountLockedTime'])
+        ->where('uid', '=', $target->username)
+        ->first();
+    expect($fresh->hasAttribute('pwdAccountLockedTime'))->toBeFalse();
+});
+
 test('a disabled user shows as inactive when the profile loads', function (): void {
     $community = newCommunity();
     $target = TestLdap::member($community);

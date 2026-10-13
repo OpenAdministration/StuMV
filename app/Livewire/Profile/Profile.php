@@ -94,6 +94,7 @@ class Profile extends Component
     {
         return view('livewire.profile.profile', [
             'verifiedAddresses' => $this->additionalEmailRows()->verified()->pluck('address')->all(),
+            'canToggleActive' => auth()->user()->can('admin', Community::findOrFailByUid($this->realm_uid)),
         ])->title(__('profile.title', ['name' => $this->givenName.' '.$this->sn]));
     }
 
@@ -208,7 +209,7 @@ class Profile extends Component
         $isCurrentlyLocked = $user->hasAttribute('pwdAccountLockedTime');
 
         if ($this->userIsActive === $isCurrentlyLocked) {
-            abort_unless(auth()->user()->can('superadmin', \App\Models\User::class), 403);
+            $this->authorize('admin', Community::findOrFailByUid($this->realm_uid));
         }
 
         if ($this->userIsActive && $isCurrentlyLocked) {
