@@ -16,7 +16,7 @@ test('a user can edit their own profile', function (): void {
     Livewire::test(Profile::class, ['realm' => $community, 'username' => $user->username])
         ->set('givenName', 'Neu')
         ->set('sn', 'Name')
-        ->set('phone', '+49 30 1234')
+        ->set('phone', '+4930123456')
         ->set('city', 'Berlin')
         ->call('save')
         ->assertHasNoErrors();
@@ -25,7 +25,7 @@ test('a user can edit their own profile', function (): void {
     expect($ldap->getFirstAttribute('givenName'))->toBe('Neu')
         ->and($ldap->getFirstAttribute('sn'))->toBe('Name')
         ->and($ldap->getFirstAttribute('cn'))->toBe('Neu Name')
-        ->and($ldap->getFirstAttribute('telephoneNumber'))->toBe('+49 30 1234')
+        ->and($ldap->getFirstAttribute('telephoneNumber'))->toBe('+4930123456')
         ->and($ldap->getFirstAttribute('l'))->toBe('Berlin');
 });
 
