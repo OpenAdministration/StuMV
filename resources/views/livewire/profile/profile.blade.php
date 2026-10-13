@@ -84,11 +84,9 @@
                     <flux:phone wire:model="phone" country="DE" :label="__('profile.phone_label')" />
                 </div>
                 @if($canToggleActive)
-                    <div class="mt-6 space-y-4">
-                        <flux:separator variant="subtle" />
+                    <flux:card class="mt-6">
                         <flux:switch wire:model.live="userIsActive" label="{{ __('profile.user_is_active') }}" description="{{ __('profile.user_is_active_description') }}" />
-                        <flux:separator variant="subtle" />
-                    </div>
+                    </flux:card>
                 @endif
                 <x-slot:abort_route>
                     {{ url()->previous() }}
