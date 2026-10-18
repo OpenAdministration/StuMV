@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
+@import '@fontsource/adwaita-sans/latin-400.css';
+@import '@fontsource/adwaita-sans/latin-600.css';
+@import '@fontsource/adwaita-sans/latin-700.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
@@ -20,7 +23,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Adwaita Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     --livewire-progress-bar-color: var(--color-accent-content) !important;
 }
 
