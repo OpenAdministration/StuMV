@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
 @import '@fontsource/adwaita-sans/latin-400.css';
+@import '@fontsource/adwaita-sans/latin-500.css';
 @import '@fontsource/adwaita-sans/latin-600.css';
 @import '@fontsource/adwaita-sans/latin-700.css';
 
