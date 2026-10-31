@@ -83,6 +83,59 @@ services:
                 condition: service_healthy
             ldap:
                 condition: service_healthy
+            mailman-core:
+                condition: service_started
+    mailman-core:
+        # Mailman 3 Core REST API for mailman:sync-lists, also reachable from
+        # the host at http://localhost:${MAILMAN_HOST_PORT:-18001}/3.1
+        # (restadmin / mailman-not-production). Without DATABASE_URL the image
+        # uses SQLite inside the container, so like ldap every run starts clean;
+        # mailman-seed recreates the demo list.
+        image: docker.io/maxking/mailman-core:0.5
+        hostname: mailman-core
+        environment:
+            # Mailman builds member self_links from this, and SyncLists follows
+            # them for unsubscribes - so it must resolve from php-fpm.
+            MM_HOSTNAME: mailman-core
+            MAILMAN_REST_USER: restadmin
+            MAILMAN_REST_PASSWORD: mailman-not-production
+            # Welcome/goodbye mails land in mailpit.
+            SMTP_HOST: mailpit
+            SMTP_PORT: "1025"
+        ports:
+            - "${MAILMAN_HOST_PORT:-18001}:8001"
+        networks:
+            - stumv
+        depends_on:
+            mailpit:
+                condition: service_started
+        healthcheck:
+            test: ["CMD", "curl", "-fsu", "restadmin:mailman-not-production",
+                   "http://mailman-core:8001/3.1/system/versions"]
+            start_period: 10s
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    mailman-seed:
+        # One-shot: creates the demo domain/list in mailman-core (see
+        # docker/mailman/seed.sh), reusing its image for curl.
+        image: docker.io/maxking/mailman-core:0.5
+        entrypoint: ["/bin/sh", "/seed.sh"]
+        volumes:
+            - ./docker/mailman/seed.sh:/seed.sh:ro,z
+        networks:
+            - stumv
+        depends_on:
+            mailman-core:
+                condition: service_healthy
+    mailpit:
+        # Catches the mails mailman-core sends; web UI at
+        # http://localhost:${MAILPIT_PORT:-18025}.
+        image: docker.io/axllent/mailpit:v1.27
+        ports:
+            - "${MAILPIT_PORT:-18025}:8025"
+        networks:
+            - stumv
     mariadb:
         image: mariadb:latest
         restart: always

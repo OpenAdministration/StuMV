@@ -29,6 +29,10 @@ php artisan migrate --force
 # emails. Idempotent (keyed on username), so it is safe on every start.
 php artisan db:seed --class=DemoUsersSeeder --force
 
+# Map the demo ref-finanzen group onto the Mailman list from
+# docker/mailman/seed.sh. Idempotent as well.
+php artisan db:seed --class=DemoMailmanSeeder --force
+
 # Make uploaded files (avatars, realm branding) reachable over HTTP. Exits 0
 # even when the link already exists, so this is safe on every start.
 php artisan storage:link

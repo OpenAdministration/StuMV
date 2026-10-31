@@ -74,6 +74,7 @@ class DemoUsersSeeder extends Seeder
 
                     $username = explode(',', substr((string) $memberDn, 4), 2)[0];
 
+                    // update() also backfills realm on rows seeded before it was set.
                     RoleMembership::firstOrCreate(
                         [
                             'role_cn' => $cn,
@@ -86,7 +87,7 @@ class DemoUsersSeeder extends Seeder
                             'decided' => $from,
                             'comment' => 'Demo seed',
                         ]
-                    );
+                    )->update(['realm' => 'demo']);
                 }
             }
         }

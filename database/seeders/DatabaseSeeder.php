@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -28,6 +27,7 @@ class DatabaseSeeder extends Seeder
         // DB-side records for the LDAP demo community (20-demo.ldif): demo login
         // rows (emails verified) plus their committee role memberships.
         $this->call(DemoUsersSeeder::class);
+        $this->call(DemoMailmanSeeder::class);
         // \App\Models\User::factory(5)->create();
 
         // \App\Models\User::factory()->create([
