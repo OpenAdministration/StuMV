@@ -15,6 +15,7 @@ class MailmanClient
         private readonly string $baseUrl,
         private readonly string $apiUser,
         private readonly string $apiKey,
+        private readonly bool|string $verifyTls = true,
     ) {}
 
     /**
@@ -71,6 +72,7 @@ class MailmanClient
     {
         return Http::withBasicAuth($this->apiUser, $this->apiKey)
             ->baseUrl(rtrim($this->baseUrl, '/').'/')
+            ->withOptions(['verify' => $this->verifyTls])
             ->timeout(10);
     }
 }

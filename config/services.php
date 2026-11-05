@@ -37,6 +37,8 @@ return [
         'url' => env('MAILMAN_URL'),
         'api_user' => env('MAILMAN_API_USER', 'restadmin'),
         'api_key' => env('MAILMAN_API_KEY'),
+        // true, false, or a path to a CA bundle to verify against.
+        'verify_tls' => env('MAILMAN_VERIFY_TLS', true),
     ],
 
 ];

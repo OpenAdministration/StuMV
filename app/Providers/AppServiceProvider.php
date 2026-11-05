@@ -53,6 +53,7 @@ class AppServiceProvider extends ServiceProvider
             (string) config('services.mailman.url'),
             (string) config('services.mailman.api_user'),
             (string) config('services.mailman.api_key'),
+            config('services.mailman.verify_tls'),
         ));
 
         // 'auth.password' is a deferred service (PasswordResetServiceProvider) -
