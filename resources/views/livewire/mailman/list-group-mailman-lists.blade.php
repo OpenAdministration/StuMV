@@ -62,6 +62,14 @@
                                 >
                                     {{ __('group_mailman_lists.link_members') }}
                                 </flux:menu.item>
+                                @if($mapping->group_exists)
+                                    <flux:menu.item
+                                        icon="refresh-ccw"
+                                        wire:click="syncList({{ $mapping->id }})"
+                                    >
+                                        {{ __('group_mailman_lists.sync') }}
+                                    </flux:menu.item>
+                                @endif
                                 <flux:menu.item
                                     variant="danger"
                                     icon="trash-2"

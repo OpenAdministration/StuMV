@@ -4,6 +4,7 @@ use App\Livewire\Mailman\ListGroupMailmanLists;
 use App\Models\GroupMailmanList;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
@@ -88,6 +89,55 @@ test('the mapping list is paginated', function (): void {
         ->call('gotoPage', 2)
         ->assertSee('list11.lists.example.org');
 });
+
+test('a single list can be synced from the overview', function (): void {
+    config(['services.mailman.api_url' => 'http://mailman.test/3.1']);
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $mapping = GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    actingAsAdmin($community);
+
+    Http::fake([
+        'mailman.test/3.1/lists/a.lists.example.org/roster/member' => Http::response([
+            'entries' => [['email' => 'stale@example.com', 'self_link' => 'http://mailman.test/3.1/members/42']],
+        ]),
+        'mailman.test/3.1/members/42' => Http::response('', 204),
+    ]);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('syncList', $mapping->id)
+        ->assertDispatched('toast-show', fn (string $name, array $params): bool => $params['dataset']['variant'] === 'success');
+
+    Http::assertSent(fn ($request): bool => $request->method() === 'DELETE' && $request->url() === 'http://mailman.test/3.1/members/42');
+    Http::assertNotSent(fn ($request): bool => str_contains($request->url(), 'b.lists.example.org'));
+});
+
+test('a failed sync shows an error toast', function (): void {
+    config(['services.mailman.api_url' => 'http://mailman.test/3.1']);
+    $community = newCommunity();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $mapping = GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
+    actingAsAdmin($community);
+
+    Http::fake(['mailman.test/*' => Http::response('', 500)]);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('syncList', $mapping->id)
+        ->assertDispatched('toast-show', fn (string $name, array $params): bool => $params['dataset']['variant'] === 'danger');
+});
+
+test('an admin cannot sync another realm\'s list', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $otherGroup = TestLdap::makeGroup($otherCommunity, 'other-list');
+    $mapping = GroupMailmanList::create(['realm' => $otherCommunity->getShortCode(), 'group_dn' => $otherGroup->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->instance()->syncList($mapping->id);
+})->throws(ModelNotFoundException::class);
 
 test('a mapping can be deleted', function (): void {
     $community = newCommunity();

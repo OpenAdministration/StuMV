@@ -22,7 +22,8 @@ class SyncLists extends Command
      */
     protected $signature = 'mailman:sync-lists
                 {realm? : The short name of the community to limit syncing to}
-                {group_dn? : Limit syncing to a single mapping\'s group_dn}';
+                {group_dn? : Limit syncing to a single mapping\'s group_dn}
+                {--list= : Limit syncing to a single Mailman list_id}';
 
     /**
      * The console command description.
@@ -42,6 +43,7 @@ class SyncLists extends Command
         $mappings = GroupMailmanList::query()
             ->when($this->argument('realm'), fn ($query, $realm) => $query->where('realm', $realm))
             ->when($this->argument('group_dn'), fn ($query, $groupDn) => $query->where('group_dn', $groupDn))
+            ->when($this->option('list'), fn ($query, $listId) => $query->where('mailman_list_id', $listId))
             ->get();
 
         if ($mappings->isEmpty()) {

@@ -127,6 +127,23 @@ test('mailman:sync-lists can be limited to a single mapping via group_dn', funct
     Http::assertSentCount(1);
 });
 
+test('mailman:sync-lists can be limited to a single list via --list', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $group = TestLdap::makeGroup($community, 'grp-a');
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+
+    Http::fake([
+        'mailman.test/3.1/lists/b.lists.example.org/roster/member' => Http::response(['entries' => []]),
+    ]);
+
+    $this->artisan('mailman:sync-lists', ['--list' => 'b.lists.example.org'])->assertExitCode(0);
+
+    Http::assertSentCount(1);
+    Http::assertSent(fn ($request): bool => str_contains($request->url(), '/lists/b.lists.example.org/'));
+});
+
 test('mailman:sync-lists leaves a list untouched when its group no longer exists', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

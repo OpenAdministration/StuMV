@@ -50,6 +50,9 @@
 
     <div class="ml-auto flex justify-end items-center gap-2">
         @if($currentRealm && auth()->user()->can('admin', $currentRealm))
+            @if(config('services.mailman.api_url') && ! $currentRealm->isAdminRealm())
+                <livewire:sync-mailman :uid="$currentRealm->getShortCode()" />
+            @endif
             <livewire:sync-ldap :uid="$currentRealm->getShortCode()" />
         @endif
         
