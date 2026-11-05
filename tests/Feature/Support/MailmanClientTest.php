@@ -102,3 +102,16 @@ test('without Postorius each address is subscribed via REST and failures are rep
     expect(array_keys($failed))->toBe(['bad@example.org']);
     Http::assertSentCount(2);
 });
+
+test('large Postorius batches are sent in chunks of 25', function (): void {
+    $emails = array_map(fn (int $i): string => "user{$i}@example.org", range(1, 30));
+    fakePostorius($emails);
+
+    $failed = postoriusClient()->subscribe('team.lists.example.org', $emails);
+
+    expect($failed)->toBe([]);
+    $posts = Http::recorded(fn (Request $request): bool => $request->method() === 'POST' && str_ends_with($request->url(), '/mass_subscribe/'))->values();
+    expect($posts)->toHaveCount(2)
+        ->and(substr_count($posts[0][0]['emails'], "\n") + 1)->toBe(25)
+        ->and(substr_count($posts[1][0]['emails'], "\n") + 1)->toBe(5);
+});

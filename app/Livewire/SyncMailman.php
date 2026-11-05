@@ -28,6 +28,8 @@ class SyncMailman extends Component
     public function syncMailman(): void
     {
         $this->authorizeRealm($this->uid);
+        // Large lists can take minutes; the web default of 30s would kill the sync midway.
+        set_time_limit(600);
 
         try {
             $exitCode = Artisan::call('mailman:sync-lists', ['realm' => $this->uid]);

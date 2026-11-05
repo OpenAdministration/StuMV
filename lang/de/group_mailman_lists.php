@@ -19,6 +19,7 @@ return [
     'delete_warning' => 'Soll die Zuordnung zur Mailingliste :name wirklich gelöscht werden? Die Gruppenmitglieder werden dadurch nicht automatisch von der Mailingliste entfernt.',
     'deleted_success' => 'Die Zuordnung wurde gelöscht.',
     'sync' => 'Synchronisieren',
+    'sync_running' => 'Wird synchronisiert …',
     'sync_success' => 'Die Mailingliste :name wurde synchronisiert.',
     'sync_failed' => 'Die Mailingliste :name konnte nicht vollständig synchronisiert werden. Details stehen im Log.',
     'link_members' => 'Mitglieder ansehen',

@@ -35,7 +35,13 @@
             <flux:table.rows>
             @forelse($mappings as $mapping)
                 <flux:table.row>
-                    <flux:table.cell><span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span></flux:table.cell>
+                    <flux:table.cell>
+                        <div class="flex items-center gap-2">
+                            <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
+                            <flux:icon.loading variant="micro" wire:loading wire:target="syncList({{ $mapping->id }})" />
+                            <span wire:loading wire:target="syncList({{ $mapping->id }})">{{ __('group_mailman_lists.sync_running') }}</span>
+                        </div>
+                    </flux:table.cell>
                     <flux:table.cell>
                         @if($mapping->group_exists)
                             <flux:link

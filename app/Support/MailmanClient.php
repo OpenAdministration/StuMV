@@ -17,6 +17,8 @@ use Throwable;
  */
 class MailmanClient
 {
+    private const int POSTORIUS_CHUNK_SIZE = 25;
+
     private readonly CookieJar $postoriusCookies;
 
     private bool $postoriusLoggedIn = false;
@@ -228,15 +230,30 @@ class MailmanClient
      */
     private function viaPostorius(string $listId, string $form, array $emails, bool $subscribed, array $fields = []): array
     {
-        try {
-            $this->submitPostoriusForm("postorius/lists/{$listId}/{$form}/", ['emails' => implode("\n", $emails)] + $fields);
-            $roster = array_map(strtolower(...), array_column($this->listMembers($listId), 'email'));
-        } catch (Throwable $e) {
-            return array_fill_keys($emails, $e->getMessage());
+        $failed = [];
+        $submitted = [];
+
+        // Chunked so each form response stays well within the HTTP timeout.
+        foreach (array_chunk($emails, self::POSTORIUS_CHUNK_SIZE) as $chunk) {
+            try {
+                $this->submitPostoriusForm("postorius/lists/{$listId}/{$form}/", ['emails' => implode("\n", $chunk)] + $fields);
+                array_push($submitted, ...$chunk);
+            } catch (Throwable $e) {
+                $failed += array_fill_keys($chunk, $e->getMessage());
+            }
         }
 
-        $failed = [];
-        foreach ($emails as $email) {
+        if ($submitted === []) {
+            return $failed;
+        }
+
+        try {
+            $roster = array_map(strtolower(...), array_column($this->listMembers($listId), 'email'));
+        } catch (Throwable $e) {
+            return $failed + array_fill_keys($submitted, $e->getMessage());
+        }
+
+        foreach ($submitted as $email) {
             if (in_array(strtolower($email), $roster, true) !== $subscribed) {
                 $failed[$email] = $subscribed
                     ? 'still not subscribed after the Postorius request'

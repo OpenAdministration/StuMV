@@ -8,6 +8,7 @@ return [
     'ldap_preview_empty' => 'No changes - LDAP is already up to date.',
     'mailman_title' => 'Synchronize the mailing lists with the rights groups',
     'mailman_confirm_text' => 'All mailing lists of this community will be matched to their rights groups. Addresses that no longer belong to the group will be removed from the list.',
+    'mailman_running' => 'Synchronizing. This can take a few minutes for large lists.',
     'mailman_success' => 'The mailing lists have been synchronized successfully.',
     'mailman_failed' => 'The mailing lists could not be fully synchronized. See the log for details.',
     'roles_section' => 'Roles',

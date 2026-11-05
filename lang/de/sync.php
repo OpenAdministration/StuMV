@@ -8,6 +8,7 @@ return [
     'ldap_preview_empty' => 'Keine Änderungen - LDAP ist bereits aktuell.',
     'mailman_title' => 'Synchronisiere die Mailinglisten mit den Rechtegruppen',
     'mailman_confirm_text' => 'Alle Mailinglisten dieser Studierendenschaft werden an ihre Rechtegruppen angeglichen. Adressen, die nicht mehr zur Gruppe gehören, werden von der Liste entfernt.',
+    'mailman_running' => 'Synchronisation läuft. Bei großen Listen kann das einige Minuten dauern.',
     'mailman_success' => 'Die Mailinglisten wurden erfolgreich synchronisiert.',
     'mailman_failed' => 'Die Mailinglisten konnten nicht vollständig synchronisiert werden. Details stehen im Log.',
     'roles_section' => 'Rollen',

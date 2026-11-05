@@ -78,6 +78,8 @@ class ListGroupMailmanLists extends Component
     public function syncList(int $mappingId): void
     {
         $mapping = GroupMailmanList::where('realm', $this->uid)->findOrFail($mappingId);
+        // Large lists can take minutes; the web default of 30s would kill the sync midway.
+        set_time_limit(600);
 
         try {
             $exitCode = Artisan::call('mailman:sync-lists', ['realm' => $this->uid, '--list' => $mapping->mailman_list_id]);
