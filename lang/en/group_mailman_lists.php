@@ -3,7 +3,7 @@
 return [
     'list_title' => 'Mailman mailing lists',
     'headline' => 'Mailman mailing lists',
-    'explanation' => 'Map groups of this community to Mailman 3 mailing lists, exactly one group per list. The group\'s members are synced onto the mailing list by running "php artisan mailman:sync-lists".',
+    'explanation' => 'Map rights groups of this community to mailing lists (Mailman 3).',
     'search' => 'Search mappings',
     'new' => 'New mapping',
     'new_title' => 'Map a group to a mailing list',
