@@ -3,6 +3,7 @@
 use App\Livewire\SyncMailman;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -26,10 +27,14 @@ test('a failed sync shows an error toast', function (): void {
     actingAsAdmin($community);
 
     Artisan::shouldReceive('call')->once()->andReturn(1);
+    Artisan::shouldReceive('output')->once()->andReturn('Failed to add a@example.org: boom');
+    Log::spy();
 
     Livewire::test(SyncMailman::class, ['uid' => $community->getShortCode()])
         ->call('syncMailman')
         ->assertDispatched('toast-show', fn (string $name, array $params): bool => $params['dataset']['variant'] === 'danger');
+
+    Log::shouldHaveReceived('error')->with('mailman:sync-lists failed', Mockery::on(fn (array $context): bool => $context['output'] === 'Failed to add a@example.org: boom'));
 });
 
 test('an admin of a different realm cannot use this component', function (): void {

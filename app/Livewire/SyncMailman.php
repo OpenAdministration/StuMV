@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Ldap\Community;
 use Flux\Flux;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Throwable;
@@ -43,6 +44,8 @@ class SyncMailman extends Component
         if ($exitCode === 0) {
             Flux::toast(variant: 'success', text: __('sync.mailman_success'));
         } else {
+            // Artisan::call() swallows the command's own output otherwise.
+            Log::error('mailman:sync-lists failed', ['realm' => $this->uid, 'output' => Artisan::output()]);
             Flux::toast(variant: 'danger', text: __('sync.mailman_failed'));
         }
     }

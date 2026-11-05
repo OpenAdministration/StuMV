@@ -109,7 +109,7 @@ class ListMailmanListMembers extends Component
         if ($failed === []) {
             Flux::toast(variant: 'success', text: $success);
         } else {
-            Log::warning('Mailman single member sync failed', ['list_id' => $this->mailmanListId, 'email' => $email, 'exception' => $failed[$email] ?? null]);
+            Log::error('Mailman single member sync failed', ['list_id' => $this->mailmanListId, 'email' => $email, 'exception' => $failed[$email] ?? null]);
             Flux::toast(variant: 'danger', text: __('group_mailman_lists.member_sync_failed', ['email' => $email]));
         }
     }

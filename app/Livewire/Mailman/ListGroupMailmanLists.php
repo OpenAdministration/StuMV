@@ -7,6 +7,7 @@ use App\Ldap\Group;
 use App\Models\GroupMailmanList;
 use Flux\Flux;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -91,6 +92,8 @@ class ListGroupMailmanLists extends Component
         if ($exitCode === 0) {
             Flux::toast(variant: 'success', text: __('group_mailman_lists.sync_success', ['name' => $mapping->mailman_list_id]));
         } else {
+            // Artisan::call() swallows the command's own output otherwise.
+            Log::error('mailman:sync-lists failed', ['realm' => $this->uid, 'list_id' => $mapping->mailman_list_id, 'output' => Artisan::output()]);
             Flux::toast(variant: 'danger', text: __('group_mailman_lists.sync_failed', ['name' => $mapping->mailman_list_id]));
         }
     }

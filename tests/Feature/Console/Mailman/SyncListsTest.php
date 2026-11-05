@@ -5,6 +5,7 @@ use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
@@ -172,4 +173,33 @@ test('mailman:sync-lists can be limited to a single realm, leaving other realms 
 
     Http::assertSentCount(1);
     Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), 'a.lists.example.org'));
+});
+
+test('mailman:sync-lists logs a failed subscription as an error', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $member = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    RoleMembership::create([
+        'realm' => $uid,
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today()->subMonth(),
+    ]);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
+        'mailman.test/3.1/members' => Http::response('', 400),
+    ]);
+    Log::spy();
+
+    $this->artisan('mailman:sync-lists')->assertExitCode(1);
+
+    Log::shouldHaveReceived('error')->with('Mailman subscribe failed', Mockery::on(fn (array $context): bool => $context['email'] === $member->ldap()->getFirstAttribute('mail')));
 });

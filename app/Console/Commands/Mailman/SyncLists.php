@@ -130,11 +130,11 @@ class SyncLists extends Command
 
         foreach ($failedRemovals as $email => $reason) {
             $this->error("  |   |-> Failed to remove $email: $reason");
-            Log::warning('Mailman unsubscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $reason]);
+            Log::error('Mailman unsubscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $reason]);
         }
         foreach ($failedAdditions as $email => $reason) {
             $this->error("  |   |-> Failed to add $email: $reason");
-            Log::warning('Mailman subscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $reason]);
+            Log::error('Mailman subscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $reason]);
         }
 
         return $failedRemovals === [] && $failedAdditions === [];
