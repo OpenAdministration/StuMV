@@ -25,6 +25,7 @@
                 multiple
                 searchable
                 wire:model="selected_role_dns"
+                wire:key="roles-{{ $roleFieldKey }}"
                 :disabled="empty($selected_committee_dn)"
             >
                 @foreach($roles as $role)

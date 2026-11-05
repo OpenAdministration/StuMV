@@ -43,6 +43,9 @@ class EditIdentityProvider extends Component
 
     public string $new_role_cn = '';
 
+    // Bumped on committee change so Flux rebuilds the role field and re-checks its "no results" hint.
+    public int $roleFieldKey = 0;
+
     public ?int $deleteMappingId = null;
 
     public string $deleteMappingLabel = '';
@@ -93,6 +96,11 @@ class EditIdentityProvider extends Component
     private function provider(): RealmIdentityProvider
     {
         return RealmIdentityProvider::where('realm', $this->uid)->findOrFail($this->providerId);
+    }
+
+    public function updatedNewCommitteeDn(): void
+    {
+        $this->roleFieldKey++;
     }
 
     public function render()

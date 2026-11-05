@@ -38,6 +38,7 @@
                         variant="listbox"
                         searchable
                         wire:model.live="selected_role_dn"
+                        wire:key="role-{{ $roleFieldKey }}"
                         placeholder="{{ __('tools.select_role_placeholder') }}"
                         :disabled="empty($selected_committee_dn)"
                     >

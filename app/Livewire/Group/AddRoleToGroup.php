@@ -18,9 +18,12 @@ class AddRoleToGroup extends Component
     #[Locked]
     public string $group_cn;
 
-    public string $selected_committee_dn;
+    public string $selected_committee_dn = '';
 
     public array $selected_role_dns = [];
+
+    // Bumped on committee change so Flux rebuilds the role field and re-checks its "no results" hint.
+    public int $roleFieldKey = 0;
 
     public function mount(Community $realm, $cn)
     {
@@ -31,6 +34,7 @@ class AddRoleToGroup extends Component
     public function updatedSelectedCommitteeDn(): void
     {
         $this->reset('selected_role_dns');
+        $this->roleFieldKey++;
     }
 
     public function render()

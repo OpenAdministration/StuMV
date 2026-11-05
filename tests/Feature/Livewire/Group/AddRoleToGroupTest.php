@@ -66,7 +66,8 @@ test('changing the committee clears the selected roles', function (): void {
         ->set('selected_committee_dn', $fsr->getDn())
         ->set('selected_role_dns', [$role->getDn()])
         ->set('selected_committee_dn', $stura->getDn())
-        ->assertSet('selected_role_dns', []);
+        ->assertSet('selected_role_dns', [])
+        ->assertSet('roleFieldKey', 2);
 });
 
 test('at least one role is required', function (): void {

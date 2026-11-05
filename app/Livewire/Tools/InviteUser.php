@@ -26,6 +26,9 @@ class InviteUser extends Component
 
     public string $selected_role_dn = '';
 
+    // Bumped on committee change so Flux rebuilds the role field and re-checks its "no results" hint.
+    public int $roleFieldKey = 0;
+
     /** @var array<string, array{committee_dn: string, role_cn: string, label: string}> keyed by "{committee_dn}|{role_cn}" */
     public array $queuedRoleSelections = [];
 
@@ -66,6 +69,7 @@ class InviteUser extends Component
     public function updatedSelectedCommitteeDn(): void
     {
         $this->reset('selected_role_dn');
+        $this->roleFieldKey++;
     }
 
     /**

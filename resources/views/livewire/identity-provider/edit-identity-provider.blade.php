@@ -174,7 +174,7 @@
 
                         <flux:field>
                             <flux:label>{{ __('identity_providers.mappings_role') }}</flux:label>
-                            <flux:select variant="listbox" searchable wire:model="new_role_cn" :disabled="empty($new_committee_dn)">
+                            <flux:select variant="listbox" searchable wire:model="new_role_cn" wire:key="role-{{ $roleFieldKey }}" :disabled="empty($new_committee_dn)">
                                 @foreach($roles as $role)
                                     <flux:select.option value="{{ $role->getFirstAttribute('cn') }}">{{ $role->getFirstAttribute('description') }} ({{ $role->getFirstAttribute('cn') }})</flux:select.option>
                                 @endforeach
