@@ -209,17 +209,14 @@ class MailmanClient
     }
 
     /**
-     * Subscriptions Mailman holds back for confirmation or moderator approval.
+     * Subscriptions Mailman holds back for confirmation ("subscriber") or
+     * moderator approval ("moderator").
      *
      * @return array<string, array{token: string, owner: string}> keyed by lowercased address
      */
-    private function pendingRequests(string $listId): array
+    public function pendingSubscriptions(string $listId): array
     {
-        try {
-            $entries = $this->request()->get("lists/{$listId}/requests")->throw()->json('entries', []);
-        } catch (Throwable) {
-            return [];
-        }
+        $entries = $this->request()->get("lists/{$listId}/requests")->throw()->json('entries', []);
 
         return collect($entries)
             ->where('type', 'subscription')
@@ -231,12 +228,20 @@ class MailmanClient
     }
 
     /**
-     * A stale pending subscription (e.g. an old, never confirmed self sign-up)
-     * makes Mailman refuse the pre-approved one with a 409, so it is dropped
-     * first - "discard" sends no notification.
+     * Drops a pending subscription without notifying anyone. A stale one
+     * (e.g. an old, never confirmed self sign-up) otherwise makes Mailman
+     * refuse a pre-approved subscribe with a 409.
      */
-    private function discardPendingRequest(string $listId, string $token, string $owner): void
+    public function discardPendingSubscription(string $listId, string $token, string $owner): void
     {
+        if (! $this->usesPostorius()) {
+            $this->request()->asForm()->post("lists/{$listId}/requests/{$token}", ['action' => 'discard'])->throw();
+
+            return;
+        }
+
+        $this->loginToPostorius();
+
         $page = $this->postoriusUrl($owner === 'subscriber'
             ? "postorius/lists/{$listId}/pending_confirmation"
             : "postorius/lists/{$listId}/subscription_requests");
@@ -264,6 +269,18 @@ class MailmanClient
         $notices = $this->postoriusNotices($response->throw()->body());
         if ($notices !== []) {
             throw new RuntimeException(implode(' | ', $notices));
+        }
+    }
+
+    /**
+     * @return array<string, array{token: string, owner: string}>
+     */
+    private function pendingRequests(string $listId): array
+    {
+        try {
+            return $this->pendingSubscriptions($listId);
+        } catch (Throwable) {
+            return [];
         }
     }
 
@@ -341,7 +358,7 @@ class MailmanClient
             foreach ($this->pendingRequests($listId) as $email => $request) {
                 if (in_array($email, array_map(strtolower(...), $emails), true)) {
                     try {
-                        $this->discardPendingRequest($listId, $request['token'], $request['owner']);
+                        $this->discardPendingSubscription($listId, $request['token'], $request['owner']);
                     } catch (Throwable $e) {
                         // Still try to subscribe; reported below if that fails too.
                         $discardErrors[$email] = $e->getMessage();
