@@ -6,6 +6,7 @@ use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
+use Throwable;
 
 /**
  * Thin wrapper around Mailman 3 Core's own REST API (see config/services.php's
@@ -57,49 +58,74 @@ class MailmanClient
      * membership this syncs from is already the authoritative source of
      * truth for who belongs where (same principle as ldap:sync-roles/-groups
      * writing LDAP's uniqueMember directly, with no separate approval step).
+     *
+     * @param  array<int, string>  $emails
+     * @return array<string, string> failed address => reason
      */
-    public function subscribe(string $listId, string $email): void
+    public function subscribe(string $listId, array $emails): array
     {
+        if ($emails === []) {
+            return [];
+        }
+
         if ($this->usesPostorius()) {
-            $this->submitPostoriusForm("postorius/lists/{$listId}/mass_subscribe/", [
-                'emails' => $email,
+            return $this->viaPostorius($listId, 'mass_subscribe', $emails, true, [
                 'pre_verified' => 'on',
                 'pre_confirmed' => 'on',
                 'pre_approved' => 'on',
             ]);
-            $this->assertMembership($listId, $email, true);
-
-            return;
         }
 
-        $this->request()
-            ->asForm()
-            ->post('members', [
-                'list_id' => $listId,
-                'subscriber' => $email,
-                'role' => 'member',
-                'pre_verified' => 'true',
-                'pre_confirmed' => 'true',
-                'pre_approved' => 'true',
-            ])
-            ->throw();
+        $failed = [];
+        foreach ($emails as $email) {
+            try {
+                $this->request()
+                    ->asForm()
+                    ->post('members', [
+                        'list_id' => $listId,
+                        'subscriber' => $email,
+                        'role' => 'member',
+                        'pre_verified' => 'true',
+                        'pre_confirmed' => 'true',
+                        'pre_approved' => 'true',
+                    ])
+                    ->throw();
+            } catch (Throwable $e) {
+                $failed[$email] = $e->getMessage();
+            }
+        }
+
+        return $failed;
     }
 
     /**
-     * $selfLink is the absolute member resource URL returned by
-     * listMembers() (e.g. "http://host:8001/3.1/members/123") - passing it
-     * straight back avoids having to know Mailman's member-id URL scheme.
+     * $members are entries from listMembers(); over REST each one's
+     * self_link is deleted directly, so Mailman's member-id URL scheme
+     * never has to be known here.
+     *
+     * @param  array<int, array{email: string, self_link: string}>  $members
+     * @return array<string, string> failed address => reason
      */
-    public function unsubscribe(string $listId, string $email, string $selfLink): void
+    public function unsubscribe(string $listId, array $members): array
     {
-        if ($this->usesPostorius()) {
-            $this->submitPostoriusForm("postorius/lists/{$listId}/mass_removal/", ['emails' => $email]);
-            $this->assertMembership($listId, $email, false);
-
-            return;
+        if ($members === []) {
+            return [];
         }
 
-        $this->request()->delete($selfLink)->throw();
+        if ($this->usesPostorius()) {
+            return $this->viaPostorius($listId, 'mass_removal', array_column($members, 'email'), false);
+        }
+
+        $failed = [];
+        foreach ($members as $member) {
+            try {
+                $this->request()->delete($member['self_link'])->throw();
+            } catch (Throwable $e) {
+                $failed[$member['email']] = $e->getMessage();
+            }
+        }
+
+        return $failed;
     }
 
     private function request(): PendingRequest
@@ -172,8 +198,9 @@ class MailmanClient
 
     private function postoriusRequest(): PendingRequest
     {
+        // Generous: a mass form subscribes every address before it responds.
         return Http::withOptions(['verify' => $this->webVerifyTls, 'cookies' => $this->postoriusCookies])
-            ->timeout(10);
+            ->timeout(60);
     }
 
     private function postoriusUrl(string $path): string
@@ -191,17 +218,32 @@ class MailmanClient
     }
 
     /**
-     * Postorius reports per-address problems only as (localized) flash
-     * messages, so the roster is the reliable check.
+     * One mass form submission for all $emails. Postorius reports
+     * per-address problems only as (localized) flash messages, so the
+     * roster afterwards is what decides which addresses failed.
+     *
+     * @param  array<int, string>  $emails
+     * @param  array<string, string>  $fields
+     * @return array<string, string> failed address => reason
      */
-    private function assertMembership(string $listId, string $email, bool $expected): void
+    private function viaPostorius(string $listId, string $form, array $emails, bool $subscribed, array $fields = []): array
     {
-        $emails = array_map(strtolower(...), array_column($this->listMembers($listId), 'email'));
-
-        if (in_array(strtolower($email), $emails, true) !== $expected) {
-            throw new RuntimeException($expected
-                ? "{$email} is still not subscribed after the Postorius request"
-                : "{$email} is still subscribed after the Postorius request");
+        try {
+            $this->submitPostoriusForm("postorius/lists/{$listId}/{$form}/", ['emails' => implode("\n", $emails)] + $fields);
+            $roster = array_map(strtolower(...), array_column($this->listMembers($listId), 'email'));
+        } catch (Throwable $e) {
+            return array_fill_keys($emails, $e->getMessage());
         }
+
+        $failed = [];
+        foreach ($emails as $email) {
+            if (in_array(strtolower($email), $roster, true) !== $subscribed) {
+                $failed[$email] = $subscribed
+                    ? 'still not subscribed after the Postorius request'
+                    : 'still subscribed after the Postorius request';
+            }
+        }
+
+        return $failed;
     }
 }

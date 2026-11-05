@@ -11,7 +11,6 @@ use App\Models\RoleMembership;
 use App\Support\MailmanClient;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class SyncLists extends Command
 {
@@ -116,35 +115,28 @@ class SyncLists extends Command
         $current = $mailman->listMembers($listId);
         $currentByEmail = collect($current)->keyBy('email');
 
-        $additions = array_diff($desiredEmails, $currentByEmail->keys()->all());
-        $removals = $currentByEmail->keys()->diff($desiredEmails)->all();
+        $additions = array_values(array_diff($desiredEmails, $currentByEmail->keys()->all()));
+        $removals = $currentByEmail->except($desiredEmails)->values()->all();
 
-        $ok = true;
-
-        foreach ($removals as $email) {
-            $this->comment("  |-> Remove: $email");
-
-            try {
-                $mailman->unsubscribe($listId, $email, $currentByEmail[$email]['self_link']);
-            } catch (Throwable $e) {
-                $ok = false;
-                $this->error("  |   |-> Failed to remove $email: {$e->getMessage()}");
-                Log::warning('Mailman unsubscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $e->getMessage()]);
-            }
+        foreach ($removals as $member) {
+            $this->comment("  |-> Remove: {$member['email']}");
         }
+        $failedRemovals = $mailman->unsubscribe($listId, $removals);
 
         foreach ($additions as $email) {
             $this->comment("  |-> Add: $email");
+        }
+        $failedAdditions = $mailman->subscribe($listId, $additions);
 
-            try {
-                $mailman->subscribe($listId, $email);
-            } catch (Throwable $e) {
-                $ok = false;
-                $this->error("  |   |-> Failed to add $email: {$e->getMessage()}");
-                Log::warning('Mailman subscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $e->getMessage()]);
-            }
+        foreach ($failedRemovals as $email => $reason) {
+            $this->error("  |   |-> Failed to remove $email: $reason");
+            Log::warning('Mailman unsubscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $reason]);
+        }
+        foreach ($failedAdditions as $email => $reason) {
+            $this->error("  |   |-> Failed to add $email: $reason");
+            Log::warning('Mailman subscribe failed', ['list_id' => $listId, 'email' => $email, 'exception' => $reason]);
         }
 
-        return $ok;
+        return $failedRemovals === [] && $failedAdditions === [];
     }
 }
