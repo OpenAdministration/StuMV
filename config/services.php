@@ -34,11 +34,17 @@ return [
     'mailman' => [
         // Mailman 3 Core's own REST API root, e.g. http://localhost:8001/3.1
         // - not the public web UI (Postorius/Hyperkitty).
-        'url' => env('MAILMAN_URL'),
+        'api_url' => env('MAILMAN_API_URL'),
         'api_user' => env('MAILMAN_API_USER', 'restadmin'),
         'api_key' => env('MAILMAN_API_KEY'),
         // true, false, or a path to a CA bundle to verify against.
-        'verify_tls' => env('MAILMAN_VERIFY_TLS', true),
+        'api_verify_tls' => env('MAILMAN_API_VERIFY_TLS', true),
+        // Optional mailman-web root (Postorius), e.g. https://lists.example.org.
+        // If set, (un)subscribes go through its forms as this list owner.
+        'web_url' => env('MAILMAN_WEB_URL'),
+        'web_user' => env('MAILMAN_WEB_USER'),
+        'web_password' => env('MAILMAN_WEB_PASSWORD'),
+        'web_verify_tls' => env('MAILMAN_WEB_VERIFY_TLS', true),
     ],
 
 ];

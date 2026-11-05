@@ -50,10 +50,14 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(RefreshTokenRepository::class, ReuseDetectingRefreshTokenRepository::class);
 
         $this->app->singleton(MailmanClient::class, fn (): MailmanClient => new MailmanClient(
-            (string) config('services.mailman.url'),
+            (string) config('services.mailman.api_url'),
             (string) config('services.mailman.api_user'),
             (string) config('services.mailman.api_key'),
-            config('services.mailman.verify_tls'),
+            config('services.mailman.api_verify_tls'),
+            config('services.mailman.web_url') ?: null,
+            config('services.mailman.web_user') ?: null,
+            config('services.mailman.web_password') ?: null,
+            config('services.mailman.web_verify_tls'),
         ));
 
         // 'auth.password' is a deferred service (PasswordResetServiceProvider) -

@@ -33,8 +33,8 @@ class SyncLists extends Command
 
     public function handle(MailmanClient $mailman): int
     {
-        if (! config('services.mailman.url')) {
-            $this->error('MAILMAN_URL is not configured - nothing to sync.');
+        if (! config('services.mailman.api_url')) {
+            $this->error('MAILMAN_API_URL is not configured - nothing to sync.');
 
             return self::FAILURE;
         }
@@ -131,7 +131,7 @@ class SyncLists extends Command
             $this->comment("  |-> Remove: $email");
 
             try {
-                $mailman->unsubscribe($currentByEmail[$email]['self_link']);
+                $mailman->unsubscribe($listId, $email, $currentByEmail[$email]['self_link']);
             } catch (Throwable $e) {
                 $ok = false;
                 $this->error("  |   |-> Failed to remove $email: {$e->getMessage()}");

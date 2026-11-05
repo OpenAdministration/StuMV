@@ -10,7 +10,7 @@ use Tests\Support\TestLdap;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    config(['services.mailman.url' => 'http://mailman.test/3.1']);
+    config(['services.mailman.api_url' => 'http://mailman.test/3.1']);
 });
 
 test('mailman:sync-lists subscribes an active member missing from the Mailman roster', function (): void {
@@ -104,8 +104,8 @@ test('mailman:sync-lists does nothing without any mapping', function (): void {
     Http::assertNothingSent();
 });
 
-test('mailman:sync-lists fails fast when MAILMAN_URL is not configured', function (): void {
-    config(['services.mailman.url' => null]);
+test('mailman:sync-lists fails fast when MAILMAN_API_URL is not configured', function (): void {
+    config(['services.mailman.api_url' => null]);
 
     $this->artisan('mailman:sync-lists')->assertExitCode(1);
 });

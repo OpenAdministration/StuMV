@@ -13,7 +13,7 @@ use Tests\Support\TestLdap;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
-    config(['services.mailman.url' => 'http://mailman.test/3.1']);
+    config(['services.mailman.api_url' => 'http://mailman.test/3.1']);
 });
 
 test('a desired member already on the Mailman roster shows as synced', function (): void {
