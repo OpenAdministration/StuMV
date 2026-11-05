@@ -36,11 +36,7 @@
             @forelse($mappings as $mapping)
                 <flux:table.row>
                     <flux:table.cell>
-                        <div class="flex items-center gap-2">
-                            <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
-                            <flux:icon.loading variant="micro" wire:loading wire:target="syncList({{ $mapping->id }})" />
-                            <span wire:loading wire:target="syncList({{ $mapping->id }})">{{ __('group_mailman_lists.sync_running') }}</span>
-                        </div>
+                        <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
                     </flux:table.cell>
                     <flux:table.cell>
                         @if($mapping->group_exists)
@@ -71,7 +67,7 @@
                                 @if($mapping->group_exists)
                                     <flux:menu.item
                                         icon="refresh-ccw"
-                                        wire:click="syncList({{ $mapping->id }})"
+                                        x-on:click="withProgressToast({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, $wire.syncList({{ $mapping->id }}))"
                                     >
                                         {{ __('group_mailman_lists.sync') }}
                                     </flux:menu.item>

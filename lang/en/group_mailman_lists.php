@@ -19,7 +19,7 @@ return [
     'delete_warning' => 'Should the mapping to the mailing list :name really be deleted? This does not automatically remove the group\'s members from the mailing list.',
     'deleted_success' => 'The mapping was deleted.',
     'sync' => 'Synchronize',
-    'sync_running' => 'Synchronizing …',
+    'sync_running' => 'Synchronizing the mailing list :name …',
     'sync_success' => 'The mailing list :name has been synced.',
     'sync_failed' => 'The mailing list :name could not be fully synced. See the log for details.',
     'link_members' => 'View members',

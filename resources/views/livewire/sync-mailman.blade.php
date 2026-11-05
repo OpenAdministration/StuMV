@@ -14,11 +14,9 @@
                 <flux:text class="mt-2">{{ __('sync.mailman_confirm_text') }}</flux:text>
             </div>
 
-            <flux:callout wire:loading.block wire:target="syncMailman" icon="loading" :heading="__('sync.mailman_running')" />
-
             <div class="flex justify-end gap-4">
-                <flux:button icon="ban" x-on:click="$flux.modal('sync-mailman-confirm').close()" wire:loading.attr="disabled" wire:target="syncMailman">{{ __('common.cancel') }}</flux:button>
-                <flux:button variant="primary" icon="mail-pen" wire:click="syncMailman">{{ __('sync.confirm') }}</flux:button>
+                <flux:button icon="ban" x-on:click="$flux.modal('sync-mailman-confirm').close()">{{ __('common.cancel') }}</flux:button>
+                <flux:button variant="primary" icon="mail-pen" x-on:click="$flux.modal('sync-mailman-confirm').close(); withProgressToast({{ Js::from(__('sync.mailman_running')) }}, $wire.syncMailman())">{{ __('sync.confirm') }}</flux:button>
             </div>
         </div>
     </flux:modal>

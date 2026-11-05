@@ -199,3 +199,13 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+// Shows a sticky toast while `promise` (e.g. a $wire call) runs and removes it
+// once it settles. Flux has no public API to dismiss one toast, so this uses
+// the hideToast() its toast group attaches to each toast it appends.
+window.withProgressToast = (text, promise) => {
+    window.Flux.toast({ text, duration: 0 });
+    const toast = document.querySelector('ui-toast-group')?.lastElementChild;
+
+    return promise.finally(() => toast?.hideToast?.());
+};
