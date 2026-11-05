@@ -67,7 +67,7 @@
                                 @if($mapping->group_exists)
                                     <flux:menu.item
                                         icon="refresh-ccw"
-                                        x-on:click="withProgressToast({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, $wire.syncList({{ $mapping->id }}))"
+                                        x-on:click="const sync = $wire.syncList({{ $mapping->id }}); window.withProgressToast?.({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, sync)"
                                     >
                                         {{ __('group_mailman_lists.sync') }}
                                     </flux:menu.item>

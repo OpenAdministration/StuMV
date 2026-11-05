@@ -201,7 +201,8 @@ document.addEventListener('alpine:init', () => {
 });
 
 // Shows a sticky toast while `promise` (e.g. a $wire call) runs and removes it
-// once it settles. Flux has no public API to dismiss one toast, so this uses
+// once it settles. Callers start the call first and invoke this optionally, so a
+// stale asset build only loses the toast, not the action. Flux has no public API to dismiss one toast, so this uses
 // the hideToast() its toast group attaches to each toast it appends.
 window.withProgressToast = (text, promise) => {
     window.Flux.toast({ text, duration: 0 });

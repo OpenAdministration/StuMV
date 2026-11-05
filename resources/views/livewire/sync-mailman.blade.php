@@ -16,7 +16,7 @@
 
             <div class="flex justify-end gap-4">
                 <flux:button icon="ban" x-on:click="$flux.modal('sync-mailman-confirm').close()">{{ __('common.cancel') }}</flux:button>
-                <flux:button variant="primary" icon="mail-pen" x-on:click="$flux.modal('sync-mailman-confirm').close(); withProgressToast({{ Js::from(__('sync.mailman_running')) }}, $wire.syncMailman())">{{ __('sync.confirm') }}</flux:button>
+                <flux:button variant="primary" icon="mail-pen" x-on:click="const sync = $wire.syncMailman(); $flux.modal('sync-mailman-confirm').close(); window.withProgressToast?.({{ Js::from(__('sync.mailman_running')) }}, sync)">{{ __('sync.confirm') }}</flux:button>
             </div>
         </div>
     </flux:modal>
