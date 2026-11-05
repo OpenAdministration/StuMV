@@ -20,12 +20,17 @@ class AddRoleToGroup extends Component
 
     public string $selected_committee_dn;
 
-    public string $selected_role_dn;
+    public array $selected_role_dns = [];
 
     public function mount(Community $realm, $cn)
     {
         $this->uid = $realm->getShortCode();
         $this->group_cn = $cn;
+    }
+
+    public function updatedSelectedCommitteeDn(): void
+    {
+        $this->reset('selected_role_dns');
     }
 
     public function render()
@@ -48,24 +53,35 @@ class AddRoleToGroup extends Component
 
     public function save()
     {
+        $this->validate(['selected_role_dns' => ['required', 'array', 'min:1']]);
+
         $group = Group::findOrFail(Group::dnFrom($this->uid, $this->group_cn));
+        $committee = Committee::fromCommunity($this->uid)->recursive()->get()
+            ->first(fn (Committee $committee): bool => $committee->getDn() === $this->selected_committee_dn);
+        abort_if($committee === null, 404);
+
+        // Only roles of the chosen committee - the DNs come from the client.
+        $committeeRoleDns = $committee->roles()->get()->map(fn ($role) => $role->getDn());
+        abort_unless(collect($this->selected_role_dns)->diff($committeeRoleDns)->isEmpty(), 404);
 
         $alreadyAdded = GroupMembership::where('group_dn', $group->getDn())
-            ->where('role_dn', $this->selected_role_dn)
+            ->whereIn('role_dn', $this->selected_role_dns)
             ->exists();
 
         if ($alreadyAdded) {
-            $this->addError('selected_role_dn', __('groups.role_already_added'));
+            $this->addError('selected_role_dns', __('groups.role_already_added'));
 
             return;
         }
 
-        GroupMembership::create([
-            'group_dn' => $group->getDn(),
-            'role_dn' => $this->selected_role_dn,
-        ]);
+        foreach ($this->selected_role_dns as $roleDn) {
+            GroupMembership::create([
+                'group_dn' => $group->getDn(),
+                'role_dn' => $roleDn,
+            ]);
+        }
 
-        Flux::toast(variant: 'success', text: __('groups.success_role_add'));
+        Flux::toast(variant: 'success', text: trans_choice('groups.success_role_add', count($this->selected_role_dns)));
 
         return to_route('realms.groups.roles', ['realm' => $this->uid, 'cn' => $this->group_cn]);
     }

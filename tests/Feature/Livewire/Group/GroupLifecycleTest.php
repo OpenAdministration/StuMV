@@ -20,7 +20,7 @@ test('an admin can map a role to a group', function (): void {
 
     Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->set('selected_committee_dn', $committee->getDn())
-        ->set('selected_role_dn', $role->getDn())
+        ->set('selected_role_dns', [$role->getDn()])
         ->call('save');
 
     $this->assertDatabaseHas('role_group_relation', [
@@ -38,14 +38,14 @@ test('adding the same role to a group twice is rejected', function (): void {
 
     Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->set('selected_committee_dn', $committee->getDn())
-        ->set('selected_role_dn', $role->getDn())
+        ->set('selected_role_dns', [$role->getDn()])
         ->call('save');
 
     Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'newsletter'])
         ->set('selected_committee_dn', $committee->getDn())
-        ->set('selected_role_dn', $role->getDn())
+        ->set('selected_role_dns', [$role->getDn()])
         ->call('save')
-        ->assertHasErrors('selected_role_dn');
+        ->assertHasErrors('selected_role_dns');
 
     $this->assertDatabaseCount('role_group_relation', 1);
 });
