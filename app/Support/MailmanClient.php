@@ -145,8 +145,9 @@ class MailmanClient
 
     /**
      * @param  array<string, string>  $fields
+     * @return array<int, string> Postorius' non-success messages from the response
      */
-    private function submitPostoriusForm(string $path, array $fields): void
+    private function submitPostoriusForm(string $path, array $fields): array
     {
         $this->loginToPostorius();
 
@@ -164,11 +165,40 @@ class MailmanClient
             throw new RuntimeException("Postorius did not show the form at {$url} - session lost?");
         }
 
-        $this->postoriusRequest()
+        $html = $this->postoriusRequest()
             ->withHeaders(['Referer' => $url])
             ->asForm()
             ->post($url, ['csrfmiddlewaretoken' => $this->csrfToken($form)] + $fields)
-            ->throw();
+            ->throw()
+            ->body();
+
+        // Django flash messages, e.g. "HTTP Error 400: Membership is banned".
+        preg_match_all('/<div class="alert alert-(\w+)[^>]*>(.*?)<\/div>/s', $html, $alerts, PREG_SET_ORDER);
+
+        return collect($alerts)
+            ->reject(fn (array $alert): bool => $alert[1] === 'success')
+            ->map(fn (array $alert): string => trim((string) preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($alert[2])))))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Subscriptions Mailman holds back for confirmation or moderator approval.
+     *
+     * @return array<string, string> lowercased address => who has to act
+     */
+    private function pendingRequests(string $listId): array
+    {
+        try {
+            $entries = $this->request()->get("lists/{$listId}/requests")->throw()->json('entries', []);
+        } catch (Throwable) {
+            return [];
+        }
+
+        return collect($entries)
+            ->mapWithKeys(fn (array $entry): array => [strtolower((string) $entry['email']) => (string) ($entry['token_owner'] ?? 'unknown')])
+            ->all();
     }
 
     private function loginToPostorius(): void
@@ -232,12 +262,16 @@ class MailmanClient
     {
         $failed = [];
         $submitted = [];
+        $notices = [];
 
         // Chunked so each form response stays well within the HTTP timeout.
         foreach (array_chunk($emails, self::POSTORIUS_CHUNK_SIZE) as $chunk) {
             try {
-                $this->submitPostoriusForm("postorius/lists/{$listId}/{$form}/", ['emails' => implode("\n", $chunk)] + $fields);
+                $chunkNotices = $this->submitPostoriusForm("postorius/lists/{$listId}/{$form}/", ['emails' => implode("\n", $chunk)] + $fields);
                 array_push($submitted, ...$chunk);
+                foreach ($chunk as $email) {
+                    $notices[$email] = $chunkNotices;
+                }
             } catch (Throwable $e) {
                 $failed += array_fill_keys($chunk, $e->getMessage());
             }
@@ -253,12 +287,28 @@ class MailmanClient
             return $failed + array_fill_keys($submitted, $e->getMessage());
         }
 
+        $pending = null;
         foreach ($submitted as $email) {
-            if (in_array(strtolower($email), $roster, true) !== $subscribed) {
-                $failed[$email] = $subscribed
-                    ? 'still not subscribed after the Postorius request'
-                    : 'still subscribed after the Postorius request';
+            if (in_array(strtolower($email), $roster, true) === $subscribed) {
+                continue;
             }
+
+            $reason = [$subscribed ? 'still not subscribed after the Postorius request' : 'still subscribed after the Postorius request'];
+
+            // Prefer messages naming this address; a chunk's other messages may still explain it.
+            $own = array_filter($notices[$email], fn (string $notice): bool => stripos($notice, $email) !== false);
+            if ($own !== [] || $notices[$email] !== []) {
+                $reason[] = 'Postorius: '.implode(' | ', $own ?: $notices[$email]);
+            }
+
+            if ($subscribed) {
+                $pending ??= $this->pendingRequests($listId);
+                if (isset($pending[strtolower($email)])) {
+                    $reason[] = 'pending in Mailman, waiting for '.$pending[strtolower($email)];
+                }
+            }
+
+            $failed[$email] = implode('; ', $reason);
         }
 
         return $failed;

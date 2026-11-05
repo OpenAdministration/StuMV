@@ -12,7 +12,7 @@ function postoriusClient(string $password = 'owner-pass'): MailmanClient
 /**
  * @param  array<int, string>  $roster
  */
-function fakePostorius(array $roster, int $formStatus = 200): void
+function fakePostorius(array $roster, int $formStatus = 200, string $postResponse = '<p>done</p>', array $pending = []): void
 {
     $csrfInput = fn (string $token): string => '<input type="hidden" name="csrfmiddlewaretoken" value="'.$token.'">';
 
@@ -22,7 +22,10 @@ function fakePostorius(array $roster, int $formStatus = 200): void
             : Http::response($request['password'] === 'owner-pass' ? '<h1>Lists</h1>' : '<input name="password">'),
         'web.test/postorius/lists/*' => fn (Request $request) => $request->method() === 'GET'
             ? Http::response($csrfInput('form-token').'<textarea name="emails"></textarea>', $formStatus)
-            : Http::response('<p>done</p>'),
+            : Http::response($postResponse),
+        'api.test/3.1/lists/*/requests' => Http::response([
+            'entries' => array_map(fn (string $email): array => ['email' => $email, 'token_owner' => 'moderator'], $pending),
+        ]),
         'api.test/3.1/lists/*/roster/member' => Http::response([
             'entries' => array_map(fn (string $email): array => ['email' => $email, 'self_link' => 'http://api.test/3.1/members/1'], $roster),
         ]),
@@ -114,4 +117,22 @@ test('large Postorius batches are sent in chunks of 25', function (): void {
     expect($posts)->toHaveCount(2)
         ->and(substr_count($posts[0][0]['emails'], "\n") + 1)->toBe(25)
         ->and(substr_count($posts[1][0]['emails'], "\n") + 1)->toBe(5);
+});
+
+test('a failure reason includes Postorius\' own error message', function (): void {
+    $alerts = '<div class="alert alert-danger fade show" role="alert">HTTP Error 400: Membership is banned <button></button></div>'
+        .'<div class="alert alert-success fade show" role="alert">The address ok@example.org has been subscribed.</div>';
+    fakePostorius(['ok@example.org'], postResponse: $alerts);
+
+    $failed = postoriusClient()->subscribe('team.lists.example.org', ['banned@example.org', 'ok@example.org']);
+
+    expect($failed)->toBe(['banned@example.org' => 'still not subscribed after the Postorius request; Postorius: HTTP Error 400: Membership is banned']);
+});
+
+test('a failure reason mentions a pending Mailman request', function (): void {
+    fakePostorius([], pending: ['waiting@example.org']);
+
+    $failed = postoriusClient()->subscribe('team.lists.example.org', ['waiting@example.org']);
+
+    expect($failed['waiting@example.org'])->toContain('pending in Mailman, waiting for moderator');
 });
