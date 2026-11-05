@@ -21,17 +21,16 @@
 
         <flux:field>
             <flux:label>{{ __('groups.field_roles') }}</flux:label>
-            <flux:select
-                variant="listbox"
+            <flux:pillbox
                 multiple
                 searchable
                 wire:model="selected_role_dns"
                 :disabled="empty($selected_committee_dn)"
             >
                 @foreach($roles as $role)
-                    <flux:select.option value="{{ $role->getDn() }}">{{ $role->getFirstAttribute('description') }} ({{ $role->getFirstAttribute('cn') }})</flux:select.option>
+                    <flux:pillbox.option value="{{ $role->getDn() }}">{{ $role->getFirstAttribute('description') }} ({{ $role->getFirstAttribute('cn') }})</flux:pillbox.option>
                 @endforeach
-            </flux:select>
+            </flux:pillbox>
             <flux:error name="selected_role_dns" />
         </flux:field>
     </x-livewire-form>
