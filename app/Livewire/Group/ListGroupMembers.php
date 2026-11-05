@@ -51,7 +51,7 @@ class ListGroupMembers extends Component
     public function mount(Community $realm, $cn): void
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
-        $this->group_cn = $cn;
+        $this->group_cn = Group::findOrFail(Group::dnFrom($this->realm_uid, $cn))->getFirstAttribute('cn');
     }
 
     public function render()

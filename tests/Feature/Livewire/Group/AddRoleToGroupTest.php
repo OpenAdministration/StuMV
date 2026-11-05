@@ -1,6 +1,5 @@
 <?php
 
-use App\Ldap\Community;
 use App\Livewire\Group\AddRoleToGroup;
 use App\Models\GroupMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,9 +9,11 @@ use Tests\Support\TestLdap;
 uses(RefreshDatabase::class);
 
 test('renders the add-role-to-group screen for an admin', function (): void {
-    actingAsAdmin('demo');
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'some-group');
+    actingAsAdmin($community);
 
-    Livewire::test(AddRoleToGroup::class, ['realm' => Community::findByUid('demo'), 'cn' => 'some-group'])
+    Livewire::test(AddRoleToGroup::class, ['realm' => $community, 'cn' => 'some-group'])
         ->assertStatus(200)
         ->assertSet('group_cn', 'some-group');
 });

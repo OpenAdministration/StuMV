@@ -42,7 +42,7 @@ class ListRolesInGroup extends Component
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->group_cn = $cn;
-        $this->group_dn = Group::dnFrom($this->realm_uid, $cn);
+        $this->group_dn = Group::findOrFail(Group::dnFrom($this->realm_uid, $cn))->getDn();
     }
 
     public function loadRoles(): void

@@ -28,7 +28,7 @@ class AddRoleToGroup extends Component
     public function mount(Community $realm, $cn)
     {
         $this->uid = $realm->getShortCode();
-        $this->group_cn = $cn;
+        $this->group_cn = Group::findOrFail(Group::dnFrom($this->uid, $cn))->getFirstAttribute('cn');
     }
 
     public function updatedSelectedCommitteeDn(): void
