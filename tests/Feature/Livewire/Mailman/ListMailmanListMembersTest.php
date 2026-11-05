@@ -272,3 +272,68 @@ test('the members can be filtered by sync status', function (): void {
         ->and($emailsFor(''))->toHaveCount(3)
         ->and($component->viewData('statusCounts'))->toBe(['synced' => 1, 'pending' => 1, 'stale' => 1]);
 });
+
+function memberSyncFixture(): array
+{
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $member = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    RoleMembership::create([
+        'realm' => $uid,
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $member->username,
+        'from' => today()->subMonth(),
+    ]);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    actingAsAdmin($community);
+
+    return [$community, $member->ldap()->getFirstAttribute('mail')];
+}
+
+test('a pending member can be subscribed on its own', function (): void {
+    [$community, $mail] = memberSyncFixture();
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
+        'mailman.test/3.1/members' => Http::response('', 201),
+    ]);
+
+    Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org'])
+        ->call('syncMember', $mail)
+        ->assertDispatched('toast-show', fn (string $name, array $params): bool => $params['dataset']['variant'] === 'success');
+
+    Http::assertSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members' && $request['subscriber'] === $mail);
+});
+
+test('a stale member can be removed on its own', function (): void {
+    [$community] = memberSyncFixture();
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => [
+            ['email' => 'stale@example.com', 'self_link' => 'http://mailman.test/3.1/members/42'],
+        ]]),
+        'mailman.test/3.1/members/42' => Http::response('', 204),
+    ]);
+
+    Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org'])
+        ->call('syncMember', 'stale@example.com')
+        ->assertDispatched('toast-show', fn (string $name, array $params): bool => $params['dataset']['variant'] === 'success');
+
+    Http::assertSent(fn ($request): bool => $request->method() === 'DELETE' && $request->url() === 'http://mailman.test/3.1/members/42');
+});
+
+test('an address outside the group cannot be subscribed via the single sync', function (): void {
+    [$community] = memberSyncFixture();
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
+    ]);
+
+    Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org'])
+        ->call('syncMember', 'intruder@example.com');
+
+    Http::assertNotSent(fn ($request): bool => $request->method() !== 'GET');
+});

@@ -9,6 +9,7 @@ use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use App\Support\MailmanClient;
+use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
@@ -66,40 +67,58 @@ class ListMailmanListMembers extends Component
         $this->resetPage();
     }
 
-    public function render(MailmanClient $mailman)
+    /**
+     * Adds or removes just this one address, after re-checking server-side
+     * that it really is pending or stale - the address comes from the client.
+     */
+    public function syncMember(string $email): void
     {
-        $mapping = GroupMailmanList::where('realm', $this->uid)
-            ->where('mailman_list_id', $this->mailmanListId)
-            ->firstOrFail();
-
+        $mapping = $this->mapping();
         $group = Group::find($mapping->group_dn);
 
-        // Same DB-driven desired-membership pipeline as mailman:sync-lists
-        // (role_group_relation -> role_user_relation), scoped to just the
-        // group mapped to this particular list.
-        $memberships = RoleMembership::active()->where('realm', $this->uid)->get();
-        $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
+        if (! $group) {
+            Flux::toast(variant: 'danger', text: __('group_mailman_lists.group_missing'));
 
-        $usersByUsername = LdapUser::query()->in(Community::peopleDnFor($this->uid))
-            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
-            ->get()
-            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
-
-        $desiredByEmail = [];
-        $groupRoles = $group ? GroupMembership::where('group_dn', $mapping->group_dn)->get() : collect();
-        foreach ($groupRoles as $groupRole) {
-            $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
-            $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
-            $key = $committeeDn.'|'.$roleCn;
-
-            foreach ($membershipsByRole->get($key, collect()) as $membership) {
-                $user = $usersByUsername->get($membership->username);
-                $mail = $user?->getFirstAttribute('mail');
-                if ($mail) {
-                    $desiredByEmail[$mail] = $user;
-                }
-            }
+            return;
         }
+
+        $mailman = resolve(MailmanClient::class);
+        $isDesired = array_key_exists($email, $this->desiredMembers($mapping));
+
+        try {
+            $current = collect($mailman->listMembers($this->mailmanListId))->firstWhere('email', $email);
+        } catch (Throwable $e) {
+            report($e);
+            Flux::toast(variant: 'danger', text: __('group_mailman_lists.member_sync_failed', ['email' => $email]));
+
+            return;
+        }
+
+        if ($isDesired && $current === null) {
+            $failed = $mailman->subscribe($this->mailmanListId, [$email]);
+            $success = __('group_mailman_lists.member_sync_added', ['email' => $email]);
+        } elseif (! $isDesired && $current !== null) {
+            $failed = $mailman->unsubscribe($this->mailmanListId, [$current]);
+            $success = __('group_mailman_lists.member_sync_removed', ['email' => $email]);
+        } else {
+            Flux::toast(text: __('group_mailman_lists.member_sync_unchanged', ['email' => $email]));
+
+            return;
+        }
+
+        if ($failed === []) {
+            Flux::toast(variant: 'success', text: $success);
+        } else {
+            Log::warning('Mailman single member sync failed', ['list_id' => $this->mailmanListId, 'email' => $email, 'exception' => $failed[$email] ?? null]);
+            Flux::toast(variant: 'danger', text: __('group_mailman_lists.member_sync_failed', ['email' => $email]));
+        }
+    }
+
+    public function render(MailmanClient $mailman)
+    {
+        $mapping = $this->mapping();
+        $group = Group::find($mapping->group_dn);
+        $desiredByEmail = $group ? $this->desiredMembers($mapping) : [];
 
         $fetchFailed = false;
         $actualByEmail = [];
@@ -171,6 +190,49 @@ class ListMailmanListMembers extends Component
             'fetchFailed' => $fetchFailed,
             'statusCounts' => $statusCounts,
             'groupCn' => $group?->getFirstAttribute('cn') ?? $mapping->group_dn,
+            'groupExists' => $group !== null,
         ])->title(__('group_mailman_lists.members_title', ['name' => $this->mailmanListId]));
+    }
+
+    private function mapping(): GroupMailmanList
+    {
+        return GroupMailmanList::where('realm', $this->uid)
+            ->where('mailman_list_id', $this->mailmanListId)
+            ->firstOrFail();
+    }
+
+    /**
+     * Same DB-driven desired-membership pipeline as mailman:sync-lists
+     * (role_group_relation -> role_user_relation), scoped to just the group
+     * mapped to this particular list.
+     *
+     * @return array<string, LdapUser> keyed by mail
+     */
+    private function desiredMembers(GroupMailmanList $mapping): array
+    {
+        $memberships = RoleMembership::active()->where('realm', $this->uid)->get();
+        $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
+
+        $usersByUsername = LdapUser::query()->in(Community::peopleDnFor($this->uid))
+            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
+            ->get()
+            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
+
+        $desiredByEmail = [];
+        foreach (GroupMembership::where('group_dn', $mapping->group_dn)->get() as $groupRole) {
+            $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
+            $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
+            $key = $committeeDn.'|'.$roleCn;
+
+            foreach ($membershipsByRole->get($key, collect()) as $membership) {
+                $user = $usersByUsername->get($membership->username);
+                $mail = $user?->getFirstAttribute('mail');
+                if ($mail) {
+                    $desiredByEmail[$mail] = $user;
+                }
+            }
+        }
+
+        return $desiredByEmail;
     }
 }

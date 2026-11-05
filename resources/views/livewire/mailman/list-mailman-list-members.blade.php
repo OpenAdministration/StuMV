@@ -34,6 +34,7 @@
                     <flux:table.column class="w-[55px]"></flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'display_name'" :direction="$sortDirection" wire:click="sortBy('display_name')">{{ __('common.user') }}</flux:table.column>
                     <flux:table.column>{{ __('group_mailman_lists.members.email') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
                 @foreach($members as $row)
@@ -71,6 +72,17 @@
                             @endif
                         </flux:table.cell>
                         <flux:table.cell><span class="text-zinc-800 dark:text-white">{{ $row['email'] }}</span></flux:table.cell>
+                        <flux:table.cell align="end">
+                            @if($groupExists && in_array($row['status'], ['pending', 'stale'], true))
+                                <flux:button
+                                    size="sm"
+                                    icon="refresh-ccw"
+                                    wire:click="syncMember({{ Js::from($row['email']) }})"
+                                >
+                                    {{ __('group_mailman_lists.sync') }}
+                                </flux:button>
+                            @endif
+                        </flux:table.cell>
                     </flux:table.row>
                 @endforeach
                 </flux:table.rows>
