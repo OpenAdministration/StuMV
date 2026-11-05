@@ -28,6 +28,12 @@ return [
     'members_explanation' => 'Below are the members of the group :group, along with their sync status in Mailman. A change may take until the next sync run to be reflected there.',
     'members_fetch_failed' => 'The member status could not be fetched from Mailman. Only the desired membership is shown.',
     'members.search' => 'Search members',
+    'members.status' => 'Status',
+    'members.status_all' => 'All',
+    'members.status_synced' => 'Synced',
+    'members.status_pending' => 'Missing from the list',
+    'members.status_stale' => 'No longer in the group',
     'members.email' => 'Email address',
     'no_members_found' => 'No members are mapped to this mailing list.',
+    'no_members_match' => 'No members match the search or filter.',
 ];

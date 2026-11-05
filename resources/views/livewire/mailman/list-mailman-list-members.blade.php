@@ -8,10 +8,24 @@
         <flux:callout variant="danger" icon="circle-alert" heading="{{ __('group_mailman_lists.members_fetch_failed') }}" class="mb-8" />
     @endif
 
-    <flux:field class="mb-8">
-        <flux:label>{{ __('group_mailman_lists.members.search') }}</flux:label>
-        <flux:input icon="search" clearable wire:model.live="search" />
-    </flux:field>
+    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+        <flux:field class="flex-1">
+            <flux:label>{{ __('group_mailman_lists.members.search') }}</flux:label>
+            <flux:input icon="search" clearable wire:model.live="search" />
+        </flux:field>
+
+        @unless($fetchFailed)
+            <flux:field class="sm:w-72">
+                <flux:label>{{ __('group_mailman_lists.members.status') }}</flux:label>
+                <flux:select variant="listbox" wire:model.live="status">
+                    <flux:select.option value="">{{ __('group_mailman_lists.members.status_all') }}</flux:select.option>
+                    @foreach(['synced', 'pending', 'stale'] as $option)
+                        <flux:select.option value="{{ $option }}">{{ __('group_mailman_lists.members.status_'.$option) }} ({{ $statusCounts[$option] ?? 0 }})</flux:select.option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
+        @endunless
+    </div>
 
     <div class="pb-6 sm:pb-8">
         @if(count($members) > 0)
@@ -66,7 +80,7 @@
                 <flux:pagination :paginator="$members" />
             </div>
         @else
-            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('group_mailman_lists.no_members_found') }}" />
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ $status !== '' || $search !== '' ? __('group_mailman_lists.no_members_match') : __('group_mailman_lists.no_members_found') }}" />
         @endif
     </div>
 </div>

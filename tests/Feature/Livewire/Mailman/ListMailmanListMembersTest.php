@@ -231,3 +231,44 @@ test('the mapping list links to the member status page', function (): void {
     Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
         ->assertSeeHtml(route('realms.group-mailman-lists.members', ['realm' => $uid, 'listId' => 'newsletter.lists.example.org']));
 });
+
+test('the members can be filtered by sync status', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $synced = TestLdap::member($community);
+    $pending = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    foreach ([$synced, $pending] as $member) {
+        RoleMembership::create([
+            'realm' => $uid,
+            'role_cn' => 'mitglied',
+            'committee_dn' => $committee->getDn(),
+            'username' => $member->username,
+            'from' => today()->subMonth(),
+        ]);
+    }
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+
+    $syncedMail = $synced->ldap()->getFirstAttribute('mail');
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => [
+            ['email' => $syncedMail, 'self_link' => 'http://mailman.test/3.1/members/1'],
+            ['email' => 'stale@example.com', 'self_link' => 'http://mailman.test/3.1/members/2'],
+        ]]),
+    ]);
+
+    actingAsAdmin($community);
+
+    $component = Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org']);
+    $emailsFor = fn (string $status): array => collect($component->set('status', $status)->viewData('members')->items())->pluck('email')->all();
+
+    expect($emailsFor('synced'))->toBe([$syncedMail])
+        ->and($emailsFor('pending'))->toBe([$pending->ldap()->getFirstAttribute('mail')])
+        ->and($emailsFor('stale'))->toBe(['stale@example.com'])
+        ->and($emailsFor(''))->toHaveCount(3)
+        ->and($component->viewData('statusCounts'))->toBe(['synced' => 1, 'pending' => 1, 'stale' => 1]);
+});

@@ -25,6 +25,9 @@ class ListMailmanListMembers extends Component
     public string $search = '';
 
     #[Url]
+    public string $status = '';
+
+    #[Url]
     public string $sortField = 'display_name';
 
     #[Url]
@@ -54,6 +57,11 @@ class ListMailmanListMembers extends Component
     }
 
     public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatus(): void
     {
         $this->resetPage();
     }
@@ -133,6 +141,12 @@ class ListMailmanListMembers extends Component
             'display_name' => $row['user']?->getFirstAttribute('cn') ?: $row['email'],
         ]);
 
+        $statusCounts = $rows->countBy('status')->all();
+
+        if ($this->status !== '') {
+            $rows = $rows->where('status', $this->status);
+        }
+
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
             $rows = $rows->filter(fn (array $row): bool => str_contains(mb_strtolower((string) $row['display_name']), $search)
@@ -155,6 +169,7 @@ class ListMailmanListMembers extends Component
         return view('livewire.mailman.list-mailman-list-members', [
             'members' => $members,
             'fetchFailed' => $fetchFailed,
+            'statusCounts' => $statusCounts,
             'groupCn' => $group?->getFirstAttribute('cn') ?? $mapping->group_dn,
         ])->title(__('group_mailman_lists.members_title', ['name' => $this->mailmanListId]));
     }

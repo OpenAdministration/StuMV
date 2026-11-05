@@ -28,6 +28,12 @@ return [
     'members_explanation' => 'Unten findest du die Mitglieder der Gruppe :group sowie ihren Synchronisationsstatus in Mailman. Es kann bis zum nächsten Synchronisations-Durchlauf dauern, bis eine Änderung dort ankommt.',
     'members_fetch_failed' => 'Der Mitgliederstatus konnte nicht von Mailman abgerufen werden. Es wird nur die gewünschte Mitgliedschaft angezeigt.',
     'members.search' => 'Durchsuche Mitglieder',
+    'members.status' => 'Status',
+    'members.status_all' => 'Alle',
+    'members.status_synced' => 'Synchronisiert',
+    'members.status_pending' => 'Fehlt auf der Liste',
+    'members.status_stale' => 'Nicht mehr in der Gruppe',
     'members.email' => 'E-Mail-Adresse',
     'no_members_found' => 'Dieser Mailingliste sind keine Mitglieder zugeordnet.',
+    'no_members_match' => 'Keine Mitglieder passen zu Suche oder Filter.',
 ];
