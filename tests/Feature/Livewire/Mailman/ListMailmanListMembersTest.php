@@ -107,36 +107,10 @@ test('a Mailman member without a backing desired membership shows as stale', fun
     expect(collect($rows->items())->firstWhere(fn (array $row) => $row['email'] === 'stale@example.com')['status'])->toBe('stale');
 });
 
-test('members are shown with every mapped group that grants them access', function (): void {
+test('the explanation names the group mapped to the list', function (): void {
     $community = newCommunity();
-    $uid = $community->getShortCode();
-    $committeeA = TestLdap::makeCommittee($community, 'fsr');
-    $committeeB = TestLdap::makeCommittee($community, 'asta');
-    $roleA = TestLdap::makeRole($committeeA, 'mitglied');
-    $roleB = TestLdap::makeRole($committeeB, 'mitglied');
-    $groupA = TestLdap::makeGroup($community, 'grp-a');
-    $groupB = TestLdap::makeGroup($community, 'grp-b');
-    $memberA = TestLdap::member($community);
-    $memberB = TestLdap::member($community);
-
-    GroupMembership::create(['group_dn' => $groupA->getDn(), 'role_dn' => $roleA->getDn()]);
-    GroupMembership::create(['group_dn' => $groupB->getDn(), 'role_dn' => $roleB->getDn()]);
-    RoleMembership::create([
-        'realm' => $uid,
-        'role_cn' => 'mitglied',
-        'committee_dn' => $committeeA->getDn(),
-        'username' => $memberA->username,
-        'from' => today()->subMonth(),
-    ]);
-    RoleMembership::create([
-        'realm' => $uid,
-        'role_cn' => 'mitglied',
-        'committee_dn' => $committeeB->getDn(),
-        'username' => $memberB->username,
-        'from' => today()->subMonth(),
-    ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $groupA->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $groupB->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    $group = TestLdap::makeGroup($community, 'grp-a');
+    GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -144,17 +118,8 @@ test('members are shown with every mapped group that grants them access', functi
 
     actingAsAdmin($community);
 
-    $rows = Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org'])
-        ->viewData('members');
-
-    $emails = collect($rows->items())->pluck('email')->all();
-    expect($emails)->toContain($memberA->ldap()->getFirstAttribute('mail'))
-        ->and($emails)->toContain($memberB->ldap()->getFirstAttribute('mail'));
-
-    expect(collect($rows->items())->firstWhere(fn (array $row) => $row['email'] === $memberA->ldap()->getFirstAttribute('mail'))['groups'])
-        ->toBe(['grp-a']);
-    expect(collect($rows->items())->firstWhere(fn (array $row) => $row['email'] === $memberB->ldap()->getFirstAttribute('mail'))['groups'])
-        ->toBe(['grp-b']);
+    Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org'])
+        ->assertSee(__('group_mailman_lists.members_explanation', ['group' => 'grp-a']));
 });
 
 test('the member search filters the list', function (): void {

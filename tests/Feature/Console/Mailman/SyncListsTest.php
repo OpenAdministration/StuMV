@@ -127,49 +127,16 @@ test('mailman:sync-lists can be limited to a single mapping via group_dn', funct
     Http::assertSentCount(1);
 });
 
-test('mailman:sync-lists unions members of several groups mapped to the same list', function (): void {
+test('mailman:sync-lists leaves a list untouched when its group no longer exists', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
-    $committee = TestLdap::makeCommittee($community, 'fsr');
-    $role = TestLdap::makeRole($committee, 'mitglied');
-    $groupA = TestLdap::makeGroup($community, 'grp-a');
-    $groupB = TestLdap::makeGroup($community, 'grp-b');
-    $memberA = TestLdap::member($community);
-    $memberB = TestLdap::member($community);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => 'cn=gone,ou=Groups,ou='.$uid.',ou=Communities,dc=stumv,dc=de', 'mailman_list_id' => 'newsletter.lists.example.org']);
 
-    GroupMembership::create(['group_dn' => $groupA->getDn(), 'role_dn' => $role->getDn()]);
-    GroupMembership::create(['group_dn' => $groupB->getDn(), 'role_dn' => $role->getDn()]);
-    RoleMembership::create([
-        'realm' => $uid,
-        'role_cn' => 'mitglied',
-        'committee_dn' => $committee->getDn(),
-        'username' => $memberA->username,
-        'from' => today()->subMonth(),
-    ]);
-    RoleMembership::create([
-        'realm' => $uid,
-        'role_cn' => 'mitglied',
-        'committee_dn' => $committee->getDn(),
-        'username' => $memberB->username,
-        'from' => today()->subMonth(),
-    ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $groupA->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $groupB->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
-
-    Http::fake([
-        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
-        'mailman.test/3.1/members' => Http::response('', 201),
-    ]);
+    Http::fake();
 
     $this->artisan('mailman:sync-lists')->assertExitCode(0);
 
-    Http::assertSentCount(3);
-    Http::assertSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members'
-        && $request['list_id'] === 'newsletter.lists.example.org'
-        && $request['subscriber'] === $memberA->ldap()->getFirstAttribute('mail'));
-    Http::assertSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members'
-        && $request['list_id'] === 'newsletter.lists.example.org'
-        && $request['subscriber'] === $memberB->ldap()->getFirstAttribute('mail'));
+    Http::assertNothingSent();
 });
 
 test('mailman:sync-lists can be limited to a single realm, leaving other realms untouched', function (): void {

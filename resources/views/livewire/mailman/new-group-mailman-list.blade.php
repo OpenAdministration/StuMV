@@ -6,13 +6,13 @@
         </div>
 
         <flux:field>
-            <flux:label>{{ __('group_mailman_lists.groups') }}</flux:label>
-            <flux:pillbox multiple searchable wire:model="group_cns">
+            <flux:label>{{ __('group_mailman_lists.group') }}</flux:label>
+            <flux:select variant="listbox" searchable wire:model="group_cn">
                 @foreach($groups as $group)
-                    <flux:pillbox.option value="{{ $group->getFirstAttribute('cn') }}">{{ $group->getFirstAttribute('cn') }} ({{ $group->getFirstAttribute('description') }})</flux:pillbox.option>
+                    <flux:select.option value="{{ $group->getFirstAttribute('cn') }}">{{ $group->getFirstAttribute('cn') }} ({{ $group->getFirstAttribute('description') }})</flux:select.option>
                 @endforeach
-            </flux:pillbox>
-            <flux:error name="group_cns" />
+            </flux:select>
+            <flux:error name="group_cn" />
         </flux:field>
 
         <flux:field>

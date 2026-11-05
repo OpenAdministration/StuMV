@@ -60,18 +60,15 @@ class ListMailmanListMembers extends Component
 
     public function render(MailmanClient $mailman)
     {
-        $mappings = GroupMailmanList::where('realm', $this->uid)
+        $mapping = GroupMailmanList::where('realm', $this->uid)
             ->where('mailman_list_id', $this->mailmanListId)
-            ->get();
+            ->firstOrFail();
 
-        abort_if($mappings->isEmpty(), 404);
-
-        $groupsByDn = Group::query()->findMany($mappings->pluck('group_dn')->unique()->all())
-            ->keyBy(fn (Group $group): string => $group->getDn());
+        $group = Group::find($mapping->group_dn);
 
         // Same DB-driven desired-membership pipeline as mailman:sync-lists
         // (role_group_relation -> role_user_relation), scoped to just the
-        // group(s) mapped to this particular list.
+        // group mapped to this particular list.
         $memberships = RoleMembership::active()->where('realm', $this->uid)->get();
         $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
 
@@ -81,27 +78,17 @@ class ListMailmanListMembers extends Component
             ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
 
         $desiredByEmail = [];
-        foreach ($mappings as $mapping) {
-            $group = $groupsByDn->get($mapping->group_dn);
-            if (! $group) {
-                continue;
-            }
+        $groupRoles = $group ? GroupMembership::where('group_dn', $mapping->group_dn)->get() : collect();
+        foreach ($groupRoles as $groupRole) {
+            $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
+            $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
+            $key = $committeeDn.'|'.$roleCn;
 
-            $groupRoles = GroupMembership::where('group_dn', $mapping->group_dn)->get();
-            foreach ($groupRoles as $groupRole) {
-                $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
-                $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
-                $key = $committeeDn.'|'.$roleCn;
-
-                foreach ($membershipsByRole->get($key, collect()) as $membership) {
-                    $user = $usersByUsername->get($membership->username);
-                    $mail = $user?->getFirstAttribute('mail');
-                    if (! $mail) {
-                        continue;
-                    }
-
-                    $desiredByEmail[$mail] ??= ['user' => $user, 'groups' => []];
-                    $desiredByEmail[$mail]['groups'][$group->getFirstAttribute('cn')] = true;
+            foreach ($membershipsByRole->get($key, collect()) as $membership) {
+                $user = $usersByUsername->get($membership->username);
+                $mail = $user?->getFirstAttribute('mail');
+                if ($mail) {
+                    $desiredByEmail[$mail] = $user;
                 }
             }
         }
@@ -118,11 +105,10 @@ class ListMailmanListMembers extends Component
         }
 
         $rows = collect();
-        foreach ($desiredByEmail as $email => $data) {
+        foreach ($desiredByEmail as $email => $user) {
             $rows->push([
                 'email' => $email,
-                'user' => $data['user'],
-                'groups' => array_keys($data['groups']),
+                'user' => $user,
                 'status' => $fetchFailed ? 'unknown' : (isset($actualByEmail[$email]) ? 'synced' : 'pending'),
             ]);
         }
@@ -138,7 +124,6 @@ class ListMailmanListMembers extends Component
                 $rows->push([
                     'email' => $email,
                     'user' => $staleUsersByEmail->get($email),
-                    'groups' => [],
                     'status' => 'stale',
                 ]);
             }
@@ -170,6 +155,7 @@ class ListMailmanListMembers extends Component
         return view('livewire.mailman.list-mailman-list-members', [
             'members' => $members,
             'fetchFailed' => $fetchFailed,
+            'groupCn' => $group?->getFirstAttribute('cn') ?? $mapping->group_dn,
         ])->title(__('group_mailman_lists.members_title', ['name' => $this->mailmanListId]));
     }
 }

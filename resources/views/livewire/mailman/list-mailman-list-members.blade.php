@@ -1,7 +1,7 @@
 <div class="flex-col">
     <div class="mb-8">
         <flux:heading size="xl" class="mb-4">{{ __('group_mailman_lists.members_headline', ['name' => $mailmanListId]) }}</flux:heading>
-        <flux:text class="text-base">{{ __('group_mailman_lists.members_explanation') }}</flux:text>
+        <flux:text class="text-base">{{ __('group_mailman_lists.members_explanation', ['group' => $groupCn]) }}</flux:text>
     </div>
 
     @if($fetchFailed)
@@ -20,7 +20,6 @@
                     <flux:table.column class="w-[55px]"></flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'display_name'" :direction="$sortDirection" wire:click="sortBy('display_name')">{{ __('common.user') }}</flux:table.column>
                     <flux:table.column>{{ __('group_mailman_lists.members.email') }}</flux:table.column>
-                    <flux:table.column>{{ __('group_mailman_lists.members.via_groups') }}</flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
                 @foreach($members as $row)
@@ -59,17 +58,6 @@
                         </flux:table.cell>
                         <flux:table.cell>
                             <div class="text-xs text-zinc-500">{{ $row['email'] }}</div>
-                        </flux:table.cell>
-                        <flux:table.cell>
-                            @if(count($row['groups']) > 0)
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach($row['groups'] as $groupCn)
-                                        <flux:badge>{{ $groupCn }}</flux:badge>
-                                    @endforeach
-                                </div>
-                            @else
-                                <flux:separator />
-                            @endif
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

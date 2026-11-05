@@ -14,7 +14,7 @@ test('a group can be mapped to a mailman list', function (): void {
     actingAsAdmin($community);
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter'])
+        ->set('group_cn', 'newsletter')
         ->set('mailman_list_id', 'newsletter.lists.example.org')
         ->call('save')
         ->assertHasNoErrors()
@@ -26,22 +26,40 @@ test('a group can be mapped to a mailman list', function (): void {
         ->and($mapping->group_dn)->toBe($group->getDn());
 });
 
-test('several groups can be mapped to a mailman list at once', function (): void {
+test('a list that already has a group cannot get a second one', function (): void {
     $community = newCommunity();
-    $newsletter = TestLdap::makeGroup($community, 'newsletter');
-    $digest = TestLdap::makeGroup($community, 'digest');
+    TestLdap::makeGroup($community, 'newsletter');
+    TestLdap::makeGroup($community, 'digest');
     actingAsAdmin($community);
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter', 'digest'])
+        ->set('group_cn', 'newsletter')
         ->set('mailman_list_id', 'newsletter.lists.example.org')
         ->call('save')
-        ->assertHasNoErrors()
-        ->assertRedirect(route('realms.group-mailman-lists', ['realm' => $community->getShortCode()]));
+        ->assertHasNoErrors();
 
-    expect(GroupMailmanList::count())->toBe(2)
-        ->and(GroupMailmanList::where('group_dn', $newsletter->getDn())->exists())->toBeTrue()
-        ->and(GroupMailmanList::where('group_dn', $digest->getDn())->exists())->toBeTrue();
+    Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
+        ->set('group_cn', 'digest')
+        ->set('mailman_list_id', 'newsletter.lists.example.org')
+        ->call('save')
+        ->assertHasErrors(['mailman_list_id' => 'unique']);
+
+    expect(GroupMailmanList::count())->toBe(1);
+});
+
+test('a list mapped in another realm cannot be mapped again', function (): void {
+    $other = newCommunity();
+    GroupMailmanList::create(['realm' => $other->getShortCode(), 'group_dn' => 'cn=newsletter,ou=Groups,ou='.$other->getShortCode().',ou=Communities,dc=stumv,dc=de', 'mailman_list_id' => 'newsletter.lists.example.org']);
+
+    $community = newCommunity();
+    TestLdap::makeGroup($community, 'newsletter');
+    actingAsAdmin($community);
+
+    Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
+        ->set('group_cn', 'newsletter')
+        ->set('mailman_list_id', 'newsletter.lists.example.org')
+        ->call('save')
+        ->assertHasErrors(['mailman_list_id' => 'unique']);
 });
 
 test('mapping the same group to the same list twice is rejected', function (): void {
@@ -50,13 +68,13 @@ test('mapping the same group to the same list twice is rejected', function (): v
     actingAsAdmin($community);
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter'])
+        ->set('group_cn', 'newsletter')
         ->set('mailman_list_id', 'newsletter.lists.example.org')
         ->call('save')
         ->assertHasNoErrors();
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter'])
+        ->set('group_cn', 'newsletter')
         ->set('mailman_list_id', 'newsletter.lists.example.org')
         ->call('save')
         ->assertHasErrors(['mailman_list_id']);
@@ -70,13 +88,13 @@ test('the same group can be mapped to two different lists', function (): void {
     actingAsAdmin($community);
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter'])
+        ->set('group_cn', 'newsletter')
         ->set('mailman_list_id', 'newsletter.lists.example.org')
         ->call('save')
         ->assertHasNoErrors();
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter'])
+        ->set('group_cn', 'newsletter')
         ->set('mailman_list_id', 'digest.lists.example.org')
         ->call('save')
         ->assertHasNoErrors();
@@ -91,7 +109,7 @@ test('mapping requires a group', function (): void {
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
         ->set('mailman_list_id', 'newsletter.lists.example.org')
         ->call('save')
-        ->assertHasErrors(['group_cns' => 'required']);
+        ->assertHasErrors(['group_cn' => 'required']);
 });
 
 test('mapping requires a mailman list id', function (): void {
@@ -100,7 +118,7 @@ test('mapping requires a mailman list id', function (): void {
     actingAsAdmin($community);
 
     Livewire::test(NewGroupMailmanList::class, ['realm' => $community])
-        ->set('group_cns', ['newsletter'])
+        ->set('group_cn', 'newsletter')
         ->call('save')
         ->assertHasErrors(['mailman_list_id' => 'required']);
 });

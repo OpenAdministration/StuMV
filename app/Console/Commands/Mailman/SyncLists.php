@@ -59,54 +59,46 @@ class SyncLists extends Command
 
         $hadFailures = false;
 
-        // Several groups can map to the same list, so the desired roster
-        // has to be accumulated across all of a list's mappings before
-        // syncing it - syncing per-mapping would make each pass undo the
-        // previous group's subscriptions instead of unioning them.
-        foreach ($mappings->groupBy('mailman_list_id') as $listId => $listMappings) {
+        foreach ($mappings as $mapping) {
+            $this->comment("> {$mapping->group_dn} -> {$mapping->mailman_list_id}");
+
+            if (! Group::find($mapping->group_dn)) {
+                $this->warn("  |-> Group no longer exists, skipping: {$mapping->group_dn}");
+
+                continue;
+            }
+
+            $usernamesInRealm = $memberships->where('realm', $mapping->realm)->pluck('username')->unique()->all();
+            $ldapUsersByUsername = empty($usernamesInRealm)
+                ? collect()
+                : LdapUser::query()->in(Community::peopleDnFor($mapping->realm))->whereIn('uid', $usernamesInRealm)->get()
+                    ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
+
             $desiredEmails = collect();
 
-            foreach ($listMappings as $mapping) {
-                $this->comment("> {$mapping->group_dn} -> {$mapping->mailman_list_id}");
+            foreach ($groupRolesByGroup->get($mapping->group_dn, collect()) as $groupRole) {
+                $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
+                $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
+                $key = $committeeDn.'|'.$roleCn;
 
-                if (! Group::find($mapping->group_dn)) {
-                    $this->warn("  |-> Group no longer exists, skipping: {$mapping->group_dn}");
+                foreach ($membershipsByRole->get($key, collect()) as $membership) {
+                    $user = $ldapUsersByUsername->get($membership->username);
+                    if ($user === null) {
+                        $this->warn("  |   |-> Unknown LDAP user: $membership->username");
 
-                    continue;
-                }
-
-                $usernamesInRealm = $memberships->where('realm', $mapping->realm)->pluck('username')->unique()->all();
-                $ldapUsersByUsername = empty($usernamesInRealm)
-                    ? collect()
-                    : LdapUser::query()->in(Community::peopleDnFor($mapping->realm))->whereIn('uid', $usernamesInRealm)->get()
-                        ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
-
-                $groupRoles = $groupRolesByGroup->get($mapping->group_dn, collect());
-
-                foreach ($groupRoles as $groupRole) {
-                    $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
-                    $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
-                    $key = $committeeDn.'|'.$roleCn;
-
-                    foreach ($membershipsByRole->get($key, collect()) as $membership) {
-                        $user = $ldapUsersByUsername->get($membership->username);
-                        if ($user === null) {
-                            $this->warn("  |   |-> Unknown LDAP user: $membership->username");
-
-                            continue;
-                        }
-                        $mail = $user->getFirstAttribute('mail');
-                        if (! $mail) {
-                            $this->warn("  |   |-> No mail attribute for: $membership->username");
-
-                            continue;
-                        }
-                        $desiredEmails->push($mail);
+                        continue;
                     }
+                    $mail = $user->getFirstAttribute('mail');
+                    if (! $mail) {
+                        $this->warn("  |   |-> No mail attribute for: $membership->username");
+
+                        continue;
+                    }
+                    $desiredEmails->push($mail);
                 }
             }
 
-            if (! $this->syncListMembers($mailman, $listId, $desiredEmails->unique()->values()->all())) {
+            if (! $this->syncListMembers($mailman, $mapping->mailman_list_id, $desiredEmails->unique()->values()->all())) {
                 $hadFailures = true;
             }
         }

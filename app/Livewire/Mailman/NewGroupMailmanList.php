@@ -6,13 +6,14 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMailmanList;
 use Flux\Flux;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class NewGroupMailmanList extends Component
 {
     public string $uid = '';
 
-    public array $group_cns = [];
+    public string $group_cn = '';
 
     public string $mailman_list_id = '';
 
@@ -25,19 +26,16 @@ class NewGroupMailmanList extends Component
     protected function rules(): array
     {
         return [
-            'group_cns' => ['required', 'array', 'min:1'],
-            'group_cns.*' => ['string'],
-            'mailman_list_id' => ['required', 'string', 'max:255', function ($attribute, $value, $fail): void {
-                foreach ($this->group_cns as $group_cn) {
-                    if (GroupMailmanList::where('group_dn', Group::dnFrom($this->uid, $group_cn))
-                        ->where('mailman_list_id', $value)
-                        ->exists()) {
-                        $fail(__('group_mailman_lists.mapping_exists', ['group' => $group_cn]));
+            'group_cn' => ['required', 'string'],
+            // Across realms too: two mappings would keep undoing each other's sync.
+            'mailman_list_id' => ['required', 'string', 'max:255', Rule::unique('group_mailman_lists', 'mailman_list_id')],
+        ];
+    }
 
-                        return;
-                    }
-                }
-            }],
+    protected function messages(): array
+    {
+        return [
+            'mailman_list_id.unique' => __('group_mailman_lists.list_already_mapped'),
         ];
     }
 
@@ -53,15 +51,13 @@ class NewGroupMailmanList extends Component
     {
         $this->validate();
 
-        foreach ($this->group_cns as $group_cn) {
-            $group = Group::findOrFail(Group::dnFrom($this->uid, $group_cn));
+        $group = Group::findOrFail(Group::dnFrom($this->uid, $this->group_cn));
 
-            GroupMailmanList::create([
-                'realm' => $this->uid,
-                'group_dn' => $group->getDn(),
-                'mailman_list_id' => $this->mailman_list_id,
-            ]);
-        }
+        GroupMailmanList::create([
+            'realm' => $this->uid,
+            'group_dn' => $group->getDn(),
+            'mailman_list_id' => $this->mailman_list_id,
+        ]);
 
         Flux::toast(variant: 'success', text: __('group_mailman_lists.created_success'));
 
