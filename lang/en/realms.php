@@ -94,6 +94,8 @@ return [
     'change_realm' => 'Change Realm',
     'members_breadcrumb' => 'Members',
     'mods_breadcrumb' => 'Moderators',
+    'admins_breadcrumb' => 'Admins',
+    'domains_breadcrumb' => 'Domains',
     'added_new_member' => 'Added new Member',
     'added_new_admin' => 'Added new Admin',
     'enter_button' => 'Enter',

@@ -61,13 +61,9 @@ Breadcrumbs::for('profile.sessions', function (BreadcrumbTrail $trail, array $ro
     $trail->push(__('profile.sessions'), route('profile.sessions', $routeParams), ['truncate' => true]);
 });
 
-Breadcrumbs::for('pick-realm', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->push('Wähle Realm', route('pick-realm' /* no route params! */), ['truncate' => true]);
-});
-
 Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
-    $trail->push('Editieren', route('realms.edit', $routeParams), ['truncate' => true]);
+    $trail->push(__('common.edit'), route('realms.edit', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('realms.branding', function (BreadcrumbTrail $trail, array $routeParams): void {
@@ -97,7 +93,7 @@ Breadcrumbs::for('realms.mods.new', function (BreadcrumbTrail $trail, array $rou
 
 Breadcrumbs::for('realms.admins', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
-    $trail->push(__('Admins'), route('realms.admins', $routeParams), ['truncate' => true]);
+    $trail->push(__('realms.admins_breadcrumb'), route('realms.admins', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $routeParams): void {
@@ -107,7 +103,7 @@ Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $r
 
 Breadcrumbs::for('realms.domains', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
-    $trail->push(__('Domains'), route('realms.domains', $routeParams), ['truncate' => true]);
+    $trail->push(__('realms.domains_breadcrumb'), route('realms.domains', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('realms.domains.new', function (BreadcrumbTrail $trail, array $routeParams): void {
@@ -153,7 +149,7 @@ Breadcrumbs::for('realms.groups.roles', function (BreadcrumbTrail $trail, array 
 
 Breadcrumbs::for('realms.groups.roles.add', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms.groups.roles', $routeParams);
-    $trail->push(__('Add'), route('realms.groups.roles.add', $routeParams), ['truncate' => true]);
+    $trail->push(__('common.add'), route('realms.groups.roles.add', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('realms.groups.members', function (BreadcrumbTrail $trail, array $routeParams): void {
@@ -220,7 +216,7 @@ Breadcrumbs::for('committees.roles.add-member', function (BreadcrumbTrail $trail
 
 Breadcrumbs::for('committees.roles.members.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.roles.members', $routeParams);
-    $trail->push(__('Edit Membership'), route('committees.roles.members.edit', $routeParams), ['truncate' => true]);
+    $trail->push(__('roles.edit_membership_breadcrumb'), route('committees.roles.members.edit', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('committees.roles.terminate-memberships', function (BreadcrumbTrail $trail, array $routeParams): void {

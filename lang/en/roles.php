@@ -56,6 +56,7 @@ return [
     'membership_from' => 'From',
     'membership_until' => 'Until',
     'new_membership_breadcrumb' => 'New Membership',
+    'edit_membership_breadcrumb' => 'Edit Membership',
     'membership_decided' => 'Decided',
     'membership_comment' => 'Comment',
     'termination_date_label' => 'Termination Date',

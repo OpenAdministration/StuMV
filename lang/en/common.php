@@ -16,6 +16,7 @@ return [
     'new' => 'New',
     'edit' => 'Edit',
     'delete' => 'Delete',
+    'add' => 'Add',
     'short_name' => 'Short Name',
     'add_member' => 'Add Member',
     'added_new_moderator' => 'Added new Moderator',

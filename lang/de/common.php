@@ -16,6 +16,7 @@ return [
     'new' => 'Neu',
     'edit' => 'Bearbeiten',
     'delete' => 'Löschen',
+    'add' => 'Hinzufügen',
     'short_name' => 'Kürzel',
     'add_member' => 'Mitglied hinzufügen',
     'added_new_moderator' => 'Neue:r Moderator:in wurde hinzugefügt',

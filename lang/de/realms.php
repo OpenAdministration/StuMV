@@ -94,6 +94,8 @@ return [
     'change_realm' => 'Studischaft wechseln',
     'members_breadcrumb' => 'Mitglieder',
     'mods_breadcrumb' => 'Moderator:innen',
+    'admins_breadcrumb' => 'Administrator:innen',
+    'domains_breadcrumb' => 'Domains',
     'added_new_member' => 'Neues Mitglied wurde hinzugefügt',
     'added_new_admin' => 'Neue:r Admin wurde hinzugefügt',
     'enter_button' => 'Eintreten',

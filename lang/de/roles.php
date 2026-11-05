@@ -56,6 +56,7 @@ return [
     'membership_from' => 'von',
     'membership_until' => 'bis',
     'new_membership_breadcrumb' => 'Neue Mitgliedschaft',
+    'edit_membership_breadcrumb' => 'Mitgliedschaft bearbeiten',
     'membership_decided' => 'Beschlussdatum',
     'membership_comment' => 'Kommentar',
     'termination_date_label' => 'Ende der Mitgliedschaft',
