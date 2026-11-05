@@ -56,9 +56,7 @@
                                 {{ $row['display_name'] }}
                             @endif
                         </flux:table.cell>
-                        <flux:table.cell>
-                            <div class="text-xs text-zinc-500">{{ $row['email'] }}</div>
-                        </flux:table.cell>
+                        <flux:table.cell><span class="text-zinc-800 dark:text-white">{{ $row['email'] }}</span></flux:table.cell>
                     </flux:table.row>
                 @endforeach
                 </flux:table.rows>

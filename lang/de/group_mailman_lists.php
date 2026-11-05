@@ -4,6 +4,7 @@ return [
     'list_title' => 'Mailinglisten',
     'headline' => 'Mailman-Mailinglisten',
     'explanation' => 'Ordne Gruppen dieser Studierendenschaft Mailman-3-Mailinglisten zu, jeder Liste genau eine Gruppe. Die Mitglieder der Gruppe werden per "php artisan mailman:sync-lists" auf die Mailingliste synchronisiert.',
+    'search' => 'Durchsuche Zuordnungen',
     'new' => 'Neue Zuordnung',
     'new_title' => 'Gruppe einer Mailingliste zuordnen',
     'group' => 'Gruppe',

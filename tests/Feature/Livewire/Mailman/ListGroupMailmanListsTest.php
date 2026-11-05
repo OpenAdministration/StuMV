@@ -36,6 +36,59 @@ test('a mapping shows a warning badge when its group no longer exists', function
         ->assertSee(__('group_mailman_lists.group_missing'));
 });
 
+test('the search filters by list id and by group short name', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $newsletter = TestLdap::makeGroup($community, 'newsletter');
+    $vorstand = TestLdap::makeGroup($community, 'vorstand');
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $newsletter->getDn(), 'mailman_list_id' => 'info.lists.example.org']);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $vorstand->getDn(), 'mailman_list_id' => 'board.lists.example.org']);
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->set('search', 'board')
+        ->assertSee('board.lists.example.org')
+        ->assertDontSee('info.lists.example.org')
+        ->set('search', 'newslet')
+        ->assertSee('info.lists.example.org')
+        ->assertDontSee('board.lists.example.org');
+});
+
+test('the mapping list can be sorted by list id and by group', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $alpha = TestLdap::makeGroup($community, 'alpha');
+    $zulu = TestLdap::makeGroup($community, 'zulu');
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $zulu->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $alpha->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->assertSeeInOrder(['a.lists.example.org', 'b.lists.example.org'])
+        ->call('sortBy', 'mailman_list_id')
+        ->assertSeeInOrder(['b.lists.example.org', 'a.lists.example.org'])
+        ->call('sortBy', 'group')
+        ->assertSeeInOrder(['b.lists.example.org', 'a.lists.example.org'])
+        ->call('sortBy', 'group')
+        ->assertSeeInOrder(['a.lists.example.org', 'b.lists.example.org']);
+});
+
+test('the mapping list is paginated', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    foreach (range(1, 11) as $i) {
+        GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => sprintf('list%02d.lists.example.org', $i)]);
+    }
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->assertSee('list10.lists.example.org')
+        ->assertDontSee('list11.lists.example.org')
+        ->call('gotoPage', 2)
+        ->assertSee('list11.lists.example.org');
+});
+
 test('a mapping can be deleted', function (): void {
     $community = newCommunity();
     $group = TestLdap::makeGroup($community, 'newsletter');
