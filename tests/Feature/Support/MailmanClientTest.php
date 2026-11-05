@@ -24,7 +24,7 @@ function fakePostorius(array $roster, int $formStatus = 200, string $postRespons
             ? Http::response($csrfInput('form-token').'<textarea name="emails"></textarea>', $formStatus)
             : Http::response($postResponse),
         'api.test/3.1/lists/*/requests' => Http::response([
-            'entries' => array_map(fn (string $email): array => ['email' => $email, 'token_owner' => 'moderator'], $pending),
+            'entries' => array_map(fn (string $email): array => ['type' => 'subscription', 'email' => $email, 'token' => 'tok-'.md5($email), 'token_owner' => 'subscriber'], $pending),
         ]),
         'api.test/3.1/lists/*/roster/member' => Http::response([
             'entries' => array_map(fn (string $email): array => ['email' => $email, 'self_link' => 'http://api.test/3.1/members/1'], $roster),
@@ -134,5 +134,32 @@ test('a failure reason mentions a pending Mailman request', function (): void {
 
     $failed = postoriusClient()->subscribe('team.lists.example.org', ['waiting@example.org']);
 
-    expect($failed['waiting@example.org'])->toContain('pending in Mailman, waiting for moderator');
+    expect($failed['waiting@example.org'])->toContain('pending in Mailman, waiting for subscriber');
+});
+
+test('a failed removal of a user-account membership says so, without the close button text', function (): void {
+    $alert = '<div class="alert alert-danger" role="alert">a.b@example.org is not a member address of team@example.org <button type="button" class="close">×</button></div>';
+    fakePostorius(['a.b@example.org'], postResponse: $alert);
+
+    $failed = postoriusClient()->unsubscribe('team.lists.example.org', [
+        ['email' => 'a.b@example.org', 'self_link' => 'http://api.test/3.1/members/1', 'as_user' => true],
+    ]);
+
+    expect($failed['a.b@example.org'])->toBe('still subscribed after the Postorius request; Postorius: a.b@example.org is not a member address of team@example.org; the membership belongs to a Mailman user account, which some Mailman versions cannot remove by address');
+});
+
+test('a stale pending request is discarded via Postorius before subscribing', function (): void {
+    fakePostorius(['old@example.org'], pending: ['old@example.org', 'unrelated@example.org']);
+
+    $failed = postoriusClient()->subscribe('team.lists.example.org', ['old@example.org']);
+
+    expect($failed)->toBe([]);
+    $posts = Http::recorded(fn (Request $request): bool => $request->method() === 'POST' && str_contains($request->url(), '/postorius/'))
+        ->map(fn (array $pair): string => $pair[0]->url())->values()->all();
+    expect($posts)->toBe([
+        'https://web.test/postorius/lists/team.lists.example.org/handle_subscription_request/tok-'.md5('old@example.org').'/',
+        'https://web.test/postorius/lists/team.lists.example.org/mass_subscribe/',
+    ]);
+    Http::assertSent(fn (Request $request): bool => str_contains($request->url(), '/handle_subscription_request/')
+        && $request['discard'] === '1' && $request['kind'] === 'confirmation');
 });

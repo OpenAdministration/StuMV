@@ -37,7 +37,7 @@ class MailmanClient
     }
 
     /**
-     * @return array<int, array{email: string, self_link: string}>
+     * @return array<int, array{email: string, self_link: string, as_user: bool}>
      */
     public function listMembers(string $listId): array
     {
@@ -50,6 +50,8 @@ class MailmanClient
             ->map(fn (array $entry): array => [
                 'email' => $entry['email'],
                 'self_link' => $entry['self_link'],
+                // Subscribed via a Mailman user account rather than the address itself.
+                'as_user' => ($entry['subscription_mode'] ?? null) === 'as_user',
             ])
             ->all();
     }
@@ -105,7 +107,7 @@ class MailmanClient
      * self_link is deleted directly, so Mailman's member-id URL scheme
      * never has to be known here.
      *
-     * @param  array<int, array{email: string, self_link: string}>  $members
+     * @param  array<int, array{email: string, self_link: string, as_user: bool}>  $members
      * @return array<string, string> failed address => reason
      */
     public function unsubscribe(string $listId, array $members): array
@@ -115,7 +117,15 @@ class MailmanClient
         }
 
         if ($this->usesPostorius()) {
-            return $this->viaPostorius($listId, 'mass_removal', array_column($members, 'email'), false);
+            $failed = $this->viaPostorius($listId, 'mass_removal', array_column($members, 'email'), false);
+
+            foreach ($members as $member) {
+                if (($member['as_user'] ?? false) && isset($failed[$member['email']])) {
+                    $failed[$member['email']] .= '; the membership belongs to a Mailman user account, which some Mailman versions cannot remove by address';
+                }
+            }
+
+            return $failed;
         }
 
         $failed = [];
@@ -177,7 +187,12 @@ class MailmanClient
 
         return collect($alerts)
             ->reject(fn (array $alert): bool => $alert[1] === 'success')
-            ->map(fn (array $alert): string => trim((string) preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($alert[2])))))
+            ->map(function (array $alert): string {
+                $text = html_entity_decode(strip_tags((string) preg_replace('/<button\b.*?<\/button>/s', '', $alert[2])));
+
+                // Collapse whitespace and drop a leftover "×" close mark.
+                return trim((string) preg_replace(['/\s+/u', '/\s*×$/u'], [' ', ''], trim($text)));
+            })
             ->filter()
             ->values()
             ->all();
@@ -186,7 +201,7 @@ class MailmanClient
     /**
      * Subscriptions Mailman holds back for confirmation or moderator approval.
      *
-     * @return array<string, string> lowercased address => who has to act
+     * @return array<string, array{token: string, owner: string}> keyed by lowercased address
      */
     private function pendingRequests(string $listId): array
     {
@@ -197,8 +212,35 @@ class MailmanClient
         }
 
         return collect($entries)
-            ->mapWithKeys(fn (array $entry): array => [strtolower((string) $entry['email']) => (string) ($entry['token_owner'] ?? 'unknown')])
+            ->where('type', 'subscription')
+            ->mapWithKeys(fn (array $entry): array => [strtolower((string) $entry['email']) => [
+                'token' => (string) $entry['token'],
+                'owner' => (string) ($entry['token_owner'] ?? 'unknown'),
+            ]])
             ->all();
+    }
+
+    /**
+     * A stale pending subscription (e.g. an old, never confirmed self sign-up)
+     * makes Mailman refuse the pre-approved one with a 409, so it is dropped
+     * first - "discard" sends no notification.
+     */
+    private function discardPendingRequest(string $listId, string $token, string $owner): void
+    {
+        $page = $this->postoriusUrl($owner === 'subscriber'
+            ? "postorius/lists/{$listId}/pending_confirmation"
+            : "postorius/lists/{$listId}/subscription_requests");
+        $html = $this->postoriusRequest()->get($page)->throw()->body();
+
+        $this->postoriusRequest()
+            ->withHeaders(['Referer' => $page])
+            ->asForm()
+            ->post($this->postoriusUrl("postorius/lists/{$listId}/handle_subscription_request/{$token}/"), [
+                'csrfmiddlewaretoken' => $this->csrfToken($html),
+                'discard' => '1',
+                'kind' => $owner === 'subscriber' ? 'confirmation' : 'subscription',
+            ])
+            ->throw();
     }
 
     private function loginToPostorius(): void
@@ -264,6 +306,24 @@ class MailmanClient
         $submitted = [];
         $notices = [];
 
+        try {
+            $this->loginToPostorius();
+        } catch (Throwable $e) {
+            return array_fill_keys($emails, $e->getMessage());
+        }
+
+        if ($subscribed) {
+            foreach ($this->pendingRequests($listId) as $email => $request) {
+                if (in_array($email, array_map(strtolower(...), $emails), true)) {
+                    try {
+                        $this->discardPendingRequest($listId, $request['token'], $request['owner']);
+                    } catch (Throwable) {
+                        // The subscribe below then fails with Postorius' own reason.
+                    }
+                }
+            }
+        }
+
         // Chunked so each form response stays well within the HTTP timeout.
         foreach (array_chunk($emails, self::POSTORIUS_CHUNK_SIZE) as $chunk) {
             try {
@@ -304,7 +364,7 @@ class MailmanClient
             if ($subscribed) {
                 $pending ??= $this->pendingRequests($listId);
                 if (isset($pending[strtolower($email)])) {
-                    $reason[] = 'pending in Mailman, waiting for '.$pending[strtolower($email)];
+                    $reason[] = 'pending in Mailman, waiting for '.$pending[strtolower($email)]['owner'];
                 }
             }
 
