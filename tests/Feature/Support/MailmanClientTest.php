@@ -163,3 +163,29 @@ test('a stale pending request is discarded via Postorius before subscribing', fu
     Http::assertSent(fn (Request $request): bool => str_contains($request->url(), '/handle_subscription_request/')
         && $request['discard'] === '1' && $request['kind'] === 'confirmation');
 });
+
+test('a failed discard of a pending request is part of the failure reason', function (): void {
+    // Registered first so it wins over fakePostorius()' catch-all for the list pages.
+    Http::fake(['web.test/postorius/lists/*/handle_subscription_request/*' => Http::response('Not Found', 404)]);
+    fakePostorius([], pending: ['old@example.org']);
+
+    $failed = postoriusClient()->subscribe('team.lists.example.org', ['old@example.org']);
+
+    expect($failed['old@example.org'])->toContain('discarding the pending request failed: HTTP request returned status code 404');
+});
+
+test('on old Postorius (no CSRF form on the request pages) a pending request is discarded via GET', function (): void {
+    // Registered first so they win over fakePostorius()' catch-all for the list pages.
+    Http::fake([
+        'web.test/postorius/lists/*/pending_confirmation' => Http::response('<a href="handle_subscription_request/x/discard">Discard</a>'),
+        'web.test/postorius/lists/*/handle_subscription_request/*' => Http::response('<div class="alert alert-success">The request has been discarded.</div>'),
+    ]);
+    fakePostorius(['old@example.org'], pending: ['old@example.org']);
+
+    $failed = postoriusClient()->subscribe('team.lists.example.org', ['old@example.org']);
+
+    expect($failed)->toBe([]);
+    Http::assertSent(fn (Request $request): bool => $request->method() === 'GET'
+        && $request->url() === 'https://web.test/postorius/lists/team.lists.example.org/handle_subscription_request/tok-'.md5('old@example.org').'/discard');
+    Http::assertNotSent(fn (Request $request): bool => $request->method() === 'POST' && str_contains($request->url(), '/handle_subscription_request/'));
+});

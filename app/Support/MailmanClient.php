@@ -182,7 +182,17 @@ class MailmanClient
             ->throw()
             ->body();
 
-        // Django flash messages, e.g. "HTTP Error 400: Membership is banned".
+        return $this->postoriusNotices($html);
+    }
+
+    /**
+     * Django flash messages other than successes, e.g. "HTTP Error 400:
+     * Membership is banned" - Postorius reports failures this way with a 200.
+     *
+     * @return array<int, string>
+     */
+    private function postoriusNotices(string $html): array
+    {
         preg_match_all('/<div class="alert alert-(\w+)[^>]*>(.*?)<\/div>/s', $html, $alerts, PREG_SET_ORDER);
 
         return collect($alerts)
@@ -231,16 +241,30 @@ class MailmanClient
             ? "postorius/lists/{$listId}/pending_confirmation"
             : "postorius/lists/{$listId}/subscription_requests");
         $html = $this->postoriusRequest()->get($page)->throw()->body();
+        $handleUrl = $this->postoriusUrl("postorius/lists/{$listId}/handle_subscription_request/{$token}/");
+        $response = null;
 
-        $this->postoriusRequest()
-            ->withHeaders(['Referer' => $page])
-            ->asForm()
-            ->post($this->postoriusUrl("postorius/lists/{$listId}/handle_subscription_request/{$token}/"), [
-                'csrfmiddlewaretoken' => $this->csrfToken($html),
-                'discard' => '1',
-                'kind' => $owner === 'subscriber' ? 'confirmation' : 'subscription',
-            ])
-            ->throw();
+        // Postorius >= 1.3.6 takes the action as a POSTed form field ...
+        if (preg_match('/name="csrfmiddlewaretoken" value="([^"]+)"/', $html, $csrf)) {
+            $response = $this->postoriusRequest()
+                ->withHeaders(['Referer' => $page])
+                ->asForm()
+                ->post($handleUrl, [
+                    'csrfmiddlewaretoken' => $csrf[1],
+                    'discard' => '1',
+                    'kind' => $owner === 'subscriber' ? 'confirmation' : 'subscription',
+                ]);
+        }
+
+        // ... older ones (e.g. 1.3.4) only link to it as a GET path segment, without a form.
+        if ($response === null || $response->notFound()) {
+            $response = $this->postoriusRequest()->withHeaders(['Referer' => $page])->get($handleUrl.'discard');
+        }
+
+        $notices = $this->postoriusNotices($response->throw()->body());
+        if ($notices !== []) {
+            throw new RuntimeException(implode(' | ', $notices));
+        }
     }
 
     private function loginToPostorius(): void
@@ -305,6 +329,7 @@ class MailmanClient
         $failed = [];
         $submitted = [];
         $notices = [];
+        $discardErrors = [];
 
         try {
             $this->loginToPostorius();
@@ -317,8 +342,9 @@ class MailmanClient
                 if (in_array($email, array_map(strtolower(...), $emails), true)) {
                     try {
                         $this->discardPendingRequest($listId, $request['token'], $request['owner']);
-                    } catch (Throwable) {
-                        // The subscribe below then fails with Postorius' own reason.
+                    } catch (Throwable $e) {
+                        // Still try to subscribe; reported below if that fails too.
+                        $discardErrors[$email] = $e->getMessage();
                     }
                 }
             }
@@ -365,6 +391,9 @@ class MailmanClient
                 $pending ??= $this->pendingRequests($listId);
                 if (isset($pending[strtolower($email)])) {
                     $reason[] = 'pending in Mailman, waiting for '.$pending[strtolower($email)]['owner'];
+                }
+                if (isset($discardErrors[strtolower($email)])) {
+                    $reason[] = 'discarding the pending request failed: '.$discardErrors[strtolower($email)];
                 }
             }
 
