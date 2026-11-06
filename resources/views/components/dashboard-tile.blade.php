@@ -6,7 +6,7 @@
         href="{{ $href }}"
         class="block rounded-lg outline-none hover:ring-2 focus-visible:ring-2 ring-(--color-accent-content)"
     >
-        <flux:card class="aspect-square flex flex-col items-center justify-center gap-3 p-4 text-center">
+        <flux:card class="aspect-4/3 flex flex-col items-center justify-center gap-3 p-4 text-center">
             <flux:icon :icon="$icon" class="size-10 text-(--color-accent-content)" />
             <flux:heading size="lg">{{ $heading }}</flux:heading>
             <span class="sr-only">{{ $description }}</span>

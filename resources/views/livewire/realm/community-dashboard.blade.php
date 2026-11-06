@@ -7,21 +7,21 @@
         <x-dashboard-tile
             :href="route('profile', ['realm' => $uid, 'username' => auth()->user()->username])"
             icon="circle-user"
-            :heading="__('realms.dashboard.profile_heading', ['name' => $name])"
+            :heading="__('profile.breadcrumb')"
             :description="__('realms.dashboard.profile_explanation', ['name' => $name])"
         />
         @unless($community->isAdminRealm())
             <x-dashboard-tile
                 :href="route('committees.list', $uid)"
                 icon="list-tree"
-                :heading="__('realms.dashboard.committee_headline', ['name' => $name])"
+                :heading="__('realms.nav_committees_and_roles')"
                 :description="__('realms.dashboard.committee_explanation', ['name' => $name])"
             />
         @endunless
         <x-dashboard-tile
             :href="route('realms.members', $uid)"
             icon="users"
-            :heading="__('realms.dashboard.members_heading', ['name' => $name])"
+            :heading="__('realms.nav_people')"
             :description="__('realms.dashboard.members_explanation', ['name' => $name])"
         />
         @unless($community->isAdminRealm())
@@ -84,7 +84,7 @@
             <x-dashboard-tile
                 :href="route('realms.api-clients', $uid)"
                 icon="unplug"
-                :heading="__('api_clients.headline')"
+                :heading="__('api_clients.list_title')"
                 :description="__('api_clients.explanation')"
             />
         @endif
@@ -92,7 +92,7 @@
             <x-dashboard-tile
                 :href="route('realms.oidc-clients', $uid)"
                 icon="network"
-                :heading="__('oidc_clients.headline')"
+                :heading="__('oidc_clients.list_title')"
                 :description="__('oidc_clients.explanation')"
             />
         @endif
@@ -100,7 +100,7 @@
             <x-dashboard-tile
                 :href="route('realms.identity-providers', $uid)"
                 icon="git-pull-request-create-arrow"
-                :heading="__('identity_providers.headline')"
+                :heading="__('identity_providers.list_title')"
                 :description="__('identity_providers.explanation')"
             />
         @endif
