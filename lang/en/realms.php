@@ -61,7 +61,7 @@ return [
     'dashboard.mods_explanation' => 'The list of your student body\'s moderators is hidden here. They can make settings for committees and assignments.',
     'dashboard.admin_headline' => 'Admins',
     'dashboard.admin_explanation' => 'Admins can make technical settings for the student body. They manage domains and rights groups.',
-    'dashboard.realms_edit_headline' => 'Edit student body',
+    'dashboard.realms_edit_headline' => 'Student body',
     'dashboard.realms_edit_explanation' => 'Here the admin can adjust, for example, the name of the student body.',
     'dashboard.branding_headline' => 'Branding',
     'dashboard.branding_explanation' => 'Upload a logo and a background image shown on your student body\'s login and registration page.',

@@ -61,7 +61,7 @@ return [
     'dashboard.mods_explanation' => 'Die Liste der Moderator:innen deiner Studierendenschaft versteckt sich hier. Sie können Einstellungen an Gremien und Zuordnungen vornehmen.',
     'dashboard.admin_headline' => 'Administrator:innen',
     'dashboard.admin_explanation' => 'Administrator:innen können technische Einstellungen an der Studierendenschaft vornehmen. Sie verwalten Domains und Rechtegruppen.',
-    'dashboard.realms_edit_headline' => 'Studierendenschaft bearbeiten',
+    'dashboard.realms_edit_headline' => 'Studierendenschaft',
     'dashboard.realms_edit_explanation' => 'Hier kann durch den:die Administrator:in z. B. der Name der Studierendenschaft angepasst werden.',
     'dashboard.branding_headline' => 'Erscheinungsbild',
     'dashboard.branding_explanation' => 'Hinterlege ein Logo und ein Hintergrundbild, die auf der Login- und Registrierungsseite eurer Studierendenschaft angezeigt werden.',
