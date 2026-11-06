@@ -31,4 +31,5 @@ return [
     'footer_license' => 'License',
     'footer_documentation' => 'Documentation',
     'footer_source_code' => 'Source code',
+    'info' => 'Information',
 ];

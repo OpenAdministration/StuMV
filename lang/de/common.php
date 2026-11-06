@@ -31,4 +31,5 @@ return [
     'footer_license' => 'Lizenz',
     'footer_documentation' => 'Handbuch',
     'footer_source_code' => 'Quelltext',
+    'info' => 'Information',
 ];
