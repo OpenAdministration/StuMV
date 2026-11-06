@@ -76,10 +76,10 @@
                             @if($groupExists && in_array($row['status'], ['pending', 'stale'], true))
                                 <flux:button
                                     size="sm"
-                                    icon="refresh-ccw"
+                                    :icon="$row['status'] === 'pending' ? 'log-in' : 'log-out'"
                                     wire:click="syncMember({{ Js::from($row['email']) }})"
                                 >
-                                    {{ __('group_mailman_lists.sync') }}
+                                    {{ $row['status'] === 'pending' ? __('group_mailman_lists.member_subscribe') : __('group_mailman_lists.member_unsubscribe') }}
                                 </flux:button>
                             @endif
                         </flux:table.cell>

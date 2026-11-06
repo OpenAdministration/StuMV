@@ -22,6 +22,8 @@ return [
     'sync_running' => 'Synchronizing the mailing list :name …',
     'sync_success' => 'The mailing list :name has been synced.',
     'sync_failed' => 'The mailing list :name could not be fully synced. See the log for details.',
+    'member_subscribe' => 'Subscribe',
+    'member_unsubscribe' => 'Unsubscribe',
     'member_sync_added' => ':email has been added to the mailing list.',
     'member_sync_removed' => ':email has been removed from the mailing list.',
     'member_sync_unchanged' => ':email is already in sync.',

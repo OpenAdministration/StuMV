@@ -22,6 +22,8 @@ return [
     'sync_running' => 'Die Mailingliste :name wird synchronisiert …',
     'sync_success' => 'Die Mailingliste :name wurde synchronisiert.',
     'sync_failed' => 'Die Mailingliste :name konnte nicht vollständig synchronisiert werden. Details stehen im Log.',
+    'member_subscribe' => 'Eintragen',
+    'member_unsubscribe' => 'Austragen',
     'member_sync_added' => ':email wurde zur Mailingliste hinzugefügt.',
     'member_sync_removed' => ':email wurde von der Mailingliste entfernt.',
     'member_sync_unchanged' => ':email ist bereits synchronisiert.',
