@@ -65,16 +65,17 @@ test('a list with only missing addresses shows as pending', function (): void {
 
     Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
         ->assertViewHas('state', 'pending')
-        ->assertSee(__('group_mailman_lists.status_out_of_sync', ['pending' => 1, 'stale' => 0]));
+        ->assertSee(__('group_mailman_lists.status_pending'))
+        ->assertDontSee(__('group_mailman_lists.status_stale'));
 });
 
-test('a list with an address that should be removed shows as stale', function (): void {
+test('a list with missing and removable addresses shows as stale with both messages', function (): void {
     [$community, $mapping, $email] = mappedListWithOneMember();
-    fakeRoster([$email, 'stale@example.org']);
+    fakeRoster(['stale@example.org']);
 
     Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
         ->assertViewHas('state', 'stale')
-        ->assertSee(__('group_mailman_lists.status_out_of_sync', ['pending' => 0, 'stale' => 1]));
+        ->assertSee(__('group_mailman_lists.status_pending').', '.__('group_mailman_lists.status_stale'));
 });
 
 test('a list whose roster cannot be fetched shows as error', function (): void {

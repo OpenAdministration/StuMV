@@ -56,10 +56,15 @@ class MailmanListStatus extends Component
         $stale = count(array_diff($actual, $desired));
 
         if ($pending === 0 && $stale === 0) {
-            return ['state' => 'synced', 'text' => trans_choice('group_mailman_lists.status_synced', count($desired))];
+            return ['state' => 'synced', 'text' => __('group_mailman_lists.status_synced')];
         }
 
+        $problems = array_filter([
+            $pending > 0 ? __('group_mailman_lists.status_pending') : null,
+            $stale > 0 ? __('group_mailman_lists.status_stale') : null,
+        ]);
+
         // Someone still on the list who no longer should be is worse than someone missing.
-        return ['state' => $stale > 0 ? 'stale' : 'pending', 'text' => __('group_mailman_lists.status_out_of_sync', ['pending' => $pending, 'stale' => $stale])];
+        return ['state' => $stale > 0 ? 'stale' : 'pending', 'text' => implode(', ', $problems)];
     }
 }
