@@ -6,9 +6,8 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Ldap\User as LdapUser;
 use App\Models\GroupMailmanList;
-use App\Models\GroupMembership;
-use App\Models\RoleMembership;
 use App\Support\MailmanClient;
+use App\Support\MailmanDesiredMembers;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -202,37 +201,10 @@ class ListMailmanListMembers extends Component
     }
 
     /**
-     * Same DB-driven desired-membership pipeline as mailman:sync-lists
-     * (role_group_relation -> role_user_relation), scoped to just the group
-     * mapped to this particular list.
-     *
      * @return array<string, LdapUser> keyed by mail
      */
     private function desiredMembers(GroupMailmanList $mapping): array
     {
-        $memberships = RoleMembership::active()->where('realm', $this->uid)->get();
-        $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
-
-        $usersByUsername = LdapUser::query()->in(Community::peopleDnFor($this->uid))
-            ->whereIn('uid', $memberships->pluck('username')->unique()->all())
-            ->get()
-            ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
-
-        $desiredByEmail = [];
-        foreach (GroupMembership::where('group_dn', $mapping->group_dn)->get() as $groupRole) {
-            $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
-            $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
-            $key = $committeeDn.'|'.$roleCn;
-
-            foreach ($membershipsByRole->get($key, collect()) as $membership) {
-                $user = $usersByUsername->get($membership->username);
-                $mail = $user?->getFirstAttribute('mail');
-                if ($mail) {
-                    $desiredByEmail[$mail] = $user;
-                }
-            }
-        }
-
-        return $desiredByEmail;
+        return resolve(MailmanDesiredMembers::class)->for($mapping);
     }
 }

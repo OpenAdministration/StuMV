@@ -30,6 +30,7 @@
                 <flux:table.column sortable :sorted="$sortField === 'group'" :direction="$sortDirection" wire:click="sortBy('group')">
                     {{ __('group_mailman_lists.group') }}
                 </flux:table.column>
+                <flux:table.column>{{ __('group_mailman_lists.status') }}</flux:table.column>
                 <flux:table.column></flux:table.column>
             </flux:table.columns>
             <flux:table.rows>
@@ -52,6 +53,9 @@
                                 <flux:badge color="red" variant="solid">{{ __('group_mailman_lists.group_missing') }}</flux:badge>
                             </div>
                         @endif
+                    </flux:table.cell>
+                    <flux:table.cell>
+                        <livewire:mailman.mailman-list-status :uid="$uid" :mapping-id="$mapping->id" :key="'status-'.$mapping->id" />
                     </flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
                         <flux:dropdown>
@@ -85,7 +89,7 @@
                 </flux:table.row>
             @empty
                 <flux:table.row>
-                    <flux:table.cell colspan="3">
+                    <flux:table.cell colspan="4">
                         <div class="flex justify-center item-center">
                             <span class="text-gray-400 text-xl py-2 font-medium">{{ __('group_mailman_lists.no_mappings_found') }}</span>
                         </div>
