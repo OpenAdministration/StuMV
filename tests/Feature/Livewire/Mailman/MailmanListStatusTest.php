@@ -59,13 +59,22 @@ test('a list whose roster matches the group shows as synced', function (): void 
         ->assertViewHas('state', 'synced');
 });
 
-test('a list with missing or stale addresses shows as out of sync', function (): void {
+test('a list with only missing addresses shows as pending', function (): void {
     [$community, $mapping] = mappedListWithOneMember();
-    fakeRoster(['stale@example.org']);
+    fakeRoster([]);
 
     Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertViewHas('state', 'out_of_sync')
-        ->assertSee(__('group_mailman_lists.status_out_of_sync', ['pending' => 1, 'stale' => 1]));
+        ->assertViewHas('state', 'pending')
+        ->assertSee(__('group_mailman_lists.status_out_of_sync', ['pending' => 1, 'stale' => 0]));
+});
+
+test('a list with an address that should be removed shows as stale', function (): void {
+    [$community, $mapping, $email] = mappedListWithOneMember();
+    fakeRoster([$email, 'stale@example.org']);
+
+    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
+        ->assertViewHas('state', 'stale')
+        ->assertSee(__('group_mailman_lists.status_out_of_sync', ['pending' => 0, 'stale' => 1]));
 });
 
 test('a list whose roster cannot be fetched shows as error', function (): void {

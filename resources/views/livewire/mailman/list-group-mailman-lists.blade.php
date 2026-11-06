@@ -35,7 +35,7 @@
             </flux:table.columns>
             <flux:table.rows>
             @forelse($mappings as $mapping)
-                <flux:table.row>
+                <flux:table.row wire:key="mapping-{{ $mapping->id }}">
                     <flux:table.cell>
                         <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
                     </flux:table.cell>
