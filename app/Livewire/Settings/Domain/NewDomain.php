@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\Settings\Domain;
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
@@ -44,7 +44,7 @@ class NewDomain extends Component
 
     public function render()
     {
-        return view('livewire.realm.new-domain')->title(__('realms.new_domain_title', ['realm' => $this->uid]));
+        return view('livewire.settings.domain.new-domain')->title(__('realms.new_domain_title', ['realm' => $this->uid]));
     }
 
     public function save()

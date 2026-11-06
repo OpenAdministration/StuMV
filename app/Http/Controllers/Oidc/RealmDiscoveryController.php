@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Oidc;
 
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
-use App\Livewire\Oidc\NewOidcClient;
+use App\Livewire\Settings\Oidc\NewOidcClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Laravel\Passport\Passport;

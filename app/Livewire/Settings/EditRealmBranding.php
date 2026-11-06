@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\Settings;
 
 use App\Ldap\Community;
 use App\Models\RealmBranding;
@@ -40,7 +40,7 @@ class EditRealmBranding extends Component
     {
         $branding = RealmBranding::forRealm($this->realm_uid);
 
-        return view('livewire.realm.edit-branding', [
+        return view('livewire.settings.edit-branding', [
             'logoID' => $branding?->logo_id,
             'backgroundID' => $branding?->background_id,
         ])->title(__('realms.branding.title', ['realm' => $this->realm_uid]));

@@ -2,10 +2,10 @@
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
-use App\Livewire\Realm\EditRealm;
 use App\Livewire\Realm\ListRealms;
-use App\Livewire\Realm\NewDomain;
 use App\Livewire\Realm\NewRealm;
+use App\Livewire\Settings\Domain\NewDomain;
+use App\Livewire\Settings\EditRealm;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;

@@ -19,8 +19,8 @@ test('a community member can open the dashboard', function (): void {
 test('a plain member is forbidden from admin and superadmin routes', function (): void {
     $member = actingAsMember('demo');
 
-    $this->actingAs($member)->get('/demo/edit')->assertStatus(403);       // communityAdmin
-    $this->actingAs($member)->get('/demo/api-clients')->assertStatus(403); // communityAdmin
+    $this->actingAs($member)->get('/demo/settings/edit')->assertStatus(403);       // communityAdmin
+    $this->actingAs($member)->get('/demo/settings/api-clients')->assertStatus(403); // communityAdmin
     $this->actingAs($member)->get('/new-realm')->assertStatus(403);        // SuperAdmin
 });
 
@@ -39,8 +39,8 @@ test('a plain member is forbidden from moderator-only routes', function (): void
 test('a community admin can open the community edit screen', function (): void {
     $admin = actingAsAdmin('demo');
 
-    $this->actingAs($admin)->get('/demo/edit')->assertStatus(200);
-    $this->actingAs($admin)->get('/demo/api-clients')->assertStatus(200);
+    $this->actingAs($admin)->get('/demo/settings/edit')->assertStatus(200);
+    $this->actingAs($admin)->get('/demo/settings/api-clients')->assertStatus(200);
 });
 
 test('a super admin can open the new-realm screen', function (): void {

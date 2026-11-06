@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Oidc\EditOidcClient;
+use App\Livewire\Settings\Oidc\EditOidcClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Laravel\Passport\ClientRepository;

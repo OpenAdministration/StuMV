@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\Settings;
 
 use App\Ldap\Community;
 use Flux\Flux;
@@ -35,7 +35,7 @@ class EditRealm extends Component
 
     public function render()
     {
-        return view('livewire.edit-realm')->title(__('realms.dashboard.title', ['realm' => $this->uid]));
+        return view('livewire.settings.edit-realm')->title(__('realms.dashboard.title', ['realm' => $this->uid]));
     }
 
     public function save()

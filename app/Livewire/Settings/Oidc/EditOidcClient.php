@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Oidc;
+namespace App\Livewire\Settings\Oidc;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
@@ -144,7 +144,7 @@ class EditOidcClient extends Component
 
     public function render()
     {
-        return view('livewire.oidc.edit-oidc-client')->title(__('oidc_clients.edit_title'));
+        return view('livewire.settings.oidc.edit-oidc-client')->title(__('oidc_clients.edit_title'));
     }
 
     public function save(ClientRepository $clients)

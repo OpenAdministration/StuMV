@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Api;
+namespace App\Livewire\Settings\Api;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
@@ -72,7 +72,7 @@ class ListApiClients extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
-        return view('livewire.api.list-api-clients', ['clients' => $clients])
+        return view('livewire.settings.api.list-api-clients', ['clients' => $clients])
             ->title(__('api_clients.list_title'));
     }
 

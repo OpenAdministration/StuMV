@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\IdentityProvider;
+namespace App\Livewire\Settings\IdentityProvider;
 
 use App\Ldap\Community;
 use App\Models\RealmIdentityProvider;
@@ -47,7 +47,7 @@ class ListIdentityProviders extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
-        return view('livewire.identity-provider.list-identity-providers', ['providers' => $providers])
+        return view('livewire.settings.identity-provider.list-identity-providers', ['providers' => $providers])
             ->title(__('identity_providers.list_title'));
     }
 

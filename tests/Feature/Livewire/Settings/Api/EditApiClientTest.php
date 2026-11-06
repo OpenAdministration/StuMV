@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Api\EditApiClient;
+use App\Livewire\Settings\Api\EditApiClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\ClientRepository;
 use Livewire\Livewire;

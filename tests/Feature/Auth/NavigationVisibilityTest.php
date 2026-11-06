@@ -24,9 +24,9 @@ function groupsLinkCount(string $html, string $uid): int
     return linkCount($html, $uid, 'groups');
 }
 
-function domainsLinkCount(string $html, string $uid): int
+function settingsLinkCount(string $html, string $uid): int
 {
-    return linkCount($html, $uid, 'domains');
+    return linkCount($html, $uid, 'settings');
 }
 
 test('a plain member does not see the admin nav link', function (): void {
@@ -125,7 +125,7 @@ test('a super admin sees the groups nav link', function (): void {
     expect(groupsLinkCount($html, $uid))->toBe(2);
 });
 
-test('a plain member does not see the domains nav link', function (): void {
+test('a plain member does not see the settings nav link', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     actingAsMember($community);
@@ -134,10 +134,10 @@ test('a plain member does not see the domains nav link', function (): void {
         ->assertOk()
         ->getContent();
 
-    expect(domainsLinkCount($html, $uid))->toBe(0);
+    expect(settingsLinkCount($html, $uid))->toBe(0);
 });
 
-test('a moderator does not see the domains nav link', function (): void {
+test('a moderator does not see the settings nav link', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     actingAsModerator($community);
@@ -146,7 +146,7 @@ test('a moderator does not see the domains nav link', function (): void {
         ->assertOk()
         ->getContent();
 
-    expect(domainsLinkCount($html, $uid))->toBe(0);
+    expect(settingsLinkCount($html, $uid))->toBe(0);
 });
 
 test('an admin sees the domains nav link', function (): void {
@@ -158,7 +158,7 @@ test('an admin sees the domains nav link', function (): void {
         ->assertOk()
         ->getContent();
 
-    expect(domainsLinkCount($html, $uid))->toBe(2);
+    expect(settingsLinkCount($html, $uid))->toBe(2);
 });
 
 test('a super admin sees the domains nav link', function (): void {
@@ -170,5 +170,5 @@ test('a super admin sees the domains nav link', function (): void {
         ->assertOk()
         ->getContent();
 
-    expect(domainsLinkCount($html, $uid))->toBe(2);
+    expect(settingsLinkCount($html, $uid))->toBe(2);
 });

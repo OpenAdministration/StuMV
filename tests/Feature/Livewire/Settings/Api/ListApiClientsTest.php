@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Api\ListApiClients;
+use App\Livewire\Settings\Api\ListApiClients;
 use App\Models\PassportClient;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;

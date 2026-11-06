@@ -15,7 +15,7 @@ test('the api clients list page renders over HTTP', function (): void {
     $uid = $community->getShortCode();
     $admin = actingAsAdmin($community);
 
-    $this->actingAs($admin)->get("/$uid/api-clients")->assertStatus(200);
+    $this->actingAs($admin)->get("/$uid/settings/api-clients")->assertStatus(200);
 });
 
 test('the new api client page renders over HTTP', function (): void {
@@ -23,5 +23,5 @@ test('the new api client page renders over HTTP', function (): void {
     $uid = $community->getShortCode();
     $admin = actingAsAdmin($community);
 
-    $this->actingAs($admin)->get("/$uid/new-api-client")->assertStatus(200);
+    $this->actingAs($admin)->get("/$uid/settings/new-api-client")->assertStatus(200);
 });

@@ -54,7 +54,7 @@
 
                     <flux:separator />
 
-                    <livewire:oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
+                    <livewire:settings.oidc.edit-oidc-client-logo :client-id="$clientId" :realm-uid="$uid" :key="'logo-'.$clientId" />
                 </flux:tab.panel>
 
                 <flux:tab.panel name="uris" class="pt-8 space-y-4">

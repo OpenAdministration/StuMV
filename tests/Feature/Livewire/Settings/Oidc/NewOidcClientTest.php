@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Oidc\NewOidcClient;
+use App\Livewire\Settings\Oidc\NewOidcClient;
 use App\Models\PassportClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -240,7 +240,7 @@ test('registering a client rejects a back-channel logout URI that is not a valid
 
 test('a client can be registered with a description', function (): void {
     // Logo upload, service provider, imprint/terms/privacy links are
-    // deliberately not part of this form - see App\Livewire\Oidc\EditOidcClientLogo's
+    // deliberately not part of this form - see App\Livewire\Settings\Oidc\EditOidcClientLogo's
     // doc comment and NewOidcClient::save()'s own comment for why they're
     // separate, edit-only fields instead.
     $community = newCommunity();

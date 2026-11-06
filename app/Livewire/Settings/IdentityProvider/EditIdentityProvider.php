@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\IdentityProvider;
+namespace App\Livewire\Settings\IdentityProvider;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
@@ -133,7 +133,7 @@ class EditIdentityProvider extends Component
                 'group' => Group::find($mapping->group_dn),
             ]);
 
-        return view('livewire.identity-provider.edit-identity-provider', [
+        return view('livewire.settings.identity-provider.edit-identity-provider', [
             'mappingRows' => $mappingRows,
             'committees' => $committees,
             'roles' => $roles,

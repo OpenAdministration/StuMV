@@ -16,7 +16,7 @@ test('the oidc clients list page renders over HTTP', function (): void {
     $uid = $community->getShortCode();
     $admin = actingAsAdmin($community);
 
-    $this->actingAs($admin)->get("/$uid/oidc-clients")->assertStatus(200);
+    $this->actingAs($admin)->get("/$uid/settings/oidc-clients")->assertStatus(200);
 });
 
 test('the new oidc client page renders over HTTP', function (): void {
@@ -24,7 +24,7 @@ test('the new oidc client page renders over HTTP', function (): void {
     $uid = $community->getShortCode();
     $admin = actingAsAdmin($community);
 
-    $this->actingAs($admin)->get("/$uid/new-oidc-client")->assertStatus(200);
+    $this->actingAs($admin)->get("/$uid/settings/new-oidc-client")->assertStatus(200);
 });
 
 test('the community dashboard (with its oidc-clients card) renders over HTTP', function (): void {

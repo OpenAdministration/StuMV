@@ -1,7 +1,7 @@
 <?php
 
 use App\Ldap\Domain;
-use App\Livewire\Realm\ListDomains;
+use App\Livewire\Settings\Domain\ListDomains;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;

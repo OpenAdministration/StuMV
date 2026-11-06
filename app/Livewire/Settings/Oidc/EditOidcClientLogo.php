@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Oidc;
+namespace App\Livewire\Settings\Oidc;
 
 use App\Ldap\Community;
 use App\Livewire\Concerns\StoresOidcClientLogo;
@@ -18,7 +18,7 @@ use Livewire\WithFileUploads;
  * other field (see EditOidcClient/NewOidcClient's own history). Isolating it
  * as its own child component - its own wire:id, its own instant save/remove
  * actions, no other deferred fields sharing its commit cycle - sidesteps the
- * issue entirely, mirroring how App\Livewire\Realm\EditRealmBranding already
+ * issue entirely, mirroring how App\Livewire\Settings\EditRealmBranding already
  * handles logo/background uploads.
  */
 class EditOidcClientLogo extends Component
@@ -44,7 +44,7 @@ class EditOidcClientLogo extends Component
 
     public function render()
     {
-        return view('livewire.oidc.edit-oidc-client-logo', [
+        return view('livewire.settings.oidc.edit-oidc-client-logo', [
             'logoId' => $this->client()->logo_id,
         ]);
     }
@@ -56,7 +56,7 @@ class EditOidcClientLogo extends Component
         // ordering isn't guaranteed, and an unvalidated file reaching
         // storeOidcClientLogo() would surface as an uncaught exception
         // instead of a validation error (same reasoning as
-        // App\Livewire\Realm\EditRealmBranding::updatedLogo()).
+        // App\Livewire\Settings\EditRealmBranding::updatedLogo()).
         $this->validateOnly('logo');
         $this->authorizeAdmin();
 

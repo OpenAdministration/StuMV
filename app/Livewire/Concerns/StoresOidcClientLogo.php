@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
  * Shared by NewOidcClient/EditOidcClient - both need the exact same logo
  * storage behavior (SVG kept as-is, everything else rasterized to WebP; same
  * folder, same max dimensions), so keeping it in one place is what stops
- * them from drifting out of sync, mirroring App\Livewire\Realm\EditRealmBranding's
+ * them from drifting out of sync, mirroring App\Livewire\Settings\EditRealmBranding's
  * own logo handling.
  */
 trait StoresOidcClientLogo

@@ -71,54 +71,29 @@
                     {{ __('realms.dashboard.groups_headline') }}
                 </flux:sidebar.item>
                 <flux:sidebar.item
-                    icon="globe"
-                    wire:navigate
-                    :href="route('realms.domains', ['realm' => $realm])"
-                >
-                    {{ __('realms.dashboard.domains_headline') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item
                     icon="mail"
                     wire:navigate
                     :href="route('realms.group-mailman-lists', ['realm' => $realm])"
                 >
                     {{ __('realms.dashboard.group_mailman_lists_headline') }}
                 </flux:sidebar.item>
+            @endif
+            @php($showSettings = auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
+            @php($showTools = ! $currentCommunity->isAdminRealm() && auth()->user()->can('tools', $currentCommunity))
+            @if($showSettings || $showTools)
                 <flux:separator class="my-2" />
+            @endif
+            @if($showSettings)
                 <flux:sidebar.item
-                    icon="unplug"
+                    icon="settings"
                     wire:navigate
-                    :href="route('realms.api-clients', ['realm' => $realm])"
+                    :href="route('settings.dashboard', ['realm' => $realm])"
+                    :current="request()->is('*/settings') || request()->is('*/settings/*')"
                 >
-                    {{ __('api_clients.list_title') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item
-                    icon="network"
-                    wire:navigate
-                    :href="route('realms.oidc-clients', ['realm' => $realm])"
-                >
-                    {{ __('oidc_clients.list_title') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item
-                    icon="git-pull-request-create-arrow"
-                    wire:navigate
-                    :href="route('realms.identity-providers', ['realm' => $realm])"
-                >
-                    {{ __('identity_providers.list_title') }}
+                    {{ __('realms.settings') }}
                 </flux:sidebar.item>
             @endif
-            @if(auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
-                <flux:separator class="my-2" />
-                <flux:sidebar.item
-                    icon="palette"
-                    wire:navigate
-                    :href="route('realms.branding', ['realm' => $realm])"
-                >
-                    {{ __('realms.dashboard.branding_headline') }}
-                </flux:sidebar.item>
-            @endif
-            @if(! $currentCommunity->isAdminRealm() && auth()->user()->can('tools', $currentCommunity))
-                <flux:separator class="my-2" />
+            @if($showTools)
                 <flux:sidebar.item
                     icon="hammer"
                     wire:navigate

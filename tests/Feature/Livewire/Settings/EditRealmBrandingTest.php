@@ -1,7 +1,7 @@
 <?php
 
 use App\Ldap\Community;
-use App\Livewire\Realm\EditRealmBranding;
+use App\Livewire\Settings\EditRealmBranding;
 use App\Models\RealmBranding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;

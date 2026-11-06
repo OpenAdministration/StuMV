@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Api;
+namespace App\Livewire\Settings\Api;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
@@ -46,7 +46,7 @@ class EditApiClient extends Component
 
     public function render()
     {
-        return view('livewire.api.edit-api-client')->title(__('api_clients.edit_title'));
+        return view('livewire.settings.api.edit-api-client')->title(__('api_clients.edit_title'));
     }
 
     public function save(ClientRepository $clients)

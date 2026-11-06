@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Oidc\ListOidcClients;
+use App\Livewire\Settings\Oidc\ListOidcClients;
 use App\Models\PassportClient;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;

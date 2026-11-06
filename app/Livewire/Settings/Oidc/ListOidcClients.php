@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Oidc;
+namespace App\Livewire\Settings\Oidc;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
@@ -72,7 +72,7 @@ class ListOidcClients extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
-        return view('livewire.oidc.list-oidc-clients', ['clients' => $clients])
+        return view('livewire.settings.oidc.list-oidc-clients', ['clients' => $clients])
             ->title(__('oidc_clients.list_title'));
     }
 

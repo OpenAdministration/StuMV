@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\Oidc\EditOidcClientLogo;
+use App\Livewire\Settings\Oidc\EditOidcClientLogo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -38,7 +38,7 @@ test('uploading a new logo replaces and deletes the old one', function (): void 
 
     // The old logo is already set, so the component shows "remove" rather
     // than the upload widget (see the view) - removing first is the only way
-    // to reach the upload widget again, matching App\Livewire\Realm\EditRealmBranding's UX.
+    // to reach the upload widget again, matching App\Livewire\Settings\EditRealmBranding's UX.
     Livewire::test(EditOidcClientLogo::class, ['clientId' => $client->id, 'realmUid' => $community->getShortCode()])
         ->call('removeLogo')
         ->set('logo', UploadedFile::fake()->image('logo.png', 100, 100))

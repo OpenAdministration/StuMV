@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Realm;
+namespace App\Livewire\Settings\Domain;
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
@@ -74,7 +74,7 @@ class ListDomains extends Component
             $page,
         );
 
-        return view('livewire.realm.list-domains', [
+        return view('livewire.settings.domain.list-domains', [
             'domains' => $domains,
             'community' => $this->community(),
         ])

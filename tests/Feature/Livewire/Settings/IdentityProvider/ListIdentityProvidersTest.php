@@ -1,6 +1,6 @@
 <?php
 
-use App\Livewire\IdentityProvider\ListIdentityProviders;
+use App\Livewire\Settings\IdentityProvider\ListIdentityProviders;
 use App\Models\RealmIdentityProvider;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;

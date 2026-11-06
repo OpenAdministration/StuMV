@@ -40,14 +40,6 @@
                 :description="__('realms.dashboard.admin_explanation', ['name' => $name])"
             />
         @endif
-        @can('edit', $community)
-            <x-dashboard-tile
-                :href="route('realms.edit', $uid)"
-                icon="landmark"
-                :heading="__('realms.dashboard.realms_edit_headline', ['name' => $name])"
-                :description="__('realms.dashboard.realms_edit_explanation', ['name' => $name])"
-            />
-        @endcan
         @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
             <x-dashboard-tile
                 :href="route('realms.groups', $uid)"
@@ -64,44 +56,12 @@
                 :description="__('realms.dashboard.group_mailman_lists_explanation', ['name' => $name])"
             />
         @endif
-        @can('edit', $community)
+        @if(auth()->user()->can('admin', $community) || auth()->user()->can('superadmin', \App\Models\User::class))
             <x-dashboard-tile
-                :href="route('realms.branding', $uid)"
-                icon="palette"
-                :heading="__('realms.dashboard.branding_headline', ['name' => $name])"
-                :description="__('realms.dashboard.branding_explanation', ['name' => $name])"
-            />
-        @endcan
-        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
-            <x-dashboard-tile
-                :href="route('realms.domains', $uid)"
-                icon="globe"
-                :heading="__('realms.dashboard.domains_headline', ['name' => $name])"
-                :description="__('realms.dashboard.domains_explanation', ['name' => $name])"
-            />
-        @endif
-        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
-            <x-dashboard-tile
-                :href="route('realms.api-clients', $uid)"
-                icon="unplug"
-                :heading="__('api_clients.list_title')"
-                :description="__('api_clients.explanation')"
-            />
-        @endif
-        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
-            <x-dashboard-tile
-                :href="route('realms.oidc-clients', $uid)"
-                icon="network"
-                :heading="__('oidc_clients.list_title')"
-                :description="__('oidc_clients.explanation')"
-            />
-        @endif
-        @if(! $community->isAdminRealm() && auth()->user()->can('viewAny', [\App\Ldap\Group::class, $community]))
-            <x-dashboard-tile
-                :href="route('realms.identity-providers', $uid)"
-                icon="git-pull-request-create-arrow"
-                :heading="__('identity_providers.list_title')"
-                :description="__('identity_providers.explanation')"
+                :href="route('settings.dashboard', $uid)"
+                icon="settings"
+                :heading="__('realms.settings')"
+                :description="__('realms.dashboard.settings_explanation')"
             />
         @endif
     </div>

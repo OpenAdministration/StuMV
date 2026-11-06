@@ -62,12 +62,12 @@ Breadcrumbs::for('profile.sessions', function (BreadcrumbTrail $trail, array $ro
 });
 
 Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
+    $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('common.edit'), route('realms.edit', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('realms.branding', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
+    $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('realms.branding.headline'), route('realms.branding', $routeParams), ['truncate' => true]);
 });
 
@@ -102,7 +102,7 @@ Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $r
 });
 
 Breadcrumbs::for('realms.domains', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
+    $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('realms.domains_breadcrumb'), route('realms.domains', $routeParams), ['truncate' => true]);
 });
 
@@ -117,7 +117,7 @@ Breadcrumbs::for('realms.groups', function (BreadcrumbTrail $trail, array $route
 });
 
 Breadcrumbs::for('realms.api-clients', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
+    $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('api_clients.list_title'), route('realms.api-clients', $routeParams), ['truncate' => true]);
 });
 
@@ -224,6 +224,11 @@ Breadcrumbs::for('committees.roles.terminate-memberships', function (BreadcrumbT
     $trail->push(__('roles.members.terminate_memberships'), route('committees.roles.terminate-memberships', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('settings.dashboard', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('realms.settings'), route('settings.dashboard', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('tools.dashboard', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
     $trail->push(__('tools.tools'), route('tools.dashboard', $routeParams), ['truncate' => true]);
@@ -250,7 +255,7 @@ Breadcrumbs::for('tools.unused-roles', function (BreadcrumbTrail $trail, array $
 });
 
 Breadcrumbs::for('realms.oidc-clients', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
+    $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('oidc_clients.list_title'), route('realms.oidc-clients', $routeParams), ['truncate' => true]);
 });
 
@@ -280,7 +285,7 @@ Breadcrumbs::for('realms.group-mailman-lists.members', function (BreadcrumbTrail
 });
 
 Breadcrumbs::for('realms.identity-providers', function (BreadcrumbTrail $trail, array $routeParams): void {
-    $trail->parent('realms', $routeParams);
+    $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('identity_providers.list_title'), route('realms.identity-providers', $routeParams), ['truncate' => true]);
 });
 
