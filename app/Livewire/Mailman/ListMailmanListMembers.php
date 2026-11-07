@@ -81,6 +81,12 @@ class ListMailmanListMembers extends Component
             return;
         }
 
+        if (! $mapping->enabled) {
+            Flux::toast(variant: 'danger', text: __('group_mailman_lists.list_disabled', ['name' => $this->mailmanListId]));
+
+            return;
+        }
+
         $mailman = resolve(MailmanClient::class);
         $isDesired = array_key_exists($email, $this->desiredMembers($mapping));
 
@@ -190,6 +196,7 @@ class ListMailmanListMembers extends Component
             'statusCounts' => $statusCounts,
             'groupCn' => $group?->getFirstAttribute('cn') ?? $mapping->group_dn,
             'groupExists' => $group !== null,
+            'enabled' => $mapping->enabled,
         ])->title(__('group_mailman_lists.members_title', ['name' => $this->mailmanListId]));
     }
 

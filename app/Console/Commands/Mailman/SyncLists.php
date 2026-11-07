@@ -51,6 +51,11 @@ class SyncLists extends Command
             return self::SUCCESS;
         }
 
+        foreach ($mappings->reject->enabled as $mapping) {
+            $this->comment("> {$mapping->mailman_list_id} is disabled, skipping");
+        }
+        $mappings = $mappings->filter->enabled;
+
         // Same DB-driven desired-membership pipeline as ldap:sync-groups
         // (role_group_relation -> role_user_relation), fetched once up
         // front for the same reason: one query instead of one per mapping.

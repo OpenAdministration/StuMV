@@ -12,5 +12,17 @@ class GroupMailmanList extends Model
         'realm',
         'group_dn',
         'mailman_list_id',
+        'enabled',
     ];
+
+    protected $attributes = [
+        'enabled' => true,
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'enabled' => 'boolean',
+        ];
+    }
 }

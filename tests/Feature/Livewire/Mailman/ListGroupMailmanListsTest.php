@@ -177,3 +177,45 @@ test('the admin realm has no group-mailman-list feature', function (): void {
 
     $this->get(route('realms.group-mailman-lists', ['realm' => 'admin']))->assertNotFound();
 });
+
+test('a list can be disabled and enabled again', function (): void {
+    $community = newCommunity();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $mapping = GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
+    actingAsAdmin($community);
+
+    $component = Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('toggleEnabled', $mapping->id)
+        ->assertSee(__('group_mailman_lists.disabled'));
+    expect($mapping->fresh()->enabled)->toBeFalse();
+
+    $component->call('toggleEnabled', $mapping->id)
+        ->assertDontSee(__('group_mailman_lists.disabled'));
+    expect($mapping->fresh()->enabled)->toBeTrue();
+});
+
+test('a disabled list is not synced from the overview', function (): void {
+    $community = newCommunity();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    $mapping = GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org', 'enabled' => false]);
+    actingAsAdmin($community);
+    Http::fake();
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('syncList', $mapping->id);
+
+    Http::assertNothingSent();
+});
+
+test('another realm\'s list cannot be toggled', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $otherGroup = TestLdap::makeGroup($otherCommunity, 'other');
+    $mapping = GroupMailmanList::create(['realm' => $otherCommunity->getShortCode(), 'group_dn' => $otherGroup->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    actingAsAdmin($community);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('toggleEnabled', $mapping->id)
+        ->assertNotFound();
+    expect($mapping->fresh()->enabled)->toBeTrue();
+});

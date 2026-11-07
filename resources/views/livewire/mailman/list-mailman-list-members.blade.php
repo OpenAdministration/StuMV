@@ -4,6 +4,10 @@
         <flux:text class="text-base">{{ __('group_mailman_lists.members_explanation', ['group' => $groupCn]) }}</flux:text>
     </div>
 
+    @unless($enabled)
+        <flux:callout variant="warning" icon="circle-pause" heading="{{ __('group_mailman_lists.members_list_disabled') }}" class="mb-8" />
+    @endunless
+
     @if($fetchFailed)
         <flux:callout variant="danger" icon="circle-alert" heading="{{ __('group_mailman_lists.members_fetch_failed') }}" class="mb-8" />
     @endif
@@ -73,7 +77,7 @@
                         </flux:table.cell>
                         <flux:table.cell><span class="text-zinc-800 dark:text-white">{{ $row['email'] }}</span></flux:table.cell>
                         <flux:table.cell align="end">
-                            @if($groupExists && in_array($row['status'], ['pending', 'stale'], true))
+                            @if($groupExists && $enabled && in_array($row['status'], ['pending', 'stale'], true))
                                 <flux:button
                                     size="sm"
                                     :icon="$row['status'] === 'pending' ? 'log-in' : 'log-out'"

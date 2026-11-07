@@ -37,7 +37,12 @@
             @forelse($mappings as $mapping)
                 <flux:table.row wire:key="mapping-{{ $mapping->id }}">
                     <flux:table.cell>
-                        <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
+                            @unless($mapping->enabled)
+                                <flux:badge size="sm" color="zinc">{{ __('group_mailman_lists.disabled') }}</flux:badge>
+                            @endunless
+                        </div>
                     </flux:table.cell>
                     <flux:table.cell>
                         @if($mapping->group_exists)
@@ -68,7 +73,7 @@
                                 >
                                     {{ __('group_mailman_lists.link_members') }}
                                 </flux:menu.item>
-                                @if($mapping->group_exists)
+                                @if($mapping->group_exists && $mapping->enabled)
                                     <flux:menu.item
                                         icon="refresh-ccw"
                                         x-on:click="const sync = $wire.syncList({{ $mapping->id }}); window.withProgressToast?.({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, sync)"
@@ -76,6 +81,12 @@
                                         {{ __('group_mailman_lists.sync') }}
                                     </flux:menu.item>
                                 @endif
+                                <flux:menu.item
+                                    :icon="$mapping->enabled ? 'circle-pause' : 'circle-play'"
+                                    wire:click="toggleEnabled({{ $mapping->id }})"
+                                >
+                                    {{ $mapping->enabled ? __('group_mailman_lists.disable') : __('group_mailman_lists.enable') }}
+                                </flux:menu.item>
                                 <flux:menu.item
                                     variant="danger"
                                     icon="trash-2"

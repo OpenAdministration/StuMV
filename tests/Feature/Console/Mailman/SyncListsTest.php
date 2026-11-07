@@ -203,3 +203,16 @@ test('mailman:sync-lists logs a failed subscription as an error', function (): v
 
     Log::shouldHaveReceived('error')->with('Mailman subscribe failed', Mockery::on(fn (array $context): bool => $context['email'] === $member->ldap()->getFirstAttribute('mail')));
 });
+
+test('mailman:sync-lists skips a disabled list without asking Mailman', function (): void {
+    $community = newCommunity();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org', 'enabled' => false]);
+    Http::fake();
+
+    $this->artisan('mailman:sync-lists')
+        ->expectsOutputToContain('newsletter.lists.example.org is disabled, skipping')
+        ->assertExitCode(0);
+
+    Http::assertNothingSent();
+});

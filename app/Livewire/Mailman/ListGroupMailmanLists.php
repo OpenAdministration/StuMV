@@ -70,15 +70,31 @@ class ListGroupMailmanLists extends Component
                 'group_cn' => substr(explode(',', $mapping->group_dn, 2)[0], 3),
                 'group_exists' => Group::find($mapping->group_dn) !== null,
                 'mailman_list_id' => $mapping->mailman_list_id,
+                'enabled' => $mapping->enabled,
             ]);
 
         return view('livewire.mailman.list-group-mailman-lists', ['mappings' => $mappings])
             ->title(__('group_mailman_lists.list_title'));
     }
 
+    public function toggleEnabled(int $mappingId): void
+    {
+        $mapping = GroupMailmanList::where('realm', $this->uid)->findOrFail($mappingId);
+        $mapping->update(['enabled' => ! $mapping->enabled]);
+
+        Flux::toast(variant: 'success', text: __($mapping->enabled ? 'group_mailman_lists.enabled_success' : 'group_mailman_lists.disabled_success', ['name' => $mapping->mailman_list_id]));
+    }
+
     public function syncList(int $mappingId): void
     {
         $mapping = GroupMailmanList::where('realm', $this->uid)->findOrFail($mappingId);
+
+        if (! $mapping->enabled) {
+            Flux::toast(variant: 'danger', text: __('group_mailman_lists.list_disabled', ['name' => $mapping->mailman_list_id]));
+
+            return;
+        }
+
         // Large lists can take minutes; the web default of 30s would kill the sync midway.
         set_time_limit(600);
 
