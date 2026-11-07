@@ -37,12 +37,7 @@
             @forelse($mappings as $mapping)
                 <flux:table.row wire:key="mapping-{{ $mapping->id }}">
                     <flux:table.cell>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
-                            @unless($mapping->enabled)
-                                <flux:badge size="sm" color="zinc">{{ __('group_mailman_lists.disabled') }}</flux:badge>
-                            @endunless
-                        </div>
+                        <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
                     </flux:table.cell>
                     <flux:table.cell>
                         @if($mapping->group_exists)
@@ -60,7 +55,12 @@
                         @endif
                     </flux:table.cell>
                     <flux:table.cell>
-                        <livewire:mailman.mailman-list-status :uid="$uid" :mapping-id="$mapping->id" :key="'status-'.$mapping->id" />
+                        <div class="flex flex-wrap items-center gap-2">
+                            <livewire:mailman.mailman-list-status :uid="$uid" :mapping-id="$mapping->id" :key="'status-'.$mapping->id" />
+                            @unless($mapping->enabled)
+                                <flux:badge size="sm" color="zinc">{{ __('group_mailman_lists.disabled') }}</flux:badge>
+                            @endunless
+                        </div>
                     </flux:table.cell>
                     <flux:table.cell class="flex justify-end gap-2">
                         <flux:dropdown>
