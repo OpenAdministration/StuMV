@@ -24,7 +24,7 @@ class MailmanListStatus extends Component
 
     public function placeholder(): string
     {
-        return '<div><flux:icon.loading variant="mini" class="text-zinc-400" /></div>';
+        return '<div class="flex items-center"><flux:icon.loading variant="mini" class="text-zinc-400" /></div>';
     }
 
     public function render(MailmanClient $mailman, MailmanDesiredMembers $desiredMembers)

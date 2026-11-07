@@ -1,4 +1,4 @@
-<div>
+<div class="flex items-center">
     <flux:tooltip :content="$text">
         @switch($state)
             @case('synced')
