@@ -128,11 +128,12 @@ test('the username may only contain lowercase url-safe characters', function ():
 
 test('registration enforces the password policy', function (): void {
     $community = Community::findByUid('testcom');
-    $short = 'Ab1$';        // too short
-    $noUpper = 'abcdefg1$';  // no uppercase
-    $noNumber = 'Abcdefg$';  // no number
-    $noSymbol = 'Abcdefg1';  // no symbol
-    $valid = 'Abcdef1$';     // satisfies Password::default()
+    $short = 'Ab1$';             // too short
+    $noUpper = 'abcdefghijk1$';  // no uppercase
+    $noNumber = 'Abcdefghijkl$'; // no number
+    $noSymbol = 'Abcdefghijk1';  // no symbol
+    // Random so it's never reported as leaked by uncompromised()
+    $valid = 'Aa1!'.bin2hex(random_bytes(8));
 
     Livewire::test('register-user', ['realm' => $community])
         ->set('password', $short)->call('save')->assertHasErrors('password')

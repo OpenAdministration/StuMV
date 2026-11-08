@@ -77,6 +77,12 @@ class RegisterUser extends Component
         $this->preFillFromMail();
     }
 
+    // Clear a stale "confirmed" error on password once the confirmation matches
+    public function updatedPasswordConfirmation(): void
+    {
+        $this->validateOnly('password');
+    }
+
     public function preFillFromMail()
     {
         $split = explode('@', $this->email);
