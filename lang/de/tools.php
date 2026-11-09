@@ -26,7 +26,7 @@ return [
     'invitation_revoked' => 'Die Einladung wurde widerrufen.',
     'invitation_sent' => 'Die Einladung wurde an :email versandt.',
     'invite_user_explanation' => 'Lade eine Person per E-Mail zur Registrierung ein, auch wenn ihre E-Mail-Adresse zu keiner freigegebenen Domain gehört, und wähle optional Gremien und Rollen, denen sie nach der Registrierung angehören soll.',
-    'invite_user_headline' => 'Registrierung einladen',
+    'invite_user_headline' => 'Zur Registrierung einladen',
     'invite_user_send_button' => 'Einladung senden',
     'lastname' => 'Nachname',
     'lock' => 'Sperren',
