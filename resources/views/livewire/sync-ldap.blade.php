@@ -9,9 +9,9 @@
     <flux:modal name="sync-ldap-preview" class="md:w-[32rem]">
         <div class="flex max-h-[calc(100dvh-8rem)] flex-col gap-6">
             <div class="shrink-0">
-                <flux:heading size="lg" class="modal-header">{{ __('sync.ldap_preview_heading') }}</flux:heading>
+                <flux:heading size="lg" class="modal-header mb-0!">{{ __('sync.ldap_preview_heading') }}</flux:heading>
                 @if(!empty($preview['roles']) || !empty($preview['groups']))
-                    <flux:text class="mt-2">{{ __('sync.ldap_preview_text') }}</flux:text>
+                    <flux:text class="mt-6">{{ __('sync.ldap_preview_text') }}</flux:text>
                 @endif
             </div>
 
