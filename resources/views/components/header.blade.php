@@ -70,10 +70,13 @@
                     @endif
                 </flux:menu>
             </flux:dropdown>
-            @if($showMailmanSync)
-                <livewire:sync-mailman :uid="$currentRealm->getShortCode()" />
-            @endif
-            <livewire:sync-ldap :uid="$currentRealm->getShortCode()" />
+            {{-- absolute: keeps the modal-only components out of the flex gap. --}}
+            <div class="absolute">
+                @if($showMailmanSync)
+                    <livewire:sync-mailman :uid="$currentRealm->getShortCode()" />
+                @endif
+                <livewire:sync-ldap :uid="$currentRealm->getShortCode()" />
+            </div>
         @endif
         
         <flux:dropdown align="end">

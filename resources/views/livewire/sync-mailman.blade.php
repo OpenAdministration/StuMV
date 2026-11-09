@@ -1,5 +1,5 @@
 <div>
-    <flux:modal name="sync-mailman-confirm" class="md:w-96">
+    <flux:modal name="sync-mailman-confirm" class="md:w-[32rem]">
         <div class="space-y-6">
             <div>
                 <flux:heading size="lg" class="modal-header">{{ __('sync.mailman_title') }}</flux:heading>
