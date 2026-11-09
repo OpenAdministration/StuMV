@@ -18,7 +18,7 @@
             @if(empty($preview['roles']) && empty($preview['groups']))
                 <flux:callout variant="success" icon="circle-check" heading="{{ __('sync.ldap_preview_empty') }}" />
             @else
-                <div class="min-h-0 flex-1 space-y-5 overflow-y-auto p-1 -m-1">
+                <div class="relative min-h-0 flex-1 space-y-5 overflow-y-auto p-1 -m-1">
                     @if(!empty($preview['roles']))
                         <div class="space-y-3">
                             <flux:text class="font-medium uppercase tracking-wide text-xs text-zinc-500">{{ __('sync.roles_section') }}</flux:text>
