@@ -8,7 +8,7 @@ trait DiffsUniqueMembers
 {
     /**
      * Diffs a "uniqueMember" attribute against a desired set of member DNs,
-     * without printing or writing anything - reused by app/Livewire/SyncLdap.php
+     * without printing or writing anything - reused by app/Support/LdapSyncDiff.php
      * to preview pending changes, and by SyncsUniqueMembers to apply them.
      * The empty-string placeholder some entries carry (to satisfy the "at
      * least one uniqueMember" schema requirement while otherwise empty) is

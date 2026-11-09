@@ -19,4 +19,9 @@ return [
     'confirm' => 'Synchronize',
     'member_added' => 'Added:',
     'member_removed' => 'Removed:',
+    'status_synced' => 'Up to date',
+    'status_pending' => 'There are pending changes.',
+    'status_failed' => 'The status could not be determined.',
+    'status_review' => 'Review',
+    'status_open_lists' => 'Open overview',
 ];

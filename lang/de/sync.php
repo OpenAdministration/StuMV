@@ -19,4 +19,9 @@ return [
     'confirm' => 'Synchronisieren',
     'member_added' => 'Hinzugefügt:',
     'member_removed' => 'Entfernt:',
+    'status_synced' => 'Aktuell',
+    'status_pending' => 'Es gibt ausstehende Änderungen.',
+    'status_failed' => 'Der Status konnte nicht ermittelt werden.',
+    'status_review' => 'Prüfen',
+    'status_open_lists' => 'Zur Übersicht',
 ];
