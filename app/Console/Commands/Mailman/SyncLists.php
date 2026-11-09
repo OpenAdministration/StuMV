@@ -2,16 +2,14 @@
 
 namespace App\Console\Commands\Mailman;
 
-use App\Ldap\Community;
 use App\Ldap\Group;
-use App\Ldap\User as LdapUser;
 use App\Models\GroupMailmanList;
-use App\Models\GroupMembership;
-use App\Models\RoleMembership;
 use App\Support\MailmanClient;
+use App\Support\MailmanDesiredMembers;
 use App\Support\MailmanListSyncStatus;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SyncLists extends Command
 {
@@ -32,7 +30,7 @@ class SyncLists extends Command
      */
     protected $description = 'Syncs the active DB-driven membership of mapped LDAP groups onto their Mailman 3 mailing lists';
 
-    public function handle(MailmanClient $mailman): int
+    public function handle(MailmanClient $mailman, MailmanDesiredMembers $desiredMembers): int
     {
         if (! config('services.mailman.api_url')) {
             $this->error('MAILMAN_API_URL is not configured - nothing to sync.');
@@ -57,55 +55,40 @@ class SyncLists extends Command
         }
         $mappings = $mappings->filter->enabled;
 
-        // Same DB-driven desired-membership pipeline as ldap:sync-groups
-        // (role_group_relation -> role_user_relation), fetched once up
-        // front for the same reason: one query instead of one per mapping.
-        $memberships = RoleMembership::active()->get();
-        $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
-        $groupRolesByGroup = GroupMembership::all()->groupBy('group_dn');
+        $withGroup = $mappings->filter(fn (GroupMailmanList $mapping): bool => Group::find($mapping->group_dn) !== null);
+
+        // Desired members are resolved once per realm and rosters fetched concurrently, up front.
+        $warnings = [];
+        $desiredByMapping = $desiredMembers->forMany($withGroup, function (GroupMailmanList $mapping, string $message) use (&$warnings): void {
+            $warnings[$mapping->id][] = $message;
+        });
+        $rosters = $mailman->listMembersMany($withGroup->pluck('mailman_list_id')->unique()->values()->all());
 
         $hadFailures = false;
 
         foreach ($mappings as $mapping) {
             $this->comment("> {$mapping->group_dn} -> {$mapping->mailman_list_id}");
 
-            if (! Group::find($mapping->group_dn)) {
+            if (! $withGroup->contains($mapping)) {
                 $this->warn("  |-> Group no longer exists, skipping: {$mapping->group_dn}");
 
                 continue;
             }
 
-            $usernamesInRealm = $memberships->where('realm', $mapping->realm)->pluck('username')->unique()->all();
-            $ldapUsersByUsername = empty($usernamesInRealm)
-                ? collect()
-                : LdapUser::query()->in(Community::peopleDnFor($mapping->realm))->whereIn('uid', $usernamesInRealm)->get()
-                    ->keyBy(fn (LdapUser $user): string => $user->getFirstAttribute('uid'));
-
-            $desiredEmails = collect();
-
-            foreach ($groupRolesByGroup->get($mapping->group_dn, collect()) as $groupRole) {
-                $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
-                $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
-                $key = $committeeDn.'|'.$roleCn;
-
-                foreach ($membershipsByRole->get($key, collect()) as $membership) {
-                    $user = $ldapUsersByUsername->get($membership->username);
-                    if ($user === null) {
-                        $this->warn("  |   |-> Unknown LDAP user: $membership->username");
-
-                        continue;
-                    }
-                    $mail = $user->getFirstAttribute('mail');
-                    if (! $mail) {
-                        $this->warn("  |   |-> No mail attribute for: $membership->username");
-
-                        continue;
-                    }
-                    $desiredEmails->push($mail);
-                }
+            foreach ($warnings[$mapping->id] ?? [] as $message) {
+                $this->warn("  |   |-> {$message}");
             }
 
-            if (! $this->syncListMembers($mailman, $mapping->mailman_list_id, $desiredEmails->unique()->values()->all())) {
+            $roster = $rosters[$mapping->mailman_list_id];
+            if ($roster instanceof Throwable) {
+                $this->error("  |-> Could not fetch the list members: {$roster->getMessage()}");
+                Log::error('Mailman listMembers failed', ['list_id' => $mapping->mailman_list_id, 'exception' => $roster->getMessage()]);
+                $hadFailures = true;
+
+                continue;
+            }
+
+            if (! $this->syncListMembers($mailman, $mapping->mailman_list_id, array_keys($desiredByMapping[$mapping->id]), $roster)) {
                 $hadFailures = true;
             }
 
@@ -117,10 +100,10 @@ class SyncLists extends Command
 
     /**
      * @param  array<int, string>  $desiredEmails
+     * @param  array<int, array{email: string, self_link: string, as_user: bool}>  $current
      */
-    private function syncListMembers(MailmanClient $mailman, string $listId, array $desiredEmails): bool
+    private function syncListMembers(MailmanClient $mailman, string $listId, array $desiredEmails, array $current): bool
     {
-        $current = $mailman->listMembers($listId);
         $currentByEmail = collect($current)->keyBy('email');
 
         $additions = array_values(array_diff($desiredEmails, $currentByEmail->keys()->all()));

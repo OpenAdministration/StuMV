@@ -216,3 +216,50 @@ test('mailman:sync-lists skips a disabled list without asking Mailman', function
 
     Http::assertNothingSent();
 });
+
+test('mailman:sync-lists keeps syncing other lists when one roster cannot be fetched', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $member = TestLdap::member($community);
+    RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $member->username, 'from' => today()->subMonth()]);
+    foreach (['broken', 'working'] as $name) {
+        $group = TestLdap::makeGroup($community, $name);
+        GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+        GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => "{$name}.lists.example.org"]);
+    }
+
+    Http::fake([
+        'mailman.test/3.1/lists/broken.lists.example.org/roster/member' => Http::response(status: 500),
+        'mailman.test/3.1/lists/working.lists.example.org/roster/member' => Http::response(['entries' => []]),
+        'mailman.test/3.1/members' => Http::response('', 201),
+    ]);
+
+    $this->artisan('mailman:sync-lists')
+        ->expectsOutputToContain('Could not fetch the list members')
+        ->assertExitCode(1);
+
+    Http::assertSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members'
+        && $request['list_id'] === 'working.lists.example.org');
+    Http::assertNotSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members'
+        && $request['list_id'] === 'broken.lists.example.org');
+});
+
+test('mailman:sync-lists warns about a member missing from LDAP', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
+    $ghost = TestLdap::member($community);
+    RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $ghost->username, 'from' => today()->subMonth()]);
+    $ghost->ldap()->delete();
+    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    Http::fake(['mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []])]);
+
+    $this->artisan('mailman:sync-lists')
+        ->expectsOutputToContain("Unknown LDAP user: {$ghost->username}")
+        ->assertExitCode(0);
+});

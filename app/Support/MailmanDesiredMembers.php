@@ -27,9 +27,10 @@ class MailmanDesiredMembers
      * Loads memberships and LDAP users once per realm instead of once per list.
      *
      * @param  Collection<int, GroupMailmanList>  $mappings
+     * @param  (callable(GroupMailmanList, string): void)|null  $warn  told about members that can't be put on a list
      * @return array<int, array<string, LdapUser>> keyed by mapping id, then by mail
      */
-    public function forMany(Collection $mappings): array
+    public function forMany(Collection $mappings, ?callable $warn = null): array
     {
         $groupRolesByGroup = GroupMembership::whereIn('group_dn', $mappings->pluck('group_dn')->unique()->all())
             ->get()
@@ -57,10 +58,18 @@ class MailmanDesiredMembers
 
                     foreach ($membershipsByRole->get($key, collect()) as $membership) {
                         $user = $usersByUsername->get($membership->username);
-                        $mail = $user?->getFirstAttribute('mail');
-                        if ($mail) {
-                            $desiredByEmail[$mail] = $user;
+                        if ($user === null) {
+                            $warn && $warn($mapping, "Unknown LDAP user: {$membership->username}");
+
+                            continue;
                         }
+                        $mail = $user->getFirstAttribute('mail');
+                        if (! $mail) {
+                            $warn && $warn($mapping, "No mail attribute for: {$membership->username}");
+
+                            continue;
+                        }
+                        $desiredByEmail[$mail] = $user;
                     }
                 }
                 $result[$mapping->id] = $desiredByEmail;
