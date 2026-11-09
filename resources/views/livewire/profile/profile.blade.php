@@ -5,7 +5,7 @@
 
     <x-navbar-profile :realm="$realm_uid" :username="$currentUsername" />
 
-    <div class="flex-1 p-6 sm:p-8 overflow-y-auto">
+    <div class="relative flex-1 p-6 sm:p-8 overflow-y-auto">
         <div class="max-w-7xl mx-auto space-y-6">
             <x-livewire-form :abort_route="null" wire:submit="save">
                 <div class="grid lg:grid-cols-2 gap-6">
