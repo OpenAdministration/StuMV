@@ -5,7 +5,9 @@ namespace App\Livewire\Mailman;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMailmanList;
+use App\Support\MailmanListSyncStatus;
 use Flux\Flux;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
@@ -32,6 +34,9 @@ class ListGroupMailmanLists extends Component
 
     public string $deleteMappingLabel = '';
 
+    /** @var array<int, array{state: string, text: string}> keyed by mapping id */
+    public array $statuses = [];
+
     public function mount(Community $realm): void
     {
         abort_if($realm->isAdminRealm(), 404);
@@ -53,19 +58,21 @@ class ListGroupMailmanLists extends Component
         $this->resetPage();
     }
 
+    /**
+     * Loads the Mailman status of every row on the current page that doesn't have one yet, in one batch.
+     */
+    public function loadStatuses(MailmanListSyncStatus $status): void
+    {
+        $missing = $this->currentPage()->getCollection()->reject(fn (GroupMailmanList $m): bool => isset($this->statuses[$m->id]));
+
+        $this->statuses = $status->forMany($missing) + $this->statuses;
+    }
+
     public function render()
     {
-        $search = trim($this->search);
-        // group_dn starts with "cn=<short name>,", so it sorts and searches by the group's short name.
-        $sortColumn = $this->sortField === 'group' ? 'group_dn' : 'mailman_list_id';
         $webUrl = rtrim((string) config('services.mailman.web_url'), '/');
 
-        $mappings = GroupMailmanList::where('realm', $this->uid)
-            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
-                ->where('mailman_list_id', 'like', "%{$search}%")
-                ->orWhere('group_dn', 'like', "cn=%{$search}%,ou=Groups,%")))
-            ->orderBy($sortColumn, $this->sortDirection === 'desc' ? 'desc' : 'asc')
-            ->paginate(10)
+        $mappings = $this->currentPage()
             ->through(fn (GroupMailmanList $mapping): object => (object) [
                 'web_url' => $webUrl !== '' ? "{$webUrl}/postorius/lists/".rawurlencode($mapping->mailman_list_id).'/' : null,
                 'id' => $mapping->id,
@@ -75,14 +82,31 @@ class ListGroupMailmanLists extends Component
                 'enabled' => $mapping->enabled,
             ]);
 
-        return view('livewire.mailman.list-group-mailman-lists', ['mappings' => $mappings])
+        $missingStatusIds = collect($mappings->items())->pluck('id')->reject(fn (int $id): bool => isset($this->statuses[$id]))->implode(',');
+
+        return view('livewire.mailman.list-group-mailman-lists', ['mappings' => $mappings, 'missingStatusIds' => $missingStatusIds])
             ->title(__('group_mailman_lists.list_title'));
+    }
+
+    private function currentPage(): LengthAwarePaginator
+    {
+        $search = trim($this->search);
+        // group_dn starts with "cn=<short name>,", so it sorts and searches by the group's short name.
+        $sortColumn = $this->sortField === 'group' ? 'group_dn' : 'mailman_list_id';
+
+        return GroupMailmanList::where('realm', $this->uid)
+            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
+                ->where('mailman_list_id', 'like', "%{$search}%")
+                ->orWhere('group_dn', 'like', "cn=%{$search}%,ou=Groups,%")))
+            ->orderBy($sortColumn, $this->sortDirection === 'desc' ? 'desc' : 'asc')
+            ->paginate(10);
     }
 
     public function toggleEnabled(int $mappingId): void
     {
         $mapping = GroupMailmanList::where('realm', $this->uid)->findOrFail($mappingId);
         $mapping->update(['enabled' => ! $mapping->enabled]);
+        unset($this->statuses[$mapping->id]);
 
         Flux::toast(variant: 'success', text: __($mapping->enabled ? 'group_mailman_lists.enabled_success' : 'group_mailman_lists.disabled_success', ['name' => $mapping->mailman_list_id]));
     }
@@ -106,6 +130,7 @@ class ListGroupMailmanLists extends Component
             report($e);
             $exitCode = 1;
         }
+        unset($this->statuses[$mapping->id]);
 
         if ($exitCode === 0) {
             Flux::toast(variant: 'success', text: __('group_mailman_lists.sync_success', ['name' => $mapping->mailman_list_id]));

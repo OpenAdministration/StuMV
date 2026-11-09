@@ -4,6 +4,8 @@ namespace App\Support;
 
 use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Pool;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 use Throwable;
@@ -41,12 +43,44 @@ class MailmanClient
      */
     public function listMembers(string $listId): array
     {
-        $entries = $this->request()
-            ->get("lists/{$listId}/roster/member")
-            ->throw()
-            ->json('entries', []);
+        return $this->mapMembers($this->request()->get("lists/{$listId}/roster/member")->throw());
+    }
 
-        return collect($entries)
+    /**
+     * Fetches several rosters concurrently instead of one after another.
+     *
+     * @param  array<int, string>  $listIds
+     * @return array<string, array<int, array{email: string, self_link: string, as_user: bool}>|Throwable> keyed by list id
+     */
+    public function listMembersMany(array $listIds, int $concurrency = 10): array
+    {
+        $responses = Http::pool(fn (Pool $pool): array => array_map(
+            fn (string $listId) => $this->configure($pool->as($listId))->get("lists/{$listId}/roster/member"),
+            $listIds,
+        ), $concurrency);
+
+        $results = [];
+        foreach ($listIds as $listId) {
+            $response = $responses[$listId] ?? null;
+            try {
+                if ($response instanceof Throwable) {
+                    throw $response;
+                }
+                $results[$listId] = $this->mapMembers($response->throw());
+            } catch (Throwable $e) {
+                $results[$listId] = $e;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * @return array<int, array{email: string, self_link: string, as_user: bool}>
+     */
+    private function mapMembers(Response $response): array
+    {
+        return collect($response->json('entries', []))
             ->map(fn (array $entry): array => [
                 'email' => $entry['email'],
                 'self_link' => $entry['self_link'],
@@ -142,7 +176,12 @@ class MailmanClient
 
     private function request(): PendingRequest
     {
-        return Http::withBasicAuth($this->apiUser, $this->apiKey)
+        return $this->configure(Http::createPendingRequest());
+    }
+
+    private function configure(PendingRequest $request): PendingRequest
+    {
+        return $request->withBasicAuth($this->apiUser, $this->apiKey)
             ->baseUrl(rtrim($this->baseUrl, '/').'/')
             ->withOptions(['verify' => $this->apiVerifyTls])
             ->timeout(10);

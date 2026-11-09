@@ -42,10 +42,8 @@ class MailmanSyncStatus extends Component
 
     public function render(MailmanListSyncStatus $status)
     {
-        $states = GroupMailmanList::where('realm', $this->uid)
-            ->where('enabled', true)
-            ->get()
-            ->map(fn (GroupMailmanList $mapping): string => $status->for($mapping)['state']);
+        $mappings = GroupMailmanList::where('realm', $this->uid)->where('enabled', true)->get();
+        $states = collect($status->forMany($mappings))->pluck('state');
 
         $state = $states->every(fn (string $s): bool => $s === 'synced') ? 'synced' : 'pending';
 

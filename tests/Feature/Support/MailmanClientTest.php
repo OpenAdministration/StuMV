@@ -189,3 +189,16 @@ test('on old Postorius (no CSRF form on the request pages) a pending request is 
         && $request->url() === 'https://web.test/postorius/lists/team.lists.example.org/handle_subscription_request/tok-'.md5('old@example.org').'/discard');
     Http::assertNotSent(fn (Request $request): bool => $request->method() === 'POST' && str_contains($request->url(), '/handle_subscription_request/'));
 });
+
+test('listMembersMany fetches several rosters and isolates failures per list', function (): void {
+    Http::fake([
+        'api.test/3.1/lists/ok.lists.example.org/roster/member' => Http::response(['entries' => [['email' => 'a@example.org', 'self_link' => 'http://api.test/3.1/members/1']]]),
+        'api.test/3.1/lists/broken.lists.example.org/roster/member' => Http::response(status: 500),
+    ]);
+
+    $result = postoriusClient()->listMembersMany(['ok.lists.example.org', 'broken.lists.example.org']);
+
+    expect($result['ok.lists.example.org'])->toBe([['email' => 'a@example.org', 'self_link' => 'http://api.test/3.1/members/1', 'as_user' => false]])
+        ->and($result['broken.lists.example.org'])->toBeInstanceOf(Throwable::class);
+    Http::assertSentCount(2);
+});

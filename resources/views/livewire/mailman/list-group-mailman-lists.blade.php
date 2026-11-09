@@ -22,6 +22,10 @@
     </flux:field>
 
     <div class="pb-8">
+        @if($missingStatusIds !== '')
+            {{-- Re-keyed per page/search so Alpine runs x-init again for newly shown rows. --}}
+            <div class="hidden" wire:key="load-statuses-{{ $missingStatusIds }}" x-init="$wire.loadStatuses()"></div>
+        @endif
         <flux:table>
             <flux:table.columns>
                 <flux:table.column sortable :sorted="$sortField === 'mailman_list_id'" :direction="$sortDirection" wire:click="sortBy('mailman_list_id')">
@@ -60,7 +64,11 @@
                     </flux:table.cell>
                     <flux:table.cell>
                         <div class="flex flex-wrap items-center gap-2">
-                            <livewire:mailman.mailman-list-status :uid="$uid" :mapping-id="$mapping->id" :key="'status-'.$mapping->id" />
+                            @if(isset($statuses[$mapping->id]))
+                                @include('livewire.mailman.mailman-list-status', $statuses[$mapping->id])
+                            @else
+                                <flux:icon.loading variant="mini" class="text-zinc-400" />
+                            @endif
                             @unless($mapping->enabled)
                                 <flux:badge size="sm" color="zinc">{{ __('group_mailman_lists.disabled') }}</flux:badge>
                             @endunless

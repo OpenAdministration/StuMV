@@ -1,7 +1,7 @@
 <?php
 
 use App\Ldap\Community;
-use App\Livewire\Mailman\MailmanListStatus;
+use App\Livewire\Mailman\ListGroupMailmanLists;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
@@ -55,16 +55,18 @@ test('a list whose roster matches the group shows as synced', function (): void 
     [$community, $mapping, $email] = mappedListWithOneMember();
     fakeRoster([$email]);
 
-    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertViewHas('state', 'synced');
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'synced');
 });
 
 test('a list with only missing addresses shows as pending', function (): void {
     [$community, $mapping] = mappedListWithOneMember();
     fakeRoster([]);
 
-    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertViewHas('state', 'pending')
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'pending')
         ->assertSee(__('group_mailman_lists.status_pending'))
         ->assertDontSee(__('group_mailman_lists.status_stale'));
 });
@@ -73,8 +75,9 @@ test('a list with missing and removable addresses shows as stale with both messa
     [$community, $mapping, $email] = mappedListWithOneMember();
     fakeRoster(['stale@example.org']);
 
-    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertViewHas('state', 'stale')
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'stale')
         ->assertSee(__('group_mailman_lists.status_pending').', '.__('group_mailman_lists.status_stale'));
 });
 
@@ -82,8 +85,9 @@ test('a list whose roster cannot be fetched shows as error', function (): void {
     [$community, $mapping] = mappedListWithOneMember();
     Http::fake(['*' => Http::response([], 500)]);
 
-    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertViewHas('state', 'error')
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'error')
         ->assertSee(__('group_mailman_lists.status_fetch_failed'));
 });
 
@@ -97,15 +101,31 @@ test('a list whose group no longer exists shows as error without asking Mailman'
     actingAsAdmin($community);
     Http::fake();
 
-    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $community->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertViewHas('state', 'error');
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'error');
     Http::assertNothingSent();
 });
 
-test('another realm\'s mapping cannot be queried', function (): void {
+test('another realm\'s mappings are not loaded', function (): void {
     [, $mapping] = mappedListWithOneMember();
     $otherCommunity = newCommunity();
+    actingAsAdmin($otherCommunity);
+    Http::fake();
 
-    Livewire::withoutLazyLoading()->test(MailmanListStatus::class, ['uid' => $otherCommunity->getShortCode(), 'mappingId' => $mapping->id])
-        ->assertNotFound();
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $otherCommunity])
+        ->call('loadStatuses')
+        ->assertSet('statuses', []);
+    Http::assertNothingSent();
+});
+
+test('the overview loads the statuses of all rows on the page in one call', function (): void {
+    [$community, $mapping, $email] = mappedListWithOneMember();
+    fakeRoster([$email]);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->assertSeeHtml('x-init="$wire.loadStatuses()"')
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'synced')
+        ->assertDontSeeHtml('x-init="$wire.loadStatuses()"');
 });

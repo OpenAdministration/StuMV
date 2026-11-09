@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Ldap\Group;
 use App\Models\GroupMailmanList;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -23,18 +24,32 @@ class MailmanListSyncStatus
      */
     public function for(GroupMailmanList $mapping): array
     {
-        $key = self::cacheKey($mapping->id);
-        $diff = Cache::get($key);
+        return $this->forMany(collect([$mapping]))[$mapping->id];
+    }
 
-        if ($diff === null) {
-            $diff = $this->diff($mapping);
-
-            if ($diff['error'] === null) {
-                Cache::put($key, $diff, self::TTL_SECONDS);
-            }
+    /**
+     * Cache misses are computed together: one DB/LDAP pass per realm and concurrent Mailman requests.
+     *
+     * @param  Collection<int, GroupMailmanList>  $mappings
+     * @return array<int, array{state: 'synced'|'pending'|'stale'|'error', text: string}> keyed by mapping id
+     */
+    public function forMany(Collection $mappings): array
+    {
+        $diffs = [];
+        $misses = collect();
+        foreach ($mappings as $mapping) {
+            $cached = Cache::get(self::cacheKey($mapping->id));
+            $cached === null ? $misses->push($mapping) : $diffs[$mapping->id] = $cached;
         }
 
-        return $this->present($diff);
+        foreach ($this->diffMany($misses) as $id => $diff) {
+            if ($diff['error'] === null) {
+                Cache::put(self::cacheKey($id), $diff, self::TTL_SECONDS);
+            }
+            $diffs[$id] = $diff;
+        }
+
+        return array_map($this->present(...), $diffs);
     }
 
     public static function forget(GroupMailmanList $mapping): void
@@ -58,29 +73,48 @@ class MailmanListSyncStatus
     }
 
     /**
-     * @return array{error: ?string, pending: int, stale: int}
+     * @param  Collection<int, GroupMailmanList>  $mappings
+     * @return array<int, array{error: ?string, pending: int, stale: int}> keyed by mapping id
      */
-    private function diff(GroupMailmanList $mapping): array
+    private function diffMany(Collection $mappings): array
     {
-        if (! Group::find($mapping->group_dn)) {
-            return ['error' => 'group_missing', 'pending' => 0, 'stale' => 0];
+        if ($mappings->isEmpty()) {
+            return [];
         }
 
-        try {
-            $actual = array_column($this->mailman->listMembers($mapping->mailman_list_id), 'email');
-        } catch (Throwable $e) {
-            Log::warning('Mailman listMembers failed', ['list_id' => $mapping->mailman_list_id, 'exception' => $e->getMessage()]);
+        $existingGroupDns = $mappings->pluck('realm')->unique()
+            ->flatMap(fn (string $realm) => Group::query()->in(Group::dnRoot($realm))->get()->map(fn (Group $group): string => strtolower((string) $group->getDn())))
+            ->flip();
 
-            return ['error' => 'status_fetch_failed', 'pending' => 0, 'stale' => 0];
+        [$withGroup, $withoutGroup] = $mappings->partition(fn (GroupMailmanList $m): bool => $existingGroupDns->has(strtolower((string) $m->group_dn)));
+
+        $diffs = [];
+        foreach ($withoutGroup as $mapping) {
+            $diffs[$mapping->id] = ['error' => 'group_missing', 'pending' => 0, 'stale' => 0];
         }
 
-        $desired = array_keys($this->desiredMembers->for($mapping));
+        $rosters = $this->mailman->listMembersMany($withGroup->pluck('mailman_list_id')->unique()->values()->all());
+        $desiredByMapping = $this->desiredMembers->forMany($withGroup);
 
-        return [
-            'error' => null,
-            'pending' => count(array_diff($desired, $actual)),
-            'stale' => count(array_diff($actual, $desired)),
-        ];
+        foreach ($withGroup as $mapping) {
+            $roster = $rosters[$mapping->mailman_list_id];
+            if ($roster instanceof Throwable) {
+                Log::warning('Mailman listMembers failed', ['list_id' => $mapping->mailman_list_id, 'exception' => $roster->getMessage()]);
+                $diffs[$mapping->id] = ['error' => 'status_fetch_failed', 'pending' => 0, 'stale' => 0];
+
+                continue;
+            }
+
+            $actual = array_column($roster, 'email');
+            $desired = array_keys($desiredByMapping[$mapping->id]);
+            $diffs[$mapping->id] = [
+                'error' => null,
+                'pending' => count(array_diff($desired, $actual)),
+                'stale' => count(array_diff($actual, $desired)),
+            ];
+        }
+
+        return $diffs;
     }
 
     /**
