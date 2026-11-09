@@ -8,7 +8,7 @@
     >
         <flux:card class="h-full min-h-36 flex flex-col items-center justify-center gap-3 p-4 text-center">
             <flux:icon :icon="$icon" class="size-10 text-(--color-accent-content)" />
-            <flux:heading size="lg">{{ $heading }}</flux:heading>
+            <flux:heading size="lg" class="hyphens-none">{{ $heading }}</flux:heading>
             <span class="sr-only">{{ $description }}</span>
         </flux:card>
     </a>
