@@ -91,7 +91,7 @@ ui-modal .modal-header {
     @apply mb-6 -mx-6 -mt-6 px-4 py-3 bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 font-semibold!;
 }
 
-ui-modal button {
+ui-modal [data-flux-modal-close] button {
     @apply -mt-2 -mr-2;
 }
 
