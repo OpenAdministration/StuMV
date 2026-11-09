@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LdapSyncState;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -26,6 +27,12 @@ class GroupMembership extends Model
         'group_dn',
         'role_dn',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn (GroupMembership $m) => LdapSyncState::forgetForGroupDn((string) $m->group_dn));
+        static::deleted(fn (GroupMembership $m) => LdapSyncState::forgetForGroupDn((string) $m->group_dn));
+    }
 
     public function roles(): HasMany
     {

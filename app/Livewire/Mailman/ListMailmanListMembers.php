@@ -8,6 +8,7 @@ use App\Ldap\User as LdapUser;
 use App\Models\GroupMailmanList;
 use App\Support\MailmanClient;
 use App\Support\MailmanDesiredMembers;
+use App\Support\MailmanListSyncStatus;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -110,6 +111,8 @@ class ListMailmanListMembers extends Component
 
             return;
         }
+
+        MailmanListSyncStatus::forget($mapping);
 
         if ($failed === []) {
             Flux::toast(variant: 'success', text: $success);

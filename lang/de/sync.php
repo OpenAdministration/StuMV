@@ -23,5 +23,6 @@ return [
     'status_pending' => 'Es gibt ausstehende Änderungen.',
     'status_failed' => 'Der Status konnte nicht ermittelt werden.',
     'status_review' => 'Prüfen',
+    'status_refresh' => 'Neu prüfen',
     'status_open_lists' => 'Zur Übersicht',
 ];

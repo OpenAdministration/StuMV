@@ -5,7 +5,10 @@
         </div>
         <div class="flex-1 min-w-0">
             <flux:heading size="lg">{{ $heading }}</flux:heading>
-            <div class="mt-1 flex items-center gap-2">
+            <div wire:loading.flex wire:target="refresh" class="mt-1 items-center">
+                <flux:icon.loading variant="mini" class="text-zinc-400" />
+            </div>
+            <div class="mt-1 flex items-center gap-2" wire:loading.remove wire:target="refresh">
                 @switch($state)
                     @case('loading')
                         <flux:icon.loading variant="mini" class="text-zinc-400" />
@@ -24,10 +27,13 @@
                 @endif
             </div>
             @if($ldapAction ?? false)
-                <flux:button size="sm" class="mt-3" x-on:click="$dispatch('open-ldap-sync-preview')">{{ __('sync.status_review') }}</flux:button>
+                <flux:button size="sm" class="mt-3" x-on:click="$dispatch('open-ldap-sync-preview')" wire:loading.remove wire:target="refresh">{{ __('sync.status_review') }}</flux:button>
             @elseif(isset($href) && $state !== 'synced')
-                <flux:button size="sm" class="mt-3" wire:navigate :href="$href">{{ __('sync.status_open_lists') }}</flux:button>
+                <flux:button size="sm" class="mt-3" wire:navigate :href="$href" wire:loading.remove wire:target="refresh">{{ __('sync.status_open_lists') }}</flux:button>
             @endif
         </div>
+        @if($refreshable ?? false)
+            <flux:button size="sm" variant="ghost" icon="refresh-cw" wire:click="refresh" wire:loading.attr="disabled" wire:target="refresh" :title="__('sync.status_refresh')" />
+        @endif
     </flux:card>
 </div>

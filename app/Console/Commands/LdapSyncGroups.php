@@ -8,6 +8,7 @@ use App\Ldap\Group;
 use App\Ldap\User as LdapUser;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
+use App\Support\LdapSyncState;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 
@@ -99,6 +100,8 @@ class LdapSyncGroups extends Command
 
                 $this->syncUniqueMembers($group, $desiredDns->unique()->values()->all(), '  |   |-> ');
             }
+
+            LdapSyncState::forget($realmUid);
         }
     }
 }

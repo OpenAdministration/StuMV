@@ -35,6 +35,11 @@ class MailmanSyncStatus extends Component
         ])->render();
     }
 
+    public function refresh(): void
+    {
+        MailmanListSyncStatus::forgetRealm($this->uid);
+    }
+
     public function render(MailmanListSyncStatus $status)
     {
         $states = GroupMailmanList::where('realm', $this->uid)
@@ -50,6 +55,7 @@ class MailmanSyncStatus extends Component
             'state' => $state,
             'text' => $state === 'synced' ? __('sync.status_synced') : __('sync.status_pending'),
             'href' => route('realms.group-mailman-lists', ['realm' => $this->uid]),
+            'refreshable' => true,
         ]);
     }
 }

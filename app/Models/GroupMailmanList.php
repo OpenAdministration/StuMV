@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MailmanListSyncStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class GroupMailmanList extends Model
@@ -18,6 +19,12 @@ class GroupMailmanList extends Model
     protected $attributes = [
         'enabled' => true,
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(MailmanListSyncStatus::forget(...));
+        static::deleted(MailmanListSyncStatus::forget(...));
+    }
 
     protected function casts(): array
     {

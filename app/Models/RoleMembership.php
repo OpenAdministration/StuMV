@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\LdapSyncState;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,6 +41,12 @@ class RoleMembership extends Model
         'comment',
         'identity_provider_id',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn (RoleMembership $m) => LdapSyncState::forget((string) $m->realm));
+        static::deleted(fn (RoleMembership $m) => LdapSyncState::forget((string) $m->realm));
+    }
 
     /**
      * @return BelongsTo

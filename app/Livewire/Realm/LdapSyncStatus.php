@@ -3,7 +3,7 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
-use App\Support\LdapSyncDiff;
+use App\Support\LdapSyncState;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
@@ -33,11 +33,15 @@ class LdapSyncStatus extends Component
         ])->render();
     }
 
-    public function render(LdapSyncDiff $diff)
+    public function refresh(): void
+    {
+        LdapSyncState::forget($this->uid);
+    }
+
+    public function render(LdapSyncState $ldapState)
     {
         try {
-            $realm = Community::findByOrFail('ou', $this->uid);
-            $state = $diff->roleChanges($realm) === [] && $diff->groupChanges($realm) === [] ? 'synced' : 'pending';
+            $state = $ldapState->for(Community::findByOrFail('ou', $this->uid));
         } catch (Throwable $e) {
             Log::warning('LDAP sync status failed', ['realm' => $this->uid, 'exception' => $e->getMessage()]);
             $state = 'error';
@@ -53,6 +57,7 @@ class LdapSyncStatus extends Component
                 default => __('sync.status_failed'),
             },
             'ldapAction' => $state === 'pending',
+            'refreshable' => true,
         ]);
     }
 }

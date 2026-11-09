@@ -7,6 +7,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
 use App\Models\RoleMembership;
+use App\Support\LdapSyncState;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 
@@ -102,6 +103,8 @@ class LdapSyncRoles extends Command
                     $this->syncUniqueMembers($role, $desiredDns, '  |   |   |-> ');
                 }
             }
+
+            LdapSyncState::forget($realmUid);
         }
     }
 }

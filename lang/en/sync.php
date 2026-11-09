@@ -23,5 +23,6 @@ return [
     'status_pending' => 'There are pending changes.',
     'status_failed' => 'The status could not be determined.',
     'status_review' => 'Review',
+    'status_refresh' => 'Check again',
     'status_open_lists' => 'Open overview',
 ];

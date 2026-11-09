@@ -9,6 +9,7 @@ use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use App\Support\MailmanClient;
+use App\Support\MailmanListSyncStatus;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -107,6 +108,8 @@ class SyncLists extends Command
             if (! $this->syncListMembers($mailman, $mapping->mailman_list_id, $desiredEmails->unique()->values()->all())) {
                 $hadFailures = true;
             }
+
+            MailmanListSyncStatus::forget($mapping);
         }
 
         return $hadFailures ? self::FAILURE : self::SUCCESS;
