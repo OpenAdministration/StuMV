@@ -58,6 +58,7 @@ class ListGroupMailmanLists extends Component
         $search = trim($this->search);
         // group_dn starts with "cn=<short name>,", so it sorts and searches by the group's short name.
         $sortColumn = $this->sortField === 'group' ? 'group_dn' : 'mailman_list_id';
+        $webUrl = rtrim((string) config('services.mailman.web_url'), '/');
 
         $mappings = GroupMailmanList::where('realm', $this->uid)
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
@@ -66,6 +67,7 @@ class ListGroupMailmanLists extends Component
             ->orderBy($sortColumn, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10)
             ->through(fn (GroupMailmanList $mapping): object => (object) [
+                'web_url' => $webUrl !== '' ? "{$webUrl}/postorius/lists/".rawurlencode($mapping->mailman_list_id).'/' : null,
                 'id' => $mapping->id,
                 'group_cn' => substr(explode(',', $mapping->group_dn, 2)[0], 3),
                 'group_exists' => Group::find($mapping->group_dn) !== null,

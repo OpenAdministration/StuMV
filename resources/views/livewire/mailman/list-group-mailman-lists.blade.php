@@ -37,7 +37,11 @@
             @forelse($mappings as $mapping)
                 <flux:table.row wire:key="mapping-{{ $mapping->id }}">
                     <flux:table.cell>
-                        <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
+                        @if($mapping->web_url)
+                            <flux:link href="{{ $mapping->web_url }}" target="_blank" rel="noopener noreferrer">{{ $mapping->mailman_list_id }}</flux:link>
+                        @else
+                            <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
+                        @endif
                     </flux:table.cell>
                     <flux:table.cell>
                         @if($mapping->group_exists)

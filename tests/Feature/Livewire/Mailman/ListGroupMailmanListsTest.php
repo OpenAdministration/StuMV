@@ -219,3 +219,18 @@ test('another realm\'s list cannot be toggled', function (): void {
         ->assertNotFound();
     expect($mapping->fresh()->enabled)->toBeTrue();
 });
+
+test('the list id links to Postorius only when the web url is configured', function (): void {
+    $community = newCommunity();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
+    actingAsAdmin($community);
+
+    config(['services.mailman.web_url' => null]);
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->assertDontSee('/postorius/lists/');
+
+    config(['services.mailman.web_url' => 'https://lists.example.org/']);
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->assertSeeHtml('href="https://lists.example.org/postorius/lists/a.lists.example.org/"');
+});
