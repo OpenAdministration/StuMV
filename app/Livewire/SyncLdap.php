@@ -13,6 +13,7 @@ use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SyncLdap extends Component
@@ -51,6 +52,7 @@ class SyncLdap extends Component
      * still runs through the full ldap:sync-roles/ldap:sync-groups commands
      * below, so this preview never itself writes to LDAP.
      */
+    #[On('open-ldap-sync-preview')]
     public function openSyncPreview(): void
     {
         $realm = Community::findByOrFail('ou', $this->uid);

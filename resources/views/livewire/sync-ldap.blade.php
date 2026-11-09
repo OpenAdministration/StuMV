@@ -1,11 +1,4 @@
 <div>
-    <flux:button
-        variant="ghost"
-        icon="folder-sync"
-        wire:click="openSyncPreview"
-        title="{{ __('sync.ldap_title') }}"
-    />
-
     <flux:modal name="sync-ldap-preview" class="md:w-[32rem]">
         <div class="flex max-h-[calc(100dvh-8rem)] flex-col gap-6">
             <div class="shrink-0">

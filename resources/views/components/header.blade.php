@@ -50,7 +50,23 @@
 
     <div class="ml-auto flex justify-end items-center gap-2">
         @if($currentRealm && auth()->user()->can('admin', $currentRealm))
-            @if(config('services.mailman.api_url') && ! $currentRealm->isAdminRealm())
+            @php
+                $showMailmanSync = config('services.mailman.api_url') && ! $currentRealm->isAdminRealm();
+            @endphp
+            <flux:dropdown align="end">
+                <flux:button variant="ghost" icon="folder-sync" :title="__('sync.menu_title')" />
+                <flux:menu>
+                    <flux:menu.item icon="list-tree" x-on:click="Livewire.dispatch('open-ldap-sync-preview')">
+                        {{ __('sync.menu_ldap') }}
+                    </flux:menu.item>
+                    @if($showMailmanSync)
+                        <flux:menu.item icon="mail" x-on:click="$flux.modal('sync-mailman-confirm').show()">
+                            {{ __('sync.menu_mailman') }}
+                        </flux:menu.item>
+                    @endif
+                </flux:menu>
+            </flux:dropdown>
+            @if($showMailmanSync)
                 <livewire:sync-mailman :uid="$currentRealm->getShortCode()" />
             @endif
             <livewire:sync-ldap :uid="$currentRealm->getShortCode()" />

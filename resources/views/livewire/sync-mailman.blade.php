@@ -1,12 +1,4 @@
 <div>
-    <flux:modal.trigger name="sync-mailman-confirm">
-        <flux:button
-            variant="ghost"
-            icon="mail-pen"
-            title="{{ __('sync.mailman_title') }}"
-        />
-    </flux:modal.trigger>
-
     <flux:modal name="sync-mailman-confirm" class="md:w-96">
         <div class="space-y-6">
             <div>

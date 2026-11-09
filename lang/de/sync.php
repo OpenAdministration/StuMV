@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'menu_title' => 'Synchronisieren',
+    'menu_ldap' => 'LDAP',
+    'menu_mailman' => 'Mailinglisten',
     'ldap_title' => 'Synchronisiere Rollen-Mitglieder und Rechte mit dem LDAP',
     'ldap_success' => 'LDAP wurde erfolgreich synchronisiert.',
     'ldap_preview_heading' => 'Änderungen prüfen',
