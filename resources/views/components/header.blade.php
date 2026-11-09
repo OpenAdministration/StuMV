@@ -55,7 +55,10 @@
             @endphp
             {{-- x-data: the header is outside any Livewire/Alpine root, so x-on:click wouldn't bind. --}}
             <flux:dropdown x-data align="end">
-                <flux:button variant="ghost" icon="refresh-cw" icon:trailing="chevron-down" :title="__('sync.menu_title')" />
+                <flux:button variant="ghost" class="gap-1! px-2!" :title="__('sync.menu_title')">
+                    <flux:icon.refresh-cw class="size-5" />
+                    <flux:icon.chevron-down class="size-4" />
+                </flux:button>
                 <flux:menu>
                     <flux:menu.item icon="list-tree" x-on:click="$dispatch('open-ldap-sync-preview')">
                         {{ __('sync.menu_ldap') }}
