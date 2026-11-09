@@ -122,7 +122,7 @@ test('the preview only shows committees/roles and groups that would actually cha
     $unchangedGroup = TestLdap::makeGroup($community, 'uncgrp'.bin2hex(random_bytes(3)));
 
     Livewire::test(SyncLdap::class, ['uid' => $community->getShortCode()])
-        ->call('openSyncPreview')
+        ->call('loadSyncPreview')
         ->assertSee($changedCommittee->getFirstAttribute('description'))
         ->assertSee($changedRole->getFirstAttribute('description'))
         ->assertSee('Test '.$active->username)
@@ -137,13 +137,4 @@ test('the preview only shows committees/roles and groups that would actually cha
         ]), false)
         ->assertSee(route('profile', ['realm' => $community->getShortCode(), 'username' => $active->username]), false)
         ->assertSee(route('realms.groups.members', ['realm' => $community->getShortCode(), 'cn' => $changedGroup->getFirstAttribute('cn')]), false);
-});
-
-test('the header menu opens the preview via the open-ldap-sync-preview event', function (): void {
-    $community = newCommunity();
-    actingAsAdmin($community);
-
-    Livewire::test(SyncLdap::class, ['uid' => $community->getShortCode()])
-        ->dispatch('open-ldap-sync-preview')
-        ->assertDispatched('modal-show', name: 'sync-ldap-preview');
 });

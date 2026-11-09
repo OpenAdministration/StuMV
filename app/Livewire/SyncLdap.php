@@ -13,7 +13,6 @@ use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SyncLdap extends Component
@@ -48,12 +47,11 @@ class SyncLdap extends Component
     /**
      * Builds a read-only preview of the pending changes (scoped to this
      * realm, filtered to only the committees/roles/groups that would
-     * actually change) and opens the confirmation modal. The real sync
+     * actually change); the modal itself is opened client-side. The real sync
      * still runs through the full ldap:sync-roles/ldap:sync-groups commands
      * below, so this preview never itself writes to LDAP.
      */
-    #[On('open-ldap-sync-preview')]
-    public function openSyncPreview(): void
+    public function loadSyncPreview(): void
     {
         $realm = Community::findByOrFail('ou', $this->uid);
 
@@ -66,7 +64,6 @@ class SyncLdap extends Component
             'groups' => $this->withResolvedMembers($groupChanges, $membersByDn),
         ];
 
-        Flux::modal('sync-ldap-preview')->show();
     }
 
     public function syncLdap()

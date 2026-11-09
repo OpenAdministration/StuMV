@@ -1,17 +1,24 @@
-<div>
+{{-- Two listeners: the CSP expression parser can't run two statements in one. --}}
+<div x-on:open-ldap-sync-preview.window="$flux.modal('sync-ldap-preview').show()">
+    <div class="hidden" x-on:open-ldap-sync-preview.window="$wire.loadSyncPreview()"></div>
+
     <flux:modal name="sync-ldap-preview" class="md:w-[32rem]">
         <div class="flex max-h-[calc(100dvh-8rem)] flex-col gap-6">
             <div class="shrink-0">
                 <flux:heading size="lg" class="modal-header mb-0!">{{ __('sync.ldap_preview_heading') }}</flux:heading>
                 @if(!empty($preview['roles']) || !empty($preview['groups']))
-                    <flux:text class="mt-6">{{ __('sync.ldap_preview_text') }}</flux:text>
+                    <flux:text class="mt-6" wire:loading.remove wire:target="loadSyncPreview">{{ __('sync.ldap_preview_text') }}</flux:text>
                 @endif
             </div>
 
+            <div wire:loading.flex wire:target="loadSyncPreview" class="flex justify-center py-8">
+                <flux:icon.loading />
+            </div>
+
             @if(empty($preview['roles']) && empty($preview['groups']))
-                <flux:callout variant="success" icon="circle-check" heading="{{ __('sync.ldap_preview_empty') }}" />
+                <flux:callout variant="success" icon="circle-check" heading="{{ __('sync.ldap_preview_empty') }}" wire:loading.remove wire:target="loadSyncPreview" />
             @else
-                <div class="relative min-h-0 flex-1 space-y-5 overflow-y-auto p-1 -m-1">
+                <div class="relative min-h-0 flex-1 space-y-5 overflow-y-auto p-1 -m-1" wire:loading.remove wire:target="loadSyncPreview">
                     @if(!empty($preview['roles']))
                         <div class="space-y-3">
                             <flux:text class="font-medium uppercase tracking-wide text-xs text-zinc-500">{{ __('sync.roles_section') }}</flux:text>
@@ -50,7 +57,7 @@
 
             <div class="flex shrink-0 justify-end gap-4">
                 <flux:button icon="ban" x-on:click="$flux.modal('sync-ldap-preview').close()">{{ __('common.cancel') }}</flux:button>
-                <flux:button variant="primary" icon="folder-sync" wire:click="syncLdap">{{ __('sync.confirm') }}</flux:button>
+                <flux:button variant="primary" icon="folder-sync" wire:click="syncLdap" wire:loading.attr="disabled" wire:target="loadSyncPreview">{{ __('sync.confirm') }}</flux:button>
             </div>
         </div>
     </flux:modal>
