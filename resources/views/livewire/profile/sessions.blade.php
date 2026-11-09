@@ -5,7 +5,7 @@
 
     <x-navbar-profile :realm="$realm_uid" :username="$currentUsername" />
 
-    <div class="relative flex-1 p-6 sm:p-8 overflow-y-auto">
+    <div class="flex-1 p-6 sm:p-8">
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex flex-col sm:flex-row gap-6">
                 <div class="flex-1 space-y-4">
