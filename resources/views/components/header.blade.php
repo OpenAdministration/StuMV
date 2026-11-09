@@ -53,10 +53,11 @@
             @php
                 $showMailmanSync = config('services.mailman.api_url') && ! $currentRealm->isAdminRealm();
             @endphp
-            <flux:dropdown align="end">
-                <flux:button variant="ghost" icon="folder-sync" :title="__('sync.menu_title')" />
+            {{-- x-data: the header is outside any Livewire/Alpine root, so x-on:click wouldn't bind. --}}
+            <flux:dropdown x-data align="end">
+                <flux:button variant="ghost" icon="refresh-cw" icon:trailing="chevron-down" :title="__('sync.menu_title')" />
                 <flux:menu>
-                    <flux:menu.item icon="list-tree" x-on:click="Livewire.dispatch('open-ldap-sync-preview')">
+                    <flux:menu.item icon="list-tree" x-on:click="$dispatch('open-ldap-sync-preview')">
                         {{ __('sync.menu_ldap') }}
                     </flux:menu.item>
                     @if($showMailmanSync)
