@@ -3,73 +3,38 @@
         <flux:heading size="xl">{{ __('tools.tools') }}</flux:heading>
         <flux:text class="text-base">{{ __('tools.dashboard_explanation') }}</flux:text>
     </div>
-    <div class="grid md:grid-cols-2 gap-6 pb-6 sm:pb-8">
-        <a
-            wire:navigate
-            href="{{ route('tools.compare-email-list', $uid) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-        >
-            <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                <flux:icon.list-check class="size-5" />
-            </div>
-            <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('tools.compare_email_list_headline') }}</flux:heading>
-                <flux:text class="mt-2">{{ __('tools.compare_email_list_explanation') }}</flux:text>
-            </flux:card>
-        </a>
+    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 sm:pb-8">
+        <x-dashboard-tile
+            :href="route('tools.compare-email-list', $uid)"
+            icon="list-check"
+            :heading="__('tools.compare_email_list_headline')"
+            :description="__('tools.compare_email_list_explanation')"
+        />
         @if($unildapDataExists)
-            <a
-                wire:navigate
-                href="{{ route('tools.import-user-uni-ldap', $uid) }}"
-                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-            >
-                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                    <flux:icon.user-plus class="size-5" />
-                </div>
-                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                    <flux:heading size="lg">{{ __('tools.import_users_from_uni_ldap_headline') }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('tools.import_users_from_uni_ldap_explanation') }}</flux:text>
-                </flux:card>
-            </a>
-            <a
-                wire:navigate
-                href="{{ route('tools.users-not-in-uni-ldap', $uid) }}"
-                class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-            >
-                <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                    <flux:icon.user-search class="size-5" />
-                </div>
-                <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                    <flux:heading size="lg">{{ __('tools.users_not_in_uni_ldap_headline') }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('tools.users_not_in_uni_ldap_explanation') }}</flux:text>
-                </flux:card>
-            </a>
+            <x-dashboard-tile
+                :href="route('tools.import-user-uni-ldap', $uid)"
+                icon="user-plus"
+                :heading="__('tools.import_users_from_uni_ldap_headline')"
+                :description="__('tools.import_users_from_uni_ldap_explanation')"
+            />
+            <x-dashboard-tile
+                :href="route('tools.users-not-in-uni-ldap', $uid)"
+                icon="user-search"
+                :heading="__('tools.users_not_in_uni_ldap_headline')"
+                :description="__('tools.users_not_in_uni_ldap_explanation')"
+            />
         @endif
-        <a
-            wire:navigate
-            href="{{ route('tools.unused-roles', $uid) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-        >
-            <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                <flux:icon.list-x class="size-5" />
-            </div>
-            <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('tools.unused_roles_headline') }}</flux:heading>
-                <flux:text class="mt-2">{{ __('tools.unused_roles_explanation') }}</flux:text>
-            </flux:card>
-        </a>
-        <a
-            wire:navigate
-            href="{{ route('tools.invitations', $uid) }}"
-            class="flex hover:ring-2 focus:ring-2 ring-(--color-accent-content) rounded-lg"
-        >
-            <div class="pt-4 px-3 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-(--color-accent-content) rounded-l-lg">
-                <flux:icon.mail class="size-5" />
-            </div>
-            <flux:card size="sm" class="flex-1 rounded-l-none border-l-0 p-3">
-                <flux:heading size="lg">{{ __('tools.invite_user_headline') }}</flux:heading>
-                <flux:text class="mt-2">{{ __('tools.invite_user_explanation') }}</flux:text>
-            </flux:card>
-        </a>
+        <x-dashboard-tile
+            :href="route('tools.unused-roles', $uid)"
+            icon="list-x"
+            :heading="__('tools.unused_roles_headline')"
+            :description="__('tools.unused_roles_explanation')"
+        />
+        <x-dashboard-tile
+            :href="route('tools.invitations', $uid)"
+            icon="mail"
+            :heading="__('tools.invite_user_headline')"
+            :description="__('tools.invite_user_explanation')"
+        />
     </div>
 </div>

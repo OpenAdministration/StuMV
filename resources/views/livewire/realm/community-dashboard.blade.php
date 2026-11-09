@@ -64,5 +64,13 @@
                 :description="__('realms.dashboard.settings_explanation')"
             />
         @endif
+        @if(! $community->isAdminRealm() && auth()->user()->can('tools', $community))
+            <x-dashboard-tile
+                :href="route('tools.dashboard', $uid)"
+                icon="hammer"
+                :heading="__('tools.tools')"
+                :description="__('tools.dashboard_explanation')"
+            />
+        @endif
     </div>
 </div>
