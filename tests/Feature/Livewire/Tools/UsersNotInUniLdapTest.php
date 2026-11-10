@@ -4,6 +4,7 @@ use App\Ldap\Domain;
 use App\Ldap\User as LdapUser;
 use App\Livewire\Tools\UsersNotInUniLdap;
 use App\Models\ProfilePicture;
+use App\Models\RoleMembership;
 use App\Models\User as DbUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -340,4 +341,29 @@ test('the result list marks members that are already locked', function (): void 
         ->assertDontSee(__('tools.lock'))
         ->call('searchForUsersNotInUniLdap')
         ->assertDontSee(__('tools.lock'));
+});
+
+test('results flag accounts that still hold an active role', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+
+    $domain = new Domain(['dc' => 'example.test']);
+    $domain->setDn('dc=example.test,'.Domain::dnRoot($uid));
+    $domain->save();
+
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    $active = TestLdap::member($community);
+    $former = TestLdap::member($community);
+    RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $active->username, 'from' => today()->subMonth()]);
+    RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $former->username, 'from' => today()->subYear(), 'until' => today()->subMonth()]);
+    actingAsModerator($community);
+
+    $results = collect(Livewire::test(UsersNotInUniLdap::class, ['realm' => $community])
+        ->call('searchForUsersNotInUniLdap')
+        ->assertSee(__('tools.has_active_role'))
+        ->get('results'))->keyBy('uid');
+
+    expect($results[$active->username]['has_active_role'])->toBeTrue()
+        ->and($results[$former->username]['has_active_role'])->toBeFalse();
 });

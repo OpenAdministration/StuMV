@@ -28,13 +28,19 @@
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700 px-4">
                         @foreach($filteredResults as $user)
                             <div class="flex items-center py-3">
-                                <div class="flex-1">
+                                <div class="flex-1 flex items-center gap-2">
                                     <flux:link
                                         wire:navigate
                                         href="{{ route('profile', ['realm' => $uid, 'username' => $user['uid']]) }}"
                                     >
                                         {{ $user['cn'] }}
                                     </flux:link>
+                                    @if($user['has_active_role'] ?? false)
+                                        <flux:tooltip :content="__('tools.has_active_role')">
+                                            <flux:icon.circle-alert variant="mini" class="text-yellow-500 dark:text-yellow-400" />
+                                        </flux:tooltip>
+                                        <span class="sr-only">{{ __('tools.has_active_role') }}</span>
+                                    @endif
                                 </div>
                                 @if($isAdmin)
                                     <div class="flex items-center gap-2">

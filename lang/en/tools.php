@@ -16,6 +16,7 @@ return [
     'email_addresses' => 'Email addresses',
     'firstname' => 'First name',
     'get_user_data' => 'Fetch user data',
+    'has_active_role' => 'Is still listed as active in a role.',
     'import_users_from_uni_ldap_headline' => 'User import from the university LDAP',
     'import_users_from_uni_ldap_explanation' => 'Create new users based on the data from the university\'s membership management.',
     'invalid_role_selection' => 'This selection is invalid.',

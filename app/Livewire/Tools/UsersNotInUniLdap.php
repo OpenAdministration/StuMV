@@ -96,6 +96,13 @@ class UsersNotInUniLdap extends Component
             ->map(fn (UniLdapUser $user) => $user->getFirstAttribute('mail'))
             ->all();
 
+        $usernamesWithActiveRole = RoleMembership::active()
+            ->where('realm', $this->uid)
+            ->whereIn('username', $candidates->map(fn ($member) => $member->getFirstAttribute('uid'))->all())
+            ->distinct()
+            ->pluck('username')
+            ->flip();
+
         $results = [];
         foreach ($candidates as $member) {
             if (! in_array($member->getFirstAttribute('mail'), $mailsFoundInUniLdap, true)) {
@@ -106,6 +113,7 @@ class UsersNotInUniLdap extends Component
                     'uid' => $member->getFirstAttribute('uid'),
                     'cn' => $member->getFirstAttribute('cn'),
                     'locked' => $member->hasAttribute('pwdAccountLockedTime'),
+                    'has_active_role' => $usernamesWithActiveRole->has($member->getFirstAttribute('uid')),
                 ];
             }
         }

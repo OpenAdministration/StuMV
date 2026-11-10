@@ -16,6 +16,7 @@ return [
     'email_addresses' => 'E-Mail-Adressen',
     'firstname' => 'Vorname',
     'get_user_data' => 'Frage Nutzerdaten ab',
+    'has_active_role' => 'Ist noch als aktiv in einer Rolle eingetragen.',
     'import_users_from_uni_ldap_headline' => 'Nutzer:innen-Import aus dem Uni-LDAP',
     'import_users_from_uni_ldap_explanation' => 'Lege neue Nutzer:innen auf Basis der Daten aus der Mitgliederverwaltung der Universität an.',
     'invalid_role_selection' => 'Diese Auswahl ist ungültig.',
