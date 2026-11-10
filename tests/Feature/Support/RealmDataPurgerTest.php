@@ -37,7 +37,7 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         'username' => $member->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Storage::disk('public')->put('avatars/pic.webp', 'fake-avatar');
     ProfilePicture::create(['user' => $member->username, 'realm' => $uid, 'file_id' => 'pic']);
@@ -93,7 +93,7 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         'username' => $otherMember->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $otherUid, 'group_dn' => $otherGroup->getDn(), 'mailman_list_id' => 'other.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $otherUid, 'mailman_list_id' => 'other.lists.example.org'], [$otherGroup->getDn()]);
 
     RealmDataPurger::purge($uid);
 

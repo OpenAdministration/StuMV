@@ -26,6 +26,11 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
         return "cn=$cn,".self::dnRoot($uid);
     }
 
+    public static function shortNameFromDn(string $dn): string
+    {
+        return preg_match('/^cn=([^,]+)/i', $dn, $matches) ? $matches[1] : $dn;
+    }
+
     public static function dnRoot(string $uid)
     {
         return "ou=Groups,ou=$uid,ou=Communities,".config('ldap.connections.default.base_dn');

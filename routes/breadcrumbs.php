@@ -279,6 +279,11 @@ Breadcrumbs::for('realms.group-mailman-lists.new', function (BreadcrumbTrail $tr
     $trail->push(__('group_mailman_lists.new'), route('realms.group-mailman-lists.new', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.group-mailman-lists.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.group-mailman-lists', $routeParams);
+    $trail->push($routeParams['listId'], route('realms.group-mailman-lists.edit', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.group-mailman-lists.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms.group-mailman-lists', $routeParams);
     $trail->push($routeParams['listId'], route('realms.group-mailman-lists.members', $routeParams), ['truncate' => true]);

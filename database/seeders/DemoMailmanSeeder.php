@@ -30,8 +30,7 @@ class DemoMailmanSeeder extends Seeder
 
         GroupMailmanList::firstOrCreate([
             'realm' => 'demo',
-            'group_dn' => $groupDn,
             'mailman_list_id' => 'finanzen.lists.demo.stumv.de',
-        ]);
+        ])->syncGroups(['member' => [$groupDn]]);
     }
 }

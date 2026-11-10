@@ -74,9 +74,8 @@ class ListMailmanListMembers extends Component
     public function syncMember(string $email): void
     {
         $mapping = $this->mapping();
-        $group = Group::find($mapping->group_dn);
 
-        if (! $group) {
+        if (! $this->memberGroupsExist($mapping)) {
             Flux::toast(variant: 'danger', text: __('group_mailman_lists.group_missing'));
 
             return;
@@ -125,8 +124,8 @@ class ListMailmanListMembers extends Component
     public function render(MailmanClient $mailman)
     {
         $mapping = $this->mapping();
-        $group = Group::find($mapping->group_dn);
-        $desiredByEmail = $group ? $this->desiredMembers($mapping) : [];
+        $groupsExist = $this->memberGroupsExist($mapping);
+        $desiredByEmail = $groupsExist ? $this->desiredMembers($mapping) : [];
 
         $fetchFailed = false;
         $actualByEmail = [];
@@ -197,8 +196,8 @@ class ListMailmanListMembers extends Component
             'members' => $members,
             'fetchFailed' => $fetchFailed,
             'statusCounts' => $statusCounts,
-            'groupCn' => $group?->getFirstAttribute('cn') ?? $mapping->group_dn,
-            'groupExists' => $group !== null,
+            'groupCn' => implode(', ', array_map(Group::shortNameFromDn(...), $mapping->groupDns('member'))),
+            'groupExists' => $groupsExist,
             'enabled' => $mapping->enabled,
         ])->title(__('group_mailman_lists.members_title', ['name' => $this->mailmanListId]));
     }
@@ -208,6 +207,13 @@ class ListMailmanListMembers extends Component
         return GroupMailmanList::where('realm', $this->uid)
             ->where('mailman_list_id', $this->mailmanListId)
             ->firstOrFail();
+    }
+
+    private function memberGroupsExist(GroupMailmanList $mapping): bool
+    {
+        $groupDns = $mapping->groupDns('member');
+
+        return $groupDns !== [] && collect($groupDns)->every(fn (string $dn): bool => Group::find($dn) !== null);
     }
 
     /**

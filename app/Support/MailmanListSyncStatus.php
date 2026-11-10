@@ -2,8 +2,8 @@
 
 namespace App\Support;
 
-use App\Ldap\Group;
 use App\Models\GroupMailmanList;
+use App\Models\GroupMailmanListGroup;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +16,7 @@ class MailmanListSyncStatus
 
     public function __construct(
         private readonly MailmanClient $mailman,
-        private readonly MailmanDesiredMembers $desiredMembers,
+        private readonly MailmanRolePlan $plan,
     ) {}
 
     /**
@@ -82,36 +82,47 @@ class MailmanListSyncStatus
             return [];
         }
 
-        $existingGroupDns = $mappings->pluck('realm')->unique()
-            ->flatMap(fn (string $realm) => Group::query()->in(Group::dnRoot($realm))->get()->map(fn (Group $group): string => strtolower((string) $group->getDn())))
-            ->flip();
-
-        [$withGroup, $withoutGroup] = $mappings->partition(fn (GroupMailmanList $m): bool => $existingGroupDns->has(strtolower((string) $m->group_dn)));
-
+        $plans = $this->plan->for($mappings);
         $diffs = [];
-        foreach ($withoutGroup as $mapping) {
-            $diffs[$mapping->id] = ['error' => 'group_missing', 'pending' => 0, 'stale' => 0];
+        $checkable = collect();
+        foreach ($mappings as $mapping) {
+            $missingGroups = collect($plans[$mapping->id])->flatMap(fn (array $plan): array => $plan['missing_groups']);
+            if ($missingGroups->isNotEmpty() || $mapping->groupDns('member') === []) {
+                $diffs[$mapping->id] = ['error' => 'group_missing', 'pending' => 0, 'stale' => 0];
+            } else {
+                $checkable->push($mapping);
+                $diffs[$mapping->id] = ['error' => null, 'pending' => 0, 'stale' => 0];
+            }
         }
 
-        $rosters = $this->mailman->listMembersMany($withGroup->pluck('mailman_list_id')->unique()->values()->all());
-        $desiredByMapping = $this->desiredMembers->forMany($withGroup);
-
-        foreach ($withGroup as $mapping) {
-            $roster = $rosters[$mapping->mailman_list_id];
-            if ($roster instanceof Throwable) {
-                Log::warning('Mailman listMembers failed', ['list_id' => $mapping->mailman_list_id, 'exception' => $roster->getMessage()]);
-                $diffs[$mapping->id] = ['error' => 'status_fetch_failed', 'pending' => 0, 'stale' => 0];
-
+        foreach (GroupMailmanListGroup::ROLES as $role) {
+            $managed = $checkable->filter(fn (GroupMailmanList $m): bool => isset($plans[$m->id][$role]));
+            if ($managed->isEmpty()) {
                 continue;
             }
 
-            $actual = array_column($roster, 'email');
-            $desired = array_keys($desiredByMapping[$mapping->id]);
-            $diffs[$mapping->id] = [
-                'error' => null,
-                'pending' => count(array_diff($desired, $actual)),
-                'stale' => count(array_diff($actual, $desired)),
-            ];
+            $rosters = $this->mailman->listMembersMany($managed->pluck('mailman_list_id')->unique()->values()->all(), $role);
+
+            foreach ($managed as $mapping) {
+                if ($diffs[$mapping->id]['error'] !== null) {
+                    continue;
+                }
+
+                $roster = $rosters[$mapping->mailman_list_id];
+                if ($roster instanceof Throwable) {
+                    Log::warning('Mailman roster fetch failed', ['list_id' => $mapping->mailman_list_id, 'role' => $role, 'exception' => $roster->getMessage()]);
+                    $diffs[$mapping->id] = ['error' => 'status_fetch_failed', 'pending' => 0, 'stale' => 0];
+
+                    continue;
+                }
+
+                // Members keep the exact comparison mailman:sync-lists has always used.
+                $normalize = $role === 'member' ? fn (array $emails): array => $emails : fn (array $emails): array => array_map(strtolower(...), $emails);
+                $actual = $normalize(array_column($roster, 'email'));
+                $desired = $normalize($plans[$mapping->id][$role]['desired']);
+                $diffs[$mapping->id]['pending'] += count(array_diff($desired, $actual));
+                $diffs[$mapping->id]['stale'] += count(array_diff($actual, $desired));
+            }
         }
 
         return $diffs;

@@ -36,7 +36,7 @@ function mappedListWithOneMember(): array
         'username' => $active->username,
         'from' => today()->subMonth(),
     ]);
-    $mapping = GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    $mapping = GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
     actingAsAdmin($community);
 
     return [$community, $mapping, $active->ldap()->getFirstAttribute('mail')];
@@ -93,11 +93,10 @@ test('a list whose roster cannot be fetched shows as error', function (): void {
 
 test('a list whose group no longer exists shows as error without asking Mailman', function (): void {
     $community = newCommunity();
-    $mapping = GroupMailmanList::create([
+    $mapping = GroupMailmanList::createForGroups([
         'realm' => $community->getShortCode(),
-        'group_dn' => 'cn=deleted,ou=Groups,ou='.$community->getShortCode().',ou=Communities,dc=stumv,dc=de',
         'mailman_list_id' => 'a.lists.example.org',
-    ]);
+    ], ['cn=deleted,ou=Groups,ou='.$community->getShortCode().',ou=Communities,dc=stumv,dc=de']);
     actingAsAdmin($community);
     Http::fake();
 
@@ -128,4 +127,18 @@ test('the overview loads the statuses of all rows on the page in one call', func
         ->call('loadStatuses')
         ->assertSet("statuses.{$mapping->id}.state", 'synced')
         ->assertDontSeeHtml('x-init="$wire.loadStatuses()"');
+});
+
+test('a list whose moderators differ from the moderator groups is not shown as synced', function (): void {
+    [$community, $mapping, $email] = mappedListWithOneMember();
+    $board = TestLdap::makeGroup($community, 'board');
+    $mapping->syncGroups(['moderator' => [$board->getDn()]]);
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => [['email' => $email, 'self_link' => 'http://mailman.test/3.1/members/1']]]),
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/moderator' => Http::response(['entries' => [['email' => 'old-mod@example.org', 'self_link' => 'http://mailman.test/3.1/members/2']]]),
+    ]);
+
+    Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
+        ->call('loadStatuses')
+        ->assertSet("statuses.{$mapping->id}.state", 'stale');
 });

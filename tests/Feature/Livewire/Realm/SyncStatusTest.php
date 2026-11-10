@@ -79,7 +79,7 @@ test('the mailman status summarizes enabled lists and skips disabled ones', func
     foreach (['synced', 'outdated', 'disabled'] as $name) {
         $group = TestLdap::makeGroup($community, $name);
         GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
-        GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => "{$name}.lists.example.org", 'enabled' => $name !== 'disabled']);
+        GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => "{$name}.lists.example.org", 'enabled' => $name !== 'disabled'], [$group->getDn()]);
     }
     $email = $active->ldap()->getFirstAttribute('mail');
     $roster = fn (array $emails) => Http::response(['entries' => array_map(fn (string $e): array => ['email' => $e, 'self_link' => 'http://mailman.test/3.1/members/'.md5($e)], $emails)]);
@@ -117,7 +117,7 @@ function cachedStatusSetup(): array
     RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $active->username, 'from' => today()->subMonth()]);
     $group = TestLdap::makeGroup($community, 'cached');
     GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
-    $mapping = GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'cached.lists.example.org']);
+    $mapping = GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'cached.lists.example.org'], [$group->getDn()]);
     actingAsAdmin($community);
 
     return [$uid, $mapping, $active->ldap()->getFirstAttribute('mail')];

@@ -5,6 +5,7 @@ namespace App\Livewire\Mailman;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMailmanList;
+use App\Models\GroupMailmanListGroup;
 use App\Support\MailmanListSyncStatus;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -71,16 +72,26 @@ class ListGroupMailmanLists extends Component
     public function render()
     {
         $webUrl = rtrim((string) config('services.mailman.web_url'), '/');
+        $existingGroupDns = Group::query()->in(Group::dnRoot($this->uid))->get()
+            ->map(fn (Group $group): string => strtolower((string) $group->getDn()))
+            ->flip();
 
-        $mappings = $this->currentPage()
-            ->through(fn (GroupMailmanList $mapping): object => (object) [
+        $mappings = $this->currentPage()->through(function (GroupMailmanList $mapping) use ($webUrl, $existingGroupDns): object {
+            $groups = collect(GroupMailmanListGroup::ROLES)->mapWithKeys(fn (string $role): array => [$role => array_map(fn (string $dn): array => [
+                'cn' => Group::shortNameFromDn($dn),
+                'exists' => $existingGroupDns->has(strtolower($dn)),
+            ], $mapping->groupDns($role))])->all();
+
+            return (object) [
                 'web_url' => $webUrl !== '' ? "{$webUrl}/postorius/lists/".rawurlencode($mapping->mailman_list_id).'/' : null,
                 'id' => $mapping->id,
-                'group_cn' => substr(explode(',', $mapping->group_dn, 2)[0], 3),
-                'group_exists' => Group::find($mapping->group_dn) !== null,
+                'groups' => $groups,
+                // Same guard as mailman:sync-lists: no member group or a deleted group means nothing gets synced.
+                'groups_complete' => $groups['member'] !== [] && collect($groups)->flatten(1)->every(fn (array $group): bool => $group['exists']),
                 'mailman_list_id' => $mapping->mailman_list_id,
                 'enabled' => $mapping->enabled,
-            ]);
+            ];
+        });
 
         $missingStatusIds = collect($mappings->items())->pluck('id')->reject(fn (int $id): bool => isset($this->statuses[$id]))->implode(',');
 
@@ -91,14 +102,23 @@ class ListGroupMailmanLists extends Component
     private function currentPage(): LengthAwarePaginator
     {
         $search = trim($this->search);
-        // group_dn starts with "cn=<short name>,", so it sorts and searches by the group's short name.
-        $sortColumn = $this->sortField === 'group' ? 'group_dn' : 'mailman_list_id';
+        $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
+        // group_dn starts with "cn=<short name>,", so it sorts and searches by the group's short name.
         return GroupMailmanList::where('realm', $this->uid)
+            ->with('groups')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->where('mailman_list_id', 'like', "%{$search}%")
-                ->orWhere('group_dn', 'like', "cn=%{$search}%,ou=Groups,%")))
-            ->orderBy($sortColumn, $this->sortDirection === 'desc' ? 'desc' : 'asc')
+                ->orWhereHas('groups', fn ($groups) => $groups->where('group_dn', 'like', "cn=%{$search}%,ou=Groups,%"))))
+            ->when(
+                $this->sortField === 'group',
+                fn ($query) => $query->orderBy(GroupMailmanListGroup::select('group_dn')
+                    ->whereColumn('group_mailman_list_id', 'group_mailman_lists.id')
+                    ->where('role', 'member')
+                    ->orderBy('group_dn')
+                    ->limit(1), $direction),
+                fn ($query) => $query->orderBy('mailman_list_id', $direction),
+            )
             ->paginate(10);
     }
 

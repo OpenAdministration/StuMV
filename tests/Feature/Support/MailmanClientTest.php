@@ -202,3 +202,36 @@ test('listMembersMany fetches several rosters and isolates failures per list', f
         ->and($result['broken.lists.example.org'])->toBeInstanceOf(Throwable::class);
     Http::assertSentCount(2);
 });
+
+test('addRole and removeRole go through the Postorius role forms one address at a time', function (): void {
+    $csrf = '<input type="hidden" name="csrfmiddlewaretoken" value="tok">';
+    $moderators = ['old@example.org'];
+    Http::fake([
+        'web.test/accounts/login/' => fn (Request $request) => $request->method() === 'GET'
+            ? Http::response($csrf.'<input name="password">')
+            : Http::response('<h1>Lists</h1>'),
+        'web.test/postorius/lists/team.lists.example.org/members/moderator/' => function (Request $request) use (&$moderators, $csrf) {
+            if ($request->method() === 'POST') {
+                $moderators[] = $request['email'];
+            }
+
+            return Http::response($csrf.'<input name="email">');
+        },
+        'web.test/postorius/lists/team.lists.example.org/remove/moderator/*' => function (Request $request) use (&$moderators, $csrf) {
+            if ($request->method() === 'POST') {
+                $moderators = array_values(array_diff($moderators, [urldecode(basename($request->url()))]));
+            }
+
+            return Http::response($csrf.'<form method="post"></form>');
+        },
+        'api.test/3.1/lists/team.lists.example.org/roster/moderator' => function () use (&$moderators) {
+            return Http::response(['entries' => array_map(fn (string $email): array => ['email' => $email, 'self_link' => 'x'], $moderators)]);
+        },
+    ]);
+
+    $client = postoriusClient();
+
+    expect($client->addRole('team.lists.example.org', 'moderator', ['new@example.org']))->toBe([])
+        ->and($client->removeRole('team.lists.example.org', 'moderator', [['email' => 'old@example.org', 'self_link' => 'x', 'as_user' => false]]))->toBe([])
+        ->and($moderators)->toBe(['new@example.org']);
+});

@@ -76,7 +76,7 @@ test('deleting a realm also purges its DB-side data', function (): void {
         'username' => $member->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     actingAsSuperAdmin();
 

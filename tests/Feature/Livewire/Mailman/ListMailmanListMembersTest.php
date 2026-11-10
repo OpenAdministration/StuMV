@@ -33,7 +33,7 @@ test('a desired member already on the Mailman roster shows as synced', function 
         'username' => $active->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response([
@@ -69,7 +69,7 @@ test('a desired member not yet on the Mailman roster shows as pending', function
         'username' => $active->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -88,7 +88,7 @@ test('a Mailman member without a backing desired membership shows as stale', fun
     $community = newCommunity();
     $uid = $community->getShortCode();
     $group = TestLdap::makeGroup($community, 'newsletter');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response([
@@ -110,7 +110,7 @@ test('a Mailman member without a backing desired membership shows as stale', fun
 test('the explanation names the group mapped to the list', function (): void {
     $community = newCommunity();
     $group = TestLdap::makeGroup($community, 'grp-a');
-    GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $community->getShortCode(), 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -143,7 +143,7 @@ test('the member search filters the list', function (): void {
     }
     $alpha->ldap()->fill(['cn' => 'Alpha Alison'])->save();
     $beta->ldap()->fill(['cn' => 'Beta Baker'])->save();
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -161,7 +161,7 @@ test('a list with no members shows a warning callout', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $group = TestLdap::makeGroup($community, 'newsletter');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -189,7 +189,7 @@ test('a failed Mailman fetch is shown with an unknown status instead of a wrong 
         'username' => $active->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response('', 500),
@@ -208,7 +208,7 @@ test('a non-admin cannot view the member status page', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $group = TestLdap::makeGroup($community, 'newsletter');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
     actingAsModerator($community);
 
     $this->get(route('realms.group-mailman-lists.members', ['realm' => $uid, 'listId' => 'newsletter.lists.example.org']))->assertForbidden();
@@ -225,7 +225,7 @@ test('the mapping list links to the member status page', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
     $group = TestLdap::makeGroup($community, 'newsletter');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
     actingAsAdmin($community);
 
     Livewire::test(ListGroupMailmanLists::class, ['realm' => $community])
@@ -251,7 +251,7 @@ test('the members can be filtered by sync status', function (): void {
             'from' => today()->subMonth(),
         ]);
     }
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     $syncedMail = $synced->ldap()->getFirstAttribute('mail');
     Http::fake([
@@ -290,7 +290,7 @@ function memberSyncFixture(): array
         'username' => $member->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
     actingAsAdmin($community);
 
     return [$community, $member->ldap()->getFirstAttribute('mail')];

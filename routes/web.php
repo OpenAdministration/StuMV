@@ -151,6 +151,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::livewire('{realm}/group-mailman-lists', ListGroupMailmanLists::class)->name('realms.group-mailman-lists');
             Route::livewire('{realm}/new-group-mailman-list', NewGroupMailmanList::class)->name('realms.group-mailman-lists.new');
             Route::livewire('{realm}/group-mailman-lists/{listId}/members', ListMailmanListMembers::class)->name('realms.group-mailman-lists.members');
+            Route::livewire('{realm}/group-mailman-lists/{listId}/edit', NewGroupMailmanList::class)->name('realms.group-mailman-lists.edit');
             Route::livewire('{realm}/settings/domains', ListDomains::class)->name('realms.domains');
             Route::livewire('{realm}/settings/new-domain', NewDomain::class)->name('realms.domains.new');
             Route::livewire('{realm}/settings/api-clients', ListApiClients::class)->name('realms.api-clients');

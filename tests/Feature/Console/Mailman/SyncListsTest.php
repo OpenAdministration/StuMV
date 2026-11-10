@@ -30,7 +30,7 @@ test('mailman:sync-lists subscribes an active member missing from the Mailman ro
         'username' => $member->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -49,7 +49,7 @@ test('mailman:sync-lists unsubscribes a Mailman member no longer active in the D
     $community = newCommunity();
     $uid = $community->getShortCode();
     $group = TestLdap::makeGroup($community, 'newsletter');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response([
@@ -82,7 +82,7 @@ test('mailman:sync-lists leaves an already-correct member untouched', function (
         'username' => $member->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response([
@@ -116,8 +116,8 @@ test('mailman:sync-lists can be limited to a single mapping via group_dn', funct
     $uid = $community->getShortCode();
     $groupA = TestLdap::makeGroup($community, 'grp-a');
     $groupB = TestLdap::makeGroup($community, 'grp-b');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $groupA->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $groupB->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'a.lists.example.org'], [$groupA->getDn()]);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'b.lists.example.org'], [$groupB->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/a.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -132,8 +132,8 @@ test('mailman:sync-lists can be limited to a single list via --list', function (
     $community = newCommunity();
     $uid = $community->getShortCode();
     $group = TestLdap::makeGroup($community, 'grp-a');
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'a.lists.example.org'], [$group->getDn()]);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'b.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/b.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -148,7 +148,7 @@ test('mailman:sync-lists can be limited to a single list via --list', function (
 test('mailman:sync-lists leaves a list untouched when its group no longer exists', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => 'cn=gone,ou=Groups,ou='.$uid.',ou=Communities,dc=stumv,dc=de', 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], ['cn=gone,ou=Groups,ou='.$uid.',ou=Communities,dc=stumv,dc=de']);
 
     Http::fake();
 
@@ -162,8 +162,8 @@ test('mailman:sync-lists can be limited to a single realm, leaving other realms 
     $communityB = newCommunity();
     $groupA = TestLdap::makeGroup($communityA, 'grp-a');
     $groupB = TestLdap::makeGroup($communityB, 'grp-b');
-    GroupMailmanList::create(['realm' => $communityA->getShortCode(), 'group_dn' => $groupA->getDn(), 'mailman_list_id' => 'a.lists.example.org']);
-    GroupMailmanList::create(['realm' => $communityB->getShortCode(), 'group_dn' => $groupB->getDn(), 'mailman_list_id' => 'b.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $communityA->getShortCode(), 'mailman_list_id' => 'a.lists.example.org'], [$groupA->getDn()]);
+    GroupMailmanList::createForGroups(['realm' => $communityB->getShortCode(), 'mailman_list_id' => 'b.lists.example.org'], [$groupB->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/a.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -191,7 +191,7 @@ test('mailman:sync-lists logs a failed subscription as an error', function (): v
         'username' => $member->username,
         'from' => today()->subMonth(),
     ]);
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
 
     Http::fake([
         'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []]),
@@ -207,7 +207,7 @@ test('mailman:sync-lists logs a failed subscription as an error', function (): v
 test('mailman:sync-lists skips a disabled list without asking Mailman', function (): void {
     $community = newCommunity();
     $group = TestLdap::makeGroup($community, 'newsletter');
-    GroupMailmanList::create(['realm' => $community->getShortCode(), 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org', 'enabled' => false]);
+    GroupMailmanList::createForGroups(['realm' => $community->getShortCode(), 'mailman_list_id' => 'newsletter.lists.example.org', 'enabled' => false], [$group->getDn()]);
     Http::fake();
 
     $this->artisan('mailman:sync-lists')
@@ -227,7 +227,7 @@ test('mailman:sync-lists keeps syncing other lists when one roster cannot be fet
     foreach (['broken', 'working'] as $name) {
         $group = TestLdap::makeGroup($community, $name);
         GroupMembership::create(['group_dn' => $group->getDn(), 'role_dn' => $role->getDn()]);
-        GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => "{$name}.lists.example.org"]);
+        GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => "{$name}.lists.example.org"], [$group->getDn()]);
     }
 
     Http::fake([
@@ -237,7 +237,7 @@ test('mailman:sync-lists keeps syncing other lists when one roster cannot be fet
     ]);
 
     $this->artisan('mailman:sync-lists')
-        ->expectsOutputToContain('Could not fetch the list members')
+        ->expectsOutputToContain("could not fetch the list's members")
         ->assertExitCode(1);
 
     Http::assertSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members'
@@ -256,10 +256,56 @@ test('mailman:sync-lists warns about a member missing from LDAP', function (): v
     $ghost = TestLdap::member($community);
     RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $ghost->username, 'from' => today()->subMonth()]);
     $ghost->ldap()->delete();
-    GroupMailmanList::create(['realm' => $uid, 'group_dn' => $group->getDn(), 'mailman_list_id' => 'newsletter.lists.example.org']);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
     Http::fake(['mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []])]);
 
     $this->artisan('mailman:sync-lists')
         ->expectsOutputToContain("Unknown LDAP user: {$ghost->username}")
         ->assertExitCode(0);
+});
+
+test('mailman:sync-lists syncs moderators from the moderator groups', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $boardRole = TestLdap::makeRole($committee, 'vorstand');
+    $member = TestLdap::member($community);
+    $moderator = TestLdap::member($community);
+    $members = TestLdap::makeGroup($community, 'newsletter');
+    $board = TestLdap::makeGroup($community, 'board');
+    GroupMembership::create(['group_dn' => $members->getDn(), 'role_dn' => $role->getDn()]);
+    GroupMembership::create(['group_dn' => $board->getDn(), 'role_dn' => $boardRole->getDn()]);
+    RoleMembership::create(['realm' => $uid, 'role_cn' => 'mitglied', 'committee_dn' => $committee->getDn(), 'username' => $member->username, 'from' => today()->subMonth()]);
+    RoleMembership::create(['realm' => $uid, 'role_cn' => 'vorstand', 'committee_dn' => $committee->getDn(), 'username' => $moderator->username, 'from' => today()->subMonth()]);
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$members->getDn()], [$board->getDn()]);
+    $memberMail = $member->ldap()->getFirstAttribute('mail');
+    $moderatorMail = $moderator->ldap()->getFirstAttribute('mail');
+
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => [['email' => $memberMail, 'self_link' => 'http://mailman.test/3.1/members/1']]]),
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/moderator' => Http::response(['entries' => [['email' => 'old-mod@example.org', 'self_link' => 'http://mailman.test/3.1/members/2']]]),
+        'mailman.test/3.1/members' => Http::response('', 201),
+        'mailman.test/3.1/members/2' => Http::response('', 204),
+    ]);
+
+    $this->artisan('mailman:sync-lists')->assertExitCode(0);
+
+    Http::assertSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members'
+        && $request['role'] === 'moderator'
+        && $request['subscriber'] === $moderatorMail);
+    Http::assertSent(fn ($request): bool => $request->method() === 'DELETE' && $request->url() === 'http://mailman.test/3.1/members/2');
+    Http::assertNotSent(fn ($request): bool => $request->url() === 'http://mailman.test/3.1/members' && $request['role'] === 'member');
+});
+
+test('mailman:sync-lists leaves moderators alone when no moderator group is assigned', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $group = TestLdap::makeGroup($community, 'newsletter');
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
+    Http::fake(['mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => []])]);
+
+    $this->artisan('mailman:sync-lists')->assertExitCode(0);
+
+    Http::assertNotSent(fn ($request): bool => str_contains($request->url(), 'roster/moderator'));
 });

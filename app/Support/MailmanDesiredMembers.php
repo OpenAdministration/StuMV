@@ -28,11 +28,15 @@ class MailmanDesiredMembers
      *
      * @param  Collection<int, GroupMailmanList>  $mappings
      * @param  (callable(GroupMailmanList, string): void)|null  $warn  told about members that can't be put on a list
+     * @param  'member'|'owner'|'moderator'  $role  whose groups to resolve
      * @return array<int, array<string, LdapUser>> keyed by mapping id, then by mail
      */
-    public function forMany(Collection $mappings, ?callable $warn = null): array
+    public function forMany(Collection $mappings, ?callable $warn = null, string $role = 'member'): array
     {
-        $groupRolesByGroup = GroupMembership::whereIn('group_dn', $mappings->pluck('group_dn')->unique()->all())
+        $mappings->each->loadMissing('groups');
+        $groupDnsByMapping = $mappings->mapWithKeys(fn (GroupMailmanList $m): array => [$m->id => $m->groupDns($role)]);
+
+        $groupRolesByGroup = GroupMembership::whereIn('group_dn', $groupDnsByMapping->flatten()->unique()->values()->all())
             ->get()
             ->groupBy('group_dn');
 
@@ -51,7 +55,8 @@ class MailmanDesiredMembers
 
             foreach ($realmMappings as $mapping) {
                 $desiredByEmail = [];
-                foreach ($groupRolesByGroup->get($mapping->group_dn, collect()) as $groupRole) {
+                $groupRoles = collect($groupDnsByMapping[$mapping->id])->flatMap(fn (string $dn) => $groupRolesByGroup->get($dn, collect()));
+                foreach ($groupRoles as $groupRole) {
                     $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
                     $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
                     $key = $committeeDn.'|'.$roleCn;

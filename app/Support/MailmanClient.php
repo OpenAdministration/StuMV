@@ -41,9 +41,9 @@ class MailmanClient
     /**
      * @return array<int, array{email: string, self_link: string, as_user: bool}>
      */
-    public function listMembers(string $listId): array
+    public function listMembers(string $listId, string $role = 'member'): array
     {
-        return $this->mapMembers($this->request()->get("lists/{$listId}/roster/member")->throw());
+        return $this->mapMembers($this->request()->get("lists/{$listId}/roster/{$role}")->throw());
     }
 
     /**
@@ -52,10 +52,10 @@ class MailmanClient
      * @param  array<int, string>  $listIds
      * @return array<string, array<int, array{email: string, self_link: string, as_user: bool}>|Throwable> keyed by list id
      */
-    public function listMembersMany(array $listIds, int $concurrency = 10): array
+    public function listMembersMany(array $listIds, string $role = 'member', int $concurrency = 10): array
     {
         $responses = Http::pool(fn (Pool $pool): array => array_map(
-            fn (string $listId) => $this->configure($pool->as($listId))->get("lists/{$listId}/roster/member"),
+            fn (string $listId) => $this->configure($pool->as($listId))->get("lists/{$listId}/roster/{$role}"),
             $listIds,
         ), $concurrency);
 
@@ -196,7 +196,7 @@ class MailmanClient
      * @param  array<string, string>  $fields
      * @return array<int, string> Postorius' non-success messages from the response
      */
-    private function submitPostoriusForm(string $path, array $fields): array
+    private function submitPostoriusForm(string $path, array $fields, string $formMarker = 'name="emails"'): array
     {
         $this->loginToPostorius();
 
@@ -210,7 +210,7 @@ class MailmanClient
         $form = $response->throw()->body();
 
         // A lost session redirects to the login page instead.
-        if (! str_contains($form, 'name="emails"')) {
+        if (! str_contains($form, $formMarker)) {
             throw new RuntimeException("Postorius did not show the form at {$url} - session lost?");
         }
 
@@ -245,6 +245,62 @@ class MailmanClient
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * Adds moderators. Postorius has no mass form for them, so they go one by one.
+     *
+     * @param  'moderator'  $role
+     * @param  array<int, string>  $emails
+     * @return array<string, string> failed address => reason
+     */
+    public function addRole(string $listId, string $role, array $emails): array
+    {
+        if ($emails === []) {
+            return [];
+        }
+
+        if ($this->usesPostorius()) {
+            return $this->viaPostoriusRole($listId, $role, $emails, true);
+        }
+
+        $failed = [];
+        foreach ($emails as $email) {
+            try {
+                $this->request()->asForm()->post('members', ['list_id' => $listId, 'subscriber' => $email, 'role' => $role])->throw();
+            } catch (Throwable $e) {
+                $failed[$email] = $e->getMessage();
+            }
+        }
+
+        return $failed;
+    }
+
+    /**
+     * @param  'moderator'  $role
+     * @param  array<int, array{email: string, self_link: string, as_user: bool}>  $members  entries from listMembers($listId, $role)
+     * @return array<string, string> failed address => reason
+     */
+    public function removeRole(string $listId, string $role, array $members): array
+    {
+        if ($members === []) {
+            return [];
+        }
+
+        if ($this->usesPostorius()) {
+            return $this->viaPostoriusRole($listId, $role, array_column($members, 'email'), false);
+        }
+
+        $failed = [];
+        foreach ($members as $member) {
+            try {
+                $this->request()->delete($member['self_link'])->throw();
+            } catch (Throwable $e) {
+                $failed[$member['email']] = $e->getMessage();
+            }
+        }
+
+        return $failed;
     }
 
     /**
@@ -454,6 +510,53 @@ class MailmanClient
             }
 
             $failed[$email] = implode('; ', $reason);
+        }
+
+        return $failed;
+    }
+
+    /**
+     * @param  'moderator'  $role
+     * @param  array<int, string>  $emails
+     * @return array<string, string> failed address => reason
+     */
+    private function viaPostoriusRole(string $listId, string $role, array $emails, bool $add): array
+    {
+        try {
+            $this->loginToPostorius();
+        } catch (Throwable $e) {
+            return array_fill_keys($emails, $e->getMessage());
+        }
+
+        $failed = [];
+        $notices = [];
+        foreach ($emails as $email) {
+            try {
+                $notices[$email] = $add
+                    ? $this->submitPostoriusForm("postorius/lists/{$listId}/members/{$role}/", ['email' => $email, 'display_name' => ''], 'name="email"')
+                    : $this->submitPostoriusForm("postorius/lists/{$listId}/remove/{$role}/".rawurlencode($email), [], 'csrfmiddlewaretoken');
+            } catch (Throwable $e) {
+                $failed[$email] = $e->getMessage();
+            }
+        }
+
+        $submitted = array_diff($emails, array_keys($failed));
+        if ($submitted === []) {
+            return $failed;
+        }
+
+        // Postorius answers with a 200 either way, so the roster decides.
+        try {
+            $roster = array_map(strtolower(...), array_column($this->listMembers($listId, $role), 'email'));
+        } catch (Throwable $e) {
+            return $failed + array_fill_keys($submitted, $e->getMessage());
+        }
+
+        foreach ($submitted as $email) {
+            if (in_array(strtolower($email), $roster, true) !== $add) {
+                $failed[$email] = ($add ? "still not {$role} after the Postorius request" : "still {$role} after the Postorius request")
+                    .($notices[$email] !== [] ? '; Postorius: '.implode(' | ', $notices[$email]) : '');
+            }
         }
 
         return $failed;
