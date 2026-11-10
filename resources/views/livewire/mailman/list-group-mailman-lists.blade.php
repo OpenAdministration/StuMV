@@ -50,15 +50,17 @@
                     </flux:table.cell>
                     @foreach(['member', 'moderator'] as $role)
                         <flux:table.cell>
-                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <div class="flex flex-wrap items-center gap-1.5">
                                 @foreach($mapping->groups[$role] as $group)
                                     @if($group['exists'])
-                                        <flux:link wire:navigate href="{{ route('realms.groups.roles', ['realm' => $uid, 'cn' => $group['cn']]) }}">{{ $group['cn'] }}</flux:link>
+                                        <a wire:navigate href="{{ route('realms.groups.roles', ['realm' => $uid, 'cn' => $group['cn']]) }}" class="rounded-md outline-none focus-visible:ring-2 ring-(--color-accent-content)">
+                                            <flux:badge size="sm" class="hover:bg-zinc-800/15 dark:hover:bg-white/20">{{ $group['cn'] }}</flux:badge>
+                                        </a>
                                     @else
-                                        <span class="flex flex-wrap items-center gap-2">
+                                        <flux:badge size="sm" color="red" icon="circle-alert" :title="__('group_mailman_lists.group_missing')">
                                             {{ $group['cn'] }}
-                                            <flux:badge color="red" variant="solid">{{ __('group_mailman_lists.group_missing') }}</flux:badge>
-                                        </span>
+                                            <span class="sr-only">({{ __('group_mailman_lists.group_missing') }})</span>
+                                        </flux:badge>
                                     @endif
                                 @endforeach
                             </div>
