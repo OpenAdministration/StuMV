@@ -337,3 +337,35 @@ test('an address outside the group cannot be subscribed via the single sync', fu
 
     Http::assertNotSent(fn ($request): bool => $request->method() !== 'GET');
 });
+
+test('each member row lists the member groups the person comes from', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $boardRole = TestLdap::makeRole($committee, 'vorstand');
+    $newsletter = TestLdap::makeGroup($community, 'newsletter');
+    $board = TestLdap::makeGroup($community, 'board');
+    $both = TestLdap::member($community);
+    $onlyNewsletter = TestLdap::member($community);
+
+    GroupMembership::create(['group_dn' => $newsletter->getDn(), 'role_dn' => $role->getDn()]);
+    GroupMembership::create(['group_dn' => $board->getDn(), 'role_dn' => $boardRole->getDn()]);
+    foreach ([[$both, 'mitglied'], [$both, 'vorstand'], [$onlyNewsletter, 'mitglied']] as [$user, $roleCn]) {
+        RoleMembership::create(['realm' => $uid, 'role_cn' => $roleCn, 'committee_dn' => $committee->getDn(), 'username' => $user->username, 'from' => today()->subMonth()]);
+    }
+    GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$newsletter->getDn(), $board->getDn()]);
+    Http::fake([
+        'mailman.test/3.1/lists/newsletter.lists.example.org/roster/member' => Http::response(['entries' => [
+            ['email' => 'stale@example.org', 'self_link' => 'http://mailman.test/3.1/members/9'],
+        ]]),
+    ]);
+    actingAsAdmin($community);
+
+    $rows = collect(Livewire::test(ListMailmanListMembers::class, ['realm' => $community, 'listId' => 'newsletter.lists.example.org'])
+        ->viewData('members')->items())->keyBy('email');
+
+    expect($rows[$both->ldap()->getFirstAttribute('mail')]['groups'])->toEqualCanonicalizing(['newsletter', 'board'])
+        ->and($rows[$onlyNewsletter->ldap()->getFirstAttribute('mail')]['groups'])->toBe(['newsletter'])
+        ->and($rows['stale@example.org']['groups'])->toBe([]);
+});

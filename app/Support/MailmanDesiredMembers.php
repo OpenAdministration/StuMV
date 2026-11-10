@@ -33,6 +33,28 @@ class MailmanDesiredMembers
      */
     public function forMany(Collection $mappings, ?callable $warn = null, string $role = 'member'): array
     {
+        return $this->resolve($mappings, $warn, $role)['users'];
+    }
+
+    /**
+     * Like for(), plus which of the mapping's groups each address comes from.
+     *
+     * @param  'member'|'moderator'  $role
+     * @return array{users: array<string, LdapUser>, sources: array<string, array<int, string>>} keyed by mail; sources are group DNs
+     */
+    public function withSources(GroupMailmanList $mapping, string $role = 'member'): array
+    {
+        $resolved = $this->resolve(collect([$mapping]), null, $role);
+
+        return ['users' => $resolved['users'][$mapping->id], 'sources' => $resolved['sources'][$mapping->id]];
+    }
+
+    /**
+     * @param  Collection<int, GroupMailmanList>  $mappings
+     * @return array{users: array<int, array<string, LdapUser>>, sources: array<int, array<string, array<int, string>>>}
+     */
+    private function resolve(Collection $mappings, ?callable $warn, string $role): array
+    {
         $mappings->each->loadMissing('groups');
         $groupDnsByMapping = $mappings->mapWithKeys(fn (GroupMailmanList $m): array => [$m->id => $m->groupDns($role)]);
 
@@ -41,6 +63,7 @@ class MailmanDesiredMembers
             ->groupBy('group_dn');
 
         $result = [];
+        $sources = [];
         foreach ($mappings->groupBy('realm') as $realm => $realmMappings) {
             $memberships = RoleMembership::active()->where('realm', $realm)->get();
             $membershipsByRole = $memberships->groupBy(fn (RoleMembership $m): string => $m->committee_dn.'|'.$m->role_cn);
@@ -55,6 +78,7 @@ class MailmanDesiredMembers
 
             foreach ($realmMappings as $mapping) {
                 $desiredByEmail = [];
+                $sourcesByEmail = [];
                 $groupRoles = collect($groupDnsByMapping[$mapping->id])->flatMap(fn (string $dn) => $groupRolesByGroup->get($dn, collect()));
                 foreach ($groupRoles as $groupRole) {
                     $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
@@ -75,12 +99,14 @@ class MailmanDesiredMembers
                             continue;
                         }
                         $desiredByEmail[$mail] = $user;
+                        $sourcesByEmail[$mail][$groupRole->group_dn] = true;
                     }
                 }
                 $result[$mapping->id] = $desiredByEmail;
+                $sources[$mapping->id] = array_map(array_keys(...), $sourcesByEmail);
             }
         }
 
-        return $result;
+        return ['users' => $result, 'sources' => $sources];
     }
 }

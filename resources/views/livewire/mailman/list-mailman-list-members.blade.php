@@ -38,6 +38,7 @@
                     <flux:table.column class="w-[55px]"></flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'display_name'" :direction="$sortDirection" wire:click="sortBy('display_name')">{{ __('common.user') }}</flux:table.column>
                     <flux:table.column>{{ __('group_mailman_lists.members.email') }}</flux:table.column>
+                    <flux:table.column>{{ __('group_mailman_lists.members.via_groups') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -76,6 +77,15 @@
                             @endif
                         </flux:table.cell>
                         <flux:table.cell><span class="text-zinc-800 dark:text-white">{{ $row['email'] }}</span></flux:table.cell>
+                        <flux:table.cell>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                @foreach($row['groups'] as $groupCn)
+                                    <a wire:navigate href="{{ route('realms.groups.roles', ['realm' => $uid, 'cn' => $groupCn]) }}" class="rounded-md outline-none focus-visible:ring-2 ring-(--color-accent-content)">
+                                        <flux:badge size="sm" class="hover:bg-zinc-800/15 dark:hover:bg-white/20">{{ $groupCn }}</flux:badge>
+                                    </a>
+                                @endforeach
+                            </div>
+                        </flux:table.cell>
                         <flux:table.cell align="end">
                             @if($groupExists && $enabled && in_array($row['status'], ['pending', 'stale'], true))
                                 <flux:button

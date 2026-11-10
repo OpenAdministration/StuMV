@@ -125,7 +125,9 @@ class ListMailmanListMembers extends Component
     {
         $mapping = $this->mapping();
         $groupsExist = $this->memberGroupsExist($mapping);
-        $desiredByEmail = $groupsExist ? $this->desiredMembers($mapping) : [];
+        ['users' => $desiredByEmail, 'sources' => $sourcesByEmail] = $groupsExist
+            ? resolve(MailmanDesiredMembers::class)->withSources($mapping)
+            : ['users' => [], 'sources' => []];
 
         $fetchFailed = false;
         $actualByEmail = [];
@@ -144,6 +146,7 @@ class ListMailmanListMembers extends Component
                 'email' => $email,
                 'user' => $user,
                 'status' => $fetchFailed ? 'unknown' : (isset($actualByEmail[$email]) ? 'synced' : 'pending'),
+                'groups' => array_map(Group::shortNameFromDn(...), $sourcesByEmail[$email] ?? []),
             ]);
         }
 
@@ -159,6 +162,7 @@ class ListMailmanListMembers extends Component
                     'email' => $email,
                     'user' => $staleUsersByEmail->get($email),
                     'status' => 'stale',
+                    'groups' => [],
                 ]);
             }
         }
