@@ -18,7 +18,7 @@
 
     <flux:field class="mb-8">
         <flux:label>{{ __('group_mailman_lists.search') }}</flux:label>
-        <flux:input icon="search" wire:model.live="search" />
+        <flux:input icon="search" wire:model.live="search" clearable />
     </flux:field>
 
     <div class="pb-8">
