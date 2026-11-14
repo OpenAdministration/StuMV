@@ -117,4 +117,7 @@ return [
     'branding.remove_background' => 'Remove background image',
     'branding.background_saved' => 'Background image saved',
     'branding.background_removed' => 'Background image removed',
+    'branding.login_notice_heading' => 'Notice on the login page',
+    'branding.login_notice_enabled' => 'Show notice',
+    'branding.login_notice_saved' => 'Notice saved',
 ];

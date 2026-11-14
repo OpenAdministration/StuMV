@@ -32,3 +32,21 @@ test('an invalid file type is rejected and never reaches storage', function (): 
 
     expect(RealmBranding::where('realm', 'demo')->exists())->toBeFalse();
 });
+
+test('an admin can save and enable a login notice', function (): void {
+    actingAsAdmin('demo');
+
+    Livewire::test(EditRealmBranding::class, ['realm' => Community::findByUid('demo')])
+        ->set('login_notice_enabled', true)
+        ->set('login_notice', '<p>Hallo <em>Welt</em></p><script>alert(1)</script>')
+        ->call('saveLoginNotice')
+        ->assertHasNoErrors();
+
+    $branding = RealmBranding::forRealm('demo');
+    expect($branding->login_notice_enabled)->toBeTrue()
+        ->and($branding->login_notice)->toBe('<p>Hallo <em>Welt</em></p>');
+
+    Livewire::test(EditRealmBranding::class, ['realm' => Community::findByUid('demo')])
+        ->assertSet('login_notice_enabled', true)
+        ->assertSet('login_notice', '<p>Hallo <em>Welt</em></p>');
+});

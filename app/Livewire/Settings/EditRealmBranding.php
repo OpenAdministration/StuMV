@@ -30,10 +30,18 @@ class EditRealmBranding extends Component
     #[Validate(['file', 'mimes:jpg,jpeg,png,gif,webp,bmp', 'max:10240'])]
     public $background = null;
 
+    public bool $login_notice_enabled = false;
+
+    public string $login_notice = '';
+
     public function mount(Community $realm): void
     {
         $this->authorize('edit', $realm);
         $this->realm_uid = $realm->getShortCode();
+
+        $branding = RealmBranding::forRealm($this->realm_uid);
+        $this->login_notice_enabled = (bool) $branding?->login_notice_enabled;
+        $this->login_notice = (string) $branding?->login_notice;
     }
 
     public function render()
@@ -84,6 +92,25 @@ class EditRealmBranding extends Component
         $this->deleteFile('logo_id');
 
         Flux::toast(variant: 'success', text: __('realms.branding.logo_removed'));
+    }
+
+    public function saveLoginNotice(): void
+    {
+        $this->authorize('edit', Community::findOrFailByUid($this->realm_uid));
+
+        $this->validate([
+            'login_notice_enabled' => ['boolean'],
+            'login_notice' => ['nullable', 'string', 'max:10000'],
+        ]);
+
+        $notice = RealmBranding::sanitizeNotice($this->login_notice);
+
+        RealmBranding::updateOrCreate(['realm' => $this->realm_uid], [
+            'login_notice_enabled' => $this->login_notice_enabled,
+            'login_notice' => trim(strip_tags($notice)) === '' ? null : $notice,
+        ]);
+
+        Flux::toast(variant: 'success', text: __('realms.branding.login_notice_saved'));
     }
 
     public function updatedBackground(): void

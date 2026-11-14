@@ -15,6 +15,14 @@
                 </div>
 
                 <div class="p-6 flex flex-col space-y-4">
+                    @if($loginNotice = $branding?->loginNoticeHtml())
+                        <flux:callout icon="info" color="blue">
+                            <flux:callout.text class="space-y-2 [&_a]:underline [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5">
+                                {!! $loginNotice !!}
+                            </flux:callout.text>
+                        </flux:callout>
+                    @endif
+
                     <flux:field>
                         <flux:label>{{ __('auth.username_or_mail') }}</flux:label>
                         <flux:input type="text" name="uid" id="uid" :value="old('uid')" required autofocus />

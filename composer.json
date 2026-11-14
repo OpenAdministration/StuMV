@@ -24,7 +24,8 @@
         "livewire/flux": "^2.11",
         "livewire/flux-pro": "^2.11",
         "livewire/livewire": "^4.0",
-        "socialiteproviders/openidconnect": "^1.0"
+        "socialiteproviders/openidconnect": "^1.0",
+        "symfony/html-sanitizer": "^8.1"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.4",

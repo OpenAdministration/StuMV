@@ -4,7 +4,7 @@
         <flux:text class="text-base">{{ __('realms.branding.explanation') }}</flux:text>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6 pb-8">
+    <div class="grid md:grid-cols-2 gap-6 pb-6">
         <flux:fieldset>
             <legend>{{ __('realms.branding.logo_heading') }}</legend>
             
@@ -55,4 +55,21 @@
             </div>
         </flux:fieldset>
     </div>
+
+    <form wire:submit="saveLoginNotice" class="pb-8">
+        <flux:fieldset>
+            <legend>{{ __('realms.branding.login_notice_heading') }}</legend>
+
+            <div class="p-4 space-y-4">
+                <flux:switch wire:model="login_notice_enabled" :label="__('realms.branding.login_notice_enabled')" align="left" />
+
+                <flux:editor wire:model="login_notice" toolbar="bold italic underline | bullet ordered | link" />
+                <flux:error name="login_notice" />
+
+                <div class="flex items-center justify-end">
+                    <flux:button type="submit" variant="primary" icon="save">{{ __('common.save') }}</flux:button>
+                </div>
+            </div>
+        </flux:fieldset>
+    </form>
 </div>

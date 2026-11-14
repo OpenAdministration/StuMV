@@ -117,4 +117,7 @@ return [
     'branding.remove_background' => 'Hintergrundbild entfernen',
     'branding.background_saved' => 'Hintergrundbild wurde gespeichert',
     'branding.background_removed' => 'Hintergrundbild wurde entfernt',
+    'branding.login_notice_heading' => 'Hinweis auf der Login-Seite',
+    'branding.login_notice_enabled' => 'Hinweis anzeigen',
+    'branding.login_notice_saved' => 'Hinweis wurde gespeichert',
 ];
