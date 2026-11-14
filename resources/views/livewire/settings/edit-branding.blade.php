@@ -60,7 +60,7 @@
         <flux:fieldset>
             <legend class="flex items-center gap-4">
                 {{ __('realms.branding.login_notice_heading') }}
-                <flux:switch wire:model="login_notice_enabled" class="ml-auto" :title="__('realms.branding.login_notice_enabled')" :aria-label="__('realms.branding.login_notice_enabled')" />
+                <flux:switch wire:model.live="login_notice_enabled" class="ml-auto" :title="__('realms.branding.login_notice_enabled')" :aria-label="__('realms.branding.login_notice_enabled')" />
             </legend>
 
             <div class="p-4 space-y-4">

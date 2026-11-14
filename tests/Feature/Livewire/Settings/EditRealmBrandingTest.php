@@ -50,3 +50,19 @@ test('an admin can save and enable a login notice', function (): void {
         ->assertSet('login_notice_enabled', true)
         ->assertSet('login_notice', '<p>Hallo <em>Welt</em></p>');
 });
+
+test('toggling the login notice switch saves immediately', function (): void {
+    actingAsAdmin('demo');
+
+    $component = Livewire::test(EditRealmBranding::class, ['realm' => Community::findByUid('demo')])
+        ->set('login_notice', '<p>Ungespeichert</p>')
+        ->set('login_notice_enabled', true)
+        ->assertHasNoErrors();
+
+    expect(RealmBranding::forRealm('demo')->login_notice_enabled)->toBeTrue()
+        ->and(RealmBranding::forRealm('demo')->login_notice)->toBeNull();
+
+    $component->set('login_notice_enabled', false);
+
+    expect(RealmBranding::forRealm('demo')->login_notice_enabled)->toBeFalse();
+});

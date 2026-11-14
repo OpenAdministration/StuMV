@@ -16,7 +16,7 @@
 
                 <div class="p-6 flex flex-col space-y-4">
                     @if($loginNotice = $branding?->loginNoticeHtml())
-                        <flux:callout icon="info" color="blue">
+                        <flux:callout icon="info" color="sky">
                             <flux:callout.text class="space-y-2 [&_a]:underline [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5">
                                 {!! $loginNotice !!}
                             </flux:callout.text>

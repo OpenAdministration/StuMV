@@ -120,4 +120,6 @@ return [
     'branding.login_notice_heading' => 'Hinweis auf der Login-Seite',
     'branding.login_notice_enabled' => 'Hinweis anzeigen',
     'branding.login_notice_saved' => 'Hinweis wurde gespeichert',
+    'branding.login_notice_activated' => 'Hinweis wurde aktiviert',
+    'branding.login_notice_deactivated' => 'Hinweis wurde deaktiviert',
 ];

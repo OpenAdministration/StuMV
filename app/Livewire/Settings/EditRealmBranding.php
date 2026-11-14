@@ -94,6 +94,20 @@ class EditRealmBranding extends Component
         Flux::toast(variant: 'success', text: __('realms.branding.logo_removed'));
     }
 
+    public function updatedLoginNoticeEnabled(): void
+    {
+        $this->authorize('edit', Community::findOrFailByUid($this->realm_uid));
+        $this->validateOnly('login_notice_enabled', ['login_notice_enabled' => ['boolean']]);
+
+        RealmBranding::updateOrCreate(['realm' => $this->realm_uid], [
+            'login_notice_enabled' => $this->login_notice_enabled,
+        ]);
+
+        Flux::toast(variant: 'success', text: __($this->login_notice_enabled
+            ? 'realms.branding.login_notice_activated'
+            : 'realms.branding.login_notice_deactivated'));
+    }
+
     public function saveLoginNotice(): void
     {
         $this->authorize('edit', Community::findOrFailByUid($this->realm_uid));

@@ -120,4 +120,6 @@ return [
     'branding.login_notice_heading' => 'Notice on the login page',
     'branding.login_notice_enabled' => 'Show notice',
     'branding.login_notice_saved' => 'Notice saved',
+    'branding.login_notice_activated' => 'Notice enabled',
+    'branding.login_notice_deactivated' => 'Notice disabled',
 ];
