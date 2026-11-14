@@ -58,11 +58,12 @@
 
     <form wire:submit="saveLoginNotice" class="pb-8">
         <flux:fieldset>
-            <legend>{{ __('realms.branding.login_notice_heading') }}</legend>
+            <legend class="flex items-center gap-4">
+                {{ __('realms.branding.login_notice_heading') }}
+                <flux:switch wire:model="login_notice_enabled" class="ml-auto" :title="__('realms.branding.login_notice_enabled')" :aria-label="__('realms.branding.login_notice_enabled')" />
+            </legend>
 
             <div class="p-4 space-y-4">
-                <flux:switch wire:model="login_notice_enabled" :label="__('realms.branding.login_notice_enabled')" align="left" />
-
                 <flux:editor wire:model="login_notice" toolbar="bold italic underline | bullet ordered | link" />
                 <flux:error name="login_notice" />
 
