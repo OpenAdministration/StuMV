@@ -2,7 +2,7 @@
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.admins_headline') }}</flux:heading>
-            <flux:text class="text-base">{{  __('realms.admins_explanation') }}</flux:text>
+            <flux:text class="text-base">{{  __('realms.admins_explanation', ['operator' => config('app.operator_name')]) }}</flux:text>
             <flux:button
                 size="sm"
                 variant="primary"
