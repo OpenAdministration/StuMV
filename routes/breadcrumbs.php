@@ -187,6 +187,16 @@ Breadcrumbs::for('committees.edit', function (BreadcrumbTrail $trail, array $rou
     $trail->push(__('common.edit'), route('committees.edit', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('committees.moderators', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('committees.details', $routeParams);
+    $trail->push(__('committees.link_moderators'), route('committees.moderators', $routeParams), ['truncate' => true]);
+});
+
+Breadcrumbs::for('committees.moderators.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('committees.moderators', $routeParams);
+    $trail->push(__('common.new'), route('committees.moderators.new', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('committees.roles', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('committees.details', $routeParams);
 });

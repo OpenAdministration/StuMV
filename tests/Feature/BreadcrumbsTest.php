@@ -100,3 +100,21 @@ test('breadcrumb titles are shown in full, not CSS-truncated - the responsive co
         ->toContain((string) $community->getLongName())
         ->not->toContain('max-w-[20ch]');
 });
+
+test('the committee moderator pages have breadcrumbs below the committee', function (string $route, array $expected): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeCommittee($community, 'fsr');
+    actingAsModerator($community);
+
+    $response = $this->get(route($route, ['realm' => $uid, 'ou' => 'fsr']));
+
+    $response->assertOk();
+    preg_match('#data-flux-breadcrumbs>(.*?)(?:data-flux-breadcrumbs>|ml-auto flex justify-end)#s', (string) $response->getContent(), $section);
+
+    expect($section[1] ?? '')
+        ->toContain('Committee fsr', ...$expected);
+})->with([
+    'list' => ['committees.moderators', ['>Moderators<']],
+    'new' => ['committees.moderators.new', ['>Moderators<', '>New<']],
+]);
