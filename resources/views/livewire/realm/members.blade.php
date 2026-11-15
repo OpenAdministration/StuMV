@@ -72,7 +72,7 @@
                                     wire:navigate
                                     :href="route('profile.memberships.export', ['realm' => $community_name, 'username' => $realm_member->getFirstAttribute('uid')])"
                                 >
-                                    {{ __('profile.memberships_as_pdf') }}
+                                    {{ __('profile.export_memberships_title') }}
                                 </flux:button>
                             @endif
                             @if($isAdmin || $canRemoveMember)

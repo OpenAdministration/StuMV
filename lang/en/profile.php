@@ -14,7 +14,6 @@ return [
     'from' => 'from',
     'in' => 'in',
     'memberships' => 'Memberships',
-    'memberships_as_pdf' => 'Memberships as PDF',
     'no_memberships_found' => 'There are no memberships for this profile',
     'note_profile_pictures_public' => 'Profile pictures are publicly accessible! By uploading a picture, you agree to its publication.',
     'personal_data' => 'Personal Data',
