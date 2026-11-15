@@ -30,6 +30,26 @@ test('the memberships page lists a users active role memberships', function (): 
         ->assertSee('Role mitglied'); // the role description set by the factory
 });
 
+test('role and committee names link to their pages', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    $user = actingAsMember($community);
+    $realm = $community->getShortCode();
+
+    RoleMembership::create([
+        'realm' => $realm,
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $user->username,
+        'from' => today()->subMonth(),
+    ]);
+
+    Livewire::test(Memberships::class, ['realm' => $community, 'username' => $user->username])
+        ->assertSeeHtml('href="'.route('committees.roles.members', ['realm' => $realm, 'ou' => 'fsr', 'cn' => 'mitglied']).'"')
+        ->assertSeeHtml('href="'.route('committees.roles', ['realm' => $realm, 'ou' => 'fsr']).'"');
+});
+
 test('the memberships page shows a callout when there are no memberships', function (): void {
     $community = newCommunity();
     $user = actingAsMember($community);

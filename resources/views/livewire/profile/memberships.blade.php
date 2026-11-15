@@ -21,8 +21,17 @@
                 <flux:table.rows>
                 @foreach($memberships as $row)
                     <flux:table.row>
-                        <flux:table.cell>{{ $row['role']->getFirstAttribute('description') }}</flux:table.cell>
-                        <flux:table.cell>{{ $row['role']->committee()->getFirstAttribute('description') }}</flux:table.cell>
+                        @php($committee = $row['role']->committee())
+                        <flux:table.cell>
+                            <flux:link wire:navigate :href="route('committees.roles.members', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou'), 'cn' => $row['role']->getFirstAttribute('cn')])">
+                                {{ $row['role']->getFirstAttribute('description') }}
+                            </flux:link>
+                        </flux:table.cell>
+                        <flux:table.cell>
+                            <flux:link wire:navigate :href="route('committees.roles', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')])">
+                                {{ $committee->getFirstAttribute('description') }}
+                            </flux:link>
+                        </flux:table.cell>
                         <flux:table.cell>{{ \Carbon\Carbon::parse($row['from'])->format('Y-m-d') }}</flux:table.cell>
                         <flux:table.cell>
                             @if ($row['until'] != '')
