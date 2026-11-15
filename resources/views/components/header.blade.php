@@ -158,5 +158,7 @@
                 </form>
             </flux:navmenu>
         </flux:dropdown>
+        {{-- Outside the dropdown: it would otherwise close together with the menu. --}}
+        <x-info-modal />
     </div>
 </flux:navbar>
