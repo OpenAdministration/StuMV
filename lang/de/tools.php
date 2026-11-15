@@ -38,6 +38,8 @@ return [
     'new_invitation_button' => 'Neue Einladung',
     'pending_invitation_exists' => 'Für diese E-Mail-Adresse gibt es bereits eine ausstehende Einladung. Nutze stattdessen "Erneut senden".',
     'no_pending_invitations' => 'Aktuell gibt es keine ausstehenden Einladungen.',
+    'no_unused_committees' => 'Alle Gremien haben aktuelle oder ehemalige Mitgliedschaften.',
+    'no_unused_roles' => 'Alle Rollen haben aktuelle oder ehemalige Mitgliedschaften.',
     'pending_invitations_explanation' => 'Verwalte versandte Einladungen, die noch nicht angenommen wurden.',
     'pending_invitations_headline' => 'Einladungen',
     'role' => 'Rolle',

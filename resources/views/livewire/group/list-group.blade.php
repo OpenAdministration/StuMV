@@ -22,81 +22,75 @@
     </flux:field>
 
     <div class="pb-8">
-        <flux:table>
-            <flux:table.columns>
-                <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">
-                    {{ __('common.short_name') }}
-                </flux:table.column>
-                <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
-                    {{ __('groups.description_label') }}
-                </flux:table.column>
-                <flux:table.column></flux:table.column>
-            </flux:table.columns>
-            <flux:table.rows>
-            @forelse($groups as $group)
-                <flux:table.row>
-                    <flux:table.cell>
-                        <flux:link
-                            wire:navigate
-                            href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                        >
-                            {{ $group->getFirstAttribute('cn') }}
-                        </flux:link>
-                    </flux:table.cell>
-                    <flux:table.cell>{{ $group->getFirstAttribute('description') }}</flux:table.cell>
-                    <flux:table.cell>
-                        <div class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        icon="users"
-                                        wire:navigate
-                                        href="{{ route('realms.groups.members', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                                    >
-                                        {{ __('groups.link_members') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        icon="square-user"
-                                        wire:navigate
-                                        href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                                    >
-                                        {{ __('groups.manage_roles') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        icon="pencil"
-                                        href="{{ route('realms.groups.edit', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                                    >
-                                        {{ __('groups.link_edit') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="trash-2"
-                                        wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
-                                    >
-                                        {{ __('common.delete') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
-                        </div>
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="5">
-                        <div class="flex justify-center item-center">
-                            <span class="text-gray-400 text-xl py-2 font-medium">{{ __('groups.no_groups_found') }}</span>
-                        </div>
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-            </flux:table.rows>
-        </flux:table>
-
         @if(count($groups) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">
+                        {{ __('common.short_name') }}
+                    </flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">
+                        {{ __('groups.description_label') }}
+                    </flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                @foreach($groups as $group)
+                    <flux:table.row>
+                        <flux:table.cell>
+                            <flux:link
+                                wire:navigate
+                                href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                            >
+                                {{ $group->getFirstAttribute('cn') }}
+                            </flux:link>
+                        </flux:table.cell>
+                        <flux:table.cell>{{ $group->getFirstAttribute('description') }}</flux:table.cell>
+                        <flux:table.cell>
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            icon="users"
+                                            wire:navigate
+                                            href="{{ route('realms.groups.members', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                        >
+                                            {{ __('groups.link_members') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            icon="square-user"
+                                            wire:navigate
+                                            href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                        >
+                                            {{ __('groups.manage_roles') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            icon="pencil"
+                                            href="{{ route('realms.groups.edit', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                        >
+                                            {{ __('groups.link_edit') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
+                                        >
+                                            {{ __('common.delete') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            </div>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+                </flux:table.rows>
+            </flux:table>
+
             <div class="pagination">
                 <flux:pagination :paginator="$groups" />
             </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('groups.no_groups_found') }}" />
         @endif
     </div>
 

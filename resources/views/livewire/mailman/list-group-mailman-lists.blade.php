@@ -26,119 +26,113 @@
             {{-- Re-keyed per page/search so Alpine runs x-init again for newly shown rows. --}}
             <div class="hidden" wire:key="load-statuses-{{ $missingStatusIds }}" x-init="$wire.loadStatuses()"></div>
         @endif
-        <flux:table>
-            <flux:table.columns>
-                <flux:table.column sortable :sorted="$sortField === 'mailman_list_id'" :direction="$sortDirection" wire:click="sortBy('mailman_list_id')">
-                    {{ __('group_mailman_lists.mailman_list_id') }}
-                </flux:table.column>
-                <flux:table.column sortable :sorted="$sortField === 'group'" :direction="$sortDirection" wire:click="sortBy('group')">
-                    {{ __('group_mailman_lists.role_member') }}
-                </flux:table.column>
-                <flux:table.column>{{ __('group_mailman_lists.role_moderator') }}</flux:table.column>
-                <flux:table.column>{{ __('group_mailman_lists.status') }}</flux:table.column>
-                <flux:table.column></flux:table.column>
-            </flux:table.columns>
-            <flux:table.rows>
-            @forelse($mappings as $mapping)
-                <flux:table.row wire:key="mapping-{{ $mapping->id }}">
-                    <flux:table.cell>
-                        @if($mapping->web_url)
-                            <flux:link href="{{ $mapping->web_url }}" target="_blank" rel="noopener noreferrer">{{ $mapping->mailman_list_id }}</flux:link>
-                        @else
-                            <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
-                        @endif
-                    </flux:table.cell>
-                    @foreach(['member', 'moderator'] as $role)
+        @if(count($mappings) > 0)
+            <flux:table>
+                <flux:table.columns>
+                    <flux:table.column sortable :sorted="$sortField === 'mailman_list_id'" :direction="$sortDirection" wire:click="sortBy('mailman_list_id')">
+                        {{ __('group_mailman_lists.mailman_list_id') }}
+                    </flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'group'" :direction="$sortDirection" wire:click="sortBy('group')">
+                        {{ __('group_mailman_lists.role_member') }}
+                    </flux:table.column>
+                    <flux:table.column>{{ __('group_mailman_lists.role_moderator') }}</flux:table.column>
+                    <flux:table.column>{{ __('group_mailman_lists.status') }}</flux:table.column>
+                    <flux:table.column></flux:table.column>
+                </flux:table.columns>
+                <flux:table.rows>
+                @foreach($mappings as $mapping)
+                    <flux:table.row wire:key="mapping-{{ $mapping->id }}">
                         <flux:table.cell>
-                            <div class="flex flex-wrap items-center gap-1.5">
-                                @foreach($mapping->groups[$role] as $group)
-                                    @if($group['exists'])
-                                        <a wire:navigate href="{{ route('realms.groups.roles', ['realm' => $uid, 'cn' => $group['cn']]) }}" class="rounded-md outline-none focus-visible:ring-2 ring-(--color-accent-content)">
-                                            <flux:badge size="sm" class="hover:bg-zinc-800/15 dark:hover:bg-white/20">{{ $group['cn'] }}</flux:badge>
-                                        </a>
-                                    @else
-                                        <flux:badge size="sm" color="red" icon="circle-alert" :title="__('group_mailman_lists.group_missing')">
-                                            {{ $group['cn'] }}
-                                            <span class="sr-only">({{ __('group_mailman_lists.group_missing') }})</span>
-                                        </flux:badge>
-                                    @endif
-                                @endforeach
+                            @if($mapping->web_url)
+                                <flux:link href="{{ $mapping->web_url }}" target="_blank" rel="noopener noreferrer">{{ $mapping->mailman_list_id }}</flux:link>
+                            @else
+                                <span class="text-zinc-800 dark:text-white">{{ $mapping->mailman_list_id }}</span>
+                            @endif
+                        </flux:table.cell>
+                        @foreach(['member', 'moderator'] as $role)
+                            <flux:table.cell>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    @foreach($mapping->groups[$role] as $group)
+                                        @if($group['exists'])
+                                            <a wire:navigate href="{{ route('realms.groups.roles', ['realm' => $uid, 'cn' => $group['cn']]) }}" class="rounded-md outline-none focus-visible:ring-2 ring-(--color-accent-content)">
+                                                <flux:badge size="sm" class="hover:bg-zinc-800/15 dark:hover:bg-white/20">{{ $group['cn'] }}</flux:badge>
+                                            </a>
+                                        @else
+                                            <flux:badge size="sm" color="red" icon="circle-alert" :title="__('group_mailman_lists.group_missing')">
+                                                {{ $group['cn'] }}
+                                                <span class="sr-only">({{ __('group_mailman_lists.group_missing') }})</span>
+                                            </flux:badge>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </flux:table.cell>
+                        @endforeach
+                        <flux:table.cell>
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if(isset($statuses[$mapping->id]))
+                                    @include('livewire.mailman.mailman-list-status', $statuses[$mapping->id])
+                                @else
+                                    <flux:icon.loading variant="mini" class="text-zinc-400" />
+                                @endif
+                                @unless($mapping->enabled)
+                                    <flux:badge size="sm" color="zinc">{{ __('group_mailman_lists.disabled') }}</flux:badge>
+                                @endunless
                             </div>
                         </flux:table.cell>
-                    @endforeach
-                    <flux:table.cell>
-                        <div class="flex flex-wrap items-center gap-2">
-                            @if(isset($statuses[$mapping->id]))
-                                @include('livewire.mailman.mailman-list-status', $statuses[$mapping->id])
-                            @else
-                                <flux:icon.loading variant="mini" class="text-zinc-400" />
-                            @endif
-                            @unless($mapping->enabled)
-                                <flux:badge size="sm" color="zinc">{{ __('group_mailman_lists.disabled') }}</flux:badge>
-                            @endunless
-                        </div>
-                    </flux:table.cell>
-                    <flux:table.cell>
-                        <div class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        icon="pencil"
-                                        wire:navigate
-                                        href="{{ route('realms.group-mailman-lists.edit', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
-                                    >
-                                        {{ __('group_mailman_lists.edit') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        icon="users"
-                                        wire:navigate
-                                        href="{{ route('realms.group-mailman-lists.members', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
-                                    >
-                                        {{ __('group_mailman_lists.link_members') }}
-                                    </flux:menu.item>
-                                    @if($mapping->groups_complete && $mapping->enabled)
+                        <flux:table.cell>
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
                                         <flux:menu.item
-                                            icon="refresh-ccw"
-                                            x-on:click="const sync = $wire.syncList({{ $mapping->id }}); window.withProgressToast?.({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, sync)"
+                                            icon="pencil"
+                                            wire:navigate
+                                            href="{{ route('realms.group-mailman-lists.edit', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
                                         >
-                                            {{ __('group_mailman_lists.sync') }}
+                                            {{ __('group_mailman_lists.edit') }}
                                         </flux:menu.item>
-                                    @endif
-                                    <flux:menu.item
-                                        :icon="$mapping->enabled ? 'circle-pause' : 'circle-play'"
-                                        wire:click="toggleEnabled({{ $mapping->id }})"
-                                    >
-                                        {{ $mapping->enabled ? __('group_mailman_lists.disable') : __('group_mailman_lists.enable') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="trash-2"
-                                        wire:click="deletePrepare({{ $mapping->id }})"
-                                    >
-                                        {{ __('common.delete') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
-                        </div>
-                    </flux:table.cell>
-                </flux:table.row>
-            @empty
-                <flux:table.row>
-                    <flux:table.cell colspan="5">
-                        <div class="flex justify-center item-center">
-                            <span class="text-gray-400 text-xl py-2 font-medium">{{ __('group_mailman_lists.no_mappings_found') }}</span>
-                        </div>
-                    </flux:table.cell>
-                </flux:table.row>
-            @endforelse
-            </flux:table.rows>
-        </flux:table>
+                                        <flux:menu.item
+                                            icon="users"
+                                            wire:navigate
+                                            href="{{ route('realms.group-mailman-lists.members', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
+                                        >
+                                            {{ __('group_mailman_lists.link_members') }}
+                                        </flux:menu.item>
+                                        @if($mapping->groups_complete && $mapping->enabled)
+                                            <flux:menu.item
+                                                icon="refresh-ccw"
+                                                x-on:click="const sync = $wire.syncList({{ $mapping->id }}); window.withProgressToast?.({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, sync)"
+                                            >
+                                                {{ __('group_mailman_lists.sync') }}
+                                            </flux:menu.item>
+                                        @endif
+                                        <flux:menu.item
+                                            :icon="$mapping->enabled ? 'circle-pause' : 'circle-play'"
+                                            wire:click="toggleEnabled({{ $mapping->id }})"
+                                        >
+                                            {{ $mapping->enabled ? __('group_mailman_lists.disable') : __('group_mailman_lists.enable') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            wire:click="deletePrepare({{ $mapping->id }})"
+                                        >
+                                            {{ __('common.delete') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            </div>
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+                </flux:table.rows>
+            </flux:table>
 
-        @if(count($mappings) > 0)
             <div class="pagination">
                 <flux:pagination :paginator="$mappings" />
             </div>
+        @else
+            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('group_mailman_lists.no_mappings_found') }}" />
         @endif
     </div>
 

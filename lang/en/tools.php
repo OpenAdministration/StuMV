@@ -38,6 +38,8 @@ return [
     'new_invitation_button' => 'New invitation',
     'pending_invitation_exists' => 'There is already a pending invitation for this email address. Use "Resend" instead.',
     'no_pending_invitations' => 'There are currently no pending invitations.',
+    'no_unused_committees' => 'All committees have current or former memberships.',
+    'no_unused_roles' => 'All roles have current or former memberships.',
     'pending_invitations_explanation' => 'Manage sent invitations that have not been accepted yet.',
     'pending_invitations_headline' => 'Invitations',
     'role' => 'Role',
