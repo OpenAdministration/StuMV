@@ -9,6 +9,8 @@ use App\Ldap\User;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Flux\Flux;
+use Illuminate\Support\Collection;
+use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -90,6 +92,7 @@ class ListRoles extends Component
                     'roles' => collect(),
                     'roleData' => [],
                     'isModerator' => $isModerator,
+                    ...$this->relatedCommittees($committee),
                 ]
             )->title(__('committees.roles_title', ['name' => $committee->getFirstAttribute('description')]));
         }
@@ -144,8 +147,30 @@ class ListRoles extends Component
                 'roles' => $rolesSlice,
                 'roleData' => $roleData,
                 'isModerator' => $isModerator,
+                ...$this->relatedCommittees($committee),
             ]
         )->title(__('committees.roles_title', ['name' => $this->ou]));
+    }
+
+    /**
+     * Navigation to the committee above, beside and below this one.
+     *
+     * @return array{parentCommittee: ?Committee, siblingCommittees: Collection<int, Committee>, childCommittees: Collection<int, Committee>}
+     */
+    private function relatedCommittees(Committee $committee): array
+    {
+        $parentDn = (string) DistinguishedName::make($committee->getDn())->parent();
+        $byName = fn (Committee $c): string => mb_strtolower((string) $c->getFirstAttribute('description'));
+
+        return [
+            'parentCommittee' => $committee->parentCommittee(),
+            // one level below the parent - a committee or, at the top, ou=Committees itself
+            'siblingCommittees' => Committee::query()->setBaseDn($parentDn)->list()->get()
+                ->reject(fn (Committee $c): bool => $c->getDn() === $committee->getDn())
+                ->sortBy($byName, SORT_NATURAL)->values(),
+            'childCommittees' => Committee::query()->setBaseDn($committee->getDn())->list()->get()
+                ->sortBy($byName, SORT_NATURAL)->values(),
+        ];
     }
 
     #[Computed]

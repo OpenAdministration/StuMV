@@ -35,6 +35,42 @@
         </div>
     </div>
 
+    @php
+        $navigation = [
+            [__('committees.parent_committee'), $parentCommittee ? collect([$parentCommittee]) : collect(), __('committees.no_parent_committee')],
+            [__('committees.sibling_committees'), $siblingCommittees, __('committees.no_sibling_committees')],
+            [__('committees.child_committees'), $childCommittees, __('committees.no_child_committees')],
+        ];
+    @endphp
+    <nav class="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="{{ __('committees.related_committees') }}">
+        @foreach($navigation as [$heading, $committees, $emptyText])
+            <flux:card class="py-4">
+                <flux:accordion transition>
+                    <flux:accordion.item>
+                        <flux:accordion.heading>
+                            <span class="flex flex-1 items-center justify-between gap-2"><span>{{ $heading }}</span><flux:badge size="sm">{{ $committees->count() }}</flux:badge></span>
+                        </flux:accordion.heading>
+                        <flux:accordion.content>
+                            @if($committees->isEmpty())
+                                <flux:callout variant="secondary" icon="info" :heading="$emptyText" class="mt-2" />
+                            @else
+                                <ul class="flex flex-wrap gap-2 pt-2">
+                                    @foreach($committees as $related)
+                                        <li>
+                                            <flux:button size="sm" wire:navigate :href="route('committees.roles', ['realm' => $uid, 'ou' => $related->getFirstAttribute('ou')])">
+                                                {{ $related->getFirstAttribute('description') }}
+                                            </flux:button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </flux:accordion.content>
+                    </flux:accordion.item>
+                </flux:accordion>
+            </flux:card>
+        @endforeach
+    </nav>
+
     <div
         class="flex items-center"
         x-data="persistedToggle('showOnlyActive', 'committees.showOnlyActive', false)"
