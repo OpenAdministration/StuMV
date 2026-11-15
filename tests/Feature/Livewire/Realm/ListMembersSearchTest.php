@@ -163,7 +163,7 @@ test('a moderator sees the export-as-PDF control for members', function (): void
 
     Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
-        ->assertSeeHtml('wire:click="exportPdf(\''.$username.'\')"');
+        ->assertSeeHtml('href="'.route('profile.memberships.export', ['realm' => $uid, 'username' => $username]).'"');
 });
 
 test('a superadmin sees a working remove-member control', function (): void {

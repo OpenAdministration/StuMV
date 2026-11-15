@@ -4,7 +4,6 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
-use App\Support\MembershipCertificate;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
@@ -143,17 +142,5 @@ class ListMembers extends Component
     {
         Flux::modals()->close();
         $this->reset('deleteMemberName', 'deleteMemberUsername');
-    }
-
-    public function exportPdf($username)
-    {
-        $community = Community::findOrFailByUid($this->community_name);
-
-        return MembershipCertificate::download(
-            $this->community_name,
-            $username,
-            $community->description[0],
-            'memberships-'.$username.'.pdf'
-        );
     }
 }

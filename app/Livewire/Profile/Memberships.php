@@ -38,14 +38,4 @@ class Memberships extends Component
             'sn' => $sn,
         ])->title(__('profile.breadcrumb'));
     }
-
-    public function exportPdf()
-    {
-        return MembershipCertificate::download(
-            $this->realm_uid,
-            $this->currentUsername,
-            null,
-            strtolower(trans('profile.memberships')).'_'.$this->currentUsername.'.pdf'
-        );
-    }
 }

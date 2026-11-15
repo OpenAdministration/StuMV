@@ -7,8 +7,6 @@ use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Ldap\User;
 use App\Models\RoleMembership;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Barryvdh\DomPDF\PDF as DomPdf;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -19,7 +17,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class MembershipCertificate
 {
     /**
-     * @return array<int, array{role: Role, from: mixed, until: mixed, decided: mixed, comment: mixed}>
+     * @return array<int, array{id: int, role: Role, from: mixed, until: mixed, decided: mixed, comment: mixed}>
      */
     public static function memberships(string $realmUid, string $username, bool $onlyActive): array
     {
@@ -35,6 +33,7 @@ class MembershipCertificate
 
         return $query->get()
             ->map(fn (RoleMembership $row): array => [
+                'id' => $row->id,
                 'role' => Role::findOrFail('cn='.$row->role_cn.','.$row->committee_dn),
                 'from' => $row->from,
                 'until' => $row->until,
@@ -44,23 +43,36 @@ class MembershipCertificate
             ->all();
     }
 
-    public static function pdf(string $realmUid, string $username, ?string $communityName = null): DomPdf
+    /**
+     * Raw bytes of the certificate PDF, limited to the given membership ids
+     * when there are any - ids of other users' memberships are ignored.
+     *
+     * @param  array<int, int>|null  $ids
+     */
+    public static function pdf(string $realmUid, string $username, ?string $communityName = null, ?array $ids = null): string
     {
         $user = User::query()->in(Community::findOrFailByUid($realmUid)->peopleDn())->where('uid', '=', $username)->first() ?? abort(404);
 
-        return Pdf::loadView('pdfs.memberships', [
-            'fullName' => $user->getFirstAttribute('cn'),
-            'community' => $communityName,
-            'memberships' => self::memberships($realmUid, $username, false),
-        ]);
+        return (new MembershipCertificatePdf)->render(
+            __('profile.activities'),
+            (string) $user->getFirstAttribute('cn'),
+            $communityName,
+            array_values(array_filter(
+                self::memberships($realmUid, $username, false),
+                fn (array $row): bool => $ids === null || in_array($row['id'], $ids, true),
+            )),
+        );
     }
 
-    public static function download(string $realmUid, string $username, ?string $communityName, string $filename): StreamedResponse
+    /**
+     * @param  array<int, int>|null  $ids
+     */
+    public static function download(string $realmUid, string $username, ?string $communityName, string $filename, ?array $ids = null): StreamedResponse
     {
-        $pdf = self::pdf($realmUid, $username, $communityName);
+        $pdf = self::pdf($realmUid, $username, $communityName, $ids);
 
         return response()->streamDownload(function () use ($pdf): void {
-            echo $pdf->stream();
-        }, $filename);
+            echo $pdf;
+        }, $filename, ['Content-Type' => 'application/pdf']);
     }
 }

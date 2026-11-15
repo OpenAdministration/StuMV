@@ -27,6 +27,7 @@ use App\Livewire\Group\NewGroup;
 use App\Livewire\Mailman\ListGroupMailmanLists;
 use App\Livewire\Mailman\ListMailmanListMembers;
 use App\Livewire\Mailman\NewGroupMailmanList;
+use App\Livewire\Profile\ExportMemberships;
 use App\Livewire\Profile\Memberships;
 use App\Livewire\Profile\Picture;
 use App\Livewire\Profile\Profile;
@@ -80,6 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('/', static fn () => redirect(RouteServiceProvider::home()));
     Route::livewire('{realm}/profile/{username}', Profile::class)->name('profile');
     Route::livewire('{realm}/profile/{username}/memberships', Memberships::class)->name('profile.memberships');
+    Route::livewire('{realm}/profile/{username}/memberships/export', ExportMemberships::class)->name('profile.memberships.export');
     Route::livewire('{realm}/profile/{username}/picture', Picture::class)->name('profile.picture');
     Route::livewire('/pick-realm', ListRealms::class)->name('realms.pick');
 

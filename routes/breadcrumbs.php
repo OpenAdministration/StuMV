@@ -46,6 +46,11 @@ Breadcrumbs::for('profile.memberships', function (BreadcrumbTrail $trail, array 
     $trail->push(__('profile.memberships'), route('profile.memberships', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('profile.memberships.export', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('profile.memberships', $routeParams);
+    $trail->push(__('profile.export_memberships_title'), route('profile.memberships.export', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('profile.picture', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('profile', $routeParams);
     $trail->push(__('profile.picture'), route('profile.picture', $routeParams), ['truncate' => true]);

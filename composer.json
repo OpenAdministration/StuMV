@@ -10,7 +10,6 @@
         "ext-gd": "*",
         "ext-ldap": "*",
         "ext-pdo": "*",
-        "barryvdh/laravel-dompdf": "^3.1",
         "dacoto/laravel-domain-validation": "^4.2",
         "diglactic/laravel-breadcrumbs": "^10.0",
         "directorytree/ldaprecord": "^4.0",
@@ -25,7 +24,8 @@
         "livewire/flux-pro": "^2.11",
         "livewire/livewire": "^4.0",
         "socialiteproviders/openidconnect": "^1.0",
-        "symfony/html-sanitizer": "^8.1"
+        "symfony/html-sanitizer": "^8.1",
+        "tecnickcom/tc-lib-pdf": "^8.84"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.4",

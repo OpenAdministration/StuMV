@@ -5,7 +5,7 @@
                 <flux:switch wire:model.live="showOnlyActive" label="{{ __('profile.show_only_active_memberships') }}" align="left" />
             </div>
             <div class="flex justify-end">
-                <flux:button variant="primary" icon="file-text" wire:click="exportPdf">{{ __('profile.export_as_pdf') }}</flux:button>
+                <flux:button variant="primary" icon="file-text" wire:navigate :href="route('profile.memberships.export', ['realm' => $realm_uid, 'username' => $currentUsername])">{{ __('profile.export_as_pdf') }}</flux:button>
             </div>
         </div>
         @if(count($memberships) > 0)

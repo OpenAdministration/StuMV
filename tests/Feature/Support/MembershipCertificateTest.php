@@ -2,7 +2,6 @@
 
 use App\Models\RoleMembership;
 use App\Support\MembershipCertificate;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Tests\Support\TestLdap;
@@ -74,29 +73,31 @@ test('memberships stays scoped to the requested realm even for a shared username
         ->and(MembershipCertificate::memberships($realmB->getShortCode(), $username, false))->toHaveCount(0);
 });
 
-test('pdf passes the full name and, when given, the community label to the view', function (): void {
+test('pdf is a tagged PDF/UA document containing the name, community and memberships', function (): void {
     $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
     $user = TestLdap::member($community);
-    $fullName = $user->ldap()->getFirstAttribute('cn');
-    $description = $community->getFirstAttribute('description');
 
-    $withCommunityPdf = Mockery::mock(Barryvdh\DomPDF\PDF::class);
-    Pdf::shouldReceive('loadView')
-        ->once()
-        ->with('pdfs.memberships', Mockery::on(fn (array $data): bool => $data['fullName'] === $fullName
-            && $data['community'] === $description
-            && $data['memberships'] === []))
-        ->andReturn($withCommunityPdf);
+    RoleMembership::create([
+        'realm' => $community->getShortCode(),
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $user->username,
+        'from' => today()->subMonth(),
+    ]);
 
-    expect(MembershipCertificate::pdf($community->getShortCode(), $user->username, $description))->toBe($withCommunityPdf);
+    $pdf = MembershipCertificate::pdf($community->getShortCode(), $user->username, 'Testgemeinschaft');
 
-    $withoutCommunityPdf = Mockery::mock(Barryvdh\DomPDF\PDF::class);
-    Pdf::shouldReceive('loadView')
-        ->once()
-        ->with('pdfs.memberships', Mockery::on(fn (array $data): bool => $data['community'] === null))
-        ->andReturn($withoutCommunityPdf);
-
-    expect(MembershipCertificate::pdf($community->getShortCode(), $user->username, null))->toBe($withoutCommunityPdf);
+    expect($pdf)->toStartWith('%PDF-2.0')
+        ->toContain('<pdfuaid:part>2</pdfuaid:part>')
+        ->toContain('/MarkInfo << /Marked true >>')
+        ->toContain('/S /H1')
+        ->toContain('/S /Table')
+        ->toContain('/S /TH')
+        ->toContain('/Scope /Column')
+        ->toContain('/S /TD')
+        ->toContain('AdwaitaSans');
 });
 
 test('download streams a PDF under the given filename', function (): void {

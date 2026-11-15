@@ -69,7 +69,8 @@
                                     size="sm"
                                     variant="primary"
                                     icon="file-text"
-                                    wire:click="exportPdf('{{ $realm_member->getFirstAttribute('uid') }}')"
+                                    wire:navigate
+                                    :href="route('profile.memberships.export', ['realm' => $community_name, 'username' => $realm_member->getFirstAttribute('uid')])"
                                 >
                                     {{ __('profile.memberships_as_pdf') }}
                                 </flux:button>
