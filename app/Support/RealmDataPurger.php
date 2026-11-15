@@ -5,14 +5,19 @@ namespace App\Support;
 use App\Ldap\Group;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
+use App\Models\Invitation;
 use App\Models\PassportClient;
 use App\Models\ProfilePicture;
 use App\Models\RealmBranding;
 use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
 use App\Models\User;
+use App\Models\UserAdditionalEmail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Passport\AuthCode;
+use Laravel\Passport\DeviceCode;
+use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token as PassportToken;
 
 /**
@@ -36,40 +41,48 @@ class RealmDataPurger
 
             GroupMailmanList::where('realm', $uid)->delete();
 
+            // invitation_role_selections cascade via their FK.
+            Invitation::where('realm', $uid)->delete();
+
+            UserAdditionalEmail::where('realm', $uid)->delete();
+
+            // Files go only once the surrounding transaction has committed.
+            $files = [];
+
             foreach (ProfilePicture::where('realm', $uid)->get() as $picture) {
-                Storage::disk('public')->delete('avatars/'.$picture->file_id.'.webp');
+                $files[] = 'avatars/'.$picture->file_id.'.webp';
                 $picture->delete();
             }
 
             if ($branding = RealmBranding::forRealm($uid)) {
                 foreach (['logo_id', 'background_id'] as $column) {
                     if ($branding->{$column}) {
-                        Storage::disk('public')->delete('realm-branding/'.$branding->{$column});
+                        $files[] = 'realm-branding/'.$branding->{$column};
                     }
                 }
                 $branding->delete();
             }
 
+            DB::afterCommit(fn () => Storage::disk('public')->delete($files));
+
             // Child identity_provider_role_mappings rows cascade via their own
             // FK (see 2026_07_20_000006_create_realm_identity_providers_table).
             RealmIdentityProvider::where('realm', $uid)->delete();
 
-            // Same manual authCodes()/tokens() cleanup ListOidcClients::deleteCommit()
-            // already does per-client - oauth_clients has no cascade FK to
-            // its tokens, so a plain delete() would leave them dangling.
-            foreach (PassportClient::where('community_uid', $uid)->get() as $client) {
-                $client->authCodes()->delete();
-                $client->tokens()->delete();
-                $client->delete();
-            }
+            // None of the oauth_* tables cascade, so tokens, refresh tokens and
+            // codes of the realm's clients and users are swept explicitly.
+            $clientIds = PassportClient::where('community_uid', $uid)->pluck('id');
+            $userIds = User::where('realm', $uid)->pluck('id');
 
-            foreach (User::where('realm', $uid)->get() as $user) {
-                // Not $user->tokens() - HasApiTokens::getProviderName()
-                // requires an "eloquent" auth provider, but this app's
-                // "users" provider is "ldap" and would throw.
-                PassportToken::where('user_id', $user->id)->delete();
-                $user->delete();
-            }
+            $tokenIds = PassportToken::whereIn('client_id', $clientIds)->orWhereIn('user_id', $userIds)->pluck('id');
+            RefreshToken::whereIn('access_token_id', $tokenIds)->delete();
+            PassportToken::whereIn('id', $tokenIds)->delete();
+            AuthCode::whereIn('client_id', $clientIds)->orWhereIn('user_id', $userIds)->delete();
+            DeviceCode::whereIn('client_id', $clientIds)->orWhereIn('user_id', $userIds)->delete();
+            PassportClient::whereIn('id', $clientIds)->delete();
+
+            DB::table(config('session.table', 'sessions'))->whereIn('user_id', $userIds)->delete();
+            User::whereIn('id', $userIds)->delete();
 
             DB::table('password_reset_tokens')->where('realm', $uid)->delete();
         });

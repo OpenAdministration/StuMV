@@ -35,7 +35,8 @@ class CommunityPolicy
 
     public function delete(User $user, Community $community): bool
     {
-        return $user->can('superadmin', User::class);
+        return ! $community->isAdminRealm()
+            && $user->can('superadmin', User::class);
     }
 
     public function member(User $user, Community $community): bool

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -157,11 +158,11 @@ class ListRealms extends Component
             return;
         }
 
-        // DB-side data first, inside a transaction: if it fails, nothing is
-        // lost and the realm can simply be deleted again. Only irreversible
-        // once the LDAP subtree itself comes down.
-        RealmDataPurger::purge($this->deleteRealmName);
-        $community->delete(recursive: true);
+        // One transaction, so a failing LDAP delete rolls the DB purge back.
+        DB::transaction(function () use ($community): void {
+            RealmDataPurger::purge($this->deleteRealmName);
+            $community->delete(recursive: true);
+        });
 
         // reset everything to prevent a 404 modal
         $this->reset('deleteRealmName');
