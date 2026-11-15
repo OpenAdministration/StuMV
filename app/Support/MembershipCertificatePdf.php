@@ -70,6 +70,11 @@ final class MembershipCertificatePdf
             define('K_PATH_FONTS', resource_path('fonts/pdf'));
         }
 
+        // PHP only defines it when built with zlib, but tc-lib-pdf-image uses it unconditionally.
+        if (! defined('IMAGETYPE_SWC')) {
+            define('IMAGETYPE_SWC', 13);
+        }
+
         $this->pdf = new Tcpdf('mm', true, true, true, 'pdfua2');
         $this->pdf->setCreator((string) config('app.name'));
         $this->pdf->setTitle($title.' – '.$fullName);
