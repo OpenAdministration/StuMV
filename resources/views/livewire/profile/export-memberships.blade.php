@@ -46,7 +46,7 @@
             <flux:error name="selected" />
 
             <div class="flex justify-end gap-2">
-                <flux:button wire:navigate :href="$backUrl">{{ __('common.cancel') }}</flux:button>
+                <flux:button icon="ban" wire:navigate :href="$backUrl">{{ __('common.cancel') }}</flux:button>
                 <flux:button type="submit" variant="primary" icon="file-text">{{ __('profile.export_as_pdf') }}</flux:button>
             </div>
         @else
