@@ -4,9 +4,9 @@ use App\Support\MembershipCertificatePdf;
 
 function fakeMembership(string $role, string $committee): array
 {
-    $committeeEntry = new class($committee)
+    $committeeEntry = new readonly class($committee)
     {
-        public function __construct(private readonly string $description) {}
+        public function __construct(private string $description) {}
 
         public function getFirstAttribute(string $attribute): string
         {
@@ -14,9 +14,9 @@ function fakeMembership(string $role, string $committee): array
         }
     };
 
-    $roleEntry = new class($role, $committeeEntry)
+    $roleEntry = new readonly class($role, $committeeEntry)
     {
-        public function __construct(private readonly string $description, private readonly object $committee) {}
+        public function __construct(private string $description, private object $committee) {}
 
         public function getFirstAttribute(string $attribute): string
         {

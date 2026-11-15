@@ -2,8 +2,8 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Date;
 use Com\Tecnick\Pdf\Tcpdf;
+use Illuminate\Support\Facades\Date;
 
 /**
  * Draws the membership certificate directly onto the page as tagged PDF/UA-2,
