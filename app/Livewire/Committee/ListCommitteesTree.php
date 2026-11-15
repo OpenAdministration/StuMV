@@ -83,7 +83,7 @@ class ListCommitteesTree extends Component
         $this->authorize('delete', [$c, $community]);
 
         if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')) {
-            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $c->getFirstAttribute('ou')]));
+            $this->addError('deleteConfirmText', __('common.does_not_equal', ['text' => $c->getFirstAttribute('ou')]));
 
             return;
         }

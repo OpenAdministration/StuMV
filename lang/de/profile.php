@@ -61,4 +61,5 @@ return [
     'log_out_other_sessions_confirm_title' => 'Alle anderen Sitzungen beenden?',
     'log_out_other_sessions_confirm_warning' => 'Auf allen anderen Geräten und Browsern wird dieses Konto sofort abgemeldet. Nur die aktuelle Sitzung bleibt bestehen.',
     'other_sessions_logged_out_success' => 'Alle anderen Sitzungen wurden beendet.',
+    'password_changed' => 'Passwort wurde geändert',
 ];

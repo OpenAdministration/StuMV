@@ -3,7 +3,7 @@
 @if ($errors->any())
     <flux:callout variant="danger" icon="circle-x">
         <flux:callout.heading>
-            {{ __('Whoops! Something went wrong.') }}
+            {{ __('common.something_went_wrong') }}
         </flux:callout.heading>
 
         <flux:callout.text>

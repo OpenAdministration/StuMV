@@ -176,7 +176,7 @@ class ListRoles extends Component
         $this->authorize('delete', [$role, $this->committee(), $this->community()]);
 
         if ($this->deleteConfirmText !== $this->deleteRoleCn) {
-            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteRoleCn]));
+            $this->addError('deleteConfirmText', __('common.does_not_equal', ['text' => $this->deleteRoleCn]));
 
             return;
         }

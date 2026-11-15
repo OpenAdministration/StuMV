@@ -32,4 +32,6 @@ return [
     'footer_documentation' => 'Documentation',
     'footer_source_code' => 'Source code',
     'info' => 'Information',
+    'does_not_equal' => 'Does not equal :text',
+    'something_went_wrong' => 'Whoops! Something went wrong.',
 ];

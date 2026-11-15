@@ -32,4 +32,6 @@ return [
     'footer_documentation' => 'Handbuch',
     'footer_source_code' => 'Quelltext',
     'info' => 'Information',
+    'does_not_equal' => 'Stimmt nicht mit :text überein',
+    'something_went_wrong' => 'Hoppla, da ist etwas schiefgelaufen.',
 ];

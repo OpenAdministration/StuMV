@@ -106,7 +106,7 @@ class ListGroups extends Component
         abort_unless(str_ends_with($this->deleteGroupDn, ','.Group::dnRoot($this->realm_uid)), 404);
 
         if ($this->deleteConfirmText !== $this->deleteGroupName) {
-            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteGroupName]));
+            $this->addError('deleteConfirmText', __('common.does_not_equal', ['text' => $this->deleteGroupName]));
 
             return;
         }

@@ -70,7 +70,7 @@ class ChangePassword extends Component
         $ldapUser->setAttribute('userPassword', '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
 
-        Flux::toast(variant: 'success', text: __('Password has been changed'));
+        Flux::toast(variant: 'success', text: __('profile.password_changed'));
 
         return redirect(RouteServiceProvider::home());
     }

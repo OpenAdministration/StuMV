@@ -6,7 +6,7 @@
         </div>
 
         <flux:field>
-            <flux:label>{{ __('Domain FQDN') }}</flux:label>
+            <flux:label>{{ __('domain.fqdn_label') }}</flux:label>
             <flux:input wire:model="dc" />
         </flux:field>
 

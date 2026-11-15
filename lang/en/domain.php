@@ -18,5 +18,6 @@ return [
     'delete_warning' => 'If you delete the domain, new users with an email address of this domain can no longer be automatically assigned to your student body, among other things.',
     'nothing_found' => 'No domains found',
     'new_button' => 'New Domain',
+    'fqdn_label' => 'Domain FQDN',
 
 ];

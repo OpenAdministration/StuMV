@@ -152,7 +152,7 @@ class ListRealms extends Component
         $this->authorize('delete', $community);
 
         if ($this->deleteConfirmText !== $this->deleteRealmName) {
-            $this->addError('deleteConfirmText', __('Does not equal :text', ['text' => $this->deleteRealmName]));
+            $this->addError('deleteConfirmText', __('common.does_not_equal', ['text' => $this->deleteRealmName]));
 
             return;
         }

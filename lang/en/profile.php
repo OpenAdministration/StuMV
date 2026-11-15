@@ -61,4 +61,5 @@ return [
     'log_out_other_sessions_confirm_title' => 'End all other sessions?',
     'log_out_other_sessions_confirm_warning' => 'This account will be logged out immediately on every other device and browser. Only the current session will remain.',
     'other_sessions_logged_out_success' => 'All other sessions have been ended.',
+    'password_changed' => 'Password has been changed',
 ];

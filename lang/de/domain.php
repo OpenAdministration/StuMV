@@ -18,5 +18,6 @@ return [
     'delete_warning' => 'Wenn du die Domain löschst, können u.a. neue Nutzer:innen mit einer E-Mail-Adresse dieser Domain nicht automatisch deiner Studierendenschaft zugeordnet werden.',
     'nothing_found' => 'Keine Domains gefunden',
     'new_button' => 'Domain hinzufügen',
+    'fqdn_label' => 'Domain (FQDN)',
 
 ];
