@@ -50,7 +50,11 @@
                 <flux:button type="submit" variant="primary" icon="file-text">{{ __('profile.export_as_pdf') }}</flux:button>
             </div>
         @else
-            <flux:callout variant="warning" icon="circle-alert" heading="{{ __('profile.no_memberships_found') }}" />
+            <flux:callout variant="warning" icon="circle-alert" inline heading="{{ __('profile.no_memberships_found') }}">
+                <x-slot name="actions">
+                    <flux:button icon="arrow-left" wire:navigate :href="$backUrl">{{ __('common.back') }}</flux:button>
+                </x-slot>
+            </flux:callout>
         @endif
     </form>
 </div>

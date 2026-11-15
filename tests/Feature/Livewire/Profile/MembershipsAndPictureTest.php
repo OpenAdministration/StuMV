@@ -38,6 +38,37 @@ test('the memberships page shows a callout when there are no memberships', funct
         ->assertSee(__('profile.no_memberships_found'));
 });
 
+test('the export button is disabled without any memberships', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    $exportUrl = route('profile.memberships.export', ['realm' => $community->getShortCode(), 'username' => $user->username]);
+
+    $html = Livewire::test(Memberships::class, ['realm' => $community, 'username' => $user->username])->html();
+
+    expect($html)->not->toContain('href="'.$exportUrl.'"');
+});
+
+test('the export button stays enabled when only ended memberships exist', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    $user = actingAsMember($community);
+
+    RoleMembership::create([
+        'realm' => $community->getShortCode(),
+        'role_cn' => 'mitglied',
+        'committee_dn' => $committee->getDn(),
+        'username' => $user->username,
+        'from' => today()->subYear(),
+        'until' => today()->subMonth(),
+    ]);
+    $exportUrl = route('profile.memberships.export', ['realm' => $community->getShortCode(), 'username' => $user->username]);
+
+    Livewire::test(Memberships::class, ['realm' => $community, 'username' => $user->username])
+        ->assertSet('showOnlyActive', true)
+        ->assertSeeHtml('href="'.$exportUrl.'"');
+});
+
 test('a user cannot view someone else memberships', function (): void {
     $community = newCommunity();
     actingAsMember($community);

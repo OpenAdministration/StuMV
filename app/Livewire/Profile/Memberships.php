@@ -34,6 +34,8 @@ class Memberships extends Component
 
         return view('livewire.profile.memberships', [
             'memberships' => $memberships,
+            // ended memberships can be exported even while hidden by the filter
+            'hasMemberships' => $memberships !== [] || MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false) !== [],
             'givenName' => $givenName,
             'sn' => $sn,
         ])->title(__('profile.breadcrumb'));

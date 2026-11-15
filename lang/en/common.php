@@ -2,6 +2,7 @@
 
 return [
     'about' => 'About',
+    'back' => 'Back',
     'based_on' => ':name is based on',
     'options' => 'Options',
     'password' => 'Password',

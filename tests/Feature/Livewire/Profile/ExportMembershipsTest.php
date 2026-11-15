@@ -49,6 +49,19 @@ test('all memberships can be deselected and selected again', function (): void {
         ->assertSet('selected', [(string) $active->id, (string) $ended->id]);
 });
 
+test('without memberships a back button leads to where the page was opened from', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    $from = route('profile', ['realm' => $community->getShortCode(), 'username' => $user->username]);
+
+    $this->withHeader('referer', $from)
+        ->get(route('profile.memberships.export', ['realm' => $community->getShortCode(), 'username' => $user->username]))
+        ->assertOk()
+        ->assertSee(__('profile.no_memberships_found'))
+        ->assertSee(__('common.back'))
+        ->assertSee('href="'.$from.'"', false);
+});
+
 test('exporting requires at least one selected membership', function (): void {
     $community = newCommunity();
     $user = actingAsMember($community);
