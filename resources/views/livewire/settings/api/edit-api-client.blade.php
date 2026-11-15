@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form class="space-y-8">
         <div>
             <flux:heading size="xl" class="mb-4">{{ __('api_clients.edit_title') }}</flux:heading>

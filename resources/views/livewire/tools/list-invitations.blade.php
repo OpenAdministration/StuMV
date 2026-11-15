@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto w-full">
+<div class="max-w-7xl mx-auto w-full">
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('tools.pending_invitations_headline') }}</flux:heading>

@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <div class="mb-8">
         <flux:heading size="xl" class="mb-4">{{ __('identity_providers.edit_title') }}</flux:heading>
         <flux:text class="text-base">{{ __('identity_providers.explanation') }}</flux:text>

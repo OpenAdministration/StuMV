@@ -1,4 +1,4 @@
-<div class="max-w-2xl mx-auto w-full">
+<div class="max-w-7xl mx-auto w-full">
     <div class="space-y-4 mb-8">
         <flux:heading size="xl">{{ __('tools.invite_user_headline') }}</flux:heading>
         <flux:text class="text-base">{{ __('tools.invite_user_explanation') }}</flux:text>

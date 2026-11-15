@@ -1,5 +1,5 @@
 <div>
-    <x-livewire-form class="max-w-6xl mx-auto w-full">
+    <x-livewire-form class="max-w-7xl mx-auto w-full">
         <flux:heading size="xl" class="mb-6">{{ __('committees.new_button') }}</flux:heading>
         <flux:field class="flex flex-col mb-6">
             <flux:label>{{ __('committees.parent_committee') }}</flux:label>

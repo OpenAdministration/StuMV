@@ -1,5 +1,5 @@
 <div>
-    <x-livewire-form class="max-w-6xl mx-auto w-full">
+    <x-livewire-form class="max-w-7xl mx-auto w-full">
         <div class="mb-6">
             <flux:heading size="xl">{{ __('roles.terminate_role_memberships_title', ['role' => $role->getFirstAttribute('description')]) }}</flux:heading>
         </div>

@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8">
+<div class="max-w-7xl mx-auto w-full flex-col space-y-8">
     <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
             <flux:heading size="xl" class="mb-4">{{ __('groups.roles_add_headline', ['name' => $group_cn]) }}</flux:heading>

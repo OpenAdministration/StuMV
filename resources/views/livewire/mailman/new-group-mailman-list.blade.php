@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form class="space-y-8">
         <div>
             <flux:heading size="xl" class="mb-4">{{ __($mappingId ? 'group_mailman_lists.edit_title' : 'group_mailman_lists.new_title') }}</flux:heading>

@@ -1,5 +1,5 @@
 <div>
-    <x-livewire-form class="max-w-6xl mx-auto w-full space-y-8">
+    <x-livewire-form class="max-w-7xl mx-auto w-full space-y-8">
         <div>
             <flux:heading size="xl">{{ __('roles.new_button') }}</flux:heading>
         </div>

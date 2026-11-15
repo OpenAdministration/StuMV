@@ -1,4 +1,4 @@
-<div class="flex-col space-y-8" wire:init="loadModerators">
+<div class="max-w-7xl mx-auto w-full flex-col space-y-8" wire:init="loadModerators">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.mods_heading') }}</flux:heading>

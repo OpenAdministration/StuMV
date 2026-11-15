@@ -1,4 +1,4 @@
-<div class="flex-col">
+<div class="max-w-7xl mx-auto w-full flex-col">
     <div class="mb-8">
         <flux:heading size="xl" class="mb-4">{{ __('group_mailman_lists.members_headline', ['name' => $mailmanListId]) }}</flux:heading>
         <flux:text class="text-base">{{ __('group_mailman_lists.members_explanation', ['group' => $groupCn]) }}</flux:text>

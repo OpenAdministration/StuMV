@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto w-full">
+<div class="max-w-7xl mx-auto w-full">
     <div class="mb-8">
         <flux:heading size="xl" class="mb-4">{{ __('realms.branding.headline') }}</flux:heading>
         <flux:text class="text-base">{{ __('realms.branding.explanation') }}</flux:text>

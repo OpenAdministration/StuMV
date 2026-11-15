@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form class="w-full space-y-8">
         <div>
             <flux:heading size="xl" class="mb-4">{{  __('committees.edit_headline', ['name' => $description]) }}</flux:heading>

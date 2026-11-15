@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form>
         <div class="mb-6">
             <flux:heading size="xl" class="mb-4">{{ __('committees.new_mod_headline', ['name' => $committee->getFirstAttribute('description')]) }}</flux:heading>

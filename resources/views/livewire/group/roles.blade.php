@@ -1,4 +1,4 @@
-<div class="flex-col" wire:init="loadRoles">
+<div class="max-w-7xl mx-auto w-full flex-col" wire:init="loadRoles">
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1">
             <flux:heading size="xl" class="mb-4">{{ __('groups.roles_headline', ['name' => $group_cn]) }}</flux:heading>

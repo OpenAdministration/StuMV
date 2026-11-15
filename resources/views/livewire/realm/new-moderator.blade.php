@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form>
         <div class="mb-6">
             <flux:heading size="xl" class="mb-4">{{ __('realms.new_mod_headline', ['name' => $community->getFirstAttribute('description'), 'uid' => $realm_uid]) }}</flux:heading>

@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto w-full">
+<div class="max-w-7xl mx-auto w-full">
     <div class="space-y-4 mb-8">
         <flux:heading size="xl">{{ __('tools.import_users_from_uni_ldap_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.import_users_from_uni_ldap_explanation') }}</flux:text>

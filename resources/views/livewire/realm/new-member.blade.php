@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form class="space-y-8">
         <div class="space-y-4">
             <flux:heading size="xl">{{ __('realms.members_new_heading') }}</flux:heading>

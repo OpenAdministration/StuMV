@@ -1,4 +1,4 @@
-<div class="flex-col">
+<div class="max-w-7xl mx-auto w-full flex-col">
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1">
             <flux:heading size="xl" class="mb-4">{{ __('realms.groups_headline') }}</flux:heading>

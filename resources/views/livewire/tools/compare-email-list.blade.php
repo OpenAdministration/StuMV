@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto w-full">
+<div class="max-w-7xl mx-auto w-full">
     <div class="space-y-4 mb-8">
         <flux:heading size="xl">{{ __('tools.compare_email_list_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.compare_email_list_explanation') }}</flux:text>

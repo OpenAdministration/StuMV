@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <div class="mb-8 space-y-4">
         <flux:heading size="xl">{{ __('tools.tools') }}</flux:heading>
         <flux:text class="text-base">{{ __('tools.dashboard_explanation') }}</flux:text>

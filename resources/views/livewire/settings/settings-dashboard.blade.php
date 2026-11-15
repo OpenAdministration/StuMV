@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <div class="mb-8">
         <flux:heading size="xl">{{ __('realms.settings') }}</flux:heading>
     </div>

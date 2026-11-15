@@ -1,4 +1,4 @@
-<div class="flex-col">
+<div class="max-w-7xl mx-auto w-full flex-col">
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('group_mailman_lists.headline') }}</flux:heading>

@@ -1,4 +1,4 @@
-<div>
+<div class="max-w-7xl mx-auto w-full">
     <x-livewire-form class="w-full">
         <div class="mb-6">
             <flux:heading size="xl">{{ __('realms.add_members_to_role_heading', ['role' => $roleName]) }}</flux:heading>
