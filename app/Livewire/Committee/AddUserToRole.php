@@ -7,7 +7,9 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
+use App\Support\DatabaseUserProvisioner;
 use Flux\Flux;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -83,18 +85,25 @@ class AddUserToRole extends Component
         $this->validate();
 
         $committee = Committee::findByName($this->uid, $this->ou);
+        $community = Community::findOrFailByUid($this->uid);
 
         foreach ($this->usernames as $username) {
-            RoleMembership::create([
-                'role_cn' => $this->cn,
-                'committee_dn' => $committee->getDn(),
-                'realm' => $this->uid,
-                'username' => $username,
-                'from' => $this->start_date,
-                'until' => ! empty($this->end_date) ? $this->end_date : null,
-                'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
-                'comment' => ! empty($this->comment) ? $this->comment : null,
-            ]);
+            DB::transaction(function () use ($community, $committee, $username): void {
+                // Members who never signed in have no user row yet, which the membership's FK needs.
+                $ldapUser = User::query()->in($community->peopleDn())->where('uid', '=', $username)->firstOrFail();
+                DatabaseUserProvisioner::ensure($community, $ldapUser);
+
+                RoleMembership::create([
+                    'role_cn' => $this->cn,
+                    'committee_dn' => $committee->getDn(),
+                    'realm' => $this->uid,
+                    'username' => $username,
+                    'from' => $this->start_date,
+                    'until' => ! empty($this->end_date) ? $this->end_date : null,
+                    'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
+                    'comment' => ! empty($this->comment) ? $this->comment : null,
+                ]);
+            });
             Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $username, 'role' => $this->cn]));
         }
 

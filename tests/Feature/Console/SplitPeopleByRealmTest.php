@@ -2,6 +2,7 @@
 
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
@@ -242,4 +243,31 @@ test('an account in no community\'s members group is left unassigned in the flat
     $this->artisan('app:split-people-by-realm')->assertExitCode(0);
 
     expect(LdapUser::findByUsername($unassigned->getFirstAttribute('uid'))->getDn())->toBe($oldDn);
+});
+
+test('each account gets a user row per realm, linked to that realm\'s entry', function (): void {
+    $communityA = newCommunity();
+    $communityB = newCommunity();
+    $shared = legacyPerson('legacyrow'.bin2hex(random_bytes(3)));
+    $uid = $shared->getFirstAttribute('uid');
+
+    // signed in once before the split, so a row without realm already exists
+    User::factory()->create(['username' => $uid, 'uid' => $shared->getConvertedGuid(), 'realm' => null]);
+
+    attachLegacyMembers($communityA, [$shared]);
+    attachLegacyMembers($communityB, [$shared]);
+
+    $this->artisan('app:split-people-by-realm')->assertExitCode(0);
+
+    foreach ([$communityA, $communityB] as $community) {
+        $entry = LdapUser::query()->in($community->peopleDn())->where('uid', '=', $uid)->first();
+
+        $this->assertDatabaseHas('user', [
+            'username' => $uid,
+            'realm' => $community->getShortCode(),
+            'uid' => $entry->getConvertedGuid(),
+        ]);
+    }
+
+    expect(User::where('username', $uid)->count())->toBe(2);
 });

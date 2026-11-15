@@ -115,3 +115,24 @@ test('it fails when copying a user into the realm they are already in', function
         'to' => $community->getShortCode(),
     ])->assertExitCode(1);
 });
+
+test('the copy gets its own user row in the target realm', function (): void {
+    $source = newCommunity();
+    $target = newCommunity();
+    $user = TestLdap::makeUser(null, $source);
+    $uid = $user->getFirstAttribute('uid');
+
+    $this->artisan('app:copy-user', [
+        'uid' => $uid,
+        'from' => $source->getShortCode(),
+        'to' => $target->getShortCode(),
+    ])->assertExitCode(0);
+
+    $inTarget = LdapUser::query()->in($target->peopleDn())->where('uid', '=', $uid)->first();
+
+    $this->assertDatabaseHas('user', [
+        'username' => $uid,
+        'realm' => $target->getShortCode(),
+        'uid' => $inTarget->getConvertedGuid(),
+    ]);
+});

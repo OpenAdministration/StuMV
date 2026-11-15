@@ -71,6 +71,29 @@ test('a moderator can add a community member to a role', function (): void {
     ]);
 });
 
+test('a community member who never signed in can be added to a role', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    // LDAP only, like a hand-made account - no user row yet
+    $ldapUser = TestLdap::makeUser(null, $community);
+    $username = $ldapUser->getFirstAttribute('uid');
+    actingAsModerator($community);
+
+    Livewire::test(AddUserToRole::class, ['realm' => $community, 'ou' => 'fsr', 'cn' => 'mitglied'])
+        ->set('usernames', [$username])
+        ->set('start_date', today()->format('Y-m-d'))
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('role_user_relation', ['username' => $username, 'realm' => $community->getShortCode()]);
+    $this->assertDatabaseHas('user', [
+        'username' => $username,
+        'realm' => $community->getShortCode(),
+        'uid' => $ldapUser->getConvertedGuid(),
+    ]);
+});
+
 test('the add-user-to-role select excludes members already active in the role', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');

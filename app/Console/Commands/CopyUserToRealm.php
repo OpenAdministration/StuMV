@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Console\Commands\Concerns\StripsLdapOperationalAttributes;
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Support\DatabaseUserProvisioner;
 use Illuminate\Console\Command;
 
 /**
@@ -81,6 +82,10 @@ class CopyUserToRealm extends Command
         $clone = new User($this->withoutOperationalAttributes($source->getAttributes()));
         $clone->setDn($newDn);
         $clone->save();
+
+        // entryUUID is server-assigned - refresh so the user row links to it.
+        $clone->refresh();
+        DatabaseUserProvisioner::ensure($toRealm, $clone);
 
         $this->info("Done. $uid now exists independently in both {$fromRealm->getShortCode()} and {$toRealm->getShortCode()}.");
 

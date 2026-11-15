@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Support\DatabaseUserProvisioner;
 use Illuminate\Console\Command;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
@@ -241,6 +242,7 @@ class SplitPeopleByRealm extends Command
                 }
             }
 
+            $this->provisionDatabaseUser($newDn, $realmUid, $dryRun);
             $this->movedCount++;
         } else {
             $this->overwriteIfExists($newDn, $dryRun);
@@ -252,7 +254,24 @@ class SplitPeopleByRealm extends Command
                 $clone->save();
             }
 
+            $this->provisionDatabaseUser($newDn, $realmUid, $dryRun);
+
             $this->clonedInto[$uid][] = $realmUid;
+        }
+    }
+
+    /**
+     * Gives the relocated or cloned entry its user row in that realm, linked to
+     * its own entryUUID - otherwise it cannot be added to roles until its owner
+     * signs in to that realm.
+     */
+    private function provisionDatabaseUser(string $dn, string $realmUid, bool $dryRun): void
+    {
+        $entry = $dryRun ? null : User::query()->find($dn);
+        $community = $dryRun ? null : Community::findByUid($realmUid);
+
+        if ($entry !== null && $community !== null) {
+            DatabaseUserProvisioner::ensure($community, $entry);
         }
     }
 
