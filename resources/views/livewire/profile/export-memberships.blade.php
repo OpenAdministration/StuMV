@@ -14,10 +14,10 @@
                 <flux:table>
                     <flux:table.columns>
                         <flux:table.column class="w-0"><span class="sr-only">{{ __('profile.export_memberships_title') }}</span></flux:table.column>
-                        <flux:table.column>{{ __('profile.role') }}</flux:table.column>
-                        <flux:table.column>{{ __('profile.committee') }}</flux:table.column>
-                        <flux:table.column>{{ __('profile.from') }}</flux:table.column>
-                        <flux:table.column>{{ __('profile.until') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'role'" :direction="$sortDirection" wire:click="sortBy('role')">{{ __('profile.role') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'committee'" :direction="$sortDirection" wire:click="sortBy('committee')">{{ __('profile.committee') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'from'" :direction="$sortDirection" wire:click="sortBy('from')">{{ __('profile.from') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'until'" :direction="$sortDirection" wire:click="sortBy('until')">{{ __('profile.until') }}</flux:table.column>
                     </flux:table.columns>
                     <flux:table.rows>
                         @foreach($memberships as $row)

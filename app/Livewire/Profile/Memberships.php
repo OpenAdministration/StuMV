@@ -4,12 +4,15 @@ namespace App\Livewire\Profile;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Livewire\Concerns\SortsMemberships;
 use App\Support\MembershipCertificate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Memberships extends Component
 {
+    use SortsMemberships;
+
     #[Locked]
     public string $realm_uid;
 
@@ -33,7 +36,7 @@ class Memberships extends Component
         $sn = $user->getFirstAttribute('sn');
 
         return view('livewire.profile.memberships', [
-            'memberships' => $memberships,
+            'memberships' => $this->sortMemberships($memberships),
             // ended memberships can be exported even while hidden by the filter
             'hasMemberships' => $memberships !== [] || MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false) !== [],
             'givenName' => $givenName,

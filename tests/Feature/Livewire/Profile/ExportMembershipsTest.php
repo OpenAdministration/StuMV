@@ -127,3 +127,61 @@ test('a moderator can export a member memberships', function (): void {
     Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $member->username])
         ->assertStatus(200);
 });
+
+/** Position of each text in the rendered table, to compare row order. */
+function rowOrder(string $html, string ...$texts): array
+{
+    return array_map(fn (string $text): int|false => strpos($html, $text), $texts);
+}
+
+test('memberships are sorted newest first by default', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    $html = Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])->html();
+
+    [$active, $ended] = rowOrder($html, 'Role mitglied', 'Role sprecher');
+    expect($active)->toBeLessThan($ended);
+});
+
+test('memberships can be sorted by role in both directions', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    $component = Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->call('sortBy', 'role');
+    [$mitglied, $sprecher] = rowOrder($component->html(), 'Role mitglied', 'Role sprecher');
+    expect($mitglied)->toBeLessThan($sprecher);
+
+    $component->call('sortBy', 'role');
+    [$mitglied, $sprecher] = rowOrder($component->html(), 'Role mitglied', 'Role sprecher');
+    expect($sprecher)->toBeLessThan($mitglied);
+});
+
+test('sorting by end date puts open-ended memberships last', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    $html = Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->call('sortBy', 'until')
+        ->html();
+
+    [$active, $ended] = rowOrder($html, 'Role mitglied', 'Role sprecher');
+    expect($ended)->toBeLessThan($active);
+});
+
+test('sorting keeps the selection and ignores unknown columns', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    [$active] = twoMemberships($community, $user->username);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->set('selected', [(string) $active->id])
+        ->call('sortBy', 'committee')
+        ->call('sortBy', 'comment')
+        ->assertSet('sortField', 'committee')
+        ->assertSet('selected', [(string) $active->id]);
+});

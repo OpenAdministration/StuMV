@@ -4,12 +4,15 @@ namespace App\Livewire\Profile;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Livewire\Concerns\SortsMemberships;
 use App\Support\MembershipCertificate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ExportMemberships extends Component
 {
+    use SortsMemberships;
+
     #[Locked]
     public string $realm_uid;
 
@@ -54,7 +57,7 @@ class ExportMemberships extends Component
         $user = User::query()->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())->where('uid', '=', $this->currentUsername)->first() ?? abort(404);
 
         return view('livewire.profile.export-memberships', [
-            'memberships' => MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false),
+            'memberships' => $this->sortMemberships(MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false)),
             'name' => $user->getFirstAttribute('givenName').' '.$user->getFirstAttribute('sn'),
         ])->title(__('profile.export_memberships_title'));
     }

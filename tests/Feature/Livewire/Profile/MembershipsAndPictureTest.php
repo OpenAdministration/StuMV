@@ -50,6 +50,31 @@ test('role and committee names link to their pages', function (): void {
         ->assertSeeHtml('href="'.route('committees.roles', ['realm' => $realm, 'ou' => 'fsr']).'"');
 });
 
+test('the memberships page can be sorted by role', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeRole($committee, 'mitglied');
+    TestLdap::makeRole($committee, 'sprecher');
+    $user = actingAsMember($community);
+
+    foreach (['mitglied', 'sprecher'] as $cn) {
+        RoleMembership::create([
+            'realm' => $community->getShortCode(),
+            'role_cn' => $cn,
+            'committee_dn' => $committee->getDn(),
+            'username' => $user->username,
+            'from' => today()->subMonth(),
+        ]);
+    }
+
+    $html = Livewire::test(Memberships::class, ['realm' => $community, 'username' => $user->username])
+        ->call('sortBy', 'role')
+        ->call('sortBy', 'role')
+        ->html();
+
+    expect(strpos($html, 'Role sprecher'))->toBeLessThan(strpos($html, 'Role mitglied'));
+});
+
 test('the memberships page shows a callout when there are no memberships', function (): void {
     $community = newCommunity();
     $user = actingAsMember($community);
