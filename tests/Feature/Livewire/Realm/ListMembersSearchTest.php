@@ -166,14 +166,14 @@ test('a moderator sees the export-as-PDF control for members', function (): void
         ->assertSeeHtml('wire:click="exportPdf(\''.$username.'\')"');
 });
 
-test('an admin sees a working remove-member control', function (): void {
+test('a superadmin sees a working remove-member control', function (): void {
     // The blade previously called deletePrepare/deleteCommit, which don't
     // exist on the component (only removePrepare/removeCommit do) - clicking
     // "Remove Member" would have thrown a MethodNotFoundException.
     $community = newCommunity();
     $uid = $community->getShortCode();
     $username = realmMember($uid, 'Alice Wonder');
-    actingAsAdmin($community);
+    actingAsSuperAdmin();
 
     $html = Livewire::test(ListMembers::class, ['realm' => $community])
         ->call('loadMembers')
@@ -224,4 +224,15 @@ test('the admin/moderator permission check does not scale with the number of mem
     });
 
     expect($queriesForEight)->toBe($queriesForTwo);
+});
+
+test('a realm admin does not see the remove-member control', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $username = realmMember($uid, 'Alice Wonder');
+    actingAsAdmin($community);
+
+    Livewire::test(ListMembers::class, ['realm' => $community])
+        ->call('loadMembers')
+        ->assertDontSeeHtml('removePrepare(\''.$username.'\')');
 });
