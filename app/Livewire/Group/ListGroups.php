@@ -4,6 +4,7 @@ namespace App\Livewire\Group;
 
 use App\Ldap\Community;
 use App\Ldap\Group;
+use App\Models\GroupMailmanListGroup;
 use App\Models\GroupMembership;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -112,6 +113,9 @@ class ListGroups extends Component
 
         // Delete role group relationships
         GroupMembership::where('group_dn', $this->deleteGroupDn)->delete();
+
+        // each->delete() so the list's sync status cache is reset
+        GroupMailmanListGroup::where('group_dn', $this->deleteGroupDn)->get()->each->delete();
 
         // Delete group
         Group::query()->delete($this->deleteGroupDn);

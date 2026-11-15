@@ -4,6 +4,7 @@ use App\Ldap\Group;
 use App\Livewire\Group\EditGroup;
 use App\Livewire\Group\ListGroups;
 use App\Livewire\Group\NewGroup;
+use App\Models\GroupMailmanList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
@@ -45,6 +46,30 @@ test('an admin can delete a group', function (): void {
         ->call('deleteCommit');
 
     expect(Group::find(Group::dnFrom($uid, 'newsletter')))->toBeNull();
+});
+
+test('deleting a group removes it from its Mailman lists', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    TestLdap::makeGroup($community, 'newsletter');
+    TestLdap::makeGroup($community, 'board');
+    actingAsAdmin($community);
+    $newsletterDn = Group::dnFrom($uid, 'newsletter');
+    $boardDn = Group::dnFrom($uid, 'board');
+    $mapping = GroupMailmanList::createForGroups(
+        ['realm' => $uid, 'mailman_list_id' => 'news.lists.example.org'],
+        [$newsletterDn, $boardDn],
+        [$newsletterDn],
+    );
+
+    Livewire::test(ListGroups::class, ['realm' => $community])
+        ->call('deletePrepare', $uid, 'newsletter')
+        ->set('deleteConfirmText', 'newsletter')
+        ->call('deleteCommit');
+
+    $mapping->refresh();
+    expect($mapping->groupDns('member'))->toBe([$boardDn])
+        ->and($mapping->groupDns('moderator'))->toBe([]);
 });
 
 test('deletePrepare fills in the group name for the confirmation modal', function (): void {
