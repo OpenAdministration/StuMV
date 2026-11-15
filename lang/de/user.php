@@ -18,6 +18,7 @@ return [
     'help.password' => 'Dein Passwort muss mindestens 12 Zeichen enthalten, davon ein Sonderzeichen, ein Klein- und ein Großbuchstaben. Zusätzlich darf es nicht leicht zu erraten sein.',
     'error.email_in_use' => 'Dieser Account existiert bereits.',
     'error.registration_failed' => 'Die Registrierung ist fehlgeschlagen. Bitte versuche einen anderen Benutzernamen oder wende dich an den Support, falls das Problem weiter besteht.',
+    'email_verified_login' => 'Deine E-Mail-Adresse wurde erfolgreich verifiziert. Du kannst dich nun anmelden.',
     'registration_successful_verify_email' => 'Registrierung erfolgreich! Bitte bestätige deine E-Mail-Adresse, indem du auf den Link in der Bestätigungs-E-Mail klickst, die wir dir gerade geschickt haben.',
     'first_name_label' => 'Vorname',
     'last_name_label' => 'Nachname',

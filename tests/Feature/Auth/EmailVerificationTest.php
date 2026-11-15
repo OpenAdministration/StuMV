@@ -45,6 +45,49 @@ test('email can be verified', function (): void {
     $response->assertRedirect(RouteServiceProvider::home($community->getShortCode()).'?verified=1');
 });
 
+test('email can be verified without being signed in and the login page confirms it', function (): void {
+    $community = newCommunity();
+    $user = User::factory()->create([
+        'email_verified_at' => null,
+        'realm' => $community->getShortCode(),
+    ]);
+
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        ['realm' => $community->getShortCode(), 'id' => $user->id, 'hash' => sha1((string) $user->email)]
+    );
+
+    $this->get($verificationUrl)
+        ->assertRedirect(route('realm.login', ['realm' => $community->getShortCode()]))
+        ->assertSessionHas('status', __('user.email_verified_login'));
+
+    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+    $this->assertGuest();
+
+    $this->get(route('realm.login', ['realm' => $community->getShortCode()]))
+        ->assertSee(__('user.email_verified_login'));
+});
+
+test('a verification link for another realm is rejected', function (): void {
+    $community = newCommunity();
+    $otherCommunity = newCommunity();
+    $user = User::factory()->create([
+        'email_verified_at' => null,
+        'realm' => $community->getShortCode(),
+    ]);
+
+    $verificationUrl = URL::temporarySignedRoute(
+        'verification.verify',
+        now()->addMinutes(60),
+        ['realm' => $otherCommunity->getShortCode(), 'id' => $user->id, 'hash' => sha1((string) $user->email)]
+    );
+
+    $this->get($verificationUrl)->assertNotFound();
+
+    expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
+});
+
 test('email is not verified with invalid hash', function (): void {
     $community = newCommunity();
     $user = User::factory()->create([

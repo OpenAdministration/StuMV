@@ -18,6 +18,7 @@ return [
     'help.password' => 'Your password must contain at least 12 characters, including a special character, a lowercase and an uppercase letter. It must also not be easy to guess.',
     'error.email_in_use' => 'This account already exists.',
     'error.registration_failed' => 'Registration failed. Please try a different username or contact support if the problem persists.',
+    'email_verified_login' => 'Your email address has been verified successfully. You can now sign in.',
     'registration_successful_verify_email' => 'Registration successful! Please verify your email address by clicking the link in the verification email we just sent you.',
     'first_name_label' => 'First name',
     'last_name_label' => 'Last name',

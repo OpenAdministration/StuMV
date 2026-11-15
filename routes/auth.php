@@ -76,10 +76,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('{realm}/verify-email', [EmailVerificationPromptController::class, '__invoke'])
         ->name('verification.notice');
 
-    Route::get('{realm}/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
     Route::post('{realm}/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
@@ -104,6 +100,11 @@ Route::middleware('auth')->group(function (): void {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('logout', [AuthenticatedSessionController::class, 'confirmLogout'])->name('logout.confirm');
 });
+
+// Outside the "auth" group for the same reason as the additional-address link below.
+Route::get('{realm}/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
 // Deliberately in neither the "guest" nor the "auth" group: the link is sent
 // to the address being confirmed and reading that mailbox is the whole proof,
