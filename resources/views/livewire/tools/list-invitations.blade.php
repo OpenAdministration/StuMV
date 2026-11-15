@@ -38,22 +38,24 @@
                             @endforelse
                         </flux:table.cell>
                         <flux:table.cell>{{ $invitation->expires_at->translatedFormat('d.m.Y') }}</flux:table.cell>
-                        <flux:table.cell class="flex justify-end gap-2">
-                            <flux:button
-                                size="sm"
-                                icon="refresh-ccw"
-                                wire:click="resend({{ $invitation->id }})"
-                            >
-                                {{ __('tools.invitation_resend') }}
-                            </flux:button>
-                            <flux:button
-                                size="sm"
-                                variant="danger"
-                                icon="trash-2"
-                                wire:click="revoke({{ $invitation->id }})"
-                            >
-                                {{ __('tools.invitation_revoke') }}
-                            </flux:button>
+                        <flux:table.cell>
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:button
+                                    size="sm"
+                                    icon="refresh-ccw"
+                                    wire:click="resend({{ $invitation->id }})"
+                                >
+                                    {{ __('tools.invitation_resend') }}
+                                </flux:button>
+                                <flux:button
+                                    size="sm"
+                                    variant="danger"
+                                    icon="trash-2"
+                                    wire:click="revoke({{ $invitation->id }})"
+                                >
+                                    {{ __('tools.invitation_revoke') }}
+                                </flux:button>
+                            </div>
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

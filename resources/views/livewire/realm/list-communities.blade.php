@@ -62,36 +62,38 @@
                             @endif
                         </flux:table.cell>
                         <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
-                        <flux:table.cell class="flex justify-end gap-2">
-                            <flux:button
-                                size="sm"
-                                variant="primary"
-                                icon="log-in"
-                                :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
-                                wire:click="enter('{{ $realm->getShortCode() }}')"
-                            >
-                                {{ __('realms.enter_button') }}
-                            </flux:button>
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        icon="pencil"
-                                        :disabled="Auth::user()->cannot('edit', $realm)"
-                                        :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['realm' => $realm->getShortCode()]) : null"
-                                        wire:navigate
-                                    >
-                                        {{ __('common.edit') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="trash-2"
-                                        :disabled="Auth::user()->cannot('delete', $realm)"
-                                        wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
-                                        {{ __('common.delete') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
+                        <flux:table.cell>
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:button
+                                    size="sm"
+                                    variant="primary"
+                                    icon="log-in"
+                                    :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
+                                    wire:click="enter('{{ $realm->getShortCode() }}')"
+                                >
+                                    {{ __('realms.enter_button') }}
+                                </flux:button>
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            icon="pencil"
+                                            :disabled="Auth::user()->cannot('edit', $realm)"
+                                            :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['realm' => $realm->getShortCode()]) : null"
+                                            wire:navigate
+                                        >
+                                            {{ __('common.edit') }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="trash-2"
+                                            :disabled="Auth::user()->cannot('delete', $realm)"
+                                            wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
+                                            {{ __('common.delete') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            </div>
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

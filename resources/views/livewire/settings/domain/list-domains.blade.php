@@ -35,16 +35,18 @@
                     <flux:table.row>
                         <flux:table.cell>{{ $domain->getFirstAttribute('dc') }}</flux:table.cell>
                         <flux:table.cell>{{ $domain->getFirstAttribute('description') }}</flux:table.cell>
-                        <flux:table.cell class="flex justify-end gap-2">
-                            <flux:button
-                                size="sm"
-                                variant="danger"
-                                icon="trash-2"
-                                wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
-                                :disabled="auth()->user()->cannot('delete', [\App\Ldap\Domain::class, $community])"
-                            >
-                                {{ __('common.delete') }}
-                            </flux:button>
+                        <flux:table.cell>
+                            <div class="flex justify-end items-center gap-2">
+                                <flux:button
+                                    size="sm"
+                                    variant="danger"
+                                    icon="trash-2"
+                                    wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
+                                    :disabled="auth()->user()->cannot('delete', [\App\Ldap\Domain::class, $community])"
+                                >
+                                    {{ __('common.delete') }}
+                                </flux:button>
+                            </div>
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

@@ -44,39 +44,41 @@
                         </flux:link>
                     </flux:table.cell>
                     <flux:table.cell>{{ $group->getFirstAttribute('description') }}</flux:table.cell>
-                    <flux:table.cell class="flex justify-end gap-2">
-                        <flux:dropdown>
-                            <flux:button size="sm" icon="ellipsis-vertical" />
-                            <flux:menu>
-                                <flux:menu.item
-                                    icon="users"
-                                    wire:navigate
-                                    href="{{ route('realms.groups.members', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                                >
-                                    {{ __('groups.link_members') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    icon="square-user"
-                                    wire:navigate
-                                    href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                                >
-                                    {{ __('groups.manage_roles') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    icon="pencil"
-                                    href="{{ route('realms.groups.edit', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
-                                >
-                                    {{ __('groups.link_edit') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    variant="danger"
-                                    icon="trash-2"
-                                    wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
-                                >
-                                    {{ __('common.delete') }}
-                                </flux:menu.item>
-                            </flux:menu>
-                        </flux:dropdown>
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
+                                    <flux:menu.item
+                                        icon="users"
+                                        wire:navigate
+                                        href="{{ route('realms.groups.members', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                    >
+                                        {{ __('groups.link_members') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        icon="square-user"
+                                        wire:navigate
+                                        href="{{ route('realms.groups.roles', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                    >
+                                        {{ __('groups.manage_roles') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        icon="pencil"
+                                        href="{{ route('realms.groups.edit', ['realm' => $realm_uid, 'cn' => $group->getFirstAttribute('cn')]) }}"
+                                    >
+                                        {{ __('groups.link_edit') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="trash-2"
+                                        wire:click="deletePrepare('{{ $realm_uid }}', '{{ $group->getFirstAttribute('cn')}}')"
+                                    >
+                                        {{ __('common.delete') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
                     </flux:table.cell>
                 </flux:table.row>
             @empty

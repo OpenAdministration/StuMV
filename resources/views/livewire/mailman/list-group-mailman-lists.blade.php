@@ -78,47 +78,49 @@
                             @endunless
                         </div>
                     </flux:table.cell>
-                    <flux:table.cell class="flex justify-end gap-2">
-                        <flux:dropdown>
-                            <flux:button size="sm" icon="ellipsis-vertical" />
-                            <flux:menu>
-                                <flux:menu.item
-                                    icon="pencil"
-                                    wire:navigate
-                                    href="{{ route('realms.group-mailman-lists.edit', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
-                                >
-                                    {{ __('group_mailman_lists.edit') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    icon="users"
-                                    wire:navigate
-                                    href="{{ route('realms.group-mailman-lists.members', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
-                                >
-                                    {{ __('group_mailman_lists.link_members') }}
-                                </flux:menu.item>
-                                @if($mapping->groups_complete && $mapping->enabled)
+                    <flux:table.cell>
+                        <div class="flex justify-end items-center gap-2">
+                            <flux:dropdown>
+                                <flux:button size="sm" icon="ellipsis-vertical" />
+                                <flux:menu>
                                     <flux:menu.item
-                                        icon="refresh-ccw"
-                                        x-on:click="const sync = $wire.syncList({{ $mapping->id }}); window.withProgressToast?.({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, sync)"
+                                        icon="pencil"
+                                        wire:navigate
+                                        href="{{ route('realms.group-mailman-lists.edit', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
                                     >
-                                        {{ __('group_mailman_lists.sync') }}
+                                        {{ __('group_mailman_lists.edit') }}
                                     </flux:menu.item>
-                                @endif
-                                <flux:menu.item
-                                    :icon="$mapping->enabled ? 'circle-pause' : 'circle-play'"
-                                    wire:click="toggleEnabled({{ $mapping->id }})"
-                                >
-                                    {{ $mapping->enabled ? __('group_mailman_lists.disable') : __('group_mailman_lists.enable') }}
-                                </flux:menu.item>
-                                <flux:menu.item
-                                    variant="danger"
-                                    icon="trash-2"
-                                    wire:click="deletePrepare({{ $mapping->id }})"
-                                >
-                                    {{ __('common.delete') }}
-                                </flux:menu.item>
-                            </flux:menu>
-                        </flux:dropdown>
+                                    <flux:menu.item
+                                        icon="users"
+                                        wire:navigate
+                                        href="{{ route('realms.group-mailman-lists.members', ['realm' => $uid, 'listId' => $mapping->mailman_list_id]) }}"
+                                    >
+                                        {{ __('group_mailman_lists.link_members') }}
+                                    </flux:menu.item>
+                                    @if($mapping->groups_complete && $mapping->enabled)
+                                        <flux:menu.item
+                                            icon="refresh-ccw"
+                                            x-on:click="const sync = $wire.syncList({{ $mapping->id }}); window.withProgressToast?.({{ Js::from(__('group_mailman_lists.sync_running', ['name' => $mapping->mailman_list_id])) }}, sync)"
+                                        >
+                                            {{ __('group_mailman_lists.sync') }}
+                                        </flux:menu.item>
+                                    @endif
+                                    <flux:menu.item
+                                        :icon="$mapping->enabled ? 'circle-pause' : 'circle-play'"
+                                        wire:click="toggleEnabled({{ $mapping->id }})"
+                                    >
+                                        {{ $mapping->enabled ? __('group_mailman_lists.disable') : __('group_mailman_lists.enable') }}
+                                    </flux:menu.item>
+                                    <flux:menu.item
+                                        variant="danger"
+                                        icon="trash-2"
+                                        wire:click="deletePrepare({{ $mapping->id }})"
+                                    >
+                                        {{ __('common.delete') }}
+                                    </flux:menu.item>
+                                </flux:menu>
+                            </flux:dropdown>
+                        </div>
                     </flux:table.cell>
                 </flux:table.row>
             @empty
