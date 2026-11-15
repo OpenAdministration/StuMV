@@ -132,7 +132,13 @@ class User extends \LdapRecord\Models\OpenLDAP\User
             ->where('uid', '=', $username)
             ->first();
 
-        $value = $fresh?->getFirstAttribute('pwdLastSuccess');
+        return $fresh?->lastSuccessfulLogin();
+    }
+
+    /** Requires pwdLastSuccess to have been selected explicitly (see above). */
+    public function lastSuccessfulLogin(): ?Carbon
+    {
+        $value = $this->getFirstAttribute('pwdLastSuccess');
 
         return $value ? Date::createFromFormat('YmdHis\Z', $value, 'UTC') : null;
     }

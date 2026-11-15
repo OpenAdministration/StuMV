@@ -122,4 +122,7 @@ return [
     'branding.login_notice_saved' => 'Hinweis wurde gespeichert',
     'branding.login_notice_activated' => 'Hinweis wurde aktiviert',
     'branding.login_notice_deactivated' => 'Hinweis wurde deaktiviert',
+    'username' => 'Anmeldename',
+    'last_login' => 'Letzte Anmeldung',
+    'never_logged_in' => 'Noch nie',
 ];

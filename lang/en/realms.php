@@ -122,4 +122,7 @@ return [
     'branding.login_notice_saved' => 'Notice saved',
     'branding.login_notice_activated' => 'Notice enabled',
     'branding.login_notice_deactivated' => 'Notice disabled',
+    'username' => 'Username',
+    'last_login' => 'Last login',
+    'never_logged_in' => 'Never',
 ];

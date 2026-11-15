@@ -33,6 +33,10 @@
                 <flux:table.columns>
                     <flux:table.column class="w-[55px]"></flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
+                    @if($isAdmin)
+                        <flux:table.column sortable :sorted="$sortField === 'uid'" :direction="$sortDirection" wire:click="sortBy('uid')">{{ __('realms.username') }}</flux:table.column>
+                        <flux:table.column sortable :sorted="$sortField === 'pwdLastSuccess'" :direction="$sortDirection" wire:click="sortBy('pwdLastSuccess')">{{ __('realms.last_login') }}</flux:table.column>
+                    @endif
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>
                 <flux:table.rows>
@@ -62,6 +66,17 @@
                             {{ $realm_member->getFirstAttribute('cn') }}
                         @endif
                     </flux:table.cell>
+                    @if($isAdmin)
+                        <flux:table.cell>{{ $realm_member->getFirstAttribute('uid') }}</flux:table.cell>
+                        <flux:table.cell>
+                            @php($lastLogin = $realm_member->lastSuccessfulLogin())
+                            @if($lastLogin)
+                                <span wire:key="last-login-{{ $realm_member->getFirstAttribute('uid') }}" wire:ignore x-data="localDateTime('{{ $lastLogin->toIso8601String() }}')">{{ $lastLogin->format('Y-m-d H:i') }} UTC</span>
+                            @else
+                                {{ __('realms.never_logged_in') }}
+                            @endif
+                        </flux:table.cell>
+                    @endif
                     <flux:table.cell>
                         <div class="flex justify-end items-center gap-2">
                             @if($isModerator)

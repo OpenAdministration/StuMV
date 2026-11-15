@@ -69,6 +69,9 @@ class ListMembers extends Component
         $isModerator = auth()->user()->can('moderator', $community);
         $canRemoveMember = auth()->user()->can('remove_member', $community);
 
+        // Username and last login are admin-only columns, so are their sort orders.
+        $sortField = in_array($this->sortField, $isAdmin ? ['cn', 'uid', 'pwdLastSuccess'] : ['cn'], true) ? $this->sortField : 'cn';
+
         if (! $this->ready) {
             return view(
                 'livewire.realm.members', [
@@ -81,7 +84,10 @@ class ListMembers extends Component
             )->title(__('realms.members_title', ['name' => $community->getLongName(), 'uid' => $community->getShortCode()]));
         }
 
-        $members = User::query()->in($community->peopleDn())->get();
+        // pwdLastSuccess is operational and only fetched for admins, who see the column.
+        $members = User::query()->in($community->peopleDn())
+            ->select($isAdmin ? ['*', 'pwdLastSuccess'] : ['*'])
+            ->get();
 
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
@@ -90,7 +96,7 @@ class ListMembers extends Component
         }
 
         $sorted = $members
-            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
 
         $perPage = 10;

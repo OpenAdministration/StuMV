@@ -236,3 +236,81 @@ test('a realm admin does not see the remove-member control', function (): void {
         ->call('loadMembers')
         ->assertDontSeeHtml('removePrepare(\''.$username.'\')');
 });
+
+test('a realm admin sees when members last logged in', function (): void {
+    $community = newCommunity();
+    realmMember($community->getShortCode(), 'Alice Wonder');
+    actingAsAdmin($community);
+
+    Livewire::test(ListMembers::class, ['realm' => $community])
+        ->call('loadMembers')
+        ->assertSee(__('realms.last_login'))
+        ->assertSee(__('realms.never_logged_in'));
+});
+
+test('a moderator does not see when members last logged in', function (): void {
+    $community = newCommunity();
+    realmMember($community->getShortCode(), 'Alice Wonder');
+    actingAsModerator($community);
+
+    Livewire::test(ListMembers::class, ['realm' => $community])
+        ->call('loadMembers')
+        ->assertDontSee(__('realms.last_login'));
+});
+
+test('a realm admin can sort members by username', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $first = realmMember($uid, 'Alice Wonder');
+    $second = realmMember($uid, 'Bob Builder');
+    [$low, $high] = strcmp($first, $second) < 0 ? [$first, $second] : [$second, $first];
+    actingAsAdmin($community);
+
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
+        ->call('loadMembers')
+        ->call('sortBy', 'uid')
+        ->call('sortBy', 'uid')
+        ->html();
+
+    expect(strpos($html, (string) $high))->toBeLessThan(strpos($html, (string) $low));
+});
+
+test('a realm admin can sort members by last login', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    realmMember($uid, 'Never Loggedin');
+    $active = realmMember($uid, 'Recently Active');
+
+    // a real bind is what makes slapd record pwdLastSuccess
+    $ldapUser = App\Ldap\User::findByUsername($active);
+    $ldapUser->fill(['userPassword' => '{ARGON2}'.password_hash('Test-password1', PASSWORD_ARGON2ID)])->save();
+    expect($ldapUser->getConnection()->auth()->attempt($ldapUser->getDn(), 'Test-password1'))->toBeTrue();
+
+    actingAsAdmin($community);
+
+    $component = Livewire::test(ListMembers::class, ['realm' => $community])
+        ->call('loadMembers')
+        ->call('sortBy', 'pwdLastSuccess');
+
+    $html = $component->html();
+    expect(strpos($html, 'Never Loggedin'))->toBeLessThan(strpos($html, 'Recently Active'));
+
+    $html = $component->call('sortBy', 'pwdLastSuccess')->html();
+    expect(strpos($html, 'Recently Active'))->toBeLessThan(strpos($html, 'Never Loggedin'));
+});
+
+test('admin-only sort orders fall back to the name for everyone else', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    realmMember($uid, 'Zebra Person');
+    realmMember($uid, 'Apple Person');
+    actingAsModerator($community);
+
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
+        ->set('sortField', 'pwdLastSuccess')
+        ->call('loadMembers')
+        ->html();
+
+    expect(strpos($html, 'Apple Person'))->toBeLessThan(strpos($html, 'Zebra Person'))
+        ->and($html)->not->toContain(__('realms.username'));
+});
