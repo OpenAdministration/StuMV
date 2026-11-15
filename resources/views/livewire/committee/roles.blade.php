@@ -16,14 +16,15 @@
             <flux:text class="text-base">{{ __('committees.roles_explanation') }}</flux:text>
         </div>
         <div class="flex flex-col gap-2">
-            <flux:button
-                variant="primary"
-                icon="plus"
-                :href="$isModerator ? route('committees.roles.new', ['realm' => $uid, 'ou' => $ou]) : null"
-                :disabled="!$isModerator"
-            >
-                {{ __('roles.new_button') }}
-            </flux:button>
+            @if($isModerator)
+                <flux:button
+                    variant="primary"
+                    icon="plus"
+                    :href="route('committees.roles.new', ['realm' => $uid, 'ou' => $ou])"
+                >
+                    {{ __('roles.new_button') }}
+                </flux:button>
+            @endif
             <flux:button
                 icon="user-star"
                 wire:navigate
@@ -91,21 +92,21 @@
                                         >
                                             {{ __('roles.link_members') }}
                                         </flux:menu.item>
-                                        <flux:menu.item
-                                            icon="pencil"
-                                            wire:navigate
-                                            :href="$isModerator ? route('committees.roles.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')]) : null"
-                                            :disabled="!$isModerator"
-                                        >
-                                            {{ __('roles.link_edit') }}
-                                        </flux:menu.item>
-                                        <flux:menu.item
-                                            variant="danger"
-                                            icon="trash-2"
-                                            :disabled="!$isModerator"
-                                            wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
-                                            {{ __('common.delete') }}
-                                        </flux:menu.item>
+                                        @if($isModerator)
+                                            <flux:menu.item
+                                                icon="pencil"
+                                                wire:navigate
+                                                :href="route('committees.roles.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $role->getFirstAttribute('cn')])"
+                                            >
+                                                {{ __('roles.link_edit') }}
+                                            </flux:menu.item>
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="trash-2"
+                                                wire:click="deletePrepare('{{ $role->getFirstAttribute('cn') }}')">
+                                                {{ __('common.delete') }}
+                                            </flux:menu.item>
+                                        @endif
                                     </flux:menu>
                                 </flux:dropdown>
                             </div>

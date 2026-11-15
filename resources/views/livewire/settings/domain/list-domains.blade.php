@@ -5,15 +5,16 @@
             <flux:text class="text-base">{{ __('realms.domains_explanation') }}</flux:text>
         </div>
         <div>
-            <flux:button
-                variant="primary"
-                icon="plus"
-                wire:navigate
-                :href="auth()->user()->can('create', [\App\Ldap\Domain::class, $community]) ? route('realms.domains.new', ['realm' => $uid]) : null"
-                :disabled="auth()->user()->cannot('create', [\App\Ldap\Domain::class, $community])"
-            >
-                {{ __('domain.new_button') }}
-            </flux:button>
+            @can('create', [\App\Ldap\Domain::class, $community])
+                <flux:button
+                    variant="primary"
+                    icon="plus"
+                    wire:navigate
+                    :href="route('realms.domains.new', ['realm' => $uid])"
+                >
+                    {{ __('domain.new_button') }}
+                </flux:button>
+            @endcan
         </div>
     </div>
 
@@ -37,15 +38,16 @@
                         <flux:table.cell>{{ $domain->getFirstAttribute('description') }}</flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">
-                                <flux:button
-                                    size="sm"
-                                    variant="danger"
-                                    icon="trash-2"
-                                    wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
-                                    :disabled="auth()->user()->cannot('delete', [\App\Ldap\Domain::class, $community])"
-                                >
-                                    {{ __('common.delete') }}
-                                </flux:button>
+                                @can('delete', [\App\Ldap\Domain::class, $community])
+                                    <flux:button
+                                        size="sm"
+                                        variant="danger"
+                                        icon="trash-2"
+                                        wire:click="deletePrepare('{{ $domain->getFirstAttribute('dc') }}')"
+                                    >
+                                        {{ __('common.delete') }}
+                                    </flux:button>
+                                @endcan
                             </div>
                         </flux:table.cell>
                     </flux:table.row>

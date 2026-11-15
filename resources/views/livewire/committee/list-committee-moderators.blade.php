@@ -5,15 +5,16 @@
             <flux:text class="text-base">{{ __('committees.mods_explanation') }}</flux:text>
         </div>
         <div>
-            <flux:button
-                variant="primary"
-                icon="user-plus"
-                wire:navigate
-                :href="$isModerator ? route('committees.moderators.new', ['realm' => $realm_uid, 'ou' => $ou]) : null"
-                :disabled="!$isModerator"
-            >
-                {{ __('common.add_moderators') }}
-            </flux:button>
+            @if($isModerator)
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    wire:navigate
+                    :href="route('committees.moderators.new', ['realm' => $realm_uid, 'ou' => $ou])"
+                >
+                    {{ __('common.add_moderators') }}
+                </flux:button>
+            @endif
         </div>
     </div>
 
@@ -49,19 +50,20 @@
                     </flux:table.cell>
                     <flux:table.cell>
                         <div class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="user-minus"
-                                        :disabled="!$isModerator"
-                                        wire:click="deletePrepare('{{ $moderator->uid[0] }}')"
-                                    >
-                                        {{ __('common.remove_moderator') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
+                            @if($isModerator)
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="user-minus"
+                                            wire:click="deletePrepare('{{ $moderator->uid[0] }}')"
+                                        >
+                                            {{ __('common.remove_moderator') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            @endif
                         </div>
                     </flux:table.cell>
                 </flux:table.row>

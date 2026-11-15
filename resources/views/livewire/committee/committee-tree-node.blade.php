@@ -58,7 +58,8 @@
             </div>
         </div>
         <div class="flex justify-end items-center gap-2 border-b border-zinc-200 dark:border-zinc-700 py-2 pl-4">
-            <flux:dropdown>
+            {{-- Without moderator rights only the mobile-only roles link is left. --}}
+            <flux:dropdown @class(['md:hidden' => ! $node['isModerator']])>
                 <flux:button size="sm" icon="ellipsis-vertical" title="{{ __('common.options') }}" />
                 <flux:menu>
                     <flux:menu.item
@@ -69,21 +70,21 @@
                     >
                         {{ __('committees.link_roles') }}
                     </flux:menu.item>
-                    <flux:menu.item
-                        icon="pencil"
-                        :href="$node['isModerator'] ? route('committees.edit', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')]) : null"
-                        :disabled="!$node['isModerator']"
-                    >
-                        {{ __('committees.link_edit') }}
-                    </flux:menu.item>
-                    <flux:menu.item
-                        variant="danger"
-                        icon="trash-2"
-                        wire:click="confirmDeleteCommittee('{{ $committee->getDn() }}')"
-                        :disabled="!$node['isModerator']"
-                    >
-                        {{ __('common.delete') }}
-                    </flux:menu.item>
+                    @if($node['isModerator'])
+                        <flux:menu.item
+                            icon="pencil"
+                            :href="route('committees.edit', ['realm' => $realm_uid, 'ou' => $committee->getFirstAttribute('ou')])"
+                        >
+                            {{ __('committees.link_edit') }}
+                        </flux:menu.item>
+                        <flux:menu.item
+                            variant="danger"
+                            icon="trash-2"
+                            wire:click="confirmDeleteCommittee('{{ $committee->getDn() }}')"
+                        >
+                            {{ __('common.delete') }}
+                        </flux:menu.item>
+                    @endif
                 </flux:menu>
             </flux:dropdown>
         </div>

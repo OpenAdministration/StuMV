@@ -74,27 +74,31 @@
                                     {{ __('profile.memberships_as_pdf') }}
                                 </flux:button>
                             @endif
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        icon="pencil"
-                                        :disabled="!$isAdmin"
-                                        wire:navigate
-                                        :href="$isAdmin ? route('profile', ['realm' => $community_name, 'username' => $realm_member->getFirstAttribute('uid')]) : null"
-                                    >
-                                        {{ __('common.edit') }}
-                                    </flux:menu.item>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="user-minus"
-                                        :disabled="!$canRemoveMember"
-                                        wire:click="removePrepare('{{ $realm_member->getFirstAttribute('uid') }}')"
-                                    >
-                                        {{ __('realms.remove_member') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
+                            @if($isAdmin || $canRemoveMember)
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        @if($isAdmin)
+                                            <flux:menu.item
+                                                icon="pencil"
+                                                wire:navigate
+                                                :href="route('profile', ['realm' => $community_name, 'username' => $realm_member->getFirstAttribute('uid')])"
+                                            >
+                                                {{ __('common.edit') }}
+                                            </flux:menu.item>
+                                        @endif
+                                        @if($canRemoveMember)
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="user-minus"
+                                                wire:click="removePrepare('{{ $realm_member->getFirstAttribute('uid') }}')"
+                                            >
+                                                {{ __('realms.remove_member') }}
+                                            </flux:menu.item>
+                                        @endif
+                                    </flux:menu>
+                                </flux:dropdown>
+                            @endif
                         </div>
                     </flux:table.cell>
                 </flux:table.row>

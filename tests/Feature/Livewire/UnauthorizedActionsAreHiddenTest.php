@@ -8,20 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
-/**
- * Flux's button-or-link-pure renders a plain <a href="..."> whenever an href
- * is given, and the disabled attribute has no native effect on anchors (only
- * on <button>) - a disabled-but-hrefed flux:button/flux:link/flux:menu.item
- * would still be fully clickable/navigable despite looking disabled. The fix
- * throughout the app is to make href conditionally null exactly when
- * disabled is true, which falls back to a real <button disabled> (verified
- * directly for committee-tree-node.blade.php in TreeModeratorPermissionsTest;
- * these cover the same pattern in a representative sample of the other
- * fixed views).
- */
+/** Actions the user has no permission for are hidden rather than shown disabled. */
 uses(RefreshDatabase::class);
 
-test('a plain member sees no href on the disabled Add Admin button', function (): void {
+test('a plain member does not see the Add Admin button', function (): void {
     $community = newCommunity();
     $member = TestLdap::member($community);
     $this->actingAs($member);
@@ -29,10 +19,11 @@ test('a plain member sees no href on the disabled Add Admin button', function ()
     $html = Livewire::test(ListAdmins::class, ['realm' => $community])->html();
 
     $newAdminUrl = route('realms.admins.new', ['realm' => $community->getShortCode()]);
-    expect($html)->not->toContain('href="'.$newAdminUrl.'"');
+    expect($html)->not->toContain('href="'.$newAdminUrl.'"')
+        ->and($html)->not->toContain(__('realms.add_admin_button'));
 });
 
-test('a plain member sees no href on another member\'s disabled profile link', function (): void {
+test('a plain member does not see the edit link for another member', function (): void {
     $community = newCommunity();
     $member = TestLdap::member($community);
     $otherMember = TestLdap::member($community);
@@ -47,7 +38,7 @@ test('a plain member sees no href on another member\'s disabled profile link', f
     expect($html)->not->toContain('href="'.$profileUrl.'"');
 });
 
-test('a plain member sees no href on the disabled New Role button', function (): void {
+test('a plain member does not see the New Role button', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');
     $member = TestLdap::member($community);
@@ -56,5 +47,6 @@ test('a plain member sees no href on the disabled New Role button', function ():
     $html = Livewire::test(ListRoles::class, ['realm' => $community, 'ou' => 'fsr'])->html();
 
     $newRoleUrl = route('committees.roles.new', ['realm' => $community->getShortCode(), 'ou' => 'fsr']);
-    expect($html)->not->toContain('href="'.$newRoleUrl.'"');
+    expect($html)->not->toContain('href="'.$newRoleUrl.'"')
+        ->and($html)->not->toContain(__('roles.new_button'));
 });

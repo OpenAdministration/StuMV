@@ -13,15 +13,16 @@
             </flux:button>
         </div>
         <div>
-            <flux:button
-                variant="primary"
-                icon="plus"
-                wire:navigate
-                :href="auth()->user()->can('create', \App\Ldap\Community::class) ? route('realms.new') : null"
-                :disabled="auth()->user()->cannot('create', \App\Ldap\Community::class)"
-            >
-                {{ __('realms.new_button') }}
-            </flux:button>
+            @can('create', \App\Ldap\Community::class)
+                <flux:button
+                    variant="primary"
+                    icon="plus"
+                    wire:navigate
+                    :href="route('realms.new')"
+                >
+                    {{ __('realms.new_button') }}
+                </flux:button>
+            @endcan
         </div>
     </div>
 
@@ -64,35 +65,40 @@
                         <flux:table.cell>{{ $realm->getShortCode() }}</flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">
-                                <flux:button
-                                    size="sm"
-                                    variant="primary"
-                                    icon="log-in"
-                                    :disabled="!($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))"
-                                    wire:click="enter('{{ $realm->getShortCode() }}')"
-                                >
-                                    {{ __('realms.enter_button') }}
-                                </flux:button>
-                                <flux:dropdown>
-                                    <flux:button size="sm" icon="ellipsis-vertical" />
-                                    <flux:menu>
-                                        <flux:menu.item
-                                            icon="pencil"
-                                            :disabled="Auth::user()->cannot('edit', $realm)"
-                                            :href="Auth::user()->can('edit', $realm) ? route('realms.edit', ['realm' => $realm->getShortCode()]) : null"
-                                            wire:navigate
-                                        >
-                                            {{ __('common.edit') }}
-                                        </flux:menu.item>
-                                        <flux:menu.item
-                                            variant="danger"
-                                            icon="trash-2"
-                                            :disabled="Auth::user()->cannot('delete', $realm)"
-                                            wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
-                                            {{ __('common.delete') }}
-                                        </flux:menu.item>
-                                    </flux:menu>
-                                </flux:dropdown>
+                                @if($canEnter === true || Arr::has($canEnter, $realm->getShortCode()))
+                                    <flux:button
+                                        size="sm"
+                                        variant="primary"
+                                        icon="log-in"
+                                        wire:click="enter('{{ $realm->getShortCode() }}')"
+                                    >
+                                        {{ __('realms.enter_button') }}
+                                    </flux:button>
+                                @endif
+                                @canany(['edit', 'delete'], $realm)
+                                    <flux:dropdown>
+                                        <flux:button size="sm" icon="ellipsis-vertical" />
+                                        <flux:menu>
+                                            @can('edit', $realm)
+                                                <flux:menu.item
+                                                    icon="pencil"
+                                                    :href="route('realms.edit', ['realm' => $realm->getShortCode()])"
+                                                    wire:navigate
+                                                >
+                                                    {{ __('common.edit') }}
+                                                </flux:menu.item>
+                                            @endcan
+                                            @can('delete', $realm)
+                                                <flux:menu.item
+                                                    variant="danger"
+                                                    icon="trash-2"
+                                                    wire:click="deletePrepare('{{ $realm->getShortCode() }}')">
+                                                    {{ __('common.delete') }}
+                                                </flux:menu.item>
+                                            @endcan
+                                        </flux:menu>
+                                    </flux:dropdown>
+                                @endcanany
                             </div>
                         </flux:table.cell>
                     </flux:table.row>

@@ -11,20 +11,16 @@ use Tests\Support\TestLdap;
  * committee, not the committee itself (see CommitteePolicy::edit()/delete()).
  * ListCommitteesTree::buildNode() computes a single flat "is a community
  * moderator" flag once and reuses it for every node, rather than checking
- * per-committee.
+ * per-committee. Actions without permission are hidden, not disabled.
  */
 uses(RefreshDatabase::class);
 
-function deleteButtonIsDisabled(string $html, string $committeeDn): bool
+function hasDeleteButton(string $html, string $committeeDn): bool
 {
-    $marker = "confirmDeleteCommittee('{$committeeDn}')";
-    $pos = strpos($html, $marker);
-    expect($pos)->not->toBeFalse();
-
-    return str_contains(substr($html, $pos, strlen($marker) + 30), 'disabled="disabled"');
+    return str_contains($html, "confirmDeleteCommittee('{$committeeDn}')");
 }
 
-test('a committee moderator sees a disabled delete button for their own committee and its descendants', function (): void {
+test('a committee moderator sees no delete button for their own committee and its descendants', function (): void {
     $community = newCommunity();
     $parent = TestLdap::makeCommittee($community, 'parent');
     $child = TestLdap::makeCommittee($community, 'child', parentDn: $parent->getDn());
@@ -36,18 +32,13 @@ test('a committee moderator sees a disabled delete button for their own committe
         ->call('toggleChildren', $parent->getDn())
         ->html();
 
-    expect(deleteButtonIsDisabled($html, $parent->getDn()))->toBeTrue()
-        ->and(deleteButtonIsDisabled($html, $child->getDn()))->toBeTrue();
+    expect(hasDeleteButton($html, $parent->getDn()))->toBeFalse()
+        ->and(hasDeleteButton($html, $child->getDn()))->toBeFalse();
 });
 
-test('a plain community member sees a non-navigable (not just visually disabled) edit link for every committee', function (): void {
-    // Flux's button-or-link-pure renders an <a href> whenever href is set,
-    // and the disabled attribute has no native effect on anchors (only on
-    // <button>) - so a disabled edit link with an href would still be fully
-    // clickable/navigable despite looking disabled. The fix is to omit href
-    // entirely while disabled, which falls back to a real <button disabled>.
+test('a plain community member sees no edit link for any committee', function (): void {
     $community = newCommunity();
-    $committee = TestLdap::makeCommittee($community, 'fsr');
+    TestLdap::makeCommittee($community, 'fsr');
     $member = TestLdap::member($community);
     $this->actingAs($member);
 
@@ -60,7 +51,7 @@ test('a plain community member sees a non-navigable (not just visually disabled)
     expect($html)->not->toContain('href="'.$editUrl.'"');
 });
 
-test('a plain community member sees disabled delete buttons for every committee', function (): void {
+test('a plain community member sees no delete button for any committee', function (): void {
     $community = newCommunity();
     $committee = TestLdap::makeCommittee($community, 'fsr');
     $member = TestLdap::member($community);
@@ -70,10 +61,10 @@ test('a plain community member sees disabled delete buttons for every committee'
         ->call('loadCommittees')
         ->html();
 
-    expect(deleteButtonIsDisabled($html, $committee->getDn()))->toBeTrue();
+    expect(hasDeleteButton($html, $committee->getDn()))->toBeFalse();
 });
 
-test('a community moderator sees enabled delete buttons for every committee', function (): void {
+test('a community moderator sees edit links and delete buttons for every committee', function (): void {
     $community = newCommunity();
     $committeeA = TestLdap::makeCommittee($community, 'committee-a');
     $committeeB = TestLdap::makeCommittee($community, 'committee-b');
@@ -83,6 +74,9 @@ test('a community moderator sees enabled delete buttons for every committee', fu
         ->call('loadCommittees')
         ->html();
 
-    expect(deleteButtonIsDisabled($html, $committeeA->getDn()))->toBeFalse()
-        ->and(deleteButtonIsDisabled($html, $committeeB->getDn()))->toBeFalse();
+    $editUrl = route('committees.edit', ['realm' => $community->getShortCode(), 'ou' => 'committee-a']);
+
+    expect(hasDeleteButton($html, $committeeA->getDn()))->toBeTrue()
+        ->and(hasDeleteButton($html, $committeeB->getDn()))->toBeTrue()
+        ->and($html)->toContain('href="'.$editUrl.'"');
 });

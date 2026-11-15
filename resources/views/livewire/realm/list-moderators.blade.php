@@ -5,15 +5,16 @@
             <flux:text class="text-base">{{ __('realms.mods_explanation') }}</flux:text>
         </div>
         <div>
-            <flux:button
-                variant="primary"
-                icon="user-plus"
-                wire:navigate
-                :href="auth()->user()->can('add_moderator', $community) ? route('realms.mods.new', ['realm' => $community_name]) : null"
-                :disabled="auth()->user()->cannot('add_moderator', $community)"
-            >
-                {{ __('common.add_moderators') }}
-            </flux:button>
+            @can('add_moderator', $community)
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    wire:navigate
+                    :href="route('realms.mods.new', ['realm' => $community_name])"
+                >
+                    {{ __('common.add_moderators') }}
+                </flux:button>
+            @endcan
         </div>
     </div>
 
@@ -63,19 +64,20 @@
                     </flux:table.cell>
                     <flux:table.cell>
                         <div class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="user-minus"
-                                        :disabled="!$canRemoveModerator"
-                                        wire:click="deletePrepare('{{ $realm_member->uid[0] }}')"
-                                    >
-                                        {{ __('common.remove_moderator') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
+                            @if($canRemoveModerator)
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="user-minus"
+                                            wire:click="deletePrepare('{{ $realm_member->uid[0] }}')"
+                                        >
+                                            {{ __('common.remove_moderator') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            @endif
                         </div>
                     </flux:table.cell>
                 </flux:table.row>

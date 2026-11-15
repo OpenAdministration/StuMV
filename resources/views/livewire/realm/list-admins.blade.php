@@ -13,15 +13,16 @@
             </flux:button>
         </div>
         <div>
-            <flux:button
-                variant="primary"
-                icon="user-plus"
-                wire:navigate
-                :href="auth()->user()->can('add_admin', $community) ? route('realms.admins.new', ['realm' => $community_name]) : null"
-                :disabled="auth()->user()->cannot('add_admin', $community)"
-            >
-                {{ __('realms.add_admin_button') }}
-            </flux:button>
+            @can('add_admin', $community)
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    wire:navigate
+                    :href="route('realms.admins.new', ['realm' => $community_name])"
+                >
+                    {{ __('realms.add_admin_button') }}
+                </flux:button>
+            @endcan
         </div>
     </div>
 
@@ -71,19 +72,20 @@
                     </flux:table.cell>
                     <flux:table.cell>
                         <div class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        variant="danger"
-                                        icon="user-minus"
-                                        :disabled="!$canRemoveAdmin"
-                                        wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
-                                    >
-                                        {{ __('common.delete') }}
-                                    </flux:menu.item>
-                                </flux:menu>
-                            </flux:dropdown>
+                            @if($canRemoveAdmin)
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
+                                        <flux:menu.item
+                                            variant="danger"
+                                            icon="user-minus"
+                                            wire:click="deletePrepare('{{ $realm_admin->uid[0] }}')"
+                                        >
+                                            {{ __('common.delete') }}
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            @endif
                         </div>
                     </flux:table.cell>
                 </flux:table.row>

@@ -16,21 +16,21 @@
             <flux:text class="text-base">{{ __('roles.membership_explanation') }}</flux:text>
         </div>
         <div class="flex flex-col gap-2">
-            <flux:button
-                variant="primary"
-                icon="user-plus"
-                :href="$isModerator ? route('committees.roles.add-member', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
-                :disabled="!$isModerator"
-            >
-                {{ __('common.add_member') }}
-            </flux:button>
-            <flux:button
-                icon="calendar-x"
-                :href="$isModerator ? route('committees.roles.terminate-memberships', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou]) : null"
-                :disabled="!$isModerator"
-            >
-                {{ __('roles.members.terminate_memberships') }}
-            </flux:button>
+            @if($isModerator)
+                <flux:button
+                    variant="primary"
+                    icon="user-plus"
+                    :href="route('committees.roles.add-member', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                >
+                    {{ __('common.add_member') }}
+                </flux:button>
+                <flux:button
+                    icon="calendar-x"
+                    :href="route('committees.roles.terminate-memberships', ['realm' => $uid, 'cn' => $cn, 'ou' => $ou])"
+                >
+                    {{ __('roles.members.terminate_memberships') }}
+                </flux:button>
+            @endif
         </div>
     </div>
 
@@ -140,29 +140,29 @@
                     </flux:table.cell>
                     <flux:table.cell>
                         <div class="flex justify-end items-center gap-2">
-                            <flux:dropdown>
-                                <flux:button size="sm" icon="ellipsis-vertical" />
-                                <flux:menu>
-                                    <flux:menu.item
-                                        icon="pencil"
-                                        wire:navigate
-                                        :disabled="!$isModerator"
-                                        :href="$isModerator ? route('committees.roles.members.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id]) : null"
-                                    >
-                                        {{ __('roles.link_edit') }}
-                                    </flux:menu.item>
-                                    <flux:modal.trigger name="delete">
+                            @if($isModerator)
+                                <flux:dropdown>
+                                    <flux:button size="sm" icon="ellipsis-vertical" />
+                                    <flux:menu>
                                         <flux:menu.item
-                                            variant="danger"
-                                            icon="trash-2"
-                                            wire:click="prepareDeletion({{ $member->id }})"
-                                            :disabled="!$isModerator"
+                                            icon="pencil"
+                                            wire:navigate
+                                            :href="route('committees.roles.members.edit', ['realm' => $uid, 'ou' => $ou, 'cn' => $cn, 'id' => $member->id])"
                                         >
-                                            {{ __('common.delete') }}
+                                            {{ __('roles.link_edit') }}
                                         </flux:menu.item>
-                                    </flux:modal.trigger>
-                                </flux:menu>
-                            </flux:dropdown>
+                                        <flux:modal.trigger name="delete">
+                                            <flux:menu.item
+                                                variant="danger"
+                                                icon="trash-2"
+                                                wire:click="prepareDeletion({{ $member->id }})"
+                                            >
+                                                {{ __('common.delete') }}
+                                            </flux:menu.item>
+                                        </flux:modal.trigger>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            @endif
                         </div>
                     </flux:table.cell>
                 </flux:table.row>
