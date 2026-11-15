@@ -3,8 +3,8 @@
 # License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
 
 # Use the official PHP CLI image as the base.
-# PHP 8.4: composer.lock resolves to symfony ^8.1 which requires php >= 8.4.1.
-FROM php:8.4-cli
+# PHP 8.5, matching the local dev setup (composer.json requires >= 8.4).
+FROM php:8.5-cli
 
 # Set environment variables for user and group ID
 ARG UID=1000

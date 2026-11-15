@@ -2,8 +2,8 @@
 # (c) 2024 Sergei Shitikov
 # License: https://github.com/dockersamples/laravel-docker-examples/blob/main/LICENSE
 
-# PHP 8.4: composer.lock resolves to symfony ^8.1 which requires php >= 8.4.1.
-FROM php:8.4-fpm AS builder
+# PHP 8.5, matching the local dev setup (composer.json requires >= 8.4).
+FROM php:8.5-fpm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
