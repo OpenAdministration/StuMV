@@ -108,8 +108,8 @@ final class MembershipCertificatePdf
     /** Space between the footer and the rule above it. */
     private const float FOOTER_RULE_GAP = 3.0;
 
-    /** Address, contact and bank columns of the letter footer as [x, width]; the page number takes the rest. */
-    private const array FOOTER_COLUMNS = [[25.0, 46.0], [75.0, 46.0], [125.0, 50.0]];
+    /** Between the address, contact and bank columns of the letter footer. */
+    private const float FOOTER_COLUMN_GAP = 5.0;
 
     private const string COLOR_BLACK = '#000000';
 
@@ -318,13 +318,18 @@ final class MembershipCertificatePdf
         ];
     }
 
+    private function footerColumnWidth(): float
+    {
+        return ($this->contentWidth - 2 * self::FOOTER_COLUMN_GAP) / 3;
+    }
+
     /** @param  list<array{string, string}>  $columns */
     private function footerHeight(array $columns): float
     {
         $this->hyphenate(false);
         $heights = [];
-        foreach ($columns as $index => [$heading, $body]) {
-            $width = self::FOOTER_COLUMNS[$index][1];
+        foreach ($columns as [$heading, $body]) {
+            $width = $this->footerColumnWidth();
             $this->font('B', self::FOOTER_FONT_SIZE);
             $height = $heading !== '' ? $this->measure($heading, $width) + self::LINE_SPACING : 0.0;
             $this->font('', self::FOOTER_FONT_SIZE);
@@ -355,7 +360,8 @@ final class MembershipCertificatePdf
             ), $pid, 'Pagination', 'Footer');
 
             foreach ($columns as $index => [$heading, $body]) {
-                [$x, $width] = self::FOOTER_COLUMNS[$index];
+                $width = $this->footerColumnWidth();
+                $x = self::MARGIN_LEFT + $index * ($width + self::FOOTER_COLUMN_GAP);
                 $y = $top;
                 foreach ([['B', $heading], ['', $body]] as [$style, $text]) {
                     if ($text === '') {
