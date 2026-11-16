@@ -9,7 +9,7 @@
         </flux:field>
 
         <flux:field>
-            <flux:label>{{ __('Name') }}</flux:label>
+            <flux:label>{{ __('common.name') }}</flux:label>
             <flux:input wire:model="name" required />
             <flux:error name="name" />
         </flux:field>

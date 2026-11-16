@@ -55,6 +55,7 @@ return [
     'unused_roles_headline' => 'Nicht verwendete Gremien und Rollen',
     'unused_roles_explanation' => 'Finde Gremien und Rollen, in denen es keine aktuellen oder ehemaligen Mitgliedschaften mehr gibt.',
     'userDeletedSuccessfully' => 'Die Person wurde gelöscht.',
+    'userCreatedSuccessfully' => 'Das Konto wurde angelegt.',
     'userLockedSuccessfully' => 'Das Konto wurde gesperrt.',
     'username' => 'Anmeldename',
     'user_not_found_in_uni_ldap' => 'Diese Person konnte leider nicht gefunden werden.',

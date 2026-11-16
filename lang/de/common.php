@@ -7,6 +7,7 @@ return [
     'options' => 'Optionen',
     'password' => 'Passwort',
     'email' => 'E-Mail',
+    'name' => 'Name',
     'username' => 'Anmeldename',
     'user' => 'Nutzer:in',
     'confirm_password' => 'Passwort wiederholen',

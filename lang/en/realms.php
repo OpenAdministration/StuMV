@@ -136,4 +136,5 @@ return [
     'contact_website' => 'Website',
     'letter_defaults_legend' => 'Cover letter template',
     'letter_defaults_description' => 'Prefills the fields when exporting memberships, where they can still be changed.',
+    'edit_success' => 'The student body :realm has been saved.',
 ];

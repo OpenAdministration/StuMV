@@ -32,7 +32,7 @@
             <flux:table>
                 <flux:table.columns>
                     <flux:table.column class="w-[55px]"></flux:table.column>
-                    <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'cn'" :direction="$sortDirection" wire:click="sortBy('cn')">{{ __('common.name') }}</flux:table.column>
                     @if($isAdmin)
                         <flux:table.column sortable :sorted="$sortField === 'uid'" :direction="$sortDirection" wire:click="sortBy('uid')">{{ __('realms.username') }}</flux:table.column>
                         <flux:table.column sortable :sorted="$sortField === 'pwdLastSuccess'" :direction="$sortDirection" wire:click="sortBy('pwdLastSuccess')">{{ __('realms.last_login') }}</flux:table.column>

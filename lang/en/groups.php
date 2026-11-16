@@ -46,4 +46,5 @@ return [
     'field_role' => 'Role',
     'field_roles' => 'Roles',
     'added_new_group' => 'Added new Group',
+    'edit_success' => 'The group has been saved.',
 ];

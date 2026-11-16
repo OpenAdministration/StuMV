@@ -6,7 +6,7 @@
         </div>
         <div class="space-y-6">
             <flux:field>
-                <flux:label>{{ __('Name') }}</flux:label>
+                <flux:label>{{ __('common.name') }}</flux:label>
                 <flux:input wire:model="name" />
                 <flux:error name="name" />
             </flux:field>

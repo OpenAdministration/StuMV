@@ -42,7 +42,7 @@
         @if(count($realms) > 0)
             <flux:table>
                 <flux:table.columns>
-                    <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">{{ __('Name') }}</flux:table.column>
+                    <flux:table.column sortable :sorted="$sortField === 'description'" :direction="$sortDirection" wire:click="sortBy('description')">{{ __('common.name') }}</flux:table.column>
                     <flux:table.column sortable :sorted="$sortField === 'ou'" :direction="$sortDirection" wire:click="sortBy('ou')">{{ __('realms.shortcode') }}</flux:table.column>
                     <flux:table.column></flux:table.column>
                 </flux:table.columns>

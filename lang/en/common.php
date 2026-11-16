@@ -7,6 +7,7 @@ return [
     'options' => 'Options',
     'password' => 'Password',
     'email' => 'Email',
+    'name' => 'Name',
     'username' => 'Username',
     'user' => 'User',
     'confirm_password' => 'Confirm Password',

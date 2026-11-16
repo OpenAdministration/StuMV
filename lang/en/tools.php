@@ -55,6 +55,7 @@ return [
     'unused_roles_headline' => 'Unused committees and roles',
     'unused_roles_explanation' => 'Find committees and roles that no longer have any current or former memberships.',
     'userDeletedSuccessfully' => 'The person was deleted.',
+    'userCreatedSuccessfully' => 'The account was created.',
     'userLockedSuccessfully' => 'The account was locked.',
     'username' => 'Username',
     'user_not_found_in_uni_ldap' => 'Unfortunately, this person could not be found.',

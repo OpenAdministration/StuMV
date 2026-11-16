@@ -136,4 +136,5 @@ return [
     'contact_website' => 'Website',
     'letter_defaults_legend' => 'Vorlage für Anschreiben',
     'letter_defaults_description' => 'Damit sind die Felder beim Export von Mitgliedschaften vorausgefüllt und lassen sich dort anpassen.',
+    'edit_success' => 'Die Studierendenschaft :realm wurde gespeichert.',
 ];

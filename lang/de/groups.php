@@ -46,4 +46,5 @@ return [
     'field_role' => 'Rolle',
     'field_roles' => 'Rollen',
     'added_new_group' => 'Neue Rechtegruppe erstellt. Füge hier jetzt die Rollen hinzu.',
+    'edit_success' => 'Die Gruppe wurde gespeichert.',
 ];

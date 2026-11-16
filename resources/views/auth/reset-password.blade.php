@@ -23,7 +23,7 @@
                     <flux:heading size="xl">{{ __('auth.reset_password') }}</flux:heading>
 
                     <!-- Email Address -->
-                    <flux:input id="mail" name="mail" :label="__('E-Mail')" :value="old('mail', $request->mail)" required disabled/>
+                    <flux:input id="mail" name="mail" :label="__('common.email')" :value="old('mail', $request->mail)" required disabled/>
 
                     <!-- Password -->
                     <flux:field>
