@@ -57,7 +57,7 @@ test('a certificate without memberships still has a table head', function (): vo
 test('a cover letter is put on its own page in front of the certificate', function (): void {
     $letter = new CoverLetter(
         'Studierendenrat',
-        new RealmContact(['street' => 'Carl-Zeiss-Straße', 'house_number' => '3', 'postal_code' => '07743', 'city' => 'Jena', 'email' => 'stura@example.test', 'phone' => '03641 930990', 'website' => 'https://stura.example.test']),
+        new RealmContact(['street' => 'Carl-Zeiss-Straße', 'house_number' => '3', 'postal_code' => '07743', 'city' => 'Jena', 'email' => 'stura@example.test', 'phone' => '03641 930990', 'website' => 'https://stura.example.test', 'bank_name' => 'Sparkasse Jena', 'iban' => 'DE89370400440532013000', 'bic' => 'HELADEF1JEN']),
         "Thüringer Landtag\n99096 Erfurt",
         '<p>Sehr geehrte Damen und Herren,</p><p>anbei die <em>Übersicht</em>:</p><ul><li>Gremium</li></ul><p>Mit freundlichen Grüßen</p><script>alert(1)</script>',
         senderUnit: 'Sprecher:innen',

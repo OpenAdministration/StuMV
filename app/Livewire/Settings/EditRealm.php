@@ -42,6 +42,17 @@ class EditRealm extends Component
     #[Rule('nullable|url:http,https|max:255')]
     public string $website = '';
 
+    #[Rule('nullable|string|max:255')]
+    public string $bank_name = '';
+
+    #[Rule(['nullable', 'regex:/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/'], as: 'IBAN')]
+    public string $iban = '';
+
+    #[Rule(['nullable', 'regex:/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/'], as: 'BIC')]
+    public string $bic = '';
+
+    private const array CONTACT_FIELDS = ['street', 'house_number', 'postal_code', 'city', 'email', 'phone', 'website', 'bank_name', 'iban', 'bic'];
+
     public function mount(Community $realm): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
@@ -49,7 +60,7 @@ class EditRealm extends Component
         $this->name = $this->realm->description[0] ?? '';
 
         $contact = RealmContact::forRealm($this->uid);
-        foreach (['street', 'house_number', 'postal_code', 'city', 'email', 'phone', 'website'] as $field) {
+        foreach (self::CONTACT_FIELDS as $field) {
             $this->{$field} = (string) $contact?->{$field};
         }
     }
@@ -67,6 +78,9 @@ class EditRealm extends Component
 
     public function save()
     {
+        // entered as printed, stored without spaces
+        $this->iban = strtoupper((string) preg_replace('/\s+/', '', $this->iban));
+        $this->bic = strtoupper((string) preg_replace('/\s+/', '', $this->bic));
         $this->validate();
 
         $r = Community::findOrFailByUid($this->uid);
@@ -75,7 +89,7 @@ class EditRealm extends Component
 
         RealmContact::updateOrCreate(['realm' => $this->uid], array_map(
             fn (string $value): ?string => trim($value) === '' ? null : trim($value),
-            $this->only(['street', 'house_number', 'postal_code', 'city', 'email', 'phone', 'website']),
+            $this->only(self::CONTACT_FIELDS),
         ));
 
         Flux::toast(variant: 'success', text: __('realms.edit_success', ['realm' => $this->uid]));

@@ -101,6 +101,16 @@ final class MembershipCertificatePdf
     /** Room for a handwritten signature, three blank lines in DIN 5008. */
     private const float SIGNATURE_SPACE = 15.0;
 
+    private const float FOOTER_FONT_SIZE = 8.0;
+
+    private const float PAGE_NUMBER_FONT_SIZE = 10.0;
+
+    /** Space between the footer and the rule above it. */
+    private const float FOOTER_RULE_GAP = 3.0;
+
+    /** Address, contact and bank columns of the letter footer as [x, width]; the page number takes the rest. */
+    private const array FOOTER_COLUMNS = [[25.0, 46.0], [75.0, 46.0], [125.0, 50.0]];
+
     private const string COLOR_BLACK = '#000000';
 
     private const string COLOR_ZINC_500 = '#71717b';
@@ -127,6 +137,14 @@ final class MembershipCertificatePdf
     private float $contentWidth;
 
     private float $cursorY;
+
+    /** Where the footer of the letter pages begins; the certificate has none. */
+    private ?float $footerTop = null;
+
+    /** On the letter pages the page number sits above the footer rule. */
+    private ?float $letterPageNumberTop = null;
+
+    private int $letterPages = 0;
 
     /**
      * @param  array<int, array{role: mixed, from: mixed, until: mixed}>  $memberships
@@ -159,7 +177,14 @@ final class MembershipCertificatePdf
         $this->cursorY = self::MARGIN_TOP;
 
         if ($letter !== null) {
+            $footer = $this->letterFooter($letter);
+            $this->footerTop = $this->pageHeight - self::FOOTER_EDGE_GAP - $this->footerHeight($footer);
+            $this->font('', self::PAGE_NUMBER_FONT_SIZE);
+            $this->letterPageNumberTop = $this->footerTop - self::FOOTER_RULE_GAP - self::SPACE - $this->measure('X', $this->contentWidth);
             $this->drawLetter($letter);
+            $this->drawLetterFooter($footer);
+            $this->letterPages = count($this->pdf->page->getPages());
+            $this->footerTop = null;
             $this->newPage();
         }
 
@@ -196,7 +221,7 @@ final class MembershipCertificatePdf
             self::LETTERHEAD_RULE_Y,
             $right,
             self::LETTERHEAD_RULE_Y,
-            ['lineWidth' => 0.2, 'lineColor' => self::COLOR_BLACK],
+            ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR],
         ));
 
         $this->font('', self::RETURN_FONT_SIZE);
@@ -269,6 +294,89 @@ final class MembershipCertificatePdf
     }
 
     /**
+     * Address, contact and bank columns, each a bold first part and the lines below it.
+     *
+     * @return list<array{string, string}>
+     */
+    private function letterFooter(CoverLetter $letter): array
+    {
+        $contact = $letter->contact;
+        $lines = fn (array $lines): string => implode("\n", array_filter($lines));
+
+        // the realm's own details, not the ones a letter overrides
+        $contactLines = $lines([$contact?->phone, $contact?->email, $contact?->websiteLabel()]);
+        $bankLines = $contact?->iban ? $lines([
+            $contact->bank_name,
+            'IBAN '.$contact->ibanLabel(),
+            $contact->bic ? 'BIC '.$contact->bic : null,
+        ]) : '';
+
+        return [
+            [$letter->senderName, $lines([$contact?->streetLine(), $contact?->cityLine()])],
+            [$contactLines !== '' ? __('profile.cover_letter_footer_contact') : '', $contactLines],
+            [$bankLines !== '' ? __('profile.cover_letter_footer_bank') : '', $bankLines],
+        ];
+    }
+
+    /** @param  list<array{string, string}>  $columns */
+    private function footerHeight(array $columns): float
+    {
+        $this->hyphenate(false);
+        $heights = [];
+        foreach ($columns as $index => [$heading, $body]) {
+            $width = self::FOOTER_COLUMNS[$index][1];
+            $this->font('B', self::FOOTER_FONT_SIZE);
+            $height = $this->measure($heading, $width);
+            $this->font('', self::FOOTER_FONT_SIZE);
+            $heights[] = $height + $this->measure($body, $width);
+        }
+
+        return max($heights);
+    }
+
+    /**
+     * The same footer on every page of the letter, below a rule.
+     *
+     * @param  list<array{string, string}>  $columns
+     */
+    private function drawLetterFooter(array $columns): void
+    {
+        $this->hyphenate(false);
+        $top = (float) $this->footerTop;
+
+        foreach ($this->pdf->page->getPages() as $page) {
+            $pid = (int) $page['pid'];
+            $this->pdf->addArtifactContent($this->pdf->graph->getLine(
+                self::MARGIN_LEFT,
+                $top - self::FOOTER_RULE_GAP,
+                $this->pageWidth - self::MARGIN_RIGHT,
+                $top - self::FOOTER_RULE_GAP,
+                ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR],
+            ), $pid, 'Pagination', 'Footer');
+
+            foreach ($columns as $index => [$heading, $body]) {
+                [$x, $width] = self::FOOTER_COLUMNS[$index];
+                $y = $top;
+                foreach ([['B', $heading], ['', $body]] as [$style, $text]) {
+                    if ($text === '') {
+                        continue;
+                    }
+
+                    $this->font($style, self::FOOTER_FONT_SIZE);
+                    // the colour goes into the content, as the style stack only reaches the current page
+                    $content = $this->pdf->graph->add(['fillColor' => self::COLOR_ZINC_600])
+                        .$this->pdf->getTextCell($text, $x, $y, $width, linespace: self::LINE_SPACING, halign: 'L', drawcell: false)
+                        .$this->pdf->graph->pop();
+                    $this->pdf->addArtifactContent($content, $pid, 'Pagination', 'Footer');
+                    $y += $this->measure($text, $width);
+                }
+            }
+        }
+
+        $this->hyphenate(true);
+    }
+
+    /**
      * Sender details in the right column of the letterhead, each with an icon
      * behind a vertical rule. Returns where the block ends.
      */
@@ -326,7 +434,7 @@ final class MembershipCertificatePdf
             self::INFO_Y,
             $ruleX,
             $y - self::SPACE,
-            ['lineWidth' => 0.2, 'lineColor' => self::COLOR_BLACK],
+            ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR],
         ));
 
         return $y - self::SPACE;
@@ -652,7 +760,9 @@ final class MembershipCertificatePdf
     {
         $pages = $this->pdf->page->getPages();
         $total = count($pages);
-        $this->font('', 10);
+
+        $this->font('', self::PAGE_NUMBER_FONT_SIZE);
+        $height = $this->measure('X', $this->contentWidth);
 
         foreach (array_values($pages) as $index => $page) {
             $pid = (int) $page['pid'];
@@ -662,7 +772,7 @@ final class MembershipCertificatePdf
             $content = $this->pdf->getTextCell(
                 ($index + 1).' / '.$total,
                 self::MARGIN_LEFT,
-                $this->pageHeight - self::FOOTER_EDGE_GAP - $this->measure('X', $this->contentWidth),
+                $index < $this->letterPages ? (float) $this->letterPageNumberTop : $this->pageHeight - self::FOOTER_EDGE_GAP - $height,
                 $this->contentWidth,
                 halign: 'R',
                 drawcell: false,
@@ -701,7 +811,9 @@ final class MembershipCertificatePdf
 
     private function hasSpace(float $need): bool
     {
-        return $this->cursorY + $need <= $this->pageHeight - self::MARGIN_BOTTOM;
+        $bottom = $this->footerTop !== null ? $this->letterPageNumberTop - self::DIN_LINE : $this->pageHeight - self::MARGIN_BOTTOM;
+
+        return $this->cursorY + $need <= $bottom;
     }
 
     private function newPage(): void

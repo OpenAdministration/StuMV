@@ -20,6 +20,9 @@ class RealmContact extends Model
         'email',
         'phone',
         'website',
+        'bank_name',
+        'iban',
+        'bic',
         'letter_enabled',
         'letter_recipient',
         'letter_sender_name',
@@ -52,6 +55,12 @@ class RealmContact extends Model
     public function cityLine(): string
     {
         return trim($this->postal_code.' '.$this->city);
+    }
+
+    /** The IBAN as printed: in groups of four. */
+    public function ibanLabel(): string
+    {
+        return trim(chunk_split((string) $this->iban, 4, ' '));
     }
 
     /** The website as printed: without scheme and trailing slash. */

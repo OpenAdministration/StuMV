@@ -69,20 +69,28 @@ test('an admin can store the address and contact details of their realm', functi
         ->set('email', 'stura@example.test')
         ->set('phone', '03641 930990')
         ->set('website', 'https://stura.example.test/')
+        ->set('bank_name', 'Sparkasse Jena')
+        ->set('iban', 'de89 3704 0044 0532 0130 00')
+        ->set('bic', 'heladef1jen')
         ->call('save')
         ->assertHasNoErrors();
 
     $contact = RealmContact::forRealm($community->getShortCode());
     expect($contact->streetLine())->toBe('Carl-Zeiss-Straße 3')
         ->and($contact->cityLine())->toBe('07743 Jena')
-        ->and($contact->websiteLabel())->toBe('stura.example.test');
+        ->and($contact->websiteLabel())->toBe('stura.example.test')
+        ->and($contact->iban)->toBe('DE89370400440532013000')
+        ->and($contact->ibanLabel())->toBe('DE89 3704 0044 0532 0130 00')
+        ->and($contact->bic)->toBe('HELADEF1JEN');
 
     Livewire::test(EditRealm::class, ['realm' => $community])
         ->assertSet('city', 'Jena')
         ->set('email', 'not-an-address')
         ->set('website', 'stura.example.test')
+        ->set('iban', 'DE89 3704')
+        ->set('bic', 'HELA')
         ->call('save')
-        ->assertHasErrors(['email', 'website']);
+        ->assertHasErrors(['email', 'website', 'iban', 'bic']);
 });
 
 test('an admin can store defaults for cover letters', function (): void {

@@ -27,6 +27,17 @@
                     <flux:input type="url" wire:model="website" :label="__('realms.contact_website')" placeholder="https://" />
                 </div>
             </flux:fieldset>
+
+            <flux:fieldset>
+                <legend>{{ __('realms.bank_legend') }}</legend>
+                <div class="space-y-6 p-4">
+                    <flux:input wire:model="bank_name" :label="__('realms.bank_name')" />
+                    <div class="grid grid-cols-[1fr_12rem] gap-4">
+                        <flux:input wire:model="iban" :label="__('realms.bank_iban')" />
+                        <flux:input wire:model="bic" :label="__('realms.bank_bic')" />
+                    </div>
+                </div>
+            </flux:fieldset>
         </div>
         <x-slot:abort_route>
             {{ url()->previous() }}
