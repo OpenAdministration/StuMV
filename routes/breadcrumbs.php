@@ -76,6 +76,11 @@ Breadcrumbs::for('realms.branding', function (BreadcrumbTrail $trail, array $rou
     $trail->push(__('realms.branding.headline'), route('realms.branding', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.membership-export', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('settings.dashboard', $routeParams);
+    $trail->push(__('realms.membership_export.headline'), route('realms.membership-export', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
     $trail->push(__('realms.members_breadcrumb'), route('realms.members', $routeParams), ['truncate' => true]);

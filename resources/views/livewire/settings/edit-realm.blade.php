@@ -11,12 +11,9 @@
                 <flux:error name="name" />
             </flux:field>
 
-            <section class="space-y-6 pt-4">
-                <div class="space-y-1">
-                    <flux:heading size="lg">{{ __('realms.contact_legend') }}</flux:heading>
-                    <flux:text>{{ __('realms.contact_description') }}</flux:text>
-                </div>
-                <div class="space-y-6">
+            <flux:fieldset>
+                <legend>{{ __('realms.contact_legend') }}</legend>
+                <div class="space-y-6 p-4">
                     <div class="grid grid-cols-[1fr_8rem] gap-4">
                         <flux:input wire:model="street" :label="__('realms.contact_street')" autocomplete="address-line1" />
                         <flux:input wire:model="house_number" :label="__('realms.contact_house_number')" />
@@ -29,17 +26,7 @@
                     <flux:input type="tel" wire:model="phone" :label="__('realms.contact_phone')" />
                     <flux:input type="url" wire:model="website" :label="__('realms.contact_website')" placeholder="https://" />
                 </div>
-            </section>
-
-            <section class="space-y-6 pt-4">
-                <div class="space-y-1">
-                    <flux:heading size="lg">{{ __('realms.letter_defaults_legend') }}</flux:heading>
-                    <flux:text>{{ __('realms.letter_defaults_description') }}</flux:text>
-                </div>
-                <flux:input wire:model="letter_sender_unit" :label="__('profile.cover_letter_sender_unit')" :placeholder="__('profile.cover_letter_sender_unit_placeholder')" />
-                <flux:input wire:model="letter_subject" :label="__('profile.cover_letter_subject')" />
-                <flux:editor wire:model="letter_body" :label="__('profile.cover_letter_body')" toolbar="bold italic underline | bullet ordered" />
-            </section>
+            </flux:fieldset>
         </div>
         <x-slot:abort_route>
             {{ url()->previous() }}

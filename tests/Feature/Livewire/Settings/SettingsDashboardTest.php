@@ -14,6 +14,7 @@ test('an admin sees all settings tiles', function (): void {
         ->assertOk()
         ->assertSee(route('realms.edit', $uid))
         ->assertSee(route('realms.branding', $uid))
+        ->assertSee(route('realms.membership-export', $uid))
         ->assertSee(route('realms.domains', $uid))
         ->assertSee(route('realms.api-clients', $uid))
         ->assertSee(route('realms.oidc-clients', $uid))
@@ -48,4 +49,14 @@ test('the settings pages sit below the settings breadcrumb', function (): void {
     $this->get(route('realms.domains', ['realm' => $uid]))
         ->assertOk()
         ->assertSeeInOrder([route('settings.dashboard', $uid), __('realms.domains_breadcrumb')]);
+});
+
+test('the membership export settings sit below the settings breadcrumb', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsAdmin($community);
+
+    $this->get(route('realms.membership-export', ['realm' => $uid]))
+        ->assertOk()
+        ->assertSeeInOrder([route('settings.dashboard', $uid), __('realms.membership_export.headline')]);
 });

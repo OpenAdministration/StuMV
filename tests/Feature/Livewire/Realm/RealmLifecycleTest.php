@@ -5,6 +5,7 @@ use App\Ldap\Domain;
 use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\NewRealm;
 use App\Livewire\Settings\Domain\NewDomain;
+use App\Livewire\Settings\EditMembershipExport;
 use App\Livewire\Settings\EditRealm;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
@@ -88,7 +89,7 @@ test('an admin can store defaults for cover letters', function (): void {
     $community = newCommunity();
     actingAsAdmin($community);
 
-    Livewire::test(EditRealm::class, ['realm' => $community])
+    Livewire::test(EditMembershipExport::class, ['realm' => $community])
         ->set('letter_sender_unit', 'Sprecher:innen')
         ->set('letter_subject', 'Tätigkeitsbescheinigung')
         ->set('letter_body', '<p>Sehr geehrte Damen und Herren,</p><script>alert(1)</script>')
@@ -100,7 +101,7 @@ test('an admin can store defaults for cover letters', function (): void {
         ->and($contact->letter_subject)->toBe('Tätigkeitsbescheinigung')
         ->and($contact->letter_body)->toBe('<p>Sehr geehrte Damen und Herren,</p>');
 
-    Livewire::test(EditRealm::class, ['realm' => $community])
+    Livewire::test(EditMembershipExport::class, ['realm' => $community])
         ->assertSet('letter_sender_unit', 'Sprecher:innen');
 });
 

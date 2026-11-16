@@ -45,6 +45,7 @@ use App\Livewire\Settings\Api\ListApiClients;
 use App\Livewire\Settings\Api\NewApiClient;
 use App\Livewire\Settings\Domain\ListDomains;
 use App\Livewire\Settings\Domain\NewDomain;
+use App\Livewire\Settings\EditMembershipExport;
 use App\Livewire\Settings\EditRealm;
 use App\Livewire\Settings\EditRealmBranding;
 use App\Livewire\Settings\IdentityProvider\EditIdentityProvider;
@@ -169,6 +170,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{realm}/settings', SettingsDashboard::class)->name('settings.dashboard');
         Route::livewire('{realm}/settings/edit', EditRealm::class)->name('realms.edit');
         Route::livewire('{realm}/settings/branding', EditRealmBranding::class)->name('realms.branding');
+        Route::livewire('{realm}/settings/membership-export', EditMembershipExport::class)->name('realms.membership-export');
         // end admin
     });
 

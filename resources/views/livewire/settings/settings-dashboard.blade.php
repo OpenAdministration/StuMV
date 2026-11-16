@@ -15,6 +15,12 @@
             :heading="__('realms.dashboard.branding_headline', ['name' => $name])"
             :description="__('realms.dashboard.branding_explanation', ['name' => $name])"
         />
+        <x-dashboard-tile
+            :href="route('realms.membership-export', $uid)"
+            icon="file-text"
+            :heading="__('realms.membership_export.headline')"
+            :description="__('realms.membership_export.explanation')"
+        />
         @unless($isAdminRealm)
             <x-dashboard-tile
                 :href="route('realms.domains', $uid)"
