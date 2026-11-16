@@ -77,7 +77,7 @@ class EditRealmBranding extends Component
             $filename = Str::uuid().'.webp';
             Storage::disk('public')->put(
                 'realm-branding/'.$filename,
-                $this->rasterize($this->logo, width: 512, height: 512),
+                $this->rasterize($this->logo, width: 2048, height: 2048, quality: 100),
             );
         }
 
@@ -156,14 +156,13 @@ class EditRealmBranding extends Component
 
     /**
      * Decode, downscale (never up), and re-encode an uploaded raster image to
-     * WebP bytes.
+     * WebP bytes; quality 100 is lossless.
      */
-    private function rasterize($file, ?int $width = null, ?int $height = null): string
+    private function rasterize($file, ?int $width = null, ?int $height = null, ?int $quality = null): string
     {
-        $img = Image::fromPath($file->getRealPath());
-        $img->scale($width, $height);
+        $img = Image::fromPath($file->getRealPath())->scale($width, $height)->toWebp();
 
-        return $img->toWebp()->toBytes();
+        return ($quality !== null ? $img->quality($quality) : $img)->toBytes();
     }
 
     private function replaceFile(string $column, string $newFilename): void

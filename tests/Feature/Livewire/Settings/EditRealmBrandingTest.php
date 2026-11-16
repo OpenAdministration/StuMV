@@ -5,6 +5,7 @@ use App\Livewire\Settings\EditRealmBranding;
 use App\Models\RealmBranding;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -21,6 +22,21 @@ test('an admin can upload a logo and it saves immediately, without an explicit s
         ->assertHasNoErrors();
 
     expect(RealmBranding::where('realm', 'demo')->value('logo_id'))->not->toBeNull();
+});
+
+test('a raster logo is scaled down and stored losslessly for print', function (): void {
+    Storage::fake('public');
+    actingAsAdmin('demo');
+
+    Livewire::test(EditRealmBranding::class, ['realm' => Community::findByUid('demo')])
+        ->set('logo', UploadedFile::fake()->image('logo.png', 3000, 1000))
+        ->assertHasNoErrors();
+
+    $stored = Storage::disk('public')->get('realm-branding/'.RealmBranding::where('realm', 'demo')->value('logo_id'));
+
+    // VP8L is the lossless WebP bitstream
+    expect(getimagesizefromstring($stored))->toMatchArray([0 => 2048, 1 => 683])
+        ->and(substr($stored, 12, 4))->toBe('VP8L');
 });
 
 test('an invalid file type is rejected and never reaches storage', function (): void {
