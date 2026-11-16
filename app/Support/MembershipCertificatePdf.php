@@ -91,6 +91,9 @@ final class MembershipCertificatePdf
 
     private const float LOGO_MAX_WIDTH = 60.0;
 
+    /** Minimum space between the sender name and the logo. */
+    private const float LOGO_GAP = 8.0;
+
     private const int LOGO_DPI = 600;
 
     private const float ICON_SIZE = 3.2;
@@ -175,12 +178,18 @@ final class MembershipCertificatePdf
 
         $this->drawFoldMarks();
 
+        // a hyphen inserted into a name, an address or a contact detail reads as part of it
+        $this->hyphenate(false);
+
         $logoWidth = $this->drawLogo($letter->logoPath, $right);
+        $nameWidth = $this->contentWidth - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
         $this->font('B', self::SENDER_FONT_SIZE);
-        $this->beginTag('P');
         $metrics = $this->pdf->font->getCurrentFont();
         $ascent = $metrics['ascent'] * $metrics['usize'] / $metrics['size'];
-        $this->text($letter->senderName, self::MARGIN_LEFT, self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP - $ascent, $this->contentWidth - $logoWidth - 5.0);
+        // lines a long name wraps to grow upwards, so the last one stays on the baseline
+        $extraLines = $this->measure($letter->senderName, $nameWidth) - $this->measure('X', $nameWidth);
+        $this->beginTag('P');
+        $this->text($letter->senderName, self::MARGIN_LEFT, self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP - $ascent - $extraLines, $nameWidth);
         $this->endTag();
         $this->artifact($this->pdf->graph->getLine(
             self::MARGIN_LEFT,
@@ -190,8 +199,6 @@ final class MembershipCertificatePdf
             ['lineWidth' => 0.2, 'lineColor' => self::COLOR_BLACK],
         ));
 
-        // a hyphen inserted into an address or a contact detail reads as part of it
-        $this->hyphenate(false);
         $this->font('', self::RETURN_FONT_SIZE);
         $returnAddress = $this->returnAddress(array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
         $this->beginTag('P');
