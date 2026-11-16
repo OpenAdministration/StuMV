@@ -53,6 +53,9 @@ final class MembershipCertificatePdf
 
     private const float LETTER_FONT_SIZE = 11.0;
 
+    /** Line height of the letter text and its closing, relative to the font size. */
+    private const float LETTER_LINE_HEIGHT = 1.4;
+
     /** 10pt without extra leading gives the 4.23mm DIN line, so six lines fit the address zone. */
     private const float ADDRESS_FONT_SIZE = 10.0;
 
@@ -231,7 +234,7 @@ final class MembershipCertificatePdf
 
         // Rich text from the editor; the HTML renderer tags paragraphs and lists itself.
         $this->font('', self::LETTER_FONT_SIZE);
-        $html = '<style>p, li { text-align: justify; line-height: 1.4; }</style>'.CoverLetter::sanitizeBody($letter->body);
+        $html = '<style>p, li { text-align: justify; line-height: '.self::LETTER_LINE_HEIGHT.'; }</style>'.CoverLetter::sanitizeBody($letter->body);
         $this->pdf->addHTMLCell($html, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
         $end = $this->pdf->getLastHTMLCellEnd();
         $this->cursorY = $end['y'];
@@ -244,9 +247,10 @@ final class MembershipCertificatePdf
     {
         $lines = array_filter([$letter->signerName, $letter->signerFunction]);
         $this->font('', self::LETTER_FONT_SIZE);
-        $lineHeight = $this->measure('X', $this->contentWidth);
+        // same leading as the text above, in mm
+        $lineHeight = self::LETTER_FONT_SIZE * self::LETTER_LINE_HEIGHT * 25.4 / 72;
 
-        $this->cursorY += 2 * self::SPACE;
+        // the HTML block already ends with its paragraph spacing
         if (! $this->hasSpace((1 + count($lines)) * $lineHeight + self::SIGNATURE_SPACE)) {
             $this->newPage();
         }
