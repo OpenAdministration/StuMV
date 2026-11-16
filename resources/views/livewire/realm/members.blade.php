@@ -68,7 +68,7 @@
                     </flux:table.cell>
                     @if($isAdmin)
                         <flux:table.cell>{{ $realm_member->getFirstAttribute('uid') }}</flux:table.cell>
-                        <flux:table.cell>
+                        <flux:table.cell class="tabular-nums">
                             @php($lastLogin = $realm_member->lastSuccessfulLogin())
                             @if($lastLogin)
                                 <span wire:key="last-login-{{ $realm_member->getFirstAttribute('uid') }}" wire:ignore x-data="localDateTime('{{ $lastLogin->toIso8601String() }}')">{{ $lastLogin->format('Y-m-d H:i') }} UTC</span>

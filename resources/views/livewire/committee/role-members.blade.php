@@ -116,15 +116,15 @@
                             {{ $displayName }}
                         @endif
                     </flux:table.cell>
-                    <flux:table.cell>{{ \Carbon\Carbon::parse($member->from)->format('Y-m-d') }}</flux:table.cell>
-                    <flux:table.cell>
+                    <flux:table.cell class="tabular-nums">{{ \Carbon\Carbon::parse($member->from)->format('Y-m-d') }}</flux:table.cell>
+                    <flux:table.cell class="tabular-nums">
                         @empty($member->until)
                             <flux:separator />
                         @else
                             {{ \Carbon\Carbon::parse($member->until)->format('Y-m-d') }}
                         @endempty
                     </flux:table.cell>
-                    <flux:table.cell>
+                    <flux:table.cell class="tabular-nums">
                         @empty($member->decided)
                             <flux:separator />
                         @else

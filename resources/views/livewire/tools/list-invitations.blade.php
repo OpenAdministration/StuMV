@@ -37,7 +37,7 @@
                                 <flux:separator />
                             @endforelse
                         </flux:table.cell>
-                        <flux:table.cell>{{ $invitation->expires_at->translatedFormat('d.m.Y') }}</flux:table.cell>
+                        <flux:table.cell class="tabular-nums">{{ $invitation->expires_at->translatedFormat('d.m.Y') }}</flux:table.cell>
                         <flux:table.cell>
                             <div class="flex justify-end items-center gap-2">
                                 <flux:button

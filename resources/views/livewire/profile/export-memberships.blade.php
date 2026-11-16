@@ -30,8 +30,8 @@
                                 </flux:table.cell>
                                 <flux:table.cell>{{ $row['role']->getFirstAttribute('description') }}</flux:table.cell>
                                 <flux:table.cell>{{ $row['role']->committee()->getFirstAttribute('description') }}</flux:table.cell>
-                                <flux:table.cell>{{ \Carbon\Carbon::parse($row['from'])->format('Y-m-d') }}</flux:table.cell>
-                                <flux:table.cell>
+                                <flux:table.cell class="tabular-nums">{{ \Carbon\Carbon::parse($row['from'])->format('Y-m-d') }}</flux:table.cell>
+                                <flux:table.cell class="tabular-nums">
                                     @if ($row['until'] != '')
                                         {{ \Carbon\Carbon::parse($row['until'])->format('Y-m-d') }}
                                     @else
