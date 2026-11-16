@@ -231,7 +231,8 @@ final class MembershipCertificatePdf
 
         // Rich text from the editor; the HTML renderer tags paragraphs and lists itself.
         $this->font('', self::LETTER_FONT_SIZE);
-        $this->pdf->addHTMLCell(CoverLetter::sanitizeBody($letter->body), self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+        $html = '<style>p, li { text-align: justify; line-height: 1.4; }</style>'.CoverLetter::sanitizeBody($letter->body);
+        $this->pdf->addHTMLCell($html, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
         $end = $this->pdf->getLastHTMLCellEnd();
         $this->cursorY = $end['y'];
 
