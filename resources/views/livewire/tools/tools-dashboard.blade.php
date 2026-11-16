@@ -3,7 +3,7 @@
         <flux:heading size="xl">{{ __('tools.tools') }}</flux:heading>
         <flux:text class="text-base">{{ __('tools.dashboard_explanation') }}</flux:text>
     </div>
-    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 sm:pb-8">
+    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <x-dashboard-tile
             :href="route('tools.compare-email-list', $uid)"
             icon="list-check"

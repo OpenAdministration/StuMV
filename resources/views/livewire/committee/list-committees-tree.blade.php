@@ -1,5 +1,5 @@
 <div class="max-w-7xl mx-auto w-full" wire:init="loadCommittees">
-    <div class="flex-col space-y-8 pb-6 sm:pb-8">
+    <div class="flex-col space-y-8">
         <x-list-committees-header :community="$community" :realm="$realm_uid" />
 
         <flux:field>

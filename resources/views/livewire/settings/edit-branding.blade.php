@@ -56,7 +56,7 @@
         </flux:fieldset>
     </div>
 
-    <form wire:submit="saveLoginNotice" class="pb-8">
+    <form wire:submit="saveLoginNotice">
         <flux:fieldset>
             <legend class="flex items-center gap-4">
                 {{ __('realms.branding.login_notice_heading') }}

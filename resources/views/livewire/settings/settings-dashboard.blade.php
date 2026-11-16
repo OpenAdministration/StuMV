@@ -2,7 +2,7 @@
     <div class="mb-8">
         <flux:heading size="xl">{{ __('realms.settings') }}</flux:heading>
     </div>
-    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 sm:pb-8">
+    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <x-dashboard-tile
             :href="route('realms.edit', $uid)"
             icon="landmark"

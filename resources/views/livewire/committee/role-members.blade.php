@@ -50,7 +50,7 @@
         />
     </flux:field>
 
-    <div class="pb-6 sm:pb-8">
+    <div>
         @if (! $ready)
             <div class="flex justify-center py-16">
                 <flux:icon.loading />

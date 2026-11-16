@@ -4,7 +4,7 @@
         <flux:text class="text-base">{{ __('identity_providers.explanation') }}</flux:text>
     </div>
 
-    <div class="pb-8">
+    <div>
         <flux:tab.group>
             <flux:tabs>
                 <flux:tab name="general">{{ __('identity_providers.tab_general') }}</flux:tab>

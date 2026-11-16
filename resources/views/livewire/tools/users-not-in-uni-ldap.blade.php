@@ -3,7 +3,7 @@
         <flux:heading size="xl">{{ __('tools.users_not_in_uni_ldap_headline') }}</flux:heading>
         <flux:text class="text-base">{{  __('tools.users_not_in_uni_ldap_explanation') }}</flux:text>
     </div>
-    <div class="pb-6 sm:pb-8 space-y-6">
+    <div class="space-y-6">
         <div>
             @if(!$comparisonCompleted)
                 <flux:button

@@ -21,7 +21,7 @@
         <flux:input icon="search" wire:model.live="search" clearable />
     </flux:field>
 
-    <div class="pb-8">
+    <div>
         @if($missingStatusIds !== '')
             {{-- Re-keyed per page/search so Alpine runs x-init again for newly shown rows. --}}
             <div class="hidden" wire:key="load-statuses-{{ $missingStatusIds }}" x-init="$wire.loadStatuses()"></div>

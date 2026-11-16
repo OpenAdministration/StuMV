@@ -21,7 +21,7 @@
         <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
 
-    <div class="pb-8">
+    <div>
         @if(! $ready)
             <div class="flex justify-center py-16">
                 <flux:icon.loading />

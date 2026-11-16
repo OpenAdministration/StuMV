@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto w-full flex-col space-y-8 pb-6 sm:pb-8" wire:init="loadMembers">
+<div class="max-w-7xl mx-auto w-full flex-col space-y-8" wire:init="loadMembers">
     <div class="flex flex-col sm:flex-row gap-6">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('realms.members_heading') }}</flux:heading>
@@ -27,7 +27,7 @@
         <flux:icon.loading />
     </div>
 
-    <div wire:loading.remove wire:target="loadMembers" class="pb-8">
+    <div wire:loading.remove wire:target="loadMembers">
         @if(count($realm_members) > 0)
             <flux:table>
                 <flux:table.columns>

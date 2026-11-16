@@ -4,7 +4,7 @@
         <flux:text class="text-base">{{ $name }}</flux:text>
     </div>
 
-    <form wire:submit="export" class="space-y-6 pb-8">
+    <form wire:submit="export" class="space-y-6">
         @if(count($memberships) > 0)
             <div class="flex gap-2">
                 <flux:button size="sm" icon="list-check" wire:click="selectAll">{{ __('profile.export_memberships_select_all') }}</flux:button>

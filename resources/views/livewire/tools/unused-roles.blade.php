@@ -7,7 +7,7 @@
         <flux:icon.loading />
     </div>
 
-    <div wire:loading.remove wire:target="loadUnusedRoles" class="pb-8">
+    <div wire:loading.remove wire:target="loadUnusedRoles">
         <flux:tab.group>
             <flux:tabs>
                 <flux:tab name="roles">{{ __('tools.roles') }}</flux:tab>

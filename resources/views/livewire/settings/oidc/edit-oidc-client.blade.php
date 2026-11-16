@@ -25,7 +25,7 @@
         </div>
     @else
         <div>
-            <x-livewire-form class="space-y-8 pb-8">
+            <x-livewire-form class="space-y-8">
                 <div>
                     <flux:heading size="xl" class="mb-4">{{ __('oidc_clients.edit_title') }}</flux:heading>
                     <flux:text class="text-base">{{ __('oidc_clients.explanation') }}</flux:text>

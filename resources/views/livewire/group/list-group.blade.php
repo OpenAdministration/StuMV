@@ -21,7 +21,7 @@
         <flux:input icon="search" wire:model.live="search" />
     </flux:field>
 
-    <div class="pb-8">
+    <div>
         @if(count($groups) > 0)
             <flux:table>
                 <flux:table.columns>

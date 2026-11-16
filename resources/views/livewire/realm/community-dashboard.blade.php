@@ -11,7 +11,7 @@
             @endif
         </div>
     @endcan
-    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 sm:pb-8">
+    <div class="grid auto-rows-fr grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         <x-dashboard-tile
             :href="route('profile', ['realm' => $uid, 'username' => auth()->user()->username])"
             icon="circle-user"

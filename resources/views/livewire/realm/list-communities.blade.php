@@ -38,7 +38,7 @@
         <flux:input icon="search" clearable wire:model.live="search" />
     </flux:field>
 
-    <div class="pb-8">
+    <div>
         @if(count($realms) > 0)
             <flux:table>
                 <flux:table.columns>

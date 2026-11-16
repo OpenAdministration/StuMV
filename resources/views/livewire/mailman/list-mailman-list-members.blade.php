@@ -31,7 +31,7 @@
         @endunless
     </div>
 
-    <div class="pb-6 sm:pb-8">
+    <div>
         @if(count($members) > 0)
             <flux:table>
                 <flux:table.columns>

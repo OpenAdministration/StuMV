@@ -23,7 +23,7 @@
         <flux:input wire:model.live.debounce="search" />
     </flux:field>
 
-    <div class="pb-8">
+    <div>
         @if(count($domains) > 0)
             <flux:table>
                 <flux:table.columns>

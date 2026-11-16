@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div class="pb-8">
+    <div>
         @if(count($providers) > 0)
             <flux:table>
                 <flux:table.columns>
