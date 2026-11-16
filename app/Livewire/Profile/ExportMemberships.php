@@ -32,8 +32,6 @@ class ExportMemberships extends Component
 
     public string $letterBody = '';
 
-    public string $senderName = '';
-
     public string $senderUnit = '';
 
     public string $senderEmail = '';
@@ -68,7 +66,6 @@ class ExportMemberships extends Component
         $contact = RealmContact::forRealm($this->realm_uid);
         $this->withCoverLetter = (bool) $contact?->letter_enabled;
         $this->recipient = CoverLetter::recipient($contact->letter_recipient ?? []);
-        $this->senderName = (string) ($contact?->letter_sender_name ?? $realm->getFirstAttribute('description'));
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) ($contact?->letter_sender_email ?? $contact?->email);
         $this->senderBuilding = (string) ($contact?->letter_sender_building ?? $contact?->office_building);
@@ -121,7 +118,6 @@ class ExportMemberships extends Component
                     ? $fail(__('validation.required', ['attribute' => __('profile.cover_letter_body')]))
                     : null,
             ],
-            'senderName' => ['exclude_unless:withCoverLetter,true', 'required', 'string', 'max:150'],
             'senderUnit' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
             'senderEmail' => ['exclude_unless:withCoverLetter,true', 'nullable', 'email', 'max:255'],
             'senderBuilding' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:255'],
@@ -140,7 +136,6 @@ class ExportMemberships extends Component
             ],
             [
                 'letterBody' => __('profile.cover_letter_body'),
-                'senderName' => __('profile.cover_letter_sender_name'),
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
                 'senderBuilding' => __('realms.contact_office_building'),
@@ -157,7 +152,7 @@ class ExportMemberships extends Component
             $logo = RealmBranding::forRealm($this->realm_uid)?->logo_id;
             $contact = RealmContact::forRealm($this->realm_uid);
             $letter = new CoverLetter(
-                trim($this->senderName),
+                (string) ($contact?->letter_sender_name ?? $community->getFirstAttribute('description')),
                 $contact,
                 CoverLetter::recipientAddress($this->recipient),
                 $this->letterBody,
