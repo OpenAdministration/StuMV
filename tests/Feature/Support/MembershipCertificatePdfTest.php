@@ -4,6 +4,7 @@ use App\Models\RealmContact;
 use App\Support\CoverLetter;
 use App\Support\MembershipCertificatePdf;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 function fakeMembership(string $role, string $committee): array
 {
@@ -87,6 +88,16 @@ test('a cover letter is put on its own page in front of the certificate', functi
         // phone, email and website in the info block and again in the footer
         ->and(substr_count($with, '/S /Link'))->toBe(6)
         ->and($with)->toContain('/URI (tel:03641930990)', '/URI (mailto:sprecher@example.test)', '/URI (https://sprecher.example.test)', '/URI (https://stura.example.test)');
+});
+
+test('an svg logo is embedded as vector graphic, its outline kept behind the fill', function (): void {
+    Storage::fake('public');
+    Storage::disk('public')->put('logo.svg', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100"><path d="M10 10 H190 V90 H10 Z" style="fill:#18181b;stroke:#ffffff;stroke-width:8;paint-order:stroke markers fill"/></svg>');
+    $letter = new CoverLetter('Studierendenrat', null, 'Landtag', '<p>Text</p>', logoPath: 'logo.svg');
+
+    $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [], $letter);
+
+    expect($pdf)->not->toContain('/Subtype /Image');
 });
 
 test('the letter body keeps emphasis and lists and drops everything else', function (): void {

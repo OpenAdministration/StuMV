@@ -545,7 +545,12 @@ final class MembershipCertificatePdf
             $raw = (string) $disk->get($path);
 
             if (str_contains(strtolower(substr($raw, 0, 1024)), '<svg')) {
-                // the library's own SVG parser paints nothing for many real-world logos
+                $width = $this->drawSvgLogo($raw, $right);
+                if ($width !== null) {
+                    return $width;
+                }
+
+                // the library's own SVG parser paints nothing for some logos, these get rasterized
                 if (! class_exists(\Imagick::class)) {
                     return 0.0;
                 }
@@ -578,6 +583,77 @@ final class MembershipCertificatePdf
             report($e);
 
             return 0.0;
+        }
+    }
+
+    /** Embeds an SVG logo as vector graphic; null when the library paints nothing of it. */
+    private function drawSvgLogo(string $raw, float $right): ?float
+    {
+        $dom = new \DOMDocument;
+        if (! @$dom->loadXML($raw, LIBXML_NONET) || ! $dom->documentElement instanceof \DOMElement) {
+            return null;
+        }
+
+        $root = $dom->documentElement;
+        $box = preg_split('/[\s,]+/', trim($root->getAttribute('viewBox'))) ?: [];
+        [$naturalWidth, $naturalHeight] = count($box) === 4
+            ? [(float) $box[2], (float) $box[3]]
+            : [(float) $root->getAttribute('width'), (float) $root->getAttribute('height')];
+        if ($naturalWidth <= 0 || $naturalHeight <= 0) {
+            return null;
+        }
+
+        $this->splitStrokeFirst($dom);
+
+        $width = min(self::LOGO_MAX_WIDTH, self::LOGO_HEIGHT * $naturalWidth / $naturalHeight);
+        $height = $width * $naturalHeight / $naturalWidth;
+
+        // an SVG names no font, so the importer would register the current one again
+        $this->font('', self::INFO_FONT_SIZE);
+        $oid = $this->pdf->addSVG('@'.$dom->saveXML(), $right - $width, self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP - $height, $width, $height);
+        $content = $this->pdf->getSetSVG($oid);
+
+        // without a fill or stroke operator nothing would show
+        if (! preg_match('/(^|\s)(f\*?|F|S|s|B\*?|b\*?)(\s|$)/', $content)) {
+            return null;
+        }
+
+        // decorative: the realm name is printed beside it
+        $this->artifact($content);
+
+        return $width;
+    }
+
+    /**
+     * The library ignores paint-order, so an outline meant to lie behind the fill
+     * (e.g. a halo for dark backgrounds) would cover it. Such elements become two:
+     * the outline alone, then the fill alone on top.
+     */
+    private function splitStrokeFirst(\DOMDocument $dom): void
+    {
+        $xpath = new \DOMXPath($dom);
+        foreach (iterator_to_array($xpath->query('//*[@style or @paint-order]') ?: []) as $element) {
+            if (! $element instanceof \DOMElement) {
+                continue;
+            }
+
+            $style = $element->getAttribute('style');
+            $order = preg_match('/paint-order\s*:\s*([^;]+)/', $style, $match) ? $match[1] : $element->getAttribute('paint-order');
+            if (! str_starts_with(trim($order), 'stroke')) {
+                continue;
+            }
+
+            $style = trim((string) preg_replace('/paint-order\s*:[^;]*;?/', '', $style), '; ');
+            $element->removeAttribute('paint-order');
+
+            $outline = $element->cloneNode(true);
+            if ($outline instanceof \DOMElement) {
+                $outline->removeAttribute('id');
+                $outline->setAttribute('style', ltrim($style.';fill:none', ';'));
+                $element->parentNode?->insertBefore($outline, $element);
+            }
+
+            $element->setAttribute('style', ltrim($style.';stroke:none', ';'));
         }
     }
 
