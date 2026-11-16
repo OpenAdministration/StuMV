@@ -60,7 +60,7 @@ final class MembershipCertificatePdf
 
     private const float RETURN_FONT_SIZE = 7.0;
 
-    private const float SENDER_FONT_SIZE = 12.0;
+    private const float SENDER_FONT_SIZE = 14.0;
 
     /** DIN 5008 form B, in mm from the top left paper corner. */
     private const float LETTERHEAD_RULE_Y = 33.0;
