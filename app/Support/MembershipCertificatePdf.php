@@ -335,8 +335,8 @@ final class MembershipCertificatePdf
             ]),
             $contact?->iban ? $column(__('profile.cover_letter_footer_bank'), [
                 [$contact->bank_name],
-                ['IBAN '.$contact->ibanLabel()],
-                [$contact->bic ? 'BIC '.$contact->bic : null],
+                ['IBAN: '.$contact->ibanLabel()],
+                [$contact->bic ? 'BIC: '.$contact->bic : null],
             ]) : [],
         ];
     }
