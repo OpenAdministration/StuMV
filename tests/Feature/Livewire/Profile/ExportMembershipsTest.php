@@ -263,6 +263,7 @@ test('the sender email is prefilled from the realm settings and can be changed',
 
     Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
         ->assertSet('senderEmail', 'stura@example.test')
+        ->assertSet('senderName', $community->getFirstAttribute('description'))
         ->set('withCoverLetter', true)
         ->set('recipient.organisation', 'Thüringer Landtag')
         ->set('letterBody', '<p>Text</p>')
@@ -289,6 +290,7 @@ test('the letter fields start out with the realm defaults', function (): void {
         'letter_sender_phone' => '03641 930991',
         'letter_enabled' => true,
         'letter_recipient' => ['organisation' => 'Landesamt'],
+        'letter_sender_name' => 'Studierendenrat der FSU',
         'letter_sender_unit' => 'Sprecher:innen',
         'letter_signer_function' => 'Sprecher:in',
         'letter_subject' => 'Tätigkeitsbescheinigung',
@@ -300,6 +302,7 @@ test('the letter fields start out with the realm defaults', function (): void {
         ->assertSet('withCoverLetter', true)
         ->assertSet('recipient.organisation', 'Landesamt')
         ->assertSet('recipient.city', '')
+        ->assertSet('senderName', 'Studierendenrat der FSU')
         ->assertSet('senderUnit', 'Sprecher:innen')
         ->assertSet('senderEmail', 'stura@example.test')
         ->assertSet('senderPhone', '03641 930991')

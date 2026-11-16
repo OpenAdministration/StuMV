@@ -6,6 +6,7 @@ return [
     'comment' => 'Bemerkung',
     'committee' => 'Gremium',
     'decision' => 'Beschluss',
+    'cover_letter_sender_name' => 'Absender-Organisation',
     'cover_letter_sender_unit' => 'Absender-Struktureinheit',
     'cover_letter_sender_unit_placeholder' => 'z. B. Sprecher:innen',
     'cover_letter_recipient_organisation' => 'Organisation',

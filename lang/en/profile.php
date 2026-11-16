@@ -6,6 +6,7 @@ return [
     'comment' => 'Comment',
     'committee' => 'Committee',
     'decision' => 'Decision',
+    'cover_letter_sender_name' => 'Sender organisation',
     'cover_letter_sender_unit' => 'Sending unit',
     'cover_letter_sender_unit_placeholder' => 'e.g. Speakers',
     'cover_letter_recipient_organisation' => 'Organisation',

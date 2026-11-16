@@ -76,6 +76,7 @@
                             <flux:fieldset>
                                 <legend class="px-1">{{ __('profile.cover_letter_sender') }}</legend>
                                 <div class="space-y-4 p-4">
+                                    <flux:input wire:model="senderName" :label="__('profile.cover_letter_sender_name')" />
                                     <flux:input wire:model="senderUnit" :label="__('profile.cover_letter_sender_unit')" :placeholder="__('profile.cover_letter_sender_unit_placeholder')" />
                                     <flux:input type="email" wire:model="senderEmail" :label="__('profile.cover_letter_sender_email')" />
                                     <flux:input type="tel" wire:model="senderPhone" :label="__('profile.cover_letter_sender_phone')" />

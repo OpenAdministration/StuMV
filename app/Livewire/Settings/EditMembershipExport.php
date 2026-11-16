@@ -19,6 +19,8 @@ class EditMembershipExport extends Component
     /** @var array<string, string> */
     public array $recipient = [];
 
+    public string $senderName = '';
+
     public string $senderUnit = '';
 
     public string $senderEmail = '';
@@ -31,7 +33,10 @@ class EditMembershipExport extends Component
 
     public string $letterBody = '';
 
-    /** Placeholders: the export falls back to the realm's contact details. */
+    /** Placeholders: the export falls back to the realm's name and contact details. */
+    #[Locked]
+    public string $realmName = '';
+
     #[Locked]
     public string $contactEmail = '';
 
@@ -45,12 +50,14 @@ class EditMembershipExport extends Component
         $contact = RealmContact::forRealm($this->uid);
         $this->withCoverLetter = (bool) $contact?->letter_enabled;
         $this->recipient = CoverLetter::recipient($contact->letter_recipient ?? []);
+        $this->senderName = (string) $contact?->letter_sender_name;
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) $contact?->letter_sender_email;
         $this->senderPhone = (string) $contact?->letter_sender_phone;
         $this->signerFunction = (string) $contact?->letter_signer_function;
         $this->subject = (string) $contact?->letter_subject;
         $this->letterBody = (string) $contact?->letter_body;
+        $this->realmName = (string) $realm->getFirstAttribute('description');
         $this->contactEmail = (string) $contact?->email;
         $this->contactPhone = (string) $contact?->phone;
     }
@@ -67,6 +74,7 @@ class EditMembershipExport extends Component
             [
                 'withCoverLetter' => ['boolean'],
                 ...CoverLetter::recipientRules('recipient'),
+                'senderName' => ['nullable', 'string', 'max:150'],
                 'senderUnit' => ['nullable', 'string', 'max:100'],
                 'senderEmail' => ['nullable', 'email', 'max:255'],
                 'senderPhone' => ['nullable', 'string', 'max:50'],
@@ -75,6 +83,7 @@ class EditMembershipExport extends Component
                 'letterBody' => ['nullable', 'string', 'max:20000'],
             ],
             attributes: [
+                'senderName' => __('profile.cover_letter_sender_name'),
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
                 'senderPhone' => __('profile.cover_letter_sender_phone'),
@@ -90,6 +99,7 @@ class EditMembershipExport extends Component
         RealmContact::updateOrCreate(['realm' => $this->uid], [
             'letter_enabled' => $this->withCoverLetter,
             'letter_recipient' => $recipient ?: null,
+            'letter_sender_name' => $clean($this->senderName),
             'letter_sender_unit' => $clean($this->senderUnit),
             'letter_sender_email' => $clean($this->senderEmail),
             'letter_sender_phone' => $clean($this->senderPhone),

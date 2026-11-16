@@ -50,8 +50,7 @@ final class MembershipCertificatePdf
     /** Table columns holding dates. */
     private const array DATE_COLUMNS = [2, 3];
 
-    /** Same size as the certificate table, so letter and certificate read as one document. */
-    private const float LETTER_FONT_SIZE = self::TABLE_FONT_SIZE;
+    private const float LETTER_FONT_SIZE = 11.0;
 
     /** Line height of the letter text and its closing, relative to the font size. */
     private const float LETTER_LINE_HEIGHT = 1.4;

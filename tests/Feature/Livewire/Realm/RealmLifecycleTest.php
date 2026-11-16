@@ -93,6 +93,7 @@ test('an admin can store defaults for cover letters', function (): void {
         ->set('withCoverLetter', true)
         ->set('recipient.organisation', 'Landesamt')
         ->set('recipient.city', 'Erfurt')
+        ->set('senderName', 'Studierendenrat der FSU')
         ->set('senderUnit', 'Sprecher:innen')
         ->set('senderEmail', 'sprecher@example.test')
         ->set('senderPhone', '03641 930991')
@@ -105,6 +106,7 @@ test('an admin can store defaults for cover letters', function (): void {
     $contact = RealmContact::forRealm($community->getShortCode());
     expect($contact->letter_enabled)->toBeTrue()
         ->and($contact->letter_recipient)->toBe(['organisation' => 'Landesamt', 'city' => 'Erfurt'])
+        ->and($contact->letter_sender_name)->toBe('Studierendenrat der FSU')
         ->and($contact->letter_sender_unit)->toBe('Sprecher:innen')
         ->and($contact->letter_sender_email)->toBe('sprecher@example.test')
         ->and($contact->letter_sender_phone)->toBe('03641 930991')
