@@ -34,6 +34,9 @@ final readonly class CoverLetter
         public ?string $signerName = null,
         public ?string $signerFunction = null,
         public ?string $subject = null,
+        /** Letterhead above the rule, both optional; without either the sender name is shown. */
+        public ?string $headerTitle = null,
+        public ?string $headerSubtitle = null,
     ) {}
 
     /** Editor HTML reduced to what the letter can print: paragraphs, emphasis and lists. */

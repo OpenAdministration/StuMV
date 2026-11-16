@@ -27,6 +27,8 @@ class RealmContact extends Model
         'bic',
         'letter_enabled',
         'letter_recipient',
+        'letter_header_title',
+        'letter_header_subtitle',
         'letter_sender_name',
         'letter_sender_unit',
         'letter_sender_building',

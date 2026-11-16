@@ -6,6 +6,13 @@
         </div>
         <div class="space-y-6">
             <flux:switch wire:model="withCoverLetter" :label="__('profile.cover_letter_toggle')" align="left" />
+            <flux:fieldset>
+                <legend>{{ __('profile.cover_letter_header') }}</legend>
+                <div class="grid gap-4 p-4 md:grid-cols-2">
+                    <flux:input wire:model="headerTitle" :label="__('profile.cover_letter_header_title')" :placeholder="$senderName ?: $realmName" />
+                    <flux:input wire:model="headerSubtitle" :label="__('profile.cover_letter_header_subtitle')" />
+                </div>
+            </flux:fieldset>
             <div class="grid gap-6 md:grid-cols-2 items-start">
                 <flux:fieldset>
                     <legend>{{ __('profile.cover_letter_recipient') }}</legend>

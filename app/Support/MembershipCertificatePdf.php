@@ -106,6 +106,8 @@ final class MembershipCertificatePdf
 
     private const float PAGE_NUMBER_FONT_SIZE = 10.0;
 
+    private const float HEADER_SUBTITLE_SIZE = self::LETTER_FONT_SIZE;
+
     /** Space between the footer and the rule above it. */
     private const float FOOTER_RULE_GAP = 3.0;
 
@@ -209,14 +211,23 @@ final class MembershipCertificatePdf
 
         $logoWidth = $this->drawLogo($letter->logoPath, $right);
         $nameWidth = $this->contentWidth - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
-        $this->font('B', self::SENDER_FONT_SIZE);
-        $metrics = $this->pdf->font->getCurrentFont();
-        $ascent = $metrics['ascent'] * $metrics['usize'] / $metrics['size'];
-        // lines a long name wraps to grow upwards, so the last one stays on the baseline
-        $extraLines = $this->measure($letter->senderName, $nameWidth) - $this->measure('X', $nameWidth);
-        $this->beginTag('P');
-        $this->text($letter->senderName, self::MARGIN_LEFT, self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP - $ascent - $extraLines, $nameWidth);
-        $this->endTag();
+        $baseline = self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP;
+        if ($letter->headerSubtitle !== null) {
+            $this->font('', self::HEADER_SUBTITLE_SIZE);
+            $baseline = $this->textAbove($letter->headerSubtitle, $baseline, $nameWidth);
+        }
+
+        // without either the sender name stands in, so the letterhead is never empty
+        $title = $letter->headerTitle ?? ($letter->headerSubtitle === null ? $letter->senderName : null);
+        if ($title !== null) {
+            $this->font('B', self::SENDER_FONT_SIZE);
+            // the subtitle follows like a further line of the title
+            if ($letter->headerSubtitle !== null) {
+                $baseline -= $this->measure('X', $nameWidth) + self::LINE_SPACING;
+            }
+
+            $this->textAbove($title, $baseline, $nameWidth);
+        }
         $this->artifact($this->pdf->graph->getLine(
             self::MARGIN_LEFT,
             self::LETTERHEAD_RULE_Y,
@@ -492,6 +503,23 @@ final class MembershipCertificatePdf
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * A paragraph whose last line sits on $baseline; lines a long text wraps to grow upwards.
+     * Returns the baseline of its first line.
+     */
+    private function textAbove(string $text, float $baseline, float $width): float
+    {
+        $metrics = $this->pdf->font->getCurrentFont();
+        $ascent = $metrics['ascent'] * $metrics['usize'] / $metrics['size'];
+        $top = $baseline - $ascent - ($this->measure($text, $width) - $this->measure('X', $width));
+
+        $this->beginTag('P');
+        $this->text($text, self::MARGIN_LEFT, $top, $width);
+        $this->endTag();
+
+        return $top + $ascent;
     }
 
     /** DIN 5008 fold marks at 105mm and 210mm, hole mark at 148.5mm. */

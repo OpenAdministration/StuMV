@@ -155,9 +155,10 @@ class ExportMemberships extends Component
         $letter = null;
         if ($this->withCoverLetter) {
             $logo = RealmBranding::forRealm($this->realm_uid)?->logo_id;
+            $contact = RealmContact::forRealm($this->realm_uid);
             $letter = new CoverLetter(
                 trim($this->senderName),
-                RealmContact::forRealm($this->realm_uid),
+                $contact,
                 CoverLetter::recipientAddress($this->recipient),
                 $this->letterBody,
                 $logo ? 'realm-branding/'.$logo : null,
@@ -170,6 +171,8 @@ class ExportMemberships extends Component
                 (string) auth()->user()->full_name,
                 trim($this->signerFunction) ?: null,
                 trim($this->subject) ?: null,
+                $contact?->letter_header_title,
+                $contact?->letter_header_subtitle,
             );
         }
 

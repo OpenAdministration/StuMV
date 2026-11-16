@@ -69,6 +69,8 @@ test('a cover letter is put on its own page in front of the certificate', functi
         signerName: 'Helen Würflein',
         signerFunction: 'Sprecherin',
         subject: 'Tätigkeitsbescheinigung',
+        headerTitle: 'Studierendenrat',
+        headerSubtitle: 'der Friedrich-Schiller-Universität Jena',
     );
 
     $without = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [fakeMembership('Rolle', 'Gremium')]);
@@ -76,9 +78,9 @@ test('a cover letter is put on its own page in front of the certificate', functi
 
     preg_match('#/Type /Pages .*?/Count (\d+)#s', $with, $pages);
 
-    // sender, return address, recipient, unit and four contact entries, date, subject, three paragraphs, closing, name and position
+    // title, subtitle, return address, recipient, unit and four contact entries, date, subject, three paragraphs, closing, name and position
     expect((int) $pages[1])->toBe(2)
-        ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(16)
+        ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(17)
         ->and(substr_count($with, '/S /H1'))->toBe(1)
         ->and(substr_count($with, '/S /TH'))->toBe(4)
         ->and(substr_count($with, '/S /LI'))->toBe(1)

@@ -19,6 +19,10 @@ class EditMembershipExport extends Component
     /** @var array<string, string> */
     public array $recipient = [];
 
+    public string $headerTitle = '';
+
+    public string $headerSubtitle = '';
+
     public string $senderName = '';
 
     public string $senderUnit = '';
@@ -62,6 +66,8 @@ class EditMembershipExport extends Component
         $contact = RealmContact::forRealm($this->uid);
         $this->withCoverLetter = (bool) $contact?->letter_enabled;
         $this->recipient = CoverLetter::recipient($contact->letter_recipient ?? []);
+        $this->headerTitle = (string) $contact?->letter_header_title;
+        $this->headerSubtitle = (string) $contact?->letter_header_subtitle;
         $this->senderName = (string) $contact?->letter_sender_name;
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) $contact?->letter_sender_email;
@@ -91,6 +97,8 @@ class EditMembershipExport extends Component
             [
                 'withCoverLetter' => ['boolean'],
                 ...CoverLetter::recipientRules('recipient'),
+                'headerTitle' => ['nullable', 'string', 'max:150'],
+                'headerSubtitle' => ['nullable', 'string', 'max:150'],
                 'senderName' => ['nullable', 'string', 'max:150'],
                 'senderUnit' => ['nullable', 'string', 'max:100'],
                 'senderEmail' => ['nullable', 'email', 'max:255'],
@@ -103,6 +111,8 @@ class EditMembershipExport extends Component
                 'letterBody' => ['nullable', 'string', 'max:20000'],
             ],
             attributes: [
+                'headerTitle' => __('profile.cover_letter_header_title'),
+                'headerSubtitle' => __('profile.cover_letter_header_subtitle'),
                 'senderName' => __('profile.cover_letter_sender_name'),
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
@@ -122,6 +132,8 @@ class EditMembershipExport extends Component
         RealmContact::updateOrCreate(['realm' => $this->uid], [
             'letter_enabled' => $this->withCoverLetter,
             'letter_recipient' => $recipient ?: null,
+            'letter_header_title' => $clean($this->headerTitle),
+            'letter_header_subtitle' => $clean($this->headerSubtitle),
             'letter_sender_name' => $clean($this->senderName),
             'letter_sender_unit' => $clean($this->senderUnit),
             'letter_sender_email' => $clean($this->senderEmail),
