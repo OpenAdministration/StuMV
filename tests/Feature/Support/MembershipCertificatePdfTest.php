@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\RealmContact;
+use App\Support\CoverLetter;
 use App\Support\MembershipCertificatePdf;
 
 function fakeMembership(string $role, string $committee): array
@@ -49,4 +51,38 @@ test('a certificate without memberships still has a table head', function (): vo
 
     expect(substr_count($pdf, '/S /TH'))->toBe(4)
         ->and($pdf)->not->toContain('/S /TD');
+});
+
+test('a cover letter is put on its own page in front of the certificate', function (): void {
+    $letter = new CoverLetter(
+        'Studierendenrat',
+        new RealmContact(['street' => 'Carl-Zeiss-Straße', 'house_number' => '3', 'postal_code' => '07743', 'city' => 'Jena', 'email' => 'stura@example.test', 'phone' => '03641 930990', 'website' => 'https://stura.example.test']),
+        "Thüringer Landtag\n99096 Erfurt",
+        '<p>Sehr geehrte Damen und Herren,</p><p>anbei die <em>Übersicht</em>:</p><ul><li>Gremium</li></ul><p>Mit freundlichen Grüßen</p><script>alert(1)</script>',
+        senderUnit: 'Sprecher:innen',
+        email: 'sprecher@example.test',
+        signerName: 'Helen Würflein',
+        signerFunction: 'Sprecherin',
+        subject: 'Tätigkeitsbescheinigung',
+    );
+
+    $without = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [fakeMembership('Rolle', 'Gremium')]);
+    $with = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [fakeMembership('Rolle', 'Gremium')], $letter);
+
+    preg_match('#/Type /Pages .*?/Count (\d+)#s', $with, $pages);
+
+    // sender, return address, recipient, unit and four contact entries, date, subject, three paragraphs, closing, name and position
+    expect((int) $pages[1])->toBe(2)
+        ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(16)
+        ->and(substr_count($with, '/S /H1'))->toBe(1)
+        ->and(substr_count($with, '/S /TH'))->toBe(4)
+        ->and(substr_count($with, '/S /LI'))->toBe(1);
+});
+
+test('the letter body keeps emphasis and lists and drops everything else', function (): void {
+    expect(CoverLetter::sanitizeBody('<p onclick="x"><strong>a</strong><a href="https://x">b</a></p><script>c</script><ul><li>d</li></ul>'))
+        ->toBe('<p><strong>a</strong>b</p><ul><li>d</li></ul>')
+        ->and(CoverLetter::bodyIsEmpty('<p>&nbsp;</p>'))->toBeTrue()
+        ->and(CoverLetter::bodyIsEmpty('<p>x</p>'))->toBeFalse()
+        ->and(CoverLetter::bodyIsEmpty('<p></p>'))->toBeTrue();
 });

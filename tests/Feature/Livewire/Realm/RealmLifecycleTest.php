@@ -9,6 +9,7 @@ use App\Livewire\Settings\EditRealm;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\Invitation;
+use App\Models\RealmContact;
 use App\Models\RoleMembership;
 use App\Models\User;
 use App\Models\UserAdditionalEmail;
@@ -53,6 +54,54 @@ test('an admin can rename their realm', function (): void {
         ->assertHasNoErrors();
 
     expect(Community::findByUid($uid)->getFirstAttribute('description'))->toBe('Renamed Realm');
+});
+
+test('an admin can store the address and contact details of their realm', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(EditRealm::class, ['realm' => $community])
+        ->set('street', 'Carl-Zeiss-Straße')
+        ->set('house_number', '3')
+        ->set('postal_code', '07743')
+        ->set('city', 'Jena')
+        ->set('email', 'stura@example.test')
+        ->set('phone', '03641 930990')
+        ->set('website', 'https://stura.example.test/')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $contact = RealmContact::forRealm($community->getShortCode());
+    expect($contact->streetLine())->toBe('Carl-Zeiss-Straße 3')
+        ->and($contact->cityLine())->toBe('07743 Jena')
+        ->and($contact->websiteLabel())->toBe('stura.example.test');
+
+    Livewire::test(EditRealm::class, ['realm' => $community])
+        ->assertSet('city', 'Jena')
+        ->set('email', 'not-an-address')
+        ->set('website', 'stura.example.test')
+        ->call('save')
+        ->assertHasErrors(['email', 'website']);
+});
+
+test('an admin can store defaults for cover letters', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(EditRealm::class, ['realm' => $community])
+        ->set('letter_sender_unit', 'Sprecher:innen')
+        ->set('letter_subject', 'Tätigkeitsbescheinigung')
+        ->set('letter_body', '<p>Sehr geehrte Damen und Herren,</p><script>alert(1)</script>')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $contact = RealmContact::forRealm($community->getShortCode());
+    expect($contact->letter_sender_unit)->toBe('Sprecher:innen')
+        ->and($contact->letter_subject)->toBe('Tätigkeitsbescheinigung')
+        ->and($contact->letter_body)->toBe('<p>Sehr geehrte Damen und Herren,</p>');
+
+    Livewire::test(EditRealm::class, ['realm' => $community])
+        ->assertSet('letter_sender_unit', 'Sprecher:innen');
 });
 
 test('a super admin can delete a realm once the shortcode is confirmed', function (): void {
@@ -109,6 +158,7 @@ test('deleting a realm also purges its DB-side data', function (): void {
         'expires_at' => now()->addHour(),
     ]);
     DB::table('sessions')->insert(['id' => Str::random(40), 'user_id' => $member->id, 'payload' => '', 'last_activity' => time()]);
+    RealmContact::create(['realm' => $uid, 'city' => 'Jena']);
 
     actingAsSuperAdmin();
 
@@ -129,7 +179,8 @@ test('deleting a realm also purges its DB-side data', function (): void {
         ->and(Token::find($token->id))->toBeNull()
         ->and(RefreshToken::where('access_token_id', $token->id)->exists())->toBeFalse()
         ->and(DB::table('oauth_device_codes')->where('client_id', $client->id)->exists())->toBeFalse()
-        ->and(DB::table('sessions')->where('user_id', $member->id)->exists())->toBeFalse();
+        ->and(DB::table('sessions')->where('user_id', $member->id)->exists())->toBeFalse()
+        ->and(RealmContact::forRealm($uid))->toBeNull();
 });
 
 test('the admin realm cannot be deleted', function (): void {

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Com\Tecnick\Pdf\Tcpdf;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Draws the membership certificate directly onto the page as tagged PDF/UA-2,
@@ -43,6 +44,54 @@ final class MembershipCertificatePdf
 
     private const string FONT = 'adwaitasans';
 
+    /** Tabular figures, so dates line up in their columns. */
+    private const string FONT_TABULAR = 'adwaitasanstabular';
+
+    /** Table columns holding dates. */
+    private const array DATE_COLUMNS = [2, 3];
+
+    private const float LETTER_FONT_SIZE = 11.0;
+
+    /** 10pt without extra leading gives the 4.23mm DIN line, so six lines fit the address zone. */
+    private const float ADDRESS_FONT_SIZE = 10.0;
+
+    private const float INFO_FONT_SIZE = 8.5;
+
+    private const float RETURN_FONT_SIZE = 7.0;
+
+    private const float SENDER_FONT_SIZE = 12.0;
+
+    /** DIN 5008 form B, in mm from the top left paper corner. */
+    private const float LETTERHEAD_RULE_Y = 33.0;
+
+    /** Name baseline and logo bottom both sit this far above the letterhead rule. */
+    private const float LETTERHEAD_GAP = 2.0;
+
+    private const float RECIPIENT_Y = 62.7;
+
+    private const float ADDRESS_WIDTH = 80.0;
+
+    private const float INFO_X = 125.0;
+
+    private const float INFO_Y = 50.0;
+
+    /** Two blank lines (4.23mm each) below the 90mm address field. */
+    private const float SUBJECT_Y = 98.46;
+
+    /** One line in DIN 5008 terms. */
+    private const float DIN_LINE = 4.23;
+
+    private const float LOGO_HEIGHT = 14.0;
+
+    private const float LOGO_MAX_WIDTH = 60.0;
+
+    private const int LOGO_DPI = 600;
+
+    private const float ICON_SIZE = 3.2;
+
+    /** Room for a handwritten signature, three blank lines in DIN 5008. */
+    private const float SIGNATURE_SPACE = 15.0;
+
     private const string COLOR_BLACK = '#000000';
 
     private const string COLOR_ZINC_500 = '#71717b';
@@ -64,7 +113,7 @@ final class MembershipCertificatePdf
     /**
      * @param  array<int, array{role: mixed, from: mixed, until: mixed}>  $memberships
      */
-    public function render(string $title, string $fullName, ?string $community, array $memberships): string
+    public function render(string $title, string $fullName, ?string $community, array $memberships, ?CoverLetter $letter = null): string
     {
         if (! defined('K_PATH_FONTS')) {
             define('K_PATH_FONTS', resource_path('fonts/pdf'));
@@ -86,14 +135,265 @@ final class MembershipCertificatePdf
         $this->contentWidth = $this->pageWidth - self::MARGIN_LEFT - self::MARGIN_RIGHT;
         $this->cursorY = self::MARGIN_TOP;
 
-        $this->drawHeader($title, $fullName, $community);
+        if ($letter !== null) {
+            $this->drawLetter($letter);
+            $this->newPage();
+        }
+
+        // the cover letter carries the date already
+        $this->drawHeader($title, $fullName, $community, withDate: $letter === null);
         $this->drawTable($memberships);
         $this->drawPageNumbers();
 
         return $this->pdf->getOutPDFString();
     }
 
-    private function drawHeader(string $title, string $fullName, ?string $community): void
+    private function drawLetter(CoverLetter $letter): void
+    {
+        $right = $this->pageWidth - self::MARGIN_RIGHT;
+        $contact = $letter->contact;
+
+        $this->drawFoldMarks();
+
+        $logoWidth = $this->drawLogo($letter->logoPath, $right);
+        $this->font('B', self::SENDER_FONT_SIZE);
+        $this->beginTag('P');
+        $metrics = $this->pdf->font->getCurrentFont();
+        $ascent = $metrics['ascent'] * $metrics['usize'] / $metrics['size'];
+        $this->text($letter->senderName, self::MARGIN_LEFT, self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP - $ascent, $this->contentWidth - $logoWidth - 5.0);
+        $this->endTag();
+        $this->artifact($this->pdf->graph->getLine(
+            self::MARGIN_LEFT,
+            self::LETTERHEAD_RULE_Y,
+            $right,
+            self::LETTERHEAD_RULE_Y,
+            ['lineWidth' => 0.2, 'lineColor' => self::COLOR_BLACK],
+        ));
+
+        $returnAddress = implode(' | ', array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
+        // DIN 5008 wants it on one line, so long names get a smaller size
+        $size = self::RETURN_FONT_SIZE;
+        $this->font('', $size);
+        while ($size > 5.0 && $this->measureWidth($returnAddress) > self::ADDRESS_WIDTH) {
+            $size -= 0.5;
+            $this->font('', $size);
+        }
+        $this->beginTag('P');
+        // bottom line of the notes zone, right above the address
+        $this->text($returnAddress, self::MARGIN_LEFT, self::RECIPIENT_Y - $this->measure('X', self::ADDRESS_WIDTH) - 0.5, self::ADDRESS_WIDTH);
+        $this->endTag();
+
+        $this->font('', self::ADDRESS_FONT_SIZE);
+        $this->beginTag('P');
+        $this->text(trim($letter->recipient), self::MARGIN_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: 0.0);
+        $this->endTag();
+
+        $infoBottom = $this->drawInfoBlock($letter, $right);
+
+        $date = Date::now()->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'Y-m-d');
+        // right-aligned on the line above the subject, unless the info block reaches further down
+        $this->font('', self::LETTER_FONT_SIZE);
+        $dateY = max(self::SUBJECT_Y - 2 * self::DIN_LINE, $infoBottom + self::SPACE);
+        $this->beginTag('P');
+        $this->text(implode(', ', array_filter([$contact?->city, $date])), self::INFO_X, $dateY, $right - self::INFO_X, halign: 'R');
+        $this->endTag();
+        $this->cursorY = max(self::SUBJECT_Y, $dateY + $this->lastHeight() + self::DIN_LINE);
+
+        // DIN 5008: bold, without a "Subject:" label, followed by two blank lines
+        if ($letter->subject !== null) {
+            $this->font('B', self::LETTER_FONT_SIZE);
+            $this->beginTag('P');
+            $this->text($letter->subject, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+            $this->endTag();
+            $this->cursorY += $this->lastHeight() + 2 * self::DIN_LINE;
+        }
+
+        // Rich text from the editor; the HTML renderer tags paragraphs and lists itself.
+        $this->font('', self::LETTER_FONT_SIZE);
+        $this->pdf->addHTMLCell(CoverLetter::sanitizeBody($letter->body), self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+        $end = $this->pdf->getLastHTMLCellEnd();
+        $this->cursorY = $end['y'];
+
+        $this->drawSignature($letter);
+    }
+
+    /** Closing, room to sign, and the signer below it - kept together on one page. */
+    private function drawSignature(CoverLetter $letter): void
+    {
+        $lines = array_filter([$letter->signerName, $letter->signerFunction]);
+        $this->font('', self::LETTER_FONT_SIZE);
+        $lineHeight = $this->measure('X', $this->contentWidth);
+
+        $this->cursorY += 2 * self::SPACE;
+        if (! $this->hasSpace((1 + count($lines)) * $lineHeight + self::SIGNATURE_SPACE)) {
+            $this->newPage();
+        }
+
+        $this->beginTag('P');
+        $this->text(__('profile.cover_letter_closing'), self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+        $this->endTag();
+        $this->cursorY += $lineHeight + self::SIGNATURE_SPACE;
+
+        foreach ($lines as $line) {
+            $this->beginTag('P');
+            $this->text($line, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+            $this->endTag();
+            $this->cursorY += $lineHeight;
+        }
+    }
+
+    /**
+     * Sender details in the right column of the letterhead, each with an icon
+     * behind a vertical rule. Returns where the block ends.
+     */
+    private function drawInfoBlock(CoverLetter $letter, float $right): float
+    {
+        $contact = $letter->contact;
+        $items = array_filter([
+            'network' => array_filter([$letter->senderUnit]),
+            'house' => array_filter([$contact?->streetLine(), $contact?->cityLine()]),
+            'phone' => array_filter([$contact?->phone]),
+            'mail' => array_filter([$letter->email]),
+            'globe' => array_filter([$contact?->websiteLabel()]),
+        ]);
+
+        if ($items === []) {
+            return self::INFO_Y;
+        }
+
+        $ruleX = $right - self::ICON_SIZE - 2.0;
+        $textRight = $ruleX - 2.0;
+        $y = self::INFO_Y;
+
+        foreach ($items as $icon => $lines) {
+            $this->font($icon === 'network' ? 'B' : '', self::INFO_FONT_SIZE);
+            $lineHeight = $this->measure('X', $this->contentWidth);
+
+            $this->beginTag('P');
+            $this->text(implode("\n", $lines), self::INFO_X, $y, $textRight - self::INFO_X, self::COLOR_BLACK, 'R');
+            $this->endTag();
+            $height = $this->lastHeight();
+
+            $this->drawIcon($icon, $right - self::ICON_SIZE, $y + ($lineHeight - self::ICON_SIZE) / 2);
+            $y += $height + self::SPACE;
+        }
+
+        $this->artifact($this->pdf->graph->getLine(
+            $ruleX,
+            self::INFO_Y,
+            $ruleX,
+            $y - self::SPACE,
+            ['lineWidth' => 0.2, 'lineColor' => self::COLOR_BLACK],
+        ));
+
+        return $y - self::SPACE;
+    }
+
+    /** DIN 5008 fold marks at 105mm and 210mm, hole mark at 148.5mm. */
+    private function drawFoldMarks(): void
+    {
+        foreach ([[105.0, 4.0], [148.5, 6.0], [210.0, 4.0]] as [$y, $length]) {
+            $this->artifact($this->pdf->graph->getLine(5.0, $y, 5.0 + $length, $y, ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR]));
+        }
+    }
+
+    /**
+     * The realm logo, right-aligned in the letterhead. A logo that cannot be
+     * read must never break the export, so it is reported and left out.
+     */
+    private function drawLogo(?string $path, float $right): float
+    {
+        $disk = Storage::disk('public');
+        if ($path === null || ! $disk->exists($path)) {
+            return 0.0;
+        }
+
+        try {
+            $raw = (string) $disk->get($path);
+
+            if (str_contains(strtolower(substr($raw, 0, 1024)), '<svg')) {
+                // the library's own SVG parser paints nothing for many real-world logos
+                if (! class_exists(\Imagick::class)) {
+                    return 0.0;
+                }
+                $raw = $this->rasterizeSvg($raw);
+            } elseif (str_ends_with(strtolower($path), '.webp')) {
+                $raw = $this->webpToPng($raw);
+            }
+
+            $size = @getimagesizefromstring($raw);
+            if ($size === false || $size[1] <= 0) {
+                return 0.0;
+            }
+
+            $width = min(self::LOGO_MAX_WIDTH, self::LOGO_HEIGHT * $size[0] / $size[1]);
+            $height = $width * $size[1] / $size[0];
+            $iid = $this->pdf->image->add('@'.$raw);
+
+            // decorative: the realm name is printed beside it
+            $this->artifact($this->pdf->image->getSetImage(
+                $iid,
+                $right - $width,
+                self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP - $height,
+                $width,
+                $height,
+                $this->pageHeight,
+            ));
+
+            return $width;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return 0.0;
+        }
+    }
+
+    private function rasterizeSvg(string $raw): string
+    {
+        $image = new \Imagick;
+        $image->setBackgroundColor(new \ImagickPixel('transparent'));
+        $image->readImageBlob($raw);
+        $image->setImageFormat('png');
+        $image->resizeImage(0, (int) round(self::LOGO_HEIGHT / 25.4 * self::LOGO_DPI), \Imagick::FILTER_LANCZOS, 1);
+
+        return $image->getImageBlob();
+    }
+
+    private function webpToPng(string $raw): string
+    {
+        $image = imagecreatefromstring($raw);
+        if ($image === false) {
+            throw new \RuntimeException('Unreadable logo');
+        }
+
+        imagesavealpha($image, true);
+        ob_start();
+        imagepng($image);
+
+        return (string) ob_get_clean();
+    }
+
+    /** Draws a Lucide icon of the project as an artifact - the text beside it says the same. */
+    private function drawIcon(string $name, float $x, float $y): void
+    {
+        $blade = (string) file_get_contents(resource_path("views/flux/icon/{$name}.blade.php"));
+        preg_match_all('#<(path|rect|circle|line|polyline)\b([^>]*)/>#', $blade, $matches, PREG_SET_ORDER);
+
+        $body = '';
+        foreach ($matches as $element) {
+            $body .= '<'.$element[1].$element[2].' fill="none" stroke="'.self::COLOR_BLACK
+                .'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+        }
+
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">'.$body.'</svg>';
+
+        // an icon names no font, so the SVG importer would register the current one again
+        $this->font('', self::INFO_FONT_SIZE);
+        $oid = $this->pdf->addSVG('@'.$svg, $x, $y, self::ICON_SIZE, self::ICON_SIZE);
+        $this->artifact($this->pdf->getSetSVG($oid));
+    }
+
+    private function drawHeader(string $title, string $fullName, ?string $community, bool $withDate): void
     {
         $this->font('B', self::HEADING_SIZE);
         $this->beginTag('H1');
@@ -101,7 +401,7 @@ final class MembershipCertificatePdf
         $this->endTag();
         $this->cursorY += $this->lastHeight() + self::SPACE;
 
-        $meta = implode(' | ', array_filter([$fullName, $community, date('Y-m-d')]));
+        $meta = implode(' | ', array_filter([$fullName, $community, $withDate ? date('Y-m-d') : null]));
         $this->font('', self::META_FONT_SIZE);
         $this->beginTag('P');
         $this->text($meta, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth, self::COLOR_ZINC_600);
@@ -131,9 +431,9 @@ final class MembershipCertificatePdf
                 $row['until'] != '' ? Date::parse($row['until'])->format('Y-m-d') : __('profile.today'),
             ];
 
-            $this->font('', self::TABLE_FONT_SIZE);
             $rowHeight = 0.0;
             foreach ($columns as $i => $column) {
+                $this->cellFont($i);
                 $rowHeight = max($rowHeight, $this->measure($cells[$i], $column['width'] - 2 * self::CELL_PADDING));
             }
             $rowHeight += 2 * self::CELL_PADDING;
@@ -150,9 +450,9 @@ final class MembershipCertificatePdf
             }
 
             $top = $this->cursorY;
-            $this->font('', self::TABLE_FONT_SIZE);
             $this->beginTag('TR');
             foreach ($columns as $i => $column) {
+                $this->cellFont($i);
                 $this->beginTag('TD', [], true);
                 $this->text(
                     $cells[$i],
@@ -185,7 +485,7 @@ final class MembershipCertificatePdf
      */
     private function columnLayout(): array
     {
-        $this->font('', self::TABLE_FONT_SIZE);
+        $this->font('', self::TABLE_FONT_SIZE, self::FONT_TABULAR);
         $dateWidth = ceil($this->measureWidth('0000-00-00')) + 2 * self::CELL_PADDING + 1.0;
         $textWidth = ($this->contentWidth - 2 * $dateWidth) / 2;
 
@@ -320,12 +620,17 @@ final class MembershipCertificatePdf
         $this->cursorY = self::MARGIN_TOP;
     }
 
-    private function font(string $style, float $size): void
+    private function font(string $style, float $size, string $family = self::FONT): void
     {
-        $this->pdf->font->insert($this->pdf->pon, self::FONT, $style, $size);
+        $this->pdf->font->insert($this->pdf->pon, $family, $style, $size);
     }
 
-    private function text(string $txt, float $x, float $y, float $width, string $color = self::COLOR_BLACK): void
+    private function cellFont(int $column): void
+    {
+        $this->font('', self::TABLE_FONT_SIZE, in_array($column, self::DATE_COLUMNS, true) ? self::FONT_TABULAR : self::FONT);
+    }
+
+    private function text(string $txt, float $x, float $y, float $width, string $color = self::COLOR_BLACK, string $halign = 'L', float $linespace = self::LINE_SPACING): void
     {
         if ($txt === '') {
             return;
@@ -338,7 +643,8 @@ final class MembershipCertificatePdf
             posx: $x,
             posy: $y,
             width: $width,
-            linespace: self::LINE_SPACING,
+            linespace: $linespace,
+            halign: $halign,
             jlast: false,
             drawcell: false,
         );

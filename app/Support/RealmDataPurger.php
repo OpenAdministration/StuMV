@@ -9,6 +9,7 @@ use App\Models\Invitation;
 use App\Models\PassportClient;
 use App\Models\ProfilePicture;
 use App\Models\RealmBranding;
+use App\Models\RealmContact;
 use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
 use App\Models\User;
@@ -64,6 +65,8 @@ class RealmDataPurger
             }
 
             DB::afterCommit(fn () => Storage::disk('public')->delete($files));
+
+            RealmContact::where('realm', $uid)->delete();
 
             // Child identity_provider_role_mappings rows cascade via their own
             // FK (see 2026_07_20_000006_create_realm_identity_providers_table).

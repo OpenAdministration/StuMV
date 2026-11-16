@@ -49,7 +49,7 @@ class MembershipCertificate
      *
      * @param  array<int, int>|null  $ids
      */
-    public static function pdf(string $realmUid, string $username, ?string $communityName = null, ?array $ids = null): string
+    public static function pdf(string $realmUid, string $username, ?string $communityName = null, ?array $ids = null, ?CoverLetter $letter = null): string
     {
         $user = User::query()->in(Community::findOrFailByUid($realmUid)->peopleDn())->where('uid', '=', $username)->first() ?? abort(404);
 
@@ -61,15 +61,16 @@ class MembershipCertificate
                 self::memberships($realmUid, $username, false),
                 fn (array $row): bool => $ids === null || in_array($row['id'], $ids, true),
             )),
+            $letter,
         );
     }
 
     /**
      * @param  array<int, int>|null  $ids
      */
-    public static function download(string $realmUid, string $username, ?string $communityName, string $filename, ?array $ids = null): StreamedResponse
+    public static function download(string $realmUid, string $username, ?string $communityName, string $filename, ?array $ids = null, ?CoverLetter $letter = null): StreamedResponse
     {
-        $pdf = self::pdf($realmUid, $username, $communityName, $ids);
+        $pdf = self::pdf($realmUid, $username, $communityName, $ids, $letter);
 
         return response()->streamDownload(function () use ($pdf): void {
             echo $pdf;

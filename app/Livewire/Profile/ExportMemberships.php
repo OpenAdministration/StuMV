@@ -5,6 +5,9 @@ namespace App\Livewire\Profile;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Livewire\Concerns\SortsMemberships;
+use App\Models\RealmBranding;
+use App\Models\RealmContact;
+use App\Support\CoverLetter;
 use App\Support\MembershipCertificate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -22,6 +25,21 @@ class ExportMemberships extends Component
     /** @var array<int, string> */
     public array $selected = [];
 
+    public bool $withCoverLetter = false;
+
+    /** @var array<string, string> */
+    public array $recipient = [];
+
+    public string $letterBody = '';
+
+    public string $senderUnit = '';
+
+    public string $senderEmail = '';
+
+    public string $signerFunction = '';
+
+    public string $subject = '';
+
     /** Where "cancel" leads: the profile or the member list this page was opened from. */
     #[Locked]
     public string $backUrl;
@@ -36,6 +54,13 @@ class ExportMemberships extends Component
         $previous = url()->previous();
         $this->backUrl = $previous !== url()->current() && str_starts_with($previous, url('/')) ? $previous : $fallback;
 
+        // the realm settings hold the defaults a letter starts out with
+        $contact = RealmContact::forRealm($this->realm_uid);
+        $this->senderEmail = (string) $contact?->email;
+        $this->senderUnit = (string) $contact?->letter_sender_unit;
+        $this->subject = (string) $contact?->letter_subject;
+        $this->recipient = CoverLetter::recipient();
+        $this->letterBody = (string) $contact?->letter_body;
         $this->selectAll();
     }
 
@@ -59,6 +84,7 @@ class ExportMemberships extends Component
         return view('livewire.profile.export-memberships', [
             'memberships' => $this->sortMemberships(MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false)),
             'name' => $user->getFirstAttribute('givenName').' '.$user->getFirstAttribute('sn'),
+            'hasContact' => RealmContact::forRealm($this->realm_uid) !== null,
         ])->title(__('profile.export_memberships_title'));
     }
 
@@ -67,10 +93,53 @@ class ExportMemberships extends Component
         $community = Community::findOrFailByUid($this->realm_uid);
         $this->authorizeExport($community, $this->currentUsername);
 
+        $rules = [
+            'selected' => ['required', 'array', 'min:1'],
+            ...CoverLetter::recipientRules('recipient', ['exclude_unless:withCoverLetter,true']),
+            'letterBody' => [
+                'exclude_unless:withCoverLetter,true', 'required', 'string', 'max:20000',
+                // the editor submits <p></p> when empty
+                fn (string $attribute, mixed $value, \Closure $fail) => CoverLetter::bodyIsEmpty((string) $value)
+                    ? $fail(__('validation.required', ['attribute' => __('profile.cover_letter_body')]))
+                    : null,
+            ],
+            'senderUnit' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
+            'senderEmail' => ['exclude_unless:withCoverLetter,true', 'nullable', 'email', 'max:255'],
+            'signerFunction' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
+            'subject' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:150'],
+        ];
+
         $this->validate(
-            ['selected' => ['required', 'array', 'min:1']],
-            ['selected.required' => __('profile.export_memberships_none_selected'), 'selected.min' => __('profile.export_memberships_none_selected')],
+            $rules,
+            [
+                'selected.required' => __('profile.export_memberships_none_selected'),
+                'selected.min' => __('profile.export_memberships_none_selected'),
+            ],
+            [
+                'letterBody' => __('profile.cover_letter_body'),
+                'senderUnit' => __('profile.cover_letter_sender_unit'),
+                'senderEmail' => __('profile.cover_letter_sender_email'),
+                'signerFunction' => __('profile.cover_letter_signer_function'),
+                'subject' => __('profile.cover_letter_subject'),
+            ],
         );
+
+        $letter = null;
+        if ($this->withCoverLetter) {
+            $logo = RealmBranding::forRealm($this->realm_uid)?->logo_id;
+            $letter = new CoverLetter(
+                (string) $community->getFirstAttribute('description'),
+                RealmContact::forRealm($this->realm_uid),
+                CoverLetter::recipientAddress($this->recipient),
+                $this->letterBody,
+                $logo ? 'realm-branding/'.$logo : null,
+                trim($this->senderUnit) ?: null,
+                trim($this->senderEmail) ?: null,
+                (string) auth()->user()->full_name,
+                trim($this->signerFunction) ?: null,
+                trim($this->subject) ?: null,
+            );
+        }
 
         return MembershipCertificate::download(
             $this->realm_uid,
@@ -78,6 +147,7 @@ class ExportMemberships extends Component
             $community->getFirstAttribute('description'),
             strtolower(trans('profile.memberships')).'_'.$this->currentUsername.'.pdf',
             array_map(intval(...), $this->selected),
+            $letter,
         );
     }
 

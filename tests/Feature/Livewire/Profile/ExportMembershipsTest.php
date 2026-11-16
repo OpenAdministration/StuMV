@@ -2,7 +2,9 @@
 
 use App\Ldap\Community;
 use App\Livewire\Profile\ExportMemberships;
+use App\Models\RealmContact;
 use App\Models\RoleMembership;
+use App\Support\CoverLetter;
 use App\Support\MembershipCertificate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -184,4 +186,113 @@ test('sorting keeps the selection and ignores unknown columns', function (): voi
         ->call('sortBy', 'comment')
         ->assertSet('sortField', 'committee')
         ->assertSet('selected', [(string) $active->id]);
+});
+
+test('a cover letter needs a text, every address field is optional', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->set('withCoverLetter', true)
+        // an emptied editor still submits a paragraph
+        ->set('letterBody', '<p></p>')
+        ->call('export')
+        ->assertHasErrors(['letterBody'])
+        ->assertHasNoErrors(['recipient.organisation', 'recipient.name'])
+        ->set('letterBody', '<p>Text</p>')
+        ->call('export')
+        ->assertHasNoErrors();
+});
+
+test('the address fields are put together in DIN 5008 order', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+
+    $component = Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->set('recipient', [
+            'organisation' => 'Universität',
+            'name' => 'Referat Finanzen',
+            'street' => 'Hauptstraße',
+            'house_number' => '1',
+            'postal_code' => '1010',
+            'city' => 'Wien',
+            'country' => 'Österreich',
+        ]);
+
+    $address = CoverLetter::recipientAddress($component->get('recipient'));
+
+    expect($address)->toBe("Universität\nReferat Finanzen\nHauptstraße 1\n1010 Wien\nÖSTERREICH");
+});
+
+test('without a cover letter its fields are not validated', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->set('recipient.organisation', str_repeat('x', 500))
+        ->call('export')
+        ->assertHasNoErrors();
+});
+
+test('exporting with a cover letter downloads the PDF', function (): void {
+    $community = newCommunity();
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->set('withCoverLetter', true)
+        ->assertSee(__('profile.cover_letter_no_contact'))
+        ->set('recipient.organisation', 'Thüringer Landtag')
+        ->set('recipient.street', 'Jürgen-Fuchs-Straße')
+        ->set('recipient.house_number', '1')
+        ->set('recipient.postal_code', '99096')
+        ->set('recipient.city', 'Erfurt')
+        ->set('letterBody', '<p>Sehr geehrte Damen und Herren,</p><p>anbei die <strong>Übersicht</strong>.</p>')
+        ->call('export')
+        ->assertHasNoErrors()
+        ->assertFileDownloaded(strtolower(trans('profile.memberships')).'_'.$user->username.'.pdf');
+});
+
+test('the sender email is prefilled from the realm settings and can be changed', function (): void {
+    $community = newCommunity();
+    RealmContact::create(['realm' => $community->getShortCode(), 'email' => 'stura@example.test']);
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->assertSet('senderEmail', 'stura@example.test')
+        ->set('withCoverLetter', true)
+        ->set('recipient.organisation', 'Thüringer Landtag')
+        ->set('letterBody', '<p>Text</p>')
+        ->set('senderUnit', 'Sprecher:innen')
+        ->set('senderEmail', 'not-an-address')
+        ->call('export')
+        ->assertHasErrors(['senderEmail'])
+        ->set('senderEmail', 'sprecher@example.test')
+        ->set('signerFunction', str_repeat('x', 101))
+        ->call('export')
+        ->assertHasErrors(['signerFunction'])
+        ->set('signerFunction', 'Sprecherin')
+        ->call('export')
+        ->assertHasNoErrors()
+        ->assertFileDownloaded();
+});
+
+test('the letter fields start out with the realm defaults', function (): void {
+    $community = newCommunity();
+    RealmContact::create([
+        'realm' => $community->getShortCode(),
+        'letter_sender_unit' => 'Sprecher:innen',
+        'letter_subject' => 'Tätigkeitsbescheinigung',
+        'letter_body' => '<p>Sehr geehrte Damen und Herren,</p>',
+    ]);
+    $user = actingAsMember($community);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->assertSet('senderUnit', 'Sprecher:innen')
+        ->assertSet('subject', 'Tätigkeitsbescheinigung')
+        ->assertSet('recipient.organisation', '')
+        ->assertSet('letterBody', '<p>Sehr geehrte Damen und Herren,</p>');
 });

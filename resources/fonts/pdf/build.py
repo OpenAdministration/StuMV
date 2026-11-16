@@ -2,11 +2,13 @@
 """Builds the Adwaita Sans font files used by tc-lib-pdf (App\\Support\\MembershipCertificate).
 
 tc-lib-pdf neither handles variable fonts nor applies OpenType features, so the
-variable AdwaitaSans-Regular.ttf is instanced into static Regular/Bold faces with
-tabular figures baked into the cmap, then converted into tc-lib-pdf's format.
+variable AdwaitaSans-Regular.ttf and AdwaitaSans-Italic.ttf are instanced into static
+Regular/Bold/Italic/BoldItalic faces, plus a
+separate "AdwaitaSansTabular" face with tabular figures baked into the cmap for
+columns of dates, then converted into tc-lib-pdf's format.
 
 Usage (from the project root, needs fonttools and the composer dependencies):
-    python3 resources/fonts/pdf/build.py /path/to/AdwaitaSans-Regular.ttf
+    python3 resources/fonts/pdf/build.py /path/to/adwaita-sans-fonts/
 """
 
 import subprocess
@@ -19,7 +21,15 @@ from fontTools.varLib.instancer import instantiateVariableFont
 
 OUT = Path(__file__).resolve().parent
 ROOT = OUT.parents[2]
-WEIGHTS = {'Regular': 400, 'Bold': 700}
+# file name -> (source file, weight, tabular figures); the converter derives the font key
+# and the italic flag from the name
+FACES = {
+    'AdwaitaSans-Regular': ('AdwaitaSans-Regular.ttf', 400, False),
+    'AdwaitaSans-Bold': ('AdwaitaSans-Regular.ttf', 700, False),
+    'AdwaitaSans-Italic': ('AdwaitaSans-Italic.ttf', 400, False),
+    'AdwaitaSans-BoldItalic': ('AdwaitaSans-Italic.ttf', 700, False),
+    'AdwaitaSansTabular-Regular': ('AdwaitaSans-Regular.ttf', 400, True),
+}
 
 
 def bake_tabular_figures(font: TTFont) -> None:
@@ -42,10 +52,11 @@ def bake_tabular_figures(font: TTFont) -> None:
 def main(source: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         files = []
-        for style, weight in WEIGHTS.items():
-            font = instantiateVariableFont(TTFont(source), {'wght': weight, 'opsz': 14}, static=True)
-            bake_tabular_figures(font)
-            path = Path(tmp) / f'AdwaitaSans-{style}.ttf'
+        for name, (file, weight, tabular) in FACES.items():
+            font = instantiateVariableFont(TTFont(Path(source) / file), {'wght': weight, 'opsz': 14}, static=True)
+            if tabular:
+                bake_tabular_figures(font)
+            path = Path(tmp) / f'{name}.ttf'
             font.save(path)
             files.append(str(path))
 
@@ -56,4 +67,4 @@ def main(source: str) -> None:
 
 
 if __name__ == '__main__':
-    main(sys.argv[1] if len(sys.argv) > 1 else '/usr/share/fonts/adwaita-sans-fonts/AdwaitaSans-Regular.ttf')
+    main(sys.argv[1] if len(sys.argv) > 1 else '/usr/share/fonts/adwaita-sans-fonts')

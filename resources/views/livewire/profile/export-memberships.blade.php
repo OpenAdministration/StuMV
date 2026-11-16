@@ -45,6 +45,42 @@
             </flux:checkbox.group>
             <flux:error name="selected" />
 
+            <flux:fieldset>
+                <legend class="flex items-center gap-4">
+                    {{ __('profile.cover_letter_heading') }}
+                    <flux:switch wire:model.live="withCoverLetter" class="ml-auto" :title="__('profile.cover_letter_toggle')" :aria-label="__('profile.cover_letter_toggle')" />
+                </legend>
+
+                @if($withCoverLetter)
+                    <div class="p-4 space-y-6">
+                        @unless($hasContact)
+                            <flux:callout variant="warning" icon="circle-alert" :heading="__('profile.cover_letter_no_contact')" />
+                        @endunless
+                        <div class="grid gap-6 sm:grid-cols-2">
+                            <flux:input wire:model="senderUnit" :label="__('profile.cover_letter_sender_unit')" :placeholder="__('profile.cover_letter_sender_unit_placeholder')" />
+                            <flux:input type="email" wire:model="senderEmail" :label="__('profile.cover_letter_sender_email')" />
+                        </div>
+                        <section class="space-y-4">
+                            <flux:heading>{{ __('profile.cover_letter_recipient') }}</flux:heading>
+                            <flux:input wire:model="recipient.organisation" :label="__('profile.cover_letter_recipient_organisation')" />
+                            <flux:input wire:model="recipient.name" :label="__('profile.cover_letter_recipient_name')" />
+                            <div class="grid grid-cols-[1fr_8rem] gap-4">
+                                <flux:input wire:model="recipient.street" :label="__('realms.contact_street')" />
+                                <flux:input wire:model="recipient.house_number" :label="__('realms.contact_house_number')" />
+                            </div>
+                            <div class="grid grid-cols-[8rem_1fr] gap-4">
+                                <flux:input wire:model="recipient.postal_code" :label="__('realms.contact_postal_code')" />
+                                <flux:input wire:model="recipient.city" :label="__('realms.contact_city')" />
+                            </div>
+                            <flux:input wire:model="recipient.country" :label="__('profile.cover_letter_recipient_country')" />
+                        </section>
+                        <flux:input wire:model="subject" :label="__('profile.cover_letter_subject')" />
+                        <flux:editor wire:model="letterBody" :label="__('profile.cover_letter_body')" toolbar="bold italic underline | bullet ordered" />
+                        <flux:input wire:model="signerFunction" :label="__('profile.cover_letter_signer_function')" :description="__('profile.cover_letter_signer_function_hint', ['name' => auth()->user()->full_name])" />
+                    </div>
+                @endif
+            </flux:fieldset>
+
             <div class="flex justify-end gap-2">
                 <flux:button icon="ban" wire:navigate :href="$backUrl">{{ __('common.cancel') }}</flux:button>
                 <flux:button type="submit" variant="primary" icon="file-text">{{ __('profile.export_as_pdf') }}</flux:button>

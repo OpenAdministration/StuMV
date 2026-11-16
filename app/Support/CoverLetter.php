@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\RealmContact;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
+
+/** A DIN 5008 cover letter put in front of the membership certificate. */
+final readonly class CoverLetter
+{
+    /** The separate fields a recipient address is entered in. */
+    public const array RECIPIENT_FIELDS = ['organisation', 'name', 'street', 'house_number', 'postal_code', 'city', 'country'];
+
+    public function __construct(
+        public string $senderName,
+        public ?RealmContact $contact,
+        public string $recipient,
+        public string $body,
+        /** Path of the realm logo on the public disk, if there is one. */
+        public ?string $logoPath = null,
+        /** The part of the realm writing, e.g. its speakers or a department. */
+        public ?string $senderUnit = null,
+        /** Replaces the realm's email address for this letter. */
+        public ?string $email = null,
+        /** Who signs the letter, printed below the space for the signature. */
+        public ?string $signerName = null,
+        public ?string $signerFunction = null,
+        public ?string $subject = null,
+    ) {}
+
+    /** Editor HTML reduced to what the letter can print: paragraphs, emphasis and lists. */
+    public static function sanitizeBody(string $html): string
+    {
+        $config = new HtmlSanitizerConfig;
+        foreach (['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'ul', 'ol', 'li'] as $element) {
+            $config = $config->allowElement($element);
+        }
+
+        // links make no sense on paper, but their text stays
+        foreach (['a', 'span'] as $element) {
+            $config = $config->blockElement($element);
+        }
+
+        return new HtmlSanitizer($config)->sanitize($html);
+    }
+
+    public static function bodyIsEmpty(string $html): bool
+    {
+        return trim(html_entity_decode(strip_tags(self::sanitizeBody($html))), " \t\n\r\0\x0B\u{A0}") === '';
+    }
+
+    /**
+     * @param  array<string, mixed>  $values
+     * @return array<string, string>
+     */
+    public static function recipient(array $values = []): array
+    {
+        return array_map(
+            fn (string $field): string => (string) ($values[$field] ?? ''),
+            array_combine(self::RECIPIENT_FIELDS, self::RECIPIENT_FIELDS),
+        );
+    }
+
+    /**
+     * Validation rules for the recipient fields under $prefix.
+     *
+     * @param  list<string>  $before  rules every field starts with
+     * @return array<string, list<mixed>>
+     */
+    public static function recipientRules(string $prefix, array $before = []): array
+    {
+        $rules = [];
+        foreach (self::RECIPIENT_FIELDS as $field) {
+            $max = in_array($field, ['house_number', 'postal_code'], true) ? 20 : 100;
+            $rules[$prefix.'.'.$field] = [...$before, 'nullable', 'string', 'max:'.$max];
+        }
+
+        return $rules;
+    }
+
+    /**
+     * The address lines in DIN 5008 order; a country goes last, in capitals.
+     *
+     * @param  array<string, string>  $recipient
+     */
+    public static function recipientAddress(array $recipient): string
+    {
+        $field = fn (string $key): string => trim($recipient[$key] ?? '');
+
+        return implode("\n", array_filter([
+            $field('organisation'),
+            $field('name'),
+            trim($field('street').' '.$field('house_number')),
+            trim($field('postal_code').' '.$field('city')),
+            mb_strtoupper($field('country')),
+        ]));
+    }
+}
