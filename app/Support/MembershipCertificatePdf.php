@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Com\Tecnick\Pdf\Tcpdf;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
 
@@ -100,7 +101,16 @@ final class MembershipCertificatePdf
 
     private const string RULE_COLOR = self::COLOR_ZINC_500;
 
+    /** TeX patterns from hyph-utf8 in resources/hyphenation, by locale. */
+    private const array HYPHENATION_PATTERNS = [
+        'de' => 'hyph-de-1996.tex',
+        'en' => 'hyph-en-us.tex',
+    ];
+
     private Tcpdf $pdf;
+
+    /** @var array<string, int|string> */
+    private array $hyphenPatterns = [];
 
     private float $pageWidth;
 
@@ -124,7 +134,12 @@ final class MembershipCertificatePdf
             define('IMAGETYPE_SWC', 13);
         }
 
-        $this->pdf = new Tcpdf('mm', true, true, true, 'pdfua2');
+        // allowedPaths replaces the library's defaults, so the fonts are listed too
+        $this->pdf = new Tcpdf('mm', true, true, true, 'pdfua2', null, [
+            'allowedPaths' => [resource_path('fonts/pdf'), resource_path('hyphenation')],
+        ]);
+        $this->hyphenPatterns = $this->hyphenationPatterns();
+        $this->hyphenate(true);
         $this->pdf->setCreator((string) config('app.name'));
         $this->pdf->setTitle($title.' – '.$fullName);
         $this->pdf->setLanguage(str_replace('_', '-', app()->getLocale()));
@@ -170,6 +185,8 @@ final class MembershipCertificatePdf
             ['lineWidth' => 0.2, 'lineColor' => self::COLOR_BLACK],
         ));
 
+        // a hyphen inserted into an address or a contact detail reads as part of it
+        $this->hyphenate(false);
         $returnAddress = implode(' | ', array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
         // DIN 5008 wants it on one line, so long names get a smaller size
         $size = self::RETURN_FONT_SIZE;
@@ -189,6 +206,7 @@ final class MembershipCertificatePdf
         $this->endTag();
 
         $infoBottom = $this->drawInfoBlock($letter, $right);
+        $this->hyphenate(true);
 
         $date = Date::now()->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'Y-m-d');
         // right-aligned on the line above the subject, unless the info block reaches further down
@@ -607,6 +625,33 @@ final class MembershipCertificatePdf
             $this->pdf->addArtifactContent($content, $pid, 'Pagination', 'Footer');
             $this->popStyle();
         }
+    }
+
+    /**
+     * Patterns for the current locale, or none. Parsing takes a few
+     * milliseconds and never changes, so it is cached per file version.
+     *
+     * @return array<string, int|string>
+     */
+    private function hyphenationPatterns(): array
+    {
+        $locale = strtolower(explode('_', str_replace('-', '_', app()->getLocale()))[0]);
+        $file = self::HYPHENATION_PATTERNS[$locale] ?? null;
+        $path = $file !== null ? resource_path('hyphenation/'.$file) : null;
+
+        if ($path === null || ! is_file($path)) {
+            return [];
+        }
+
+        return Cache::rememberForever(
+            'pdf.hyphenation.'.$locale.'.'.filemtime($path),
+            fn (): array => $this->pdf->loadTexHyphenPatterns($path),
+        );
+    }
+
+    private function hyphenate(bool $enabled): void
+    {
+        $this->pdf->setTexHyphenPatterns($enabled ? $this->hyphenPatterns : []);
     }
 
     private function hasSpace(float $need): bool

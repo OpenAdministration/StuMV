@@ -3,6 +3,7 @@
 use App\Models\RealmContact;
 use App\Support\CoverLetter;
 use App\Support\MembershipCertificatePdf;
+use Illuminate\Support\Facades\Cache;
 
 function fakeMembership(string $role, string $committee): array
 {
@@ -85,4 +86,20 @@ test('the letter body keeps emphasis and lists and drops everything else', funct
         ->and(CoverLetter::bodyIsEmpty('<p>&nbsp;</p>'))->toBeTrue()
         ->and(CoverLetter::bodyIsEmpty('<p>x</p>'))->toBeFalse()
         ->and(CoverLetter::bodyIsEmpty('<p></p>'))->toBeTrue();
+});
+
+test('hyphenation patterns of the locale are loaded once and cached', function (): void {
+    app()->setLocale('de');
+    $key = 'pdf.hyphenation.de.'.filemtime(resource_path('hyphenation/hyph-de-1996.tex'));
+    Cache::forget($key);
+
+    (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [fakeMembership('Rolle', 'Fachschaftsratskoordinationsausschuss')]);
+
+    expect(Cache::get($key))->toBeArray()->not->toBeEmpty();
+});
+
+test('a locale without patterns still renders', function (): void {
+    app()->setLocale('fr');
+
+    expect((new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, []))->toStartWith('%PDF-');
 });
