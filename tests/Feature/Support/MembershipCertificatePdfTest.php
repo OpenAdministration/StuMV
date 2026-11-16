@@ -63,6 +63,7 @@ test('a cover letter is put on its own page in front of the certificate', functi
         senderUnit: 'Sprecher:innen',
         email: 'sprecher@example.test',
         phone: '03641 930990',
+        website: 'https://sprecher.example.test',
         signerName: 'Helen Würflein',
         signerFunction: 'Sprecherin',
         subject: 'Tätigkeitsbescheinigung',
@@ -81,7 +82,7 @@ test('a cover letter is put on its own page in front of the certificate', functi
         ->and(substr_count($with, '/S /LI'))->toBe(1)
         // phone, email and website in the info block and again in the footer
         ->and(substr_count($with, '/S /Link'))->toBe(6)
-        ->and($with)->toContain('/URI (tel:03641930990)', '/URI (mailto:sprecher@example.test)', '/URI (https://stura.example.test)');
+        ->and($with)->toContain('/URI (tel:03641930990)', '/URI (mailto:sprecher@example.test)', '/URI (https://sprecher.example.test)', '/URI (https://stura.example.test)');
 });
 
 test('the letter body keeps emphasis and lists and drops everything else', function (): void {

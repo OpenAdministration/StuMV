@@ -40,6 +40,8 @@ class ExportMemberships extends Component
 
     public string $senderPhone = '';
 
+    public string $senderWebsite = '';
+
     public string $signerFunction = '';
 
     public string $subject = '';
@@ -66,6 +68,8 @@ class ExportMemberships extends Component
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) ($contact?->letter_sender_email ?? $contact?->email);
         $this->senderPhone = (string) ($contact?->letter_sender_phone ?? $contact?->phone);
+        // unlike email and phone without a fallback, the realm's website is in the footer
+        $this->senderWebsite = (string) $contact?->letter_sender_website;
         $this->signerFunction = (string) $contact?->letter_signer_function;
         $this->subject = (string) $contact?->letter_subject;
         $this->letterBody = (string) $contact?->letter_body;
@@ -115,6 +119,7 @@ class ExportMemberships extends Component
             'senderUnit' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
             'senderEmail' => ['exclude_unless:withCoverLetter,true', 'nullable', 'email', 'max:255'],
             'senderPhone' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:50'],
+            'senderWebsite' => ['exclude_unless:withCoverLetter,true', 'nullable', 'url:http,https', 'max:255'],
             'signerFunction' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
             'subject' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:150'],
         ];
@@ -131,6 +136,7 @@ class ExportMemberships extends Component
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
                 'senderPhone' => __('profile.cover_letter_sender_phone'),
+                'senderWebsite' => __('profile.cover_letter_sender_website'),
                 'signerFunction' => __('profile.cover_letter_signer_function'),
                 'subject' => __('profile.cover_letter_subject'),
             ],
@@ -148,6 +154,7 @@ class ExportMemberships extends Component
                 trim($this->senderUnit) ?: null,
                 trim($this->senderEmail) ?: null,
                 trim($this->senderPhone) ?: null,
+                trim($this->senderWebsite) ?: null,
                 (string) auth()->user()->full_name,
                 trim($this->signerFunction) ?: null,
                 trim($this->subject) ?: null,

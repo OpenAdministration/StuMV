@@ -14,6 +14,7 @@ return [
     'cover_letter_recipient_country' => 'Country',
     'cover_letter_sender_email' => 'Sender email address',
     'cover_letter_sender_phone' => 'Sender phone number',
+    'cover_letter_sender_website' => 'Sender website',
     'cover_letter_office_room' => 'Room :room',
     'cover_letter_footer_contact' => 'Contact',
     'cover_letter_footer_bank' => 'Bank details',

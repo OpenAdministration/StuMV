@@ -31,6 +31,7 @@ class RealmContact extends Model
         'letter_sender_unit',
         'letter_sender_email',
         'letter_sender_phone',
+        'letter_sender_website',
         'letter_signer_function',
         'letter_subject',
         'letter_body',
@@ -68,6 +69,11 @@ class RealmContact extends Model
     /** The website as printed: without scheme and trailing slash. */
     public function websiteLabel(): string
     {
-        return rtrim((string) preg_replace('#^https?://#i', '', (string) $this->website), '/');
+        return self::urlLabel((string) $this->website);
+    }
+
+    public static function urlLabel(string $url): string
+    {
+        return rtrim((string) preg_replace('#^https?://#i', '', $url), '/');
     }
 }

@@ -25,6 +25,8 @@ final readonly class CoverLetter
         public ?string $email = null,
         /** Replaces the realm's phone number for this letter. */
         public ?string $phone = null,
+        /** A website of the sending unit; the info block shows none without it. */
+        public ?string $website = null,
         /** Who signs the letter, printed below the space for the signature. */
         public ?string $signerName = null,
         public ?string $signerFunction = null,

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\RealmContact;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
@@ -421,7 +422,7 @@ final class MembershipCertificatePdf
             ]),
             'phone' => array_filter([$letter->phone]),
             'mail' => array_filter([$letter->email]),
-            'globe' => array_filter([$contact?->websiteLabel()]),
+            'globe' => array_filter([RealmContact::urlLabel((string) $letter->website)]),
         ]);
 
         if ($items === []) {
@@ -431,7 +432,7 @@ final class MembershipCertificatePdf
         $links = [
             'phone' => 'tel:'.preg_replace('/[^\d+]/', '', (string) $letter->phone),
             'mail' => 'mailto:'.$letter->email,
-            'globe' => (string) $contact?->website,
+            'globe' => (string) $letter->website,
         ];
 
         $ruleX = $right - self::ICON_SIZE - 2.0;

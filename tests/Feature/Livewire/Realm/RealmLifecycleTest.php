@@ -109,6 +109,7 @@ test('an admin can store defaults for cover letters', function (): void {
         ->set('senderUnit', 'Sprecher:innen')
         ->set('senderEmail', 'sprecher@example.test')
         ->set('senderPhone', '03641 930991')
+        ->set('senderWebsite', 'https://sprecher.example.test')
         ->set('signerFunction', 'Sprecher:in')
         ->set('subject', 'Tätigkeitsbescheinigung')
         ->set('letterBody', '<p>Sehr geehrte Damen und Herren,</p><script>alert(1)</script>')
@@ -122,6 +123,7 @@ test('an admin can store defaults for cover letters', function (): void {
         ->and($contact->letter_sender_unit)->toBe('Sprecher:innen')
         ->and($contact->letter_sender_email)->toBe('sprecher@example.test')
         ->and($contact->letter_sender_phone)->toBe('03641 930991')
+        ->and($contact->letter_sender_website)->toBe('https://sprecher.example.test')
         ->and($contact->letter_signer_function)->toBe('Sprecher:in')
         ->and($contact->letter_subject)->toBe('Tätigkeitsbescheinigung')
         ->and($contact->letter_body)->toBe('<p>Sehr geehrte Damen und Herren,</p>');

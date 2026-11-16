@@ -27,6 +27,8 @@ class EditMembershipExport extends Component
 
     public string $senderPhone = '';
 
+    public string $senderWebsite = '';
+
     public string $signerFunction = '';
 
     public string $subject = '';
@@ -54,6 +56,7 @@ class EditMembershipExport extends Component
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) $contact?->letter_sender_email;
         $this->senderPhone = (string) $contact?->letter_sender_phone;
+        $this->senderWebsite = (string) $contact?->letter_sender_website;
         $this->signerFunction = (string) $contact?->letter_signer_function;
         $this->subject = (string) $contact?->letter_subject;
         $this->letterBody = (string) $contact?->letter_body;
@@ -78,6 +81,7 @@ class EditMembershipExport extends Component
                 'senderUnit' => ['nullable', 'string', 'max:100'],
                 'senderEmail' => ['nullable', 'email', 'max:255'],
                 'senderPhone' => ['nullable', 'string', 'max:50'],
+                'senderWebsite' => ['nullable', 'url:http,https', 'max:255'],
                 'signerFunction' => ['nullable', 'string', 'max:100'],
                 'subject' => ['nullable', 'string', 'max:150'],
                 'letterBody' => ['nullable', 'string', 'max:20000'],
@@ -87,6 +91,7 @@ class EditMembershipExport extends Component
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
                 'senderPhone' => __('profile.cover_letter_sender_phone'),
+                'senderWebsite' => __('profile.cover_letter_sender_website'),
                 'signerFunction' => __('profile.cover_letter_signer_function'),
                 'subject' => __('profile.cover_letter_subject'),
                 'letterBody' => __('profile.cover_letter_body'),
@@ -103,6 +108,7 @@ class EditMembershipExport extends Component
             'letter_sender_unit' => $clean($this->senderUnit),
             'letter_sender_email' => $clean($this->senderEmail),
             'letter_sender_phone' => $clean($this->senderPhone),
+            'letter_sender_website' => $clean($this->senderWebsite),
             'letter_signer_function' => $clean($this->signerFunction),
             'letter_subject' => $clean($this->subject),
             'letter_body' => CoverLetter::bodyIsEmpty($this->letterBody) ? null : CoverLetter::sanitizeBody($this->letterBody),
