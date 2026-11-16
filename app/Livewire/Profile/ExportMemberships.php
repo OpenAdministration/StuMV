@@ -38,6 +38,10 @@ class ExportMemberships extends Component
 
     public string $senderEmail = '';
 
+    public string $senderBuilding = '';
+
+    public string $senderRoom = '';
+
     public string $senderPhone = '';
 
     public string $senderWebsite = '';
@@ -67,6 +71,8 @@ class ExportMemberships extends Component
         $this->senderName = (string) ($contact?->letter_sender_name ?? $realm->getFirstAttribute('description'));
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) ($contact?->letter_sender_email ?? $contact?->email);
+        $this->senderBuilding = (string) ($contact?->letter_sender_building ?? $contact?->office_building);
+        $this->senderRoom = (string) ($contact?->letter_sender_room ?? $contact?->office_room);
         $this->senderPhone = (string) ($contact?->letter_sender_phone ?? $contact?->phone);
         // unlike email and phone without a fallback, the realm's website is in the footer
         $this->senderWebsite = (string) $contact?->letter_sender_website;
@@ -118,6 +124,8 @@ class ExportMemberships extends Component
             'senderName' => ['exclude_unless:withCoverLetter,true', 'required', 'string', 'max:150'],
             'senderUnit' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
             'senderEmail' => ['exclude_unless:withCoverLetter,true', 'nullable', 'email', 'max:255'],
+            'senderBuilding' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:255'],
+            'senderRoom' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:50'],
             'senderPhone' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:50'],
             'senderWebsite' => ['exclude_unless:withCoverLetter,true', 'nullable', 'url:http,https', 'max:255'],
             'signerFunction' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
@@ -135,6 +143,8 @@ class ExportMemberships extends Component
                 'senderName' => __('profile.cover_letter_sender_name'),
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
+                'senderBuilding' => __('realms.contact_office_building'),
+                'senderRoom' => __('realms.contact_office_room'),
                 'senderPhone' => __('profile.cover_letter_sender_phone'),
                 'senderWebsite' => __('profile.cover_letter_sender_website'),
                 'signerFunction' => __('profile.cover_letter_signer_function'),
@@ -152,6 +162,8 @@ class ExportMemberships extends Component
                 $this->letterBody,
                 $logo ? 'realm-branding/'.$logo : null,
                 trim($this->senderUnit) ?: null,
+                trim($this->senderBuilding) ?: null,
+                trim($this->senderRoom) ?: null,
                 trim($this->senderEmail) ?: null,
                 trim($this->senderPhone) ?: null,
                 trim($this->senderWebsite) ?: null,

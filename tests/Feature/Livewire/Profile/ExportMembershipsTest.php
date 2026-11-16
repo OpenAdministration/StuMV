@@ -288,6 +288,9 @@ test('the letter fields start out with the realm defaults', function (): void {
         'email' => 'stura@example.test',
         'phone' => '03641 930990',
         'letter_sender_phone' => '03641 930991',
+        'office_building' => 'Haus auf der Mauer',
+        'office_room' => '105',
+        'letter_sender_room' => '106',
         'letter_sender_website' => 'https://sprecher.example.test',
         'letter_enabled' => true,
         'letter_recipient' => ['organisation' => 'Landesamt'],
@@ -307,6 +310,8 @@ test('the letter fields start out with the realm defaults', function (): void {
         ->assertSet('senderUnit', 'Sprecher:innen')
         ->assertSet('senderEmail', 'stura@example.test')
         ->assertSet('senderPhone', '03641 930991')
+        ->assertSet('senderBuilding', 'Haus auf der Mauer')
+        ->assertSet('senderRoom', '106')
         ->assertSet('senderWebsite', 'https://sprecher.example.test')
         ->assertSet('signerFunction', 'Sprecher:in')
         ->assertSet('subject', 'Tätigkeitsbescheinigung')

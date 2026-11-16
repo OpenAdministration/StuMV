@@ -25,6 +25,10 @@ class EditMembershipExport extends Component
 
     public string $senderEmail = '';
 
+    public string $senderBuilding = '';
+
+    public string $senderRoom = '';
+
     public string $senderPhone = '';
 
     public string $senderWebsite = '';
@@ -45,6 +49,12 @@ class EditMembershipExport extends Component
     #[Locked]
     public string $contactPhone = '';
 
+    #[Locked]
+    public string $contactBuilding = '';
+
+    #[Locked]
+    public string $contactRoom = '';
+
     public function mount(Community $realm): void
     {
         $this->uid = $realm->getShortCode();
@@ -55,6 +65,8 @@ class EditMembershipExport extends Component
         $this->senderName = (string) $contact?->letter_sender_name;
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) $contact?->letter_sender_email;
+        $this->senderBuilding = (string) $contact?->letter_sender_building;
+        $this->senderRoom = (string) $contact?->letter_sender_room;
         $this->senderPhone = (string) $contact?->letter_sender_phone;
         $this->senderWebsite = (string) $contact?->letter_sender_website;
         $this->signerFunction = (string) $contact?->letter_signer_function;
@@ -63,6 +75,8 @@ class EditMembershipExport extends Component
         $this->realmName = (string) $realm->getFirstAttribute('description');
         $this->contactEmail = (string) $contact?->email;
         $this->contactPhone = (string) $contact?->phone;
+        $this->contactBuilding = (string) $contact?->office_building;
+        $this->contactRoom = (string) $contact?->office_room;
     }
 
     public function render()
@@ -80,6 +94,8 @@ class EditMembershipExport extends Component
                 'senderName' => ['nullable', 'string', 'max:150'],
                 'senderUnit' => ['nullable', 'string', 'max:100'],
                 'senderEmail' => ['nullable', 'email', 'max:255'],
+                'senderBuilding' => ['nullable', 'string', 'max:255'],
+                'senderRoom' => ['nullable', 'string', 'max:50'],
                 'senderPhone' => ['nullable', 'string', 'max:50'],
                 'senderWebsite' => ['nullable', 'url:http,https', 'max:255'],
                 'signerFunction' => ['nullable', 'string', 'max:100'],
@@ -90,6 +106,8 @@ class EditMembershipExport extends Component
                 'senderName' => __('profile.cover_letter_sender_name'),
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
+                'senderBuilding' => __('realms.contact_office_building'),
+                'senderRoom' => __('realms.contact_office_room'),
                 'senderPhone' => __('profile.cover_letter_sender_phone'),
                 'senderWebsite' => __('profile.cover_letter_sender_website'),
                 'signerFunction' => __('profile.cover_letter_signer_function'),
@@ -107,6 +125,8 @@ class EditMembershipExport extends Component
             'letter_sender_name' => $clean($this->senderName),
             'letter_sender_unit' => $clean($this->senderUnit),
             'letter_sender_email' => $clean($this->senderEmail),
+            'letter_sender_building' => $clean($this->senderBuilding),
+            'letter_sender_room' => $clean($this->senderRoom),
             'letter_sender_phone' => $clean($this->senderPhone),
             'letter_sender_website' => $clean($this->senderWebsite),
             'letter_signer_function' => $clean($this->signerFunction),

@@ -21,6 +21,9 @@ final readonly class CoverLetter
         public ?string $logoPath = null,
         /** The part of the realm writing, e.g. its speakers or a department. */
         public ?string $senderUnit = null,
+        /** Replace the realm's office for this letter. */
+        public ?string $building = null,
+        public ?string $room = null,
         /** Replaces the realm's email address for this letter. */
         public ?string $email = null,
         /** Replaces the realm's phone number for this letter. */

@@ -417,8 +417,8 @@ final class MembershipCertificatePdf
             'network' => array_filter([$letter->senderUnit]),
             // the postal address is in the return address and the footer already
             'house' => array_filter([
-                $contact?->office_building,
-                $contact?->office_room ? __('profile.cover_letter_office_room', ['room' => $contact->office_room]) : null,
+                $letter->building,
+                $letter->room ? __('profile.cover_letter_office_room', ['room' => $letter->room]) : null,
             ]),
             'phone' => array_filter([$letter->phone]),
             'mail' => array_filter([$letter->email]),

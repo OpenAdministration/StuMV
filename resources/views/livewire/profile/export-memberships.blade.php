@@ -78,6 +78,10 @@
                                 <div class="space-y-4 p-4">
                                     <flux:input wire:model="senderName" :label="__('profile.cover_letter_sender_name')" />
                                     <flux:input wire:model="senderUnit" :label="__('profile.cover_letter_sender_unit')" :placeholder="__('profile.cover_letter_sender_unit_placeholder')" />
+                                    <div class="grid grid-cols-[1fr_8rem] gap-4">
+                                        <flux:input wire:model="senderBuilding" :label="__('realms.contact_office_building')" />
+                                        <flux:input wire:model="senderRoom" :label="__('realms.contact_office_room')" />
+                                    </div>
                                     <flux:input type="email" wire:model="senderEmail" :label="__('profile.cover_letter_sender_email')" />
                                     <flux:input type="tel" wire:model="senderPhone" :label="__('profile.cover_letter_sender_phone')" />
                                     <flux:input type="url" wire:model="senderWebsite" :label="__('profile.cover_letter_sender_website')" placeholder="https://" />

@@ -61,6 +61,8 @@ test('a cover letter is put on its own page in front of the certificate', functi
         "Thüringer Landtag\n99096 Erfurt",
         '<p>Sehr geehrte Damen und Herren,</p><p>anbei die <em>Übersicht</em>:</p><ul><li>Gremium</li></ul><p>Mit freundlichen Grüßen</p><script>alert(1)</script>',
         senderUnit: 'Sprecher:innen',
+        building: 'Haus auf der Mauer',
+        room: '105',
         email: 'sprecher@example.test',
         phone: '03641 930990',
         website: 'https://sprecher.example.test',
