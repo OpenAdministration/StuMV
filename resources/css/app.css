@@ -34,15 +34,6 @@ body {
     hyphens: auto;
 }
 
-main {
-    @apply flex;
-}
-
-main > div {
-    @apply w-full max-w-7xl;
-    margin: 0 auto;
-}
-
 /* Flux */
 
 table th,
