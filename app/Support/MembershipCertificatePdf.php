@@ -326,7 +326,7 @@ final class MembershipCertificatePdf
         foreach ($columns as $index => [$heading, $body]) {
             $width = self::FOOTER_COLUMNS[$index][1];
             $this->font('B', self::FOOTER_FONT_SIZE);
-            $height = $this->measure($heading, $width);
+            $height = $heading !== '' ? $this->measure($heading, $width) + self::LINE_SPACING : 0.0;
             $this->font('', self::FOOTER_FONT_SIZE);
             $heights[] = $height + $this->measure($body, $width);
         }
@@ -368,7 +368,8 @@ final class MembershipCertificatePdf
                         .$this->pdf->getTextCell($text, $x, $y, $width, linespace: self::LINE_SPACING, halign: 'L', drawcell: false)
                         .$this->pdf->graph->pop();
                     $this->pdf->addArtifactContent($content, $pid, 'Pagination', 'Footer');
-                    $y += $this->measure($text, $width);
+                    // the gap a line break would leave, so heading and body share one pitch
+                    $y += $this->measure($text, $width) + self::LINE_SPACING;
                 }
             }
         }
