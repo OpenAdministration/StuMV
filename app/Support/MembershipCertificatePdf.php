@@ -95,7 +95,7 @@ final class MembershipCertificatePdf
     /** Minimum space between the sender name and the logo. */
     private const float LOGO_GAP = 8.0;
 
-    private const int LOGO_DPI = 600;
+    private const int LOGO_DPI = 1200;
 
     private const float ICON_SIZE = 3.2;
 
@@ -583,11 +583,20 @@ final class MembershipCertificatePdf
 
     private function rasterizeSvg(string $raw): string
     {
+        $target = (int) round(self::LOGO_HEIGHT / 25.4 * self::LOGO_DPI);
+
+        // read once for the natural size, then again at the density that yields the target height
+        $probe = new \Imagick;
+        $probe->setResolution(72, 72);
+        $probe->readImageBlob($raw);
+        $density = 72 * $target / max(1, $probe->getImageHeight());
+
         $image = new \Imagick;
         $image->setBackgroundColor(new \ImagickPixel('transparent'));
+        $image->setResolution($density, $density);
         $image->readImageBlob($raw);
         $image->setImageFormat('png');
-        $image->resizeImage(0, (int) round(self::LOGO_HEIGHT / 25.4 * self::LOGO_DPI), \Imagick::FILTER_LANCZOS, 1);
+        $image->resizeImage(0, $target, \Imagick::FILTER_LANCZOS, 1);
 
         return $image->getImageBlob();
     }
