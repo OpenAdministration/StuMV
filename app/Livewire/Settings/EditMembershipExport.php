@@ -23,15 +23,20 @@ class EditMembershipExport extends Component
 
     public string $senderEmail = '';
 
+    public string $senderPhone = '';
+
     public string $signerFunction = '';
 
     public string $subject = '';
 
     public string $letterBody = '';
 
-    /** Shown as placeholder, the export falls back to it without an own sender address. */
+    /** Placeholders: the export falls back to the realm's contact details. */
     #[Locked]
     public string $contactEmail = '';
+
+    #[Locked]
+    public string $contactPhone = '';
 
     public function mount(Community $realm): void
     {
@@ -42,10 +47,12 @@ class EditMembershipExport extends Component
         $this->recipient = CoverLetter::recipient($contact->letter_recipient ?? []);
         $this->senderUnit = (string) $contact?->letter_sender_unit;
         $this->senderEmail = (string) $contact?->letter_sender_email;
+        $this->senderPhone = (string) $contact?->letter_sender_phone;
         $this->signerFunction = (string) $contact?->letter_signer_function;
         $this->subject = (string) $contact?->letter_subject;
         $this->letterBody = (string) $contact?->letter_body;
         $this->contactEmail = (string) $contact?->email;
+        $this->contactPhone = (string) $contact?->phone;
     }
 
     public function render()
@@ -62,6 +69,7 @@ class EditMembershipExport extends Component
                 ...CoverLetter::recipientRules('recipient'),
                 'senderUnit' => ['nullable', 'string', 'max:100'],
                 'senderEmail' => ['nullable', 'email', 'max:255'],
+                'senderPhone' => ['nullable', 'string', 'max:50'],
                 'signerFunction' => ['nullable', 'string', 'max:100'],
                 'subject' => ['nullable', 'string', 'max:150'],
                 'letterBody' => ['nullable', 'string', 'max:20000'],
@@ -69,6 +77,7 @@ class EditMembershipExport extends Component
             attributes: [
                 'senderUnit' => __('profile.cover_letter_sender_unit'),
                 'senderEmail' => __('profile.cover_letter_sender_email'),
+                'senderPhone' => __('profile.cover_letter_sender_phone'),
                 'signerFunction' => __('profile.cover_letter_signer_function'),
                 'subject' => __('profile.cover_letter_subject'),
                 'letterBody' => __('profile.cover_letter_body'),
@@ -83,6 +92,7 @@ class EditMembershipExport extends Component
             'letter_recipient' => $recipient ?: null,
             'letter_sender_unit' => $clean($this->senderUnit),
             'letter_sender_email' => $clean($this->senderEmail),
+            'letter_sender_phone' => $clean($this->senderPhone),
             'letter_signer_function' => $clean($this->signerFunction),
             'letter_subject' => $clean($this->subject),
             'letter_body' => CoverLetter::bodyIsEmpty($this->letterBody) ? null : CoverLetter::sanitizeBody($this->letterBody),

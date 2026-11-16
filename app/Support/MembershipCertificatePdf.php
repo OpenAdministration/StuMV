@@ -278,7 +278,7 @@ final class MembershipCertificatePdf
         $items = array_filter([
             'network' => array_filter([$letter->senderUnit]),
             'house' => array_filter([$contact?->streetLine(), $contact?->cityLine()]),
-            'phone' => array_filter([$contact?->phone]),
+            'phone' => array_filter([$letter->phone]),
             'mail' => array_filter([$letter->email]),
             'globe' => array_filter([$contact?->websiteLabel()]),
         ]);
@@ -288,7 +288,7 @@ final class MembershipCertificatePdf
         }
 
         $links = [
-            'phone' => 'tel:'.preg_replace('/[^\d+]/', '', (string) $contact?->phone),
+            'phone' => 'tel:'.preg_replace('/[^\d+]/', '', (string) $letter->phone),
             'mail' => 'mailto:'.$letter->email,
             'globe' => (string) $contact?->website,
         ];

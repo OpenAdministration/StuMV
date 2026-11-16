@@ -24,6 +24,7 @@ class RealmContact extends Model
         'letter_recipient',
         'letter_sender_unit',
         'letter_sender_email',
+        'letter_sender_phone',
         'letter_signer_function',
         'letter_subject',
         'letter_body',

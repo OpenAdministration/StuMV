@@ -12,6 +12,7 @@ return [
     'cover_letter_recipient_name' => 'Name oder Struktureinheit',
     'cover_letter_recipient_country' => 'Land',
     'cover_letter_sender_email' => 'Absender-E-Mail-Adresse',
+    'cover_letter_sender_phone' => 'Absender-Telefonnummer',
     'cover_letter_closing' => 'Mit freundlichen Grüßen',
     'cover_letter_signer_function' => 'Funktionsbezeichnung',
     'cover_letter_signer_function_hint' => 'Steht im Unterschriftsfeld unter deinem Namen (:name).',

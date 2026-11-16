@@ -12,6 +12,7 @@ return [
     'cover_letter_recipient_name' => 'Name or unit',
     'cover_letter_recipient_country' => 'Country',
     'cover_letter_sender_email' => 'Sender email address',
+    'cover_letter_sender_phone' => 'Sender phone number',
     'cover_letter_closing' => 'Kind regards',
     'cover_letter_signer_function' => 'Position',
     'cover_letter_signer_function_hint' => 'Shown below your name (:name) in the signature block.',

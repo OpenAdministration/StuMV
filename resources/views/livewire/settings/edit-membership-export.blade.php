@@ -28,6 +28,7 @@
                     <div class="space-y-4 p-4">
                         <flux:input wire:model="senderUnit" :label="__('profile.cover_letter_sender_unit')" :placeholder="__('profile.cover_letter_sender_unit_placeholder')" />
                         <flux:input type="email" wire:model="senderEmail" :label="__('profile.cover_letter_sender_email')" :placeholder="$contactEmail" />
+                        <flux:input type="tel" wire:model="senderPhone" :label="__('profile.cover_letter_sender_phone')" :placeholder="$contactPhone" />
                         <flux:input wire:model="signerFunction" :label="__('profile.cover_letter_signer_function')" />
                     </div>
                 </flux:fieldset>

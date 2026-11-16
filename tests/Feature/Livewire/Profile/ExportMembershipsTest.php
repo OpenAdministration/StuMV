@@ -285,6 +285,8 @@ test('the letter fields start out with the realm defaults', function (): void {
     RealmContact::create([
         'realm' => $community->getShortCode(),
         'email' => 'stura@example.test',
+        'phone' => '03641 930990',
+        'letter_sender_phone' => '03641 930991',
         'letter_enabled' => true,
         'letter_recipient' => ['organisation' => 'Landesamt'],
         'letter_sender_unit' => 'Sprecher:innen',
@@ -300,6 +302,7 @@ test('the letter fields start out with the realm defaults', function (): void {
         ->assertSet('recipient.city', '')
         ->assertSet('senderUnit', 'Sprecher:innen')
         ->assertSet('senderEmail', 'stura@example.test')
+        ->assertSet('senderPhone', '03641 930991')
         ->assertSet('signerFunction', 'Sprecher:in')
         ->assertSet('subject', 'Tätigkeitsbescheinigung')
         ->assertSet('letterBody', '<p>Sehr geehrte Damen und Herren,</p>');
