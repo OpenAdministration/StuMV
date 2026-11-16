@@ -22,6 +22,10 @@
                         <flux:input wire:model="postal_code" :label="__('realms.contact_postal_code')" autocomplete="postal-code" />
                         <flux:input wire:model="city" :label="__('realms.contact_city')" autocomplete="address-level2" />
                     </div>
+                    <div class="grid grid-cols-[1fr_8rem] gap-4">
+                        <flux:input wire:model="office_building" :label="__('realms.contact_office_building')" />
+                        <flux:input wire:model="office_room" :label="__('realms.contact_office_room')" />
+                    </div>
                     <flux:input type="email" wire:model="email" :label="__('realms.contact_email')" />
                     <flux:input type="tel" wire:model="phone" :label="__('realms.contact_phone')" />
                     <flux:input type="url" wire:model="website" :label="__('realms.contact_website')" placeholder="https://" />

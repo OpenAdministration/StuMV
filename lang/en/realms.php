@@ -130,6 +130,8 @@ return [
     'contact_house_number' => 'House number',
     'contact_postal_code' => 'Postal code',
     'contact_city' => 'City',
+    'contact_office_building' => 'Building',
+    'contact_office_room' => 'Room',
     'contact_email' => 'Email address',
     'contact_phone' => 'Phone number',
     'contact_website' => 'Website',

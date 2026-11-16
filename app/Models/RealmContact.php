@@ -17,6 +17,8 @@ class RealmContact extends Model
         'house_number',
         'postal_code',
         'city',
+        'office_building',
+        'office_room',
         'email',
         'phone',
         'website',

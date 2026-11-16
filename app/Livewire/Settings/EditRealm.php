@@ -33,6 +33,12 @@ class EditRealm extends Component
     #[Rule('nullable|string|max:255')]
     public string $city = '';
 
+    #[Rule('nullable|string|max:255')]
+    public string $office_building = '';
+
+    #[Rule('nullable|string|max:50')]
+    public string $office_room = '';
+
     #[Rule('nullable|email|max:255')]
     public string $email = '';
 
@@ -51,7 +57,7 @@ class EditRealm extends Component
     #[Rule(['nullable', 'regex:/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/'], as: 'BIC')]
     public string $bic = '';
 
-    private const array CONTACT_FIELDS = ['street', 'house_number', 'postal_code', 'city', 'email', 'phone', 'website', 'bank_name', 'iban', 'bic'];
+    private const array CONTACT_FIELDS = ['street', 'house_number', 'postal_code', 'city', 'office_building', 'office_room', 'email', 'phone', 'website', 'bank_name', 'iban', 'bic'];
 
     public function mount(Community $realm): void
     {

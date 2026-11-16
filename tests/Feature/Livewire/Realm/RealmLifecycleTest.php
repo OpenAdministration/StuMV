@@ -66,6 +66,8 @@ test('an admin can store the address and contact details of their realm', functi
         ->set('house_number', '3')
         ->set('postal_code', '07743')
         ->set('city', 'Jena')
+        ->set('office_building', 'Haus auf der Mauer')
+        ->set('office_room', '105')
         ->set('email', 'stura@example.test')
         ->set('phone', '03641 930990')
         ->set('website', 'https://stura.example.test/')
@@ -78,6 +80,8 @@ test('an admin can store the address and contact details of their realm', functi
     $contact = RealmContact::forRealm($community->getShortCode());
     expect($contact->streetLine())->toBe('Carl-Zeiss-Straße 3')
         ->and($contact->cityLine())->toBe('07743 Jena')
+        ->and($contact->office_building)->toBe('Haus auf der Mauer')
+        ->and($contact->office_room)->toBe('105')
         ->and($contact->websiteLabel())->toBe('stura.example.test')
         ->and($contact->iban)->toBe('DE89370400440532013000')
         ->and($contact->ibanLabel())->toBe('DE89 3704 0044 0532 0130 00')

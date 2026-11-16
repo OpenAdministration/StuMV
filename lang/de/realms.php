@@ -130,6 +130,8 @@ return [
     'contact_house_number' => 'Hausnummer',
     'contact_postal_code' => 'Postleitzahl',
     'contact_city' => 'Ort',
+    'contact_office_building' => 'Gebäude',
+    'contact_office_room' => 'Raum',
     'contact_email' => 'E-Mail-Adresse',
     'contact_phone' => 'Telefonnummer',
     'contact_website' => 'Website',

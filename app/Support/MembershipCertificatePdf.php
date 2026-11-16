@@ -294,27 +294,38 @@ final class MembershipCertificatePdf
     }
 
     /**
-     * Address, contact and bank columns, each a bold first part and the lines below it.
+     * Address, contact and bank columns, each a list of [style, text, link] entries set one below the other.
      *
-     * @return list<array{string, string}>
+     * @return list<list<array{string, string, ?string}>>
      */
     private function letterFooter(CoverLetter $letter): array
     {
         $contact = $letter->contact;
-        $lines = fn (array $lines): string => implode("\n", array_filter($lines));
+        $column = function (string $heading, array $lines): array {
+            $lines = array_values(array_filter($lines, fn (array $line): bool => (string) $line[0] !== ''));
+
+            return [
+                ...($heading !== '' && $lines !== [] ? [['B', $heading, null]] : []),
+                ...array_map(fn (array $line): array => ['', (string) $line[0], $line[1] ?? null], $lines),
+            ];
+        };
 
         // the realm's own details, not the ones a letter overrides
-        $contactLines = $lines([$contact?->phone, $contact?->email, $contact?->websiteLabel()]);
-        $bankLines = $contact?->iban ? $lines([
-            $contact->bank_name,
-            'IBAN '.$contact->ibanLabel(),
-            $contact->bic ? 'BIC '.$contact->bic : null,
-        ]) : '';
+        $phone = (string) $contact?->phone;
+        $email = (string) $contact?->email;
 
         return [
-            [$letter->senderName, $lines([$contact?->streetLine(), $contact?->cityLine()])],
-            [$contactLines !== '' ? __('profile.cover_letter_footer_contact') : '', $contactLines],
-            [$bankLines !== '' ? __('profile.cover_letter_footer_bank') : '', $bankLines],
+            [['B', $letter->senderName, null], ...$column('', [[$contact?->streetLine()], [$contact?->cityLine()]])],
+            $column(__('profile.cover_letter_footer_contact'), [
+                [$phone, 'tel:'.preg_replace('/[^\d+]/', '', $phone)],
+                [$email, 'mailto:'.$email],
+                [$contact?->websiteLabel(), $contact?->website],
+            ]),
+            $contact?->iban ? $column(__('profile.cover_letter_footer_bank'), [
+                [$contact->bank_name],
+                ['IBAN '.$contact->ibanLabel()],
+                [$contact->bic ? 'BIC '.$contact->bic : null],
+            ]) : [],
         ];
     }
 
@@ -323,34 +334,44 @@ final class MembershipCertificatePdf
         return ($this->contentWidth - 2 * self::FOOTER_COLUMN_GAP) / 3;
     }
 
-    /** @param  list<array{string, string}>  $columns */
+    /**
+     * Height of an entry plus the gap a line break would leave, so all entries share one pitch.
+     *
+     * @param  array{string, string, ?string}  $entry
+     */
+    private function footerEntryHeight(array $entry): float
+    {
+        $this->font($entry[0], self::FOOTER_FONT_SIZE);
+
+        return $this->measure($entry[1], $this->footerColumnWidth()) + self::LINE_SPACING;
+    }
+
+    /** @param  list<list<array{string, string, ?string}>>  $columns */
     private function footerHeight(array $columns): float
     {
         $this->hyphenate(false);
-        $heights = [];
-        foreach ($columns as [$heading, $body]) {
-            $width = $this->footerColumnWidth();
-            $this->font('B', self::FOOTER_FONT_SIZE);
-            $height = $heading !== '' ? $this->measure($heading, $width) + self::LINE_SPACING : 0.0;
-            $this->font('', self::FOOTER_FONT_SIZE);
-            $heights[] = $height + $this->measure($body, $width);
-        }
 
-        return max($heights);
+        return max(array_map(
+            fn (array $entries): float => array_sum(array_map($this->footerEntryHeight(...), $entries)),
+            $columns,
+        )) - self::LINE_SPACING;
     }
 
     /**
      * The same footer on every page of the letter, below a rule.
      *
-     * @param  list<array{string, string}>  $columns
+     * @param  list<list<array{string, string, ?string}>>  $columns
      */
     private function drawLetterFooter(array $columns): void
     {
         $this->hyphenate(false);
         $top = (float) $this->footerTop;
+        $width = $this->footerColumnWidth();
 
         foreach ($this->pdf->page->getPages() as $page) {
             $pid = (int) $page['pid'];
+            // links go on the current page
+            $this->pdf->setCurrentPage($pid);
             $this->pdf->addArtifactContent($this->pdf->graph->getLine(
                 self::MARGIN_LEFT,
                 $top - self::FOOTER_RULE_GAP,
@@ -359,23 +380,24 @@ final class MembershipCertificatePdf
                 ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR],
             ), $pid, 'Pagination', 'Footer');
 
-            foreach ($columns as $index => [$heading, $body]) {
-                $width = $this->footerColumnWidth();
+            foreach ($columns as $index => $entries) {
                 $x = self::MARGIN_LEFT + $index * ($width + self::FOOTER_COLUMN_GAP);
                 $y = $top;
-                foreach ([['B', $heading], ['', $body]] as [$style, $text]) {
-                    if ($text === '') {
-                        continue;
-                    }
-
+                foreach ($entries as $entry) {
+                    [$style, $text, $link] = $entry;
                     $this->font($style, self::FOOTER_FONT_SIZE);
                     // the colour goes into the content, as the style stack only reaches the current page
                     $content = $this->pdf->graph->add(['fillColor' => self::COLOR_ZINC_600])
                         .$this->pdf->getTextCell($text, $x, $y, $width, linespace: self::LINE_SPACING, halign: 'L', drawcell: false)
                         .$this->pdf->graph->pop();
+                    $box = $this->pdf->getLastTextBBox();
                     $this->pdf->addArtifactContent($content, $pid, 'Pagination', 'Footer');
-                    // the gap a line break would leave, so heading and body share one pitch
-                    $y += $this->measure($text, $width) + self::LINE_SPACING;
+                    // the text is an artifact, so the link becomes a structure element of its own
+                    if ($link !== null) {
+                        $this->pdf->addTaggedLink($box['x'], $box['y'], $box['w'], $box['h'], $link);
+                    }
+
+                    $y += $this->footerEntryHeight($entry);
                 }
             }
         }
@@ -392,7 +414,11 @@ final class MembershipCertificatePdf
         $contact = $letter->contact;
         $items = array_filter([
             'network' => array_filter([$letter->senderUnit]),
-            'house' => array_filter([$contact?->streetLine(), $contact?->cityLine()]),
+            // the postal address is in the return address and the footer already
+            'house' => array_filter([
+                $contact?->office_building,
+                $contact?->office_room ? __('profile.cover_letter_office_room', ['room' => $contact->office_room]) : null,
+            ]),
             'phone' => array_filter([$letter->phone]),
             'mail' => array_filter([$letter->email]),
             'globe' => array_filter([$contact?->websiteLabel()]),
