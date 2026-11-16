@@ -21,6 +21,7 @@ return [
     'cover_letter_recipient' => 'Recipient',
     'cover_letter_sender' => 'Sender',
     'cover_letter_body' => 'Text',
+    'cover_letter_content' => 'Content',
     'cover_letter_no_contact' => 'No address or contact details for the letterhead have been entered in the student body settings yet.',
     'export_as_pdf' => 'Export as PDF',
     'export_memberships_deselect_all' => 'Deselect all',

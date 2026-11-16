@@ -21,6 +21,7 @@ return [
     'cover_letter_recipient' => 'Empfänger',
     'cover_letter_sender' => 'Absender',
     'cover_letter_body' => 'Text',
+    'cover_letter_content' => 'Inhalt',
     'cover_letter_no_contact' => 'Für den Briefkopf sind in den Einstellungen der Studierendenschaft noch keine Anschrift und Kontaktdaten hinterlegt.',
     'export_as_pdf' => 'Als PDF exportieren',
     'export_memberships_deselect_all' => 'Alle abwählen',

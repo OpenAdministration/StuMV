@@ -284,15 +284,23 @@ test('the letter fields start out with the realm defaults', function (): void {
     $community = newCommunity();
     RealmContact::create([
         'realm' => $community->getShortCode(),
+        'email' => 'stura@example.test',
+        'letter_enabled' => true,
+        'letter_recipient' => ['organisation' => 'Landesamt'],
         'letter_sender_unit' => 'Sprecher:innen',
+        'letter_signer_function' => 'Sprecher:in',
         'letter_subject' => 'Tätigkeitsbescheinigung',
         'letter_body' => '<p>Sehr geehrte Damen und Herren,</p>',
     ]);
     $user = actingAsMember($community);
 
     Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->assertSet('withCoverLetter', true)
+        ->assertSet('recipient.organisation', 'Landesamt')
+        ->assertSet('recipient.city', '')
         ->assertSet('senderUnit', 'Sprecher:innen')
+        ->assertSet('senderEmail', 'stura@example.test')
+        ->assertSet('signerFunction', 'Sprecher:in')
         ->assertSet('subject', 'Tätigkeitsbescheinigung')
-        ->assertSet('recipient.organisation', '')
         ->assertSet('letterBody', '<p>Sehr geehrte Damen und Herren,</p>');
 });

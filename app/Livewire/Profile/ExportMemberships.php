@@ -56,10 +56,12 @@ class ExportMemberships extends Component
 
         // the realm settings hold the defaults a letter starts out with
         $contact = RealmContact::forRealm($this->realm_uid);
-        $this->senderEmail = (string) $contact?->email;
+        $this->withCoverLetter = (bool) $contact?->letter_enabled;
+        $this->recipient = CoverLetter::recipient($contact->letter_recipient ?? []);
         $this->senderUnit = (string) $contact?->letter_sender_unit;
+        $this->senderEmail = (string) ($contact?->letter_sender_email ?? $contact?->email);
+        $this->signerFunction = (string) $contact?->letter_signer_function;
         $this->subject = (string) $contact?->letter_subject;
-        $this->recipient = CoverLetter::recipient();
         $this->letterBody = (string) $contact?->letter_body;
         $this->selectAll();
     }

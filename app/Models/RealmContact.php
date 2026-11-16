@@ -20,10 +20,22 @@ class RealmContact extends Model
         'email',
         'phone',
         'website',
+        'letter_enabled',
+        'letter_recipient',
         'letter_sender_unit',
+        'letter_sender_email',
+        'letter_signer_function',
         'letter_subject',
         'letter_body',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'letter_enabled' => 'boolean',
+            'letter_recipient' => 'array',
+        ];
+    }
 
     public static function forRealm(string $realmUid): ?self
     {

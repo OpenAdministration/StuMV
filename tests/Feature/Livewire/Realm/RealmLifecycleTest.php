@@ -90,19 +90,31 @@ test('an admin can store defaults for cover letters', function (): void {
     actingAsAdmin($community);
 
     Livewire::test(EditMembershipExport::class, ['realm' => $community])
-        ->set('letter_sender_unit', 'Sprecher:innen')
-        ->set('letter_subject', 'Tätigkeitsbescheinigung')
-        ->set('letter_body', '<p>Sehr geehrte Damen und Herren,</p><script>alert(1)</script>')
+        ->set('withCoverLetter', true)
+        ->set('recipient.organisation', 'Landesamt')
+        ->set('recipient.city', 'Erfurt')
+        ->set('senderUnit', 'Sprecher:innen')
+        ->set('senderEmail', 'sprecher@example.test')
+        ->set('signerFunction', 'Sprecher:in')
+        ->set('subject', 'Tätigkeitsbescheinigung')
+        ->set('letterBody', '<p>Sehr geehrte Damen und Herren,</p><script>alert(1)</script>')
         ->call('save')
         ->assertHasNoErrors();
 
     $contact = RealmContact::forRealm($community->getShortCode());
-    expect($contact->letter_sender_unit)->toBe('Sprecher:innen')
+    expect($contact->letter_enabled)->toBeTrue()
+        ->and($contact->letter_recipient)->toBe(['organisation' => 'Landesamt', 'city' => 'Erfurt'])
+        ->and($contact->letter_sender_unit)->toBe('Sprecher:innen')
+        ->and($contact->letter_sender_email)->toBe('sprecher@example.test')
+        ->and($contact->letter_signer_function)->toBe('Sprecher:in')
         ->and($contact->letter_subject)->toBe('Tätigkeitsbescheinigung')
         ->and($contact->letter_body)->toBe('<p>Sehr geehrte Damen und Herren,</p>');
 
     Livewire::test(EditMembershipExport::class, ['realm' => $community])
-        ->assertSet('letter_sender_unit', 'Sprecher:innen');
+        ->assertSet('recipient.city', 'Erfurt')
+        ->set('senderEmail', 'not-an-address')
+        ->call('save')
+        ->assertHasErrors(['senderEmail']);
 });
 
 test('a super admin can delete a realm once the shortcode is confirmed', function (): void {
