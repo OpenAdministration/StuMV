@@ -68,6 +68,9 @@ final class MembershipCertificatePdf
     /** Name baseline and logo bottom both sit this far above the letterhead rule. */
     private const float LETTERHEAD_GAP = 2.0;
 
+    /** Zusatz- und Vermerkzone of DIN 5008 form B, 45 to 62.7mm. */
+    private const float NOTES_ZONE_Y = 45.0;
+
     private const float RECIPIENT_Y = 62.7;
 
     private const float ADDRESS_WIDTH = 80.0;
@@ -196,8 +199,8 @@ final class MembershipCertificatePdf
             $this->font('', $size);
         }
         $this->beginTag('P');
-        // bottom line of the notes zone, right above the address
-        $this->text($returnAddress, self::MARGIN_LEFT, self::RECIPIENT_Y - $this->measure('X', self::ADDRESS_WIDTH) - 0.5, self::ADDRESS_WIDTH);
+        // top line of the notes zone; notes like "Einschreiben" would go below it, above the address
+        $this->text($returnAddress, self::MARGIN_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH);
         $this->endTag();
 
         $this->font('', self::ADDRESS_FONT_SIZE);
