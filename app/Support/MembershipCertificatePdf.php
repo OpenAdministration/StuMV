@@ -66,7 +66,7 @@ final class MembershipCertificatePdf
     private const float LETTERHEAD_RULE_Y = 33.0;
 
     /** Name baseline and logo bottom both sit this far above the letterhead rule. */
-    private const float LETTERHEAD_GAP = 2.0;
+    private const float LETTERHEAD_GAP = 3.0;
 
     /** Zusatz- und Vermerkzone of DIN 5008 form B, 45 to 62.7mm. */
     private const float NOTES_ZONE_Y = 45.0;
