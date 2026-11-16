@@ -263,7 +263,8 @@ test('a realm admin can sort members by username', function (): void {
     $uid = $community->getShortCode();
     $first = realmMember($uid, 'Alice Wonder');
     $second = realmMember($uid, 'Bob Builder');
-    [$low, $high] = strcmp($first, $second) < 0 ? [$first, $second] : [$second, $first];
+    // natural order like the list itself - the random usernames contain digits
+    [$low, $high] = strnatcasecmp($first, $second) < 0 ? [$first, $second] : [$second, $first];
     actingAsAdmin($community);
 
     $html = Livewire::test(ListMembers::class, ['realm' => $community])
@@ -273,6 +274,22 @@ test('a realm admin can sort members by username', function (): void {
         ->html();
 
     expect(strpos($html, (string) $high))->toBeLessThan(strpos($html, (string) $low));
+});
+
+test('usernames are sorted naturally, so a 9 comes before a 12', function (): void {
+    $community = newCommunity();
+    $suffix = bin2hex(random_bytes(3));
+    foreach (["member12{$suffix}", "member9{$suffix}"] as $username) {
+        TestLdap::databaseUser(TestLdap::makeUser($username, $community), $community);
+    }
+    actingAsAdmin($community);
+
+    $html = Livewire::test(ListMembers::class, ['realm' => $community])
+        ->call('loadMembers')
+        ->call('sortBy', 'uid')
+        ->html();
+
+    expect(strpos($html, "member9{$suffix}"))->toBeLessThan(strpos($html, "member12{$suffix}"));
 });
 
 test('a realm admin can sort members by last login', function (): void {
