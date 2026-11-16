@@ -57,7 +57,7 @@
                             <flux:callout variant="warning" icon="circle-alert" :heading="__('profile.cover_letter_no_contact')" />
                         @endunless
                         <div class="grid gap-6 md:grid-cols-2 items-start">
-                            <fieldset class="rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            <flux:fieldset>
                                 <legend class="px-1">{{ __('profile.cover_letter_recipient') }}</legend>
                                 <div class="space-y-4 p-4">
                                     <flux:input wire:model="recipient.organisation" :label="__('profile.cover_letter_recipient_organisation')" />
@@ -72,15 +72,15 @@
                                     </div>
                                     <flux:input wire:model="recipient.country" :label="__('profile.cover_letter_recipient_country')" />
                                 </div>
-                            </fieldset>
-                            <fieldset class="rounded-lg border border-zinc-200 dark:border-zinc-700">
+                            </flux:fieldset>
+                            <flux:fieldset>
                                 <legend class="px-1">{{ __('profile.cover_letter_sender') }}</legend>
                                 <div class="space-y-4 p-4">
                                     <flux:input wire:model="senderUnit" :label="__('profile.cover_letter_sender_unit')" :placeholder="__('profile.cover_letter_sender_unit_placeholder')" />
                                     <flux:input type="email" wire:model="senderEmail" :label="__('profile.cover_letter_sender_email')" />
                                     <flux:input wire:model="signerFunction" :label="__('profile.cover_letter_signer_function')" :description="__('profile.cover_letter_signer_function_hint', ['name' => auth()->user()->full_name])" />
                                 </div>
-                            </fieldset>
+                            </flux:fieldset>
                         </div>
                         <flux:input wire:model="subject" :label="__('profile.cover_letter_subject')" />
                         <flux:editor wire:model="letterBody" :label="__('profile.cover_letter_body')" toolbar="bold italic underline | bullet ordered" />
