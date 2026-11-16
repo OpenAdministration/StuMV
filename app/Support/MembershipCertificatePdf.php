@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use Com\Tecnick\Pdf\Tcpdf;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
@@ -57,8 +56,8 @@ final class MembershipCertificatePdf
     /** Line height of the letter text and its closing, relative to the font size. */
     private const float LETTER_LINE_HEIGHT = 1.4;
 
-    /** 10pt without extra leading gives the 4.23mm DIN line, so six lines fit the address zone. */
-    private const float ADDRESS_FONT_SIZE = 10.0;
+    /** With the letter's leading five lines fit the address zone, as many as a recipient has fields. */
+    private const float ADDRESS_FONT_SIZE = self::LETTER_FONT_SIZE;
 
     private const float INFO_FONT_SIZE = 8.5;
 
@@ -114,7 +113,7 @@ final class MembershipCertificatePdf
         'en' => 'hyph-en-us.tex',
     ];
 
-    private Tcpdf $pdf;
+    private TaggedPdf $pdf;
 
     /** @var array<string, int|string> */
     private array $hyphenPatterns = [];
@@ -142,7 +141,7 @@ final class MembershipCertificatePdf
         }
 
         // allowedPaths replaces the library's defaults, so the fonts are listed too
-        $this->pdf = new Tcpdf('mm', true, true, true, 'pdfua2', null, [
+        $this->pdf = new TaggedPdf('mm', true, true, true, 'pdfua2', null, [
             'allowedPaths' => [resource_path('fonts/pdf'), resource_path('hyphenation')],
         ]);
         $this->hyphenPatterns = $this->hyphenationPatterns();
@@ -209,7 +208,8 @@ final class MembershipCertificatePdf
 
         $this->font('', self::ADDRESS_FONT_SIZE);
         $this->beginTag('P');
-        $this->text(trim($letter->recipient), self::MARGIN_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: 0.0);
+        $linespace = $this->letterLineHeight() - $this->measure('X', self::ADDRESS_WIDTH);
+        $this->text(trim($letter->recipient), self::MARGIN_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: $linespace);
         $this->endTag();
 
         $infoBottom = $this->drawInfoBlock($letter, $right);
@@ -248,8 +248,7 @@ final class MembershipCertificatePdf
     {
         $lines = array_filter([$letter->signerName, $letter->signerFunction]);
         $this->font('', self::LETTER_FONT_SIZE);
-        // same leading as the text above, in mm
-        $lineHeight = self::LETTER_FONT_SIZE * self::LETTER_LINE_HEIGHT * 25.4 / 72;
+        $lineHeight = $this->letterLineHeight();
 
         // the HTML block already ends with its paragraph spacing
         if (! $this->hasSpace((1 + count($lines)) * $lineHeight + self::SIGNATURE_SPACE)) {
@@ -288,6 +287,12 @@ final class MembershipCertificatePdf
             return self::INFO_Y;
         }
 
+        $links = [
+            'phone' => 'tel:'.preg_replace('/[^\d+]/', '', (string) $contact?->phone),
+            'mail' => 'mailto:'.$letter->email,
+            'globe' => (string) $contact?->website,
+        ];
+
         $ruleX = $right - self::ICON_SIZE - 2.0;
         $textRight = $ruleX - 2.0;
         $y = self::INFO_Y;
@@ -296,10 +301,21 @@ final class MembershipCertificatePdf
             $this->font($icon === 'network' ? 'B' : '', self::INFO_FONT_SIZE);
             $lineHeight = $this->measure('X', $this->contentWidth);
 
+            $link = $links[$icon] ?? null;
             $this->beginTag('P');
+            if ($link !== null) {
+                $this->beginTag('Link');
+            }
+
             $this->text(implode("\n", $lines), self::INFO_X, $y, $textRight - self::INFO_X, self::COLOR_BLACK, 'R');
-            $this->endTag();
             $height = $this->lastHeight();
+            if ($link !== null) {
+                $box = $this->pdf->getLastTextBBox();
+                $this->pdf->addTaggedLink($box['x'], $box['y'], $box['w'], $box['h'], $link);
+                $this->endTag();
+            }
+
+            $this->endTag();
 
             $this->drawIcon($icon, $right - self::ICON_SIZE, $y + ($lineHeight - self::ICON_SIZE) / 2);
             $y += $height + self::SPACE;
@@ -738,6 +754,12 @@ final class MembershipCertificatePdf
     }
 
     /** Height the text would need in the given width, without drawing it. */
+    /** Line pitch of the letter text in mm. */
+    private function letterLineHeight(): float
+    {
+        return self::LETTER_FONT_SIZE * self::LETTER_LINE_HEIGHT * 25.4 / 72;
+    }
+
     private function measure(string $txt, float $width): float
     {
         if ($txt === '') {

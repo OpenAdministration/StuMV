@@ -77,7 +77,9 @@ test('a cover letter is put on its own page in front of the certificate', functi
         ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(16)
         ->and(substr_count($with, '/S /H1'))->toBe(1)
         ->and(substr_count($with, '/S /TH'))->toBe(4)
-        ->and(substr_count($with, '/S /LI'))->toBe(1);
+        ->and(substr_count($with, '/S /LI'))->toBe(1)
+        ->and(substr_count($with, '/S /Link'))->toBe(3)
+        ->and($with)->toContain('/URI (tel:03641930990)', '/URI (mailto:sprecher@example.test)', '/URI (https://stura.example.test)');
 });
 
 test('the letter body keeps emphasis and lists and drops everything else', function (): void {
