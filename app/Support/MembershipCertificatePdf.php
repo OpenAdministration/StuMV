@@ -58,9 +58,9 @@ final class MembershipCertificatePdf
     /** With the letter's leading five lines fit the address zone, as many as a recipient has fields. */
     private const float ADDRESS_FONT_SIZE = self::LETTER_FONT_SIZE;
 
-    private const float INFO_FONT_SIZE = 8.5;
+    private const float INFO_FONT_SIZE = 9.5;
 
-    private const float RETURN_FONT_SIZE = 7.0;
+    private const float RETURN_FONT_SIZE = 8.0;
 
     private const float SENDER_FONT_SIZE = 14.0;
 
@@ -192,14 +192,8 @@ final class MembershipCertificatePdf
 
         // a hyphen inserted into an address or a contact detail reads as part of it
         $this->hyphenate(false);
-        $returnAddress = implode(' | ', array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
-        // DIN 5008 wants it on one line, so long names get a smaller size
-        $size = self::RETURN_FONT_SIZE;
-        $this->font('', $size);
-        while ($size > 5.0 && $this->measureWidth($returnAddress) > self::ADDRESS_WIDTH) {
-            $size -= 0.5;
-            $this->font('', $size);
-        }
+        $this->font('', self::RETURN_FONT_SIZE);
+        $returnAddress = $this->returnAddress(array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
         $this->beginTag('P');
         // top line of the notes zone; notes like "Einschreiben" would go below it, above the address
         $this->text($returnAddress, self::MARGIN_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH);
@@ -329,6 +323,26 @@ final class MembershipCertificatePdf
         ));
 
         return $y - self::SPACE;
+    }
+
+    /**
+     * Parts joined on one line while they fit, otherwise broken between parts.
+     *
+     * @param  array<int, string>  $parts
+     */
+    private function returnAddress(array $parts): string
+    {
+        $lines = [];
+        foreach ($parts as $part) {
+            $last = array_key_last($lines);
+            if ($last !== null && $this->measureWidth($lines[$last].' | '.$part) <= self::ADDRESS_WIDTH) {
+                $lines[$last] .= ' | '.$part;
+            } else {
+                $lines[] = $part;
+            }
+        }
+
+        return implode("\n", $lines);
     }
 
     /** DIN 5008 fold marks at 105mm and 210mm, hole mark at 148.5mm. */
