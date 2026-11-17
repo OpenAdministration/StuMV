@@ -64,7 +64,7 @@ final class MembershipCertificatePdf
 
     private const float INFO_FONT_SIZE = 9.5;
 
-    private const float RETURN_FONT_SIZE = 8.0;
+    private const float RETURN_FONT_SIZE = 7.0;
 
     private const float SENDER_FONT_SIZE = self::HEADING_SIZE;
 
@@ -79,7 +79,7 @@ final class MembershipCertificatePdf
 
     private const float RECIPIENT_Y = 62.7;
 
-    private const float ADDRESS_WIDTH = 80.0;
+    private const float ADDRESS_WIDTH = 85.0;
 
     private const float INFO_X = 125.0;
 
