@@ -102,8 +102,6 @@ final class MembershipCertificatePdf
     /** One line in DIN 5008 terms. */
     private const float DIN_LINE = 4.23;
 
-    private const float LOGO_HEIGHT = 14.0;
-
     private const float LOGO_MAX_WIDTH = 60.0;
 
     /** Minimum space between the sender name and the logo. */
@@ -156,6 +154,9 @@ final class MembershipCertificatePdf
     private float $contentWidth;
 
     private float $cursorY;
+
+    /** From the cap height of the title to the baseline of the subtitle below it. */
+    private float $logoHeight = 0.0;
 
     /** Where the footer of the letter pages begins; the certificate has none. */
     private ?float $footerTop = null;
@@ -225,6 +226,7 @@ final class MembershipCertificatePdf
         // a hyphen inserted into a name, an address or a contact detail reads as part of it
         $this->hyphenate(false);
 
+        $this->logoHeight = $this->letterheadHeight();
         $logoWidth = $this->drawLogo($letter->logoPath, $right);
         $nameWidth = $right - self::LETTERHEAD_LEFT - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
         $baseline = self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP;
@@ -529,6 +531,17 @@ final class MembershipCertificatePdf
         return implode("\n", $lines);
     }
 
+    /** Two lines of the letterhead, measured as drawLetter() sets them, whether or not there is a subtitle. */
+    private function letterheadHeight(): float
+    {
+        $this->font('', self::HEADER_SUBTITLE_SIZE);
+        $subtitleLine = $this->measure('X', $this->contentWidth);
+        $this->font('B', self::SENDER_FONT_SIZE);
+        $metrics = $this->pdf->font->getCurrentFont();
+
+        return $subtitleLine + self::SPACE + $metrics['capheight'] * $metrics['usize'] / $metrics['size'];
+    }
+
     /**
      * A paragraph whose last line sits on $baseline; lines a long text wraps to grow upwards.
      * Returns the baseline of its first line.
@@ -588,7 +601,7 @@ final class MembershipCertificatePdf
                 return 0.0;
             }
 
-            $width = min(self::LOGO_MAX_WIDTH, self::LOGO_HEIGHT * $size[0] / $size[1]);
+            $width = min(self::LOGO_MAX_WIDTH, $this->logoHeight * $size[0] / $size[1]);
             $height = $width * $size[1] / $size[0];
             $iid = $this->pdf->image->add('@'.$raw);
 
@@ -629,7 +642,7 @@ final class MembershipCertificatePdf
 
         $this->splitStrokeFirst($dom);
 
-        $width = min(self::LOGO_MAX_WIDTH, self::LOGO_HEIGHT * $naturalWidth / $naturalHeight);
+        $width = min(self::LOGO_MAX_WIDTH, $this->logoHeight * $naturalWidth / $naturalHeight);
         $height = $width * $naturalHeight / $naturalWidth;
 
         // an SVG names no font, so the importer would register the current one again
@@ -683,7 +696,7 @@ final class MembershipCertificatePdf
 
     private function rasterizeSvg(string $raw): string
     {
-        $target = (int) round(self::LOGO_HEIGHT / 25.4 * self::LOGO_DPI);
+        $target = (int) round($this->logoHeight / 25.4 * self::LOGO_DPI);
 
         // read once for the natural size, then again at the density that yields the target height
         $probe = new \Imagick;
