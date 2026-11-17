@@ -236,11 +236,12 @@ final class MembershipCertificatePdf
         $this->logoHeight = $this->letterheadHeight();
         $logoWidth = $this->drawLogo($letter->logoPath, $right);
         $nameWidth = $right - self::LETTERHEAD_LEFT - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
+        $halign = $letter->fromPerson ? 'R' : 'L';
         $baseline = self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP;
         $subtitleLine = 0.0;
         if ($letter->headerSubtitle !== null) {
             $this->font('', self::HEADER_SUBTITLE_SIZE);
-            $baseline = $this->textAbove($letter->headerSubtitle, $baseline, $nameWidth);
+            $baseline = $this->textAbove($letter->headerSubtitle, $baseline, $nameWidth, $halign);
             $subtitleLine = $this->measure('X', $nameWidth);
         }
 
@@ -253,7 +254,7 @@ final class MembershipCertificatePdf
                 $baseline -= $subtitleLine + self::SPACE;
             }
 
-            $this->textAbove($title, $baseline, $nameWidth);
+            $this->textAbove($title, $baseline, $nameWidth, $halign);
         }
         $this->artifact($this->pdf->graph->getLine(
             self::LETTERHEAD_LEFT,
@@ -378,7 +379,7 @@ final class MembershipCertificatePdf
         // a column left out moves the ones after it to the left
         return array_values(array_filter([
             [['B', $letter->senderName, null], ...$column('', [[$office], [$contact?->streetLine()], [$contact?->cityLine()]])],
-            $letter->footerContact ? $column(__('profile.cover_letter_footer_contact'), [
+            ! $letter->fromPerson ? $column(__('profile.cover_letter_footer_contact'), [
                 [$phone, 'tel:'.preg_replace('/[^\d+]/', '', $phone)],
                 [$email, 'mailto:'.$email],
                 [$contact?->websiteLabel(), $contact?->website],
@@ -473,7 +474,7 @@ final class MembershipCertificatePdf
      */
     private function drawInfoBlock(CoverLetter $letter, float $right): float
     {
-        if (! $letter->infoBlock) {
+        if ($letter->fromPerson) {
             return self::INFO_Y;
         }
 
@@ -575,14 +576,14 @@ final class MembershipCertificatePdf
      * A paragraph whose last line sits on $baseline; lines a long text wraps to grow upwards.
      * Returns the baseline of its first line.
      */
-    private function textAbove(string $text, float $baseline, float $width): float
+    private function textAbove(string $text, float $baseline, float $width, string $halign = 'L'): float
     {
         $metrics = $this->pdf->font->getCurrentFont();
         $ascent = $metrics['ascent'] * $metrics['usize'] / $metrics['size'];
         $top = $baseline - $ascent - ($this->measure($text, $width) - $this->measure('X', $width));
 
         $this->beginTag('P');
-        $this->text($text, self::LETTERHEAD_LEFT, $top, $width);
+        $this->text($text, self::LETTERHEAD_LEFT, $top, $width, halign: $halign);
         $this->endTag();
 
         return $top + $ascent;

@@ -39,10 +39,8 @@ final readonly class CoverLetter
         /** Letterhead above the rule, both optional; without either the sender name is shown. */
         public ?string $headerTitle = null,
         public ?string $headerSubtitle = null,
-        /** The sender details beside the address. */
-        public bool $infoBlock = true,
-        /** Phone, email and website in the footer. */
-        public bool $footerContact = true,
+        /** Sent by a person: their name right-aligned, no info block and no contact details in the footer. */
+        public bool $fromPerson = false,
     ) {}
 
     /**
@@ -73,8 +71,7 @@ final readonly class CoverLetter
                     'city' => $sender->getFirstAttribute('l'),
                 ]),
                 headerTitle: $name,
-                infoBlock: false,
-                footerContact: false,
+                fromPerson: true,
             );
         }
 
