@@ -23,6 +23,9 @@ final class MembershipCertificatePdf
 
     private const float MARGIN_RIGHT = 20.0;
 
+    /** Left edge of the letterhead and the address field. */
+    private const float LETTERHEAD_LEFT = 20.0;
+
     private const float MARGIN_TOP = 20.0;
 
     private const float MARGIN_BOTTOM = 25.0;
@@ -210,7 +213,7 @@ final class MembershipCertificatePdf
         $this->hyphenate(false);
 
         $logoWidth = $this->drawLogo($letter->logoPath, $right);
-        $nameWidth = $this->contentWidth - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
+        $nameWidth = $right - self::LETTERHEAD_LEFT - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
         $baseline = self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP;
         if ($letter->headerSubtitle !== null) {
             $this->font('', self::HEADER_SUBTITLE_SIZE);
@@ -229,7 +232,7 @@ final class MembershipCertificatePdf
             $this->textAbove($title, $baseline, $nameWidth);
         }
         $this->artifact($this->pdf->graph->getLine(
-            self::MARGIN_LEFT,
+            self::LETTERHEAD_LEFT,
             self::LETTERHEAD_RULE_Y,
             $right,
             self::LETTERHEAD_RULE_Y,
@@ -240,13 +243,13 @@ final class MembershipCertificatePdf
         $returnAddress = $this->returnAddress(array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
         $this->beginTag('P');
         // top line of the notes zone; notes like "Einschreiben" would go below it, above the address
-        $this->text($returnAddress, self::MARGIN_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH);
+        $this->text($returnAddress, self::LETTERHEAD_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH);
         $this->endTag();
 
         $this->font('', self::ADDRESS_FONT_SIZE);
         $this->beginTag('P');
         $linespace = $this->letterLineHeight() - $this->measure('X', self::ADDRESS_WIDTH);
-        $this->text(trim($letter->recipient), self::MARGIN_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: $linespace);
+        $this->text(trim($letter->recipient), self::LETTERHEAD_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: $linespace);
         $this->endTag();
 
         $infoBottom = $this->drawInfoBlock($letter, $right);
@@ -516,7 +519,7 @@ final class MembershipCertificatePdf
         $top = $baseline - $ascent - ($this->measure($text, $width) - $this->measure('X', $width));
 
         $this->beginTag('P');
-        $this->text($text, self::MARGIN_LEFT, $top, $width);
+        $this->text($text, self::LETTERHEAD_LEFT, $top, $width);
         $this->endTag();
 
         return $top + $ascent;
