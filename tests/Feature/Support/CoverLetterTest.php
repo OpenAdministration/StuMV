@@ -72,8 +72,10 @@ test('a letter sent by a person carries their profile details', function (): voi
         ->and($letter->headerTitle)->toBe('Helen Würflein')
         ->and($letter->headerSubtitle)->toBeNull()
         ->and($letter->senderUnit)->toBeNull()
-        ->and($letter->email)->toBe('helen@example.test')
-        ->and($letter->phone)->toBe('+493641930990')
+        ->and($letter->email)->toBeNull()
+        ->and($letter->phone)->toBeNull()
+        ->and($letter->infoBlock)->toBeFalse()
+        ->and($letter->footerContact)->toBeFalse()
         ->and($letter->logoPath)->toBeNull()
         ->and($letter->contact?->streetLine())->toBe('Lutherstraße 1')
         ->and($letter->contact?->cityLine())->toBe('07743 Jena')
@@ -82,7 +84,7 @@ test('a letter sent by a person carries their profile details', function (): voi
         ->and($letter->body)->toBe('<p>Bescheinigung für Max &lt;Muster&gt;</p>');
 
     $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Muster', null, [], $letter);
-    expect($pdf)->toContain('/URI (mailto:helen@example.test)')->not->toContain('stura@example.test');
+    expect($pdf)->not->toContain('/URI (mailto:')->not->toContain('/URI (tel:');
 });
 
 test('unknown placeholders are reported and left as they are', function (): void {

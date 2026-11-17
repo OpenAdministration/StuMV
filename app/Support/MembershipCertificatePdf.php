@@ -301,7 +301,7 @@ final class MembershipCertificatePdf
         foreach (LetterPlaceholders::splitAtSignatures(CoverLetter::sanitizeBody($letter->body)) as [$part, $signature]) {
             if (! CoverLetter::bodyIsEmpty($part)) {
                 $this->font('', self::LETTER_FONT_SIZE);
-                $html = '<style>p, li { text-align: justify; line-height: '.self::LETTER_LINE_HEIGHT.'; }</style>'.$part;
+                $html = '<style>p, li { text-align: justify; line-height: '.self::LETTER_LINE_HEIGHT.'; } hr { color: '.self::COLOR_ZINC_600.'; }</style>'.$part;
                 $this->pdf->addHTMLCell($html, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
                 $this->cursorY = $this->pdf->getLastHTMLCellEnd()['y'];
             }
@@ -375,19 +375,20 @@ final class MembershipCertificatePdf
             $contact?->office_room ? __('profile.cover_letter_office_room', ['room' => $contact->office_room]) : null,
         ]));
 
-        return [
+        // a column left out moves the ones after it to the left
+        return array_values(array_filter([
             [['B', $letter->senderName, null], ...$column('', [[$office], [$contact?->streetLine()], [$contact?->cityLine()]])],
-            $column(__('profile.cover_letter_footer_contact'), [
+            $letter->footerContact ? $column(__('profile.cover_letter_footer_contact'), [
                 [$phone, 'tel:'.preg_replace('/[^\d+]/', '', $phone)],
                 [$email, 'mailto:'.$email],
                 [$contact?->websiteLabel(), $contact?->website],
-            ]),
+            ]) : [],
             $contact?->iban ? $column(__('profile.cover_letter_footer_bank'), [
                 [$contact->bank_name],
                 ['IBAN: '.$contact->ibanLabel()],
                 [$contact->bic ? 'BIC: '.$contact->bic : null],
             ]) : [],
-        ];
+        ]));
     }
 
     private function footerColumnWidth(): float
@@ -472,6 +473,10 @@ final class MembershipCertificatePdf
      */
     private function drawInfoBlock(CoverLetter $letter, float $right): float
     {
+        if (! $letter->infoBlock) {
+            return self::INFO_Y;
+        }
+
         $contact = $letter->contact;
         $items = array_filter([
             'network' => array_filter([$letter->senderUnit]),
@@ -529,7 +534,7 @@ final class MembershipCertificatePdf
             $bottom - self::INFO_Y + self::INFO_BOX_PADDING,
             self::INFO_BOX_RADIUS,
             self::INFO_BOX_RADIUS,
-            style: ['lineWidth' => 0.2, 'lineColor' => self::COLOR_ZINC_300],
+            style: ['lineWidth' => 0.2, 'lineColor' => self::COLOR_ZINC_600],
         ));
 
         return $bottom;

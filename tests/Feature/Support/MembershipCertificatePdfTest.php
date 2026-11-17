@@ -99,9 +99,9 @@ test('an svg logo is embedded as vector graphic, its outline kept behind the fil
     expect($pdf)->not->toContain('/Subtype /Image');
 });
 
-test('the letter body keeps emphasis and lists and drops everything else', function (): void {
-    expect(CoverLetter::sanitizeBody('<p onclick="x"><strong>a</strong><a href="https://x">b</a></p><script>c</script><ul><li>d</li></ul>'))
-        ->toBe('<p><strong>a</strong>b</p><ul><li>d</li></ul>')
+test('the letter body keeps emphasis, lists and rules and drops everything else', function (): void {
+    expect(CoverLetter::sanitizeBody('<p onclick="x"><strong>a</strong><a href="https://x">b</a></p><script>c</script><ul><li>d</li></ul><hr>'))
+        ->toBe('<p><strong>a</strong>b</p><ul><li>d</li></ul><hr />')
         ->and(CoverLetter::bodyIsEmpty('<p>&nbsp;</p>'))->toBeTrue()
         ->and(CoverLetter::bodyIsEmpty('<p>x</p>'))->toBeFalse()
         ->and(CoverLetter::bodyIsEmpty('<p></p>'))->toBeTrue();
@@ -138,4 +138,21 @@ test('a signature placeholder becomes room to sign instead of a paragraph', func
         ->and(LetterPlaceholders::signatureMisplaced('<p>[signature;rank=1]</p>'))->toBeTrue()
         ->and(LetterPlaceholders::signatureMisplaced('<p>[signature;name=[sender.name];function=Sprecher:in]</p>'))->toBeFalse()
         ->and(LetterPlaceholders::signatureMisplaced('<p>Gruß</p><p>[signature]</p>'))->toBeFalse();
+});
+
+test('a rule in the letter text is drawn as an artifact', function (): void {
+    $render = fn (string $body): string => (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [], new CoverLetter('Studierendenrat', null, 'Landtag', $body));
+
+    $without = $render('<p>a</p><p>b</p>');
+    $with = $render('<p>a</p><hr><p>b</p>');
+
+    // marked content lives in the compressed page streams
+    $artifacts = function (string $pdf): int {
+        preg_match_all('#stream\r?\n(.*?)\r?\nendstream#s', $pdf, $streams);
+
+        return array_sum(array_map(fn (string $stream): int => substr_count((string) @gzuncompress($stream), '/Artifact'), $streams[1]));
+    };
+
+    expect($artifacts($with))->toBe($artifacts($without) + 1)
+        ->and(substr_count($with, '/S /P'))->toBe(substr_count($without, '/S /P'));
 });

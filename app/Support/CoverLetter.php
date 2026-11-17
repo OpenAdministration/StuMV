@@ -39,6 +39,10 @@ final readonly class CoverLetter
         /** Letterhead above the rule, both optional; without either the sender name is shown. */
         public ?string $headerTitle = null,
         public ?string $headerSubtitle = null,
+        /** The sender details beside the address. */
+        public bool $infoBlock = true,
+        /** Phone, email and website in the footer. */
+        public bool $footerContact = true,
     ) {}
 
     /**
@@ -57,9 +61,8 @@ final readonly class CoverLetter
 
         if ($template->sender === LetterSender::User) {
             $name = (string) $sender->getFirstAttribute('cn');
-            $email = $sender->getFirstAttribute('mail');
-            $phone = $sender->getFirstAttribute('telephoneNumber');
 
+            // a person's letter carries only their name and address
             return new self(
                 ...$shared,
                 senderName: $name,
@@ -68,12 +71,10 @@ final readonly class CoverLetter
                     'street' => $sender->getFirstAttribute('street'),
                     'postal_code' => $sender->getFirstAttribute('postalCode'),
                     'city' => $sender->getFirstAttribute('l'),
-                    'email' => $email,
-                    'phone' => $phone,
                 ]),
-                email: $email,
-                phone: $phone,
                 headerTitle: $name,
+                infoBlock: false,
+                footerContact: false,
             );
         }
 
@@ -97,11 +98,11 @@ final readonly class CoverLetter
         );
     }
 
-    /** Editor HTML reduced to what the letter can print: paragraphs, emphasis and lists. */
+    /** Editor HTML reduced to what the letter can print: paragraphs, emphasis, lists and rules. */
     public static function sanitizeBody(string $html): string
     {
         $config = new HtmlSanitizerConfig;
-        foreach (['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'ul', 'ol', 'li'] as $element) {
+        foreach (['p', 'br', 'hr', 'strong', 'b', 'em', 'i', 'u', 's', 'ul', 'ol', 'li'] as $element) {
             $config = $config->allowElement($element);
         }
 

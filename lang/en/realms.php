@@ -153,7 +153,7 @@ return [
     'membership_export.without_letter' => 'no cover letter',
     'membership_export.sender_realm' => 'Student body',
     'membership_export.sender_user' => 'Exporting person',
-    'membership_export.sender_user_hint' => 'Name, address, email address and phone number are taken from the profile of the person exporting.',
+    'membership_export.sender_user_hint' => 'Name and address are taken from the profile of the person exporting.',
     'membership_export.no_templates' => 'No templates yet. Without a template the export only contains the list of memberships.',
     'membership_export.delete' => 'Delete template',
     'membership_export.delete_title' => 'Delete template “:name”?',

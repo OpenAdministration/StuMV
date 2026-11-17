@@ -153,7 +153,7 @@ return [
     'membership_export.without_letter' => 'ohne Anschreiben',
     'membership_export.sender_realm' => 'Studierendenschaft',
     'membership_export.sender_user' => 'Exportierende Person',
-    'membership_export.sender_user_hint' => 'Name, Anschrift, E-Mail-Adresse und Telefonnummer stammen aus dem Profil der Person, die exportiert.',
+    'membership_export.sender_user_hint' => 'Name und Anschrift stammen aus dem Profil der Person, die exportiert.',
     'membership_export.no_templates' => 'Noch keine Vorlagen angelegt. Ohne Vorlage enthält der Export nur die Übersicht der Mitgliedschaften.',
     'membership_export.delete' => 'Vorlage löschen',
     'membership_export.delete_title' => 'Vorlage „:name“ löschen?',
