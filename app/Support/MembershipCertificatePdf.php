@@ -479,7 +479,7 @@ final class MembershipCertificatePdf
                 $this->beginTag('Link');
             }
 
-            $this->text(implode("\n", $lines), self::INFO_TEXT_X, $y, $right - self::INFO_BOX_PADDING - self::INFO_TEXT_X);
+            $this->text(implode("\n", $lines), self::INFO_TEXT_X, $y, $right - self::INFO_BOX_PADDING - self::INFO_TEXT_X, self::COLOR_ZINC_600);
             $height = $this->lastHeight();
             if ($link !== null) {
                 $box = $this->pdf->getLastTextBBox();
@@ -721,7 +721,7 @@ final class MembershipCertificatePdf
 
         $body = '';
         foreach ($matches as $element) {
-            $body .= '<'.$element[1].$element[2].' fill="none" stroke="'.self::COLOR_BLACK
+            $body .= '<'.$element[1].$element[2].' fill="none" stroke="'.self::COLOR_ZINC_600
                 .'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
         }
 
