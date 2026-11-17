@@ -48,7 +48,7 @@ final class MembershipCertificatePdf
 
     private const string FONT = 'adwaitasans';
 
-    /** Tabular figures, for dates in columns, addresses and phone numbers. */
+    /** Tabular figures, for dates, addresses and phone numbers. */
     private const string FONT_TABULAR = 'adwaitasanstabular';
 
     /** Table columns holding dates. */
@@ -272,7 +272,7 @@ final class MembershipCertificatePdf
 
         $date = Date::now()->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'Y-m-d');
         // right-aligned on the line above the subject, unless the info block reaches further down
-        $this->font('', self::DATE_FONT_SIZE);
+        $this->font('', self::DATE_FONT_SIZE, self::FONT_TABULAR);
         $dateY = max(self::SUBJECT_Y - 2 * self::DIN_LINE, $infoBottom + self::SPACE);
         $this->beginTag('P');
         $this->text(implode(', ', array_filter([$contact?->city, $date])), self::INFO_X, $dateY, $right - self::INFO_X, halign: 'R');
