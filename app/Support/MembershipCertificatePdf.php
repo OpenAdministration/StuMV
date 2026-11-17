@@ -66,7 +66,7 @@ final class MembershipCertificatePdf
     /** Six lines fill the 27.3mm address zone. */
     private const float ADDRESS_LINE_PITCH = 27.3 / 6;
 
-    private const float INFO_FONT_SIZE = 10.0;
+    private const float INFO_FONT_SIZE = 9.0;
 
     private const float RETURN_FONT_SIZE = 7.0;
 
