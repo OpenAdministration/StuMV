@@ -91,6 +91,11 @@ final class MembershipCertificatePdf
 
     private const float INFO_TEXT_X = self::INFO_X + self::ICON_SIZE + 3.0;
 
+    /** Between the info block and the box around it. */
+    private const float INFO_BOX_PADDING = 3.0;
+
+    private const float INFO_BOX_RADIUS = 2.0;
+
     /** Two blank lines (4.23mm each) below the 90mm address field. */
     private const float SUBJECT_Y = 98.46;
 
@@ -124,6 +129,8 @@ final class MembershipCertificatePdf
     private const float FOOTER_COLUMN_GAP = 5.0;
 
     private const string COLOR_BLACK = '#000000';
+
+    private const string COLOR_ZINC_300 = '#d4d4d8';
 
     private const string COLOR_ZINC_500 = '#71717b';
 
@@ -472,7 +479,7 @@ final class MembershipCertificatePdf
                 $this->beginTag('Link');
             }
 
-            $this->text(implode("\n", $lines), self::INFO_TEXT_X, $y, $right - self::INFO_TEXT_X);
+            $this->text(implode("\n", $lines), self::INFO_TEXT_X, $y, $right - self::INFO_BOX_PADDING - self::INFO_TEXT_X);
             $height = $this->lastHeight();
             if ($link !== null) {
                 $box = $this->pdf->getLastTextBBox();
@@ -486,7 +493,18 @@ final class MembershipCertificatePdf
             $y += $height + self::SPACE;
         }
 
-        return $y - self::SPACE;
+        $bottom = $y - self::SPACE + self::INFO_BOX_PADDING;
+        $this->artifact($this->pdf->graph->getRoundedRect(
+            self::INFO_X - self::INFO_BOX_PADDING,
+            self::INFO_Y - self::INFO_BOX_PADDING,
+            $right - self::INFO_X + self::INFO_BOX_PADDING,
+            $bottom - self::INFO_Y + self::INFO_BOX_PADDING,
+            self::INFO_BOX_RADIUS,
+            self::INFO_BOX_RADIUS,
+            style: ['lineWidth' => 0.2, 'lineColor' => self::COLOR_ZINC_300],
+        ));
+
+        return $bottom;
     }
 
     /**
