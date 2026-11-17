@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\ExportDateFormat;
 use App\Models\RealmContact;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
@@ -166,11 +167,15 @@ final class MembershipCertificatePdf
 
     private int $letterPages = 0;
 
+    private ExportDateFormat $dateFormat = ExportDateFormat::Iso;
+
     /**
      * @param  array<int, array{role: mixed, from: mixed, until: mixed}>  $memberships
      */
-    public function render(string $title, string $fullName, ?string $community, array $memberships, ?CoverLetter $letter = null): string
+    public function render(string $title, string $fullName, ?string $community, array $memberships, ?CoverLetter $letter = null, ExportDateFormat $dateFormat = ExportDateFormat::Iso): string
     {
+        $this->dateFormat = $dateFormat;
+
         if (! defined('K_PATH_FONTS')) {
             define('K_PATH_FONTS', resource_path('fonts/pdf'));
         }
@@ -272,7 +277,7 @@ final class MembershipCertificatePdf
         $infoBottom = $this->drawInfoBlock($letter, $right);
         $this->hyphenate(true);
 
-        $date = Date::now()->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'Y-m-d');
+        $date = $this->dateFormat->format(Date::now());
         // right-aligned on the line above the subject, unless the info block reaches further down
         $this->font('', self::DATE_FONT_SIZE, self::FONT_TABULAR);
         $dateY = max(self::SUBJECT_Y - 2 * self::DIN_LINE, $infoBottom + self::SPACE);
@@ -756,7 +761,7 @@ final class MembershipCertificatePdf
         $this->endTag();
         $this->cursorY += $this->lastHeight() + self::SPACE;
 
-        $meta = implode(' | ', array_filter([$fullName, $community, $withDate ? date('Y-m-d') : null]));
+        $meta = implode(' | ', array_filter([$fullName, $community, $withDate ? $this->dateFormat->format(Date::now()) : null]));
         $this->font('', self::META_FONT_SIZE);
         $this->beginTag('P');
         $this->text($meta, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth, self::COLOR_ZINC_600);
@@ -782,8 +787,8 @@ final class MembershipCertificatePdf
             $cells = [
                 (string) $row['role']->getFirstAttribute('description'),
                 (string) $row['role']->committee()->getFirstAttribute('description'),
-                Date::parse($row['from'])->format('Y-m-d'),
-                $row['until'] != '' ? Date::parse($row['until'])->format('Y-m-d') : __('profile.today'),
+                $this->dateFormat->format($row['from']),
+                $row['until'] != '' ? $this->dateFormat->format($row['until']) : __('profile.today'),
             ];
 
             $rowHeight = 0.0;
@@ -833,15 +838,19 @@ final class MembershipCertificatePdf
     }
 
     /**
-     * Both date columns are as wide as a date plus padding; role and committee
-     * share the rest.
+     * Both date columns are as wide as the widest date plus padding; role and
+     * committee share the rest.
      *
      * @return list<array{x: float, width: float, label: string}>
      */
     private function columnLayout(): array
     {
         $this->font('', self::TABLE_FONT_SIZE, self::FONT_TABULAR);
-        $dateWidth = ceil($this->measureWidth('0000-00-00')) + 2 * self::CELL_PADDING + 1.0;
+        $widest = max(array_map(
+            fn (int $month): float => $this->measureWidth($this->dateFormat->format(Date::create(2000, $month, 28))),
+            range(1, 12),
+        ));
+        $dateWidth = ceil($widest) + 2 * self::CELL_PADDING + 1.0;
         $textWidth = ($this->contentWidth - 2 * $dateWidth) / 2;
 
         $labels = [

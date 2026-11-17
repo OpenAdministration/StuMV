@@ -6,6 +6,7 @@ use App\Ldap\Group;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\Invitation;
+use App\Models\MembershipExportTemplate;
 use App\Models\PassportClient;
 use App\Models\ProfilePicture;
 use App\Models\RealmBranding;
@@ -67,6 +68,7 @@ class RealmDataPurger
             DB::afterCommit(fn () => Storage::disk('public')->delete($files));
 
             RealmContact::where('realm', $uid)->delete();
+            MembershipExportTemplate::where('realm', $uid)->delete();
 
             // Child identity_provider_role_mappings rows cascade via their own
             // FK (see 2026_07_20_000006_create_realm_identity_providers_table).

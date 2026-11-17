@@ -1,15 +1,19 @@
 <?php
 
+use App\Enums\ExportDateFormat;
+use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Livewire\Realm\ListRealms;
 use App\Livewire\Realm\NewRealm;
 use App\Livewire\Settings\Domain\NewDomain;
-use App\Livewire\Settings\EditMembershipExport;
 use App\Livewire\Settings\EditRealm;
+use App\Livewire\Settings\MembershipExport\EditMembershipExportTemplate;
+use App\Livewire\Settings\MembershipExport\ListMembershipExportTemplates;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\Invitation;
+use App\Models\MembershipExportTemplate;
 use App\Models\RealmContact;
 use App\Models\RoleMembership;
 use App\Models\User;
@@ -97,50 +101,96 @@ test('an admin can store the address and contact details of their realm', functi
         ->assertHasErrors(['email', 'website', 'iban', 'bic']);
 });
 
-test('an admin can store defaults for cover letters', function (): void {
+test('an admin can create, edit and delete export templates', function (): void {
     $community = newCommunity();
+    $uid = $community->getShortCode();
     actingAsAdmin($community);
 
-    Livewire::test(EditMembershipExport::class, ['realm' => $community])
-        ->set('withCoverLetter', true)
+    Livewire::test(EditMembershipExportTemplate::class, ['realm' => $community])
+        ->set('name', 'Nachweis für das Landesamt')
+        ->set('dateFormat', ExportDateFormat::MonthYear->value)
+        ->set('withLetter', true)
         ->set('recipient.organisation', 'Landesamt')
         ->set('recipient.city', 'Erfurt')
         ->set('headerTitle', 'Studierendenrat')
-        ->set('headerSubtitle', 'der Friedrich-Schiller-Universität Jena')
-        ->set('senderName', 'Studierendenrat der FSU')
         ->set('senderUnit', 'Sprecher:innen')
         ->set('senderEmail', 'sprecher@example.test')
-        ->set('senderPhone', '03641 930991')
-        ->set('senderBuilding', 'Haus auf der Mauer')
-        ->set('senderRoom', '106')
-        ->set('senderWebsite', 'https://sprecher.example.test')
         ->set('signerFunction', 'Sprecher:in')
-        ->set('subject', 'Tätigkeitsbescheinigung')
-        ->set('letterBody', '<p>Sehr geehrte Damen und Herren,</p><script>alert(1)</script>')
+        ->set('subject', 'Tätigkeit von [person.name]')
+        ->set('letterBody', '<p>[person.first_name] war aktiv.</p><script>alert(1)</script>')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('realms.membership-export', ['realm' => $uid]));
+
+    $template = MembershipExportTemplate::where('realm', $uid)->sole();
+    expect($template->with_letter)->toBeTrue()
+        ->and($template->sender)->toBe(LetterSender::Realm)
+        ->and($template->date_format)->toBe(ExportDateFormat::MonthYear)
+        ->and($template->recipient)->toBe(['organisation' => 'Landesamt', 'city' => 'Erfurt'])
+        ->and($template->header_title)->toBe('Studierendenrat')
+        ->and($template->sender_email)->toBe('sprecher@example.test')
+        ->and($template->subject)->toBe('Tätigkeit von [person.name]')
+        ->and($template->body)->toBe('<p>[person.first_name] war aktiv.</p>');
+
+    Livewire::test(EditMembershipExportTemplate::class, ['realm' => $community, 'template' => $template])
+        ->assertSet('recipient.city', 'Erfurt')
+        ->set('sender', LetterSender::User->value)
+        ->set('senderEmail', 'not-an-address')
+        ->set('letterBody', '<p>[person.shoe_size]</p>')
+        ->call('save')
+        ->assertHasErrors(['senderEmail', 'letterBody'])
+        ->set('senderEmail', '')
+        ->set('letterBody', '<p>[person.name]</p>')
         ->call('save')
         ->assertHasNoErrors();
 
-    $contact = RealmContact::forRealm($community->getShortCode());
-    expect($contact->letter_enabled)->toBeTrue()
-        ->and($contact->letter_recipient)->toBe(['organisation' => 'Landesamt', 'city' => 'Erfurt'])
-        ->and($contact->letter_header_title)->toBe('Studierendenrat')
-        ->and($contact->letter_header_subtitle)->toBe('der Friedrich-Schiller-Universität Jena')
-        ->and($contact->letter_sender_name)->toBe('Studierendenrat der FSU')
-        ->and($contact->letter_sender_unit)->toBe('Sprecher:innen')
-        ->and($contact->letter_sender_email)->toBe('sprecher@example.test')
-        ->and($contact->letter_sender_phone)->toBe('03641 930991')
-        ->and($contact->letter_sender_building)->toBe('Haus auf der Mauer')
-        ->and($contact->letter_sender_room)->toBe('106')
-        ->and($contact->letter_sender_website)->toBe('https://sprecher.example.test')
-        ->and($contact->letter_signer_function)->toBe('Sprecher:in')
-        ->and($contact->letter_subject)->toBe('Tätigkeitsbescheinigung')
-        ->and($contact->letter_body)->toBe('<p>Sehr geehrte Damen und Herren,</p>');
+    expect($template->fresh()->sender)->toBe(LetterSender::User);
 
-    Livewire::test(EditMembershipExport::class, ['realm' => $community])
-        ->assertSet('recipient.city', 'Erfurt')
-        ->set('senderEmail', 'not-an-address')
+    Livewire::test(ListMembershipExportTemplates::class, ['realm' => $community])
+        ->assertSee('Nachweis für das Landesamt')
+        ->call('deletePrepare', $template->id)
+        ->call('deleteCommit');
+
+    expect(MembershipExportTemplate::where('realm', $uid)->exists())->toBeFalse();
+});
+
+test('the export template pages render', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $template = MembershipExportTemplate::create(['realm' => $uid, 'name' => 'Nachweis', 'with_letter' => true, 'sender' => LetterSender::User]);
+    actingAsAdmin($community);
+
+    $this->get(route('realms.membership-export', ['realm' => $uid]))->assertOk()->assertSee('Nachweis');
+    $this->get(route('realms.membership-export.new', ['realm' => $uid]))->assertOk()->assertSee(__('realms.membership_export.new'));
+    $this->get(route('realms.membership-export.edit', ['realm' => $uid, 'template' => $template->id]))
+        ->assertOk()
+        ->assertSee(__('realms.membership_export.sender_user_hint'))
+        ->assertSee('[person.first_name]');
+});
+
+test('a template without a cover letter needs no text', function (): void {
+    $community = newCommunity();
+    actingAsAdmin($community);
+
+    Livewire::test(EditMembershipExportTemplate::class, ['realm' => $community])
         ->call('save')
-        ->assertHasErrors(['senderEmail']);
+        ->assertHasErrors(['name'])
+        ->assertHasNoErrors(['letterBody'])
+        ->set('name', 'Nur Übersicht')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(MembershipExportTemplate::where('realm', $community->getShortCode())->sole()->with_letter)->toBeFalse();
+});
+
+test('a template of another realm cannot be edited', function (): void {
+    $community = newCommunity();
+    $other = newCommunity();
+    $template = MembershipExportTemplate::create(['realm' => $other->getShortCode(), 'name' => 'Fremd']);
+    actingAsAdmin($community);
+
+    Livewire::test(EditMembershipExportTemplate::class, ['realm' => $community, 'template' => $template])
+        ->assertNotFound();
 });
 
 test('a super admin can delete a realm once the shortcode is confirmed', function (): void {
@@ -198,6 +248,7 @@ test('deleting a realm also purges its DB-side data', function (): void {
     ]);
     DB::table('sessions')->insert(['id' => Str::random(40), 'user_id' => $member->id, 'payload' => '', 'last_activity' => time()]);
     RealmContact::create(['realm' => $uid, 'city' => 'Jena']);
+    MembershipExportTemplate::create(['realm' => $uid, 'name' => 'Nachweis']);
 
     actingAsSuperAdmin();
 
@@ -219,7 +270,8 @@ test('deleting a realm also purges its DB-side data', function (): void {
         ->and(RefreshToken::where('access_token_id', $token->id)->exists())->toBeFalse()
         ->and(DB::table('oauth_device_codes')->where('client_id', $client->id)->exists())->toBeFalse()
         ->and(DB::table('sessions')->where('user_id', $member->id)->exists())->toBeFalse()
-        ->and(RealmContact::forRealm($uid))->toBeNull();
+        ->and(RealmContact::forRealm($uid))->toBeNull()
+        ->and(MembershipExportTemplate::where('realm', $uid)->exists())->toBeFalse();
 });
 
 test('the admin realm cannot be deleted', function (): void {

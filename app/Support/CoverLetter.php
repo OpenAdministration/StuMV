@@ -2,6 +2,11 @@
 
 namespace App\Support;
 
+use App\Enums\LetterSender;
+use App\Ldap\Community;
+use App\Ldap\User;
+use App\Models\MembershipExportTemplate;
+use App\Models\RealmBranding;
 use App\Models\RealmContact;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
@@ -10,7 +15,7 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 final readonly class CoverLetter
 {
     /** The separate fields a recipient address is entered in. */
-    public const array RECIPIENT_FIELDS = ['organisation', 'name', 'street', 'house_number', 'postal_code', 'city', 'country'];
+    public const array RECIPIENT_FIELDS = ['organisation', 'unit', 'name', 'street', 'house_number', 'postal_code', 'city', 'country'];
 
     public function __construct(
         public string $senderName,
@@ -38,6 +43,64 @@ final readonly class CoverLetter
         public ?string $headerTitle = null,
         public ?string $headerSubtitle = null,
     ) {}
+
+    /**
+     * The letter a template describes, sent by the realm or by $sender.
+     * $person is the one whose memberships are exported.
+     */
+    public static function fromTemplate(MembershipExportTemplate $template, Community $community, User $person, User $sender, string $signerName): self
+    {
+        $realmName = (string) $community->getFirstAttribute('description');
+        $values = LetterPlaceholders::values($person, $realmName, $template->date_format);
+        $shared = [
+            'recipient' => self::recipientAddress(self::recipient($template->recipient ?? [])),
+            'body' => LetterPlaceholders::replace(self::sanitizeBody((string) $template->body), $values, html: true),
+            'signerName' => $signerName,
+            'subject' => $template->subject !== null ? LetterPlaceholders::replace($template->subject, $values, html: false) : null,
+        ];
+
+        if ($template->sender === LetterSender::User) {
+            $name = (string) $sender->getFirstAttribute('cn');
+            $email = $sender->getFirstAttribute('mail');
+            $phone = $sender->getFirstAttribute('telephoneNumber');
+
+            return new self(
+                ...$shared,
+                senderName: $name,
+                // never saved, it only carries the profile address to the return address and footer
+                contact: new RealmContact([
+                    'street' => $sender->getFirstAttribute('street'),
+                    'postal_code' => $sender->getFirstAttribute('postalCode'),
+                    'city' => $sender->getFirstAttribute('l'),
+                    'email' => $email,
+                    'phone' => $phone,
+                ]),
+                email: $email,
+                phone: $phone,
+                headerTitle: $name,
+            );
+        }
+
+        $realm = $community->getShortCode();
+        $contact = RealmContact::forRealm($realm);
+        $logo = RealmBranding::forRealm($realm)?->logo_id;
+
+        return new self(
+            ...$shared,
+            senderName: $template->sender_name ?? $realmName,
+            contact: $contact,
+            logoPath: $logo ? 'realm-branding/'.$logo : null,
+            building: $template->sender_building ?? $contact?->office_building,
+            room: $template->sender_room ?? $contact?->office_room,
+            email: $template->sender_email ?? $contact?->email,
+            phone: $template->sender_phone ?? $contact?->phone,
+            website: $template->sender_website,
+            senderUnit: $template->sender_unit,
+            signerFunction: $template->signer_function,
+            headerTitle: $template->header_title,
+            headerSubtitle: $template->header_subtitle,
+        );
+    }
 
     /** Editor HTML reduced to what the letter can print: paragraphs, emphasis and lists. */
     public static function sanitizeBody(string $html): string
@@ -100,6 +163,7 @@ final readonly class CoverLetter
 
         return implode("\n", array_filter([
             $field('organisation'),
+            $field('unit'),
             $field('name'),
             trim($field('street').' '.$field('house_number')),
             trim($field('postal_code').' '.$field('city')),

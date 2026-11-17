@@ -45,12 +45,13 @@ use App\Livewire\Settings\Api\ListApiClients;
 use App\Livewire\Settings\Api\NewApiClient;
 use App\Livewire\Settings\Domain\ListDomains;
 use App\Livewire\Settings\Domain\NewDomain;
-use App\Livewire\Settings\EditMembershipExport;
 use App\Livewire\Settings\EditRealm;
 use App\Livewire\Settings\EditRealmBranding;
 use App\Livewire\Settings\IdentityProvider\EditIdentityProvider;
 use App\Livewire\Settings\IdentityProvider\ListIdentityProviders;
 use App\Livewire\Settings\IdentityProvider\NewIdentityProvider;
+use App\Livewire\Settings\MembershipExport\EditMembershipExportTemplate;
+use App\Livewire\Settings\MembershipExport\ListMembershipExportTemplates;
 use App\Livewire\Settings\Oidc\EditOidcClient;
 use App\Livewire\Settings\Oidc\ListOidcClients;
 use App\Livewire\Settings\Oidc\NewOidcClient;
@@ -170,7 +171,9 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         Route::livewire('{realm}/settings', SettingsDashboard::class)->name('settings.dashboard');
         Route::livewire('{realm}/settings/edit', EditRealm::class)->name('realms.edit');
         Route::livewire('{realm}/settings/branding', EditRealmBranding::class)->name('realms.branding');
-        Route::livewire('{realm}/settings/membership-export', EditMembershipExport::class)->name('realms.membership-export');
+        Route::livewire('{realm}/settings/membership-export', ListMembershipExportTemplates::class)->name('realms.membership-export');
+        Route::livewire('{realm}/settings/membership-export/new', EditMembershipExportTemplate::class)->name('realms.membership-export.new');
+        Route::livewire('{realm}/settings/membership-export/{template}/edit', EditMembershipExportTemplate::class)->name('realms.membership-export.edit');
         // end admin
     });
 

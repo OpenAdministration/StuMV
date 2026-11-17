@@ -81,6 +81,16 @@ Breadcrumbs::for('realms.membership-export', function (BreadcrumbTrail $trail, a
     $trail->push(__('realms.membership_export.headline'), route('realms.membership-export', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.membership-export.new', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.membership-export', $routeParams);
+    $trail->push(__('realms.membership_export.new'), route('realms.membership-export.new', $routeParams), ['truncate' => true]);
+});
+
+Breadcrumbs::for('realms.membership-export.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms.membership-export', $routeParams);
+    $trail->push(__('common.edit'), route('realms.membership-export.edit', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.members', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
     $trail->push(__('realms.members_breadcrumb'), route('realms.members', $routeParams), ['truncate' => true]);

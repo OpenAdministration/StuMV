@@ -1,0 +1,104 @@
+<?php
+
+use App\Enums\ExportDateFormat;
+use App\Enums\LetterSender;
+use App\Ldap\Community;
+use App\Ldap\User;
+use App\Models\MembershipExportTemplate;
+use App\Models\RealmContact;
+use App\Support\CoverLetter;
+use App\Support\LetterPlaceholders;
+use App\Support\MembershipCertificatePdf;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Date;
+
+uses(RefreshDatabase::class);
+
+function letterPerson(): User
+{
+    return new User(['uid' => 'mmuster', 'cn' => 'Max <Muster>', 'givenName' => 'Max', 'sn' => 'Muster', 'mail' => 'max@example.test']);
+}
+
+function letterSender(): User
+{
+    return new User([
+        'cn' => 'Helen Würflein',
+        'mail' => 'helen@example.test',
+        'telephoneNumber' => '+493641930990',
+        'street' => 'Lutherstraße 1',
+        'postalCode' => '07743',
+        'l' => 'Jena',
+    ]);
+}
+
+test('a realm letter takes the realm details where the template leaves them open', function (): void {
+    RealmContact::create(['realm' => 'stura', 'city' => 'Jena', 'email' => 'stura@example.test', 'phone' => '03641 930990', 'office_room' => '105']);
+    $template = new MembershipExportTemplate([
+        'realm' => 'stura',
+        'sender' => LetterSender::Realm,
+        'date_format' => ExportDateFormat::German,
+        'recipient' => ['organisation' => 'Landesamt', 'city' => 'Erfurt'],
+        'sender_phone' => '03641 930991',
+        'subject' => 'Tätigkeit von [person.name]',
+        'body' => '<p>[person.first_name] [person.last_name] ([person.username]) war in [realm.name] aktiv, Stand [today].</p>',
+    ]);
+
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender(), 'Helen Würflein');
+
+    expect($letter->senderName)->toBe('StuRa Jena')
+        ->and($letter->contact?->city)->toBe('Jena')
+        ->and($letter->email)->toBe('stura@example.test')
+        ->and($letter->phone)->toBe('03641 930991')
+        ->and($letter->room)->toBe('105')
+        ->and($letter->recipient)->toBe("Landesamt\nErfurt")
+        ->and($letter->subject)->toBe('Tätigkeit von Max <Muster>')
+        ->and($letter->body)->toBe('<p>Max Muster (mmuster) war in StuRa Jena aktiv, Stand '.Date::today()->format('d.m.Y').'.</p>')
+        ->and($letter->signerName)->toBe('Helen Würflein');
+});
+
+test('a letter sent by a person carries their profile details', function (): void {
+    RealmContact::create(['realm' => 'stura', 'email' => 'stura@example.test', 'iban' => 'DE89370400440532013000']);
+    $template = new MembershipExportTemplate([
+        'sender' => LetterSender::User,
+        'header_title' => 'Studierendenrat',
+        'header_subtitle' => 'der FSU Jena',
+        'sender_unit' => 'Sprecher:innen',
+        'signer_function' => 'Sprecherin',
+        'sender_email' => 'sprecher@example.test',
+        'body' => '<p>Bescheinigung für [person.name]</p>',
+    ]);
+
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender(), 'Helen Würflein');
+
+    expect($letter->senderName)->toBe('Helen Würflein')
+        ->and($letter->headerTitle)->toBe('Helen Würflein')
+        ->and($letter->headerSubtitle)->toBeNull()
+        ->and($letter->senderUnit)->toBeNull()
+        ->and($letter->signerFunction)->toBeNull()
+        ->and($letter->email)->toBe('helen@example.test')
+        ->and($letter->phone)->toBe('+493641930990')
+        ->and($letter->logoPath)->toBeNull()
+        ->and($letter->contact?->streetLine())->toBe('Lutherstraße 1')
+        ->and($letter->contact?->cityLine())->toBe('07743 Jena')
+        ->and($letter->contact?->iban)->toBeNull()
+        // the value is escaped, the HTML around it kept
+        ->and($letter->body)->toBe('<p>Bescheinigung für Max &lt;Muster&gt;</p>');
+
+    $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Muster', null, [], $letter);
+    expect($pdf)->toContain('/URI (mailto:helen@example.test)')->not->toContain('stura@example.test');
+});
+
+test('unknown placeholders are reported and left as they are', function (): void {
+    expect(LetterPlaceholders::unknown('[person.name] [person.shoe_size] [today] [foo]'))->toBe(['[person.shoe_size]', '[foo]'])
+        ->and(LetterPlaceholders::replace('[person.shoe_size]', ['person.name' => 'Max'], html: true))->toBe('[person.shoe_size]');
+});
+
+test('dates are written in the format of the template', function (): void {
+    app()->setLocale('de');
+    $date = Date::create(2026, 9, 7);
+
+    expect(ExportDateFormat::Iso->format($date))->toBe('2026-09-07')
+        ->and(ExportDateFormat::German->format($date))->toBe('07.09.2026')
+        ->and(ExportDateFormat::MonthYear->format($date))->toBe('Sept. 2026')
+        ->and(ExportDateFormat::MonthYear->format('2026-03-01'))->toBe('März 2026');
+});

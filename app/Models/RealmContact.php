@@ -25,29 +25,7 @@ class RealmContact extends Model
         'bank_name',
         'iban',
         'bic',
-        'letter_enabled',
-        'letter_recipient',
-        'letter_header_title',
-        'letter_header_subtitle',
-        'letter_sender_name',
-        'letter_sender_unit',
-        'letter_sender_building',
-        'letter_sender_room',
-        'letter_sender_email',
-        'letter_sender_phone',
-        'letter_sender_website',
-        'letter_signer_function',
-        'letter_subject',
-        'letter_body',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'letter_enabled' => 'boolean',
-            'letter_recipient' => 'array',
-        ];
-    }
 
     public static function forRealm(string $realmUid): ?self
     {

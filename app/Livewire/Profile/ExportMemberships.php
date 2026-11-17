@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Profile;
 
+use App\Enums\ExportDateFormat;
+use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Livewire\Concerns\SortsMemberships;
-use App\Models\RealmBranding;
+use App\Models\MembershipExportTemplate;
 use App\Models\RealmContact;
 use App\Support\CoverLetter;
 use App\Support\MembershipCertificate;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -25,28 +29,8 @@ class ExportMemberships extends Component
     /** @var array<int, string> */
     public array $selected = [];
 
-    public bool $withCoverLetter = false;
-
-    /** @var array<string, string> */
-    public array $recipient = [];
-
-    public string $letterBody = '';
-
-    public string $senderUnit = '';
-
-    public string $senderEmail = '';
-
-    public string $senderBuilding = '';
-
-    public string $senderRoom = '';
-
-    public string $senderPhone = '';
-
-    public string $senderWebsite = '';
-
-    public string $signerFunction = '';
-
-    public string $subject = '';
+    /** Id of the chosen template. */
+    public string $template = '';
 
     /** Where "cancel" leads: the profile or the member list this page was opened from. */
     #[Locked]
@@ -62,20 +46,11 @@ class ExportMemberships extends Component
         $previous = url()->previous();
         $this->backUrl = $previous !== url()->current() && str_starts_with($previous, url('/')) ? $previous : $fallback;
 
-        // the realm settings hold the defaults a letter starts out with
-        $contact = RealmContact::forRealm($this->realm_uid);
-        $this->withCoverLetter = (bool) $contact?->letter_enabled;
-        $this->recipient = CoverLetter::recipient($contact->letter_recipient ?? []);
-        $this->senderUnit = (string) $contact?->letter_sender_unit;
-        $this->senderEmail = (string) ($contact?->letter_sender_email ?? $contact?->email);
-        $this->senderBuilding = (string) ($contact?->letter_sender_building ?? $contact?->office_building);
-        $this->senderRoom = (string) ($contact?->letter_sender_room ?? $contact?->office_room);
-        $this->senderPhone = (string) ($contact?->letter_sender_phone ?? $contact?->phone);
-        // unlike email and phone without a fallback, the realm's website is in the footer
-        $this->senderWebsite = (string) $contact?->letter_sender_website;
-        $this->signerFunction = (string) $contact?->letter_signer_function;
-        $this->subject = (string) $contact?->letter_subject;
-        $this->letterBody = (string) $contact?->letter_body;
+        $templates = $this->templates();
+        if ($templates->count() === 1) {
+            $this->template = (string) $templates->first()->id;
+        }
+
         $this->selectAll();
     }
 
@@ -94,12 +69,13 @@ class ExportMemberships extends Component
 
     public function render()
     {
-        $user = User::query()->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())->where('uid', '=', $this->currentUsername)->first() ?? abort(404);
+        $user = $this->member();
 
         return view('livewire.profile.export-memberships', [
             'memberships' => $this->sortMemberships(MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false)),
             'name' => $user->getFirstAttribute('givenName').' '.$user->getFirstAttribute('sn'),
-            'hasContact' => RealmContact::forRealm($this->realm_uid) !== null,
+            'templates' => $this->templates(),
+            'warning' => $this->warning(),
         ])->title(__('profile.export_memberships_title'));
     }
 
@@ -107,69 +83,24 @@ class ExportMemberships extends Component
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $this->authorizeExport($community, $this->currentUsername);
-
-        $rules = [
-            'selected' => ['required', 'array', 'min:1'],
-            ...CoverLetter::recipientRules('recipient', ['exclude_unless:withCoverLetter,true']),
-            'letterBody' => [
-                'exclude_unless:withCoverLetter,true', 'required', 'string', 'max:20000',
-                // the editor submits <p></p> when empty
-                fn (string $attribute, mixed $value, \Closure $fail) => CoverLetter::bodyIsEmpty((string) $value)
-                    ? $fail(__('validation.required', ['attribute' => __('profile.cover_letter_body')]))
-                    : null,
-            ],
-            'senderUnit' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
-            'senderEmail' => ['exclude_unless:withCoverLetter,true', 'nullable', 'email', 'max:255'],
-            'senderBuilding' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:255'],
-            'senderRoom' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:50'],
-            'senderPhone' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:50'],
-            'senderWebsite' => ['exclude_unless:withCoverLetter,true', 'nullable', 'url:http,https', 'max:255'],
-            'signerFunction' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:100'],
-            'subject' => ['exclude_unless:withCoverLetter,true', 'nullable', 'string', 'max:150'],
-        ];
+        $templates = $this->templates();
 
         $this->validate(
-            $rules,
+            [
+                'selected' => ['required', 'array', 'min:1'],
+                'template' => [Rule::requiredIf($templates->isNotEmpty()), Rule::in($templates->modelKeys())],
+            ],
             [
                 'selected.required' => __('profile.export_memberships_none_selected'),
                 'selected.min' => __('profile.export_memberships_none_selected'),
             ],
-            [
-                'letterBody' => __('profile.cover_letter_body'),
-                'senderUnit' => __('profile.cover_letter_sender_unit'),
-                'senderEmail' => __('profile.cover_letter_sender_email'),
-                'senderBuilding' => __('realms.contact_office_building'),
-                'senderRoom' => __('realms.contact_office_room'),
-                'senderPhone' => __('profile.cover_letter_sender_phone'),
-                'senderWebsite' => __('profile.cover_letter_sender_website'),
-                'signerFunction' => __('profile.cover_letter_signer_function'),
-                'subject' => __('profile.cover_letter_subject'),
-            ],
+            ['template' => __('profile.export_template')],
         );
 
-        $letter = null;
-        if ($this->withCoverLetter) {
-            $logo = RealmBranding::forRealm($this->realm_uid)?->logo_id;
-            $contact = RealmContact::forRealm($this->realm_uid);
-            $letter = new CoverLetter(
-                (string) ($contact?->letter_sender_name ?? $community->getFirstAttribute('description')),
-                $contact,
-                CoverLetter::recipientAddress($this->recipient),
-                $this->letterBody,
-                $logo ? 'realm-branding/'.$logo : null,
-                trim($this->senderUnit) ?: null,
-                trim($this->senderBuilding) ?: null,
-                trim($this->senderRoom) ?: null,
-                trim($this->senderEmail) ?: null,
-                trim($this->senderPhone) ?: null,
-                trim($this->senderWebsite) ?: null,
-                (string) auth()->user()->full_name,
-                trim($this->signerFunction) ?: null,
-                trim($this->subject) ?: null,
-                $contact?->letter_header_title,
-                $contact?->letter_header_subtitle,
-            );
-        }
+        $template = $templates->find($this->template);
+        $letter = $template?->with_letter
+            ? CoverLetter::fromTemplate($template, $community, $this->member(), auth()->user()->ldap(), (string) auth()->user()->full_name)
+            : null;
 
         return MembershipCertificate::download(
             $this->realm_uid,
@@ -178,7 +109,36 @@ class ExportMemberships extends Component
             strtolower(trans('profile.memberships')).'_'.$this->currentUsername.'.pdf',
             array_map(intval(...), $this->selected),
             $letter,
+            $template?->date_format ?? ExportDateFormat::Iso,
         );
+    }
+
+    /** @return Collection<int, MembershipExportTemplate> */
+    private function templates(): Collection
+    {
+        return MembershipExportTemplate::forRealm($this->realm_uid)->get();
+    }
+
+    /** Sender details the chosen letter would be missing. */
+    private function warning(): ?string
+    {
+        $template = $this->templates()->find($this->template);
+        if (! $template?->with_letter) {
+            return null;
+        }
+
+        if ($template->sender === LetterSender::User) {
+            $sender = auth()->user()->ldap();
+
+            return $sender->getFirstAttribute('street') && $sender->getFirstAttribute('l') ? null : __('profile.cover_letter_no_profile_address');
+        }
+
+        return RealmContact::forRealm($this->realm_uid) === null ? __('profile.cover_letter_no_contact') : null;
+    }
+
+    private function member(): User
+    {
+        return User::query()->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())->where('uid', '=', $this->currentUsername)->first() ?? abort(404);
     }
 
     /** The member themselves, their realm's admins, or its moderators (member list export). */
