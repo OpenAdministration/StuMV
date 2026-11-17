@@ -126,7 +126,7 @@ final class MembershipCertificatePdf
     private const float FOOTER_RULE_GAP = 3.0;
 
     /** Between the address, contact and bank columns of the letter footer. */
-    private const float FOOTER_COLUMN_GAP = 5.0;
+    private const float FOOTER_COLUMN_GAP = 3.0;
 
     private const string COLOR_BLACK = '#000000';
 
@@ -198,7 +198,7 @@ final class MembershipCertificatePdf
         if ($letter !== null) {
             $footer = $this->letterFooter($letter);
             $this->footerTop = $this->pageHeight - self::FOOTER_EDGE_GAP - $this->footerHeight($footer);
-            $this->font('', self::PAGE_NUMBER_FONT_SIZE);
+            $this->font('', self::PAGE_NUMBER_FONT_SIZE, self::FONT_TABULAR);
             $this->letterPageNumberTop = $this->footerTop - self::FOOTER_RULE_GAP - self::SPACE - $this->measure('X', $this->contentWidth);
             $this->drawLetter($letter);
             $this->drawLetterFooter($footer);
@@ -376,7 +376,7 @@ final class MembershipCertificatePdf
      */
     private function footerEntryHeight(array $entry): float
     {
-        $this->font($entry[0], self::FOOTER_FONT_SIZE);
+        $this->footerFont($entry[0]);
 
         return $this->measure($entry[1], $this->footerColumnWidth()) + self::LINE_SPACING;
     }
@@ -420,7 +420,7 @@ final class MembershipCertificatePdf
                 $y = $top;
                 foreach ($entries as $entry) {
                     [$style, $text, $link] = $entry;
-                    $this->font($style, self::FOOTER_FONT_SIZE);
+                    $this->footerFont($style);
                     // the colour goes into the content, as the style stack only reaches the current page
                     $content = $this->pdf->graph->add(['fillColor' => self::COLOR_ZINC_600])
                         .$this->pdf->getTextCell($text, $x, $y, $width, linespace: self::LINE_SPACING, halign: 'L', drawcell: false)
@@ -932,7 +932,7 @@ final class MembershipCertificatePdf
         $pages = $this->pdf->page->getPages();
         $total = count($pages);
 
-        $this->font('', self::PAGE_NUMBER_FONT_SIZE);
+        $this->font('', self::PAGE_NUMBER_FONT_SIZE, self::FONT_TABULAR);
         $height = $this->measure('X', $this->contentWidth);
 
         foreach (array_values($pages) as $index => $page) {
@@ -996,6 +996,12 @@ final class MembershipCertificatePdf
     private function font(string $style, float $size, string $family = self::FONT): void
     {
         $this->pdf->font->insert($this->pdf->pon, $family, $style, $size);
+    }
+
+    /** Tabular figures for phone numbers and IBAN; there is no bold tabular cut. */
+    private function footerFont(string $style): void
+    {
+        $this->font($style, self::FOOTER_FONT_SIZE, $style === '' ? self::FONT_TABULAR : self::FONT);
     }
 
     private function cellFont(int $column): void
