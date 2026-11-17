@@ -329,8 +329,13 @@ final class MembershipCertificatePdf
         $phone = (string) $contact?->phone;
         $email = (string) $contact?->email;
 
+        $office = implode(', ', array_filter([
+            $contact?->office_building,
+            $contact?->office_room ? __('profile.cover_letter_office_room', ['room' => $contact->office_room]) : null,
+        ]));
+
         return [
-            [['B', $letter->senderName, null], ...$column('', [[$contact?->streetLine()], [$contact?->cityLine()]])],
+            [['B', $letter->senderName, null], ...$column('', [[$office], [$contact?->streetLine()], [$contact?->cityLine()]])],
             $column(__('profile.cover_letter_footer_contact'), [
                 [$phone, 'tel:'.preg_replace('/[^\d+]/', '', $phone)],
                 [$email, 'mailto:'.$email],
