@@ -61,10 +61,12 @@ final class MembershipCertificatePdf
 
     private const float ADDRESS_FONT_SIZE = 10.0;
 
+    private const float DATE_FONT_SIZE = 10.0;
+
     /** Six lines fill the 27.3mm address zone. */
     private const float ADDRESS_LINE_PITCH = 27.3 / 6;
 
-    private const float INFO_FONT_SIZE = 9.5;
+    private const float INFO_FONT_SIZE = 9.0;
 
     private const float RETURN_FONT_SIZE = 7.0;
 
@@ -259,7 +261,7 @@ final class MembershipCertificatePdf
 
         $date = Date::now()->format(app()->getLocale() === 'de' ? 'd.m.Y' : 'Y-m-d');
         // right-aligned on the line above the subject, unless the info block reaches further down
-        $this->font('', self::LETTER_FONT_SIZE);
+        $this->font('', self::DATE_FONT_SIZE);
         $dateY = max(self::SUBJECT_Y - 2 * self::DIN_LINE, $infoBottom + self::SPACE);
         $this->beginTag('P');
         $this->text(implode(', ', array_filter([$contact?->city, $date])), self::INFO_X, $dateY, $right - self::INFO_X, halign: 'R');
