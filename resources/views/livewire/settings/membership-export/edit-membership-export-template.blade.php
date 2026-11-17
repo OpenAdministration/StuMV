@@ -61,7 +61,6 @@
                                 <flux:input type="email" wire:model="senderEmail" :label="__('profile.cover_letter_sender_email')" :placeholder="$contactEmail" />
                                 <flux:input type="tel" wire:model="senderPhone" :label="__('profile.cover_letter_sender_phone')" :placeholder="$contactPhone" />
                                 <flux:input type="url" wire:model="senderWebsite" :label="__('profile.cover_letter_sender_website')" placeholder="https://" />
-                                <flux:input wire:model="signerFunction" :label="__('profile.cover_letter_signer_function')" />
                             @else
                                 <flux:text>{{ __('realms.membership_export.sender_user_hint') }}</flux:text>
                             @endif

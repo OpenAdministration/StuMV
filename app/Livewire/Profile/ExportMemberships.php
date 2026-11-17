@@ -99,7 +99,7 @@ class ExportMemberships extends Component
 
         $template = $templates->find($this->template);
         $letter = $template?->with_letter
-            ? CoverLetter::fromTemplate($template, $community, $this->member(), auth()->user()->ldap(), (string) auth()->user()->full_name)
+            ? CoverLetter::fromTemplate($template, $community, $this->member(), auth()->user()->ldap())
             : null;
 
         return MembershipCertificate::download(

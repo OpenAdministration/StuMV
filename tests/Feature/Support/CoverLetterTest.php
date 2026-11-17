@@ -40,10 +40,10 @@ test('a realm letter takes the realm details where the template leaves them open
         'recipient' => ['organisation' => 'Landesamt', 'city' => 'Erfurt'],
         'sender_phone' => '03641 930991',
         'subject' => 'Tätigkeit von [person.name]',
-        'body' => '<p>[person.first_name] [person.last_name] ([person.username]) war in [realm.name] aktiv, Stand [today].</p>',
+        'body' => '<p>[person.name] ([person.email]) war in [realm.name] aktiv, Stand [today].</p><p>Mit freundlichen Grüßen<br>[sender.name]</p>',
     ]);
 
-    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender(), 'Helen Würflein');
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender());
 
     expect($letter->senderName)->toBe('StuRa Jena')
         ->and($letter->contact?->city)->toBe('Jena')
@@ -52,8 +52,7 @@ test('a realm letter takes the realm details where the template leaves them open
         ->and($letter->room)->toBe('105')
         ->and($letter->recipient)->toBe("Landesamt\nErfurt")
         ->and($letter->subject)->toBe('Tätigkeit von Max <Muster>')
-        ->and($letter->body)->toBe('<p>Max Muster (mmuster) war in StuRa Jena aktiv, Stand '.Date::today()->format('d.m.Y').'.</p>')
-        ->and($letter->signerName)->toBe('Helen Würflein');
+        ->and($letter->body)->toBe('<p>Max &lt;Muster&gt; (max@example.test) war in StuRa Jena aktiv, Stand '.Date::today()->format('d.m.Y').'.</p><p>Mit freundlichen Grüßen<br />Helen Würflein</p>');
 });
 
 test('a letter sent by a person carries their profile details', function (): void {
@@ -63,18 +62,16 @@ test('a letter sent by a person carries their profile details', function (): voi
         'header_title' => 'Studierendenrat',
         'header_subtitle' => 'der FSU Jena',
         'sender_unit' => 'Sprecher:innen',
-        'signer_function' => 'Sprecherin',
         'sender_email' => 'sprecher@example.test',
         'body' => '<p>Bescheinigung für [person.name]</p>',
     ]);
 
-    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender(), 'Helen Würflein');
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender());
 
     expect($letter->senderName)->toBe('Helen Würflein')
         ->and($letter->headerTitle)->toBe('Helen Würflein')
         ->and($letter->headerSubtitle)->toBeNull()
         ->and($letter->senderUnit)->toBeNull()
-        ->and($letter->signerFunction)->toBeNull()
         ->and($letter->email)->toBe('helen@example.test')
         ->and($letter->phone)->toBe('+493641930990')
         ->and($letter->logoPath)->toBeNull()
@@ -89,7 +86,7 @@ test('a letter sent by a person carries their profile details', function (): voi
 });
 
 test('unknown placeholders are reported and left as they are', function (): void {
-    expect(LetterPlaceholders::unknown('[person.name] [person.shoe_size] [today] [foo]'))->toBe(['[person.shoe_size]', '[foo]'])
+    expect(LetterPlaceholders::unknown('[person.name] [person.username] [today] [foo]'))->toBe(['[person.username]', '[foo]'])
         ->and(LetterPlaceholders::replace('[person.shoe_size]', ['person.name' => 'Max'], html: true))->toBe('[person.shoe_size]');
 });
 

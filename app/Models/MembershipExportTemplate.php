@@ -29,7 +29,6 @@ class MembershipExportTemplate extends Model
         'sender_email',
         'sender_phone',
         'sender_website',
-        'signer_function',
         'subject',
         'body',
     ];

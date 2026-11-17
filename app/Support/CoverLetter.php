@@ -35,9 +35,6 @@ final readonly class CoverLetter
         public ?string $phone = null,
         /** A website of the sending unit; the info block shows none without it. */
         public ?string $website = null,
-        /** Who signs the letter, printed below the space for the signature. */
-        public ?string $signerName = null,
-        public ?string $signerFunction = null,
         public ?string $subject = null,
         /** Letterhead above the rule, both optional; without either the sender name is shown. */
         public ?string $headerTitle = null,
@@ -48,14 +45,13 @@ final readonly class CoverLetter
      * The letter a template describes, sent by the realm or by $sender.
      * $person is the one whose memberships are exported.
      */
-    public static function fromTemplate(MembershipExportTemplate $template, Community $community, User $person, User $sender, string $signerName): self
+    public static function fromTemplate(MembershipExportTemplate $template, Community $community, User $person, User $sender): self
     {
         $realmName = (string) $community->getFirstAttribute('description');
-        $values = LetterPlaceholders::values($person, $realmName, $template->date_format);
+        $values = LetterPlaceholders::values($person, $sender, $realmName, $template->date_format);
         $shared = [
             'recipient' => self::recipientAddress(self::recipient($template->recipient ?? [])),
             'body' => LetterPlaceholders::replace(self::sanitizeBody((string) $template->body), $values, html: true),
-            'signerName' => $signerName,
             'subject' => $template->subject !== null ? LetterPlaceholders::replace($template->subject, $values, html: false) : null,
         ];
 
@@ -96,7 +92,6 @@ final readonly class CoverLetter
             phone: $template->sender_phone ?? $contact?->phone,
             website: $template->sender_website,
             senderUnit: $template->sender_unit,
-            signerFunction: $template->signer_function,
             headerTitle: $template->header_title,
             headerSubtitle: $template->header_subtitle,
         );

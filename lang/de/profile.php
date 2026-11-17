@@ -22,8 +22,6 @@ return [
     'cover_letter_office_room' => 'Raum :room',
     'cover_letter_footer_contact' => 'Kontakt',
     'cover_letter_footer_bank' => 'Bankverbindung',
-    'cover_letter_closing' => 'Mit freundlichen Grüßen',
-    'cover_letter_signer_function' => 'Funktionsbezeichnung',
     'cover_letter_subject' => 'Betreff',
     'cover_letter_toggle' => 'Anschreiben voranstellen',
     'cover_letter_recipient' => 'Empfänger',

@@ -19,7 +19,6 @@ return new class extends Migration
         'letter_sender_email' => 'sender_email',
         'letter_sender_phone' => 'sender_phone',
         'letter_sender_website' => 'sender_website',
-        'letter_signer_function' => 'signer_function',
         'letter_subject' => 'subject',
         'letter_body' => 'body',
     ];
@@ -44,7 +43,6 @@ return new class extends Migration
             $table->string('sender_email')->nullable();
             $table->string('sender_phone')->nullable();
             $table->string('sender_website')->nullable();
-            $table->string('signer_function')->nullable();
             $table->string('subject')->nullable();
             $table->text('body')->nullable();
             $table->timestamps();
@@ -71,7 +69,7 @@ return new class extends Migration
         }
 
         Schema::table('realm_contacts', function (Blueprint $table): void {
-            $table->dropColumn(array_keys(self::LETTER_COLUMNS));
+            $table->dropColumn([...array_keys(self::LETTER_COLUMNS), 'letter_signer_function']);
         });
     }
 
@@ -81,7 +79,7 @@ return new class extends Migration
             $table->boolean('letter_enabled')->default(false);
             $table->json('letter_recipient')->nullable();
             $table->text('letter_body')->nullable();
-            foreach (array_keys(self::LETTER_COLUMNS) as $column) {
+            foreach ([...array_keys(self::LETTER_COLUMNS), 'letter_signer_function'] as $column) {
                 if (! in_array($column, ['letter_enabled', 'letter_recipient', 'letter_body'], true)) {
                     $table->string($column)->nullable();
                 }

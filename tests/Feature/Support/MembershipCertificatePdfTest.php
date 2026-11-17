@@ -2,6 +2,7 @@
 
 use App\Models\RealmContact;
 use App\Support\CoverLetter;
+use App\Support\LetterPlaceholders;
 use App\Support\MembershipCertificatePdf;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -67,8 +68,6 @@ test('a cover letter is put on its own page in front of the certificate', functi
         email: 'sprecher@example.test',
         phone: '03641 930990',
         website: 'https://sprecher.example.test',
-        signerName: 'Helen Würflein',
-        signerFunction: 'Sprecherin',
         subject: 'Tätigkeitsbescheinigung',
         headerTitle: 'Studierendenrat',
         headerSubtitle: 'der Friedrich-Schiller-Universität Jena',
@@ -79,9 +78,9 @@ test('a cover letter is put on its own page in front of the certificate', functi
 
     preg_match('#/Type /Pages .*?/Count (\d+)#s', $with, $pages);
 
-    // title, subtitle, return address, recipient, unit and four contact entries, date, subject, three paragraphs, closing, name and position
+    // title, subtitle, return address, recipient, unit and four contact entries, date, subject and three paragraphs
     expect((int) $pages[1])->toBe(2)
-        ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(17)
+        ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(14)
         ->and(substr_count($with, '/S /H1'))->toBe(1)
         ->and(substr_count($with, '/S /TH'))->toBe(4)
         ->and(substr_count($with, '/S /LI'))->toBe(1)
@@ -122,4 +121,21 @@ test('a locale without patterns still renders', function (): void {
     app()->setLocale('fr');
 
     expect((new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, []))->toStartWith('%PDF-');
+});
+
+test('a signature placeholder becomes room to sign instead of a paragraph', function (): void {
+    $render = fn (string $body): string => (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [], new CoverLetter('Studierendenrat', null, 'Landtag', $body));
+
+    $plain = $render('<p>Mit freundlichen Grüßen</p><p>Helen Würflein</p>');
+    $signed = $render('<p>Mit freundlichen Grüßen</p><p>[signature]</p><p>Helen Würflein</p>');
+    $named = $render('<p>Mit freundlichen Grüßen</p><p>[signature;function=Sprecherin;name=Helen Würflein]</p>');
+
+    expect(substr_count($signed, '/S /P'))->toBe(substr_count($plain, '/S /P'))
+        ->and(substr_count($named, '/S /P'))->toBe(substr_count($plain, '/S /P') + 1)
+        ->and(LetterPlaceholders::splitAtSignatures('<p>a</p><p> [signature] </p><p>b</p>'))->toBe([['<p>a</p>', []], ['<p>b</p>', null]])
+        ->and(LetterPlaceholders::splitAtSignatures('<p>[signature;function=Sprecher:in;name=Max &amp; Moritz]</p>'))->toBe([['', ['Max & Moritz', 'Sprecher:in']], ['', null]])
+        ->and(LetterPlaceholders::signatureMisplaced('<p>Gruß [signature]</p>'))->toBeTrue()
+        ->and(LetterPlaceholders::signatureMisplaced('<p>[signature;rank=1]</p>'))->toBeTrue()
+        ->and(LetterPlaceholders::signatureMisplaced('<p>[signature;name=[sender.name];function=Sprecher:in]</p>'))->toBeFalse()
+        ->and(LetterPlaceholders::signatureMisplaced('<p>Gruß</p><p>[signature]</p>'))->toBeFalse();
 });

@@ -115,9 +115,8 @@ test('an admin can create, edit and delete export templates', function (): void 
         ->set('headerTitle', 'Studierendenrat')
         ->set('senderUnit', 'Sprecher:innen')
         ->set('senderEmail', 'sprecher@example.test')
-        ->set('signerFunction', 'Sprecher:in')
         ->set('subject', 'Tätigkeit von [person.name]')
-        ->set('letterBody', '<p>[person.first_name] war aktiv.</p><script>alert(1)</script>')
+        ->set('letterBody', '<p>[person.name] war aktiv.</p><script>alert(1)</script>')
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(route('realms.membership-export', ['realm' => $uid]));
@@ -130,7 +129,7 @@ test('an admin can create, edit and delete export templates', function (): void 
         ->and($template->header_title)->toBe('Studierendenrat')
         ->and($template->sender_email)->toBe('sprecher@example.test')
         ->and($template->subject)->toBe('Tätigkeit von [person.name]')
-        ->and($template->body)->toBe('<p>[person.first_name] war aktiv.</p>');
+        ->and($template->body)->toBe('<p>[person.name] war aktiv.</p>');
 
     Livewire::test(EditMembershipExportTemplate::class, ['realm' => $community, 'template' => $template])
         ->assertSet('recipient.city', 'Erfurt')
@@ -140,7 +139,12 @@ test('an admin can create, edit and delete export templates', function (): void 
         ->call('save')
         ->assertHasErrors(['senderEmail', 'letterBody'])
         ->set('senderEmail', '')
-        ->set('letterBody', '<p>[person.name]</p>')
+        ->set('letterBody', '<p>Gruß [signature]</p>')
+        ->set('subject', 'Betreff [signature]')
+        ->call('save')
+        ->assertHasErrors(['letterBody', 'subject'])
+        ->set('subject', '')
+        ->set('letterBody', '<p>Mit freundlichen Grüßen</p><p>[signature;name=[sender.name];function=Sprecher:in]</p>')
         ->call('save')
         ->assertHasNoErrors();
 
@@ -165,7 +169,7 @@ test('the export template pages render', function (): void {
     $this->get(route('realms.membership-export.edit', ['realm' => $uid, 'template' => $template->id]))
         ->assertOk()
         ->assertSee(__('realms.membership_export.sender_user_hint'))
-        ->assertSee('[person.first_name]');
+        ->assertSee('[person.name]');
 });
 
 test('a template without a cover letter needs no text', function (): void {

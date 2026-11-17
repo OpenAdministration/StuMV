@@ -57,7 +57,7 @@ final class MembershipCertificatePdf
 
     private const float LETTER_FONT_SIZE = 11.0;
 
-    /** Line height of the letter text and its closing, relative to the font size. */
+    /** Line height of the letter text, relative to the font size. */
     private const float LETTER_LINE_HEIGHT = 1.4;
 
     private const float ADDRESS_FONT_SIZE = 10.0;
@@ -114,6 +114,8 @@ final class MembershipCertificatePdf
 
     /** Room for a handwritten signature, three blank lines in DIN 5008. */
     private const float SIGNATURE_SPACE = 15.0;
+
+    private const float SIGNATURE_LINE_WIDTH = 70.0;
 
     private const float FOOTER_FONT_SIZE = 8.0;
 
@@ -296,38 +298,55 @@ final class MembershipCertificatePdf
         }
 
         // Rich text from the editor; the HTML renderer tags paragraphs and lists itself.
-        $this->font('', self::LETTER_FONT_SIZE);
-        $html = '<style>p, li { text-align: justify; line-height: '.self::LETTER_LINE_HEIGHT.'; }</style>'.CoverLetter::sanitizeBody($letter->body);
-        $this->pdf->addHTMLCell($html, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
-        $end = $this->pdf->getLastHTMLCellEnd();
-        $this->cursorY = $end['y'];
+        foreach (LetterPlaceholders::splitAtSignatures(CoverLetter::sanitizeBody($letter->body)) as [$part, $signature]) {
+            if (! CoverLetter::bodyIsEmpty($part)) {
+                $this->font('', self::LETTER_FONT_SIZE);
+                $html = '<style>p, li { text-align: justify; line-height: '.self::LETTER_LINE_HEIGHT.'; }</style>'.$part;
+                $this->pdf->addHTMLCell($html, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+                $this->cursorY = $this->pdf->getLastHTMLCellEnd()['y'];
+            }
 
-        $this->drawSignature($letter);
+            if ($signature !== null) {
+                $this->drawSignature($signature);
+            }
+        }
     }
 
-    /** Closing, room to sign, and the signer below it - kept together on one page. */
-    private function drawSignature(CoverLetter $letter): void
+    /**
+     * Room for a handwritten signature, a line, and the lines below it - kept together on one page.
+     *
+     * @param  list<string>  $lines
+     */
+    private function drawSignature(array $lines): void
     {
-        $lines = array_filter([$letter->signerName, $letter->signerFunction]);
         $this->font('', self::LETTER_FONT_SIZE);
-        $lineHeight = $this->letterLineHeight();
-
-        // the HTML block already ends with its paragraph spacing
-        if (! $this->hasSpace((1 + count($lines)) * $lineHeight + self::SIGNATURE_SPACE)) {
+        $this->hyphenate(false);
+        $lineHeight = self::LETTER_FONT_SIZE * self::LETTER_LINE_HEIGHT * 25.4 / 72;
+        $heights = array_map(fn (string $line): float => $this->measure($line, self::SIGNATURE_LINE_WIDTH), $lines);
+        // without lines below, the line of text after it comes along
+        $below = $lines === [] ? $lineHeight : array_sum($heights) + (count($lines) - 1) * ($lineHeight - $this->measure('X', $this->contentWidth));
+        if (! $this->hasSpace(self::SIGNATURE_SPACE + self::SPACE + $below)) {
             $this->newPage();
         }
 
-        $this->beginTag('P');
-        $this->text(__('profile.cover_letter_closing'), self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
-        $this->endTag();
-        $this->cursorY += $lineHeight + self::SIGNATURE_SPACE;
+        $this->cursorY += self::SIGNATURE_SPACE;
+        $this->artifact($this->pdf->graph->getLine(
+            self::MARGIN_LEFT,
+            $this->cursorY,
+            self::MARGIN_LEFT + self::SIGNATURE_LINE_WIDTH,
+            $this->cursorY,
+            ['lineWidth' => 0.2, 'lineColor' => self::COLOR_ZINC_600],
+        ));
+        $this->cursorY += self::SPACE;
 
         foreach ($lines as $line) {
             $this->beginTag('P');
-            $this->text($line, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+            $this->text($line, self::MARGIN_LEFT, $this->cursorY, self::SIGNATURE_LINE_WIDTH);
             $this->endTag();
-            $this->cursorY += $lineHeight;
+            $this->cursorY += $this->lastHeight() + $lineHeight - $this->measure('X', $this->contentWidth);
         }
+
+        $this->hyphenate(true);
     }
 
     /**
@@ -1085,12 +1104,6 @@ final class MembershipCertificatePdf
     }
 
     /** Height the text would need in the given width, without drawing it. */
-    /** Line pitch of the letter text in mm. */
-    private function letterLineHeight(): float
-    {
-        return self::LETTER_FONT_SIZE * self::LETTER_LINE_HEIGHT * 25.4 / 72;
-    }
-
     private function measure(string $txt, float $width): float
     {
         if ($txt === '') {

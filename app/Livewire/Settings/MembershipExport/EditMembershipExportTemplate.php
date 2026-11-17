@@ -52,8 +52,6 @@ class EditMembershipExportTemplate extends Component
 
     public string $senderWebsite = '';
 
-    public string $signerFunction = '';
-
     public string $subject = '';
 
     public string $letterBody = '';
@@ -96,7 +94,6 @@ class EditMembershipExportTemplate extends Component
             $this->senderRoom = (string) $template->sender_room;
             $this->senderPhone = (string) $template->sender_phone;
             $this->senderWebsite = (string) $template->sender_website;
-            $this->signerFunction = (string) $template->signer_function;
             $this->subject = (string) $template->subject;
             $this->letterBody = (string) $template->body;
         }
@@ -123,8 +120,14 @@ class EditMembershipExportTemplate extends Component
         $letter = 'exclude_unless:withLetter,true';
         $knownPlaceholders = function (string $attribute, mixed $value, \Closure $fail): void {
             $unknown = LetterPlaceholders::unknown((string) $value);
+            if ($attribute === 'subject' && str_contains((string) $value, '[signature')) {
+                $unknown[] = LetterPlaceholders::SIGNATURE;
+            }
+
             if ($unknown !== []) {
                 $fail(__('realms.membership_export.placeholder_unknown', ['placeholders' => implode(', ', $unknown)]));
+            } elseif (LetterPlaceholders::signatureMisplaced(CoverLetter::sanitizeBody((string) $value))) {
+                $fail(__('realms.membership_export.placeholder_signature_misplaced', ['placeholder' => LetterPlaceholders::SIGNATURE]));
             }
         };
 
@@ -144,7 +147,6 @@ class EditMembershipExportTemplate extends Component
                 'senderRoom' => [$letter, 'nullable', 'string', 'max:50'],
                 'senderPhone' => [$letter, 'nullable', 'string', 'max:50'],
                 'senderWebsite' => [$letter, 'nullable', 'url:http,https', 'max:255'],
-                'signerFunction' => [$letter, 'nullable', 'string', 'max:100'],
                 'subject' => [$letter, 'nullable', 'string', 'max:150', $knownPlaceholders],
                 'letterBody' => [
                     $letter, 'required', 'string', 'max:20000', $knownPlaceholders,
@@ -167,7 +169,6 @@ class EditMembershipExportTemplate extends Component
                 'senderRoom' => __('realms.contact_office_room'),
                 'senderPhone' => __('profile.cover_letter_sender_phone'),
                 'senderWebsite' => __('profile.cover_letter_sender_website'),
-                'signerFunction' => __('profile.cover_letter_signer_function'),
                 'subject' => __('profile.cover_letter_subject'),
                 'letterBody' => __('profile.cover_letter_body'),
             ],
@@ -191,7 +192,6 @@ class EditMembershipExportTemplate extends Component
             'sender_room' => $clean($this->senderRoom),
             'sender_phone' => $clean($this->senderPhone),
             'sender_website' => $clean($this->senderWebsite),
-            'signer_function' => $clean($this->signerFunction),
             'subject' => $clean($this->subject),
             'body' => CoverLetter::bodyIsEmpty($this->letterBody) ? null : CoverLetter::sanitizeBody($this->letterBody),
         ];

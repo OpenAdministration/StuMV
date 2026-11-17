@@ -22,8 +22,6 @@ return [
     'cover_letter_office_room' => 'Room :room',
     'cover_letter_footer_contact' => 'Contact',
     'cover_letter_footer_bank' => 'Bank details',
-    'cover_letter_closing' => 'Kind regards',
-    'cover_letter_signer_function' => 'Position',
     'cover_letter_subject' => 'Subject',
     'cover_letter_toggle' => 'Add a cover letter',
     'cover_letter_recipient' => 'Recipient',
