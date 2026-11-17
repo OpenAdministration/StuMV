@@ -48,7 +48,7 @@ final class MembershipCertificatePdf
 
     private const string FONT = 'adwaitasans';
 
-    /** Tabular figures, so dates line up in their columns. */
+    /** Tabular figures, for dates in columns, addresses and phone numbers. */
     private const string FONT_TABULAR = 'adwaitasanstabular';
 
     /** Table columns holding dates. */
@@ -254,14 +254,14 @@ final class MembershipCertificatePdf
             ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR],
         ));
 
-        $this->font('', self::RETURN_FONT_SIZE);
+        $this->font('', self::RETURN_FONT_SIZE, self::FONT_TABULAR);
         $returnAddress = $this->returnAddress(array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
         $this->beginTag('P');
         // top line of the notes zone; notes like "Einschreiben" would go below it, above the address
         $this->text($returnAddress, self::LETTERHEAD_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH, self::COLOR_ZINC_600);
         $this->endTag();
 
-        $this->font('', self::ADDRESS_FONT_SIZE);
+        $this->font('', self::ADDRESS_FONT_SIZE, self::FONT_TABULAR);
         $this->beginTag('P');
         $linespace = self::ADDRESS_LINE_PITCH - $this->measure('X', self::ADDRESS_WIDTH);
         $this->text(trim($letter->recipient), self::LETTERHEAD_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: $linespace);
@@ -472,7 +472,7 @@ final class MembershipCertificatePdf
         $y = self::INFO_Y;
 
         foreach ($items as $icon => $lines) {
-            $this->font($icon === 'network' ? 'B' : '', self::INFO_FONT_SIZE);
+            $this->font($icon === 'network' ? 'B' : '', self::INFO_FONT_SIZE, $icon === 'network' ? self::FONT : self::FONT_TABULAR);
             $lineHeight = $this->measure('X', $this->contentWidth);
 
             $link = $links[$icon] ?? null;
