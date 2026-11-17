@@ -70,7 +70,7 @@ final class MembershipCertificatePdf
 
     private const float RETURN_FONT_SIZE = 7.0;
 
-    private const float SENDER_FONT_SIZE = self::HEADING_SIZE;
+    private const float SENDER_FONT_SIZE = 17.0;
 
     /** DIN 5008 form B, in mm from the top left paper corner. */
     private const float LETTERHEAD_RULE_Y = 33.0;
@@ -228,18 +228,20 @@ final class MembershipCertificatePdf
         $logoWidth = $this->drawLogo($letter->logoPath, $right);
         $nameWidth = $right - self::LETTERHEAD_LEFT - ($logoWidth > 0 ? $logoWidth + self::LOGO_GAP : 0);
         $baseline = self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP;
+        $subtitleLine = 0.0;
         if ($letter->headerSubtitle !== null) {
             $this->font('', self::HEADER_SUBTITLE_SIZE);
             $baseline = $this->textAbove($letter->headerSubtitle, $baseline, $nameWidth);
+            $subtitleLine = $this->measure('X', $nameWidth);
         }
 
         // without either the sender name stands in, so the letterhead is never empty
         $title = $letter->headerTitle ?? ($letter->headerSubtitle === null ? $letter->senderName : null);
         if ($title !== null) {
             $this->font('B', self::SENDER_FONT_SIZE);
-            // the subtitle follows like a further line of the title
+            // spaced by the subtitle's line, as the title's would leave a gap
             if ($letter->headerSubtitle !== null) {
-                $baseline -= $this->measure('X', $nameWidth) + self::LINE_SPACING;
+                $baseline -= $subtitleLine + self::SPACE;
             }
 
             $this->textAbove($title, $baseline, $nameWidth);
