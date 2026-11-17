@@ -89,6 +89,8 @@ final class MembershipCertificatePdf
 
     private const float INFO_Y = 50.0;
 
+    private const float INFO_TEXT_X = self::INFO_X + self::ICON_SIZE + 3.0;
+
     /** Two blank lines (4.23mm each) below the 90mm address field. */
     private const float SUBJECT_Y = 98.46;
 
@@ -430,8 +432,8 @@ final class MembershipCertificatePdf
     }
 
     /**
-     * Sender details in the right column of the letterhead, each with an icon
-     * behind a vertical rule. Returns where the block ends.
+     * Sender details in the right column of the letterhead, each behind an icon.
+     * Returns where the block ends.
      */
     private function drawInfoBlock(CoverLetter $letter, float $right): float
     {
@@ -458,8 +460,6 @@ final class MembershipCertificatePdf
             'globe' => (string) $letter->website,
         ];
 
-        $ruleX = $right - self::ICON_SIZE - 2.0;
-        $textRight = $ruleX - 2.0;
         $y = self::INFO_Y;
 
         foreach ($items as $icon => $lines) {
@@ -472,7 +472,7 @@ final class MembershipCertificatePdf
                 $this->beginTag('Link');
             }
 
-            $this->text(implode("\n", $lines), self::INFO_X, $y, $textRight - self::INFO_X, self::COLOR_BLACK, 'R');
+            $this->text(implode("\n", $lines), self::INFO_TEXT_X, $y, $right - self::INFO_TEXT_X);
             $height = $this->lastHeight();
             if ($link !== null) {
                 $box = $this->pdf->getLastTextBBox();
@@ -482,17 +482,9 @@ final class MembershipCertificatePdf
 
             $this->endTag();
 
-            $this->drawIcon($icon, $right - self::ICON_SIZE, $y + ($lineHeight - self::ICON_SIZE) / 2);
+            $this->drawIcon($icon, self::INFO_X, $y + ($lineHeight - self::ICON_SIZE) / 2);
             $y += $height + self::SPACE;
         }
-
-        $this->artifact($this->pdf->graph->getLine(
-            $ruleX,
-            self::INFO_Y,
-            $ruleX,
-            $y - self::SPACE,
-            ['lineWidth' => 0.2, 'lineColor' => self::RULE_COLOR],
-        ));
 
         return $y - self::SPACE;
     }
