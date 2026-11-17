@@ -59,8 +59,10 @@ final class MembershipCertificatePdf
     /** Line height of the letter text and its closing, relative to the font size. */
     private const float LETTER_LINE_HEIGHT = 1.4;
 
-    /** With the letter's leading five lines fit the address zone, as many as a recipient has fields. */
-    private const float ADDRESS_FONT_SIZE = self::LETTER_FONT_SIZE;
+    private const float ADDRESS_FONT_SIZE = 10.0;
+
+    /** Six lines fill the 27.3mm address zone. */
+    private const float ADDRESS_LINE_PITCH = 27.3 / 6;
 
     private const float INFO_FONT_SIZE = 9.5;
 
@@ -243,12 +245,12 @@ final class MembershipCertificatePdf
         $returnAddress = $this->returnAddress(array_filter([$letter->senderName, $contact?->streetLine(), $contact?->cityLine()]));
         $this->beginTag('P');
         // top line of the notes zone; notes like "Einschreiben" would go below it, above the address
-        $this->text($returnAddress, self::LETTERHEAD_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH);
+        $this->text($returnAddress, self::LETTERHEAD_LEFT, self::NOTES_ZONE_Y, self::ADDRESS_WIDTH, self::COLOR_ZINC_600);
         $this->endTag();
 
         $this->font('', self::ADDRESS_FONT_SIZE);
         $this->beginTag('P');
-        $linespace = $this->letterLineHeight() - $this->measure('X', self::ADDRESS_WIDTH);
+        $linespace = self::ADDRESS_LINE_PITCH - $this->measure('X', self::ADDRESS_WIDTH);
         $this->text(trim($letter->recipient), self::LETTERHEAD_LEFT, self::RECIPIENT_Y, self::ADDRESS_WIDTH, linespace: $linespace);
         $this->endTag();
 
