@@ -81,15 +81,19 @@
                     <div class="space-y-4 p-4">
                         <flux:input wire:model="subject" :label="__('profile.cover_letter_subject')" />
                         <flux:editor wire:model="letterBody" :label="__('profile.cover_letter_body')" toolbar="bold italic underline | bullet ordered" />
-                        <div>
-                            <flux:heading>{{ __('realms.membership_export.placeholders') }}</flux:heading>
-                            <dl class="mt-2 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">
-                                @foreach($placeholders as $placeholder => $label)
-                                    <dt><code class="select-all">{{ $placeholder }}</code></dt>
-                                    <dd class="text-zinc-500 dark:text-zinc-400">{{ $label }}</dd>
-                                @endforeach
-                            </dl>
-                        </div>
+                        <flux:accordion transition>
+                            <flux:accordion.item>
+                                <flux:accordion.heading>{{ __('realms.membership_export.placeholders') }}</flux:accordion.heading>
+                                <flux:accordion.content>
+                                    <dl class="mt-2 grid gap-x-4 gap-y-1 text-sm sm:grid-cols-[auto_1fr]">
+                                        @foreach($placeholders as $placeholder => $label)
+                                            <dt><code class="select-all">{{ $placeholder }}</code></dt>
+                                            <dd class="text-zinc-500 dark:text-zinc-400">{{ $label }}</dd>
+                                        @endforeach
+                                    </dl>
+                                </flux:accordion.content>
+                            </flux:accordion.item>
+                        </flux:accordion>
                     </div>
                 </flux:fieldset>
             @endif
