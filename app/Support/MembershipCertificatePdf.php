@@ -777,7 +777,7 @@ final class MembershipCertificatePdf
         $this->cursorY += $this->lastHeight() + self::SPACE;
 
         $meta = implode(' | ', array_filter([$fullName, $community, $withDate ? $this->dateFormat->format(Date::now()) : null]));
-        $this->font('', self::META_FONT_SIZE);
+        $this->font('', self::META_FONT_SIZE, self::FONT_TABULAR);
         $this->beginTag('P');
         $this->text($meta, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth, self::COLOR_ZINC_600);
         $this->endTag();
