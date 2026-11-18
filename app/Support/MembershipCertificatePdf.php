@@ -108,7 +108,7 @@ final class MembershipCertificatePdf
     /** Room for a handwritten signature, three blank lines in DIN 5008. */
     private const float SIGNATURE_SPACE = 15.0;
 
-    private const float SIGNATURE_LINE_WIDTH = 70.0;
+    private const float SIGNATURE_LINE_WIDTH = 80.0;
 
     private const float FOOTER_FONT_SIZE = 8.0;
 
