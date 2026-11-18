@@ -12,7 +12,7 @@ trait SortsMemberships
     public string $sortField = 'from';
 
     #[Url]
-    public string $sortDirection = 'desc';
+    public string $sortDirection = 'asc';
 
     public function sortBy(string $field): void
     {

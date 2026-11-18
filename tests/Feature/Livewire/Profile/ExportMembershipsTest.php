@@ -138,7 +138,7 @@ function rowOrder(string $html, string ...$texts): array
     return array_map(fn (string $text): int|false => strpos($html, $text), $texts);
 }
 
-test('memberships are sorted newest first by default', function (): void {
+test('memberships are sorted oldest first by default', function (): void {
     $community = newCommunity();
     $user = actingAsMember($community);
     twoMemberships($community, $user->username);
@@ -146,7 +146,7 @@ test('memberships are sorted newest first by default', function (): void {
     $html = Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])->html();
 
     [$active, $ended] = rowOrder($html, 'Role mitglied', 'Role sprecher');
-    expect($active)->toBeLessThan($ended);
+    expect($ended)->toBeLessThan($active);
 });
 
 test('memberships can be sorted by role in both directions', function (): void {
