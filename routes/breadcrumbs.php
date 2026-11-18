@@ -4,6 +4,7 @@
 // Note: Laravel will automatically resolve `Breadcrumbs::` without
 // this import. This is nice for IDE syntax and refactoring.
 use App\Ldap\Committee;
+use App\Ldap\User;
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
 // This import is also not required, and you could replace `BreadcrumbTrail $trail`
@@ -38,7 +39,9 @@ Breadcrumbs::for('realms.fallback', function (BreadcrumbTrail $trail, array $rou
 
 Breadcrumbs::for('profile', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('realms', $routeParams);
-    $trail->push(__('profile.breadcrumb'), route('profile', array_merge(['username' => auth()->user()->username], $routeParams)), ['truncate' => true]);
+    $routeParams = array_merge(['username' => auth()->user()->username], $routeParams);
+    $person = User::query()->in(Route::current()->parameter('realm')->peopleDn())->where('uid', '=', $routeParams['username'])->first();
+    $trail->push($person?->getFirstAttribute('cn') ?: __('profile.breadcrumb'), route('profile', $routeParams), ['truncate' => true]);
 });
 
 Breadcrumbs::for('profile.memberships', function (BreadcrumbTrail $trail, array $routeParams): void {
