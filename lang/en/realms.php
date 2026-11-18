@@ -142,7 +142,7 @@ return [
     'edit_success' => 'The student body :realm has been saved.',
     'membership_export.title' => 'Membership export of :realm',
     'membership_export.headline' => 'Membership export',
-    'membership_export.explanation' => 'Set up templates members choose from when exporting their memberships – with or without a cover letter.',
+    'membership_export.explanation' => 'Set up templates members can choose from when exporting their memberships.',
     'membership_export.saved' => 'The template has been saved.',
     'membership_export.deleted' => 'The template has been deleted.',
     'membership_export.new' => 'New template',

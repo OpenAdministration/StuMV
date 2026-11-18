@@ -142,7 +142,7 @@ return [
     'edit_success' => 'Die Studierendenschaft :realm wurde gespeichert.',
     'membership_export.title' => 'Mitgliedschaften-Export von :realm',
     'membership_export.headline' => 'Mitgliedschaften-Export',
-    'membership_export.explanation' => 'Lege Vorlagen an, aus denen Mitglieder beim Export ihrer Mitgliedschaften wählen – mit oder ohne Anschreiben.',
+    'membership_export.explanation' => 'Lege Vorlagen an, aus denen Mitglieder beim Export ihrer Mitgliedschaften wählen können.',
     'membership_export.saved' => 'Die Vorlage wurde gespeichert.',
     'membership_export.deleted' => 'Die Vorlage wurde gelöscht.',
     'membership_export.new' => 'Neue Vorlage',
