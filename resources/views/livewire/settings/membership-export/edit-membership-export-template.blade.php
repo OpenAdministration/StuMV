@@ -6,7 +6,7 @@
         <div class="space-y-6">
             <div class="grid gap-4 md:grid-cols-2">
                 <flux:input wire:model="name" :label="__('realms.membership_export.name')" :placeholder="__('realms.membership_export.name_placeholder')" />
-                <flux:select wire:model="dateFormat" :label="__('realms.membership_export.date_format')">
+                <flux:select variant="listbox" wire:model="dateFormat" :label="__('realms.membership_export.date_format')">
                     @foreach($dateFormats as $format)
                         <flux:select.option :value="$format->value">{{ $format->label() }}</flux:select.option>
                     @endforeach

@@ -46,7 +46,7 @@
             <flux:error name="selected" />
 
             @if($templates->isNotEmpty())
-                <flux:select wire:model.live="template" :label="__('profile.export_template')" :placeholder="__('profile.export_template_placeholder')" class="max-w-md">
+                <flux:select variant="listbox" searchable wire:model.live="template" :label="__('profile.export_template')" :placeholder="__('profile.export_template_placeholder')">
                     @foreach($templates as $option)
                         <flux:select.option :value="$option->id">{{ $option->name }}</flux:select.option>
                     @endforeach
