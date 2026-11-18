@@ -1,6 +1,6 @@
 @props(['realm', 'username', 'name'])
 
-<div class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_3rem)]! sm:w-[calc(100%_+_4rem)]! flex flex-col -m-6! sm:-mx-8!">
+<div data-profile-layout class="max-w-[calc(100%_+_4rem)]! w-[calc(100%_+_3rem)]! sm:w-[calc(100%_+_4rem)]! flex flex-col flex-1 min-h-0 -m-6! sm:-mx-8! sm:-mb-8!">
     <div class="pt-6 px-6 sm:px-8 pb-3">
         <flux:heading size="xl" class="max-w-7xl mx-auto">{{ $name }}</flux:heading>
     </div>

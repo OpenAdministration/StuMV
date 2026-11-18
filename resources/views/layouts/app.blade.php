@@ -20,7 +20,8 @@
             @include('components.header')
 
             <main class="relative h-full flex-1 overflow-x-hidden overflow-y-auto">
-                <div class="p-6 sm:px-8 sm:pb-8 [&>div]:mx-auto [&>div]:max-w-7xl">
+                {{-- profile pages fill the height, only their content below the tabs scrolls --}}
+                <div class="p-6 sm:px-8 sm:pb-8 [&>div]:mx-auto [&>div]:max-w-7xl has-[[data-profile-layout]]:flex has-[[data-profile-layout]]:flex-col has-[[data-profile-layout]]:h-full">
                     <x-alert/>
                     {{ $slot }}
                 </div>
