@@ -115,3 +115,14 @@ test('dates are written in the format of the template', function (): void {
         ->and(ExportDateFormat::MonthYear->format($date))->toBe('Sept. 2026')
         ->and(ExportDateFormat::MonthYear->format('2026-03-01'))->toBe('März 2026');
 });
+
+test('the letter is dated to the day even when the template only shows month and year', function (): void {
+    $template = new MembershipExportTemplate(['date_format' => ExportDateFormat::MonthYear, 'body' => '<p>Stand [today]</p>']);
+
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), letterPerson(), letterSender());
+    $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Muster', null, [], $letter, ExportDateFormat::MonthYear);
+
+    expect($letter->body)->toBe('<p>Stand '.Date::today()->format('d.m.Y').'</p>')
+        ->and(ExportDateFormat::Iso->forDay())->toBe(ExportDateFormat::Iso)
+        ->and($pdf)->not->toBeEmpty();
+});

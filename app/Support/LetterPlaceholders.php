@@ -55,7 +55,7 @@ final class LetterPlaceholders
             ...array_map(fn (string $attribute): string => (string) $person->getFirstAttribute($attribute), self::PERSON),
             'sender.name' => (string) $sender->getFirstAttribute('cn'),
             'realm.name' => $realmName,
-            'today' => $dateFormat->format(Date::today()),
+            'today' => $dateFormat->forDay()->format(Date::today()),
         ];
     }
 

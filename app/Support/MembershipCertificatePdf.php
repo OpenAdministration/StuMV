@@ -271,7 +271,7 @@ final class MembershipCertificatePdf
         $infoBottom = $this->drawInfoBlock($letter, $right);
         $this->hyphenate(true);
 
-        $date = $this->dateFormat->format(Date::now());
+        $date = $this->dateFormat->forDay()->format(Date::now());
         // right-aligned on the line above the subject, unless the info block reaches further down
         $this->font('', self::DATE_FONT_SIZE, self::FONT_TABULAR);
         $dateY = max(self::SUBJECT_Y - 2 * self::DIN_LINE, $infoBottom + self::SPACE);

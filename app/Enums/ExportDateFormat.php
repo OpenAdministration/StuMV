@@ -23,6 +23,12 @@ enum ExportDateFormat: string
         return $date->format($this->value);
     }
 
+    /** For a single day, like the date of a letter: month and year alone say too little. */
+    public function forDay(): self
+    {
+        return $this === self::MonthYear ? self::German : $this;
+    }
+
     /** Today in this format, so the choice shows what it looks like. */
     public function label(): string
     {
