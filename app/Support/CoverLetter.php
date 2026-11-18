@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Ldap\User;
@@ -52,7 +53,14 @@ final readonly class CoverLetter
         $realmName = (string) $community->getFirstAttribute('description');
         $values = LetterPlaceholders::values($person, $sender, $realmName, $template->date_format);
         $shared = [
-            'recipient' => self::recipientAddress(self::recipient($template->recipient ?? [])),
+            'recipient' => self::recipientAddress($template->recipient_type === LetterRecipient::Member
+                ? self::recipient([
+                    'name' => $person->getFirstAttribute('cn'),
+                    'street' => $person->getFirstAttribute('street'),
+                    'postal_code' => $person->getFirstAttribute('postalCode'),
+                    'city' => $person->getFirstAttribute('l'),
+                ])
+                : self::recipient($template->recipient ?? [])),
             'body' => LetterPlaceholders::replace(self::sanitizeBody((string) $template->body), $values, html: true),
             'subject' => $template->subject !== null ? LetterPlaceholders::replace($template->subject, $values, html: false) : null,
         ];

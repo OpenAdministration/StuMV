@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ExportDateFormat;
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,7 @@ class MembershipExportTemplate extends Model
         'with_letter',
         'sender',
         'date_format',
+        'recipient_type',
         'recipient',
         'header_title',
         'header_subtitle',
@@ -40,6 +42,7 @@ class MembershipExportTemplate extends Model
         'with_letter' => false,
         'sender' => 'realm',
         'date_format' => 'Y-m-d',
+        'recipient_type' => 'other',
     ];
 
     protected function casts(): array
@@ -48,6 +51,7 @@ class MembershipExportTemplate extends Model
             'with_letter' => 'boolean',
             'sender' => LetterSender::class,
             'date_format' => ExportDateFormat::class,
+            'recipient_type' => LetterRecipient::class,
             'recipient' => 'array',
         ];
     }

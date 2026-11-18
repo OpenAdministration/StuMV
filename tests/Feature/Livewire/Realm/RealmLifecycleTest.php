@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ExportDateFormat;
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Ldap\Domain;
@@ -145,10 +146,15 @@ test('an admin can create, edit and delete export templates', function (): void 
         ->assertHasErrors(['letterBody', 'subject'])
         ->set('subject', '')
         ->set('letterBody', '<p>Mit freundlichen Grüßen</p><p>[signature;name=[sender.name];function=Sprecher:in]</p>')
+        ->set('recipientType', LetterRecipient::Member->value)
+        ->set('recipient.postal_code', str_repeat('1', 30))
         ->call('save')
         ->assertHasNoErrors();
 
-    expect($template->fresh()->sender)->toBe(LetterSender::User);
+    expect($template->fresh())
+        ->sender->toBe(LetterSender::User)
+        ->recipient_type->toBe(LetterRecipient::Member)
+        ->recipient->toBeNull();
 
     Livewire::test(ListMembershipExportTemplates::class, ['realm' => $community])
         ->assertSee('Nachweis für das Landesamt')
@@ -169,6 +175,7 @@ test('the export template pages render', function (): void {
     $this->get(route('realms.membership-export.edit', ['realm' => $uid, 'template' => $template->id]))
         ->assertOk()
         ->assertSee(__('realms.membership_export.sender_user_hint'))
+        ->assertSee(__('realms.membership_export.recipient_other'))
         ->assertSee('[person.name]');
 });
 

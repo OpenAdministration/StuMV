@@ -3,6 +3,7 @@
 namespace App\Livewire\Profile;
 
 use App\Enums\ExportDateFormat;
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Ldap\User;
@@ -75,7 +76,7 @@ class ExportMemberships extends Component
             'memberships' => $this->sortMemberships(MembershipCertificate::memberships($this->realm_uid, $this->currentUsername, false)),
             'name' => $user->getFirstAttribute('givenName').' '.$user->getFirstAttribute('sn'),
             'templates' => $this->templates(),
-            'warning' => $this->warning(),
+            'warnings' => $this->warnings(),
         ])->title(__('profile.export_memberships_title'));
     }
 
@@ -119,21 +120,34 @@ class ExportMemberships extends Component
         return MembershipExportTemplate::forRealm($this->realm_uid)->get();
     }
 
-    /** Sender details the chosen letter would be missing. */
-    private function warning(): ?string
+    /**
+     * Addresses the chosen letter would be missing.
+     *
+     * @return list<string>
+     */
+    private function warnings(): array
     {
         $template = $this->templates()->find($this->template);
         if (! $template?->with_letter) {
-            return null;
+            return [];
         }
+
+        $hasAddress = fn (User $user): bool => $user->getFirstAttribute('street') && $user->getFirstAttribute('l');
+        $warnings = [];
 
         if ($template->sender === LetterSender::User) {
-            $sender = auth()->user()->ldap();
-
-            return $sender->getFirstAttribute('street') && $sender->getFirstAttribute('l') ? null : __('profile.cover_letter_no_profile_address');
+            if (! $hasAddress(auth()->user()->ldap())) {
+                $warnings[] = __('profile.cover_letter_no_profile_address');
+            }
+        } elseif (RealmContact::forRealm($this->realm_uid) === null) {
+            $warnings[] = __('profile.cover_letter_no_contact');
         }
 
-        return RealmContact::forRealm($this->realm_uid) === null ? __('profile.cover_letter_no_contact') : null;
+        if ($template->recipient_type === LetterRecipient::Member && ! $hasAddress($this->member())) {
+            $warnings[] = __('profile.cover_letter_no_member_address');
+        }
+
+        return $warnings;
     }
 
     private function member(): User

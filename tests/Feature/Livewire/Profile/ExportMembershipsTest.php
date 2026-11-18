@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Livewire\Profile\ExportMemberships;
@@ -257,6 +258,25 @@ test('a letter sent by the exporting person warns when their profile has no addr
 
     Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
         ->assertSee(__('profile.cover_letter_no_profile_address'))
+        ->call('export')
+        ->assertHasNoErrors()
+        ->assertFileDownloaded();
+});
+
+test('a letter to the member warns when their profile has no address', function (): void {
+    $community = newCommunity();
+    MembershipExportTemplate::create([
+        'realm' => $community->getShortCode(),
+        'name' => 'Bescheinigung',
+        'with_letter' => true,
+        'recipient_type' => LetterRecipient::Member,
+        'body' => '<p>Hallo [person.name]</p>',
+    ]);
+    $user = actingAsMember($community);
+    twoMemberships($community, $user->username);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $user->username])
+        ->assertSee(__('profile.cover_letter_no_member_address'))
         ->call('export')
         ->assertHasNoErrors()
         ->assertFileDownloaded();

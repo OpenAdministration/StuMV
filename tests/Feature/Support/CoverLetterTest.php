@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ExportDateFormat;
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Ldap\User;
@@ -84,6 +85,20 @@ test('a letter sent by a person carries their profile details', function (): voi
 
     $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Muster', null, [], $letter);
     expect($pdf)->not->toContain('/URI (mailto:')->not->toContain('/URI (tel:');
+});
+
+test('a letter to the member is addressed to their profile address', function (): void {
+    $template = new MembershipExportTemplate([
+        'sender' => LetterSender::User,
+        'recipient_type' => LetterRecipient::Member,
+        'recipient' => ['organisation' => 'Landesamt'],
+        'body' => '<p>Hallo</p>',
+    ]);
+    $person = new User(['cn' => 'Max Muster', 'street' => 'Markt 5', 'postalCode' => '07743', 'l' => 'Jena']);
+
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), $person, letterSender());
+
+    expect($letter->recipient)->toBe("Max Muster\nMarkt 5\n07743 Jena");
 });
 
 test('unknown placeholders are reported and left as they are', function (): void {

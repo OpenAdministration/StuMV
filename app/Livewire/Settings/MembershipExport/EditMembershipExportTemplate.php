@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings\MembershipExport;
 
 use App\Enums\ExportDateFormat;
+use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
 use App\Ldap\Community;
 use App\Models\MembershipExportTemplate;
@@ -30,6 +31,8 @@ class EditMembershipExportTemplate extends Component
     public string $sender = LetterSender::Realm->value;
 
     public string $dateFormat = ExportDateFormat::Iso->value;
+
+    public string $recipientType = LetterRecipient::Other->value;
 
     /** @var array<string, string> */
     public array $recipient = [];
@@ -84,6 +87,7 @@ class EditMembershipExportTemplate extends Component
             $this->withLetter = $template->with_letter;
             $this->sender = $template->sender->value;
             $this->dateFormat = $template->date_format->value;
+            $this->recipientType = $template->recipient_type->value;
             $this->recipient = CoverLetter::recipient($template->recipient ?? []);
             $this->headerTitle = (string) $template->header_title;
             $this->headerSubtitle = (string) $template->header_subtitle;
@@ -111,6 +115,7 @@ class EditMembershipExportTemplate extends Component
         return view('livewire.settings.membership-export.edit-membership-export-template', [
             'dateFormats' => ExportDateFormat::cases(),
             'senders' => LetterSender::cases(),
+            'recipientTypes' => LetterRecipient::cases(),
             'placeholders' => LetterPlaceholders::labels(),
         ])->title(__('realms.membership_export.title', ['realm' => $this->uid]));
     }
@@ -118,6 +123,7 @@ class EditMembershipExportTemplate extends Component
     public function save()
     {
         $letter = 'exclude_unless:withLetter,true';
+        $otherRecipient = 'exclude_unless:recipientType,'.LetterRecipient::Other->value;
         $knownPlaceholders = function (string $attribute, mixed $value, \Closure $fail): void {
             $unknown = LetterPlaceholders::unknown((string) $value);
             if ($attribute === 'subject' && str_contains((string) $value, '[signature')) {
@@ -137,7 +143,8 @@ class EditMembershipExportTemplate extends Component
                 'withLetter' => ['boolean'],
                 'dateFormat' => ['required', Rule::enum(ExportDateFormat::class)],
                 'sender' => ['required', Rule::enum(LetterSender::class)],
-                ...CoverLetter::recipientRules('recipient', [$letter]),
+                'recipientType' => [$letter, 'required', Rule::enum(LetterRecipient::class)],
+                ...CoverLetter::recipientRules('recipient', [$letter, $otherRecipient]),
                 'headerTitle' => [$letter, 'nullable', 'string', 'max:150'],
                 'headerSubtitle' => [$letter, 'nullable', 'string', 'max:150'],
                 'senderName' => [$letter, 'nullable', 'string', 'max:150'],
@@ -160,6 +167,7 @@ class EditMembershipExportTemplate extends Component
                 'name' => __('realms.membership_export.name'),
                 'dateFormat' => __('realms.membership_export.date_format'),
                 'sender' => __('profile.cover_letter_sender'),
+                'recipientType' => __('profile.cover_letter_recipient'),
                 'headerTitle' => __('profile.cover_letter_header_title'),
                 'headerSubtitle' => __('profile.cover_letter_header_subtitle'),
                 'senderName' => __('profile.cover_letter_sender_name'),
@@ -182,7 +190,8 @@ class EditMembershipExportTemplate extends Component
             'with_letter' => $this->withLetter,
             'sender' => $this->sender,
             'date_format' => $this->dateFormat,
-            'recipient' => $recipient ?: null,
+            'recipient_type' => $this->recipientType,
+            'recipient' => $this->recipientType === LetterRecipient::Other->value && $recipient ? $recipient : null,
             'header_title' => $clean($this->headerTitle),
             'header_subtitle' => $clean($this->headerSubtitle),
             'sender_name' => $clean($this->senderName),

@@ -52,9 +52,9 @@
                     @endforeach
                 </flux:select>
             @endif
-            @if($warning)
+            @foreach($warnings as $warning)
                 <flux:callout variant="warning" icon="circle-alert" :heading="$warning" />
-            @endif
+            @endforeach
 
             <div class="flex justify-end gap-2">
                 <flux:button icon="ban" wire:navigate :href="$backUrl">{{ __('common.cancel') }}</flux:button>

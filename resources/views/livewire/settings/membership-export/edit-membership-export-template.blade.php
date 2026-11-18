@@ -34,18 +34,27 @@
                     <flux:fieldset>
                         <legend>{{ __('profile.cover_letter_recipient') }}</legend>
                         <div class="space-y-4 p-4">
-                            <flux:input wire:model="recipient.organisation" :label="__('profile.cover_letter_recipient_organisation')" />
-                            <flux:input wire:model="recipient.unit" :label="__('profile.cover_letter_recipient_unit')" />
-                            <flux:input wire:model="recipient.name" :label="__('profile.cover_letter_recipient_name')" />
-                            <div class="grid grid-cols-[1fr_8rem] gap-4">
-                                <flux:input wire:model="recipient.street" :label="__('realms.contact_street')" />
-                                <flux:input wire:model="recipient.house_number" :label="__('realms.contact_house_number')" />
-                            </div>
-                            <div class="grid grid-cols-[8rem_1fr] gap-4">
-                                <flux:input wire:model="recipient.postal_code" :label="__('realms.contact_postal_code')" />
-                                <flux:input wire:model="recipient.city" :label="__('realms.contact_city')" />
-                            </div>
-                            <flux:input wire:model="recipient.country" :label="__('profile.cover_letter_recipient_country')" />
+                            <flux:radio.group wire:model.live="recipientType" variant="segmented">
+                                @foreach($recipientTypes as $option)
+                                    <flux:radio :value="$option->value" :label="$option->label()" />
+                                @endforeach
+                            </flux:radio.group>
+                            @if($recipientType === 'member')
+                                <flux:text>{{ __('realms.membership_export.recipient_member_hint') }}</flux:text>
+                            @else
+                                <flux:input wire:model="recipient.organisation" :label="__('profile.cover_letter_recipient_organisation')" />
+                                <flux:input wire:model="recipient.unit" :label="__('profile.cover_letter_recipient_unit')" />
+                                <flux:input wire:model="recipient.name" :label="__('profile.cover_letter_recipient_name')" />
+                                <div class="grid grid-cols-[1fr_8rem] gap-4">
+                                    <flux:input wire:model="recipient.street" :label="__('realms.contact_street')" />
+                                    <flux:input wire:model="recipient.house_number" :label="__('realms.contact_house_number')" />
+                                </div>
+                                <div class="grid grid-cols-[8rem_1fr] gap-4">
+                                    <flux:input wire:model="recipient.postal_code" :label="__('realms.contact_postal_code')" />
+                                    <flux:input wire:model="recipient.city" :label="__('realms.contact_city')" />
+                                </div>
+                                <flux:input wire:model="recipient.country" :label="__('profile.cover_letter_recipient_country')" />
+                            @endif
                         </div>
                     </flux:fieldset>
                     <flux:fieldset>
