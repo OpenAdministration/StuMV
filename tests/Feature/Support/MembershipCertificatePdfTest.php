@@ -55,12 +55,13 @@ test('memberships are grouped by committee, each under its name', function (): v
         fakeMembership('Vorsitz', 'Haushaltsausschuss', '2024-10-01'),
         fakeMembership('Sprecher:in', 'Studierendenrat', '2025-04-01'),
         fakeMembership('Mitglied', 'Studierendenrat', '2024-04-01'),
+        fakeMembership('Mitglied', 'Ältestenrat', '2026-01-01'),
     ]);
 
-    expect(substr_count($pdf, '/S /H2'))->toBe(2)
-        ->and(substr_count($pdf, '/S /Table'))->toBe(2)
-        ->and(substr_count($pdf, '/S /TH'))->toBe(6)
-        ->and(substr_count($pdf, '/S /TR'))->toBe(5);
+    expect(substr_count($pdf, '/S /H2'))->toBe(3)
+        ->and(substr_count($pdf, '/S /Table'))->toBe(3)
+        ->and(substr_count($pdf, '/S /TH'))->toBe(9)
+        ->and(substr_count($pdf, '/S /TR'))->toBe(7);
 });
 
 test('a certificate without memberships still has a table head', function (): void {

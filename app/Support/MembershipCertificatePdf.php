@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\ExportDateFormat;
 use App\Models\RealmContact;
+use Collator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
@@ -788,8 +789,8 @@ final class MembershipCertificatePdf
     }
 
     /**
-     * One table per committee under its name; committees in order of their
-     * earliest membership, each committee's roles by start.
+     * One table per committee under its name; committees alphabetically,
+     * each committee's roles by start.
      *
      * @param  array<int, array{role: mixed, from: mixed, until: mixed}>  $memberships
      */
@@ -807,9 +808,13 @@ final class MembershipCertificatePdf
         }
 
         $start = fn (array $row): string => Date::parse($row['from'])->format('Y-m-d');
+        $collator = new Collator(app()->getLocale());
+        // "Fachschaft 2" before "Fachschaft 10"
+        $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
         $groups = collect($memberships)
             ->sortBy($start)
-            ->groupBy(fn (array $row): string => (string) $row['role']->committee()->getFirstAttribute('description'));
+            ->groupBy(fn (array $row): string => (string) $row['role']->committee()->getFirstAttribute('description'))
+            ->sortKeysUsing(fn (string $a, string $b): int => (int) $collator->compare($a, $b));
 
         foreach ($groups as $committee => $rows) {
             $this->drawTable((string) $committee, $rows->values()->all(), $columns);
@@ -862,9 +867,9 @@ final class MembershipCertificatePdf
                 $this->beginTag('TD', [], true);
                 $this->text(
                     $cells[$i],
-                    $column['x'] + self::CELL_PADDING,
+                    $column['x'] + $this->inset($i),
                     $top + self::CELL_PADDING,
-                    $column['width'] - 2 * self::CELL_PADDING,
+                    $column['width'] - $this->inset($i) - self::CELL_PADDING,
                 );
                 $this->endTag();
             }
@@ -916,7 +921,7 @@ final class MembershipCertificatePdf
         $height = 0.0;
         foreach ($columns as $i => $column) {
             $this->cellFont($i);
-            $height = max($height, $this->measure($cells[$i], $column['width'] - 2 * self::CELL_PADDING));
+            $height = max($height, $this->measure($cells[$i], $column['width'] - $this->inset($i) - self::CELL_PADDING));
         }
 
         return $height + 2 * self::CELL_PADDING;
@@ -974,9 +979,9 @@ final class MembershipCertificatePdf
             $this->beginTag('TR');
         }
 
-        foreach ($columns as $column) {
-            $x = $column['x'] + self::CELL_PADDING;
-            $width = $column['width'] - self::CELL_PADDING;
+        foreach ($columns as $i => $column) {
+            $x = $column['x'] + $this->inset($i);
+            $width = $column['width'] - $this->inset($i);
 
             if (! $tagged) {
                 $this->pushStyle(['fillColor' => self::COLOR_ZINC_600]);
@@ -1018,6 +1023,12 @@ final class MembershipCertificatePdf
                 ['lineWidth' => 0.1, 'lineColor' => self::RULE_COLOR],
             ));
         }
+    }
+
+    /** The first column lines up with the committee heading above. */
+    private function inset(int $column): float
+    {
+        return $column === 0 ? 0.0 : self::CELL_PADDING;
     }
 
     private function rule(float $y, float $width): void

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "148326f4ebb0ca2fefc3be673771803c",
+    "content-hash": "49397fb75a8a64f313695f908f82d603",
     "packages": [
         {
             "name": "brick/math",
@@ -14833,6 +14833,7 @@
     "platform": {
         "php": "^8.4",
         "ext-gd": "*",
+        "ext-intl": "*",
         "ext-ldap": "*",
         "ext-pdo": "*"
     },
