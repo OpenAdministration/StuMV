@@ -56,8 +56,8 @@
                             @else
                                 <ul class="flex flex-wrap gap-2 pt-2">
                                     @foreach($committees as $related)
-                                        <li>
-                                            <flux:button size="sm" wire:navigate :href="route('committees.roles', ['realm' => $uid, 'ou' => $related->getFirstAttribute('ou')])">
+                                        <li class="max-w-full">
+                                            <flux:button size="sm" class="h-auto! min-h-8 py-1.5 whitespace-normal! text-start" wire:navigate :href="route('committees.roles', ['realm' => $uid, 'ou' => $related->getFirstAttribute('ou')])">
                                                 {{ $related->getFirstAttribute('description') }}
                                             </flux:button>
                                         </li>
