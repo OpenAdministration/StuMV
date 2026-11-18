@@ -7,7 +7,7 @@ use App\Support\MembershipCertificatePdf;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
-function fakeMembership(string $role, string $committee): array
+function fakeMembership(string $role, string $committee, string $from = '2019-02-07'): array
 {
     $committeeEntry = new readonly class($committee)
     {
@@ -34,26 +34,41 @@ function fakeMembership(string $role, string $committee): array
         }
     };
 
-    return ['role' => $roleEntry, 'from' => '2019-02-07', 'until' => ''];
+    return ['role' => $roleEntry, 'from' => $from, 'until' => ''];
 }
 
 test('a table spanning several pages repeats its head but tags it only once', function (): void {
-    $memberships = array_map(fn (int $i): array => fakeMembership('Rolle '.$i, 'Gremium '.$i), range(1, 80));
+    $memberships = array_map(fn (int $i): array => fakeMembership('Rolle '.$i, 'Gremium'), range(1, 80));
 
     $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, $memberships);
 
     preg_match('#/Type /Pages .*?/Count (\d+)#s', $pdf, $pages);
 
     expect((int) $pages[1])->toBeGreaterThan(1)
-        ->and(substr_count($pdf, '/S /TH'))->toBe(4)
-        ->and(substr_count($pdf, '/S /TR'))->toBe(81);
+        ->and(substr_count($pdf, '/S /TH'))->toBe(3)
+        ->and(substr_count($pdf, '/S /TR'))->toBe(81)
+        ->and(substr_count($pdf, '/S /H2'))->toBe(1);
+});
+
+test('memberships are grouped by committee, each under its name', function (): void {
+    $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [
+        fakeMembership('Vorsitz', 'Haushaltsausschuss', '2024-10-01'),
+        fakeMembership('Sprecher:in', 'Studierendenrat', '2025-04-01'),
+        fakeMembership('Mitglied', 'Studierendenrat', '2024-04-01'),
+    ]);
+
+    expect(substr_count($pdf, '/S /H2'))->toBe(2)
+        ->and(substr_count($pdf, '/S /Table'))->toBe(2)
+        ->and(substr_count($pdf, '/S /TH'))->toBe(6)
+        ->and(substr_count($pdf, '/S /TR'))->toBe(5);
 });
 
 test('a certificate without memberships still has a table head', function (): void {
     $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, []);
 
-    expect(substr_count($pdf, '/S /TH'))->toBe(4)
-        ->and($pdf)->not->toContain('/S /TD');
+    expect(substr_count($pdf, '/S /TH'))->toBe(3)
+        ->and($pdf)->not->toContain('/S /TD')
+        ->and($pdf)->not->toContain('/S /H2');
 });
 
 test('a cover letter is put on its own page in front of the certificate', function (): void {
@@ -82,7 +97,7 @@ test('a cover letter is put on its own page in front of the certificate', functi
     expect((int) $pages[1])->toBe(2)
         ->and(substr_count($with, '/S /P') - substr_count($without, '/S /P'))->toBe(14)
         ->and(substr_count($with, '/S /H1'))->toBe(1)
-        ->and(substr_count($with, '/S /TH'))->toBe(4)
+        ->and(substr_count($with, '/S /TH'))->toBe(3)
         ->and(substr_count($with, '/S /LI'))->toBe(1)
         // phone, email and website in the info block and again in the footer
         ->and(substr_count($with, '/S /Link'))->toBe(6)

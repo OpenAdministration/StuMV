@@ -45,6 +45,9 @@ final class MembershipCertificatePdf
 
     private const float HEADING_SIZE = 15.0;
 
+    /** Committee headings above their table. */
+    private const float GROUP_HEADING_SIZE = 12.0;
+
     private const float META_FONT_SIZE = 10.0;
 
     private const string FONT = 'adwaitasans';
@@ -53,7 +56,7 @@ final class MembershipCertificatePdf
     private const string FONT_TABULAR = 'adwaitasanstabular';
 
     /** Table columns holding dates. */
-    private const array DATE_COLUMNS = [2, 3];
+    private const array DATE_COLUMNS = [1, 2];
 
     private const float LETTER_FONT_SIZE = 11.0;
 
@@ -208,7 +211,7 @@ final class MembershipCertificatePdf
 
         // the cover letter carries the date already
         $this->drawHeader($title, $fullName, $community, withDate: $letter === null);
-        $this->drawTable($memberships);
+        $this->drawGroupedTables($memberships);
         $this->drawPageNumbers();
 
         return $this->pdf->getOutPDFString();
@@ -785,12 +788,50 @@ final class MembershipCertificatePdf
     }
 
     /**
+     * One table per committee under its name; committees in order of their
+     * earliest membership, each committee's roles by start.
+     *
      * @param  array<int, array{role: mixed, from: mixed, until: mixed}>  $memberships
      */
-    private function drawTable(array $memberships): void
+    private function drawGroupedTables(array $memberships): void
     {
         $columns = $this->columnLayout();
 
+        if ($memberships === []) {
+            // still a table head, so it is not an empty Table
+            $this->beginTag('Table');
+            $this->drawTableHead($columns, true);
+            $this->endTag();
+
+            return;
+        }
+
+        $start = fn (array $row): string => Date::parse($row['from'])->format('Y-m-d');
+        $groups = collect($memberships)
+            ->sortBy($start)
+            ->groupBy(fn (array $row): string => (string) $row['role']->committee()->getFirstAttribute('description'));
+
+        foreach ($groups as $committee => $rows) {
+            $this->drawTable((string) $committee, $rows->values()->all(), $columns);
+            $this->cursorY += 3 * self::SPACE;
+        }
+    }
+
+    /**
+     * @param  list<array{role: mixed, from: mixed, until: mixed}>  $rows
+     * @param  list<array{x: float, width: float, label: string}>  $columns
+     */
+    private function drawTable(string $committee, array $rows, array $columns): void
+    {
+        $this->font('B', self::GROUP_HEADING_SIZE);
+        $headingHeight = $this->measure($committee, $this->contentWidth) + self::SPACE;
+
+        // the heading never stays behind alone without its head and first row
+        if (! $this->hasSpace($headingHeight + $this->tableHeadHeight() + $this->rowHeight($this->cells($rows[0]), $columns))) {
+            $this->newPage();
+        }
+
+        $this->drawGroupHeading($committee, true);
         $this->beginTag('Table');
 
         // The head waits for the first row of each page, so it never ends up
@@ -798,23 +839,13 @@ final class MembershipCertificatePdf
         $headPending = true;
         $headTagged = false;
 
-        foreach ($memberships as $row) {
-            $cells = [
-                (string) $row['role']->getFirstAttribute('description'),
-                (string) $row['role']->committee()->getFirstAttribute('description'),
-                $this->dateFormat->format($row['from']),
-                $row['until'] != '' ? $this->dateFormat->format($row['until']) : __('profile.today'),
-            ];
-
-            $rowHeight = 0.0;
-            foreach ($columns as $i => $column) {
-                $this->cellFont($i);
-                $rowHeight = max($rowHeight, $this->measure($cells[$i], $column['width'] - 2 * self::CELL_PADDING));
-            }
-            $rowHeight += 2 * self::CELL_PADDING;
+        foreach ($rows as $row) {
+            $cells = $this->cells($row);
+            $rowHeight = $this->rowHeight($cells, $columns);
 
             if (! $this->hasSpace(($headPending ? $this->tableHeadHeight() : 0.0) + $rowHeight)) {
                 $this->newPage();
+                $this->drawGroupHeading($committee, false);
                 $headPending = true;
             }
 
@@ -844,17 +875,56 @@ final class MembershipCertificatePdf
             $this->columnRules($columns, $top, $this->cursorY);
         }
 
-        // Without rows the table still gets its head, so it is not an empty Table.
-        if ($headPending) {
-            $this->drawTableHead($columns, ! $headTagged);
-        }
-
         $this->endTag();
     }
 
+    /** Repeated on a continuation page as an artifact, like the table head. */
+    private function drawGroupHeading(string $committee, bool $tagged): void
+    {
+        $this->font('B', self::GROUP_HEADING_SIZE);
+
+        if ($tagged) {
+            $this->beginTag('H2');
+            $this->text($committee, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
+            $this->endTag();
+        } else {
+            $this->artifact($this->pdf->getTextCell($committee, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth, linespace: self::LINE_SPACING, halign: 'L', drawcell: false));
+        }
+
+        $this->cursorY += $this->lastHeight() + self::SPACE;
+    }
+
     /**
-     * Both date columns are as wide as the widest date plus padding; role and
-     * committee share the rest.
+     * @param  array{role: mixed, from: mixed, until: mixed}  $row
+     * @return list<string>
+     */
+    private function cells(array $row): array
+    {
+        return [
+            (string) $row['role']->getFirstAttribute('description'),
+            $this->dateFormat->format($row['from']),
+            $row['until'] != '' ? $this->dateFormat->format($row['until']) : __('profile.today'),
+        ];
+    }
+
+    /**
+     * @param  list<string>  $cells
+     * @param  list<array{x: float, width: float, label: string}>  $columns
+     */
+    private function rowHeight(array $cells, array $columns): float
+    {
+        $height = 0.0;
+        foreach ($columns as $i => $column) {
+            $this->cellFont($i);
+            $height = max($height, $this->measure($cells[$i], $column['width'] - 2 * self::CELL_PADDING));
+        }
+
+        return $height + 2 * self::CELL_PADDING;
+    }
+
+    /**
+     * Both date columns are as wide as the widest date plus padding; the role
+     * takes the rest.
      *
      * @return list<array{x: float, width: float, label: string}>
      */
@@ -866,11 +936,8 @@ final class MembershipCertificatePdf
             range(1, 12),
         ));
         $dateWidth = ceil($widest) + 2 * self::CELL_PADDING + 1.0;
-        $textWidth = ($this->contentWidth - 2 * $dateWidth) / 2;
-
         $labels = [
-            [__('profile.role'), $textWidth],
-            [__('profile.committee'), $textWidth],
+            [__('profile.role'), $this->contentWidth - 2 * $dateWidth],
             [__('profile.from'), $dateWidth],
             [__('profile.until'), $dateWidth],
         ];
