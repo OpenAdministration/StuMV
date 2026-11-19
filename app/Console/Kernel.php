@@ -17,6 +17,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('ldap:sync-roles')->dailyAt('00:01');
+        $schedule->command('app:mark-inactive-accounts')->dailyAt('03:00')->withoutOverlapping()->onOneServer();
+        $schedule->command('app:delete-marked-accounts')->dailyAt('03:30')->withoutOverlapping()->onOneServer();
     }
 
     /**
