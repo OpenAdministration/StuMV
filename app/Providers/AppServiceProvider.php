@@ -4,11 +4,14 @@ namespace App\Providers;
 
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
 use App\Http\Middleware\SetContentSecurityPolicy;
+use App\Models\AccountDeletionMark;
+use App\Models\User;
 use App\Services\Oidc\LoggingClientRepository;
 use App\Services\Oidc\ReuseDetectingRefreshTokenRepository;
 use App\Support\MailmanClient;
 use App\Support\RealmContext;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\Events\RequestHandled;
@@ -110,6 +113,18 @@ class AppServiceProvider extends ServiceProvider
         // Token issuance/revocation otherwise leaves no trace at all -
         // these are Passport's own events (Bridge\AccessTokenRepository,
         // Bridge\RefreshTokenRepository), not anything this app dispatches.
+        // also covers logins via an identity provider, which never bind against LDAP
+        Event::listen(function (Login $event): void {
+            if (! $event->user instanceof User) {
+                return;
+            }
+
+            $event->user->forceFill(['last_login_at' => Date::now()])->saveQuietly();
+            if ($event->user->uid) {
+                AccountDeletionMark::where('ldap_uid', $event->user->uid)->delete();
+            }
+        });
+
         Event::listen(function (AccessTokenCreated $event): void {
             Log::info('OIDC access token issued', ['client_id' => $event->clientId, 'user_id' => $event->userId]);
         });
