@@ -2,15 +2,13 @@
 
 namespace App\Livewire\Tools;
 
-use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Ldap\Uni\User as UniLdapUser;
 use App\Ldap\User;
-use App\Models\ProfilePicture;
 use App\Models\RoleMembership;
+use App\Support\AccountPurger;
 use Flux\Flux;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -172,25 +170,7 @@ class UsersNotInUniLdap extends Component
         $community = Community::findByOrFail('ou', $this->uid);
         $this->authorize('admin', $community);
 
-        // LDAP - scoped to this realm's People branch: the same username
-        // could independently exist in another realm too, and deleting the
-        // account is what removing a member means now.
-        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->userToDelete)->first();
-        $user?->delete();
-
-        // Database - committee_dn/realm-scoped for the same reason: these
-        // are bare username columns with no realm of their own.
-        RoleMembership::where('username', $this->userToDelete)
-            ->where('committee_dn', 'like', '%'.Committee::dnRootResolved($this->uid))
-            ->delete();
-        \App\Models\User::where('username', $this->userToDelete)->where('realm', $this->uid)->delete();
-
-        // Profile picture
-        $picture = ProfilePicture::where('user', $this->userToDelete)->where('realm', $this->uid)->first();
-        if ($picture) {
-            Storage::disk('public')->delete('avatars/'.$picture->file_id.'.webp');
-            $picture->delete();
-        }
+        AccountPurger::purge($community, $this->userToDelete);
 
         Flux::toast(variant: 'success', text: __('tools.userDeletedSuccessfully'));
         Flux::modal('confirm-delete-user')->close();
