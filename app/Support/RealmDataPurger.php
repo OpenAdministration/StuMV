@@ -6,6 +6,7 @@ use App\Ldap\Group;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\Invitation;
+use App\Models\MailmanDomainRealm;
 use App\Models\MembershipExportTemplate;
 use App\Models\PassportClient;
 use App\Models\ProfilePicture;
@@ -42,6 +43,7 @@ class RealmDataPurger
             GroupMembership::where('group_dn', 'like', '%,'.Group::dnRoot($uid))->delete();
 
             GroupMailmanList::where('realm', $uid)->delete();
+            MailmanDomainRealm::where('realm', $uid)->delete();
 
             // invitation_role_selections cascade via their FK.
             Invitation::where('realm', $uid)->delete();

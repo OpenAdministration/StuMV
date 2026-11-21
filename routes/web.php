@@ -26,6 +26,7 @@ use App\Livewire\Group\ListRolesInGroup;
 use App\Livewire\Group\NewGroup;
 use App\Livewire\Mailman\ListGroupMailmanLists;
 use App\Livewire\Mailman\ListMailmanListMembers;
+use App\Livewire\Mailman\MailmanDomains;
 use App\Livewire\Mailman\NewGroupMailmanList;
 use App\Livewire\Profile\ExportMemberships;
 use App\Livewire\Profile\Memberships;
@@ -184,6 +185,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::middleware([SuperAdminMiddleware::class])->group(function (): void {
         Route::livewire('{realm}/new-member', NewMember::class)->name('realms.members.new');
         Route::livewire('new-realm', NewRealm::class)->name('realms.new');
+        Route::livewire('{realm}/settings/mailman-domains', MailmanDomains::class)->name('realms.mailman-domains');
     });
     // end auth verified
 });

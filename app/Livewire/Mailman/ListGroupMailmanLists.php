@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMailmanListGroup;
+use App\Models\MailmanDomainRealm;
 use App\Support\MailmanListSyncStatus;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -95,7 +96,7 @@ class ListGroupMailmanLists extends Component
 
         $missingStatusIds = collect($mappings->items())->pluck('id')->reject(fn (int $id): bool => isset($this->statuses[$id]))->implode(',');
 
-        return view('livewire.mailman.list-group-mailman-lists', ['mappings' => $mappings, 'missingStatusIds' => $missingStatusIds])
+        return view('livewire.mailman.list-group-mailman-lists', ['mappings' => $mappings, 'missingStatusIds' => $missingStatusIds, 'listCreationEnabled' => MailmanDomainRealm::creationAllowedFor($this->uid)])
             ->title(__('group_mailman_lists.list_title'));
     }
 

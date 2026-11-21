@@ -124,6 +124,11 @@ Breadcrumbs::for('realms.admins.new', function (BreadcrumbTrail $trail, array $r
     $trail->push(__('common.new'), route('realms.admins.new', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('realms.mailman-domains', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('settings.dashboard', $routeParams);
+    $trail->push(__('mailman_domains.title'), route('realms.mailman-domains', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.domains', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('realms.domains_breadcrumb'), route('realms.domains', $routeParams), ['truncate' => true]);

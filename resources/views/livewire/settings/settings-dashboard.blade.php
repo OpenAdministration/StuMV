@@ -21,6 +21,14 @@
             :heading="__('realms.membership_export.headline')"
             :description="__('realms.membership_export.explanation')"
         />
+        @if($mailmanDomains)
+            <x-dashboard-tile
+                :href="route('realms.mailman-domains', $uid)"
+                icon="mail"
+                :heading="__('mailman_domains.title')"
+                :description="__('mailman_domains.explanation')"
+            />
+        @endif
         @unless($isAdminRealm)
             <x-dashboard-tile
                 :href="route('realms.domains', $uid)"

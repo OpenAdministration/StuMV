@@ -45,6 +45,10 @@ return [
         'web_user' => env('MAILMAN_WEB_USER'),
         'web_password' => env('MAILMAN_WEB_PASSWORD'),
         'web_verify_tls' => env('MAILMAN_WEB_VERIFY_TLS', true),
+        // Lets admins create lists from StuMV; needs write access to the REST API.
+        'list_creation' => (bool) env('MAILMAN_LIST_CREATION', false),
+        // Optional address made owner of each list StuMV creates.
+        'list_owner' => env('MAILMAN_LIST_OWNER'),
     ],
 
 ];

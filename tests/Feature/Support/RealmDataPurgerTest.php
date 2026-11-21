@@ -3,6 +3,7 @@
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\IdentityProviderRoleMapping;
+use App\Models\MailmanDomainRealm;
 use App\Models\PassportClient;
 use App\Models\ProfilePicture;
 use App\Models\RealmBranding;
@@ -38,6 +39,7 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         'from' => today()->subMonth(),
     ]);
     GroupMailmanList::createForGroups(['realm' => $uid, 'mailman_list_id' => 'newsletter.lists.example.org'], [$group->getDn()]);
+    MailmanDomainRealm::create(['mail_host' => 'lists.example.org', 'realm' => $uid]);
 
     Storage::disk('public')->put('avatars/pic.webp', 'fake-avatar');
     ProfilePicture::create(['user' => $member->username, 'realm' => $uid, 'file_id' => 'pic']);
@@ -94,12 +96,14 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         'from' => today()->subMonth(),
     ]);
     GroupMailmanList::createForGroups(['realm' => $otherUid, 'mailman_list_id' => 'other.lists.example.org'], [$otherGroup->getDn()]);
+    MailmanDomainRealm::create(['mail_host' => 'lists.example.org', 'realm' => $otherUid]);
 
     RealmDataPurger::purge($uid);
 
     expect(RoleMembership::where('realm', $uid)->exists())->toBeFalse()
         ->and(GroupMembership::where('group_dn', $group->getDn())->exists())->toBeFalse()
         ->and(GroupMailmanList::where('realm', $uid)->exists())->toBeFalse()
+        ->and(MailmanDomainRealm::where('realm', $uid)->exists())->toBeFalse()
         ->and(ProfilePicture::where('realm', $uid)->exists())->toBeFalse()
         ->and(Storage::disk('public')->exists('avatars/pic.webp'))->toBeFalse()
         ->and(RealmBranding::where('realm', $uid)->exists())->toBeFalse()
@@ -116,6 +120,7 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
     expect(RoleMembership::where('realm', $otherUid)->exists())->toBeTrue()
         ->and(GroupMembership::where('group_dn', $otherGroup->getDn())->exists())->toBeTrue()
         ->and(GroupMailmanList::where('realm', $otherUid)->exists())->toBeTrue()
+        ->and(MailmanDomainRealm::where('realm', $otherUid)->exists())->toBeTrue()
         ->and(User::where('realm', $otherUid)->exists())->toBeTrue();
 });
 

@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Ldap\Community;
+use App\Support\MailmanClient;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -26,7 +27,9 @@ class SettingsDashboard extends Component
 
     public function render()
     {
-        return view('livewire.settings.settings-dashboard')
+        return view('livewire.settings.settings-dashboard', [
+            'mailmanDomains' => $this->isAdminRealm && MailmanClient::listCreationEnabled(),
+        ])
             ->title(__('realms.settings'));
     }
 }

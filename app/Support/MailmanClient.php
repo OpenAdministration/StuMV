@@ -7,6 +7,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
@@ -36,6 +37,45 @@ class MailmanClient
         private readonly bool|string $webVerifyTls = true,
     ) {
         $this->postoriusCookies = new CookieJar;
+    }
+
+    public static function listCreationEnabled(): bool
+    {
+        return config('services.mailman.api_url') && config('services.mailman.list_creation');
+    }
+
+    /**
+     * @return array<int, string> mail hosts of the domains Mailman serves
+     */
+    public function domains(): array
+    {
+        return collect($this->request()->get('domains')->throw()->json('entries', []))
+            ->map(fn (array $entry): string => (string) $entry['mail_host'])
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Always over REST: Postorius only lets site admins create lists.
+     *
+     * @return string the new list's list_id
+     */
+    public function createList(string $name, string $mailHost, ?string $owner = null): string
+    {
+        $location = $this->request()->asForm()->post('lists', ['fqdn_listname' => "{$name}@{$mailHost}"])->throw()->header('Location');
+        $listId = $location !== '' ? basename(rtrim($location, '/')) : "{$name}.{$mailHost}";
+
+        if ($owner) {
+            try {
+                $this->request()->asForm()->post('members', ['list_id' => $listId, 'subscriber' => $owner, 'role' => 'owner'])->throw();
+            } catch (Throwable $e) {
+                // The list exists already, so it still gets mapped.
+                Log::warning("Mailman: could not make {$owner} owner of {$listId}: {$e->getMessage()}");
+            }
+        }
+
+        return $listId;
     }
 
     /**

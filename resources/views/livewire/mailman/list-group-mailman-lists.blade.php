@@ -2,7 +2,7 @@
     <div class="flex flex-col sm:flex-row gap-6 mb-8">
         <div class="flex-1 space-y-4">
             <flux:heading size="xl">{{ __('group_mailman_lists.headline') }}</flux:heading>
-            <flux:text class="text-base">{{ __('group_mailman_lists.explanation') }}</flux:text>
+            <flux:text class="text-base">{{ __($listCreationEnabled ? 'group_mailman_lists.explanation_with_creation' : 'group_mailman_lists.explanation') }}</flux:text>
         </div>
         <div>
             <flux:button
