@@ -1,5 +1,11 @@
 <?php
 
+$options = array_filter([
+    LDAP_OPT_X_TLS_REQUIRE_CERT => env('LDAP_TLS_VERIFY', true) ? LDAP_OPT_X_TLS_DEMAND : LDAP_OPT_X_TLS_NEVER,
+    LDAP_OPT_X_TLS_CACERTFILE => env('LDAP_TLS_CACERT'),
+    LDAP_OPT_PROTOCOL_VERSION => 3,
+], static fn (mixed $value): bool => $value !== null && $value !== '');
+
 return [
 
     /*
@@ -36,11 +42,7 @@ return [
             'timeout' => env('LDAP_TIMEOUT', 5),
             'use_tls' => false,
             'use_starttls' => true,
-            'options' => [
-                // See: http://php.net/ldap_set_option
-                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
-                LDAP_OPT_PROTOCOL_VERSION => 3,
-            ],
+            'options' => $options,
         ],
         'uni' => [
             'hosts' => [env('UNI_LDAP_HOST', '127.0.0.1')],
@@ -51,11 +53,7 @@ return [
             'timeout' => env('UNI_LDAP_TIMEOUT', 5),
             'use_tls' => false,
             'use_starttls' => true,
-            'options' => [
-                // See: http://php.net/ldap_set_option
-                LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
-                LDAP_OPT_PROTOCOL_VERSION => 3,
-            ],
+            'options' => $options,
         ],
     ],
 
