@@ -22,6 +22,10 @@ USER root
 RUN set -eux; \
     export PATH="/opt/symas/bin:/opt/symas/sbin:$PATH"; \
     mkdir -p /opt/symas/etc/openldap/slapd.d /opt/symas/var/openldap-data /opt/symas/var/run; \
+    mkdir -p /opt/symas/etc/openldap/tls; \
+    openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj "/CN=ldap" \
+        -addext "subjectAltName=DNS:ldap,DNS:localhost,IP:127.0.0.1" \
+        -keyout /opt/symas/etc/openldap/tls/server.key -out /opt/symas/etc/openldap/tls/server.crt; \
     slapadd -n0 -F /opt/symas/etc/openldap/slapd.d -l /bootstrap/config.ldif; \
     cat /bootstrap/00-base.ldif /bootstrap/10-sample.ldif /bootstrap/20-demo.ldif > /tmp/seed.ldif; \
     slapadd -q -F /opt/symas/etc/openldap/slapd.d -l /tmp/seed.ldif; \

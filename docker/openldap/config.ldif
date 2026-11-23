@@ -2,7 +2,7 @@
 #
 # Loaded with `slapadd -n0` to build a slapd.d directory, matching the way
 # production is configured (cn=config, not slapd.conf). Ported from a sanitised
-# production `slapcat -n0` dump: prod-specific paths, TLS and secrets stripped,
+# production `slapcat -n0` dump: prod-specific paths and secrets stripped,
 # suffix pinned to dc=stumv,dc=de. Stock schema is pulled from the image via
 # include: directives so only the genuinely custom config lives here.
 
@@ -12,6 +12,9 @@ cn: config
 olcArgsFile: /opt/symas/var/run/slapd.args
 olcPidFile: /opt/symas/var/run/slapd.pid
 olcLogLevel: stats
+# Self-signed dev certificate generated in the Dockerfile, used for StartTLS.
+olcTLSCertificateFile: /opt/symas/etc/openldap/tls/server.crt
+olcTLSCertificateKeyFile: /opt/symas/etc/openldap/tls/server.key
 
 # Backends and overlays are loadable modules in the Symas image.
 dn: cn=module,cn=config

@@ -34,7 +34,8 @@ return [
             'port' => env('LDAP_PORT', 389),
             'base_dn' => env('LDAP_BASE_DN'),
             'timeout' => env('LDAP_TIMEOUT', 5),
-            'use_tls' => env('LDAP_TLS', false),
+            'use_tls' => false,
+            'use_starttls' => true,
             'options' => [
                 // See: http://php.net/ldap_set_option
                 LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,
@@ -48,7 +49,8 @@ return [
             'port' => env('UNI_LDAP_PORT', 389),
             'base_dn' => env('UNI_LDAP_BASE_DN'),
             'timeout' => env('UNI_LDAP_TIMEOUT', 5),
-            'use_tls' => env('UNI_LDAP_TLS', false),
+            'use_tls' => false,
+            'use_starttls' => true,
             'options' => [
                 // See: http://php.net/ldap_set_option
                 LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER,

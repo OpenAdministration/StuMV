@@ -16,9 +16,12 @@ services:
             - "${LDAP_HOST_PORT:-13389}:1389"
         networks:
             - stumv
+        environment:
+            # Self-signed dev certificate, see docker/openldap/Dockerfile.
+            LDAPTLS_REQCERT: never
         healthcheck:
             test: ["CMD", "/opt/symas/bin/ldapwhoami", "-x",
-                   "-H", "ldap://127.0.0.1:1389",
+                   "-H", "ldap://127.0.0.1:1389", "-ZZ",
                    "-D", "uid=stumv,ou=Services,dc=stumv,dc=de",
                    "-w", "stumv-not-production"]
             start_period: 5s
