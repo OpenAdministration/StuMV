@@ -53,6 +53,9 @@ final class MembershipCertificatePdf
 
     private const string FONT = 'adwaitasans';
 
+    /** Bold only, headings are always bold. */
+    private const string FONT_HEADING = 'merriweather';
+
     /** Tabular figures, for dates, addresses and phone numbers. */
     private const string FONT_TABULAR = 'adwaitasanstabular';
 
@@ -774,7 +777,7 @@ final class MembershipCertificatePdf
 
     private function drawHeader(string $title, string $fullName, ?string $community, bool $withDate): void
     {
-        $this->font('B', self::HEADING_SIZE);
+        $this->font('B', self::HEADING_SIZE, self::FONT_HEADING);
         $this->beginTag('H1');
         $this->text($title, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth);
         $this->endTag();
@@ -828,7 +831,7 @@ final class MembershipCertificatePdf
      */
     private function drawTable(string $committee, array $rows, array $columns): void
     {
-        $this->font('B', self::GROUP_HEADING_SIZE);
+        $this->font('B', self::GROUP_HEADING_SIZE, self::FONT_HEADING);
         $headingHeight = $this->measure($committee, $this->contentWidth) + self::SPACE;
 
         // the heading never stays behind alone without its head and first row
@@ -886,7 +889,7 @@ final class MembershipCertificatePdf
     /** Repeated on a continuation page as an artifact, like the table head. */
     private function drawGroupHeading(string $committee, bool $tagged): void
     {
-        $this->font('B', self::GROUP_HEADING_SIZE);
+        $this->font('B', self::GROUP_HEADING_SIZE, self::FONT_HEADING);
 
         if ($tagged) {
             $this->beginTag('H2');

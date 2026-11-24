@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Builds the Adwaita Sans font files used by tc-lib-pdf (App\\Support\\MembershipCertificate).
+"""Builds the font files used by tc-lib-pdf (App\\Support\\MembershipCertificate).
 
 tc-lib-pdf neither handles variable fonts nor applies OpenType features, so the
 variable AdwaitaSans-Regular.ttf and AdwaitaSans-Italic.ttf are instanced into static
 Regular/Bold/Italic/BoldItalic faces, plus a
 separate "AdwaitaSansTabular" face with tabular figures baked into the cmap for
-columns of dates, then converted into tc-lib-pdf's format.
+columns of dates, then converted into tc-lib-pdf's format. The headings use the
+static Merriweather Bold as is.
 
 Usage (from the project root, needs fonttools and the composer dependencies):
-    python3 resources/fonts/pdf/build.py /path/to/adwaita-sans-fonts/
+    python3 resources/fonts/pdf/build.py /path/to/adwaita-sans-fonts/ /path/to/merriweather-fonts/
 """
 
 import subprocess
@@ -49,9 +50,9 @@ def bake_tabular_figures(font: TTFont) -> None:
                 table.cmap[codepoint] = mapping[glyph]
 
 
-def main(source: str) -> None:
+def main(source: str, merriweather: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
-        files = []
+        files = [str(Path(merriweather) / 'Merriweather-Bold.ttf')]
         for name, (file, weight, tabular) in FACES.items():
             font = instantiateVariableFont(TTFont(Path(source) / file), {'wght': weight, 'opsz': 14}, static=True)
             if tabular:
@@ -67,4 +68,7 @@ def main(source: str) -> None:
 
 
 if __name__ == '__main__':
-    main(sys.argv[1] if len(sys.argv) > 1 else '/usr/share/fonts/adwaita-sans-fonts')
+    main(
+        sys.argv[1] if len(sys.argv) > 1 else '/usr/share/fonts/adwaita-sans-fonts',
+        sys.argv[2] if len(sys.argv) > 2 else '/usr/share/fonts/sorkintype-merriweather-fonts',
+    )

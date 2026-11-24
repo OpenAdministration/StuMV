@@ -64,6 +64,12 @@ test('memberships are grouped by committee, each under its name', function (): v
         ->and(substr_count($pdf, '/S /TR'))->toBe(7);
 });
 
+test('headings are set in Merriweather', function (): void {
+    $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, [fakeMembership('Vorsitz', 'Haushaltsausschuss')]);
+
+    expect($pdf)->toMatch('#/BaseFont /[A-Z]{6}\+Merriweather-Bold#');
+});
+
 test('a certificate without memberships still has a table head', function (): void {
     $pdf = (new MembershipCertificatePdf)->render('Tätigkeiten', 'Max Mustermann', null, []);
 
