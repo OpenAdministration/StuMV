@@ -49,6 +49,11 @@ final class MembershipCertificatePdf
     /** Committee headings above their table. */
     private const float GROUP_HEADING_SIZE = 12.0;
 
+    /** Distance from a committee heading down to the rule under it. */
+    private const float GROUP_HEADING_RULE_GAP = 1.0;
+
+    private const float GROUP_HEADING_RULE_WIDTH = 0.18;
+
     private const float META_FONT_SIZE = 10.0;
 
     private const string FONT = 'adwaitasans';
@@ -832,7 +837,7 @@ final class MembershipCertificatePdf
     private function drawTable(string $committee, array $rows, array $columns): void
     {
         $this->font('B', self::GROUP_HEADING_SIZE, self::FONT_HEADING);
-        $headingHeight = $this->measure($committee, $this->contentWidth) + self::SPACE;
+        $headingHeight = $this->measure($committee, $this->contentWidth) + self::GROUP_HEADING_RULE_GAP + self::SPACE;
 
         // the heading never stays behind alone without its head and first row
         if (! $this->hasSpace($headingHeight + $this->tableHeadHeight() + $this->rowHeight($this->cells($rows[0]), $columns))) {
@@ -899,7 +904,9 @@ final class MembershipCertificatePdf
             $this->artifact($this->pdf->getTextCell($committee, self::MARGIN_LEFT, $this->cursorY, $this->contentWidth, linespace: self::LINE_SPACING, halign: 'L', drawcell: false));
         }
 
-        $this->cursorY += $this->lastHeight() + self::SPACE;
+        $this->cursorY += $this->lastHeight() + self::GROUP_HEADING_RULE_GAP;
+        $this->rule($this->cursorY, self::GROUP_HEADING_RULE_WIDTH);
+        $this->cursorY += self::SPACE;
     }
 
     /**
