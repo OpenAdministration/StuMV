@@ -56,13 +56,9 @@ class IdentityProviderGroupRoleSync
             );
 
             if (! $stillMapped) {
-                $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
+                $wasCurrent = $membership->isActive();
                 if ($membership->from->isToday()) {
-                    // "Ended the day before" would mean until < from here,
-                    // which Carbon's isActive()/betweenIncluded() treats as a
-                    // reversed range and reads as still active (it swaps the
-                    // bounds) - a grant that never saw a single active day
-                    // has no history worth keeping, so just remove it.
+                    // "Ended the day before" would mean until < from, and a grant without an active day has no history worth keeping.
                     $membership->delete();
                 } else {
                     $membership->update(['until' => now()->subDay()->toDateString()]);
@@ -100,7 +96,7 @@ class IdentityProviderGroupRoleSync
             // moments ago on an earlier day is already inactive, but should
             // still reactivate here rather than staying revoked forever.
             if ($membership->identity_provider_id === $provider->id && $membership->until !== null) {
-                $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
+                $wasCurrent = $membership->isActive();
                 $membership->update(['until' => null]);
                 $this->ldapSync->sync($membership, $wasCurrent);
             }

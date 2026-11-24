@@ -107,10 +107,7 @@ test('a role this sync granted today is removed outright if revoked the same day
     $sync->apply($provider, $user->username, ['groups' => ['stura-member']]);
     $sync->apply($provider, $user->username, ['groups' => ['some-other-group']]);
 
-    // "Ended the day before" would mean until < from for a grant made today -
-    // a reversed range isActive() reads as still active (see the sync's doc
-    // comment) - so a same-day grant-then-revoke has no valid historical
-    // window to record and is deleted outright instead.
+    // A same-day grant-then-revoke has no valid window to record, so it's deleted.
     expect(RoleMembership::where('username', $user->username)
         ->where('role_cn', $role->getFirstAttribute('cn'))
         ->where('committee_dn', $committee->getDn())

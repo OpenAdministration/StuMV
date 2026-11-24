@@ -63,14 +63,9 @@ class RoleMembership extends Model
 
     public function isActive(): bool
     {
-        if ($this->until) {
-            return Date::today()->betweenIncluded(
-                $this->from->format('Y-m-d'),
-                $this->until?->format('Y-m-d')
-            );
-        } else {
-            return true;
-        }
+        return $this->from !== null
+            && $this->from->lte(Date::today())
+            && ($this->until === null || $this->until->gte(Date::today()));
     }
 
     #[Scope]

@@ -69,7 +69,7 @@ class EditRoleMembership extends Component
         $committee = Committee::findByName($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('edit', [$membership, $committee, $community]);
-        $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
+        $wasCurrent = $membership->isActive();
         $membership->update([
             'from' => $this->start_date,
             'until' => ! empty($this->end_date) ? $this->end_date : null,

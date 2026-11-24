@@ -60,7 +60,7 @@ class TerminateRoleMemberships extends Component
             $this->authorize('terminate', [$membership, $committee, $community]);
             $this->validate(['terminationDate' => 'date:Y-m-d|after_or_equal:'.$membership->from->format('Y-m-d')]);
 
-            $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
+            $wasCurrent = $membership->isActive();
             $membership->until = $this->terminationDate;
             $membership->save();
             $ldapSynced = resolve(RoleMembershipLdapSync::class)->sync($membership, $wasCurrent) && $ldapSynced;

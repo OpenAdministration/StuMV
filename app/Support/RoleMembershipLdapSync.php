@@ -26,7 +26,7 @@ class RoleMembershipLdapSync
      */
     public function sync(RoleMembership $membership, bool $wasCurrent = false): bool
     {
-        if (! $wasCurrent && ! self::isCurrent($membership)) {
+        if (! $wasCurrent && ! $membership->isActive()) {
             return true;
         }
 
@@ -105,13 +105,6 @@ class RoleMembershipLdapSync
         foreach ($groupDns as $groupDn) {
             $this->pendingMailman[$realm]['groupDns'][$groupDn] = true;
         }
-    }
-
-    public static function isCurrent(RoleMembership $membership): bool
-    {
-        return $membership->from !== null
-            && $membership->from->lte(today())
-            && ($membership->until === null || $membership->until->gte(today()));
     }
 
     // The empty placeholder keeps the entry valid once its last member is gone.

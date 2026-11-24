@@ -27,3 +27,15 @@ test('a membership that already ended is not active', function (): void {
 test('a membership that has not started yet is not active', function (): void {
     expect(membership(['from' => today()->addDay(), 'until' => today()->addWeek()])->isActive())->toBeFalse();
 });
+
+test('a membership without an end date is not active before it starts', function (): void {
+    expect(membership(['from' => today()->addDay(), 'until' => null])->isActive())->toBeFalse();
+});
+
+test('a membership ending before it starts is not active', function (): void {
+    expect(membership(['from' => today(), 'until' => today()->subDay()])->isActive())->toBeFalse();
+});
+
+test('a membership is active on its first and last day', function (): void {
+    expect(membership(['from' => today(), 'until' => today()])->isActive())->toBeTrue();
+});

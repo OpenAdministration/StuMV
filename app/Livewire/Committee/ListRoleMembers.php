@@ -202,7 +202,7 @@ class ListRoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('delete', [$membership, $committee, $community]);
 
-        $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
+        $wasCurrent = $membership->isActive();
         $membership->delete();
         $this->close();
 
