@@ -153,10 +153,10 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
             Route::livewire('{realm}/group/{cn}/roles', ListRolesInGroup::class)->name('realms.groups.roles');
             Route::livewire('{realm}/group/{cn}/add-role', AddRoleToGroup::class)->name('realms.groups.roles.add');
             Route::livewire('{realm}/group/{cn}/members', ListGroupMembers::class)->name('realms.groups.members');
-            Route::livewire('{realm}/group-mailman-lists', ListGroupMailmanLists::class)->name('realms.group-mailman-lists');
-            Route::livewire('{realm}/new-group-mailman-list', NewGroupMailmanList::class)->name('realms.group-mailman-lists.new');
-            Route::livewire('{realm}/group-mailman-lists/{listId}/members', ListMailmanListMembers::class)->name('realms.group-mailman-lists.members');
-            Route::livewire('{realm}/group-mailman-lists/{listId}/edit', NewGroupMailmanList::class)->name('realms.group-mailman-lists.edit');
+            Route::livewire('{realm}/mailing-lists', ListGroupMailmanLists::class)->name('realms.group-mailman-lists');
+            Route::livewire('{realm}/new-mailing-list', NewGroupMailmanList::class)->name('realms.group-mailman-lists.new');
+            Route::livewire('{realm}/mailing-lists/{listId}/members', ListMailmanListMembers::class)->name('realms.group-mailman-lists.members');
+            Route::livewire('{realm}/mailing-lists/{listId}/edit', NewGroupMailmanList::class)->name('realms.group-mailman-lists.edit');
             Route::livewire('{realm}/settings/domains', ListDomains::class)->name('realms.domains');
             Route::livewire('{realm}/settings/new-domain', NewDomain::class)->name('realms.domains.new');
             Route::livewire('{realm}/settings/api-clients', ListApiClients::class)->name('realms.api-clients');

@@ -22,9 +22,9 @@
                     <flux:input icon="search" clearable wire:model.live="search" />
                 </flux:field>
                 <flux:fieldset>
-                    <flux:legend class="w-full flex py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
+                    <legend class="flex items-center">
                         {{ __('tools.matches') }} <flux:badge class="ml-auto">{{ count($filteredResults) }}</flux:badge>
-                    </flux:legend>
+                    </legend>
                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700 px-4">
                         @foreach($filteredResults as $user)
                             <div class="flex items-center py-3">

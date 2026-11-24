@@ -24,11 +24,11 @@
                             <flux:text class="font-medium uppercase tracking-wide text-xs text-zinc-500">{{ __('sync.roles_section') }}</flux:text>
                             @foreach($preview['roles'] as $entry)
                                 <flux:fieldset>
-                                    <flux:legend class="w-full flex flex-wrap items-center gap-1 py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
+                                    <legend class="flex flex-wrap items-center gap-1">
                                         <flux:link href="{{ route('committees.roles', ['realm' => $uid, 'ou' => $entry['committee_ou']]) }}" target="_blank" rel="noopener noreferrer">{{ $entry['committee'] }}</flux:link>
                                         <span>&rsaquo;</span>
                                         <flux:link href="{{ route('committees.roles.members', ['realm' => $uid, 'ou' => $entry['committee_ou'], 'cn' => $entry['role_cn']]) }}" target="_blank" rel="noopener noreferrer">{{ $entry['role'] }}</flux:link>
-                                    </flux:legend>
+                                    </legend>
                                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700 px-4">
                                         @include('livewire.sync-ldap-member-list')
                                     </div>
@@ -42,9 +42,9 @@
                             <flux:text class="font-medium uppercase tracking-wide text-xs text-zinc-500">{{ __('sync.groups_section') }}</flux:text>
                             @foreach($preview['groups'] as $entry)
                                 <flux:fieldset>
-                                    <flux:legend class="w-full flex py-3 border-b border-zinc-800/10 dark:border-white/20 font-bold">
+                                    <legend>
                                         <flux:link href="{{ route('realms.groups.members', ['realm' => $uid, 'cn' => $entry['group']]) }}" target="_blank" rel="noopener noreferrer">{{ $entry['group'] }}</flux:link>
-                                    </flux:legend>
+                                    </legend>
                                     <div class="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-700 px-4">
                                         @include('livewire.sync-ldap-member-list')
                                     </div>
