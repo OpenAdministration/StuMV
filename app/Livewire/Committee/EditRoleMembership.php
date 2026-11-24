@@ -5,6 +5,7 @@ namespace App\Livewire\Committee;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Models\RoleMembership;
+use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -68,6 +69,7 @@ class EditRoleMembership extends Component
         $committee = Committee::findByName($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('edit', [$membership, $committee, $community]);
+        $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
         $membership->update([
             'from' => $this->start_date,
             'until' => ! empty($this->end_date) ? $this->end_date : null,
@@ -76,6 +78,9 @@ class EditRoleMembership extends Component
         ]);
 
         Flux::toast(variant: 'success', text: __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
+        if (! resolve(RoleMembershipLdapSync::class)->sync($membership, $wasCurrent)) {
+            Flux::toast(variant: 'warning', text: __('roles.ldap_sync_failed'));
+        }
 
         return to_route('committees.roles.members', [
             'realm' => $this->uid,

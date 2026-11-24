@@ -8,6 +8,7 @@ use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use App\Support\DatabaseUserProvisioner;
+use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
@@ -88,12 +89,12 @@ class AddUserToRole extends Component
         $community = Community::findOrFailByUid($this->uid);
 
         foreach ($this->usernames as $username) {
-            DB::transaction(function () use ($community, $committee, $username): void {
+            $membership = DB::transaction(function () use ($community, $committee, $username): RoleMembership {
                 // Members who never signed in have no user row yet, which the membership's FK needs.
                 $ldapUser = User::query()->in($community->peopleDn())->where('uid', '=', $username)->firstOrFail();
                 DatabaseUserProvisioner::ensure($community, $ldapUser);
 
-                RoleMembership::create([
+                return RoleMembership::create([
                     'role_cn' => $this->cn,
                     'committee_dn' => $committee->getDn(),
                     'realm' => $this->uid,
@@ -105,6 +106,9 @@ class AddUserToRole extends Component
                 ]);
             });
             Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $username, 'role' => $this->cn]));
+            if (! resolve(RoleMembershipLdapSync::class)->sync($membership)) {
+                Flux::toast(variant: 'warning', text: __('roles.ldap_sync_failed'));
+            }
         }
 
         return to_route('committees.roles.members', [

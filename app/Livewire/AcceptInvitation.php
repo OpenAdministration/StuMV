@@ -2,15 +2,13 @@
 
 namespace App\Livewire;
 
-use App\Ldap\Committee;
 use App\Ldap\Community;
-use App\Ldap\Group as LdapGroup;
-use App\Models\GroupMembership;
 use App\Models\Invitation;
 use App\Models\RealmBranding;
 use App\Models\RoleMembership;
 use App\Rules\UniqueEmail;
 use App\Support\LdapAccountRegistrar;
+use App\Support\RoleMembershipLdapSync;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -116,23 +114,15 @@ class AcceptInvitation extends Component
 
             $eloquentUser->markEmailAsVerified();
 
-            $ldapUser = $eloquentUser->ldap();
-
             foreach ($invitation->roleSelections as $selection) {
-                RoleMembership::create([
+                $membership = RoleMembership::create([
                     'role_cn' => $selection->role_cn,
                     'committee_dn' => $selection->committee_dn,
                     'realm' => $this->realm_uid,
                     'username' => $this->username,
                     'from' => today(),
                 ]);
-
-                $role = Committee::find($selection->committee_dn)?->roles()->where('cn', $selection->role_cn)->first();
-                $role?->members()->attach($ldapUser);
-
-                foreach (GroupMembership::where('role_dn', $role?->getDn())->pluck('group_dn') as $groupDn) {
-                    LdapGroup::find($groupDn)?->members()->attach($ldapUser);
-                }
+                resolve(RoleMembershipLdapSync::class)->sync($membership);
             }
 
             $invitation->update(['accepted_at' => now()]);

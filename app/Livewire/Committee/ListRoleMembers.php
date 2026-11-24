@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\RoleMembership;
+use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Locked;
@@ -201,10 +202,14 @@ class ListRoleMembers extends Component
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('delete', [$membership, $committee, $community]);
 
+        $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
         $membership->delete();
         $this->close();
 
         Flux::toast(variant: 'success', text: __('roles.message_delete_member_success'));
+        if (! resolve(RoleMembershipLdapSync::class)->sync($membership, $wasCurrent)) {
+            Flux::toast(variant: 'warning', text: __('roles.ldap_sync_failed'));
+        }
 
         return to_route('committees.roles.members', ['realm' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }

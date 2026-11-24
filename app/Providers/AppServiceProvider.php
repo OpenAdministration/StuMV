@@ -10,6 +10,7 @@ use App\Services\Oidc\LoggingClientRepository;
 use App\Services\Oidc\ReuseDetectingRefreshTokenRepository;
 use App\Support\MailmanClient;
 use App\Support\RealmContext;
+use App\Support\RoleMembershipLdapSync;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -40,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(RealmContext::class);
+        // Scoped so one request's people share a single Mailman sync.
+        $this->app->scoped(RoleMembershipLdapSync::class);
 
         // Logs *why* an OIDC client failed to authenticate at the token
         // endpoint - League OAuth2 Server's own invalid_client response is a

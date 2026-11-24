@@ -22,6 +22,8 @@ use Illuminate\Support\Collection;
  */
 class IdentityProviderGroupRoleSync
 {
+    public function __construct(private readonly RoleMembershipLdapSync $ldapSync) {}
+
     public function apply(RealmIdentityProvider $provider, string $username, array $claims): void
     {
         $claimKey = $provider->groups_claim ?: 'groups';
@@ -54,6 +56,7 @@ class IdentityProviderGroupRoleSync
             );
 
             if (! $stillMapped) {
+                $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
                 if ($membership->from->isToday()) {
                     // "Ended the day before" would mean until < from here,
                     // which Carbon's isActive()/betweenIncluded() treats as a
@@ -64,6 +67,7 @@ class IdentityProviderGroupRoleSync
                 } else {
                     $membership->update(['until' => now()->subDay()->toDateString()]);
                 }
+                $this->ldapSync->sync($membership, $wasCurrent);
             }
         }
     }
@@ -86,6 +90,7 @@ class IdentityProviderGroupRoleSync
                     'comment' => __('identity_providers.auto_assigned_comment', ['provider' => $provider->name]),
                     'identity_provider_id' => $provider->id,
                 ])->save();
+                $this->ldapSync->sync($membership);
 
                 continue;
             }
@@ -95,7 +100,9 @@ class IdentityProviderGroupRoleSync
             // moments ago on an earlier day is already inactive, but should
             // still reactivate here rather than staying revoked forever.
             if ($membership->identity_provider_id === $provider->id && $membership->until !== null) {
+                $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
                 $membership->update(['until' => null]);
+                $this->ldapSync->sync($membership, $wasCurrent);
             }
         }
     }

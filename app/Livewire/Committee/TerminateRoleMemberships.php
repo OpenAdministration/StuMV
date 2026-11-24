@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\RoleMembership;
+use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -51,6 +52,7 @@ class TerminateRoleMemberships extends Component
 
     public function save()
     {
+        $ldapSynced = true;
         foreach ($this->membershipsToTerminate as $m) {
             $membership = RoleMembership::findOrFail($m);
             $committee = Committee::findByName($this->uid, $this->ou);
@@ -58,11 +60,16 @@ class TerminateRoleMemberships extends Component
             $this->authorize('terminate', [$membership, $committee, $community]);
             $this->validate(['terminationDate' => 'date:Y-m-d|after_or_equal:'.$membership->from->format('Y-m-d')]);
 
+            $wasCurrent = RoleMembershipLdapSync::isCurrent($membership);
             $membership->until = $this->terminationDate;
             $membership->save();
+            $ldapSynced = resolve(RoleMembershipLdapSync::class)->sync($membership, $wasCurrent) && $ldapSynced;
         }
 
         Flux::toast(variant: 'success', text: __('roles.message_terminate_member_success'));
+        if (! $ldapSynced) {
+            Flux::toast(variant: 'warning', text: __('roles.ldap_sync_failed'));
+        }
 
         return to_route('committees.roles.members', [
             'realm' => $this->uid,

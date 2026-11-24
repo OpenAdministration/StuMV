@@ -44,6 +44,7 @@ return [
     'membership_edit_explanation' => 'Here you can edit the user\'s assignment. The start and end date limit the role assignment. If the dates are in the future, the assignment will only start or end then. Decision date and comment are optional pieces of information that are only for description purposes.',
     'there_are_inactive_roles' => 'There are roles in this committee without active memberships. To have these roles displayed, flip the switch above.',
     'edit_member_success' => 'The changes to the membership were saved successfully.',
+    'ldap_sync_failed' => 'LDAP could not be updated right away, the change will be applied with the next sync.',
 
     'membership_starting' => 'Starting',
     'membership_ending' => 'Ending',

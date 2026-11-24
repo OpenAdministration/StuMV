@@ -44,6 +44,7 @@ return [
     'membership_edit_explanation' => 'Hier kannst du die Zuordnung des:der Nutzers:Nutzerin bearbeiten. Das Start- und Enddatum begrenzt die Rollenzuordnung. Liegen die Daten in der Zukunft, wird die Zuordnung dann erst begonnen oder beendet. Beschlussdatum und Kommentar sind optionale Informationen, die lediglich der Beschreibung dienen.',
     'there_are_inactive_roles' => 'In diesem Gremium gibt es Rollen ohne aktive Mitgliedschaften. Um diese Rollen angezeigt zu bekommen, lege oben den Schalter um.',
     'edit_member_success' => 'Die Änderungen an der Mitgliedschaft wurden erfolgreich gespeichert.',
+    'ldap_sync_failed' => 'Das LDAP konnte nicht sofort aktualisiert werden, die Änderung wird beim nächsten Abgleich übernommen.',
 
     'membership_starting' => 'Start',
     'membership_ending' => 'Ende',
