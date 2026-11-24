@@ -17,6 +17,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('ldap:sync-roles')->dailyAt('00:01');
+        $schedule->command('ldap:sync-groups')->dailyAt('00:15')->withoutOverlapping()->onOneServer();
+        $schedule->command('mailman:sync-lists')->dailyAt('00:30')->withoutOverlapping()->onOneServer()
+            ->when(fn (): bool => (bool) config('services.mailman.api_url'));
         $schedule->command('app:mark-inactive-accounts')->dailyAt('03:00')->withoutOverlapping()->onOneServer();
         $schedule->command('app:delete-marked-accounts')->dailyAt('03:30')->withoutOverlapping()->onOneServer();
     }
