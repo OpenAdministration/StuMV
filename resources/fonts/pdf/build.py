@@ -6,7 +6,7 @@ variable AdwaitaSans-Regular.ttf and AdwaitaSans-Italic.ttf are instanced into s
 Regular/Bold/Italic/BoldItalic faces, plus a
 separate "AdwaitaSansTabular" face with tabular figures baked into the cmap for
 columns of dates, then converted into tc-lib-pdf's format. The headings use the
-static Merriweather Bold as is.
+static Merriweather Regular and Bold as is.
 
 Usage (from the project root, needs fonttools and the composer dependencies):
     python3 resources/fonts/pdf/build.py /path/to/adwaita-sans-fonts/ /path/to/merriweather-fonts/
@@ -52,7 +52,7 @@ def bake_tabular_figures(font: TTFont) -> None:
 
 def main(source: str, merriweather: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
-        files = [str(Path(merriweather) / 'Merriweather-Bold.ttf')]
+        files = [str(Path(merriweather) / f'Merriweather-{style}.ttf') for style in ('Regular', 'Bold')]
         for name, (file, weight, tabular) in FACES.items():
             font = instantiateVariableFont(TTFont(Path(source) / file), {'wght': weight, 'opsz': 14}, static=True)
             if tabular:

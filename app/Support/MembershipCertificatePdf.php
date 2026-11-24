@@ -53,7 +53,7 @@ final class MembershipCertificatePdf
 
     private const string FONT = 'adwaitasans';
 
-    /** Bold only, headings are always bold. */
+    /** Headings and the letterhead. */
     private const string FONT_HEADING = 'merriweather';
 
     /** Tabular figures, for dates, addresses and phone numbers. */
@@ -238,7 +238,7 @@ final class MembershipCertificatePdf
         $baseline = self::LETTERHEAD_RULE_Y - self::LETTERHEAD_GAP;
         $subtitleLine = 0.0;
         if ($letter->headerSubtitle !== null) {
-            $this->font('', self::HEADER_SUBTITLE_SIZE);
+            $this->font('', self::HEADER_SUBTITLE_SIZE, self::FONT_HEADING);
             $baseline = $this->textAbove($letter->headerSubtitle, $baseline, $nameWidth, $halign);
             $subtitleLine = $this->measure('X', $nameWidth);
         }
@@ -246,7 +246,7 @@ final class MembershipCertificatePdf
         // without either the sender name stands in, so the letterhead is never empty
         $title = $letter->headerTitle ?? ($letter->headerSubtitle === null ? $letter->senderName : null);
         if ($title !== null) {
-            $this->font('B', self::SENDER_FONT_SIZE);
+            $this->font('B', self::SENDER_FONT_SIZE, self::FONT_HEADING);
             // spaced by the subtitle's line, as the title's would leave a gap
             if ($letter->headerSubtitle !== null) {
                 $baseline -= $subtitleLine + self::SPACE;
@@ -561,9 +561,9 @@ final class MembershipCertificatePdf
     /** Two lines of the letterhead, measured as drawLetter() sets them, whether or not there is a subtitle. */
     private function letterheadHeight(): float
     {
-        $this->font('', self::HEADER_SUBTITLE_SIZE);
+        $this->font('', self::HEADER_SUBTITLE_SIZE, self::FONT_HEADING);
         $subtitleLine = $this->measure('X', $this->contentWidth);
-        $this->font('B', self::SENDER_FONT_SIZE);
+        $this->font('B', self::SENDER_FONT_SIZE, self::FONT_HEADING);
         $metrics = $this->pdf->font->getCurrentFont();
 
         return $subtitleLine + self::SPACE + $metrics['capheight'] * $metrics['usize'] / $metrics['size'];
