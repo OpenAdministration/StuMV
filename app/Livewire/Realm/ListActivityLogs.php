@@ -3,6 +3,7 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use App\Ldap\User as LdapUser;
 use App\Models\ActivityLog;
 use App\Models\RealmIdentityProvider;
 use App\Models\User;
@@ -55,8 +56,8 @@ class ListActivityLogs extends Component
 
         return view('livewire.realm.list-activity-logs', [
             'logs' => $logs,
-            'actors' => $this->actorNames($logs),
-            'people' => $this->personNames($logs),
+            'people' => $this->people($logs),
+            'providers' => $this->providerNames($logs),
             'actionOptions' => $this->scoped(ActivityLog::query())->distinct()->pluck('action')
                 ->mapWithKeys(fn (string $action): array => [$action => __('activity_log.actions.'.$action)])
                 ->sort(),
@@ -103,33 +104,31 @@ class ListActivityLogs extends Component
     }
 
     /**
-     * Names of the page's actors, keyed by "type:id"; deleted ones are missing.
+     * The people the page refers to by entryUUID (as actor, subject or detail), while their account exists.
      *
-     * @return array<string, string>
+     * @return array<string, array{name: string, url: string}>
      */
-    private function actorNames(LengthAwarePaginator $logs): array
+    private function people(LengthAwarePaginator $logs): array
     {
-        $ids = fn (string $type) => collect($logs->items())->where('actor_type', $type)->pluck('actor_id')->unique()->all();
-
-        $users = User::whereIn('uid', $ids('user'))->get()
-            ->mapWithKeys(fn (User $user): array => ['user:'.$user->uid => "{$user->full_name} ({$user->username})"]);
-        $providers = RealmIdentityProvider::whereIn('id', $ids('identity_provider'))->pluck('name', 'id')
-            ->mapWithKeys(fn (string $name, string $id): array => ['identity_provider:'.$id => $name]);
-
-        return [...$users->all(), ...$providers->all()];
-    }
-
-    /**
-     * Names of the people the page's details refer to by entryUUID, while their account exists.
-     *
-     * @return array<string, string>
-     */
-    private function personNames(LengthAwarePaginator $logs): array
-    {
-        $uids = collect($logs->items())->pluck('details.person')->filter()->unique()->all();
+        $logs = collect($logs->items());
+        $uids = $logs->where('actor_type', 'user')->pluck('actor_id')
+            ->merge($logs->where('subject_type', LdapUser::class)->pluck('subject_id'))
+            ->merge($logs->pluck('details.person'))
+            ->filter()->unique()->all();
 
         return User::whereIn('uid', $uids)->get()
-            ->mapWithKeys(fn (User $user): array => [$user->uid => "{$user->full_name} ({$user->username})"])
+            ->mapWithKeys(fn (User $user): array => [$user->uid => [
+                'name' => "{$user->full_name} ({$user->username})",
+                'url' => route('profile', ['realm' => $user->realm, 'username' => $user->username]),
+            ]])
             ->all();
+    }
+
+    /** @return array<string, string> */
+    private function providerNames(LengthAwarePaginator $logs): array
+    {
+        $ids = collect($logs->items())->where('actor_type', 'identity_provider')->pluck('actor_id')->unique()->all();
+
+        return RealmIdentityProvider::whereIn('id', $ids)->pluck('name', 'id')->all();
     }
 }

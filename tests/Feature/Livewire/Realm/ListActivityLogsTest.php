@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Community;
+use App\Ldap\User as LdapUser;
 use App\Livewire\Realm\ListActivityLogs;
 use App\Models\ActivityLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -113,4 +114,18 @@ test('a person referred to by entryUUID is shown by name while the account exist
         ->assertSee(__('activity_log.fields.person').':')
         ->assertSee("{$member->full_name} ({$member->username})")
         ->assertSee('gone-uuid');
+});
+
+test('people link to their profile, as actor, subject and in the details', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    $member = TestLdap::member($community);
+    $admin = actingAsAdmin($community);
+    logEntry($uid, 'member.locked', ['actor_type' => 'user', 'actor_id' => $admin->uid, 'subject_type' => LdapUser::class, 'subject_id' => $member->uid, 'subject_label' => 'Gesperrte Person']);
+    logEntry($uid, 'role_membership.created', ['subject_label' => 'mitglied (fsr)', 'details' => ['person' => $member->uid]]);
+
+    $html = Livewire::test(ListActivityLogs::class, ['realm' => $community])->html();
+
+    expect($html)->toContain('href="'.route('profile', ['realm' => $uid, 'username' => $admin->username]).'"')
+        ->and(substr_count($html, 'href="'.route('profile', ['realm' => $uid, 'username' => $member->username]).'"'))->toBe(2);
 });

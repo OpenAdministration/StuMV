@@ -40,26 +40,36 @@
                         <flux:table.cell class="align-top">
                             @if($log->actor_type === null)
                                 {{ __('activity_log.system') }}
+                            @elseif($log->actor_type === 'user' && isset($people[$log->actor_id]))
+                                <flux:link wire:navigate :href="$people[$log->actor_id]['url']">{{ $people[$log->actor_id]['name'] }}</flux:link>
+                            @elseif($log->actor_type === 'identity_provider' && isset($providers[$log->actor_id]))
+                                {{ $providers[$log->actor_id] }}
                             @else
-                                {{ $actors[$log->actor_type.':'.$log->actor_id] ?? __('activity_log.deleted_actor') }}
+                                {{ __('activity_log.deleted_actor') }}
                             @endif
                             @if($log->ip)
                                 <div class="text-xs text-zinc-500">{{ $log->ip }}</div>
                             @endif
                         </flux:table.cell>
                         <flux:table.cell class="align-top">{{ __('activity_log.actions.'.$log->action) }}</flux:table.cell>
-                        <flux:table.cell class="align-top whitespace-normal wrap-anywhere min-w-40">{{ $log->subject_label ?? '–' }}</flux:table.cell>
-                        <flux:table.cell class="align-top">
+                        <flux:table.cell class="align-top whitespace-normal wrap-anywhere min-w-40">
+                            @if($log->subject_type === \App\Ldap\User::class && isset($people[$log->subject_id]))
+                                <flux:link wire:navigate :href="$people[$log->subject_id]['url']">{{ $log->subject_label }}</flux:link>
+                            @else
+                                {{ $log->subject_label ?? '–' }}
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell class="align-top min-w-64">
                             @if($log->details)
-                                <dl class="text-xs space-y-1 max-w-md whitespace-normal">
+                                <dl class="text-xs space-y-1 max-w-md whitespace-normal wrap-anywhere">
                                     @foreach($log->details as $field => $value)
                                         <div class="break-words">
                                             <dt class="inline font-medium">{{ $this->fieldLabel($field) }}:</dt>
                                             <dd class="inline">
                                                 @if(is_array($value) && array_key_exists('old', $value) && array_key_exists('new', $value) && count($value) === 2)
                                                     {{ $this->formatValue($value['old']) }} → {{ $this->formatValue($value['new']) }}
-                                                @elseif($field === 'person' && isset($people[$value]))
-                                                    {{ $people[$value] }}
+                                                @elseif($field === 'person' && is_string($value) && isset($people[$value]))
+                                                    <flux:link wire:navigate :href="$people[$value]['url']">{{ $people[$value]['name'] }}</flux:link>
                                                 @else
                                                     {{ $this->formatValue($value) }}
                                                 @endif
