@@ -27,8 +27,9 @@ class ListActivityLogs extends Component
     #[Url]
     public string $search = '';
 
+    /** @var list<string> */
     #[Url]
-    public string $action = '';
+    public array $actions = [];
 
     #[Url]
     public string $from = '';
@@ -56,7 +57,9 @@ class ListActivityLogs extends Component
             'logs' => $logs,
             'actors' => $this->actorNames($logs),
             'people' => $this->personNames($logs),
-            'actions' => $this->scoped(ActivityLog::query())->distinct()->orderBy('action')->pluck('action'),
+            'actionOptions' => $this->scoped(ActivityLog::query())->distinct()->pluck('action')
+                ->mapWithKeys(fn (string $action): array => [$action => __('activity_log.actions.'.$action)])
+                ->sort(),
         ])->title(__('activity_log.title'));
     }
 
@@ -84,7 +87,7 @@ class ListActivityLogs extends Component
     private function query(): Builder
     {
         return $this->scoped(ActivityLog::query())
-            ->when($this->action !== '', fn (Builder $q) => $q->where('action', $this->action))
+            ->when($this->actions !== [], fn (Builder $q) => $q->whereIn('action', $this->actions))
             ->when($this->search !== '', fn (Builder $q) => $q->where('subject_label', 'like', '%'.$this->search.'%'))
             ->when($this->from !== '', fn (Builder $q) => $q->whereDate('created_at', '>=', $this->from))
             ->when($this->until !== '', fn (Builder $q) => $q->whereDate('created_at', '<=', $this->until));

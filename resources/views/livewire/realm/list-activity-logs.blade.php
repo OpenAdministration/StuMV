@@ -6,12 +6,11 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <flux:input icon="search" clearable wire:model.live.debounce="search" :label="__('activity_log.search')" />
-        <flux:select wire:model.live="action" :label="__('activity_log.action')">
-            <flux:select.option value="">{{ __('activity_log.all_actions') }}</flux:select.option>
-            @foreach($actions as $key)
-                <flux:select.option value="{{ $key }}">{{ __('activity_log.actions.'.$key) }}</flux:select.option>
+        <flux:pillbox multiple searchable wire:model.live="actions" :label="__('activity_log.action')" :placeholder="__('activity_log.all_actions')">
+            @foreach($actionOptions as $key => $label)
+                <flux:pillbox.option value="{{ $key }}">{{ $label }}</flux:pillbox.option>
             @endforeach
-        </flux:select>
+        </flux:pillbox>
         <flux:input type="date" wire:model.live="from" :label="__('activity_log.from')" />
         <flux:input type="date" wire:model.live="until" :label="__('activity_log.until')" />
     </div>

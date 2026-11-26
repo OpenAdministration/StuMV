@@ -28,6 +28,8 @@ test('a realm admin sees their realm\'s entries with actor, action and changed f
     $this->get(route('realms.activity-log', ['realm' => $community->getShortCode()]))
         ->assertOk()
         ->assertSee(__('activity_log.actions.role.updated'))
+        // a missing translation would show its key instead
+        ->assertDontSee('activity_log.actions.')
         ->assertSee("{$admin->full_name} ({$admin->username})")
         ->assertSee(__('activity_log.fields.description').':')
         ->assertSee('Kasse → Kassenwart')
@@ -42,9 +44,11 @@ test('entries can be filtered by action, affected object and date', function ():
     logEntry($uid, 'group.created', ['subject_label' => 'Newsletter', 'created_at' => '2026-03-10 12:00:00']);
 
     Livewire::test(ListActivityLogs::class, ['realm' => $community])
-        ->set('action', 'group.created')
+        ->set('actions', ['group.created'])
         ->assertSee('Newsletter')->assertDontSee('Kasse')
-        ->set('action', '')
+        ->set('actions', ['group.created', 'role.created'])
+        ->assertSee('Newsletter')->assertSee('Kasse')
+        ->set('actions', [])
         ->set('search', 'kas')
         ->assertSee('Kasse')->assertDontSee('Newsletter')
         ->set('search', '')
