@@ -4,6 +4,7 @@ namespace App\Livewire\Settings\Domain;
 
 use App\Ldap\Community;
 use App\Ldap\Domain;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
@@ -96,7 +97,9 @@ class ListDomains extends Component
         $this->authorize('delete', [Domain::class, $this->community()]);
         $results = Domain::fromCommunity($this->uid)->where('dc', $this->deleteDomain)->get();
         if ($results->count() === 1) {
-            $results->first()->delete();
+            $domain = $results->first();
+            $domain->delete();
+            resolve(ActivityLogger::class)->record('domain.deleted', $this->uid, $domain, ['dn' => $domain->getDn()], $domain->getFirstAttribute('dc'));
             $this->close();
         }
     }

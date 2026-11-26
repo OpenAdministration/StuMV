@@ -2,6 +2,7 @@
 
 use App\Ldap\User as LdapUser;
 use App\Livewire\Profile\Profile;
+use App\Models\ActivityLog;
 use App\Models\UserAdditionalEmail;
 use App\Notifications\VerifyAdditionalEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -68,7 +69,11 @@ test('a newly added address is recorded unverified and stays out of LDAP until c
         ->and($row->isVerified())->toBeFalse()
         // Not in the directory yet, so identity-provider matching cannot see
         // it and nobody else is blocked from claiming the address.
-        ->and(additionalEmailsInLdap($user->username, $community))->toBe([]);
+        ->and(additionalEmailsInLdap($user->username, $community))->toBe([])
+        ->and(ActivityLog::sole()->only(['action', 'details']))->toBe([
+            'action' => 'profile.updated',
+            'details' => ['additional_emails' => ['old' => [], 'new' => ['alias@example.test']]],
+        ]);
 
     Notification::assertSentOnDemand(VerifyAdditionalEmail::class);
 });
@@ -100,7 +105,10 @@ test('the confirmation link works without being signed in', function (): void {
     $this->get(verificationUrlFor($row, $community))
         ->assertRedirect(route('realm.login', ['realm' => $community->getShortCode()]));
 
-    expect($row->fresh()->isVerified())->toBeTrue();
+    // signed out, so the owner is recorded as the one who confirmed
+    expect($row->fresh()->isVerified())->toBeTrue()
+        ->and(ActivityLog::where('action', 'profile.email_verified')->sole()->only(['actor_id', 'details']))
+        ->toBe(['actor_id' => $user->uid, 'details' => ['address' => 'alias@example.test']]);
 });
 
 test('an unsigned confirmation link is rejected', function (): void {

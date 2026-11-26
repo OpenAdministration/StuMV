@@ -62,7 +62,9 @@ class ListIdentityProviders extends Component
     public function deleteCommit(): void
     {
         $provider = RealmIdentityProvider::where('realm', $this->uid)->findOrFail($this->deleteProviderId);
+        $mappings = $provider->mappingsForActivityLog();
         $provider->delete();
+        $provider->recordAction('deleted', $mappings);
 
         Flux::toast(variant: 'success', text: __('identity_providers.deleted_success'));
         $this->closeDelete();

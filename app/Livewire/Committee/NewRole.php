@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueRole;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -62,6 +63,7 @@ class NewRole extends Component
         ]);
         $r->inside($c);
         $r->save();
+        resolve(ActivityLogger::class)->recordEntry('role.created', $this->uid, $r);
 
         Flux::toast(variant: 'success', text: __('roles.new_role_created'));
 

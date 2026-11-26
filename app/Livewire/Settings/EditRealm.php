@@ -4,6 +4,7 @@ namespace App\Livewire\Settings;
 
 use App\Ldap\Community;
 use App\Models\RealmContact;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -90,6 +91,7 @@ class EditRealm extends Component
         $this->validate();
 
         $r = Community::findOrFailByUid($this->uid);
+        $before = $this->realmSettings($r);
         $r->description = [$this->name];
         $r->save();
 
@@ -98,8 +100,24 @@ class EditRealm extends Component
             $this->only(self::CONTACT_FIELDS),
         ));
 
+        $details = ActivityLogger::diff($before, $this->realmSettings($r));
+        if ($details !== []) {
+            resolve(ActivityLogger::class)->record('realm.updated', $this->uid, $r, $details);
+        }
+
         Flux::toast(variant: 'success', text: __('realms.edit_success', ['realm' => $this->uid]));
 
         return to_route('realms.dashboard', ['realm' => $this->uid]);
+    }
+
+    /** @return array<string, ?string> */
+    private function realmSettings(Community $realm): array
+    {
+        $contact = RealmContact::forRealm($this->uid);
+
+        return [
+            'name' => $realm->getFirstAttribute('description'),
+            ...array_map(fn (string $field): ?string => $contact?->getAttribute($field), array_combine(self::CONTACT_FIELDS, self::CONTACT_FIELDS)),
+        ];
     }
 }

@@ -4,6 +4,8 @@ namespace App\Ldap;
 
 use App\Ldap\Scopes\AddMemberOfAttributeScope;
 use App\Ldap\Traits\SearchScopeTrait;
+use App\Models\User as DbUser;
+use App\Support\ActivityLogger;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
 use LdapRecord\Models\OpenLDAP\Group;
@@ -141,6 +143,17 @@ class User extends \LdapRecord\Models\OpenLDAP\User
         $value = $this->getFirstAttribute('pwdLastSuccess');
 
         return $value ? Date::createFromFormat('YmdHis\Z', $value, 'UTC') : null;
+    }
+
+    /**
+     * Logs $action with this person as subject, e.g. becoming a moderator.
+     *
+     * @param  array<string, mixed>  $details
+     * @param  ?DbUser  $actor  for actions without a login, e.g. a password reset
+     */
+    public function recordAction(string $action, string $realm, array $details = [], ?DbUser $actor = null): void
+    {
+        resolve(ActivityLogger::class)->record($action, $realm, $this, $details, $this->getFirstAttribute('cn'), $actor);
     }
 
     #[\Override]

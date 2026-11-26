@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueCommittee;
+use App\Support\ActivityLogger;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -123,6 +124,8 @@ class NewCommittee extends Component
         ]);
         $c->setDn($dn);
         $c->save();
+        $log = resolve(ActivityLogger::class);
+        $log->recordEntry('committee.created', $this->realm_uid, $c);
         // Provisions the committee's own (initially empty) moderators group
         // eagerly, so it exists from the start rather than lazily on first
         // access - see Committee::moderatorsGroup().
@@ -137,6 +140,7 @@ class NewCommittee extends Component
             ]);
             $r->inside($c);
             $r->save();
+            $log->recordEntry('role.created', $this->realm_uid, $r);
         }
 
         return response()->redirectToRoute('committees.roles', [

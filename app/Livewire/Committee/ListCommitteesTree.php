@@ -7,6 +7,7 @@ use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
@@ -90,11 +91,16 @@ class ListCommitteesTree extends Component
 
         // Delete role memberships and role group relashionships for this committee and its descendants
         $dn = $c->getDn();
+        $groupDns = [];
         $roles = $c->roles()->get();
+        $deleted = [[$c, $roles]];
         foreach ($roles as $role) {
+            // one by one, so each removed person stays in the activity log
             RoleMembership::where('role_cn', $role->getFirstAttribute('cn'))
                 ->where('committee_dn', $dn)
-                ->delete();
+                ->get()
+                ->each->deleteAndRecord();
+            $groupDns[$role->getDn()] = GroupMembership::where('role_dn', $role->getDn())->pluck('group_dn')->all();
             GroupMembership::where('role_dn', $role->getDn())
                 ->delete();
         }
@@ -102,10 +108,13 @@ class ListCommitteesTree extends Component
         $descendants = $c->descendants()->get();
         foreach ($descendants as $descendant) {
             $roles = $descendant->roles()->get();
+            $deleted[] = [$descendant, $roles];
             foreach ($roles as $role) {
                 RoleMembership::where('role_cn', $role->getFirstAttribute('cn'))
                     ->where('committee_dn', $descendant->getDn())
-                    ->delete();
+                    ->get()
+                    ->each->deleteAndRecord();
+                $groupDns[$role->getDn()] = GroupMembership::where('role_dn', $role->getDn())->pluck('group_dn')->all();
                 GroupMembership::where('role_dn', $role->getDn())
                     ->delete();
             }
@@ -113,6 +122,13 @@ class ListCommitteesTree extends Component
 
         // Delete the committee and its descendants recursively
         $c->delete(recursive: true);
+        $log = resolve(ActivityLogger::class);
+        foreach ($deleted as [$committee, $roles]) {
+            $log->recordEntry('committee.deleted', $this->realm_uid, $committee);
+            foreach ($roles as $role) {
+                $log->recordRoleDeletion($this->realm_uid, $role, $groupDns[$role->getDn()]);
+            }
+        }
 
         Flux::modal('delete-committee')->close();
 

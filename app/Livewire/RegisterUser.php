@@ -131,6 +131,7 @@ class RegisterUser extends Component
                 $this->email,
                 $this->password,
             );
+            $eloquentUser->ldap()->recordAction('member.registered', $this->realm_uid, actor: $eloquentUser);
 
             // Fired with the Eloquent user (not the LDAP one) since only it
             // implements MustVerifyEmail/Notifiable, which the

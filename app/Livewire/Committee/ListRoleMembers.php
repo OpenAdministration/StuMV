@@ -203,7 +203,7 @@ class ListRoleMembers extends Component
         $this->authorize('delete', [$membership, $committee, $community]);
 
         $wasCurrent = $membership->isActive();
-        $membership->delete();
+        $membership->deleteAndRecord();
         $this->close();
 
         Flux::toast(variant: 'success', text: __('roles.message_delete_member_success'));

@@ -4,6 +4,7 @@ namespace App\Livewire\Group;
 
 use App\Ldap\Community;
 use App\Ldap\Group;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -43,9 +44,11 @@ class EditGroup extends Component
         $this->validate();
         try {
             $group = Group::findOrFail($this->dn);
+            $before = $group->getFirstAttribute('description');
             $group->save([
                 'description' => $this->name,
             ]);
+            resolve(ActivityLogger::class)->recordDescriptionChange('group.updated', $this->uid, $group, $before);
 
             Flux::toast(variant: 'success', text: __('groups.edit_success'));
 

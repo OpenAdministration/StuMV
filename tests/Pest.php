@@ -9,6 +9,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Tests\Support\TestLdap;
@@ -30,7 +31,13 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
-    ->afterEach(fn () => TestLdap::cleanup())
+    ->afterEach(function (): void {
+        TestLdap::cleanup();
+        // tests without RefreshDatabase would leave their entries for the next ones
+        if (Schema::hasTable('activity_logs')) {
+            DB::table('activity_logs')->delete();
+        }
+    })
     ->in('Feature');
 
 /*

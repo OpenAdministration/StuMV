@@ -5,12 +5,15 @@ namespace App\Models;
 use App\Enums\ExportDateFormat;
 use App\Enums\LetterRecipient;
 use App\Enums\LetterSender;
+use App\Models\Concerns\RecordsActions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /** What a member can pick when exporting their memberships, set up by the realm admins. */
 class MembershipExportTemplate extends Model
 {
+    use RecordsActions;
+
     /**
      * @var list<string>
      */
@@ -60,5 +63,10 @@ class MembershipExportTemplate extends Model
     protected function scopeForRealm(Builder $query, string $realmUid): void
     {
         $query->where('realm', $realmUid)->orderBy('name');
+    }
+
+    protected function activityLogName(): string
+    {
+        return 'membership_export_template';
     }
 }

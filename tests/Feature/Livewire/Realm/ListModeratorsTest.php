@@ -3,6 +3,7 @@
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Livewire\Realm\ListModerators;
+use App\Models\ActivityLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LdapRecord\Container;
 use Livewire\Livewire;
@@ -59,7 +60,8 @@ test('deleteCommit removes the moderator and closes the modal', function (): voi
 
     $ldapCommunity = Community::findByUid($community->getShortCode());
     $ldapUser = User::findByUsername($mod->username);
-    expect($ldapCommunity->moderatorsGroup()->members()->contains($ldapUser))->toBeFalse();
+    expect($ldapCommunity->moderatorsGroup()->members()->contains($ldapUser))->toBeFalse()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'realm_moderator.removed', 'subject_id' => $mod->uid]);
 });
 
 test('moderators are sorted by name ascending by default', function (): void {

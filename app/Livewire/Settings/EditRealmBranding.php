@@ -101,7 +101,7 @@ class EditRealmBranding extends Component
 
         RealmBranding::updateOrCreate(['realm' => $this->realm_uid], [
             'login_notice_enabled' => $this->login_notice_enabled,
-        ]);
+        ])->recordAction('saved');
 
         Flux::toast(variant: 'success', text: __($this->login_notice_enabled
             ? 'realms.branding.login_notice_activated'
@@ -122,7 +122,7 @@ class EditRealmBranding extends Component
         RealmBranding::updateOrCreate(['realm' => $this->realm_uid], [
             'login_notice_enabled' => $this->login_notice_enabled,
             'login_notice' => trim(strip_tags($notice)) === '' ? null : $notice,
-        ]);
+        ])->recordAction('saved');
 
         Flux::toast(variant: 'success', text: __('realms.branding.login_notice_saved'));
     }
@@ -171,6 +171,7 @@ class EditRealmBranding extends Component
         $oldFilename = $branding->{$column};
         $branding->{$column} = $newFilename;
         $branding->save();
+        $branding->recordAction('saved');
 
         if ($oldFilename) {
             Storage::disk('public')->delete('realm-branding/'.$oldFilename);
@@ -187,5 +188,6 @@ class EditRealmBranding extends Component
         Storage::disk('public')->delete('realm-branding/'.$branding->{$column});
         $branding->{$column} = null;
         $branding->save();
+        $branding->recordAction('saved');
     }
 }

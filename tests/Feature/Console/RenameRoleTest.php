@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Role;
+use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -94,4 +95,21 @@ test('app:rename-role fails when a role with the new name already exists', funct
         'role' => 'kassenwart',
         'new-role' => 'schatzmeister',
     ])->assertExitCode(1);
+});
+
+test('app:rename-role repoints activity log references without logging itself', function (): void {
+    $community = newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'kassenwart');
+    $log = ActivityLog::forceCreate(['action' => 'role_membership.created', 'details' => ['role' => $role->getDn()]]);
+
+    $this->artisan('app:rename-role', [
+        'community' => $community->getShortCode(),
+        'committee' => 'fsr',
+        'role' => 'kassenwart',
+        'new-role' => 'schatzmeister',
+    ])->assertExitCode(0);
+
+    expect($log->fresh()->details)->toBe(['role' => 'cn=schatzmeister,'.$committee->getDn()])
+        ->and(ActivityLog::count())->toBe(1);
 });

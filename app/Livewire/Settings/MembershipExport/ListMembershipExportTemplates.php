@@ -39,7 +39,9 @@ class ListMembershipExportTemplates extends Component
 
     public function deleteCommit(): void
     {
-        MembershipExportTemplate::where('realm', $this->uid)->findOrFail($this->deleteId)->delete();
+        $template = MembershipExportTemplate::where('realm', $this->uid)->findOrFail($this->deleteId);
+        $template->delete();
+        $template->recordAction('deleted');
 
         Flux::toast(variant: 'success', text: __('realms.membership_export.deleted'));
         $this->closeDelete();

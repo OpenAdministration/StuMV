@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
+use App\Models\User;
 use App\Models\UserAdditionalEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,8 @@ class VerifyAdditionalEmailController extends Controller
             $ldapUser->addAdditionalEmail($additionalEmail->address);
             $ldapUser->save();
         });
+        // the link works without a login, the owner confirmed it
+        $ldapUser->recordAction('profile.email_verified', $realm->getShortCode(), ['address' => $additionalEmail->address], User::where('uid', $ldapUser->getConvertedGuid())->first());
 
         return $this->done($realm, $additionalEmail, 'profile.emails_verified_success');
     }

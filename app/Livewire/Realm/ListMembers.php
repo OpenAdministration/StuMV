@@ -4,6 +4,7 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use App\Support\AccountPurger;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
@@ -137,10 +138,9 @@ class ListMembers extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_member', $community);
-        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteMemberUsername)->first();
         // Deleting the account is what "removing a member" means now -
         // membership is the physical location itself, not a group entry.
-        $user?->delete();
+        AccountPurger::purge($community, $this->deleteMemberUsername);
         Flux::modal('remove')->close();
     }
 

@@ -4,6 +4,7 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -43,9 +44,11 @@ class EditRole extends Component
         $this->validate();
         $committe = Committee::findByNameOrFail($this->uid, $this->ou);
         $role = $committe->roles()->where('cn', $this->cn)->first();
+        $before = $role->getFirstAttribute('description');
         $role->save([
             'description' => $this->description,
         ]);
+        resolve(ActivityLogger::class)->recordDescriptionChange('role.updated', $this->uid, $role, $before);
 
         Flux::toast(variant: 'success', text: __('roles.edit_success', ['role' => $this->cn]));
 

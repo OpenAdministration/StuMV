@@ -70,12 +70,14 @@ class EditRoleMembership extends Component
         $community = Community::findOrFailByUid($this->uid);
         $this->authorize('edit', [$membership, $committee, $community]);
         $wasCurrent = $membership->isActive();
+        $before = $membership->activityLogAttributes();
         $membership->update([
             'from' => $this->start_date,
             'until' => ! empty($this->end_date) ? $this->end_date : null,
             'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
             'comment' => ! empty($this->comment) ? $this->comment : null,
         ]);
+        $membership->recordAction('updated', $before);
 
         Flux::toast(variant: 'success', text: __('roles.edit_member_success', ['username' => $this->username, 'role' => $this->cn]));
         if (! resolve(RoleMembershipLdapSync::class)->sync($membership, $wasCurrent)) {

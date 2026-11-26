@@ -74,5 +74,6 @@ class AccountPurger
 
         // last, so a failed cleanup leaves the account usable
         $ldap->delete();
+        $ldap->recordAction('member.deleted', $realm);
     }
 }

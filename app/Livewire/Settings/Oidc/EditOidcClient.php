@@ -155,6 +155,7 @@ class EditOidcClient extends Component
         $scopesChanged = collect($client->scopes ?? [])->sort()->values()->all() !== collect($this->scopes)->sort()->values()->all();
         $wasConfidential = $client->confidential();
         $staysConfidential = ! $this->disableClientAuthentication;
+        $before = $client->activityLogSnapshot();
 
         $clients->update($client, $this->name, $this->redirectUriList());
 
@@ -180,6 +181,9 @@ class EditOidcClient extends Component
         }
 
         $client->save();
+        $client->recordAction('updated', $wasConfidential === $staysConfidential ? [] : [
+            'client_authentication' => ['old' => $wasConfidential, 'new' => $staysConfidential],
+        ], $before);
 
         // A user's prior approval is remembered for as long as they hold a
         // non-revoked token whose granted scopes already cover what's
@@ -240,6 +244,7 @@ class EditOidcClient extends Component
 
         $client->secret = $newSecret = Str::random(40);
         $client->save();
+        $client->recordAction('secret_regenerated');
 
         Log::info('OIDC client secret rotated', ['client_id' => $client->id, 'realm' => $this->uid]);
 

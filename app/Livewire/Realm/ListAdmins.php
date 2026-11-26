@@ -136,8 +136,9 @@ class ListAdmins extends Component
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
         $admins = $community?->adminsGroup()->members();
-        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteAdminUsername)->first();
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteAdminUsername)->first() ?? abort(404);
         $admins->detach($user);
+        $user->recordAction('realm_admin.removed', $community->getShortCode());
 
         // reset everything to prevent a 404 modal
         $this->close();

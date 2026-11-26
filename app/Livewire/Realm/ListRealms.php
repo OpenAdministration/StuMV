@@ -3,6 +3,7 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use App\Support\ActivityLogger;
 use App\Support\RealmDataPurger;
 use Flux\Flux;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -163,6 +164,10 @@ class ListRealms extends Component
             RealmDataPurger::purge($this->deleteRealmName);
             $community->delete(recursive: true);
         });
+        // without a retention period it would outlive the realm forever
+        if (config('activity_log.retention_days') !== null) {
+            resolve(ActivityLogger::class)->recordEntry('realm.deleted', $this->deleteRealmName, $community);
+        }
 
         // reset everything to prevent a 404 modal
         $this->reset('deleteRealmName');

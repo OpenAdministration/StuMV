@@ -56,10 +56,12 @@ class EditApiClient extends Component
         $client = PassportClient::where('community_uid', $this->uid)->findOrFail($this->clientId);
         abort_unless($client->hasGrantType('client_credentials'), 404);
 
+        $before = $client->activityLogSnapshot();
         $clients->update($client, $this->name, []);
         $client->forceFill([
             'scopes' => array_values($this->scopes),
         ])->save();
+        $client->recordAction('updated', before: $before);
 
         Flux::toast(variant: 'success', text: __('api_clients.edit_success'));
 

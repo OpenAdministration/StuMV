@@ -3,6 +3,7 @@
 use App\Ldap\User;
 use App\Livewire\Committee\ListCommitteeModerators;
 use App\Livewire\Committee\NewCommitteeModerator;
+use App\Models\ActivityLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
@@ -28,6 +29,15 @@ test('a committee moderator can add another moderator to their committee', funct
         ->call('save');
 
     expect($committee->moderatorsGroup()->members()->contains($newMod->ldap()))->toBeTrue();
+
+    $log = ActivityLog::sole();
+    expect($log->action)->toBe('committee_moderator.added')
+        ->and($log->realm)->toBe($community->getShortCode())
+        ->and($log->subject_id)->toBe($newMod->uid)
+        ->and($log->details)->toBe([
+            'committee' => $committee->getDn(),
+            'committee_label' => $committee->getFirstAttribute('description'),
+        ]);
 });
 
 test('a plain member can view a committee\'s moderators but cannot add one', function (): void {
@@ -103,7 +113,8 @@ test('deleteCommit removes the moderator and closes the modal', function (): voi
         ->assertDispatched('modal-close', name: 'delete');
 
     $ldapUser = User::findByUsername($target->username);
-    expect($committee->moderatorsGroup()->members()->contains($ldapUser))->toBeFalse();
+    expect($committee->moderatorsGroup()->members()->contains($ldapUser))->toBeFalse()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'committee_moderator.removed', 'subject_id' => $target->uid]);
 });
 
 test('a moderator can remove themselves without the page crashing on re-render', function (): void {

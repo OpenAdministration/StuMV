@@ -110,6 +110,7 @@ class Picture extends Component
             ['user' => $this->currentUsername, 'realm' => $this->realm_uid],
             ['file_id' => $imgID],
         );
+        $user->recordAction('profile.picture_changed', $this->realm_uid);
 
         $this->reset('upload');
 
@@ -135,6 +136,7 @@ class Picture extends Component
 
         // Delete database entry
         $pictureDB->delete();
+        $user->recordAction('profile.picture_removed', $this->realm_uid);
 
         Flux::toast(variant: 'success', text: trans('profile.picture_removed'));
 

@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use App\Models\UserAdditionalEmail;
 use App\Rules\UniqueEmail;
+use App\Support\ActivityLogger;
 use App\Support\AdditionalEmailMailer;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -188,10 +189,28 @@ class Profile extends Component
         return $this->additionalEmailRows()->verified()->pluck('address')->all();
     }
 
+    /** @return array<string, mixed> */
+    private function profileForActivityLog(User $user): array
+    {
+        return [
+            'email' => $user->getFirstAttribute('mail'),
+            'given_name' => $user->getFirstAttribute('givenName'),
+            'surname' => $user->getFirstAttribute('sn'),
+            'course' => $user->getFirstAttribute('description'),
+            'street' => $user->getFirstAttribute('street'),
+            'postal_code' => $user->getFirstAttribute('postalCode'),
+            'city' => $user->getFirstAttribute('l'),
+            'phone' => $user->getFirstAttribute('telephoneNumber'),
+            // pending ones too, the request to add one is a change already
+            'additional_emails' => $this->additionalEmailRows()->orderBy('address')->pluck('address')->all(),
+        ];
+    }
+
     public function save()
     {
         $this->validate();
         $this->validateAdditionalEmails();
+        $before = $this->profileForActivityLog($this->findUserWithLockStatus($this->uid));
         $verifiedAddresses = $this->reconcileAdditionalEmails();
         $user = $this->findUserWithLockStatus($this->uid);
         // The primary stays in first position - App\Ldap\User relies on that
@@ -219,6 +238,13 @@ class Profile extends Component
         }
 
         $user->save();
+        $details = ActivityLogger::diff($before, $this->profileForActivityLog($user));
+        if ($details !== []) {
+            $user->recordAction('profile.updated', $this->realm_uid, $details);
+        }
+        if ($this->userIsActive === $isCurrentlyLocked) {
+            $user->recordAction($this->userIsActive ? 'member.unlocked' : 'member.locked', $this->realm_uid);
+        }
 
         \App\Models\User::where('uid', $user->getConvertedGuid())->update([
             'full_name' => $this->givenName.' '.$this->sn,

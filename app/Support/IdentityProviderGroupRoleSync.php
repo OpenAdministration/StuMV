@@ -60,8 +60,11 @@ class IdentityProviderGroupRoleSync
                 if ($membership->from->isToday()) {
                     // "Ended the day before" would mean until < from, and a grant without an active day has no history worth keeping.
                     $membership->delete();
+                    $membership->recordAction('deleted', actor: $provider);
                 } else {
+                    $before = $membership->activityLogAttributes();
                     $membership->update(['until' => now()->subDay()->toDateString()]);
+                    $membership->recordAction('updated', $before, $provider);
                 }
                 $this->ldapSync->sync($membership, $wasCurrent);
             }
@@ -86,6 +89,7 @@ class IdentityProviderGroupRoleSync
                     'comment' => __('identity_providers.auto_assigned_comment', ['provider' => $provider->name]),
                     'identity_provider_id' => $provider->id,
                 ])->save();
+                $membership->recordAction('created', actor: $provider);
                 $this->ldapSync->sync($membership);
 
                 continue;
@@ -97,7 +101,9 @@ class IdentityProviderGroupRoleSync
             // still reactivate here rather than staying revoked forever.
             if ($membership->identity_provider_id === $provider->id && $membership->until !== null) {
                 $wasCurrent = $membership->isActive();
+                $before = $membership->activityLogAttributes();
                 $membership->update(['until' => null]);
+                $membership->recordAction('updated', $before, $provider);
                 $this->ldapSync->sync($membership, $wasCurrent);
             }
         }

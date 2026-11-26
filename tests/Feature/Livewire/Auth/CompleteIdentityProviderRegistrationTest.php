@@ -2,6 +2,7 @@
 
 use App\Ldap\User as LdapUser;
 use App\Livewire\Auth\CompleteIdentityProviderRegistration;
+use App\Models\ActivityLog;
 use App\Models\IdentityProviderSession;
 use App\Models\RoleMembership;
 use App\Models\User as DbUser;
@@ -76,7 +77,9 @@ test('completing registration creates exactly one LDAP entry and database accoun
     expect($dbUser)->not->toBeNull()
         ->and($dbUser->realm)->toBe($community->getShortCode())
         ->and($dbUser->email_verified_at)->not->toBeNull()
-        ->and(DbUser::where('email', $email)->count())->toBe(1);
+        ->and(DbUser::where('email', $email)->count())->toBe(1)
+        ->and(ActivityLog::where('subject_id', $dbUser->uid)->sole()->only(['action', 'actor_id']))
+        ->toBe(['action' => 'member.registered', 'actor_id' => $dbUser->uid]);
 
     $this->assertAuthenticatedAs($dbUser);
 });

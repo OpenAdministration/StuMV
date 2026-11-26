@@ -4,6 +4,7 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Locked;
@@ -53,8 +54,10 @@ class EditCommittee extends Component
         $this->validate();
 
         $c = Committee::findByName($this->realm_uid, $this->ou);
+        $before = $c->getFirstAttribute('description');
         $c->setAttribute('description', $this->description);
         $c->save();
+        resolve(ActivityLogger::class)->recordDescriptionChange('committee.updated', $this->realm_uid, $c, $before);
 
         Flux::toast(variant: 'success', text: __('common.saved'));
 

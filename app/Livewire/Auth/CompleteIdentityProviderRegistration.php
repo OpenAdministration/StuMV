@@ -102,13 +102,14 @@ class CompleteIdentityProviderRegistration extends Component
                 'realm' => $community->getFirstAttribute('ou'),
                 'email_verified_at' => now(),
             ])->save();
+            $provider = RealmIdentityProvider::find($pending['provider_id']);
+            $user->recordAction('member.registered', $this->realm_uid, $provider ? ['identity_provider' => $provider->name] : [], $eloquentUser);
 
             Auth::login($eloquentUser);
             session()->regenerate();
             session()->put('auth_time', time());
             session()->forget('identity_provider_pending');
 
-            $provider = RealmIdentityProvider::find($pending['provider_id']);
             if ($provider) {
                 resolve(IdentityProviderGroupRoleSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);
                 resolve(IdentityProviderGroupSync::class)->apply($provider, $this->username, $pending['claims'] ?? []);

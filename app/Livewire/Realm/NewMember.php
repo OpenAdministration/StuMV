@@ -5,8 +5,8 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use App\Rules\UniqueEmail;
+use App\Support\DatabaseUserProvisioner;
 use Flux\Flux;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Validate;
@@ -90,18 +90,9 @@ class NewMember extends Component
             // model right after an insert - refresh so getConvertedGuid()
             // below actually returns it.
             $user->refresh();
+            $user->recordAction('member.created', $this->realm_uid);
 
-            \App\Models\User::updateOrCreate(
-                ['uid' => $user->getConvertedGuid()],
-                [
-                    'username' => $this->username,
-                    'full_name' => $this->first_name.' '.$this->last_name,
-                    'email' => $this->email,
-                    'email_verified_at' => now(),
-                    'password' => password_hash(Str::random(40), PASSWORD_ARGON2ID),
-                    'realm' => $this->realm_uid,
-                ],
-            );
+            DatabaseUserProvisioner::ensure($realm, $user)->markEmailAsVerified();
         } catch (LdapRecordException $ldapRecordException) {
             report($ldapRecordException);
             $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));

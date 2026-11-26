@@ -7,6 +7,7 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Models\GroupMembership;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
@@ -178,7 +179,8 @@ class ListRolesInGroup extends Component
         $groupRole = GroupMembership::findOrFail($this->deleteGroupRoleId);
         abort_unless($groupRole->group_dn === $this->group_dn, 404);
 
-        GroupMembership::whereKey($this->deleteGroupRoleId)->delete();
+        $groupRole->delete();
+        resolve(ActivityLogger::class)->recordEntry('group_role.removed', $this->realm_uid, Group::findOrFail($this->group_dn), ['role' => $groupRole->role_dn]);
 
         $this->close();
     }

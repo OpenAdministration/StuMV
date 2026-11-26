@@ -69,6 +69,7 @@ class ChangePassword extends Component
         $ldapUser = $this->findLdapUser();
         $ldapUser->setAttribute('userPassword', '{ARGON2}'.password_hash($this->password, PASSWORD_ARGON2ID));
         $ldapUser->save();
+        $ldapUser->recordAction('profile.password_changed', $this->realm_uid);
 
         Flux::toast(variant: 'success', text: __('profile.password_changed'));
 

@@ -33,6 +33,7 @@ use App\Livewire\Profile\Memberships;
 use App\Livewire\Profile\Picture;
 use App\Livewire\Profile\Profile;
 use App\Livewire\Realm\CommunityDashboard;
+use App\Livewire\Realm\ListActivityLogs;
 use App\Livewire\Realm\ListAdmins;
 use App\Livewire\Realm\ListMembers;
 use App\Livewire\Realm\ListModerators;
@@ -171,6 +172,7 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
         });
         Route::livewire('{realm}/settings', SettingsDashboard::class)->name('settings.dashboard');
         Route::livewire('{realm}/settings/edit', EditRealm::class)->name('realms.edit');
+        Route::livewire('{realm}/activity-log', ListActivityLogs::class)->name('realms.activity-log');
         Route::livewire('{realm}/settings/branding', EditRealmBranding::class)->name('realms.branding');
         Route::livewire('{realm}/settings/membership-export', ListMembershipExportTemplates::class)->name('realms.membership-export');
         Route::livewire('{realm}/settings/membership-export/new', EditMembershipExportTemplate::class)->name('realms.membership-export.new');

@@ -80,7 +80,9 @@
             @endif
             @php($showSettings = auth()->user()->can('admin', $currentCommunity) || auth()->user()->can('superadmin', \App\Models\User::class))
             @php($showTools = ! $currentCommunity->isAdminRealm() && auth()->user()->can('tools', $currentCommunity))
-            @if($showSettings || $showTools)
+            {{-- in the admin realm the log spans every realm --}}
+            @php($showActivityLog = $currentCommunity->isAdminRealm() ? auth()->user()->can('superadmin', \App\Models\User::class) : $showSettings)
+            @if($showSettings || $showTools || $showActivityLog)
                 <flux:separator class="my-2" />
             @endif
             @if($showSettings)
@@ -101,6 +103,15 @@
                     :current="request()->is('*/tools') || request()->is('*/tools/*')"
                 >
                     {{ __('tools.tools') }}
+                </flux:sidebar.item>
+            @endif
+            @if($showActivityLog)
+                <flux:sidebar.item
+                    icon="scroll-text"
+                    wire:navigate
+                    :href="route('realms.activity-log', ['realm' => $realm])"
+                >
+                    {{ __('activity_log.title') }}
                 </flux:sidebar.item>
             @endif
         @endcan

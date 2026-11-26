@@ -152,6 +152,7 @@ class UsersNotInUniLdap extends Component
         if ($user && ! $user->hasAttribute('pwdAccountLockedTime')) {
             $user->setAttribute('pwdAccountLockedTime', '00000101000000Z');
             $user->save();
+            $user->recordAction('member.locked', $this->uid);
         }
 
         $this->results = array_map(

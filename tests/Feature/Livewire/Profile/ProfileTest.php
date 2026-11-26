@@ -2,6 +2,7 @@
 
 use App\Ldap\User as LdapUser;
 use App\Livewire\Profile\Profile;
+use App\Models\ActivityLog;
 use App\Models\User as DbUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -126,7 +127,8 @@ test('a realm admin sees the account-active switch and can disable a user', func
         ->select(['*', 'pwdAccountLockedTime'])
         ->where('uid', '=', $target->username)
         ->first();
-    expect($ldap->getFirstAttribute('pwdAccountLockedTime'))->toBe('00000101000000Z');
+    expect($ldap->getFirstAttribute('pwdAccountLockedTime'))->toBe('00000101000000Z')
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'member.locked', 'subject_id' => $target->uid]);
 });
 
 test('a realm admin can re-enable a previously disabled user', function (): void {
@@ -147,7 +149,8 @@ test('a realm admin can re-enable a previously disabled user', function (): void
         ->select(['*', 'pwdAccountLockedTime'])
         ->where('uid', '=', $target->username)
         ->first();
-    expect($fresh->hasAttribute('pwdAccountLockedTime'))->toBeFalse();
+    expect($fresh->hasAttribute('pwdAccountLockedTime'))->toBeFalse()
+        ->and(ActivityLog::sole()->action)->toBe('member.unlocked');
 });
 
 test('a disabled user shows as inactive when the profile loads', function (): void {

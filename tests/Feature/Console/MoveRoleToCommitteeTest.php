@@ -1,6 +1,7 @@
 <?php
 
 use App\Ldap\Role;
+use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -81,4 +82,22 @@ test('app:move-role-to-committee fails when source and target committee are the 
         'role' => 'mitglied',
         'target-committee' => 'source',
     ])->assertExitCode(1);
+});
+
+test('app:move-role-to-committee repoints activity log references without logging itself', function (): void {
+    $community = newCommunity();
+    $source = TestLdap::makeCommittee($community, 'source');
+    $target = TestLdap::makeCommittee($community, 'target');
+    $role = TestLdap::makeRole($source, 'mitglied');
+    $log = ActivityLog::forceCreate(['action' => 'role_membership.created', 'details' => ['role' => $role->getDn()]]);
+
+    $this->artisan('app:move-role-to-committee', [
+        'community' => $community->getShortCode(),
+        'committee' => 'source',
+        'role' => 'mitglied',
+        'target-committee' => 'target',
+    ])->assertExitCode(0);
+
+    expect($log->fresh()->details)->toBe(['role' => 'cn=mitglied,'.$target->getDn()])
+        ->and(ActivityLog::count())->toBe(1);
 });

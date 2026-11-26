@@ -63,7 +63,12 @@ class ListInvitations extends Component
 
         // Scoped by realm, not just id - an invitation id alone must never
         // be enough to revoke another realm's invitation.
-        Invitation::where('id', $invitationId)->where('realm', $this->uid)->delete();
+        $invitation = Invitation::where('id', $invitationId)->where('realm', $this->uid)->first();
+        if ($invitation !== null) {
+            $changes = $invitation->activityLogAttributes();
+            $invitation->delete();
+            $invitation->recordAction('revoked', $changes);
+        }
 
         Flux::toast(variant: 'success', text: __('tools.invitation_revoked'));
     }
@@ -82,7 +87,9 @@ class ListInvitations extends Component
             return;
         }
 
+        $before = $invitation->expires_at?->toDateTimeString();
         $invitation->update(['expires_at' => Invitation::freshExpiry()]);
+        $invitation->recordAction('resent', ['expires_at' => ['old' => $before, 'new' => $invitation->expires_at->toDateTimeString()]]);
 
         resolve(InvitationMailer::class)->send($invitation, $community);
 

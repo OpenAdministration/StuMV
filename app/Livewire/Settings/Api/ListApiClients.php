@@ -93,6 +93,7 @@ class ListApiClients extends Component
             $token->revoke();
         });
         $client->forceFill(['revoked' => true])->save();
+        $client->recordAction('revoked');
 
         Flux::toast(variant: 'success', text: __('api_clients.revoked_success'));
         $this->close();
@@ -119,6 +120,7 @@ class ListApiClients extends Component
         $client->authCodes()->delete();
         $client->tokens()->delete();
         $client->delete();
+        $client->recordAction('deleted');
 
         Flux::toast(variant: 'success', text: __('api_clients.deleted_success'));
         $this->closeDelete();

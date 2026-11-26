@@ -341,3 +341,8 @@ Breadcrumbs::for('realms.identity-providers.edit', function (BreadcrumbTrail $tr
     $trail->parent('realms.identity-providers', $routeParams);
     $trail->push(__('common.edit'), route('realms.identity-providers.edit', $routeParams), ['truncate' => true]);
 });
+
+Breadcrumbs::for('realms.activity-log', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('realms', $routeParams);
+    $trail->push(__('activity_log.title'), route('realms.activity-log', $routeParams), ['truncate' => true]);
+});

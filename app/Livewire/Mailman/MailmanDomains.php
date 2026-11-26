@@ -4,6 +4,7 @@ namespace App\Livewire\Mailman;
 
 use App\Ldap\Community;
 use App\Models\MailmanDomainRealm;
+use App\Support\ActivityLogger;
 use App\Support\MailmanClient;
 use Flux\Flux;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,13 @@ class MailmanDomains extends Component
         DB::transaction(function (): void {
             foreach ($this->allowed as ['mail_host' => $domain, 'realms' => $realms]) {
                 $realms = array_values(array_unique($realms));
+                $before = MailmanDomainRealm::where('mail_host', $domain)->orderBy('realm')->pluck('realm')->all();
+                $after = collect($realms)->sort()->values()->all();
+                if ($before !== $after) {
+                    resolve(ActivityLogger::class)->record('mailman_domain.updated', null, details: [
+                        'realms' => ['old' => $before, 'new' => $after],
+                    ], label: $domain);
+                }
                 MailmanDomainRealm::where('mail_host', $domain)->whereNotIn('realm', $realms)->delete();
                 foreach ($realms as $realm) {
                     MailmanDomainRealm::firstOrCreate(['mail_host' => $domain, 'realm' => $realm]);

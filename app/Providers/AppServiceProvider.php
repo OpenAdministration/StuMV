@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
 use App\Http\Middleware\SetContentSecurityPolicy;
 use App\Models\AccountDeletionMark;
+use App\Models\PassportClient;
 use App\Models\User;
 use App\Services\Oidc\LoggingClientRepository;
 use App\Services\Oidc\ReuseDetectingRefreshTokenRepository;
+use App\Support\ActivityLogger;
 use App\Support\MailmanClient;
 use App\Support\RealmContext;
 use App\Support\RoleMembershipLdapSync;
@@ -23,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Passport\AuthCode;
 use Laravel\Passport\Bridge\ClientRepository;
 use Laravel\Passport\Bridge\RefreshTokenRepository;
 use Laravel\Passport\Events\AccessTokenCreated;
@@ -125,6 +128,17 @@ class AppServiceProvider extends ServiceProvider
             $event->user->forceFill(['last_login_at' => Date::now()])->saveQuietly();
             if ($event->user->uid) {
                 AccountDeletionMark::where('ldap_uid', $event->user->uid)->delete();
+            }
+            // the guard sets its user only after this event
+            resolve(ActivityLogger::class)->record('login.app', $event->user->realm, label: (string) config('app.name'), actor: $event->user);
+        });
+
+        // one auth code per sign-in at a client; tokens are also issued on every refresh
+        AuthCode::created(function (AuthCode $code): void {
+            $user = User::find($code->user_id);
+            $client = PassportClient::find($code->client_id);
+            if ($user !== null && $client !== null) {
+                resolve(ActivityLogger::class)->record('login.oidc_client', $user->realm, $client, label: $client->name, actor: $user);
             }
         });
 

@@ -128,6 +128,7 @@ class ListModerators extends Component
         $this->authorize('remove_moderator', $community);
         $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteMemberUsername)->first() ?? abort(404);
         $community->moderatorsGroup()->members()->detach($user);
+        $user->recordAction('realm_moderator.removed', $community->getShortCode());
         $this->close();
     }
 

@@ -2,6 +2,7 @@
 
 use App\Ldap\Committee;
 use App\Ldap\Role;
+use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -128,4 +129,26 @@ test('app:move-committee fails for an unknown committee', function (): void {
         'committee' => 'does-not-exist',
         'target-committee' => 'target',
     ])->assertExitCode(1);
+});
+
+test('app:move-committee repoints activity log references below the committee without logging itself', function (): void {
+    $community = newCommunity();
+    $target = TestLdap::makeCommittee($community, 'target');
+    $source = TestLdap::makeCommittee($community, 'source');
+    $child = TestLdap::makeCommittee($community, 'child', parentDn: $source->getDn());
+    $log = ActivityLog::forceCreate(['action' => 'committee_moderator.added', 'details' => [
+        'committee' => $child->getDn(),
+        'role' => 'cn=mitglied,'.$source->getDn(),
+    ]]);
+
+    $this->artisan('app:move-committee', [
+        'community' => $community->getShortCode(),
+        'committee' => 'source',
+        'target-committee' => 'target',
+    ])->assertExitCode(0);
+
+    expect($log->fresh()->details)->toBe([
+        'committee' => 'ou=child,ou=source,'.$target->getDn(),
+        'role' => 'cn=mitglied,ou=source,'.$target->getDn(),
+    ])->and(ActivityLog::count())->toBe(1);
 });

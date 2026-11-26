@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMembership;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -83,6 +84,7 @@ class AddRoleToGroup extends Component
                 'group_dn' => $group->getDn(),
                 'role_dn' => $roleDn,
             ]);
+            resolve(ActivityLogger::class)->recordEntry('group_role.added', $this->uid, $group, ['role' => $roleDn]);
         }
 
         Flux::toast(variant: 'success', text: trans_choice('groups.success_role_add', count($this->selected_role_dns)));

@@ -167,6 +167,7 @@ class InviteUser extends Component
             ]);
         }
 
+        $invitation->recordAction('created', $invitation->activityLogAttributes());
         resolve(InvitationMailer::class)->send($invitation, $community);
 
         Flux::toast(variant: 'success', text: __('tools.invitation_sent', ['email' => $invitation->email]));

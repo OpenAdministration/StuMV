@@ -146,7 +146,8 @@ class EditIdentityProvider extends Component
     {
         $this->validate();
 
-        $this->provider()->update(array_filter([
+        $provider = $this->provider();
+        $provider->update(array_filter([
             'name' => $this->name,
             'issuer' => rtrim($this->issuer, '/'),
             'client_id' => $this->client_id,
@@ -156,6 +157,7 @@ class EditIdentityProvider extends Component
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
         ], fn ($value) => $value !== null));
+        $provider->recordAction('updated');
 
         Flux::toast(variant: 'success', text: __('identity_providers.edit_success'));
 
@@ -170,11 +172,12 @@ class EditIdentityProvider extends Component
             'new_role_cn' => 'required|string',
         ]);
 
-        $this->provider()->roleMappings()->create([
+        $mapping = $this->provider()->roleMappings()->create([
             'external_group' => $this->new_external_group,
             'committee_dn' => $this->new_committee_dn,
             'role_cn' => $this->new_role_cn,
         ]);
+        $this->provider()->recordAction('role_mapping_added', $mapping->only('external_group', 'committee_dn', 'role_cn'));
 
         $this->reset('new_external_group', 'new_committee_dn', 'new_role_cn');
 
@@ -191,7 +194,9 @@ class EditIdentityProvider extends Component
 
     public function deleteMappingCommit(): void
     {
-        $this->provider()->roleMappings()->findOrFail($this->deleteMappingId)->delete();
+        $mapping = $this->provider()->roleMappings()->findOrFail($this->deleteMappingId);
+        $mapping->delete();
+        $this->provider()->recordAction('role_mapping_removed', $mapping->only('external_group', 'committee_dn', 'role_cn'));
 
         Flux::toast(variant: 'success', text: __('identity_providers.mapping_deleted_success'));
         $this->closeDeleteMapping();
@@ -210,10 +215,11 @@ class EditIdentityProvider extends Component
             'new_group_dn' => 'required|string',
         ]);
 
-        $this->provider()->groupMappings()->create([
+        $mapping = $this->provider()->groupMappings()->create([
             'external_group' => $this->new_group_external_group,
             'group_dn' => $this->new_group_dn,
         ]);
+        $this->provider()->recordAction('group_mapping_added', $mapping->only('external_group', 'group_dn'));
 
         $this->reset('new_group_external_group', 'new_group_dn');
 
@@ -230,7 +236,9 @@ class EditIdentityProvider extends Component
 
     public function deleteGroupMappingCommit(): void
     {
-        $this->provider()->groupMappings()->findOrFail($this->deleteGroupMappingId)->delete();
+        $mapping = $this->provider()->groupMappings()->findOrFail($this->deleteGroupMappingId);
+        $mapping->delete();
+        $this->provider()->recordAction('group_mapping_removed', $mapping->only('external_group', 'group_dn'));
 
         Flux::toast(variant: 'success', text: __('identity_providers.group_mapping_deleted_success'));
         $this->closeDeleteGroupMapping();

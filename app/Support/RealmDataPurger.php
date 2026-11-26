@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Ldap\Group;
+use App\Models\ActivityLog;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\Invitation;
@@ -71,6 +72,10 @@ class RealmDataPurger
 
             RealmContact::where('realm', $uid)->delete();
             MembershipExportTemplate::where('realm', $uid)->delete();
+            // with a retention period the entries expire on their own
+            if (config('activity_log.retention_days') === null) {
+                ActivityLog::where('realm', $uid)->delete();
+            }
 
             // Child identity_provider_role_mappings rows cascade via their own
             // FK (see 2026_07_20_000006_create_realm_identity_providers_table).

@@ -63,6 +63,7 @@ class EditOidcClientLogo extends Component
         $client = $this->client();
         $this->deleteOidcClientLogo($client->logo_id);
         $client->forceFill(['logo_id' => $this->storeOidcClientLogo($this->logo)])->save();
+        $client->recordAction('updated');
         $this->reset('logo');
 
         Flux::toast(variant: 'success', text: __('oidc_clients.logo_saved'));
@@ -75,6 +76,7 @@ class EditOidcClientLogo extends Component
         $client = $this->client();
         $this->deleteOidcClientLogo($client->logo_id);
         $client->forceFill(['logo_id' => null])->save();
+        $client->recordAction('updated');
 
         Flux::toast(variant: 'success', text: __('oidc_clients.logo_removed'));
     }

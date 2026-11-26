@@ -127,6 +127,7 @@ class ListGroupMailmanLists extends Component
     {
         $mapping = GroupMailmanList::where('realm', $this->uid)->findOrFail($mappingId);
         $mapping->update(['enabled' => ! $mapping->enabled]);
+        $mapping->recordAction('updated');
         unset($this->statuses[$mapping->id]);
 
         Flux::toast(variant: 'success', text: __($mapping->enabled ? 'group_mailman_lists.enabled_success' : 'group_mailman_lists.disabled_success', ['name' => $mapping->mailman_list_id]));
@@ -172,7 +173,11 @@ class ListGroupMailmanLists extends Component
 
     public function deleteCommit(): void
     {
-        GroupMailmanList::where('realm', $this->uid)->findOrFail($this->deleteMappingId)->delete();
+        $mapping = GroupMailmanList::where('realm', $this->uid)->findOrFail($this->deleteMappingId);
+        // taken before, the groups go with the list
+        $snapshot = $mapping->activityLogSnapshot();
+        $mapping->delete();
+        $mapping->recordAction('deleted', $snapshot);
 
         Flux::toast(variant: 'success', text: __('group_mailman_lists.deleted_success'));
         $this->closeDelete();

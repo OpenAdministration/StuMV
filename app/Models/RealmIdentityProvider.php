@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActions;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RealmIdentityProvider extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, RecordsActions;
 
     /**
      * @var array
@@ -56,5 +57,19 @@ class RealmIdentityProvider extends Model
     public function groupMappings(): HasMany
     {
         return $this->hasMany(IdentityProviderGroupMapping::class, 'provider_id');
+    }
+
+    protected function activityLogName(): string
+    {
+        return 'identity_provider';
+    }
+
+    /** @return array{role_mappings: list<array<string, mixed>>, group_mappings: list<array<string, mixed>>} */
+    public function mappingsForActivityLog(): array
+    {
+        return [
+            'role_mappings' => $this->roleMappings()->get(['external_group', 'committee_dn', 'role_cn'])->toArray(),
+            'group_mappings' => $this->groupMappings()->get(['external_group', 'group_dn'])->toArray(),
+        ];
     }
 }

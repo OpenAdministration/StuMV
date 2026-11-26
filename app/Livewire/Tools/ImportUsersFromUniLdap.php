@@ -6,8 +6,8 @@ use App\Ldap\Community;
 use App\Ldap\Uni\User as UniLdapUser;
 use App\Ldap\User;
 use App\Rules\UniqueEmail;
+use App\Support\DatabaseUserProvisioner;
 use Flux\Flux;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -100,15 +100,11 @@ class ImportUsersFromUniLdap extends Component
         $user->setDn("uid=$this->username,".$community->peopleDn());
         try {
             $user->save();
+            // entryUUID is server-assigned, the database row links to it
+            $user->refresh();
+            $user->recordAction('member.imported', $this->uid);
 
-            \App\Models\User::create([
-                'username' => $this->username,
-                'full_name' => trim($this->firstname.' '.$this->lastname),
-                'email' => $this->email,
-                'email_verified_at' => now(),
-                'password' => Hash::make(Str::uuid()),
-                'realm' => $this->uid,
-            ]);
+            DatabaseUserProvisioner::ensure($community, $user)->markEmailAsVerified();
 
             Flux::toast(variant: 'success', text: __('tools.userCreatedSuccessfully'));
 
@@ -118,7 +114,8 @@ class ImportUsersFromUniLdap extends Component
             $this->firstname = '';
             $this->lastname = '';
         } catch (LdapRecordException $ldapRecordException) {
-            dump($ldapRecordException->getDetailedError());
+            report($ldapRecordException);
+            $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));
         }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Profile\ChangePassword;
+use App\Models\ActivityLog;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -18,6 +19,9 @@ test('a user can change their own password and log in with it', function (): voi
         ->set('password_confirmation', $newPassword)
         ->call('save')
         ->assertHasNoErrors();
+
+    expect(ActivityLog::sole()->only(['action', 'subject_id', 'actor_id', 'details']))
+        ->toBe(['action' => 'profile.password_changed', 'subject_id' => $user->uid, 'actor_id' => $user->uid, 'details' => null]);
 
     // Prove the directory really accepts the new password on bind.
     auth()->logout();

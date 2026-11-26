@@ -52,6 +52,7 @@ class NewApiClient extends Component
             'community_uid' => $this->uid,
             'scopes' => array_values($this->scopes),
         ])->save();
+        $client->recordAction('created');
 
         $this->createdClientId = $client->id;
         $this->createdClientSecret = $client->plainSecret;

@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -22,6 +23,8 @@ class Kernel extends ConsoleKernel
             ->when(fn (): bool => (bool) config('services.mailman.api_url'));
         $schedule->command('app:mark-inactive-accounts')->dailyAt('03:00')->withoutOverlapping()->onOneServer();
         $schedule->command('app:delete-marked-accounts')->dailyAt('03:30')->withoutOverlapping()->onOneServer();
+        $schedule->command('model:prune', ['--model' => [ActivityLog::class]])->dailyAt('04:00')->onOneServer()
+            ->when(fn (): bool => config('activity_log.retention_days') !== null || config('activity_log.login_retention_days') !== null);
     }
 
     /**

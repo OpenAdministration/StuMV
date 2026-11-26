@@ -50,6 +50,7 @@ class NewModerator extends Component
                 $user = User::findOrFail($dn);
                 $realm = Community::findOrFailByUid($this->realm_uid);
                 $realm->moderatorsGroup()->members()->attach($user);
+                $user->recordAction('realm_moderator.added', $realm->getShortCode());
 
                 Flux::toast(variant: 'success', text: __('common.added_new_moderator'));
             } catch (LdapRecordException $exception) {

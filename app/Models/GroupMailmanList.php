@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActions;
 use App\Support\MailmanListSyncStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GroupMailmanList extends Model
 {
+    use RecordsActions;
+
     protected $table = 'group_mailman_lists';
 
     protected $fillable = [
@@ -74,6 +77,29 @@ class GroupMailmanList extends Model
     {
         return [
             'enabled' => 'boolean',
+        ];
+    }
+
+    protected function activityLogName(): string
+    {
+        return 'mailing_list';
+    }
+
+    protected function activityLogLabel(): ?string
+    {
+        return $this->mailman_list_id;
+    }
+
+    /** @return array{mailman_list_id: string, enabled: bool, member_groups: list<string>, moderator_groups: list<string>} */
+    public function activityLogSnapshot(): array
+    {
+        $groups = fn (string $role): array => $this->groups()->where('role', $role)->orderBy('group_dn')->pluck('group_dn')->all();
+
+        return [
+            'mailman_list_id' => $this->mailman_list_id,
+            'enabled' => (bool) $this->enabled,
+            'member_groups' => $groups('member'),
+            'moderator_groups' => $groups('moderator'),
         ];
     }
 }

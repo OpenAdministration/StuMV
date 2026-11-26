@@ -2,6 +2,7 @@
 
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
+use App\Models\ActivityLog;
 use App\Models\User as DbUser;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Event;
@@ -92,6 +93,10 @@ test('a valid registration persists every submitted field, joins the community a
     // need to verify their email first.
     Event::assertDispatched(Registered::class);
     $this->assertGuest();
+
+    // nobody is logged in, the new account registered itself
+    expect(ActivityLog::where('subject_id', $ldapUser->getConvertedGuid())->sole()->only(['action', 'actor_id']))
+        ->toBe(['action' => 'member.registered', 'actor_id' => $ldapUser->getConvertedGuid()]);
 });
 
 test('registration is refused for a domain that is not registerable in this realm', function (): void {

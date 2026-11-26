@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use Illuminate\Console\Command;
@@ -120,8 +121,12 @@ class MoveCommittee extends Command
                 ->update(['role_dn' => $newRoleDn]);
         }
 
+        // the committee's own DN covers everything below it
+        $updatedLogs = ActivityLog::relocateDn($oldCommitteeDn, $newCommitteeDn);
+
         $this->comment("  |-> updated $updatedMemberships role membership(s)");
         $this->comment("  |-> updated $updatedGroupRelations group relation(s)");
+        $this->comment("  |-> updated $updatedLogs activity log entry(s)");
 
         return self::SUCCESS;
     }

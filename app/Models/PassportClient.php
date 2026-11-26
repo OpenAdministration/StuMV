@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActions;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Laravel\Passport\Client;
 
 class PassportClient extends Client
 {
+    use RecordsActions;
+
     /**
      * Client declares $casts as a plain property (scopes, grant_types,
      * redirect_uris, the bool flags...) - redeclaring that property here
@@ -63,5 +66,15 @@ class PassportClient extends Client
         return collect($scopes)->pluck('id')->diff(
             $grantedTokens->pluck('scopes')->flatten()
         )->isEmpty();
+    }
+
+    protected function activityLogName(): string
+    {
+        return $this->hasGrantType('client_credentials') ? 'api_client' : 'oidc_client';
+    }
+
+    protected function activityLogRealm(): ?string
+    {
+        return $this->community_uid;
     }
 }

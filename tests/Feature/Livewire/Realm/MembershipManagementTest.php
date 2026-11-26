@@ -6,6 +6,7 @@ use App\Livewire\Realm\ListAdmins;
 use App\Livewire\Realm\NewAdmin;
 use App\Livewire\Realm\NewMember;
 use App\Livewire\Realm\NewModerator;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -32,6 +33,12 @@ test('an admin can promote a member to admin', function (): void {
         ->assertHasNoErrors();
 
     expect(groupHasUid(Community::findByUid($community->getShortCode()), 'adminsGroup', $member->username))->toBeTrue();
+
+    $log = ActivityLog::sole();
+    expect($log->action)->toBe('realm_admin.added')
+        ->and($log->realm)->toBe($community->getShortCode())
+        ->and($log->subject_id)->toBe($member->uid)
+        ->and($log->details)->toBeNull();
 });
 
 test('an admin can remove another admin', function (): void {
@@ -43,7 +50,8 @@ test('an admin can remove another admin', function (): void {
         ->call('deletePrepare', $target->username)
         ->call('deleteCommit');
 
-    expect(groupHasUid(Community::findByUid($community->getShortCode()), 'adminsGroup', $target->username))->toBeFalse();
+    expect(groupHasUid(Community::findByUid($community->getShortCode()), 'adminsGroup', $target->username))->toBeFalse()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'realm_admin.removed', 'subject_id' => $target->uid]);
 });
 
 test('an admin can add a moderator', function (): void {
@@ -57,7 +65,8 @@ test('an admin can add a moderator', function (): void {
         ->call('save')
         ->assertHasNoErrors();
 
-    expect(groupHasUid(Community::findByUid($community->getShortCode()), 'moderatorsGroup', $member->username))->toBeTrue();
+    expect(groupHasUid(Community::findByUid($community->getShortCode()), 'moderatorsGroup', $member->username))->toBeTrue()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'realm_moderator.added', 'subject_id' => $member->uid]);
 });
 
 test('a super admin can add a community member', function (): void {
@@ -84,5 +93,9 @@ test('a super admin can add a community member', function (): void {
 
     expect($ldapUser)->not->toBeNull()
         ->and($ldapUser->getDn())->toEndWith(','.$community->peopleDn())
-        ->and(User::where('username', $username)->value('realm'))->toBe($community->getShortCode());
+        ->and(User::where('username', $username)->value('realm'))->toBe($community->getShortCode())
+        ->and(User::where('username', $username)->value('uid'))->toBe($ldapUser->getConvertedGuid())
+        ->and(User::where('username', $username)->value('email_verified_at'))->not->toBeNull()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id', 'subject_label']))
+        ->toBe(['action' => 'member.created', 'subject_id' => $ldapUser->getConvertedGuid(), 'subject_label' => 'New Member']);
 });

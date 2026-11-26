@@ -5,6 +5,7 @@ namespace App\Livewire\Settings\Domain;
 use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Rules\UniqueDomain;
+use App\Support\ActivityLogger;
 use dacoto\DomainValidator\Validator\Domain as DomainValidator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -58,6 +59,7 @@ class NewDomain extends Component
 
         $d->setDn("dc=$this->dc,".Domain::dnRoot($this->uid));
         $d->save();
+        resolve(ActivityLogger::class)->record('domain.created', $this->uid, $d, ['dn' => $d->getDn()], $this->dc);
         $this->redirectRoute('realms.domains', ['realm' => $this->uid]);
     }
 }

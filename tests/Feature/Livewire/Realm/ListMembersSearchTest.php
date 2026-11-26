@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Realm\ListMembers;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use LdapRecord\Container;
@@ -199,7 +200,8 @@ test('a super admin can remove a member through the full prepare/confirm flow', 
         ->assertSet('deleteMemberUsername', $username)
         ->call('removeCommit');
 
-    expect(App\Ldap\User::query()->in($community->peopleDn())->where('uid', '=', $username)->first())->toBeNull();
+    expect(App\Ldap\User::query()->in($community->peopleDn())->where('uid', '=', $username)->first())->toBeNull()
+        ->and(ActivityLog::sole()->only(['action', 'subject_label']))->toBe(['action' => 'member.deleted', 'subject_label' => 'Alice Wonder']);
 });
 
 test('the admin/moderator permission check does not scale with the number of members shown', function (): void {

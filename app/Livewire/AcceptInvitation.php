@@ -122,10 +122,13 @@ class AcceptInvitation extends Component
                     'username' => $this->username,
                     'from' => today(),
                 ]);
+                $membership->recordAction('created');
                 resolve(RoleMembershipLdapSync::class)->sync($membership);
             }
 
             $invitation->update(['accepted_at' => now()]);
+            // the inviting person is the actor of invitation.created
+            $invitation->recordAction('accepted', ['person' => $eloquentUser->uid]);
 
             return to_route('realm.login', ['realm' => $this->realm_uid])->with('status', __('invitations.accept_success'));
 

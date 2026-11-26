@@ -2,6 +2,7 @@
 
 use App\Ldap\User as LdapUser;
 use App\Models\AccountDeletionMark;
+use App\Models\ActivityLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Date;
@@ -39,7 +40,9 @@ test('an account without a login after the deadline is deleted', function (): vo
 
     expect(ldapEntryExists($ldap))->toBeFalse()
         ->and(User::find($user->id))->toBeNull()
-        ->and(AccountDeletionMark::count())->toBe(0);
+        ->and(AccountDeletionMark::count())->toBe(0)
+        ->and(ActivityLog::where('action', 'member.deleted')->sole()->only(['subject_id', 'actor_type']))
+        ->toBe(['subject_id' => $user->uid, 'actor_type' => null]);
 });
 
 test('nothing is deleted before the deadline or on a dry run', function (): void {

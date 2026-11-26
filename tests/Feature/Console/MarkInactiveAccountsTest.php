@@ -32,6 +32,7 @@ test('the owner of an inactive account is asked by email and the account is mark
     expect($mark->ldap_uid)->toBe($ldap->getConvertedGuid())
         ->and($mark->email)->toBe($ldap->getFirstAttribute('mail'))
         ->and($mark->delete_after->toDateString())->toBe(Date::today()->addDays(30)->toDateString());
+
     Notification::assertSentOnDemand(
         InactiveAccountNotice::class,
         fn (InactiveAccountNotice $notice, array $channels, AnonymousNotifiable $notifiable): bool => $notifiable->routes['mail'] === $ldap->getFirstAttribute('mail'),

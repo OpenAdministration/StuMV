@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RecordsActions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
@@ -10,6 +11,7 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 class RealmBranding extends Model
 {
     use HasFactory;
+    use RecordsActions;
 
     /**
      * The table associated with the model.
@@ -73,5 +75,10 @@ class RealmBranding extends Model
         $config = $config->allowElement('a', ['href']);
 
         return new HtmlSanitizer($config)->sanitize((string) $html);
+    }
+
+    protected function activityLogName(): string
+    {
+        return 'realm_branding';
     }
 }

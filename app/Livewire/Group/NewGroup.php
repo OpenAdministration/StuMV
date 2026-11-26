@@ -3,6 +3,7 @@
 namespace App\Livewire\Group;
 
 use App\Ldap\Community;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -44,6 +45,7 @@ class NewGroup extends Component
             ]);
             $group->setDn("cn=$this->cn,ou=Groups,ou=$this->realm_uid,ou=Communities,{$group->getBaseDn()}");
             $group->save();
+            resolve(ActivityLogger::class)->recordEntry('group.created', $this->realm_uid, $group);
 
             Flux::toast(variant: 'success', text: __('groups.added_new_group'));
 

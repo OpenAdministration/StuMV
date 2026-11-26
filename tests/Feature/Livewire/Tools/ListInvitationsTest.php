@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Tools\ListInvitations;
+use App\Models\ActivityLog;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
 use App\Notifications\UserInvitation;
@@ -78,7 +79,8 @@ test('revoking an invitation belonging to the acting realm deletes it', function
     Livewire::test(ListInvitations::class, ['realm' => $community])
         ->call('revoke', $invitation->id);
 
-    expect(Invitation::find($invitation->id))->toBeNull();
+    expect(Invitation::find($invitation->id))->toBeNull()
+        ->and(ActivityLog::sole()->only(['action', 'subject_label']))->toBe(['action' => 'invitation.revoked', 'subject_label' => 'own@not-a-registerable-domain.invalid']);
 });
 
 test('resending an invitation refreshes its expiry and re-sends the notification', function (): void {
@@ -95,7 +97,8 @@ test('resending an invitation refreshes its expiry and re-sends the notification
     Livewire::test(ListInvitations::class, ['realm' => $community])
         ->call('resend', $invitation->id);
 
-    expect($invitation->fresh()->expires_at->isFuture())->toBeTrue();
+    expect($invitation->fresh()->expires_at->isFuture())->toBeTrue()
+        ->and(ActivityLog::sole()->action)->toBe('invitation.resent');
     Notification::assertSentOnDemand(UserInvitation::class);
 });
 

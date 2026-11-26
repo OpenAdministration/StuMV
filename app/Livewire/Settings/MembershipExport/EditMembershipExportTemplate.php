@@ -206,9 +206,11 @@ class EditMembershipExportTemplate extends Component
         ];
 
         if ($this->templateId !== null) {
-            MembershipExportTemplate::where('realm', $this->uid)->findOrFail($this->templateId)->update($values);
+            $template = MembershipExportTemplate::where('realm', $this->uid)->findOrFail($this->templateId);
+            $template->update($values);
+            $template->recordAction('updated');
         } else {
-            MembershipExportTemplate::create([...$values, 'realm' => $this->uid]);
+            MembershipExportTemplate::create([...$values, 'realm' => $this->uid])->recordAction('created');
         }
 
         Flux::toast(variant: 'success', text: __('realms.membership_export.saved'));

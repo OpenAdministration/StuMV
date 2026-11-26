@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Tools\InviteUser;
+use App\Models\ActivityLog;
 use App\Models\Invitation;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -109,7 +110,7 @@ test('removing a queued role selection removes it', function (): void {
 
 test('sending an invitation persists it with the queued role selections, scoped to the acting realm, and redirects to the pending list', function (): void {
     $community = newCommunity();
-    actingAsAdmin($community);
+    $admin = actingAsAdmin($community);
     $committee = TestLdap::makeCommittee($community);
     $role = TestLdap::makeRole($committee);
     $email = 'invitee-'.uniqid().'@not-a-registerable-domain.invalid';
@@ -131,6 +132,12 @@ test('sending an invitation persists it with the queued role selections, scoped 
         ->and($invitation->roleSelections)->toHaveCount(1)
         ->and($invitation->roleSelections->first()->committee_dn)->toBe($committee->getDn())
         ->and($invitation->roleSelections->first()->role_cn)->toBe($role->getFirstAttribute('cn'));
+
+    $log = ActivityLog::sole();
+    expect($log->action)->toBe('invitation.created')
+        ->and($log->actor_id)->toBe($admin->uid)
+        ->and($log->subject_label)->toBe($email)
+        ->and($log->details['roles'])->toBe([$role->getDn()]);
 });
 
 test('sending an invitation with no role selections at all is allowed', function (): void {

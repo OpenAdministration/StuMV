@@ -136,8 +136,10 @@ class NewGroupMailmanList extends Component
             $this->mailman_list_id = $this->createList();
         }
 
-        $mapping = $this->mappingId
-            ? tap(GroupMailmanList::where('realm', $this->uid)->findOrFail($this->mappingId))->update(['mailman_list_id' => $this->mailman_list_id])
+        $existing = $this->mappingId ? GroupMailmanList::where('realm', $this->uid)->findOrFail($this->mappingId) : null;
+        $before = $existing?->activityLogSnapshot();
+        $mapping = $existing
+            ? tap($existing)->update(['mailman_list_id' => $this->mailman_list_id])
             : GroupMailmanList::create(['realm' => $this->uid, 'mailman_list_id' => $this->mailman_list_id]);
 
         $dnsByCn = Group::query()->in(Group::dnRoot($this->uid))->get()
@@ -147,6 +149,7 @@ class NewGroupMailmanList extends Component
             'member' => $toDns($this->member_groups),
             'moderator' => $toDns($this->moderator_groups),
         ]);
+        $mapping->recordAction($before === null ? 'created' : 'updated', before: $before);
 
         Flux::toast(variant: 'success', text: match (true) {
             $createdList => __('group_mailman_lists.list_created_success', ['name' => $this->mailman_list_id]),

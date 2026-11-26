@@ -94,7 +94,7 @@ class AddUserToRole extends Component
                 $ldapUser = User::query()->in($community->peopleDn())->where('uid', '=', $username)->firstOrFail();
                 DatabaseUserProvisioner::ensure($community, $ldapUser);
 
-                return RoleMembership::create([
+                $membership = RoleMembership::create([
                     'role_cn' => $this->cn,
                     'committee_dn' => $committee->getDn(),
                     'realm' => $this->uid,
@@ -104,6 +104,9 @@ class AddUserToRole extends Component
                     'decided' => ! empty($this->decision_date) ? $this->decision_date : null,
                     'comment' => ! empty($this->comment) ? $this->comment : null,
                 ]);
+                $membership->recordAction('created');
+
+                return $membership;
             });
             Flux::toast(variant: 'success', text: __('roles.added_user', ['username' => $username, 'role' => $this->cn]));
             if (! resolve(RoleMembershipLdapSync::class)->sync($membership)) {

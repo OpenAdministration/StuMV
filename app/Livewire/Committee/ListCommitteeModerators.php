@@ -90,6 +90,7 @@ class ListCommitteeModerators extends Component
 
         $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteModeratorUsername)->first() ?? abort(404);
         $committee->moderatorsGroup()->members()->detach($user);
+        $user->recordAction('committee_moderator.removed', $community->getShortCode(), ['committee' => $committee->getDn(), 'committee_label' => $committee->getFirstAttribute('description')]);
         $this->close();
     }
 

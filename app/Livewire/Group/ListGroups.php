@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Models\GroupMailmanListGroup;
 use App\Models\GroupMembership;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
@@ -111,6 +112,9 @@ class ListGroups extends Component
             return;
         }
 
+        $group = Group::findOrFail($this->deleteGroupDn);
+        $roleDns = GroupMembership::where('group_dn', $this->deleteGroupDn)->pluck('role_dn')->all();
+
         // Delete role group relationships
         GroupMembership::where('group_dn', $this->deleteGroupDn)->delete();
 
@@ -119,6 +123,11 @@ class ListGroups extends Component
 
         // Delete group
         Group::query()->delete($this->deleteGroupDn);
+        resolve(ActivityLogger::class)->recordEntry('group.deleted', $this->realm_uid, $group, [
+            'dn' => $group->getDn(),
+            'description' => $group->getFirstAttribute('description'),
+            'roles' => $roleDns,
+        ]);
 
         // reset everything to prevent a 404 modal
         $this->reset('deleteGroupDn');

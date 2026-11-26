@@ -56,7 +56,7 @@ class NewIdentityProvider extends Component
     {
         $this->validate();
 
-        RealmIdentityProvider::create([
+        $provider = RealmIdentityProvider::create([
             'realm' => $this->uid,
             'name' => $this->name,
             'issuer' => rtrim($this->issuer, '/'),
@@ -67,6 +67,7 @@ class NewIdentityProvider extends Component
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
         ]);
+        $provider->recordAction('created');
 
         Flux::toast(variant: 'success', text: __('identity_providers.created_success'));
 

@@ -53,13 +53,14 @@ class NewPasswordController extends Controller
         // even if another realm has an account sharing the same email.
         $status = Password::reset(
             $request->only('mail', 'uid', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request): void {
+            function ($user) use ($request, $realm): void {
                 $user->forceFill([
                     'remember_token' => Str::random(60),
                 ])->save();
                 $ldapUser = $user->ldap();
                 $ldapUser->setAttribute('userPassword', '{ARGON2}'.password_hash($request->password, PASSWORD_ARGON2ID));
                 $ldapUser->save();
+                $ldapUser->recordAction('profile.password_reset', $realm->getShortCode(), actor: $user);
 
                 event(new PasswordReset($user));
             }

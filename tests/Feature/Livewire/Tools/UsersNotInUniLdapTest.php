@@ -3,6 +3,7 @@
 use App\Ldap\Domain;
 use App\Ldap\User as LdapUser;
 use App\Livewire\Tools\UsersNotInUniLdap;
+use App\Models\ActivityLog;
 use App\Models\ProfilePicture;
 use App\Models\RoleMembership;
 use App\Models\User as DbUser;
@@ -223,7 +224,8 @@ test('deleting a user removes the LDAP entry, database rows, and profile picture
 
     expect(LdapUser::findByUsername($member->username))->toBeNull()
         ->and(DbUser::where('username', $member->username)->exists())->toBeFalse()
-        ->and(ProfilePicture::where('user', $member->username)->exists())->toBeFalse();
+        ->and(ProfilePicture::where('user', $member->username)->exists())->toBeFalse()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'member.deleted', 'subject_id' => $member->uid]);
     Storage::disk('public')->assertMissing('avatars/some-file-id.webp');
 });
 
@@ -250,7 +252,8 @@ test('locking a user sets the LDAP lock attribute', function (): void {
         ->call('lockUser')
         ->assertOk();
 
-    expect(LdapUser::isLockedByUsername($member->username, $community->peopleDn()))->toBeTrue();
+    expect(LdapUser::isLockedByUsername($member->username, $community->peopleDn()))->toBeTrue()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'member.locked', 'subject_id' => $member->uid]);
 });
 
 test('a realm admin may lock a user', function (): void {

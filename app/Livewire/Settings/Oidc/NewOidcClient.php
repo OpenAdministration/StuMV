@@ -133,6 +133,7 @@ class NewOidcClient extends Component
             'post_logout_redirect_uris' => $this->postLogoutRedirectUriList() ?: null,
             'description' => $this->description ?: null,
         ])->save();
+        $client->recordAction('created');
 
         $this->created = true;
         $this->createdClientId = $client->id;

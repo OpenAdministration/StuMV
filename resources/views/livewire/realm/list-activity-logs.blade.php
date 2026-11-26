@@ -1,0 +1,83 @@
+<div class="max-w-7xl mx-auto w-full flex-col">
+    <div class="mb-8 space-y-4">
+        <flux:heading size="xl">{{ __('activity_log.title') }}</flux:heading>
+        <flux:text class="text-base">{{ __($allRealms ? 'activity_log.explanation_all' : 'activity_log.explanation') }}</flux:text>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <flux:input icon="search" clearable wire:model.live.debounce="search" :label="__('activity_log.search')" />
+        <flux:select wire:model.live="action" :label="__('activity_log.action')">
+            <flux:select.option value="">{{ __('activity_log.all_actions') }}</flux:select.option>
+            @foreach($actions as $key)
+                <flux:select.option value="{{ $key }}">{{ __('activity_log.actions.'.$key) }}</flux:select.option>
+            @endforeach
+        </flux:select>
+        <flux:input type="date" wire:model.live="from" :label="__('activity_log.from')" />
+        <flux:input type="date" wire:model.live="until" :label="__('activity_log.until')" />
+    </div>
+
+    @if($logs->isNotEmpty())
+        <flux:table>
+            <flux:table.columns>
+                <flux:table.column>{{ __('activity_log.time') }}</flux:table.column>
+                @if($allRealms)
+                    <flux:table.column>{{ __('activity_log.realm') }}</flux:table.column>
+                @endif
+                <flux:table.column>{{ __('activity_log.actor') }}</flux:table.column>
+                <flux:table.column>{{ __('activity_log.action') }}</flux:table.column>
+                <flux:table.column>{{ __('activity_log.subject') }}</flux:table.column>
+                <flux:table.column>{{ __('activity_log.details') }}</flux:table.column>
+            </flux:table.columns>
+            <flux:table.rows>
+                @foreach($logs as $log)
+                    <flux:table.row wire:key="log-{{ $log->id }}">
+                        <flux:table.cell class="whitespace-nowrap align-top">
+                            <span wire:key="time-{{ $log->id }}" wire:ignore x-data="localDateTime('{{ $log->created_at->toIso8601String() }}')">{{ $log->created_at->format('Y-m-d H:i') }} UTC</span>
+                        </flux:table.cell>
+                        @if($allRealms)
+                            <flux:table.cell class="align-top">{{ $log->realm ?? '–' }}</flux:table.cell>
+                        @endif
+                        <flux:table.cell class="align-top">
+                            @if($log->actor_type === null)
+                                {{ __('activity_log.system') }}
+                            @else
+                                {{ $actors[$log->actor_type.':'.$log->actor_id] ?? __('activity_log.deleted_actor') }}
+                            @endif
+                            @if($log->ip)
+                                <div class="text-xs text-zinc-500">{{ $log->ip }}</div>
+                            @endif
+                        </flux:table.cell>
+                        <flux:table.cell class="align-top">{{ __('activity_log.actions.'.$log->action) }}</flux:table.cell>
+                        <flux:table.cell class="align-top">{{ $log->subject_label ?? '–' }}</flux:table.cell>
+                        <flux:table.cell class="align-top">
+                            @if($log->details)
+                                <dl class="text-xs space-y-1 max-w-md">
+                                    @foreach($log->details as $field => $value)
+                                        <div class="break-words">
+                                            <dt class="inline font-medium">{{ $this->fieldLabel($field) }}:</dt>
+                                            <dd class="inline">
+                                                @if(is_array($value) && array_key_exists('old', $value) && array_key_exists('new', $value) && count($value) === 2)
+                                                    {{ $this->formatValue($value['old']) }} → {{ $this->formatValue($value['new']) }}
+                                                @elseif($field === 'person' && isset($people[$value]))
+                                                    {{ $people[$value] }}
+                                                @else
+                                                    {{ $this->formatValue($value) }}
+                                                @endif
+                                            </dd>
+                                        </div>
+                                    @endforeach
+                                </dl>
+                            @endif
+                        </flux:table.cell>
+                    </flux:table.row>
+                @endforeach
+            </flux:table.rows>
+        </flux:table>
+
+        <div class="pagination">
+            <flux:pagination :paginator="$logs" />
+        </div>
+    @else
+        <flux:callout variant="warning" icon="circle-alert" heading="{{ __('activity_log.empty') }}" />
+    @endif
+</div>

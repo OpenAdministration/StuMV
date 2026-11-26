@@ -3,6 +3,7 @@
 use App\Ldap\Community;
 use App\Ldap\Group as LdapGroup;
 use App\Ldap\User as LdapUser;
+use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
@@ -107,7 +108,9 @@ test('accepting an invitation registers the account outside the domain whitelist
         ->where('role_cn', $role->getFirstAttribute('cn'))
         ->exists())->toBeTrue();
 
-    expect($invitation->fresh()->accepted_at)->not->toBeNull();
+    expect($invitation->fresh()->accepted_at)->not->toBeNull()
+        ->and(ActivityLog::orderBy('id')->pluck('action')->all())->toBe(['role_membership.created', 'invitation.accepted'])
+        ->and(ActivityLog::whereNotNull('actor_type')->exists())->toBeFalse();
 });
 
 test('accepting an invitation with a pre-selected role also adds the user to the actual LDAP role, not just the DB', function (): void {

@@ -2,6 +2,7 @@
 
 use App\Livewire\Profile\Memberships;
 use App\Livewire\Profile\Picture;
+use App\Models\ActivityLog;
 use App\Models\ProfilePicture;
 use App\Models\RoleMembership;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -192,7 +193,8 @@ test('uploading and cropping a picture saves it, without a separate save-canvas 
         ->call('savePicture')
         ->assertRedirect(route('profile.picture', ['realm' => $community->getShortCode(), 'username' => $user->username]));
 
-    expect(ProfilePicture::where('user', $user->username)->where('realm', $community->getShortCode())->exists())->toBeTrue();
+    expect(ProfilePicture::where('user', $user->username)->where('realm', $community->getShortCode())->exists())->toBeTrue()
+        ->and(ActivityLog::sole()->only(['action', 'subject_id']))->toBe(['action' => 'profile.picture_changed', 'subject_id' => $user->uid]);
 });
 
 test('an invalid file type is rejected and never reaches storage', function (): void {

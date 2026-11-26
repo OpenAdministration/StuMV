@@ -8,6 +8,7 @@ use App\Ldap\Role;
 use App\Ldap\User;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
+use App\Support\ActivityLogger;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use LdapRecord\Models\Attributes\DistinguishedName;
@@ -206,16 +207,19 @@ class ListRoles extends Component
             return;
         }
 
-        // Delete role memberships
+        // one by one, so each removed person stays in the activity log
         RoleMembership::where('role_cn', $role->getFirstAttribute('cn'))
             ->where('committee_dn', $this->committee()->getDn())
-            ->delete();
+            ->get()
+            ->each->deleteAndRecord();
 
         // Delete role group relationships
+        $groupDns = GroupMembership::where('role_dn', $role->getDn())->pluck('group_dn')->all();
         GroupMembership::where('role_dn', $role->getDn())->delete();
 
         // Delete role
         $role->delete();
+        resolve(ActivityLogger::class)->recordRoleDeletion($this->uid, $role, $groupDns);
 
         Flux::toast(variant: 'success', text: __('roles.role_deleted'));
 

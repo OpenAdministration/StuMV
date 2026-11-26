@@ -46,6 +46,7 @@ class NewAdmin extends Component
                 $user = User::findOrFail($dn);
                 $realm = Community::findOrFailByUid($this->realm_uid);
                 $realm->adminsGroup()->members()->attach($user);
+                $user->recordAction('realm_admin.added', $realm->getShortCode());
 
                 Flux::toast(variant: 'success', text: __('realms.added_new_admin'));
             } catch (LdapRecordException $exception) {
