@@ -48,7 +48,7 @@
                                 {{ __('activity_log.deleted_actor') }}
                             @endif
                             @if($log->ip)
-                                <div class="text-xs text-zinc-500">{{ $log->ip }}</div>
+                                <div class="mt-1 text-xs text-zinc-500">{{ $log->ip }}</div>
                             @endif
                         </flux:table.cell>
                         <flux:table.cell class="align-top">{{ __('activity_log.actions.'.$log->action) }}</flux:table.cell>

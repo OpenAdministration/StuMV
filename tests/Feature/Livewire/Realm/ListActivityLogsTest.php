@@ -31,7 +31,7 @@ test('a realm admin sees their realm\'s entries with actor, action and changed f
         ->assertSee(__('activity_log.actions.role.updated'))
         // a missing translation would show its key instead
         ->assertDontSee('activity_log.actions.')
-        ->assertSee("{$admin->full_name} ({$admin->username})")
+        ->assertSee($admin->full_name)
         ->assertSee(__('activity_log.fields.description').':')
         ->assertSee('Kasse → Kassenwart')
         ->assertDontSee('Fremde Rolle');
@@ -112,7 +112,7 @@ test('a person referred to by entryUUID is shown by name while the account exist
 
     Livewire::test(ListActivityLogs::class, ['realm' => $community])
         ->assertSee(__('activity_log.fields.person').':')
-        ->assertSee("{$member->full_name} ({$member->username})")
+        ->assertSee($member->full_name)
         ->assertSee('gone-uuid');
 });
 

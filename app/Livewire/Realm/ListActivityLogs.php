@@ -118,7 +118,7 @@ class ListActivityLogs extends Component
 
         return User::whereIn('uid', $uids)->get()
             ->mapWithKeys(fn (User $user): array => [$user->uid => [
-                'name' => "{$user->full_name} ({$user->username})",
+                'name' => $user->full_name,
                 'url' => route('profile', ['realm' => $user->realm, 'username' => $user->username]),
             ]])
             ->all();
