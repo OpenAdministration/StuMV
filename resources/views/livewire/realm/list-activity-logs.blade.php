@@ -31,7 +31,8 @@
                 @foreach($logs as $log)
                     <flux:table.row wire:key="log-{{ $log->id }}">
                         <flux:table.cell class="whitespace-nowrap align-top tabular-nums">
-                            <span wire:key="time-{{ $log->id }}" wire:ignore x-data="localDateTime('{{ $log->created_at->toIso8601String() }}')">{{ $log->created_at->format('Y-m-d H:i') }} UTC</span>
+                            <span class="whitespace-pre-line" wire:key="time-{{ $log->id }}" wire:ignore x-data="localDateTime('{{ $log->created_at->toIso8601String() }}', '\n')">{{ $log->created_at->format('Y-m-d') }}
+{{ $log->created_at->format('H:i') }} UTC</span>
                         </flux:table.cell>
                         @if($allRealms)
                             <flux:table.cell class="align-top">{{ $log->realm ?? '–' }}</flux:table.cell>

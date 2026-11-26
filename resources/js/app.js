@@ -7,10 +7,10 @@ import 'cropperjs';
 // so the format stays the same, unambiguous shape regardless of the visitor's
 // browser/OS locale (toLocaleString() would e.g. render mm/dd/yyyy for an
 // en-US browser even on the German-language pages).
-function formatLocalDateTime(date) {
+function formatLocalDateTime(date, separator = ' ') {
     const pad = (n) => String(n).padStart(2, '0');
 
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}${separator}${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 document.addEventListener('alpine:init', () => {
@@ -86,9 +86,10 @@ document.addEventListener('alpine:init', () => {
     // expression: the CSP-safe Alpine build's restricted expression parser
     // can't evaluate a `new Date(...)` call inline, only a literal-argument
     // Alpine.data() call like this one.
-    Alpine.data('localDateTime', (iso) => ({
+    // separator "\n" puts the time on its own line, given white-space: pre-line
+    Alpine.data('localDateTime', (iso, separator = ' ') => ({
         init() {
-            this.$el.textContent = formatLocalDateTime(new Date(iso));
+            this.$el.textContent = formatLocalDateTime(new Date(iso), separator);
         },
     }));
 
