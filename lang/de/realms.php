@@ -154,6 +154,8 @@ return [
     'membership_export.sender_realm' => 'Studierendenschaft',
     'membership_export.sender_user' => 'Exportierende Person',
     'membership_export.sender_user_hint' => 'Name und Anschrift stammen aus dem Profil der Person, die exportiert.',
+    'membership_export.sender_member' => 'Mitglied',
+    'membership_export.sender_member_hint' => 'Name und Anschrift stammen aus dem Profil der Person, deren Mitgliedschaften exportiert werden.',
     'membership_export.recipient_member' => 'Mitglied',
     'membership_export.recipient_other' => 'Anderer Adressat',
     'membership_export.recipient_member_hint' => 'Name und Anschrift stammen aus dem Profil der Person, deren Mitgliedschaften exportiert werden.',

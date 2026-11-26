@@ -45,8 +45,8 @@ final readonly class CoverLetter
     ) {}
 
     /**
-     * The letter a template describes, sent by the realm or by $sender.
-     * $person is the one whose memberships are exported.
+     * The letter a template describes, sent by the realm, by $sender or by $person.
+     * $person is the one whose memberships are exported, $sender the one exporting.
      */
     public static function fromTemplate(MembershipExportTemplate $template, Community $community, User $person, User $sender): self
     {
@@ -65,8 +65,9 @@ final readonly class CoverLetter
             'subject' => $template->subject !== null ? LetterPlaceholders::replace($template->subject, $values, html: false) : null,
         ];
 
-        if ($template->sender === LetterSender::User) {
-            $name = (string) $sender->getFirstAttribute('cn');
+        if ($template->sender !== LetterSender::Realm) {
+            $writer = $template->sender === LetterSender::Member ? $person : $sender;
+            $name = (string) $writer->getFirstAttribute('cn');
 
             // a person's letter carries only their name and address
             return new self(
@@ -74,9 +75,9 @@ final readonly class CoverLetter
                 senderName: $name,
                 // never saved, it only carries the profile address to the return address and footer
                 contact: new RealmContact([
-                    'street' => $sender->getFirstAttribute('street'),
-                    'postal_code' => $sender->getFirstAttribute('postalCode'),
-                    'city' => $sender->getFirstAttribute('l'),
+                    'street' => $writer->getFirstAttribute('street'),
+                    'postal_code' => $writer->getFirstAttribute('postalCode'),
+                    'city' => $writer->getFirstAttribute('l'),
                 ]),
                 headerTitle: $name,
                 fromPerson: true,

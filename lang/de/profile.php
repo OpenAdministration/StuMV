@@ -30,6 +30,7 @@ return [
     'cover_letter_content' => 'Inhalt',
     'cover_letter_no_profile_address' => 'In deinem Profil ist keine Anschrift hinterlegt, sie fehlt dann im Absender des Anschreibens.',
     'cover_letter_no_member_address' => 'Im Profil des Mitglieds ist keine Anschrift hinterlegt, sie fehlt dann im Empfänger des Anschreibens.',
+    'cover_letter_no_member_sender_address' => 'Im Profil des Mitglieds ist keine Anschrift hinterlegt, sie fehlt dann im Absender des Anschreibens.',
     'cover_letter_no_contact' => 'Für den Briefkopf sind in den Einstellungen der Studierendenschaft noch keine Anschrift und Kontaktdaten hinterlegt.',
     'export_template' => 'Was benötigst du?',
     'export_template_placeholder' => 'Bitte auswählen …',

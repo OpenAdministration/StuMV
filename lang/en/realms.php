@@ -154,6 +154,8 @@ return [
     'membership_export.sender_realm' => 'Student body',
     'membership_export.sender_user' => 'Exporting person',
     'membership_export.sender_user_hint' => 'Name and address are taken from the profile of the person exporting.',
+    'membership_export.sender_member' => 'Member',
+    'membership_export.sender_member_hint' => 'Name and address are taken from the profile of the person whose memberships are exported.',
     'membership_export.recipient_member' => 'Member',
     'membership_export.recipient_other' => 'Other recipient',
     'membership_export.recipient_member_hint' => 'Name and address are taken from the profile of the person whose memberships are exported.',

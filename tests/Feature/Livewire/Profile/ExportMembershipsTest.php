@@ -244,6 +244,27 @@ test('a template of another realm cannot be chosen', function (): void {
         ->assertHasErrors(['template' => 'in']);
 });
 
+test('a letter sent by the certified person warns when their profile has no address', function (): void {
+    $community = newCommunity();
+    MembershipExportTemplate::create([
+        'realm' => $community->getShortCode(),
+        'name' => 'Eigenes Anschreiben',
+        'with_letter' => true,
+        'sender' => LetterSender::Member,
+        'body' => '<p>[person.name] war aktiv.</p>',
+    ]);
+    $member = TestLdap::member($community);
+    twoMemberships($community, $member->username);
+    actingAsAdmin($community);
+
+    Livewire::test(ExportMemberships::class, ['realm' => $community, 'username' => $member->username])
+        ->assertSee(__('profile.cover_letter_no_member_sender_address'))
+        ->assertDontSee(__('profile.cover_letter_no_profile_address'))
+        ->call('export')
+        ->assertHasNoErrors()
+        ->assertFileDownloaded();
+});
+
 test('a letter sent by the exporting person warns when their profile has no address', function (): void {
     $community = newCommunity();
     MembershipExportTemplate::create([

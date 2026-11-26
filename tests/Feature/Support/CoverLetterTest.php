@@ -87,6 +87,19 @@ test('a letter sent by a person carries their profile details', function (): voi
     expect($pdf)->not->toContain('/URI (mailto:')->not->toContain('/URI (tel:');
 });
 
+test('a letter sent by the certified person carries their profile details, not the exporting person\'s', function (): void {
+    $template = new MembershipExportTemplate(['sender' => LetterSender::Member, 'body' => '<p>Hallo</p>']);
+    $person = new User(['cn' => 'Max Muster', 'street' => 'Markt 5', 'postalCode' => '07743', 'l' => 'Jena']);
+
+    $letter = CoverLetter::fromTemplate($template, new Community(['ou' => 'stura', 'description' => 'StuRa Jena']), $person, letterSender());
+
+    expect($letter->senderName)->toBe('Max Muster')
+        ->and($letter->headerTitle)->toBe('Max Muster')
+        ->and($letter->fromPerson)->toBeTrue()
+        ->and($letter->contact?->streetLine())->toBe('Markt 5')
+        ->and($letter->contact?->cityLine())->toBe('07743 Jena');
+});
+
 test('a letter to the member is addressed to their profile address', function (): void {
     $template = new MembershipExportTemplate([
         'sender' => LetterSender::User,

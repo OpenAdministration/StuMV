@@ -30,6 +30,7 @@ return [
     'cover_letter_content' => 'Content',
     'cover_letter_no_profile_address' => 'Your profile has no postal address, so the sender of the cover letter will lack one.',
     'cover_letter_no_member_address' => 'The member\'s profile has no postal address, so the recipient of the cover letter will lack one.',
+    'cover_letter_no_member_sender_address' => 'The member\'s profile has no postal address, so the sender of the cover letter will lack one.',
     'cover_letter_no_contact' => 'No address or contact details for the letterhead have been entered in the student body settings yet.',
     'export_template' => 'What do you need?',
     'export_template_placeholder' => 'Please choose …',

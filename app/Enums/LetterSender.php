@@ -7,6 +7,8 @@ enum LetterSender: string
 {
     case Realm = 'realm';
     case User = 'user';
+    /** The person the certificate is for. */
+    case Member = 'member';
 
     public function label(): string
     {

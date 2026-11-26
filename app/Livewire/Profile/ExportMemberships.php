@@ -139,6 +139,10 @@ class ExportMemberships extends Component
             if (! $hasAddress(auth()->user()->ldap())) {
                 $warnings[] = __('profile.cover_letter_no_profile_address');
             }
+        } elseif ($template->sender === LetterSender::Member) {
+            if (! $hasAddress($this->member())) {
+                $warnings[] = __('profile.cover_letter_no_member_sender_address');
+            }
         } elseif (RealmContact::forRealm($this->realm_uid) === null) {
             $warnings[] = __('profile.cover_letter_no_contact');
         }

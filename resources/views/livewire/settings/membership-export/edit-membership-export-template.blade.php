@@ -15,7 +15,7 @@
             <flux:switch wire:model.live="withLetter" :label="__('profile.cover_letter_toggle')" align="left" />
 
             @if($withLetter)
-                <flux:radio.group wire:model.live="sender" :label="__('profile.cover_letter_sender')" variant="segmented" class="max-w-md">
+                <flux:radio.group wire:model.live="sender" :label="__('profile.cover_letter_sender')" variant="segmented" class="max-w-2xl">
                     @foreach($senders as $option)
                         <flux:radio :value="$option->value" :label="$option->label()" />
                     @endforeach
@@ -71,7 +71,7 @@
                                 <flux:input type="tel" wire:model="senderPhone" :label="__('profile.cover_letter_sender_phone')" :placeholder="$contactPhone" />
                                 <flux:input type="url" wire:model="senderWebsite" :label="__('profile.cover_letter_sender_website')" placeholder="https://" />
                             @else
-                                <flux:text>{{ __('realms.membership_export.sender_user_hint') }}</flux:text>
+                                <flux:text>{{ __('realms.membership_export.sender_'.$sender.'_hint') }}</flux:text>
                             @endif
                         </div>
                     </flux:fieldset>
