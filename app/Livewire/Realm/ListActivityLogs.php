@@ -7,6 +7,8 @@ use App\Ldap\User as LdapUser;
 use App\Models\ActivityLog;
 use App\Models\RealmIdentityProvider;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Lang;
@@ -37,6 +39,9 @@ class ListActivityLogs extends Component
 
     #[Url]
     public string $until = '';
+
+    /** The browser's, so the filter times match the local times shown. */
+    public string $timezone = 'UTC';
 
     public function mount(Community $realm): void
     {
@@ -90,8 +95,21 @@ class ListActivityLogs extends Component
         return $this->scoped(ActivityLog::query())
             ->when($this->actions !== [], fn (Builder $q) => $q->whereIn('action', $this->actions))
             ->when($this->search !== '', fn (Builder $q) => $q->where('subject_label', 'like', '%'.$this->search.'%'))
-            ->when($this->from !== '', fn (Builder $q) => $q->whereDate('created_at', '>=', $this->from))
-            ->when($this->until !== '', fn (Builder $q) => $q->whereDate('created_at', '<=', $this->until));
+            ->when($this->filterTime($this->from), fn (Builder $q, CarbonImmutable $from) => $q->where('created_at', '>=', $from))
+            // the whole minute given
+            ->when($this->filterTime($this->until), fn (Builder $q, CarbonImmutable $until) => $q->where('created_at', '<', $until->addMinute()));
+    }
+
+    /** A datetime-local value in the browser's timezone, as UTC; null when empty or invalid. */
+    private function filterTime(string $value): ?CarbonImmutable
+    {
+        $timezone = in_array($this->timezone, timezone_identifiers_list(), true) ? $this->timezone : 'UTC';
+
+        try {
+            return $value === '' ? null : CarbonImmutable::parse($value, $timezone)->utc();
+        } catch (InvalidFormatException) {
+            return null;
+        }
     }
 
     /**

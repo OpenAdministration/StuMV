@@ -4,15 +4,15 @@
         <flux:text class="text-base">{{ __($allRealms ? 'activity_log.explanation_all' : 'activity_log.explanation') }}</flux:text>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6" x-init="$wire.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone">
         <flux:input icon="search" clearable wire:model.live.debounce="search" :label="__('activity_log.search')" />
         <flux:pillbox multiple searchable wire:model.live="actions" :label="__('activity_log.action')" :placeholder="__('activity_log.all_actions')">
             @foreach($actionOptions as $key => $label)
                 <flux:pillbox.option value="{{ $key }}">{{ $label }}</flux:pillbox.option>
             @endforeach
         </flux:pillbox>
-        <flux:input type="date" wire:model.live="from" :label="__('activity_log.from')" />
-        <flux:input type="date" wire:model.live="until" :label="__('activity_log.until')" />
+        <flux:input type="datetime-local" wire:model.live="from" :label="__('activity_log.from')" />
+        <flux:input type="datetime-local" wire:model.live="until" :label="__('activity_log.until')" />
     </div>
 
     @if($logs->isNotEmpty())

@@ -53,7 +53,7 @@ test('entries can be filtered by action, affected object and date', function ():
         ->set('search', 'kas')
         ->assertSee('Kasse')->assertDontSee('Newsletter')
         ->set('search', '')
-        ->set('from', '2026-02-01')
+        ->set('from', '2026-02-01T00:00')
         ->assertSee('Newsletter')->assertDontSee('Kasse');
 });
 
@@ -128,4 +128,21 @@ test('people link to their profile, as actor, subject and in the details', funct
 
     expect($html)->toContain('href="'.route('profile', ['realm' => $uid, 'username' => $admin->username]).'"')
         ->and(substr_count($html, 'href="'.route('profile', ['realm' => $uid, 'username' => $member->username]).'"'))->toBe(2);
+});
+
+test('the time filter reads times in the browser\'s timezone and includes the whole last minute', function (): void {
+    $community = newCommunity();
+    $uid = $community->getShortCode();
+    actingAsAdmin($community);
+    logEntry($uid, 'role.created', ['subject_label' => 'Kasse', 'created_at' => '2026-01-10 11:59:30']);
+    logEntry($uid, 'group.created', ['subject_label' => 'Newsletter', 'created_at' => '2026-01-10 12:01:00']);
+
+    // 13:00 in Berlin is 12:00 UTC in January
+    Livewire::test(ListActivityLogs::class, ['realm' => $community])
+        ->set('timezone', 'Europe/Berlin')
+        ->set('until', '2026-01-10T12:59')
+        ->assertSee('Kasse')->assertDontSee('Newsletter')
+        ->set('until', '')
+        ->set('from', '2026-01-10T13:00')
+        ->assertSee('Newsletter')->assertDontSee('Kasse');
 });
