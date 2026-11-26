@@ -48,10 +48,10 @@
                             @endif
                         </flux:table.cell>
                         <flux:table.cell class="align-top">{{ __('activity_log.actions.'.$log->action) }}</flux:table.cell>
-                        <flux:table.cell class="align-top">{{ $log->subject_label ?? '–' }}</flux:table.cell>
+                        <flux:table.cell class="align-top whitespace-normal wrap-anywhere min-w-40">{{ $log->subject_label ?? '–' }}</flux:table.cell>
                         <flux:table.cell class="align-top">
                             @if($log->details)
-                                <dl class="text-xs space-y-1 max-w-md">
+                                <dl class="text-xs space-y-1 max-w-md whitespace-normal">
                                     @foreach($log->details as $field => $value)
                                         <div class="break-words">
                                             <dt class="inline font-medium">{{ $this->fieldLabel($field) }}:</dt>
