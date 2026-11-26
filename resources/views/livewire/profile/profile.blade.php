@@ -76,11 +76,6 @@
             <div class="grid lg:grid-cols-2 gap-6 mt-6">
                 <flux:phone wire:model="phone" country="DE" :label="__('profile.phone_label')" />
             </div>
-            @if($canToggleActive)
-                <flux:card class="mt-6">
-                    <flux:switch wire:model.live="userIsActive" label="{{ __('profile.user_is_active') }}" description="{{ __('profile.user_is_active_description') }}" />
-                </flux:card>
-            @endif
             <x-slot:abort_route>
                 {{ url()->previous() }}
             </x-slot:abort_route>

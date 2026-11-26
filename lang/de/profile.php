@@ -94,4 +94,12 @@ return [
     'log_out_other_sessions_confirm_warning' => 'Auf allen anderen Geräten und Browsern wird dieses Konto sofort abgemeldet. Nur die aktuelle Sitzung bleibt bestehen.',
     'other_sessions_logged_out_success' => 'Alle anderen Sitzungen wurden beendet.',
     'password_changed' => 'Passwort wurde geändert',
+    'account' => 'Konto',
+    'delete_account' => 'Konto löschen',
+    'delete_account_description' => 'Löscht das Konto samt Profil, Profilbild, Rollen- und Gruppenmitgliedschaften und Sitzungen. Das kann nicht rückgängig gemacht werden.',
+    'delete_account_confirm_title' => 'Konto endgültig löschen?',
+    'delete_account_confirm_warning' => 'Alle Daten dieses Kontos werden unwiderruflich gelöscht.',
+    'delete_account_confirmation_label' => 'Zur Bestätigung den Benutzernamen „:username“ eingeben',
+    'delete_account_confirmation_mismatch' => 'Der Benutzername stimmt nicht überein.',
+    'delete_account_success' => 'Das Konto wurde gelöscht.',
 ];

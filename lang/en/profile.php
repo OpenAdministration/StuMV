@@ -94,4 +94,12 @@ return [
     'log_out_other_sessions_confirm_warning' => 'This account will be logged out immediately on every other device and browser. Only the current session will remain.',
     'other_sessions_logged_out_success' => 'All other sessions have been ended.',
     'password_changed' => 'Password has been changed',
+    'account' => 'Account',
+    'delete_account' => 'Delete account',
+    'delete_account_description' => 'Deletes the account including profile, profile picture, role and group memberships and sessions. This cannot be undone.',
+    'delete_account_confirm_title' => 'Permanently delete account?',
+    'delete_account_confirm_warning' => 'All data of this account will be irrevocably deleted.',
+    'delete_account_confirmation_label' => 'Enter the username ":username" to confirm',
+    'delete_account_confirmation_mismatch' => 'The username does not match.',
+    'delete_account_success' => 'The account has been deleted.',
 ];

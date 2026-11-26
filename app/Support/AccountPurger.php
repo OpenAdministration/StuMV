@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
+use App\Models\AccountDeletionMark;
 use App\Models\IdentityProviderGroupGrant;
 use App\Models\Invitation;
 use App\Models\ProfilePicture;
@@ -35,6 +36,7 @@ class AccountPurger
                 ->where('committee_dn', 'like', '%'.Committee::dnRootResolved($realm))
                 ->delete();
             UserAdditionalEmail::where('username', $username)->where('realm', $realm)->delete();
+            AccountDeletionMark::where('username', $username)->where('realm', $realm)->delete();
             IdentityProviderGroupGrant::where('username', $username)
                 ->whereIn('provider_id', RealmIdentityProvider::where('realm', $realm)->select('id'))
                 ->delete();

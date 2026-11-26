@@ -58,14 +58,12 @@ class Profile extends Component
 
     public $currentUsername;
 
-    public $userIsActive = true;
-
     public function mount(Community $realm, $username)
     {
         $this->authorize('manageProfile', [User::class, $realm, $username]);
         $this->realm_uid = $realm->getShortCode();
         $this->currentUsername = $username;
-        $user = $this->findUserWithLockStatus($this->currentUsername);
+        $user = $this->findUser($this->currentUsername);
         $this->uid = $user->getFirstAttribute('uid');
         $this->givenName = $user->getFirstAttribute('givenName');
         $this->sn = $user->getFirstAttribute('sn');
@@ -77,12 +75,6 @@ class Profile extends Component
         $this->postalCode = $user->getFirstAttribute('postalCode');
         $this->city = $user->getFirstAttribute('l');
         $this->phone = $user->getFirstAttribute('telephoneNumber');
-
-        if ($user->hasAttribute('pwdAccountLockedTime') && $user->getFirstAttribute('pwdAccountLockedTime') === '00000101000000Z') {
-            $this->userIsActive = false;
-        } else {
-            $this->userIsActive = true;
-        }
     }
 
     /** @return array<string, string> */
@@ -95,7 +87,6 @@ class Profile extends Component
     {
         return view('livewire.profile.profile', [
             'verifiedAddresses' => $this->additionalEmailRows()->verified()->pluck('address')->all(),
-            'canToggleActive' => auth()->user()->can('admin', Community::findOrFailByUid($this->realm_uid)),
         ])->title(__('profile.title', ['name' => $this->givenName.' '.$this->sn]));
     }
 
@@ -210,9 +201,9 @@ class Profile extends Component
     {
         $this->validate();
         $this->validateAdditionalEmails();
-        $before = $this->profileForActivityLog($this->findUserWithLockStatus($this->uid));
+        $before = $this->profileForActivityLog($this->findUser($this->uid));
         $verifiedAddresses = $this->reconcileAdditionalEmails();
-        $user = $this->findUserWithLockStatus($this->uid);
+        $user = $this->findUser($this->uid);
         // The primary stays in first position - App\Ldap\User relies on that
         // to tell it apart from the additional addresses.
         $user->setAttribute('mail', [$this->email, ...$verifiedAddresses]);
@@ -225,25 +216,10 @@ class Profile extends Component
         $user->setAttribute('l', $this->city);
         $user->setAttribute('telephoneNumber', $this->phone);
 
-        $isCurrentlyLocked = $user->hasAttribute('pwdAccountLockedTime');
-
-        if ($this->userIsActive === $isCurrentlyLocked) {
-            $this->authorize('admin', Community::findOrFailByUid($this->realm_uid));
-        }
-
-        if ($this->userIsActive && $isCurrentlyLocked) {
-            $user->removeAttribute('pwdAccountLockedTime');
-        } elseif (! $this->userIsActive) {
-            $user->setAttribute('pwdAccountLockedTime', '00000101000000Z');
-        }
-
         $user->save();
         $details = ActivityLogger::diff($before, $this->profileForActivityLog($user));
         if ($details !== []) {
             $user->recordAction('profile.updated', $this->realm_uid, $details);
-        }
-        if ($this->userIsActive === $isCurrentlyLocked) {
-            $user->recordAction($this->userIsActive ? 'member.unlocked' : 'member.locked', $this->realm_uid);
         }
 
         \App\Models\User::where('uid', $user->getConvertedGuid())->update([
@@ -256,16 +232,10 @@ class Profile extends Component
         $this->redirect(route('profile', ['realm' => $this->realm_uid, 'username' => $this->uid]), navigate: true);
     }
 
-    /**
-     * pwdAccountLockedTime is an operational attribute: the LDAP server only
-     * returns it when explicitly named in the select, never via a plain "*"
-     * fetch. Without this, the account-active status can never be read back.
-     */
-    protected function findUserWithLockStatus(string $username): User
+    protected function findUser(string $username): User
     {
         return User::query()
             ->in(Community::findOrFailByUid($this->realm_uid)->peopleDn())
-            ->select(['*', 'pwdAccountLockedTime'])
             ->where('uid', '=', $username)
             ->first() ?? abort(404);
     }

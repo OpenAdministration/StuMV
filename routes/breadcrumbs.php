@@ -69,6 +69,11 @@ Breadcrumbs::for('profile.sessions', function (BreadcrumbTrail $trail, array $ro
     $trail->push(__('profile.sessions'), route('profile.sessions', $routeParams), ['truncate' => true]);
 });
 
+Breadcrumbs::for('profile.account', function (BreadcrumbTrail $trail, array $routeParams): void {
+    $trail->parent('profile', $routeParams);
+    $trail->push(__('profile.account'), route('profile.account', $routeParams), ['truncate' => true]);
+});
+
 Breadcrumbs::for('realms.edit', function (BreadcrumbTrail $trail, array $routeParams): void {
     $trail->parent('settings.dashboard', $routeParams);
     $trail->push(__('common.edit'), route('realms.edit', $routeParams), ['truncate' => true]);

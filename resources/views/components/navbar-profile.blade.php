@@ -7,6 +7,7 @@
                 <flux:navbar.item wire:navigate href="{{ route('profile.memberships', ['realm' => $realm, 'username' => $username]) }}">{{ __('profile.memberships') }}</flux:navbar.item>
                 <flux:navbar.item wire:navigate href="{{ route('password.change', ['realm' => $realm, 'username' => $username]) }}">{{ __('profile.change_password_title') }}</flux:navbar.item>
                 <flux:navbar.item wire:navigate href="{{ route('profile.sessions', ['realm' => $realm, 'username' => $username]) }}">{{ __('profile.sessions') }}</flux:navbar.item>
+                <flux:navbar.item wire:navigate href="{{ route('profile.account', ['realm' => $realm, 'username' => $username]) }}">{{ __('profile.account') }}</flux:navbar.item>
             </flux:navbar>
         </div>
     </div>
