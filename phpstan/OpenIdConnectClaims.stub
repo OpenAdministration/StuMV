@@ -1,0 +1,19 @@
+<?php
+
+namespace OpenIDConnect\Claims\Traits;
+
+// Claims are not only strings: email_verified is a bool, groups and address are arrays.
+trait WithClaims
+{
+    /** @var array<string, mixed> */
+    protected array $claims;
+
+    /**
+     * @param string[] $scopes
+     * @return array<string, mixed>
+     */
+    public function getClaims(array $scopes = []): array {}
+
+    /** @param array<string, mixed> $claims */
+    public function setClaims(array $claims): void {}
+}

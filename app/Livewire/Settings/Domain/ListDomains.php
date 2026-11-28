@@ -6,6 +6,7 @@ use App\Ldap\Community;
 use App\Ldap\Domain;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -31,7 +32,7 @@ class ListDomains extends Component
     #[Locked]
     public string $uid;
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
     }
@@ -42,7 +43,7 @@ class ListDomains extends Component
         return Community::findOrFailByUid($this->uid);
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -58,12 +59,12 @@ class ListDomains extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $sorted = Domain::fromCommunity($this->uid)
             ->searchFor('dc', $this->search)
             ->get()
-            ->sortBy(fn ($domain) => mb_strtolower((string) $domain->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn ($domain): string => mb_strtolower((string) $domain->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
 
         $perPage = 10;
@@ -82,7 +83,7 @@ class ListDomains extends Component
             ->title(__('realms.domains.list_title'));
     }
 
-    public function deletePrepare($dc): void
+    public function deletePrepare(string $dc): void
     {
         $this->authorize('delete', [Domain::class, $this->community()]);
         $results = Domain::fromCommunity($this->uid)->where('dc', $dc)->get();
@@ -92,7 +93,7 @@ class ListDomains extends Component
         }
     }
 
-    public function deleteCommit()
+    public function deleteCommit(): void
     {
         $this->authorize('delete', [Domain::class, $this->community()]);
         $results = Domain::fromCommunity($this->uid)->where('dc', $this->deleteDomain)->get();
@@ -104,7 +105,7 @@ class ListDomains extends Component
         }
     }
 
-    public function close()
+    public function close(): void
     {
         Flux::modal('delete')->close();
         $this->reset('deleteDomain');

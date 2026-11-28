@@ -5,6 +5,7 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
@@ -39,7 +40,7 @@ class ListModerators extends Component
         $this->community_name = $realm->getFirstAttribute('ou');
     }
 
-    public function sortBy($field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -60,15 +61,15 @@ class ListModerators extends Component
         $this->ready = true;
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findOrFailByUid($this->community_name);
 
         // admin/remove_moderator are the same check for every row (they only
         // depend on $community, never on the row) - computed once here
         // (admin hits LDAP) rather than repeatedly per row.
-        $isAdmin = auth()->user()->can('admin', $community);
-        $canRemoveModerator = auth()->user()->can('remove_moderator', $community);
+        $isAdmin = \App\Models\User::current()->can('admin', $community);
+        $canRemoveModerator = \App\Models\User::current()->can('remove_moderator', $community);
 
         if (! $this->ready) {
             return view(
@@ -84,7 +85,7 @@ class ListModerators extends Component
         $mods = $community->moderatorsGroup()->members()->get();
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
-            $mods = $mods->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
+            $mods = $mods->filter(fn ($user): bool => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
         }
         $sorted = $this->sortUsers($mods);
 
@@ -107,7 +108,7 @@ class ListModerators extends Component
         )->title(__('realms.mods_heading'));
     }
 
-    public function deletePrepare($uid): void
+    public function deletePrepare(string $uid): void
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_moderator', $community);
@@ -141,11 +142,14 @@ class ListModerators extends Component
     /**
      * Sorted client-side (rather than via an LDAP orderBy) because the
      * production directory doesn't support the sssvlv sort control.
+     *
+     * @param  Collection<array-key, User>  $users
+     * @return Collection<array-key, User>
      */
     protected function sortUsers(Collection $users): Collection
     {
         return $users
-            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
     }
 }

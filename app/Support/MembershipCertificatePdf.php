@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Enums\ExportDateFormat;
 use App\Models\RealmContact;
 use Collator;
+use Com\Tecnick\Pdf\Graph\Base;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
  * zinc rules, one table font size). Every text run sits in a structure element
  * and every rule is an artifact, so screen readers get heading and table
  * semantics and skip the decoration.
+ *
+ * @phpstan-import-type StyleDataOpt from Base
  */
 final class MembershipCertificatePdf
 {
@@ -150,7 +153,7 @@ final class MembershipCertificatePdf
 
     private TaggedPdf $pdf;
 
-    /** @var array<string, int|string> */
+    /** @var array<string, string> */
     private array $hyphenPatterns = [];
 
     private float $pageWidth;
@@ -377,7 +380,7 @@ final class MembershipCertificatePdf
         $office = implode(', ', array_filter([
             $contact?->office_building,
             $contact?->office_room ? __('profile.cover_letter_office_room', ['room' => $contact->office_room]) : null,
-        ]));
+        ], fn ($value): bool => is_string($value) && $value !== ''));
 
         // a column left out moves the ones after it to the left
         return array_values(array_filter([
@@ -417,7 +420,7 @@ final class MembershipCertificatePdf
     {
         $this->hyphenate(false);
 
-        return max(array_map(
+        return max(0.0, ...array_map(
             fn (array $entries): float => array_sum(array_map($this->footerEntryHeight(...), $entries)),
             $columns,
         )) - self::LINE_SPACING;
@@ -488,7 +491,7 @@ final class MembershipCertificatePdf
             'house' => array_filter([
                 $letter->building,
                 $letter->room ? __('profile.cover_letter_office_room', ['room' => $letter->room]) : null,
-            ]),
+            ], fn ($value): bool => is_string($value) && $value !== ''),
             'phone' => array_filter([$letter->phone]),
             'mail' => array_filter([$letter->email]),
             'globe' => array_filter([RealmContact::urlLabel((string) $letter->website)]),
@@ -831,7 +834,7 @@ final class MembershipCertificatePdf
     }
 
     /**
-     * @param  list<array{role: mixed, from: mixed, until: mixed}>  $rows
+     * @param  array<int, array{role: mixed, from: mixed, until: mixed}>  $rows
      * @param  list<array{x: float, width: float, label: string}>  $columns
      */
     private function drawTable(string $committee, array $rows, array $columns): void
@@ -1082,7 +1085,7 @@ final class MembershipCertificatePdf
      * Patterns for the current locale, or none. Parsing takes a few
      * milliseconds and never changes, so it is cached per file version.
      *
-     * @return array<string, int|string>
+     * @return array<string, string>
      */
     private function hyphenationPatterns(): array
     {
@@ -1175,7 +1178,7 @@ final class MembershipCertificatePdf
     }
 
     /**
-     * @param  array<string, string|float>  $style
+     * @param  StyleDataOpt  $style
      */
     private function pushStyle(array $style): void
     {

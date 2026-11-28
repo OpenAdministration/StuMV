@@ -4,6 +4,7 @@ namespace App\Livewire\Settings\Api;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
 use Livewire\Component;
@@ -14,6 +15,7 @@ class NewApiClient extends Component
 
     public string $name = '';
 
+    /** @var array<int, string> */
     public array $scopes = [];
 
     public string $uid = '';
@@ -22,12 +24,13 @@ class NewApiClient extends Component
 
     public ?string $createdClientSecret = null;
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -37,12 +40,12 @@ class NewApiClient extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.api.new-api-client')->title(__('api_clients.new_title'));
     }
 
-    public function save(ClientRepository $clients)
+    public function save(ClientRepository $clients): void
     {
         $this->validate();
 

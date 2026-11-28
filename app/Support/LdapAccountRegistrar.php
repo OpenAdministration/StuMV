@@ -59,7 +59,7 @@ class LdapAccountRegistrar
         // Resolve by the fresh LDAP entry's own GUID, not by username - a
         // username search could now match a different realm's existing
         // account sharing the same username.
-        $eloquentUser = User::where('uid', $user->getConvertedGuid())->first();
+        $eloquentUser = User::where('uid', $user->getConvertedGuid())->firstOrFail();
         $eloquentUser->update([
             'realm' => $realm->getFirstAttribute('ou'),
         ]);

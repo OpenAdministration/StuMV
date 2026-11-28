@@ -5,6 +5,9 @@ namespace Database\Factories;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Role>
+ */
 class RoleFactory extends Factory
 {
     protected $model = Role::class;
@@ -16,6 +19,7 @@ class RoleFactory extends Factory
         ];
     }
 
+    /** @return Factory<Role> */
     public function default_names(): Factory
     {
         return $this->sequence(

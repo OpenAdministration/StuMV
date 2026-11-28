@@ -4,6 +4,7 @@ namespace App\Livewire\Tools;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class UnusedRoles extends Component
@@ -12,7 +13,7 @@ class UnusedRoles extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
     }
@@ -22,7 +23,7 @@ class UnusedRoles extends Component
         $this->ready = true;
     }
 
-    public function render()
+    public function render(): View
     {
         if (! $this->ready) {
             return view('livewire.tools.unused-roles', [

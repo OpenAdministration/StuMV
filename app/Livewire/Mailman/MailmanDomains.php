@@ -7,6 +7,7 @@ use App\Models\MailmanDomainRealm;
 use App\Support\ActivityLogger;
 use App\Support\MailmanClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -18,8 +19,8 @@ use Throwable;
 /**
  * Super admins decide which realm may create lists under which Mailman domain.
  *
- * @property-read ?array $domains
- * @property-read array $communities
+ * @property-read ?array<int, string> $domains
+ * @property-read array<string, string> $communities
  */
 class MailmanDomains extends Component
 {
@@ -72,6 +73,7 @@ class MailmanDomains extends Component
             ->all();
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -82,7 +84,7 @@ class MailmanDomains extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.mailman.mailman-domains')
             ->title(__('mailman_domains.title'));

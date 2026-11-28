@@ -5,7 +5,12 @@ namespace App\Models;
 use App\Models\Concerns\RecordsActions;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Laravel\Passport\Client;
+use Laravel\Passport\Scope;
 
+/**
+ * @property ?string $secret hashed; Passport's untyped accessor hides it from static analysis
+ * @property ?array<int, string> $post_logout_redirect_uris
+ */
 class PassportClient extends Client
 {
     use RecordsActions;
@@ -52,6 +57,7 @@ class PassportClient extends Client
         return $this->hasGrantedScopes($user, $scopes);
     }
 
+    /** @param array<Scope> $scopes */
     private function hasGrantedScopes(Authenticatable $user, array $scopes): bool
     {
         $grantedTokens = $this->tokens()->where([

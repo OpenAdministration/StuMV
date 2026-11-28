@@ -10,6 +10,8 @@ class User extends Model
 
     /**
      * The object classes of the LDAP model.
+     *
+     * @var array<int, string>
      */
     public static array $objectClasses = [];
 }

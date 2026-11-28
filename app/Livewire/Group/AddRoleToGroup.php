@@ -8,6 +8,8 @@ use App\Ldap\Group;
 use App\Models\GroupMembership;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -21,12 +23,13 @@ class AddRoleToGroup extends Component
 
     public string $selected_committee_dn = '';
 
+    /** @var array<int, string> */
     public array $selected_role_dns = [];
 
     // Bumped on committee change so Flux rebuilds the role field and re-checks its "no results" hint.
     public int $roleFieldKey = 0;
 
-    public function mount(Community $realm, $cn)
+    public function mount(Community $realm, string $cn): void
     {
         $this->uid = $realm->getShortCode();
         $this->group_cn = Group::findOrFail(Group::dnFrom($this->uid, $cn))->getFirstAttribute('cn');
@@ -38,7 +41,7 @@ class AddRoleToGroup extends Component
         $this->roleFieldKey++;
     }
 
-    public function render()
+    public function render(): View
     {
         $committees = Committee::fromCommunity($this->uid)->recursive()->get();
         $roles = collect();
@@ -47,7 +50,7 @@ class AddRoleToGroup extends Component
             $groupDn = Group::dnFrom($this->uid, $this->group_cn);
             $addedRoleDns = GroupMembership::where('group_dn', $groupDn)->pluck('role_dn');
             $roles = $committee->roles()->get()
-                ->filter(fn ($role) => ! $addedRoleDns->contains($role->getDn()));
+                ->filter(fn ($role): bool => ! $addedRoleDns->contains($role->getDn()));
         }
 
         return view('livewire.group.add-role-to-group', [
@@ -56,6 +59,7 @@ class AddRoleToGroup extends Component
         ])->title(__('groups.roles_add_title', ['group' => $this->group_cn]));
     }
 
+    /** @return RedirectResponse|null */
     public function save()
     {
         $this->validate(['selected_role_dns' => ['required', 'array', 'min:1']]);
@@ -76,7 +80,7 @@ class AddRoleToGroup extends Component
         if ($alreadyAdded) {
             $this->addError('selected_role_dns', __('groups.role_already_added'));
 
-            return;
+            return null;
         }
 
         foreach ($this->selected_role_dns as $roleDn) {

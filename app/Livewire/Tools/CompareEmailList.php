@@ -4,6 +4,8 @@ namespace App\Livewire\Tools;
 
 use App\Ldap\Community;
 use App\Ldap\User;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -14,23 +16,24 @@ class CompareEmailList extends Component
 
     public string $emailAddressesInput = '';
 
+    /** @var array<int, array<string, mixed>> */
     public array $matches = [];
 
     public bool $comparisonCompleted = false;
 
     public bool $noMatches = false;
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.tools.compare-email-list');
     }
 
-    public function compareEmailAddressesWithLdap()
+    public function compareEmailAddressesWithLdap(): void
     {
         $this->comparisonCompleted = false;
         $this->noMatches = false;
@@ -41,7 +44,7 @@ class CompareEmailList extends Component
         // this email would otherwise show up as a false "match" here.
         $community = Community::findOrFailByUid($this->uid);
 
-        $emailAddresses = preg_split("/\r\n|\n|\r/", $this->emailAddressesInput);
+        $emailAddresses = preg_split("/\r\n|\n|\r/", $this->emailAddressesInput) ?: [];
 
         foreach ($emailAddresses as $email) {
             $user = User::query()->in($community->peopleDn())->where('mail', '=', $email)->first();

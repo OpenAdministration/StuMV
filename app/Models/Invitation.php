@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property string $realm
+ * @property string $email
+ * @property ?string $invited_by_username
+ * @property Carbon $expires_at
+ * @property ?Carbon $accepted_at
+ */
 class Invitation extends Model
 {
     protected $fillable = [
@@ -25,6 +32,7 @@ class Invitation extends Model
         ];
     }
 
+    /** @return HasMany<InvitationRoleSelection, $this> */
     public function roleSelections(): HasMany
     {
         return $this->hasMany(InvitationRoleSelection::class);
@@ -40,13 +48,13 @@ class Invitation extends Model
         resolve(ActivityLogger::class)->record("invitation.{$event}", $this->realm, $this, $details, $this->email);
     }
 
-    /** @return array{email: string, roles: list<string>, expires_at: ?string} */
+    /** @return array{email: string, roles: array<int, string>, expires_at: string} */
     public function activityLogAttributes(): array
     {
         return [
             'email' => $this->email,
             'roles' => $this->roleSelections->map(fn (InvitationRoleSelection $s): string => "cn={$s->role_cn},{$s->committee_dn}")->values()->all(),
-            'expires_at' => $this->expires_at?->toDateTimeString(),
+            'expires_at' => $this->expires_at->toDateTimeString(),
         ];
     }
 

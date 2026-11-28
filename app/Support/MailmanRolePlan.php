@@ -18,7 +18,7 @@ class MailmanRolePlan
     /**
      * @param  Collection<int, GroupMailmanList>  $mappings
      * @param  (callable(GroupMailmanList, string): void)|null  $warn
-     * @return array<int, array<string, array{missing_groups: array<int, string>, desired: array<int, string>}>> mapping id => role => plan
+     * @return array<int, array<'member'|'moderator', array{missing_groups: array<int, string>, desired: array<int, string>}>> mapping id => role => plan
      */
     public function for(Collection $mappings, ?callable $warn = null): array
     {

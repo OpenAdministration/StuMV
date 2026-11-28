@@ -7,9 +7,12 @@ use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
+use App\Models\User;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -76,6 +79,7 @@ class ListCommitteesTree extends Component
         Flux::modal('delete-committee')->show();
     }
 
+    /** @return RedirectResponse|null */
     public function deleteCommittee()
     {
         $community = Community::findByUid($this->realm_uid);
@@ -86,7 +90,7 @@ class ListCommitteesTree extends Component
         if ($this->deleteConfirmText !== $c->getFirstAttribute('ou')) {
             $this->addError('deleteConfirmText', __('common.does_not_equal', ['text' => $c->getFirstAttribute('ou')]));
 
-            return;
+            return null;
         }
 
         // Delete role memberships and role group relashionships for this committee and its descendants
@@ -137,7 +141,7 @@ class ListCommitteesTree extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findByUid($this->realm_uid);
 
@@ -156,7 +160,7 @@ class ListCommitteesTree extends Component
         // moderators (committee moderators are scoped to roles/role
         // memberships within their committee, not the committee itself) - a
         // single flat check, reused for every node in the tree.
-        $isModerator = auth()->user()->can('moderator', $community);
+        $isModerator = User::current()->can('moderator', $community);
 
         $nodes = $committees
             ->map(fn (Committee $committee): ?array => $this->buildNode($committee, $search, $isModerator))
@@ -181,7 +185,7 @@ class ListCommitteesTree extends Component
      * roles, nor any of its descendants match, so the branch is dropped
      * entirely.
      *
-     * @return array{committee: Committee, hasChildren: bool, unfolded: bool, children: array, isModerator: bool, matchingRoles: array}|null
+     * @return array<string, mixed>
      */
     protected function buildNode(Committee $committee, string $search, bool $isModerator): ?array
     {
@@ -232,6 +236,9 @@ class ListCommitteesTree extends Component
     /**
      * Sorted client-side (rather than via an LDAP orderBy) because the
      * production directory doesn't support the sssvlv sort control.
+     *
+     * @param  Collection<array-key, Committee>  $committees
+     * @return Collection<array-key, Committee>
      */
     protected function sortByName(Collection $committees): Collection
     {
@@ -247,7 +254,7 @@ class ListCommitteesTree extends Component
             $committee->getFirstAttribute('description'),
         ]);
 
-        return array_any($values, fn ($value) => mb_stripos(mb_strtolower((string) $value), $search) !== false);
+        return array_any($values, fn ($value): bool => mb_stripos(mb_strtolower((string) $value), $search) !== false);
     }
 
     /**
@@ -256,16 +263,18 @@ class ListCommitteesTree extends Component
      */
     protected function matchingRoles(Committee $committee, string $search): array
     {
-        return $committee->roles()->get()
-            ->filter(function (Role $role) use ($search): bool {
-                $values = array_filter([
-                    $role->getFirstAttribute('cn'),
-                    $role->getFirstAttribute('description'),
-                ]);
+        $matches = [];
+        foreach ($committee->roles()->get() as $role) {
+            $values = array_filter([
+                $role->getFirstAttribute('cn'),
+                $role->getFirstAttribute('description'),
+            ]);
 
-                return array_any($values, fn ($value) => mb_stripos(mb_strtolower((string) $value), $search) !== false);
-            })
-            ->values()
-            ->all();
+            if (array_any($values, fn ($value): bool => mb_stripos(mb_strtolower((string) $value), $search) !== false)) {
+                $matches[] = $role;
+            }
+        }
+
+        return $matches;
     }
 }

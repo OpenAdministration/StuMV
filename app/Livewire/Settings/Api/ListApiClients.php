@@ -5,6 +5,8 @@ namespace App\Livewire\Settings\Api;
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,6 +22,7 @@ class ListApiClients extends Component
     public string $sortField = 'name';
 
     #[Url]
+    /** @var 'asc'|'desc' */
     public string $sortDirection = 'asc';
 
     public string $uid;
@@ -32,13 +35,13 @@ class ListApiClients extends Component
 
     public string $deleteClientName = '';
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -58,18 +61,20 @@ class ListApiClients extends Component
      * OIDC clients now also carry a community_uid, so grant_types (not just
      * community_uid) is what actually distinguishes the two client kinds
      * sharing this table.
+     *
+     * @return Builder<PassportClient>
      */
-    private function scopeToRealmApiClients()
+    private function scopeToRealmApiClients(): Builder
     {
         return PassportClient::where('community_uid', $this->uid)
             ->whereJsonContains('grant_types', 'client_credentials');
     }
 
-    public function render()
+    public function render(): View
     {
         $clients = $this->scopeToRealmApiClients()
             ->when($this->search !== '', fn ($query) => $query->whereLike('name', '%'.$this->search.'%'))
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderBy($this->sortField, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
 
         return view('livewire.settings.api.list-api-clients', ['clients' => $clients])

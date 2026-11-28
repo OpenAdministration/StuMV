@@ -5,15 +5,15 @@ namespace App\Http\Controllers\Oidc;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Models\PassportClient;
+use App\Services\Oidc\SigningKeyFile;
 use App\Support\EndsAuthenticatedSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
+use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Throwable;
 
@@ -77,13 +77,13 @@ class EndSessionController extends Controller
         try {
             $config = Configuration::forAsymmetricSigner(
                 new Sha256,
-                InMemory::file(Passport::keyPath('oauth-private.key')),
-                InMemory::file(Passport::keyPath('oauth-public.key')),
+                SigningKeyFile::private(),
+                SigningKeyFile::public(),
             );
 
             $token = $config->parser()->parse($hint);
 
-            if (! $config->validator()->validate($token, new SignedWith($config->signer(), $config->verificationKey()))) {
+            if (! $token instanceof UnencryptedToken || ! $config->validator()->validate($token, new SignedWith($config->signer(), $config->verificationKey()))) {
                 return null;
             }
 

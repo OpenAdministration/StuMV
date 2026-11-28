@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Directory\Concerns;
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Passport\Guards\TokenGuard;
 
 trait AuthorizesDirectoryClient
 {
@@ -15,9 +16,9 @@ trait AuthorizesDirectoryClient
      */
     protected function authorizeClientForCommunity(Community $community): void
     {
-        /** @var PassportClient|null $client */
-        $client = Auth::guard('api')->client();
+        $guard = Auth::guard('api');
+        $client = $guard instanceof TokenGuard ? $guard->client() : null;
 
-        abort_unless($client?->community_uid === $community->getShortCode(), 403);
+        abort_unless($client instanceof PassportClient && $client->community_uid === $community->getShortCode(), 403);
     }
 }

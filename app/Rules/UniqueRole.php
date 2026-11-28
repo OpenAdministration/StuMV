@@ -28,7 +28,7 @@ class UniqueRole implements ValidationRule
             return;
         }
 
-        $committee = Committee::findByName($this->uid, $this->committee_ou);
+        $committee = Committee::findByNameOrFail($this->uid, $this->committee_ou);
         $exists = $committee->roles()->where('cn', $value)->exists();
         if ($exists) {
             $fail(__('validation.unique', ['attribute' => __('common.short_name')]));

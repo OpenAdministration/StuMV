@@ -4,11 +4,13 @@ namespace App\Support;
 
 use App\Jobs\SyncPeopleToMailmanLists;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Ldap\User as LdapUser;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
+use Illuminate\Support\Arr;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\Model as LdapModel;
 
@@ -49,7 +51,7 @@ class RoleMembershipLdapSync
                 ->map(fn (RoleMembership $m): string => strtolower("cn={$m->role_cn},{$m->committee_dn}"))
                 ->unique();
 
-            $this->setMember($role, $user->getDn(), $currentRoleDns->contains(strtolower((string) $role->getDn())));
+            $this->setMember($role, Dn::of($user), $currentRoleDns->contains(strtolower((string) $role->getDn())));
 
             $groupDns = GroupMembership::where('role_dn', $role->getDn())->pluck('group_dn')->unique()->values()->all();
             foreach ($groupDns as $groupDn) {
@@ -58,7 +60,7 @@ class RoleMembershipLdapSync
                     continue;
                 }
                 $groupRoleDns = GroupMembership::where('group_dn', $groupDn)->pluck('role_dn')->map(strtolower(...));
-                $this->setMember($group, $user->getDn(), $groupRoleDns->intersect($currentRoleDns)->isNotEmpty());
+                $this->setMember($group, Dn::of($user), $groupRoleDns->intersect($currentRoleDns)->isNotEmpty());
             }
         } catch (LdapRecordException $e) {
             report($e);
@@ -111,7 +113,7 @@ class RoleMembershipLdapSync
     private function setMember(LdapModel $entry, string $dn, bool $member): void
     {
         $values = $entry->getAttribute('uniqueMember') ?? [];
-        $existing = collect($values)->first(fn (string $value): bool => strcasecmp($value, $dn) === 0);
+        $existing = collect(Arr::wrap($values))->first(fn (string $value): bool => strcasecmp($value, $dn) === 0);
 
         if ($member && $existing === null) {
             $entry->addAttribute('uniqueMember', $dn);

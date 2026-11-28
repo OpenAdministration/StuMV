@@ -14,18 +14,19 @@ use Illuminate\Auth\Passwords\PasswordBrokerManager;
  */
 class RealmScopedPasswordBrokerManager extends PasswordBrokerManager
 {
+    /** @param array<string, mixed> $config */
     #[\Override]
     protected function createTokenRepository(array $config)
     {
-        $key = $this->app['config']['app.key'];
+        $key = $this->app->make('config')->get('app.key');
 
         if (str_starts_with((string) $key, 'base64:')) {
             $key = base64_decode(substr((string) $key, 7));
         }
 
         return new RealmScopedTokenRepository(
-            $this->app['db']->connection($config['connection'] ?? null),
-            $this->app['hash'],
+            $this->app->make('db')->connection($config['connection'] ?? null),
+            $this->app->make('hash'),
             $config['table'],
             $key,
             ($config['expire'] ?? 60) * 60,

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class GroupMailmanListGroup extends Model
 {
+    /** @var list<'member'|'moderator'> */
     public const array ROLES = ['member', 'moderator'];
 
     protected $fillable = [
@@ -30,6 +31,7 @@ class GroupMailmanListGroup extends Model
         static::deleted($forget);
     }
 
+    /** @return BelongsTo<GroupMailmanList, $this> */
     public function mailmanList(): BelongsTo
     {
         return $this->belongsTo(GroupMailmanList::class, 'group_mailman_list_id');

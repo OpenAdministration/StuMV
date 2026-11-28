@@ -9,7 +9,7 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 
 class UniqueCommittee implements ValidationRule
 {
-    public function __construct(private $realm_uid) {}
+    public function __construct(private readonly string $realm_uid) {}
 
     /**
      * Run the validation rule.

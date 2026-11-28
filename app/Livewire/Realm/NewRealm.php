@@ -8,6 +8,7 @@ use Flux\Flux;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
@@ -26,6 +27,7 @@ class NewRealm extends Component
             ->title(__('realms.new_realm_title', ['realm' => $this->uid]));
     }
 
+    /** @return false|RedirectResponse */
     public function save()
     {
         $this->validate();

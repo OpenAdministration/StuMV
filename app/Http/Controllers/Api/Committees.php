@@ -5,29 +5,30 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Ldap\Committee;
 use App\Ldap\Role;
-use App\Ldap\User;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class Committees extends Controller
 {
-    public function all(Request $request)
+    public function all(Request $request): JsonResponse
     {
-        $committees = $this->prepareData(fn (string $dn) => str_contains($dn, 'ou=Committees'));
+        $committees = $this->prepareData(fn (string $dn): bool => str_contains($dn, 'ou=Committees'));
 
         return response()->json($committees);
     }
 
-    public function fromCommunity(Request $request, string $community_uid)
+    public function fromCommunity(Request $request, string $community_uid): JsonResponse
     {
-        $committees = $this->prepareData(fn (string $dn) => str_contains($dn, "ou=Committees,ou=$community_uid"));
+        $committees = $this->prepareData(fn (string $dn): bool => str_contains($dn, "ou=Committees,ou=$community_uid"));
 
         return response()->json($committees);
     }
 
+    /** @return array<string, mixed> */
     private function prepareData(?callable $filter = null): array
     {
-        /** @var User $ldapUser */
-        $ldapUser = \Auth::user()->ldap();
+        $ldapUser = User::current()->ldap();
         $userDn = $ldapUser->getDn();
 
         $roles = Role::query()->where('uniqueMember', $userDn)->get();
@@ -44,7 +45,7 @@ class Committees extends Controller
         return $committees
             ->keyBy(
                 // change key
-                fn ($item) => $item->getFirstAttribute('ou'))->map(
+                fn ($item): string => $item->getFirstAttribute('ou'))->map(
                     // change value
                     fn ($item) => $item->getFirstAttribute('description'))->toArray();
     }

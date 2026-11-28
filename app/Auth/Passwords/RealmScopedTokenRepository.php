@@ -2,6 +2,7 @@
 
 namespace App\Auth\Passwords;
 
+use App\Models\User;
 use Illuminate\Auth\Passwords\DatabaseTokenRepository;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Support\Carbon;
@@ -29,7 +30,7 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
 
         $this->getTable()->insert([
             'email' => $email,
-            'realm' => $user->realm,
+            'realm' => $this->realmOf($user),
             'token' => $this->hasher->make($token),
             'created_at' => new Carbon,
         ]);
@@ -42,7 +43,7 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
     {
         return $this->getTable()
             ->where('email', $user->getEmailForPasswordReset())
-            ->where('realm', $user->realm)
+            ->where('realm', $this->realmOf($user))
             ->delete();
     }
 
@@ -51,7 +52,7 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
     {
         $record = (array) $this->getTable()
             ->where('email', $user->getEmailForPasswordReset())
-            ->where('realm', $user->realm)
+            ->where('realm', $this->realmOf($user))
             ->first();
 
         return $record
@@ -64,9 +65,14 @@ class RealmScopedTokenRepository extends DatabaseTokenRepository
     {
         $record = (array) $this->getTable()
             ->where('email', $user->getEmailForPasswordReset())
-            ->where('realm', $user->realm)
+            ->where('realm', $this->realmOf($user))
             ->first();
 
         return $record && $this->tokenRecentlyCreated($record['created_at']);
+    }
+
+    private function realmOf(CanResetPasswordContract $user): ?string
+    {
+        return $user instanceof User ? $user->realm : null;
     }
 }

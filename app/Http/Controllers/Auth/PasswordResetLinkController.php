@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Models\RealmBranding;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -18,7 +19,7 @@ class PasswordResetLinkController extends Controller
      *
      * @return View
      */
-    public function create(Community $realm)
+    public function create(Community $realm): Factory|\Illuminate\Contracts\View\View
     {
         return view('auth.forgot-password', [
             'realm' => $realm,

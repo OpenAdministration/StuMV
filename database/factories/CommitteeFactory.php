@@ -5,6 +5,9 @@ namespace Database\Factories;
 use App\Models\Committee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<Committee>
+ */
 class CommitteeFactory extends Factory
 {
     protected $model = Committee::class;

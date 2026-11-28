@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Ldap\Community;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class CommunityMember
         if (! ($community instanceof Community)) {
             abort(404);
         }
-        if ($request->user()->cannot('enter', $community)) {
+        if (User::current()->cannot('enter', $community)) {
             abort(403);
         }
 

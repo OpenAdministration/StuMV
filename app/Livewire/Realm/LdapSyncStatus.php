@@ -3,7 +3,10 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use App\Models\User;
 use App\Support\LdapSyncState;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
@@ -18,7 +21,7 @@ class LdapSyncStatus extends Component
 
     public function mount(string $uid): void
     {
-        abort_unless(auth()->user()->can('admin', Community::findByOrFail('ou', $uid)), 403);
+        abort_unless(User::current()->can('admin', Community::findByOrFail('ou', $uid)), 403);
 
         $this->uid = $uid;
     }
@@ -38,7 +41,7 @@ class LdapSyncStatus extends Component
         LdapSyncState::forget($this->uid);
     }
 
-    public function render(LdapSyncState $ldapState)
+    public function render(LdapSyncState $ldapState): Factory|View
     {
         try {
             $state = $ldapState->for(Community::findByOrFail('ou', $this->uid));

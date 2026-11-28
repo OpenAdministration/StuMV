@@ -35,7 +35,7 @@ class LdapSyncGroups extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         if ($this->option('date') === 'today()') {
             $date = today();
@@ -82,7 +82,7 @@ class LdapSyncGroups extends Command
 
                 $desiredDns = collect();
                 foreach ($groupRoles as $groupRole) {
-                    $roleCn = str_replace('cn=', '', substr((string) $groupRole->role_dn, 0, strpos((string) $groupRole->role_dn, ',')));
+                    $roleCn = str_replace('cn=', '', explode(',', (string) $groupRole->role_dn, 2)[0]);
                     $committeeDn = strstr((string) $groupRole->role_dn, 'ou=');
                     $key = $committeeDn.'|'.$roleCn;
 

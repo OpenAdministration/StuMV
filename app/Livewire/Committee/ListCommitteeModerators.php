@@ -6,6 +6,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -35,7 +36,7 @@ class ListCommitteeModerators extends Component
         $this->ready = true;
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
@@ -43,7 +44,7 @@ class ListCommitteeModerators extends Component
         // (matching Realm\ListModerators at the community level) - only
         // adding/removing moderators is restricted, see deletePrepare()/
         // deleteCommit()/NewCommitteeModerator.
-        $isModerator = auth()->user()->can('moderator', [$committee, $community]);
+        $isModerator = \App\Models\User::current()->can('moderator', [$committee, $community]);
 
         if (! $this->ready) {
             return view(
@@ -66,7 +67,7 @@ class ListCommitteeModerators extends Component
         )->title(__('committees.mods_heading', ['name' => $committee->getFirstAttribute('description')]));
     }
 
-    public function deletePrepare($username): void
+    public function deletePrepare(string $username): void
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $committee = Committee::findByNameOrFail($this->realm_uid, $this->ou);
@@ -103,6 +104,9 @@ class ListCommitteeModerators extends Component
     /**
      * Sorted client-side (rather than via an LDAP orderBy) because the
      * production directory doesn't support the sssvlv sort control.
+     *
+     * @param  Collection<array-key, User>  $users
+     * @return Collection<array-key, User>
      */
     protected function sortByName(Collection $users): Collection
     {

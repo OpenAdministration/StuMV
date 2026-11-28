@@ -7,9 +7,9 @@ use App\Models\User;
 
 class UserPolicy
 {
-    public function superadmin(): bool
+    public function superadmin(User $user): bool
     {
-        return auth()->user()?->ldap()->isSuperAdmin();
+        return $user->ldap()->isSuperAdmin();
     }
 
     /**

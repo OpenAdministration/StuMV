@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Database\Factories\RoleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class Role extends Model
 {
+    /** @use HasFactory<RoleFactory> */
     use HasFactory;
 
     /**
@@ -30,12 +31,12 @@ class Role extends Model
     protected $table = 'role';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = ['committee_id', 'name'];
 
     /**
-     * @return BelongsToMany
+     * @return BelongsToMany<Group, $this>
      */
     public function groups(): Relation
     {
@@ -43,7 +44,7 @@ class Role extends Model
     }
 
     /**
-     * @return BelongsTo
+     * @return BelongsTo<Committee, $this>
      */
     public function committee(): Relation
     {
@@ -51,16 +52,10 @@ class Role extends Model
     }
 
     /**
-     * @return HasMany
+     * @return HasMany<RoleMembership, $this>
      */
     public function members(): Relation
     {
         return $this->hasMany(RoleMembership::class, 'role_id');
-    }
-
-    public function addMember(User $user, Carbon $start, ?Carbon $end = null)
-    {
-        $this->members()->save($user);
-        $this->refresh();
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
 use App\Support\InvitationMailer;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -21,7 +22,7 @@ class ListInvitations extends Component
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render()
+    public function render(): View
     {
         $pending = Invitation::where('realm', $this->uid)
             ->whereNull('accepted_at')
@@ -87,7 +88,7 @@ class ListInvitations extends Component
             return;
         }
 
-        $before = $invitation->expires_at?->toDateTimeString();
+        $before = $invitation->expires_at->toDateTimeString();
         $invitation->update(['expires_at' => Invitation::freshExpiry()]);
         $invitation->recordAction('resent', ['expires_at' => ['old' => $before, 'new' => $invitation->expires_at->toDateTimeString()]]);
 

@@ -5,6 +5,7 @@ namespace App\Livewire\Settings\IdentityProvider;
 use App\Ldap\Community;
 use App\Models\RealmIdentityProvider;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,6 +20,7 @@ class ListIdentityProviders extends Component
     public string $sortField = 'name';
 
     #[Url]
+    /** @var 'asc'|'desc' */
     public string $sortDirection = 'asc';
 
     public ?string $deleteProviderId = null;
@@ -31,7 +33,7 @@ class ListIdentityProviders extends Component
         $this->uid = $realm->getShortCode();
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -41,10 +43,10 @@ class ListIdentityProviders extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $providers = RealmIdentityProvider::where('realm', $this->uid)
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderBy($this->sortField, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
 
         return view('livewire.settings.identity-provider.list-identity-providers', ['providers' => $providers])

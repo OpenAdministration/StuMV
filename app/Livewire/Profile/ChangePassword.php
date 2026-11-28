@@ -6,6 +6,9 @@ use App\Ldap\Community;
 use App\Ldap\User;
 use App\Providers\RouteServiceProvider;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Redirector;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -22,9 +25,11 @@ class ChangePassword extends Component
     #[Locked]
     public string $realm_uid;
 
+    /** @var string */
     #[Locked]
     public $currentUsername;
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -36,7 +41,7 @@ class ChangePassword extends Component
         ];
     }
 
-    public function mount(Community $realm, $username)
+    public function mount(Community $realm, string $username): void
     {
         $this->authorize('manageProfile', [User::class, $realm, $username]);
         $this->realm_uid = $realm->getShortCode();
@@ -51,7 +56,7 @@ class ChangePassword extends Component
             ->first() ?? abort(404);
     }
 
-    public function render()
+    public function render(): View
     {
         $user = $this->findLdapUser();
         $givenName = $user->getFirstAttribute('givenName');
@@ -63,7 +68,7 @@ class ChangePassword extends Component
         ])->title(__('profile.change_password_title'));
     }
 
-    public function save()
+    public function save(): Redirector|RedirectResponse
     {
         $this->validate();
         $ldapUser = $this->findLdapUser();

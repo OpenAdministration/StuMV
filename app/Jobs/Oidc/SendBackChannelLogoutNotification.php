@@ -34,12 +34,17 @@ class SendBackChannelLogoutNotification implements ShouldQueue
      */
     public function handle(BackChannelLogoutTokenBuilder $tokenBuilder): void
     {
+        $uri = $this->client->back_channel_logout_uri;
+        if (blank($uri)) {
+            return;
+        }
+
         $logoutToken = $tokenBuilder->build($this->client, $this->userId, $this->sid);
 
         try {
             Http::asForm()
                 ->timeout(5)
-                ->post($this->client->back_channel_logout_uri, [
+                ->post($uri, [
                     'logout_token' => $logoutToken->toString(),
                 ])
                 ->throw();

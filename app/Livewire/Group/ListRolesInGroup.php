@@ -4,11 +4,13 @@ namespace App\Livewire\Group;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Models\GroupMembership;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -35,15 +37,16 @@ class ListRolesInGroup extends Component
 
     public ?int $deleteGroupRoleId = null;
 
+    /** @var array<string, string> */
     public array $deleteRoleName = [];
 
     public bool $ready = false;
 
-    public function mount(Community $realm, $cn)
+    public function mount(Community $realm, string $cn): void
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->group_cn = $cn;
-        $this->group_dn = Group::findOrFail(Group::dnFrom($this->realm_uid, $cn))->getDn();
+        $this->group_dn = Dn::of(Group::findOrFail(Group::dnFrom($this->realm_uid, $cn)));
     }
 
     public function loadRoles(): void
@@ -51,7 +54,7 @@ class ListRolesInGroup extends Component
         $this->ready = true;
     }
 
-    public function sortBy($field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -67,7 +70,7 @@ class ListRolesInGroup extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         if (! $this->ready) {
             return view('livewire.group.roles', [
@@ -87,13 +90,13 @@ class ListRolesInGroup extends Component
         $rolesByDn = $groupRoles->isEmpty()
             ? collect()
             : Role::query()->in(Committee::dnRoot($this->realm_uid))->get()
-                ->keyBy(fn (Role $role) => $role->getDn())
+                ->keyBy(fn (Role $role): string => $role->getDn() ?? '')
                 ->only($groupRoles->pluck('role_dn')->unique()->all());
 
         $committeesByDn = $rolesByDn->isEmpty()
             ? collect()
             : Committee::fromCommunity($this->realm_uid)->get()
-                ->keyBy(fn (Committee $committee) => $committee->getDn());
+                ->keyBy(fn (Committee $committee): string => $committee->getDn() ?? '');
 
         $rows = $groupRoles
             ->map(function (GroupMembership $groupRole) use ($rolesByDn, $committeesByDn): ?array {

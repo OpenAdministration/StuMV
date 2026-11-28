@@ -9,6 +9,7 @@ use App\Rules\UniqueEmail;
 use App\Support\ActivityLogger;
 use App\Support\AdditionalEmailMailer;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule as ValidationRule;
 use Livewire\Attributes\Locked;
@@ -45,20 +46,26 @@ class Profile extends Component
     #[Rule('string|required')]
     public string $sn;
 
+    /** @var ?string */
     public $course;
 
+    /** @var ?string */
     public $street;
 
+    /** @var ?string */
     public $postalCode;
 
+    /** @var ?string */
     public $city;
 
+    /** @var ?string */
     #[Rule(['nullable', 'regex:/^\+[1-9]\d{6,14}$/'])]
     public $phone;
 
+    /** @var string */
     public $currentUsername;
 
-    public function mount(Community $realm, $username)
+    public function mount(Community $realm, string $username): void
     {
         $this->authorize('manageProfile', [User::class, $realm, $username]);
         $this->realm_uid = $realm->getShortCode();
@@ -83,7 +90,7 @@ class Profile extends Component
         return ['phone.regex' => __('profile.phone_invalid')];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.profile.profile', [
             'verifiedAddresses' => $this->additionalEmailRows()->verified()->pluck('address')->all(),
@@ -197,7 +204,7 @@ class Profile extends Component
         ];
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validate();
         $this->validateAdditionalEmails();

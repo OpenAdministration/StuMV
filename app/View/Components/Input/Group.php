@@ -7,6 +7,7 @@ use Illuminate\View\Component;
 
 class Group extends Component
 {
+    /** @var string */
     public $id = '';
 
     /**

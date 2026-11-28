@@ -34,11 +34,20 @@ class PassportServiceProvider extends BasePassportServiceProvider
     {
         $cryptKey = $this->makeCryptKey('private');
         $encryptionKey = $this->getEncryptionKey(resolve(Encrypter::class)->getKey());
+        // the OIDC package's constructor only takes a string key; a Defuse key would be a TypeError there
+        if (! is_string($encryptionKey)) {
+            throw new \RuntimeException('The OIDC id_token response needs APP_KEY as a plain string key.');
+        }
+
+        $keyContents = $cryptKey->getKeyContents();
+        if ($keyContents === '') {
+            throw new \RuntimeException('The Passport private key is empty.');
+        }
 
         $customClaimSets = config('openid.custom_claim_sets');
 
         $claimSets = array_map(
-            fn ($claimSet, $name) => new ClaimSet($name, $claimSet),
+            fn ($claimSet, $name): ClaimSet => new ClaimSet($name, $claimSet),
             $customClaimSets,
             array_keys($customClaimSets),
         );
@@ -48,7 +57,7 @@ class PassportServiceProvider extends BasePassportServiceProvider
             new ClaimExtractor(...$claimSets),
             Configuration::forSymmetricSigner(
                 resolve(config('openid.signer')),
-                InMemory::plainText($cryptKey->getKeyContents(), $cryptKey->getPassPhrase() ?? ''),
+                InMemory::plainText($keyContents, $cryptKey->getPassPhrase() ?? ''),
             ),
             config('openid.token_headers'),
             config('openid.use_microseconds'),

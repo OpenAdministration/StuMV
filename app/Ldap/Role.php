@@ -9,14 +9,15 @@ use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Query\Model\Builder;
 
 /**
- * @method static Builder fromCommunity(string $uid)
+ * @method static Builder<static> fromCommunity(string $uid)
  */
 class Role extends Group
 {
     use FromCommunityScopeTrait;
     use SearchScopeTrait;
 
-    public function dbMemberships()
+    /** @return \Illuminate\Database\Eloquent\Builder<RoleMembership> */
+    public function dbMemberships(): \Illuminate\Database\Eloquent\Builder
     {
         $cn = explode('=', (string) $this->getRdn(), 2)[1];
         $dn = $this->getParentDn();
@@ -30,6 +31,8 @@ class Role extends Group
 
     public function committee(): ?Committee
     {
-        return Committee::find($this->getParentDn());
+        $parentDn = $this->getParentDn();
+
+        return $parentDn === null ? null : Committee::find($parentDn);
     }
 }

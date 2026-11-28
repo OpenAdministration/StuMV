@@ -4,12 +4,16 @@ namespace App\Livewire\Tools;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Models\Invitation;
 use App\Models\InvitationRoleSelection;
+use App\Models\User;
 use App\Rules\NoPendingInvitation;
 use App\Rules\UniqueEmail;
 use App\Support\InvitationMailer;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -37,6 +41,7 @@ class InviteUser extends Component
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         $community = Community::findOrFailByUid($this->uid);
@@ -51,7 +56,7 @@ class InviteUser extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $committees = Committee::fromCommunity($this->uid)->recursive()->get();
 
@@ -96,7 +101,7 @@ class InviteUser extends Component
         // own roles() (see render()), but the submitted value is still
         // client-controlled - confirm it actually resolves to one of them
         // rather than trusting the DN string as-is.
-        $role = $committee->roles()->get()->first(fn ($role) => $role->getDn() === $this->selected_role_dn);
+        $role = $committee->roles()->get()->first(fn ($role): bool => $role->getDn() === $this->selected_role_dn);
 
         if (! $role) {
             $this->addError('selected_role_dn', __('tools.invalid_role_selection'));
@@ -104,7 +109,8 @@ class InviteUser extends Component
             return;
         }
 
-        $key = $committee->getDn().'|'.$role->getFirstAttribute('cn');
+        $roleCn = (string) $role->getFirstAttribute('cn');
+        $key = Dn::of($committee).'|'.$roleCn;
 
         if (isset($this->queuedRoleSelections[$key])) {
             $this->addError('selected_role_dn', __('tools.role_already_added'));
@@ -113,11 +119,11 @@ class InviteUser extends Component
         }
 
         $committeeLabel = $committee->getFirstAttribute('description') ?: $committee->getFirstAttribute('ou');
-        $roleLabel = $role->getFirstAttribute('description') ?: $role->getFirstAttribute('cn');
+        $roleLabel = $role->getFirstAttribute('description') ?: $roleCn;
 
         $this->queuedRoleSelections[$key] = [
-            'committee_dn' => $committee->getDn(),
-            'role_cn' => $role->getFirstAttribute('cn'),
+            'committee_dn' => Dn::of($committee),
+            'role_cn' => $roleCn,
             'label' => "{$committeeLabel} › {$roleLabel}",
         ];
 
@@ -146,7 +152,7 @@ class InviteUser extends Component
         return Committee::find($committeeDn);
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
 
@@ -155,7 +161,7 @@ class InviteUser extends Component
         $invitation = Invitation::create([
             'realm' => $this->uid,
             'email' => $this->email,
-            'invited_by_username' => auth()->user()->username,
+            'invited_by_username' => User::current()->username,
             'expires_at' => Invitation::freshExpiry(),
         ]);
 

@@ -5,20 +5,20 @@ namespace App\Ldap;
 use App\Ldap\Traits\SearchScopeTrait;
 use App\Models\User;
 use Illuminate\Support\Arr;
-use LdapRecord\Models\Attributes\DistinguishedName;
 use LdapRecord\Models\Attributes\DistinguishedNameBuilder;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Model\Builder;
 
 /**
- * @method static Builder fromCommunity(string $uid)
+ * @method static Builder<static> fromCommunity(string $uid)
  */
 class Committee extends OrganizationalUnit
 {
     use SearchScopeTrait;
 
-    public static function dnFrom(string $uid, string $ou, ?array $parent_ous = null, string $parentDn = '')
+    /** @param ?array<int, string> $parent_ous */
+    public static function dnFrom(string $uid, string $ou, ?array $parent_ous = null, string $parentDn = ''): string
     {
         // if dn is given short circuit the method
         if (! empty($parentDn)) {
@@ -31,13 +31,17 @@ class Committee extends OrganizationalUnit
         return "ou=$ou,".$parents.self::dnRoot($uid);
     }
 
+    /**
+     * @param  Builder<Committee>  $query
+     * @return Builder<Committee>
+     */
     public static function scopeFromCommunity(Builder $query, string $uid): Builder
     {
         return $query->in(self::dnRoot($uid))
             ->whereNotEquals('ou', 'Committees');
     }
 
-    public static function dnRoot(string $uid)
+    public static function dnRoot(string $uid): string
     {
         return "ou=Committees,ou=$uid,ou=Communities,{base}";
     }
@@ -53,18 +57,17 @@ class Committee extends OrganizationalUnit
         return "ou=Committees,ou=$uid,".Community::rootDn();
     }
 
-    public function setDnFrom(string $uid, string|array $ous): static
+    public function setDnFrom(string $uid, string $ou): static
     {
-        $dn = self::dnFrom($uid, $ous);
+        $dn = self::dnFrom($uid, $ou);
 
         return parent::setDn($dn);
     }
 
     public function parentCommittee(): ?Committee
     {
-        $dn = DistinguishedName::make($this->getDn());
-        $parentDn = $dn->parent();
-        if (! str_contains((string) $parentDn, ',ou=Committees,')) {
+        $parentDn = $this->getParentDn();
+        if ($parentDn === null || ! str_contains($parentDn, ',ou=Committees,')) {
             return null;
         }
 
@@ -81,9 +84,7 @@ class Committee extends OrganizationalUnit
         return $this->getFirstAttribute('ou');
     }
 
-    /**
-     * @return array returns all ou's inside the ou=Committees path starting with the uppermost Entry
-     */
+    /** @return array<int, string> */
     public function committeePath(): array
     {
         $dn = new DistinguishedNameBuilder($this->getDn());
@@ -93,16 +94,14 @@ class Committee extends OrganizationalUnit
         return array_reverse(Arr::map($ous, fn ($entry) => $entry[1]));
     }
 
-    /**
-     * @return array returns all ou's inside the ou=Committees path starting with the uppermost Entry but without itself
-     */
+    /** @return array<int, string> */
     public function parentCommitteePath(): array
     {
         return array_slice($this->committeePath(), -1);
     }
 
     /**
-     * @return Builder returns a querry wich
+     * @return Builder<Role> the roles directly inside this committee
      */
     public function roles(): Builder
     {

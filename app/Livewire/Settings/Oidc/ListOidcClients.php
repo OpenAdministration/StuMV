@@ -5,6 +5,8 @@ namespace App\Livewire\Settings\Oidc;
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,6 +22,7 @@ class ListOidcClients extends Component
     public string $sortField = 'name';
 
     #[Url]
+    /** @var 'asc'|'desc' */
     public string $sortDirection = 'asc';
 
     public string $uid;
@@ -38,7 +41,7 @@ class ListOidcClients extends Component
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -58,18 +61,20 @@ class ListOidcClients extends Component
      * OIDC clients now carry a community_uid like the Directory API's
      * clients do, so grant_types (not community_uid) is what actually
      * distinguishes the two client kinds sharing the same table.
+     *
+     * @return Builder<PassportClient>
      */
-    private function scopeToRealmOidcClients()
+    private function scopeToRealmOidcClients(): Builder
     {
         return PassportClient::where('community_uid', $this->uid)
             ->whereJsonContains('grant_types', 'authorization_code');
     }
 
-    public function render()
+    public function render(): View
     {
         $clients = $this->scopeToRealmOidcClients()
             ->when($this->search !== '', fn ($query) => $query->whereLike('name', '%'.$this->search.'%'))
-            ->orderBy($this->sortField, $this->sortDirection)
+            ->orderBy($this->sortField, $this->sortDirection === 'desc' ? 'desc' : 'asc')
             ->paginate(10);
 
         return view('livewire.settings.oidc.list-oidc-clients', ['clients' => $clients])

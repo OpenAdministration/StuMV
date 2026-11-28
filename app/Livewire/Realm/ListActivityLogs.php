@@ -10,6 +10,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Lang;
 use Livewire\Attributes\Url;
@@ -47,7 +48,7 @@ class ListActivityLogs extends Component
     {
         $this->uid = $realm->getShortCode();
         $this->allRealms = $realm->isAdminRealm();
-        abort_if($this->allRealms && ! auth()->user()->ldap()->isSuperAdmin(), 403);
+        abort_if($this->allRealms && ! User::current()->ldap()->isSuperAdmin(), 403);
     }
 
     public function updated(): void
@@ -55,7 +56,7 @@ class ListActivityLogs extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $logs = $this->query()->latest()->orderByDesc('id')->paginate(25);
 
@@ -124,6 +125,7 @@ class ListActivityLogs extends Component
     /**
      * The people the page refers to by entryUUID (as actor, subject or detail), while their account exists.
      *
+     * @param  LengthAwarePaginator<int, ActivityLog>  $logs
      * @return array<string, array{name: string, url: string}>
      */
     private function people(LengthAwarePaginator $logs): array
@@ -142,7 +144,10 @@ class ListActivityLogs extends Component
             ->all();
     }
 
-    /** @return array<string, string> */
+    /**
+     * @param  LengthAwarePaginator<int, ActivityLog>  $logs
+     * @return array<string, string>
+     */
     private function providerNames(LengthAwarePaginator $logs): array
     {
         $ids = collect($logs->items())->where('actor_type', 'identity_provider')->pluck('actor_id')->unique()->all();

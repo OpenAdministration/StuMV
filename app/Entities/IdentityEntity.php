@@ -2,6 +2,7 @@
 
 namespace App\Entities;
 
+use App\Ldap\Dn;
 use App\Ldap\Group;
 use App\Models\ProfilePicture;
 use App\Models\User;
@@ -27,7 +28,11 @@ class IdentityEntity implements IdentityEntityInterface
         // entryUUID (see User::getLdapGuidColumn()/User::ldap()), stable
         // across e.g. a MoveUserToRealm relocation. App\Http\Controllers\Oidc\UserInfoController
         // must agree with this same value for the userinfo endpoint's `sub`.
-        $this->identifier = $this->user->uid;
+        $uid = $this->user->uid;
+        if ($uid === null || $uid === '') {
+            throw new \RuntimeException("Account {$this->user->username} has no LDAP entryUUID to use as subject.");
+        }
+        $this->identifier = $uid;
 
         // The local `user` table only holds full_name/email/username (synced
         // from LDAP on login) - the rest of the standard OIDC claims live
@@ -56,8 +61,8 @@ class IdentityEntity implements IdentityEntityInterface
             // Only surfaced to clients granted the "groups" scope (see the
             // matching custom claim set in config/openid.php) - same source
             // as the Directory API's Users::groups().
-            'groups' => Group::query()->in(Group::dnRoot($this->user->realm))
-                ->where('uniqueMember', '=', $ldapUser->getDn())
+            'groups' => $this->user->realm === null ? [] : Group::query()->in(Group::dnRoot($this->user->realm))
+                ->where('uniqueMember', '=', Dn::of($ldapUser))
                 ->get()
                 ->map(fn (Group $group): string => $group->getFirstAttribute('cn'))
                 ->values()

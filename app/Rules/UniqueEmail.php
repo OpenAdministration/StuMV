@@ -14,8 +14,7 @@ class UniqueEmail implements ValidationRule
      * Scoped to a single realm - the same email can now legitimately belong
      * to independent accounts in different realms (each account is clearly
      * assigned to one realm), so uniqueness is only meaningful within one.
-     */
-    /**
+     *
      * $ignoreUsername exempts one account's own entry, so re-saving addresses
      * it already holds doesn't collide with itself. "mail" is multi-valued
      * (see App\Ldap\User), so this covers primary and additional addresses

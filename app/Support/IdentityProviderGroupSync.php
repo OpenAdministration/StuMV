@@ -31,6 +31,7 @@ use Illuminate\Support\Collection;
  */
 class IdentityProviderGroupSync
 {
+    /** @param array<string, mixed> $claims */
     public function apply(RealmIdentityProvider $provider, string $username, array $claims): void
     {
         $claimKey = $provider->groups_claim ?: 'groups';
@@ -51,7 +52,6 @@ class IdentityProviderGroupSync
         $externalGroups = (array) $claims[$claimKey];
         $desiredGroupDns = $provider->groupMappings()
             ->whereIn('external_group', $externalGroups)
-            ->get()
             ->pluck('group_dn')
             ->unique();
 
@@ -59,6 +59,7 @@ class IdentityProviderGroupSync
         $this->grantMappedGroups($provider, $username, $ldapUser, $desiredGroupDns);
     }
 
+    /** @param Collection<int, string> $desiredGroupDns */
     private function revokeStaleGrants(RealmIdentityProvider $provider, string $username, LdapUser $ldapUser, Collection $desiredGroupDns): void
     {
         $staleGrants = IdentityProviderGroupGrant::where('provider_id', $provider->id)
@@ -77,6 +78,7 @@ class IdentityProviderGroupSync
         }
     }
 
+    /** @param Collection<int, string> $desiredGroupDns */
     private function grantMappedGroups(RealmIdentityProvider $provider, string $username, LdapUser $ldapUser, Collection $desiredGroupDns): void
     {
         foreach ($desiredGroupDns as $groupDn) {

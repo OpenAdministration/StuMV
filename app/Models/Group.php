@@ -24,12 +24,12 @@ class Group extends Model
     protected $table = 'group';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = ['realm_uid', 'name'];
 
     /**
-     * @return BelongsTo
+     * @return BelongsTo<Realm, $this>
      */
     public function realm(): Relation
     {
@@ -37,7 +37,7 @@ class Group extends Model
     }
 
     /**
-     * @return BelongsToMany
+     * @return BelongsToMany<Role, $this>
      */
     public function roles(): Relation
     {

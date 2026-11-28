@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class EmailVerificationNotificationController extends Controller
      */
     public function store(Community $realm, Request $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        if (User::current()->hasVerifiedEmail()) {
             return redirect()->intended(RouteServiceProvider::home($realm->getShortCode()));
         }
 
@@ -25,7 +26,7 @@ class EmailVerificationNotificationController extends Controller
         // is queued, so without this, the redirect would wait on a real SMTP
         // round-trip (same reasoning as App\Support\EndsAuthenticatedSession
         // and App\Livewire\RegisterUser).
-        $user = $request->user();
+        $user = User::current();
         dispatch(function () use ($user): void {
             $user->sendEmailVerificationNotification();
         })->afterResponse();

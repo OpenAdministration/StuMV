@@ -8,6 +8,7 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Models\ProfilePicture;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use LdapRecord\Models\Model as LdapModel;
@@ -16,7 +17,7 @@ class Committees extends Controller
 {
     use AuthorizesDirectoryClient;
 
-    public function index(Request $request, Community $realm)
+    public function index(Request $request, Community $realm): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -29,7 +30,7 @@ class Committees extends Controller
         ])->values());
     }
 
-    public function show(Request $request, Community $realm, string $ou)
+    public function show(Request $request, Community $realm, string $ou): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -41,7 +42,7 @@ class Committees extends Controller
         ]);
     }
 
-    public function roles(Request $request, Community $realm, string $ou)
+    public function roles(Request $request, Community $realm, string $ou): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -55,7 +56,7 @@ class Committees extends Controller
         ])->values());
     }
 
-    public function role(Request $request, Community $realm, string $ou, string $cn)
+    public function role(Request $request, Community $realm, string $ou, string $cn): JsonResponse
     {
         $committee = Committee::findByNameOrFail($realm, $ou);
         $role = $committee->roles()->where('cn', $cn)->first() ?? abort(404);
@@ -68,7 +69,7 @@ class Committees extends Controller
         ]);
     }
 
-    public function roleMembers(Request $request, Community $realm, string $ou, string $cn)
+    public function roleMembers(Request $request, Community $realm, string $ou, string $cn): JsonResponse
     {
         $committee = Committee::findByNameOrFail($realm, $ou);
         $role = $committee->roles()->where('cn', $cn)->first() ?? abort(404);
@@ -79,7 +80,7 @@ class Committees extends Controller
         // filter down to the actual people (entries carrying a uid).
         $usernames = $role->members()->get()
             ->filter(fn ($member) => $member->getFirstAttribute('uid'))
-            ->sortBy(fn ($member) => mb_strtolower((string) $member->getFirstAttribute('cn')), SORT_NATURAL)
+            ->sortBy(fn ($member): string => mb_strtolower((string) $member->getFirstAttribute('cn')), SORT_NATURAL)
             ->map(fn ($member) => $member->getFirstAttribute('uid'))
             ->values();
 
@@ -106,7 +107,7 @@ class Committees extends Controller
      * (asc/desc, default asc) to sort the returned members - the only
      * endpoint where a caller needs that choice.
      */
-    public function rolesMembers(Request $request, Community $realm)
+    public function rolesMembers(Request $request, Community $realm): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -135,10 +136,10 @@ class Committees extends Controller
 
         $memberEntries = $roleEntries->flatMap(fn (array $entry) => $entry['role']->members()->get()
             ->filter(fn ($member) => $member->getFirstAttribute('uid'))
-            ->map(fn ($member) => ['member' => $member, 'ou' => $entry['ou'], 'role' => $entry['role']]));
+            ->map(fn ($member): array => ['member' => $member, 'ou' => $entry['ou'], 'role' => $entry['role']]));
 
         $members = $memberEntries
-            ->groupBy(fn (array $entry) => $entry['member']->getDn())
+            ->groupBy(fn (array $entry): string => $entry['member']->getDn())
             ->map(fn (Collection $group): array => [
                 'member' => $group->first()['member'],
                 'roles' => $group
@@ -164,6 +165,10 @@ class Committees extends Controller
             ->values());
     }
 
+    /**
+     * @param  ?Collection<int, array{ou: mixed, cn: mixed, role_name: mixed}>  $roles
+     * @return array<string, mixed>
+     */
     private function formatMember(LdapModel $user, ?Collection $roles = null): array
     {
         $picture = ProfilePicture::where('user', $user->getFirstAttribute('uid'))->first();

@@ -8,6 +8,7 @@ use Flux\Flux;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use LdapRecord\LdapRecordException;
 use LdapRecord\Models\OpenLDAP\Group;
 use Livewire\Attributes\Rule;
@@ -24,7 +25,7 @@ class NewGroup extends Component
     #[Rule('required|min:6')]
     public string $name = '';
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->realm_uid = $realm->getShortCode();
     }
@@ -34,6 +35,7 @@ class NewGroup extends Component
         return view('livewire.group.new-group')->title(__('groups.new_title'));
     }
 
+    /** @return false|RedirectResponse */
     public function save()
     {
         $this->validate();

@@ -3,14 +3,12 @@
 namespace App\Models;
 
 use App\Models\Concerns\RecordsActions;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class RealmBranding extends Model
 {
-    use HasFactory;
     use RecordsActions;
 
     /**
@@ -21,7 +19,7 @@ class RealmBranding extends Model
     protected $table = 'realm_branding';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'realm',

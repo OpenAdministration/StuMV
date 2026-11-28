@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CommitteeFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class Committee extends Model
 {
+    /** @use HasFactory<CommitteeFactory> */
     use HasFactory;
 
     /**
@@ -29,25 +31,26 @@ class Committee extends Model
     protected $table = 'committee';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = ['realm_uid', 'parent_committee_id', 'name'];
 
     /**
-     * @return BelongsTo
+     * @return BelongsTo<self, $this>
      */
     public function parentCommittee(): Relation
     {
         return $this->belongsTo(self::class, 'parent_committee_id');
     }
 
+    /** @return HasMany<self, $this> */
     public function childCommittee(): Relation
     {
         return $this->hasMany(self::class, 'parent_committee_id', 'id');
     }
 
     /**
-     * @return BelongsTo
+     * @return BelongsTo<Realm, $this>
      */
     public function realm(): Relation
     {
@@ -55,7 +58,7 @@ class Committee extends Model
     }
 
     /**
-     * @return HasMany
+     * @return HasMany<Role, $this>
      */
     public function roles(): Relation
     {

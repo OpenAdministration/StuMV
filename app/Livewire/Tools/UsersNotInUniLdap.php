@@ -9,6 +9,9 @@ use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Support\AccountPurger;
 use Flux\Flux;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use LdapRecord\Models\Collection as LdapCollection;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -17,6 +20,7 @@ class UsersNotInUniLdap extends Component
     #[Locked]
     public string $uid;
 
+    /** @var array<int, array<string, mixed>> */
     public array $results = [];
 
     public bool $comparisonCompleted = false;
@@ -27,14 +31,14 @@ class UsersNotInUniLdap extends Component
 
     public string $search = '';
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         abort_unless(filled(config('ldap.connections.uni.base_dn')), 404);
 
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         $search = mb_strtolower(trim($this->search));
 
@@ -49,11 +53,11 @@ class UsersNotInUniLdap extends Component
             'filteredResults' => $filteredResults,
             // Same check for every row - it only depends on the realm - and
             // it hits LDAP, so it's computed once here rather than per row.
-            'isAdmin' => auth()->user()->can('admin', Community::findOrFailByUid($this->uid)),
+            'isAdmin' => \App\Models\User::current()->can('admin', Community::findOrFailByUid($this->uid)),
         ]);
     }
 
-    public function searchForUsersNotInUniLdap()
+    public function searchForUsersNotInUniLdap(): void
     {
         $this->comparisonCompleted = false;
         $this->results = [];
@@ -90,8 +94,8 @@ class UsersNotInUniLdap extends Component
         // batches themselves must stay at or under that configured size.
         $mailsFoundInUniLdap = $mails
             ->chunk(config('ldap.uni_batch_size', 10))
-            ->flatMap(fn ($chunk) => UniLdapUser::whereIn('mail', $chunk->all())->get())
-            ->map(fn (UniLdapUser $user) => $user->getFirstAttribute('mail'))
+            ->flatMap(fn ($chunk): LdapCollection => UniLdapUser::whereIn('mail', $chunk->all())->get())
+            ->map(fn (UniLdapUser $user): mixed => $user->getFirstAttribute('mail'))
             ->all();
 
         $usernamesWithActiveRole = RoleMembership::active()
@@ -126,19 +130,19 @@ class UsersNotInUniLdap extends Component
         $this->comparisonCompleted = true;
     }
 
-    public function confirmDeleteUser(string $username)
+    public function confirmDeleteUser(string $username): void
     {
         $this->userToDelete = $username;
         Flux::modal('confirm-delete-user')->show();
     }
 
-    public function confirmLockUser(string $username)
+    public function confirmLockUser(string $username): void
     {
         $this->userToLock = $username;
         Flux::modal('confirm-lock-user')->show();
     }
 
-    public function lockUser()
+    public function lockUser(): void
     {
         $community = Community::findByOrFail('ou', $this->uid);
         $this->authorize('admin', $community);
@@ -166,7 +170,7 @@ class UsersNotInUniLdap extends Component
         Flux::modal('confirm-lock-user')->close();
     }
 
-    public function deleteUser()
+    public function deleteUser(): void
     {
         $community = Community::findByOrFail('ou', $this->uid);
         $this->authorize('admin', $community);

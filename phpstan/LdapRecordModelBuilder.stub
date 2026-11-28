@@ -1,0 +1,139 @@
+<?php
+
+namespace LdapRecord\Query {
+    // declared so the stub validator knows the @mixin target below; adds nothing
+    class Builder {}
+}
+
+namespace LdapRecord\Models {
+    // declared for the validator; has no class PHPDoc of its own to replace
+    class Collection {}
+
+    /**
+     * Static calls (Group::find(), User::findOrFail(), ...) return the concrete model.
+     *
+     * @mixin \LdapRecord\Query\Model\Builder<static>
+     * @method static static|null find(string $dn, string[]|string $selects = ['*'])
+     * @method static static findOrFail(string $dn, string[]|string $selects = ['*'])
+     * @method static static|null findBy(string $attribute, string $value, string[]|string $selects = ['*'])
+     * @method static static findByOrFail(string $attribute, string $value, string[]|string $selects = ['*'])
+     * @method static static|null findByGuid(string $guid, string[]|string $selects = ['*'])
+     * @method static static findByGuidOrFail(string $guid, string[]|string $selects = ['*'])
+     */
+    abstract class Model
+    {
+        /** @return \LdapRecord\Query\Model\Builder<static> */
+        public static function query() {}
+
+        /** @return \LdapRecord\Query\Model\Builder<static> */
+        public static function on(?string $connection = null) {}
+
+        /**
+         * @return \LdapRecord\Query\Model\Builder<static>
+         */
+        public function newQuery() {}
+    }
+}
+
+namespace LdapRecord\Query\Model {
+    /**
+     * The model builder forwards these fluent methods to the query builder, whose
+     * `static` return type would otherwise resolve to the plain query builder.
+     *
+     * @template TModel of \LdapRecord\Models\Model
+     *
+     * @mixin \LdapRecord\Query\Builder
+     * @method $this searchFor(string $attributeName, ?string $searchString, string $operator = 'contains') local scope of App\Ldap\Traits\SearchScopeTrait
+     * @method $this setConnection(mixed $connection)
+     * @method $this setCache(mixed $cache = null)
+     * @method $this setBaseDn(\Stringable|string|null $dn = null)
+     * @method $this setDn(\Stringable|string|null $dn = null)
+     * @method $this in(\Stringable|string|null $dn = null)
+     * @method $this limit(int $limit)
+     * @method $this orderBy(string $attribute, string $direction = 'asc', array<mixed> $options = [])
+     * @method $this orderByDesc(string $attribute, array<mixed> $options = [])
+     * @method $this whereApproximatelyEquals(string $attribute, string $value)
+     * @method $this whereContains(string $attribute, string $value)
+     * @method $this whereNotContains(string $attribute, string $value)
+     * @method $this whereIn(string $attribute, array<mixed> $values)
+     * @method $this whereBetween(string $attribute, array<mixed> $values)
+     * @method $this whereStartsWith(string $attribute, string $value)
+     * @method $this whereNotStartsWith(string $attribute, string $value)
+     * @method $this whereEndsWith(string $attribute, string $value)
+     * @method $this whereNotEndsWith(string $attribute, string $value)
+     * @method $this whereDeleted()
+     * @method $this withDeleted()
+     * @method $this addControl(string $oid, bool $isCritical = false, mixed $value = null)
+     * @method $this orWhereHas(string $attribute)
+     * @method $this orWhereNotHas(string $attribute)
+     * @method $this orWhereEquals(string $attribute, string $value)
+     * @method $this orWhereNotEquals(string $attribute, string $value)
+     * @method $this orWhereApproximatelyEquals(string $attribute, string $value)
+     * @method $this orWhereContains(string $attribute, string $value)
+     * @method $this orWhereNotContains(string $attribute, string $value)
+     * @method $this orWhereStartsWith(string $attribute, string $value)
+     * @method $this orWhereNotStartsWith(string $attribute, string $value)
+     * @method $this orWhereEndsWith(string $attribute, string $value)
+     * @method $this orWhereNotEndsWith(string $attribute, string $value)
+     * @method $this addFilter(mixed $filter, string $boolean = 'and', bool $wrap = true)
+     * @method $this clearFilters()
+     * @method $this read()
+     * @method $this list()
+     * @method $this recursive()
+     * @method $this search()
+     * @method $this nested(bool $nested = true)
+     * @method $this cache(?\DateTimeInterface $until = null, bool $flush = false, ?string $key = null)
+     * @method $this dynamicWhere(string $method, array<mixed> $parameters)
+     */
+    class Builder
+    {
+        /**
+         * @param string[]|string $selects
+         * @return TModel|null
+         */
+        public function first(array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $selects
+         * @return TModel
+         */
+        public function firstOrFail(array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $dn
+         * @param string[]|string $selects
+         * @return ($dn is array ? \LdapRecord\Models\Collection : TModel|null)
+         */
+        public function find(array|string $dn, array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $selects
+         * @return TModel
+         */
+        public function findOrFail(string $dn, array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $selects
+         * @return TModel|null
+         */
+        public function findBy(string $attribute, string $value, array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $selects
+         * @return TModel
+         */
+        public function findByOrFail(string $attribute, string $value, array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $selects
+         * @return TModel|null
+         */
+        public function findByGuid(string $guid, array|string $selects = ['*']) {}
+
+        /**
+         * @param string[]|string $selects
+         * @return TModel
+         */
+        public function findByGuidOrFail(string $guid, array|string $selects = ['*']) {}
+    }
+}

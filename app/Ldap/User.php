@@ -61,7 +61,7 @@ class User extends \LdapRecord\Models\OpenLDAP\User
      */
     public function additionalEmails(): array
     {
-        return array_values(array_slice($this->emailValues(), 1));
+        return array_slice($this->emailValues(), 1);
     }
 
     public function addAdditionalEmail(string $address): void

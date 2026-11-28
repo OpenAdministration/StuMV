@@ -7,6 +7,8 @@ use App\Ldap\User;
 use App\Rules\UniqueEmail;
 use App\Support\DatabaseUserProvisioner;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Validate;
@@ -45,6 +47,7 @@ class NewMember extends Component
         $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -61,12 +64,13 @@ class NewMember extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.realm.new-member')
             ->title(__('realms.new_member_title', ['realm' => $this->realm_uid]));
     }
 
+    /** @return false|RedirectResponse */
     public function save()
     {
         $this->validate();

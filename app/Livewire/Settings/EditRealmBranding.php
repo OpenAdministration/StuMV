@@ -5,12 +5,14 @@ namespace App\Livewire\Settings;
 use App\Ldap\Community;
 use App\Models\RealmBranding;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class EditRealmBranding extends Component
@@ -24,9 +26,11 @@ class EditRealmBranding extends Component
     // formats (e.g. avif) that aren't necessarily previewable via Livewire's
     // temporaryUrl() (see config/livewire.php's preview_mimes) - must stay in
     // sync with that list.
+    /** @var TemporaryUploadedFile|null */
     #[Validate(['file', 'mimes:jpg,jpeg,png,gif,webp,bmp,svg', 'max:5120'])]
     public $logo = null;
 
+    /** @var TemporaryUploadedFile|null */
     #[Validate(['file', 'mimes:jpg,jpeg,png,gif,webp,bmp', 'max:10240'])]
     public $background = null;
 
@@ -44,7 +48,7 @@ class EditRealmBranding extends Component
         $this->login_notice = (string) $branding?->login_notice;
     }
 
-    public function render()
+    public function render(): View
     {
         $branding = RealmBranding::forRealm($this->realm_uid);
 
@@ -62,22 +66,24 @@ class EditRealmBranding extends Component
         // rasterize() surfaces as an uncaught exception instead of a
         // validation error.
         $this->validateOnly('logo');
-        $this->saveLogo();
+        if ($this->logo instanceof TemporaryUploadedFile) {
+            $this->saveLogo($this->logo);
+        }
     }
 
-    private function saveLogo(): void
+    private function saveLogo(TemporaryUploadedFile $logo): void
     {
         // SVG logos are stored as-is - Intervention/GD can only rasterize
         // bitmap formats, and a logo is commonly a vector graphic (the app's
         // own default logo is SVG too).
-        if (strtolower((string) $this->logo->getClientOriginalExtension()) === 'svg') {
+        if (strtolower($logo->getClientOriginalExtension()) === 'svg') {
             $filename = Str::uuid().'.svg';
-            $this->logo->storePubliclyAs('realm-branding', $filename, 'public');
+            $logo->storePubliclyAs('realm-branding', $filename, 'public');
         } else {
             $filename = Str::uuid().'.webp';
             Storage::disk('public')->put(
                 'realm-branding/'.$filename,
-                $this->rasterize($this->logo, width: 2048, height: 2048, quality: 100),
+                $this->rasterize($logo, width: 2048, height: 2048, quality: 100),
             );
         }
 
@@ -130,15 +136,17 @@ class EditRealmBranding extends Component
     public function updatedBackground(): void
     {
         $this->validateOnly('background');
-        $this->saveBackground();
+        if ($this->background instanceof TemporaryUploadedFile) {
+            $this->saveBackground($this->background);
+        }
     }
 
-    private function saveBackground(): void
+    private function saveBackground(TemporaryUploadedFile $background): void
     {
         $filename = Str::uuid().'.webp';
         Storage::disk('public')->put(
             'realm-branding/'.$filename,
-            $this->rasterize($this->background, width: 1920),
+            $this->rasterize($background, width: 1920),
         );
 
         $this->replaceFile('background_id', $filename);
@@ -157,8 +165,12 @@ class EditRealmBranding extends Component
     /**
      * Decode, downscale (never up), and re-encode an uploaded raster image to
      * WebP bytes; quality 100 is lossless.
+     *
+     * @param  int<1, max>|null  $width
+     * @param  int<1, max>|null  $height
+     * @param  int<1, 100>|null  $quality
      */
-    private function rasterize($file, ?int $width = null, ?int $height = null, ?int $quality = null): string
+    private function rasterize(TemporaryUploadedFile $file, ?int $width = null, ?int $height = null, ?int $quality = null): string
     {
         $img = Image::fromPath($file->getRealPath())->scale($width, $height)->toWebp();
 

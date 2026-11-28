@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class IdentityProviderGroupGrant extends Model
 {
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'provider_id',
@@ -24,6 +24,7 @@ class IdentityProviderGroupGrant extends Model
         'group_dn',
     ];
 
+    /** @return BelongsTo<RealmIdentityProvider, $this> */
     public function provider(): BelongsTo
     {
         return $this->belongsTo(RealmIdentityProvider::class, 'provider_id');

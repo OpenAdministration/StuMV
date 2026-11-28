@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 class CommunityPolicy
 {
-    public function create(User $user)
+    public function create(User $user): bool
     {
         return $user->can('superadmin', User::class);
     }

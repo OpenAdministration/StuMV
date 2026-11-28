@@ -145,7 +145,7 @@ class MailmanListSyncStatus
         $problems = array_filter([
             $diff['pending'] > 0 ? __('group_mailman_lists.status_pending') : null,
             $diff['stale'] > 0 ? __('group_mailman_lists.status_stale') : null,
-        ]);
+        ], fn ($value): bool => is_string($value) && $value !== '');
 
         // Someone still on the list who no longer should be is worse than someone missing.
         return ['state' => $diff['stale'] > 0 ? 'stale' : 'pending', 'text' => implode(', ', $problems)];

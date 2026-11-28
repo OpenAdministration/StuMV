@@ -7,6 +7,8 @@ use App\Ldap\Community;
 use App\Ldap\Role;
 use App\Rules\UniqueCommittee;
 use App\Support\ActivityLogger;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -25,8 +27,10 @@ class NewCommittee extends Component
     #[Validate('required|min:3')]
     public string $description = '';
 
+    /** @var array<int, string> */
     public array $roles = ['member'];
 
+    /** @var array<string, array{cn: string, description: string}> */
     private array $defaultRoles = [
         'head' => [
             'cn' => 'leitung',
@@ -50,11 +54,12 @@ class NewCommittee extends Component
         ],
     ];
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
         return [
@@ -66,6 +71,7 @@ class NewCommittee extends Component
         ];
     }
 
+    /** @return array<string, string> */
     protected function validationAttributes(): array
     {
         return [
@@ -74,6 +80,7 @@ class NewCommittee extends Component
         ];
     }
 
+    /** @return array<string, string> */
     protected function messages(): array
     {
         return [
@@ -81,7 +88,7 @@ class NewCommittee extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $parentsLdap = Committee::fromCommunity($this->realm_uid)
             ->whereNotEquals('ou', 'Committees') // remove parent Folder from Results;
@@ -112,7 +119,7 @@ class NewCommittee extends Component
         ])->title(__('committees.new_title'));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
 
         $this->validate();

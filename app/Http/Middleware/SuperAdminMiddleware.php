@@ -16,7 +16,7 @@ class SuperAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()->can('superadmin', User::class)) {
+        if (! User::current()->can('superadmin', User::class)) {
             return abort(403);
         }
 

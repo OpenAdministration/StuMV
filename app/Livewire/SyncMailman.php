@@ -3,7 +3,10 @@
 namespace App\Livewire;
 
 use App\Ldap\Community;
+use App\Models\User;
 use Flux\Flux;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
@@ -21,7 +24,7 @@ class SyncMailman extends Component
         $this->uid = $uid;
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.sync-mailman');
     }
@@ -53,6 +56,6 @@ class SyncMailman extends Component
     private function authorizeRealm(string $uid): void
     {
         $realm = Community::findByOrFail('ou', $uid);
-        abort_unless(auth()->user()->can('admin', $realm), 403);
+        abort_unless(User::current()->can('admin', $realm), 403);
     }
 }

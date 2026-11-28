@@ -6,10 +6,8 @@ use App\Ldap\Community;
 use App\Models\PassportClient;
 use DateTimeImmutable;
 use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
 use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Signer\Key\InMemory;
-use Lcobucci\JWT\Token\Plain;
+use Lcobucci\JWT\UnencryptedToken;
 
 /**
  * Builds the signed logout_token sent to a client's back_channel_logout_uri
@@ -30,11 +28,16 @@ class BackChannelLogoutTokenBuilder
      * persists as the token row's own primary key), so the client can tell
      * which of a user's sessions this logout_token is for.
      */
-    public function build(PassportClient $client, string $userId, string $sid): Plain
+    public function build(PassportClient $client, string $userId, string $sid): UnencryptedToken
     {
+        if ($userId === '') {
+            throw new \InvalidArgumentException('A logout token needs a subject.');
+        }
+        $realm = $client->community_uid ?? throw new \InvalidArgumentException("Client {$client->getKey()} is not bound to a realm.");
+
         $config = Configuration::forSymmetricSigner(
             resolve(config('openid.signer')),
-            InMemory::file(Passport::keyPath('oauth-private.key')),
+            SigningKeyFile::private(),
         );
 
         $builder = $config->builder();
@@ -50,7 +53,7 @@ class BackChannelLogoutTokenBuilder
         }
 
         return $builder
-            ->issuedBy(Community::issuerFor($client->community_uid))
+            ->issuedBy(Community::issuerFor($realm))
             ->permittedFor($client->getKey())
             ->relatedTo($userId)
             // Whole seconds, not `new DateTimeImmutable` (which carries
@@ -58,7 +61,7 @@ class BackChannelLogoutTokenBuilder
             // serializes a fractional-second claim as a JSON float, which
             // some relying-party JWT libraries fail to validate at all (see
             // config('openid.use_microseconds')'s doc comment).
-            ->issuedAt(DateTimeImmutable::createFromFormat('U', (string) time()))
+            ->issuedAt(new DateTimeImmutable('@'.time()))
             ->identifiedBy((string) Str::uuid())
             ->withClaim('sid', $sid)
             ->withClaim('events', [

@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProfilePicture extends Model
 {
-    use HasFactory;
-
     /**
      * The table associated with the model.
      *
@@ -17,7 +14,7 @@ class ProfilePicture extends Model
     protected $table = 'profile_pictures';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'user',

@@ -2,6 +2,7 @@
 
 namespace App\Ldap\Traits;
 
+use LdapRecord\Models\Model;
 use LdapRecord\Query\Model\Builder;
 
 trait SearchScopeTrait
@@ -22,6 +23,7 @@ trait SearchScopeTrait
      *                            'not_ends_with'
      *                            'contains'
      *                            'not_contains'
+     * @param  Builder<Model>  $query
      */
     public function scopeSearchFor(Builder $query, string $attributeName, ?string $searchString, string $operator = 'contains'): void
     {

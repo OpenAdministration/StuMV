@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProfilePicture;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SocialiteUser extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = User::current();
         $ldapUser = $user->ldap();
         $picture = ProfilePicture::where('user', $user->username)->where('realm', $user->realm)->first();
 

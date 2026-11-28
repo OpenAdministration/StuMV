@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property int $group_id
- * @property Group $group
- * @property Role $role
+ * @property string $group_dn
+ * @property string $role_dn
  */
 class GroupMembership extends Model
 {
@@ -21,7 +20,7 @@ class GroupMembership extends Model
     protected $table = 'role_group_relation';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'group_dn',
@@ -34,6 +33,7 @@ class GroupMembership extends Model
         static::deleted(fn (GroupMembership $m) => LdapSyncState::forgetForGroupDn((string) $m->group_dn));
     }
 
+    /** @return HasMany<Role, $this> */
     public function roles(): HasMany
     {
         return $this->hasMany(Role::class);

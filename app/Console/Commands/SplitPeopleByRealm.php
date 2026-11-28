@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Ldap\User;
 use App\Support\DatabaseUserProvisioner;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use LdapRecord\Models\Model;
 use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 
@@ -67,7 +70,7 @@ class SplitPeopleByRealm extends Command
      * uid => attributes/dn of its one physical flat entry, fetched (and
      * removed as an option) at most once per uid.
      *
-     * @var array<string, array{dn: string, attributes: array}>
+     * @var array<string, array{dn: string, attributes: array<string, mixed>}|null>
      */
     private array $originals = [];
 
@@ -152,8 +155,10 @@ class SplitPeopleByRealm extends Command
      * Walks the super-admins group and every (non-admin) community's members
      * group exactly once, before mutating anything - a move() changes a DN a
      * later group might still reference otherwise.
+     *
+     * @param  Collection<int, Community>  $communities
      */
-    private function buildPersonIndex($communities): void
+    private function buildPersonIndex(Collection $communities): void
     {
         $superAdminGroup = Group::query()->find($this->superAdminGroupDn());
 
@@ -191,8 +196,10 @@ class SplitPeopleByRealm extends Command
         }
 
         if ($community !== null) {
-            $this->rewireRoleGroup($community->adminsGroup(), $realmUid, $dryRun);
-            $this->rewireRoleGroup($community->moderatorsGroup(), $realmUid, $dryRun);
+            // realms mid-migration may lack these groups, so no adminsGroup()/moderatorsGroup() here
+            foreach (['admins', 'moderators'] as $cn) {
+                $this->rewireRoleGroup(Group::query()->in(Dn::of($community))->where('cn', $cn)->first(), $realmUid, $dryRun);
+            }
             $this->deleteMembersGroup($community, $dryRun);
         } else {
             $this->deleteSuperAdminGroup($dryRun);
@@ -299,7 +306,7 @@ class SplitPeopleByRealm extends Command
     }
 
     /**
-     * @return array{dn: string, attributes: array}|null
+     * @return array{dn: string, attributes: array<string, mixed>}|null
      */
     private function loadOriginal(string $uid): ?array
     {
@@ -311,7 +318,7 @@ class SplitPeopleByRealm extends Command
 
         $attributes = array_diff_key($entry->getAttributes(), array_flip(self::OPERATIONAL_ATTRIBUTES));
 
-        return ['dn' => $entry->getDn(), 'attributes' => $attributes];
+        return ['dn' => Dn::of($entry), 'attributes' => $attributes];
     }
 
     private function rewireRoleGroup(?Group $group, string $realmUid, bool $dryRun): void
@@ -393,6 +400,7 @@ class SplitPeopleByRealm extends Command
         return Group::query()->in($community->getDn())->where('cn', '=', 'members')->first();
     }
 
+    /** @return Collection<int, Model> */
     private function membersGroupMembers(Community $community)
     {
         return $this->membersGroup($community)?->members()->get() ?? collect();

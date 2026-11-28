@@ -8,7 +8,7 @@ use LdapRecord\Models\Relations\HasManyIn;
 use LdapRecord\Query\Model\Builder;
 
 /**
- * @method static Builder fromCommunity(string $uid)
+ * @method static Builder<static> fromCommunity(string $uid)
  */
 class Group extends \LdapRecord\Models\OpenLDAP\Group
 {
@@ -21,7 +21,7 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
 
     }
 
-    public static function dnFrom(string $uid, string $cn)
+    public static function dnFrom(string $uid, string $cn): string
     {
         return "cn=$cn,".self::dnRoot($uid);
     }
@@ -31,7 +31,7 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
         return preg_match('/^cn=([^,]+)/i', $dn, $matches) ? $matches[1] : $dn;
     }
 
-    public static function dnRoot(string $uid)
+    public static function dnRoot(string $uid): string
     {
         return "ou=Groups,ou=$uid,ou=Communities,".config('ldap.connections.default.base_dn');
     }
@@ -43,6 +43,7 @@ class Group extends \LdapRecord\Models\OpenLDAP\Group
         return parent::setDn($dn);
     }
 
+    /** @param Builder<Group> $query */
     public function scopeFromCommunity(Builder $query, string $uid): void
     {
         $query->setBaseDn("ou=Groups,ou=$uid,".Community::$rootDn);

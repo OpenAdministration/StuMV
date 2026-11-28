@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
@@ -32,7 +33,7 @@ class RenameRole extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $community = Community::findByUid($this->argument('community'));
 
@@ -73,8 +74,8 @@ class RenameRole extends Command
             return self::FAILURE;
         }
 
-        $oldDn = $role->getDn();
-        $committeeDn = $committee->getDn();
+        $oldDn = Dn::of($role);
+        $committeeDn = Dn::of($committee);
 
         $this->comment('> '.$oldDn);
         $this->comment('  |-> renaming to cn='.$newCn);
@@ -83,7 +84,7 @@ class RenameRole extends Command
         // itself since we're passing a bare attribute value.
         $role->rename($newCn);
 
-        $newDn = $role->getDn();
+        $newDn = Dn::of($role);
 
         // The role's DB-tracked memberships are keyed by (committee_dn,
         // role_cn), not the role's DN - repoint them at the new cn.

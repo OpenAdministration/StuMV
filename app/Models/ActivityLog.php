@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use LogicException;
 
-/** One change a person or the system made, written by App\Support\ActivityLogger. */
+/**
+ * One change a person or the system made, written by App\Support\ActivityLogger.
+ *
+ * @property ?array<string, mixed> $details
+ */
 class ActivityLog extends Model
 {
     use MassPrunable;
@@ -44,6 +48,9 @@ class ActivityLog extends Model
         $updated = 0;
         static::query()->whereNotNull('details')->chunkById(500, function ($logs) use ($oldDn, $newDn, &$updated): void {
             foreach ($logs as $log) {
+                if ($log->details === null) {
+                    continue;
+                }
                 $details = self::relocateIn($log->details, $oldDn, $newDn);
                 if ($details !== $log->details) {
                     // past the guard against changes, only references move

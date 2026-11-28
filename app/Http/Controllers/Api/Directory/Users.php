@@ -6,17 +6,20 @@ use App\Http\Controllers\Api\Directory\Concerns\AuthorizesDirectoryClient;
 use App\Http\Controllers\Controller;
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Ldap\User as LdapUser;
 use App\Models\ProfilePicture;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use LdapRecord\Models\Collection as LdapCollection;
 
 class Users extends Controller
 {
     use AuthorizesDirectoryClient;
 
-    public function show(Request $request, Community $realm, string $uid)
+    public function show(Request $request, Community $realm, string $uid): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -34,7 +37,7 @@ class Users extends Controller
         ]);
     }
 
-    public function roles(Request $request, Community $realm, string $uid)
+    public function roles(Request $request, Community $realm, string $uid): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -54,7 +57,7 @@ class Users extends Controller
         return response()->json($roles->values());
     }
 
-    public function committees(Request $request, Community $realm, string $uid)
+    public function committees(Request $request, Community $realm, string $uid): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -63,7 +66,7 @@ class Users extends Controller
         $committees = $this->userRoles($realm, $user)
             ->map(fn (Role $role): ?Committee => $role->committee())
             ->filter()
-            ->unique(fn (Committee $committee): string => $committee->getDn())
+            ->unique(fn (Committee $committee): string => Dn::of($committee))
             ->map(fn (Committee $committee): string => $committee->getFirstAttribute('ou'))
             ->sortBy(fn (string $ou): string => mb_strtolower($ou), SORT_NATURAL);
 
@@ -77,14 +80,14 @@ class Users extends Controller
      * DN-syntax, which OpenLDAP only indexes/matches for equality, not
      * substrings - whereContains() silently returns nothing.
      */
-    private function userRoles(Community $realm, LdapUser $user)
+    private function userRoles(Community $realm, LdapUser $user): LdapCollection
     {
         return Role::query()->in(Committee::dnRoot($realm->getShortCode()))
             ->where('uniqueMember', '=', $user->getDn())
             ->get();
     }
 
-    public function groups(Request $request, Community $realm, string $uid)
+    public function groups(Request $request, Community $realm, string $uid): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 

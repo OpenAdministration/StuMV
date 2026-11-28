@@ -6,6 +6,8 @@ use App\Ldap\Committee;
 use App\Ldap\Community;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -24,26 +26,26 @@ class EditRole extends Component
     #[Validate('string|required|min:1')]
     public string $description;
 
-    public function mount(Community $realm, $ou, $cn)
+    public function mount(Community $realm, string $ou, string $cn): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
         $this->cn = $cn;
         $committe = Committee::findByNameOrFail($realm, $ou);
-        $role = $committe->roles()->where('cn', $cn)->first();
+        $role = $committe->roles()->where('cn', $cn)->firstOrFail();
         $this->description = $role->getFirstAttribute('description');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.committee.edit-role')->title(__('roles.edit_title'));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
         $committe = Committee::findByNameOrFail($this->uid, $this->ou);
-        $role = $committe->roles()->where('cn', $this->cn)->first();
+        $role = $committe->roles()->where('cn', $this->cn)->firstOrFail();
         $before = $role->getFirstAttribute('description');
         $role->save([
             'description' => $this->description,

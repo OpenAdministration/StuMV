@@ -14,7 +14,7 @@ class UserIsMember implements ValidationRule
 
     public function __construct(string $community_name)
     {
-        $this->community = Community::findByUid($community_name);
+        $this->community = Community::findOrFailByUid($community_name);
     }
 
     /**

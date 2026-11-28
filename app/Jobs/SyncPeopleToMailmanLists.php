@@ -82,20 +82,21 @@ class SyncPeopleToMailmanLists
      * @param  array<int, string>  $mails
      * @param  array<int, string>  $desiredEmails
      * @param  array<int, array{email: string, self_link: string, as_user: bool}>  $roster
+     * @param  'member'|'moderator'  $role
      */
     private function syncRole(MailmanClient $mailman, string $listId, string $role, array $mails, array $desiredEmails, array $roster): void
     {
         $desired = collect($desiredEmails)->map(strtolower(...))->flip();
-        $current = collect($roster)->keyBy(fn (array $member): string => strtolower((string) $member['email']));
+        $current = collect($roster)->keyBy(fn (array $member): string => strtolower((string) $member['email']))->all();
 
         $additions = [];
         $removals = [];
         foreach ($mails as $mail) {
             $key = strtolower($mail);
-            if ($desired->has($key) && ! $current->has($key)) {
+            if ($desired->has($key) && ! isset($current[$key])) {
                 $additions[] = $mail;
-            } elseif (! $desired->has($key) && $current->has($key)) {
-                $removals[] = $current->get($key);
+            } elseif (! $desired->has($key) && isset($current[$key])) {
+                $removals[] = $current[$key];
             }
         }
 

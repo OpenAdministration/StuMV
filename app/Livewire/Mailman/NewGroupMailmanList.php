@@ -8,7 +8,9 @@ use App\Models\GroupMailmanList;
 use App\Models\MailmanDomainRealm;
 use App\Support\MailmanClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +24,7 @@ use Throwable;
  * Creates a mapping, or edits one when a listId is given.
  *
  * @property-read bool $canCreateList
- * @property-read ?array $domains
+ * @property-read ?array<int, string> $domains
  */
 class NewGroupMailmanList extends Component
 {
@@ -92,6 +94,7 @@ class NewGroupMailmanList extends Component
         }
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         $groupCns = $this->groupCns();
@@ -114,6 +117,7 @@ class NewGroupMailmanList extends Component
         ];
     }
 
+    /** @return array<string, string> */
     protected function messages(): array
     {
         return [
@@ -122,7 +126,7 @@ class NewGroupMailmanList extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $groups = Group::query()->in(Group::dnRoot($this->uid))->get();
 
@@ -130,7 +134,7 @@ class NewGroupMailmanList extends Component
             ->title(__($this->mappingId ? 'group_mailman_lists.edit_title' : 'group_mailman_lists.new_title'));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
 

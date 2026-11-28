@@ -8,6 +8,8 @@ use App\Ldap\User;
 use App\Rules\UniqueEmail;
 use App\Support\DatabaseUserProvisioner;
 use Flux\Flux;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -34,7 +36,8 @@ class ImportUsersFromUniLdap extends Component
     #[Validate('required|string|max:255')]
     public string $lastname = '';
 
-    protected function rules()
+    /** @return array<string, mixed> */
+    protected function rules(): array
     {
         return [
             'email' => [
@@ -45,19 +48,19 @@ class ImportUsersFromUniLdap extends Component
         ];
     }
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         abort_unless(filled(config('ldap.connections.uni.base_dn')), 404);
 
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.tools.import-users-from-uni-ldap');
     }
 
-    public function getUserData()
+    public function getUserData(): void
     {
         $this->searchCompleted = false;
 
@@ -73,7 +76,7 @@ class ImportUsersFromUniLdap extends Component
             $this->lastname = $entry->getFirstAttribute('sn');
 
             $split = explode('@', $this->email);
-            $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? '');
+            $this->username = str_replace(['-', '_', '.'], '', $split[0]);
         } else {
             $this->userNotFound = true;
         }
@@ -81,7 +84,7 @@ class ImportUsersFromUniLdap extends Component
         $this->searchCompleted = true;
     }
 
-    public function createUser()
+    public function createUser(): void
     {
         $this->validate();
 

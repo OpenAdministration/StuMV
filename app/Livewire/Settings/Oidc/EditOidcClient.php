@@ -5,6 +5,7 @@ namespace App\Livewire\Settings\Oidc;
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,7 @@ class EditOidcClient extends Component
 
     public string $redirectUris = '';
 
+    /** @var array<int, string> */
     public array $scopes = [];
 
     public bool $requiresConsent = false;
@@ -74,20 +76,23 @@ class EditOidcClient extends Component
         $this->postLogoutRedirectUris = implode("\n", $client->post_logout_redirect_uris ?? []);
     }
 
+    /** @return array<int, string> */
     protected function redirectUriList(): array
     {
         return self::splitUriList($this->redirectUris);
     }
 
+    /** @return array<int, string> */
     protected function postLogoutRedirectUriList(): array
     {
         return self::splitUriList($this->postLogoutRedirectUris);
     }
 
+    /** @return array<int, string> */
     private static function splitUriList(string $value): array
     {
-        return collect(preg_split('/\r\n|\r|\n/', $value))
-            ->map(fn ($uri) => trim($uri))
+        return collect(preg_split('/\r\n|\r|\n/', $value) ?: [])
+            ->map(fn ($uri): string => trim($uri))
             ->filter()
             ->values()
             ->all();
@@ -113,6 +118,7 @@ class EditOidcClient extends Component
         }
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -142,12 +148,12 @@ class EditOidcClient extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.oidc.edit-oidc-client')->title(__('oidc_clients.edit_title'));
     }
 
-    public function save(ClientRepository $clients)
+    public function save(ClientRepository $clients): void
     {
         $this->validate();
 

@@ -16,7 +16,14 @@ Sicherheitslücken meldest du bitte nicht öffentlich, sondern per E-Mail an ser
 | `composer fix` | Rector, dann Pint | Refactorings anwenden und Code formatieren – vor jedem Commit |
 | `composer pint` | Laravel Pint | nur formatieren |
 | `composer rector-dry` | Rector | Vorschau ohne Änderungen |
-| `composer lint` | PHPStan/Larastan | statische Analyse (derzeit Level 1) |
+| `composer lint` | PHPStan/Larastan | statische Analyse (Level 8, auch als GitHub-Workflow `analysis.yml`) |
+
+### Hinweise zu PHPStan
+
+- `phpstan/LdapRecordModelBuilder.stub` ergänzt Typangaben, die LdapRecord fehlen: `Group::find()`, `User::query()->…->first()` usw. liefern damit das konkrete Modell statt des Basismodells. Eigene Builder-Relationen sollten den Typ angeben, z. B. `@return Builder<Role>`.
+- `phpstan/bootstrap.php` sagt Larastan, dass das angemeldete Konto `App\Models\User` ist und nicht das LDAP-Modell aus `config/auth.php`.
+- Livewire-*Computed Properties* brauchen ein `@property-read` an der Klasse, Eloquent-Relationen einen Rückgabetyp mit Generics, z. B. `@return HasMany<Invitation, $this>`.
+- Fehler bitte an der Ursache beheben, nicht per Baseline oder `@phpstan-ignore` unterdrücken.
 
 ## Continuous Integration
 

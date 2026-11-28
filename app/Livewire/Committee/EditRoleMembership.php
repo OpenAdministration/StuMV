@@ -7,6 +7,8 @@ use App\Ldap\Community;
 use App\Models\RoleMembership;
 use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -40,7 +42,7 @@ class EditRoleMembership extends Component
     #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $realm, $ou, $cn, $id)
+    public function mount(Community $realm, string $ou, string $cn, int $id): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
@@ -50,19 +52,19 @@ class EditRoleMembership extends Component
         $committee = Committee::findByName($this->uid, $this->ou);
         $this->authorize('edit', [$membership, $committee, $realm]);
         $this->username = $membership->username;
-        $this->start_date = $membership->from?->format('Y-m-d');
+        $this->start_date = $membership->from->format('Y-m-d');
         $this->end_date = $membership->until?->format('Y-m-d');
         $this->decision_date = $membership->decided?->format('Y-m-d');
         $this->comment = $membership->comment ?? '';
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.committee.edit-role-membership')
             ->title(__('roles.membership_edit_headline'));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
         $membership = RoleMembership::findOrFail($this->id);

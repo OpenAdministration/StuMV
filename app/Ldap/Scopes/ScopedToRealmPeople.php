@@ -25,6 +25,7 @@ use LdapRecord\Query\Model\Builder;
  */
 class ScopedToRealmPeople implements Scope
 {
+    /** @param Builder<Model> $query */
     public function apply(Builder $query, Model $model): void
     {
         $realm = request()->route('realm');

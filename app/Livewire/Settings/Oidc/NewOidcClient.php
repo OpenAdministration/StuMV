@@ -4,6 +4,7 @@ namespace App\Livewire\Settings\Oidc;
 
 use App\Ldap\Community;
 use App\Models\PassportClient;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
 use Livewire\Component;
@@ -18,6 +19,7 @@ class NewOidcClient extends Component
 
     public string $redirectUris = '';
 
+    /** @var array<int, string> */
     public array $scopes = ['openid', 'profile', 'email', 'groups'];
 
     public bool $requiresConsent = true;
@@ -42,20 +44,23 @@ class NewOidcClient extends Component
         $this->uid = $realm->getFirstAttribute('ou');
     }
 
+    /** @return array<int, string> */
     protected function redirectUriList(): array
     {
         return self::splitUriList($this->redirectUris);
     }
 
+    /** @return array<int, string> */
     protected function postLogoutRedirectUriList(): array
     {
         return self::splitUriList($this->postLogoutRedirectUris);
     }
 
+    /** @return array<int, string> */
     private static function splitUriList(string $value): array
     {
-        return collect(preg_split('/\r\n|\r|\n/', $value))
-            ->map(fn ($uri) => trim($uri))
+        return collect(preg_split('/\r\n|\r|\n/', $value) ?: [])
+            ->map(fn ($uri): string => trim($uri))
             ->filter()
             ->values()
             ->all();
@@ -81,6 +86,7 @@ class NewOidcClient extends Component
         }
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -106,12 +112,12 @@ class NewOidcClient extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.oidc.new-oidc-client')->title(__('oidc_clients.new_title'));
     }
 
-    public function save(ClientRepository $clients)
+    public function save(ClientRepository $clients): void
     {
         $this->validate();
 

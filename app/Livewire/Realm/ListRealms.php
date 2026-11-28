@@ -3,13 +3,14 @@
 namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
+use App\Ldap\User;
 use App\Support\ActivityLogger;
 use App\Support\RealmDataPurger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -35,7 +36,7 @@ class ListRealms extends Component
 
     public bool $showOnlyMine = false;
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -67,7 +68,7 @@ class ListRealms extends Component
      */
     public function mount(): void
     {
-        $ldapUser = Auth::user()->ldap();
+        $ldapUser = \App\Models\User::current()->ldap();
 
         if ($ldapUser->isSuperAdmin()) {
             return;
@@ -80,7 +81,7 @@ class ListRealms extends Component
         }
     }
 
-    public function render(Request $request)
+    public function render(Request $request): View
     {
         $communityQuery = Community::query()
             ->setDn(Community::$rootDn)->search()
@@ -96,7 +97,7 @@ class ListRealms extends Component
             ->sortBy(fn (Community $community): string => mb_strtolower((string) $community->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
 
-        $ldapUser = Auth::user()->ldap();
+        $ldapUser = \App\Models\User::current()->ldap();
         // Actual LDAP membership, independent of superadmin status - used
         // both for the "only mine" filter below and (for non-superadmins)
         // to gate the Enter button per row.
@@ -127,10 +128,8 @@ class ListRealms extends Component
         ])->title(__('realms.list_title'));
     }
 
-    /**
-     * @return array<string, true> community short codes this user is a member of
-     */
-    private function communityMemberships($ldapUser): array
+    /** @return array<string, true> */
+    private function communityMemberships(User $ldapUser): array
     {
         // A physical entry lives under at most one community's People branch
         // now, so this is either empty or a single entry - never more.
@@ -139,7 +138,7 @@ class ListRealms extends Component
         return $realm === null ? [] : [$realm => true];
     }
 
-    public function deletePrepare($uid): void
+    public function deletePrepare(string $uid): void
     {
         $c = Community::findOrFailByUid($uid);
         $this->authorize('delete', $c);
@@ -181,9 +180,8 @@ class ListRealms extends Component
 
     /**
      * @param  $realm_uid  string the selected realm_uid
-     * @return void
      */
-    public function enter(string $realm_uid)
+    public function enter(string $realm_uid): void
     {
         $c = Community::findOrFailByUid($realm_uid);
         $this->authorize('enter', $c);

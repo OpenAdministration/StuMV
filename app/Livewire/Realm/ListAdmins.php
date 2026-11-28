@@ -5,6 +5,7 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -35,7 +36,7 @@ class ListAdmins extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->community_name = $realm->getFirstAttribute('ou');
     }
@@ -45,7 +46,7 @@ class ListAdmins extends Component
         $this->ready = true;
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -62,20 +63,20 @@ class ListAdmins extends Component
     }
 
     #[Computed]
-    public function community(): ?Community
+    public function community(): Community
     {
-        return Community::findByUid($this->community_name);
+        return Community::findOrFailByUid($this->community_name);
     }
 
-    public function render()
+    public function render(): View
     {
         $community = $this->community();
 
         // admin/remove_admin are the same check for every row (they only
         // depend on $community, never on the row) - computed once here
         // (admin hits LDAP) rather than repeatedly per row and per menu item.
-        $isAdmin = $community && auth()->user()->can('admin', $community);
-        $canRemoveAdmin = $community && auth()->user()->can('remove_admin', $community);
+        $isAdmin = \App\Models\User::current()->can('admin', $community);
+        $canRemoveAdmin = \App\Models\User::current()->can('remove_admin', $community);
 
         if (! $this->ready) {
             return view(
@@ -88,10 +89,10 @@ class ListAdmins extends Component
             )->title(__('realms.admins_headline'));
         }
 
-        $admins = $community?->adminsGroup()->members()->get() ?? collect();
+        $admins = $community->adminsGroup()->members()->get();
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
-            $admins = $admins->filter(fn ($user) => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
+            $admins = $admins->filter(fn ($user): bool => str_contains(mb_strtolower((string) $user->getFirstAttribute('cn')), $search));
         }
         $sorted = $this->sortUsers($admins);
 
@@ -114,12 +115,12 @@ class ListAdmins extends Component
         )->title(__('realms.admins_headline'));
     }
 
-    public function deletePrepare($username): void
+    public function deletePrepare(string $username): void
     {
         $community = Community::findOrFailByUid($this->community_name);
-        $user = User::query()->in($community->peopleDn())->where('uid', '=', $username)->first();
+        $user = User::query()->in($community->peopleDn())->where('uid', '=', $username)->firstOrFail();
         $this->authorize('remove_admin', $community);
-        $userIsAdmin = $community?->adminsGroup()->members()->get()->contains($user);
+        $userIsAdmin = $community->adminsGroup()->members()->get()->contains($user);
         if (! $userIsAdmin) {
             // check if the user to delete is an admin in this realm
             $this->reset('deleteAdminUsername', 'deleteAdminName');
@@ -135,7 +136,7 @@ class ListAdmins extends Component
     {
         $community = Community::findOrFailByUid($this->community_name);
         $this->authorize('remove_admin', $community);
-        $admins = $community?->adminsGroup()->members();
+        $admins = $community->adminsGroup()->members();
         $user = User::query()->in($community->peopleDn())->where('uid', '=', $this->deleteAdminUsername)->first() ?? abort(404);
         $admins->detach($user);
         $user->recordAction('realm_admin.removed', $community->getShortCode());
@@ -153,11 +154,14 @@ class ListAdmins extends Component
     /**
      * Sorted client-side (rather than via an LDAP orderBy) because the
      * production directory doesn't support the sssvlv sort control.
+     *
+     * @param  Collection<array-key, User>  $users
+     * @return Collection<array-key, User>
      */
     protected function sortUsers(Collection $users): Collection
     {
         return $users
-            ->sortBy(fn ($user) => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
     }
 }

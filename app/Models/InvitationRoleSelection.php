@@ -15,6 +15,7 @@ class InvitationRoleSelection extends Model
         'role_cn',
     ];
 
+    /** @return BelongsTo<Invitation, $this> */
     public function invitation(): BelongsTo
     {
         return $this->belongsTo(Invitation::class);

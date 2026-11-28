@@ -27,5 +27,7 @@ class Authenticate extends Middleware
 
             return Community::loginUrlFor($realm instanceof Community ? $realm->getShortCode() : $realm);
         }
+
+        return null;
     }
 }

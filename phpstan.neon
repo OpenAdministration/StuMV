@@ -4,9 +4,16 @@ includes:
 
 parameters:
 
+    bootstrapFiles:
+        - phpstan/bootstrap.php
+
+    stubFiles:
+        - phpstan/LdapRecordModelBuilder.stub
+        - phpstan/OpenIdConnectClaims.stub
+
     paths:
         - app/
         - database/
 
     # Level 10 is the highest level.
-    level: 1
+    level: 8

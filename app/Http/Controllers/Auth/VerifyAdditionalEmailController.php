@@ -54,8 +54,8 @@ class VerifyAdditionalEmailController extends Controller
     private function done(Community $realm, UserAdditionalEmail $additionalEmail, string $message): RedirectResponse
     {
         $isOwner = Auth::check()
-            && Auth::user()->username === $additionalEmail->username
-            && Auth::user()->realm === $additionalEmail->realm;
+            && User::current()->username === $additionalEmail->username
+            && User::current()->realm === $additionalEmail->realm;
 
         $target = $isOwner
             ? to_route('profile', ['realm' => $realm->getShortCode(), 'username' => $additionalEmail->username])

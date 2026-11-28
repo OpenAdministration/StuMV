@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\RealmFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class Realm extends Model
 {
+    /** @use HasFactory<RealmFactory> */
     use HasFactory;
 
     public $timestamps = false;
@@ -52,12 +54,12 @@ class Realm extends Model
     public $incrementing = false;
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = ['uid', 'long_name'];
 
     /**
-     * @return HasMany
+     * @return HasMany<Domain, $this>
      */
     public function domains(): Relation
     {
@@ -65,7 +67,7 @@ class Realm extends Model
     }
 
     /**
-     * @return HasMany
+     * @return HasMany<Committee, $this>
      */
     public function committees(): Relation
     {
@@ -73,7 +75,7 @@ class Realm extends Model
     }
 
     /**
-     * @return HasMany
+     * @return HasMany<Group, $this>
      */
     public function groups(): Relation
     {
@@ -81,7 +83,7 @@ class Realm extends Model
     }
 
     /**
-     * @return BelongsToMany
+     * @return BelongsToMany<User, $this>
      */
     public function admins(): Relation
     {
@@ -89,7 +91,7 @@ class Realm extends Model
     }
 
     /**
-     * @return BelongsToMany
+     * @return BelongsToMany<User, $this>
      */
     public function members(): Relation
     {

@@ -4,7 +4,10 @@ namespace App\Livewire\Realm;
 
 use App\Ldap\Community;
 use App\Models\GroupMailmanList;
+use App\Models\User;
 use App\Support\MailmanListSyncStatus;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -19,7 +22,7 @@ class MailmanSyncStatus extends Component
     public function mount(string $uid): void
     {
         $realm = Community::findByOrFail('ou', $uid);
-        abort_unless(auth()->user()->can('admin', $realm), 403);
+        abort_unless(User::current()->can('admin', $realm), 403);
         abort_if($realm->isAdminRealm(), 404);
 
         $this->uid = $uid;
@@ -40,7 +43,7 @@ class MailmanSyncStatus extends Component
         MailmanListSyncStatus::forgetRealm($this->uid);
     }
 
-    public function render(MailmanListSyncStatus $status)
+    public function render(MailmanListSyncStatus $status): Factory|View
     {
         $mappings = GroupMailmanList::where('realm', $this->uid)->where('enabled', true)->get();
         $states = collect($status->forMany($mappings))->pluck('state');

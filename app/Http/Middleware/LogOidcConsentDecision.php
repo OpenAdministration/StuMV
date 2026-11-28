@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Ldap\Community;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -31,7 +32,7 @@ class LogOidcConsentDecision
     public function handle(Request $request, Closure $next): Response
     {
         Log::info('OIDC consent '.$this->decision($request), [
-            'realm' => $request->route('realm')?->getShortCode(),
+            'realm' => ($realm = $request->route('realm')) instanceof Community ? $realm->getShortCode() : $realm,
             'client_id' => $this->clientIdFromPendingAuthRequest($request),
             'user_id' => $request->user()?->id,
         ]);

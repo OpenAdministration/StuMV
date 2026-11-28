@@ -42,6 +42,7 @@ class GroupMailmanList extends Model
         static::deleted(MailmanListSyncStatus::forget(...));
     }
 
+    /** @return HasMany<GroupMailmanListGroup, $this> */
     public function groups(): HasMany
     {
         return $this->hasMany(GroupMailmanListGroup::class);
@@ -90,7 +91,7 @@ class GroupMailmanList extends Model
         return $this->mailman_list_id;
     }
 
-    /** @return array{mailman_list_id: string, enabled: bool, member_groups: list<string>, moderator_groups: list<string>} */
+    /** @return array{mailman_list_id: string, enabled: bool, member_groups: array<int, string>, moderator_groups: array<int, string>} */
     public function activityLogSnapshot(): array
     {
         $groups = fn (string $role): array => $this->groups()->where('role', $role)->orderBy('group_dn')->pluck('group_dn')->all();

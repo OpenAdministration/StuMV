@@ -7,6 +7,7 @@ use App\Ldap\Domain;
 use App\Rules\UniqueDomain;
 use App\Support\ActivityLogger;
 use dacoto\DomainValidator\Validator\Domain as DomainValidator;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -20,7 +21,7 @@ class NewDomain extends Component
     #[Validate(as: 'Domain')]
     public string $dc;
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->authorize('create', [Domain::class, $realm]);
         $this->uid = $realm->getFirstAttribute('ou');
@@ -32,7 +33,8 @@ class NewDomain extends Component
         return Community::findOrFailByUid($this->uid);
     }
 
-    public function rules()
+    /** @return array<string, mixed> */
+    public function rules(): array
     {
         return [
             'dc' => [
@@ -43,12 +45,12 @@ class NewDomain extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.domain.new-domain')->title(__('realms.new_domain_title', ['realm' => $this->uid]));
     }
 
-    public function save()
+    public function save(): void
     {
         $this->authorize('create', [Domain::class, $this->community()]);
         $this->validate();

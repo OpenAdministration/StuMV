@@ -55,7 +55,7 @@ class IdTokenResponse extends BaseIdTokenResponse
 
         $client = PassportClient::find($accessToken->getClient()->getIdentifier());
 
-        if ($client !== null) {
+        if ($client?->community_uid !== null) {
             $builder = $builder->issuedBy(Community::issuerFor($client->community_uid));
         }
 
@@ -70,7 +70,7 @@ class IdTokenResponse extends BaseIdTokenResponse
     {
         $body = resolve(LaravelCurrentRequestService::class)->getRequest()->getParsedBody();
 
-        if (! isset($body['code'])) {
+        if (! is_array($body) || ! isset($body['code'])) {
             return null;
         }
 

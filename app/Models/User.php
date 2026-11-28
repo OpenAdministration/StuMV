@@ -2,23 +2,33 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use LdapRecord\Laravel\Auth\AuthenticatesWithLdap;
 use LdapRecord\Laravel\Auth\LdapAuthenticatable;
+use LdapRecord\Models\ModelNotFoundException;
 
 /**
  * @property ?string $uid LDAP entryUUID; added by a loop migration Larastan cannot read.
  * @property ?Carbon $last_login_at
  */
-class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEmail
+class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEmail, OAuthenticatable
 {
     use AuthenticatesWithLdap;
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+
+    /** @use HasFactory<UserFactory> */
+    use HasFactory;
+
+    use Notifiable;
 
     protected $table = 'user';
 
@@ -34,7 +44,7 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'full_name',
@@ -47,7 +57,7 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -63,7 +73,22 @@ class User extends Authenticatable implements LdapAuthenticatable, MustVerifyEma
         // above), not the uid attribute - a GUID lookup anchors to this specific
         // physical entry, unlike a username search which is ambiguous once the
         // same username can belong to independent accounts in different realms.
+        if ($this->uid === null) {
+            throw new ModelNotFoundException("User {$this->username} has no LDAP entry.");
+        }
+
         return \App\Ldap\User::query()->findByGuidOrFail($this->uid);
+    }
+
+    /** For code behind the auth middleware; a guest here is sent to the login. */
+    public static function current(): self
+    {
+        $user = Auth::user();
+        if (! $user instanceof self) {
+            throw new AuthenticationException;
+        }
+
+        return $user;
     }
 
     /**

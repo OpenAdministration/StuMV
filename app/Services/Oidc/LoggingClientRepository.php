@@ -2,6 +2,7 @@
 
 namespace App\Services\Oidc;
 
+use App\Models\PassportClient;
 use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Bridge\ClientRepository as BaseClientRepository;
 
@@ -23,7 +24,8 @@ class LoggingClientRepository extends BaseClientRepository
     {
         $record = $this->clients->findActive($clientIdentifier);
 
-        if ($record === null) {
+        // always a PassportClient, see Passport::useClientModel() in AuthServiceProvider
+        if (! $record instanceof PassportClient) {
             Log::warning('OIDC client authentication failed: unknown or revoked client_id', [
                 'client_id' => $clientIdentifier,
                 'grant_type' => $grantType,
@@ -41,7 +43,7 @@ class LoggingClientRepository extends BaseClientRepository
             return false;
         }
 
-        if (! $this->hasher->check($clientSecret, $record->secret)) {
+        if ($record->secret === null || ! $this->hasher->check($clientSecret, $record->secret)) {
             Log::warning('OIDC client authentication failed: client_secret did not match', [
                 'client_id' => $clientIdentifier,
                 'grant_type' => $grantType,

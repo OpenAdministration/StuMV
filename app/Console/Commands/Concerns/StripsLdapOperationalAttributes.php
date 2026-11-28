@@ -24,6 +24,10 @@ trait StripsLdapOperationalAttributes
         'pwdaccountlockedtime', 'pwdfailuretime', 'pwdhistory', 'memberof',
     ];
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return array<string, mixed>
+     */
     private function withoutOperationalAttributes(array $attributes): array
     {
         return array_diff_key($attributes, array_flip(self::OPERATIONAL_ATTRIBUTES));

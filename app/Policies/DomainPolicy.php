@@ -7,25 +7,25 @@ use App\Models\User;
 
 class DomainPolicy
 {
-    public function viewAny(User $user, Community $community)
+    public function viewAny(User $user, Community $community): bool
     {
         return $user->can('superadmin', User::class)
             || $user->can('admin', $community);
     }
 
-    public function create(User $user, Community $community)
+    public function create(User $user, Community $community): bool
     {
         return $user->can('superadmin', User::class)
             || $user->can('admin', $community);
     }
 
-    public function edit(User $user, Community $community)
+    public function edit(User $user, Community $community): bool
     {
         return $user->can('superadmin', User::class)
             || $user->can('admin', $community);
     }
 
-    public function delete(User $user, Community $community)
+    public function delete(User $user, Community $community): bool
     {
         return $user->can('superadmin', User::class)
             || $user->can('admin', $community);

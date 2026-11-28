@@ -11,6 +11,7 @@ use Flux\Flux;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -26,13 +27,14 @@ class NewRole extends Component
 
     public string $description;
 
-    public function mount(Community $realm, $ou)
+    public function mount(Community $realm, string $ou): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
     }
 
-    public function rules()
+    /** @return array<string, mixed> */
+    public function rules(): array
     {
         return [
             'cn' => [
@@ -52,7 +54,7 @@ class NewRole extends Component
         $this->validate();
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
         $c = Committee::fromCommunity($this->uid)->findByOrFail('ou', $this->ou);

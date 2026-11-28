@@ -6,6 +6,7 @@ use GuzzleHttp\Cookie\CookieJar;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -49,7 +50,7 @@ class MailmanClient
      */
     public function domains(): array
     {
-        return collect($this->request()->get('domains')->throw()->json('entries', []))
+        return collect(Arr::wrap($this->request()->get('domains')->throw()->json('entries', [])))
             ->map(fn (array $entry): string => (string) $entry['mail_host'])
             ->sort()
             ->values()
@@ -90,6 +91,7 @@ class MailmanClient
      * Fetches several rosters concurrently instead of one after another.
      *
      * @param  array<int, string>  $listIds
+     * @param  int<0, max>  $concurrency
      * @return array<string, array<int, array{email: string, self_link: string, as_user: bool}>|Throwable> keyed by list id
      */
     public function listMembersMany(array $listIds, string $role = 'member', int $concurrency = 10): array
@@ -106,6 +108,9 @@ class MailmanClient
                 if ($response instanceof Throwable) {
                     throw $response;
                 }
+                if ($response === null) {
+                    throw new RuntimeException("No roster response for list {$listId}.");
+                }
                 $results[$listId] = $this->mapMembers($response->throw());
             } catch (Throwable $e) {
                 $results[$listId] = $e;
@@ -120,7 +125,7 @@ class MailmanClient
      */
     private function mapMembers(Response $response): array
     {
-        return collect($response->json('entries', []))
+        return collect(Arr::wrap($response->json('entries', [])))
             ->map(fn (array $entry): array => [
                 'email' => $entry['email'],
                 'self_link' => $entry['self_link'],
@@ -181,7 +186,7 @@ class MailmanClient
      * self_link is deleted directly, so Mailman's member-id URL scheme
      * never has to be known here.
      *
-     * @param  array<int, array{email: string, self_link: string, as_user: bool}>  $members
+     * @param  array<int, array{email: string, self_link: string, as_user?: bool}>  $members
      * @return array<string, string> failed address => reason
      */
     public function unsubscribe(string $listId, array $members): array
@@ -353,7 +358,7 @@ class MailmanClient
     {
         $entries = $this->request()->get("lists/{$listId}/requests")->throw()->json('entries', []);
 
-        return collect($entries)
+        return collect(Arr::wrap($entries))
             ->where('type', 'subscription')
             ->mapWithKeys(fn (array $entry): array => [strtolower((string) $entry['email']) => [
                 'token' => (string) $entry['token'],

@@ -6,6 +6,8 @@ use App\Ldap\Community;
 use App\Ldap\Group;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
@@ -25,7 +27,7 @@ class EditGroup extends Component
     #[Rule('required|min:6')]
     public string $name;
 
-    public function mount(Community $realm, $cn)
+    public function mount(Community $realm, string $cn): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->cn = $cn;
@@ -34,11 +36,12 @@ class EditGroup extends Component
         $this->name = $group->getFirstAttribute('description');
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.group.edit-group');
     }
 
+    /** @return false|null */
     public function save()
     {
         $this->validate();
@@ -53,6 +56,8 @@ class EditGroup extends Component
             Flux::toast(variant: 'success', text: __('groups.edit_success'));
 
             $this->redirect(url()->previous());
+
+            return null;
         } catch (LdapRecordException $exception) {
             $this->addError('cn', $exception->getMessage());
 

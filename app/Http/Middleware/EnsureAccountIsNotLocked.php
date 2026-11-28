@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Ldap\User as LdapUser;
 use Closure;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class EnsureAccountIsNotLocked
         $user = $request->user();
         $ldapUser = $user?->ldapOrNull();
 
-        if ($ldapUser && LdapUser::isLockedByUsername($ldapUser->getFirstAttribute('uid'), $ldapUser->getParentDn())) {
+        if ($ldapUser && LdapUser::isLockedByUsername($ldapUser->getFirstAttribute('uid'), Dn::parentOf($ldapUser))) {
             $realmLoginUrl = Community::loginUrlFor($user->realm);
 
             Auth::guard('web')->logout();

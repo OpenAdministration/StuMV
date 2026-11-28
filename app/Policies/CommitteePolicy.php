@@ -15,7 +15,7 @@ class CommitteePolicy
      * for committee create/edit/delete themselves - those stay
      * community-moderator-only, see edit()/delete()/create() below.
      */
-    public function moderator(User $user, Committee $committee, Community $community)
+    public function moderator(User $user, Committee $committee, Community $community): bool
     {
         return $user->can('moderator', $community) || $committee->hasModerator($user);
     }

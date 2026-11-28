@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +33,7 @@ class CommunityModerator
         // separately (community-moderator-only, see routes/web.php).
         $committee = Committee::findByName($community->getShortCode(), $ou) ?? abort(404);
 
-        if ($request->user()->cannot('moderator', [$committee, $community])) {
+        if (User::current()->cannot('moderator', [$committee, $community])) {
             abort(403);
         }
 

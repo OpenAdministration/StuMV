@@ -5,6 +5,8 @@ namespace App\Livewire\Settings\IdentityProvider;
 use App\Ldap\Community;
 use App\Models\RealmIdentityProvider;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Component;
 
 class NewIdentityProvider extends Component
@@ -33,6 +35,7 @@ class NewIdentityProvider extends Component
         $this->uid = $realm->getShortCode();
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -47,12 +50,12 @@ class NewIdentityProvider extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.identity-provider.new-identity-provider')->title(__('identity_providers.new_title'));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
 

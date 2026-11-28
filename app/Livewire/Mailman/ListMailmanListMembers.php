@@ -10,6 +10,7 @@ use App\Support\MailmanClient;
 use App\Support\MailmanDesiredMembers;
 use App\Support\MailmanListSyncStatus;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Locked;
@@ -47,7 +48,7 @@ class ListMailmanListMembers extends Component
         $this->mailmanListId = $listId;
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -121,7 +122,7 @@ class ListMailmanListMembers extends Component
         }
     }
 
-    public function render(MailmanClient $mailman)
+    public function render(MailmanClient $mailman): View
     {
         $mapping = $this->mapping();
         $groupsExist = $this->memberGroupsExist($mapping);
@@ -184,7 +185,7 @@ class ListMailmanListMembers extends Component
         }
 
         $sorted = $rows
-            ->sortBy(fn (array $row) => mb_strtolower((string) $row[$this->sortField]), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn (array $row): string => mb_strtolower((string) $row[$this->sortField]), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
 
         $perPage = 10;

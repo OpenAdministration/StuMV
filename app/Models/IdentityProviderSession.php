@@ -21,6 +21,7 @@ class IdentityProviderSession extends Model
         'session_id',
     ];
 
+    /** @return BelongsTo<RealmIdentityProvider, $this> */
     public function provider(): BelongsTo
     {
         return $this->belongsTo(RealmIdentityProvider::class, 'provider_id');

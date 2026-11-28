@@ -69,7 +69,7 @@ class ActivityLogger
     }
 
     /**
-     * @param  list<string>  $groupDns  the groups the role was linked to
+     * @param  array<int, string>  $groupDns  the groups the role was linked to
      */
     public function recordRoleDeletion(string $realm, LdapModel $role, array $groupDns): void
     {
@@ -123,7 +123,12 @@ class ActivityLogger
         }
 
         // a freshly created entry gets its entryUUID from the server
-        $guid = $subject->getConvertedGuid() ?? ($subject->exists ? $subject->fresh()?->getConvertedGuid() : null);
+        $guid = $subject->getConvertedGuid();
+        if ($guid === null && $subject->exists) {
+            // fresh() returns false, not null, for an entry that is gone
+            $fresh = $subject->fresh();
+            $guid = $fresh ? $fresh->getConvertedGuid() : null;
+        }
 
         return $guid ?? $subject->getDn();
     }

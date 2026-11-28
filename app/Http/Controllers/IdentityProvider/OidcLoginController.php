@@ -55,7 +55,7 @@ class OidcLoginController extends Controller
      * though, this must never silently switch the session to a different
      * account, so that case is rejected instead.
      */
-    public function callback(Community $realm, RealmIdentityProvider $provider, Request $request)
+    public function callback(Community $realm, RealmIdentityProvider $provider, Request $request): RedirectResponse
     {
         $this->authorizeProvider($realm, $provider);
 
@@ -83,7 +83,7 @@ class OidcLoginController extends Controller
         $claims = $oidcUser->getRaw();
         $email = $oidcUser->getEmail();
 
-        abort_unless($email, 422, 'The identity provider did not return an email address.');
+        abort_if(blank($email), 422, 'The identity provider did not return an email address.');
 
         // Accounts are matched by email below, so an address the provider
         // itself doesn't vouch for would let anyone able to set one at the
@@ -190,6 +190,7 @@ class OidcLoginController extends Controller
      * wherever it's present, with sub left to cover only those sessions
      * recorded before the provider started sending one (external_sid null).
      *
+     * @param  array<string, mixed>  $claims
      * @return Collection<int, IdentityProviderSession>
      */
     private function sessionsToTerminate(RealmIdentityProvider $provider, array $claims): Collection
@@ -258,6 +259,8 @@ class OidcLoginController extends Controller
      * user re-running this flow to pick up a new mapping (see callback()'s
      * doc comment) keeps their existing session_id - a plain create() would
      * hit that unique constraint on every such re-sync.
+     *
+     * @param  array<string, mixed>  $claims
      */
     private function rememberSession(RealmIdentityProvider $provider, array $claims, string $sessionId): void
     {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\DomainFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 class Domain extends Model
 {
+    /** @use HasFactory<DomainFactory> */
     use HasFactory;
 
     /**
@@ -27,12 +29,12 @@ class Domain extends Model
     protected $table = 'domain';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = ['name', 'realm_uid', 'for_registration'];
 
     /**
-     * @return BelongsTo
+     * @return BelongsTo<Realm, $this>
      */
     public function realm(): Relation
     {

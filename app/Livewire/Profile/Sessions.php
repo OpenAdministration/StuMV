@@ -7,6 +7,7 @@ use App\Ldap\User;
 use App\Models\User as EloquentUser;
 use App\Support\UserAgentParser;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -16,21 +17,23 @@ class Sessions extends Component
     #[Locked]
     public string $realm_uid;
 
+    /** @var string */
     #[Locked]
     public $currentUsername;
 
     public string $sortField = 'last_activity';
 
+    /** @var 'asc'|'desc' */
     public string $sortDirection = 'desc';
 
-    public function mount(Community $realm, $username): void
+    public function mount(Community $realm, string $username): void
     {
         $this->authorize('manageProfile', [User::class, $realm, $username]);
         $this->realm_uid = $realm->getShortCode();
         $this->currentUsername = $username;
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -47,7 +50,7 @@ class Sessions extends Component
             ->firstOrFail();
     }
 
-    public function render()
+    public function render(): View
     {
         $peopleDn = Community::findOrFailByUid($this->realm_uid)->peopleDn();
 

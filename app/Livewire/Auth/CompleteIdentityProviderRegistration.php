@@ -11,6 +11,8 @@ use App\Providers\RouteServiceProvider;
 use App\Support\IdentityProviderGroupRoleSync;
 use App\Support\IdentityProviderGroupSync;
 use App\Support\RealmContext;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use LdapRecord\LdapRecordException;
@@ -51,6 +53,7 @@ class CompleteIdentityProviderRegistration extends Component
         $this->last_name = $pending['family_name'] ?? '';
     }
 
+    /** @return array<string, mixed> */
     protected function pending(): array
     {
         $pending = session('identity_provider_pending');
@@ -63,7 +66,7 @@ class CompleteIdentityProviderRegistration extends Component
         return $pending;
     }
 
-    public function render()
+    public function render(): View
     {
         $branding = RealmBranding::forRealm($this->realm_uid);
 
@@ -72,7 +75,7 @@ class CompleteIdentityProviderRegistration extends Component
             ->title(__('identity_providers.complete_registration_title'));
     }
 
-    public function save()
+    public function save(): ?RedirectResponse
     {
         $this->validate();
 
@@ -97,12 +100,12 @@ class CompleteIdentityProviderRegistration extends Component
             resolve(RealmContext::class)->set($community);
             Auth::validate(['uid' => $this->username, 'password' => $randomPassword]);
 
-            $eloquentUser = \App\Models\User::where('uid', $user->getConvertedGuid())->first();
+            $eloquentUser = \App\Models\User::where('uid', $user->getConvertedGuid())->firstOrFail();
             $eloquentUser->forceFill([
                 'realm' => $community->getFirstAttribute('ou'),
                 'email_verified_at' => now(),
             ])->save();
-            $provider = RealmIdentityProvider::find($pending['provider_id']);
+            $provider = is_string($pending['provider_id'] ?? null) ? RealmIdentityProvider::find($pending['provider_id']) : null;
             $user->recordAction('member.registered', $this->realm_uid, $provider ? ['identity_provider' => $provider->name] : [], $eloquentUser);
 
             Auth::login($eloquentUser);
@@ -128,5 +131,7 @@ class CompleteIdentityProviderRegistration extends Component
             report($ldapRecordException);
             $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));
         }
+
+        return null;
     }
 }

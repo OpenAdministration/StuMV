@@ -5,6 +5,7 @@ namespace App\Livewire\Concerns;
 use Illuminate\Support\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 /**
  * Shared by NewOidcClient/EditOidcClient - both need the exact same logo
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
  */
 trait StoresOidcClientLogo
 {
-    private function storeOidcClientLogo($upload): string
+    private function storeOidcClientLogo(TemporaryUploadedFile $upload): string
     {
         if (strtolower((string) $upload->getClientOriginalExtension()) === 'svg') {
             $filename = Str::uuid().'.svg';

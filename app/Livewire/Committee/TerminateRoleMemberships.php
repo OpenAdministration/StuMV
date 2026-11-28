@@ -8,6 +8,9 @@ use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Date;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -22,11 +25,12 @@ class TerminateRoleMemberships extends Component
     #[Locked]
     public string $cn;
 
+    /** @var array<int, int|string> ids of the selected memberships */
     public array $membershipsToTerminate = [];
 
     public ?string $terminationDate = null;
 
-    public function mount(Community $realm, string $ou, string $cn)
+    public function mount(Community $realm, string $ou, string $cn): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
@@ -34,11 +38,11 @@ class TerminateRoleMemberships extends Component
         $this->terminationDate = today()->format('Y-m-d');
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findOrFailByUid($this->uid);
-        $committee = Committee::findByName($this->uid, $this->ou);
-        $role = $committee?->roles()->where('cn', $this->cn)->first();
+        $committee = Committee::findByNameOrFail($this->uid, $this->ou);
+        $role = $committee->roles()->where('cn', $this->cn)->firstOrFail();
         $memberships = $role->dbMemberships()->active(today())->get()
             ->sortBy(fn ($m): string => mb_strtolower((string) (User::query()->in($community->peopleDn())->where('uid', '=', $m->username)->first()?->getFirstAttribute('cn') ?? $m->username)), SORT_NATURAL)
             ->values();
@@ -50,7 +54,7 @@ class TerminateRoleMemberships extends Component
         ])->title(__('roles.terminate_role_memberships_title', ['role' => $role->getFirstAttribute('description')]));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $ldapSynced = true;
         foreach ($this->membershipsToTerminate as $m) {
@@ -62,7 +66,7 @@ class TerminateRoleMemberships extends Component
 
             $wasCurrent = $membership->isActive();
             $before = $membership->activityLogAttributes();
-            $membership->until = $this->terminationDate;
+            $membership->until = Date::parse($this->terminationDate);
             $membership->save();
             $membership->recordAction('updated', $before);
             $ldapSynced = resolve(RoleMembershipLdapSync::class)->sync($membership, $wasCurrent) && $ldapSynced;

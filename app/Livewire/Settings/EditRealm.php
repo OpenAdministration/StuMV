@@ -6,13 +6,15 @@ use App\Ldap\Community;
 use App\Models\RealmContact;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 /**
- * @property $realm
+ * @property-read Community $realm
  */
 class EditRealm extends Component
 {
@@ -78,12 +80,12 @@ class EditRealm extends Component
         return Community::findOrFailByUid($this->uid);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.edit-realm')->title(__('realms.dashboard.title', ['realm' => $this->uid]));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         // entered as printed, stored without spaces
         $this->iban = strtoupper((string) preg_replace('/\s+/', '', $this->iban));

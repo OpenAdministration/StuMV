@@ -43,11 +43,9 @@ class Handler extends ExceptionHandler
 
     /**
      * Register the exception handling callbacks for the application.
-     *
-     * @return void
      */
     #[\Override]
-    public function register()
+    public function register(): void
     {
         // LdapRecord's findOrFail()-style lookups (e.g. the global "uid"
         // route binding resolving a Community) throw this when nothing

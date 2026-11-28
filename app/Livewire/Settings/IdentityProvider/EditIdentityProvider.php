@@ -10,6 +10,8 @@ use App\Models\IdentityProviderGroupMapping;
 use App\Models\IdentityProviderRoleMapping;
 use App\Models\RealmIdentityProvider;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -76,6 +78,7 @@ class EditIdentityProvider extends Component
         $this->enabled = $provider->enabled;
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -103,7 +106,7 @@ class EditIdentityProvider extends Component
         $this->roleFieldKey++;
     }
 
-    public function render()
+    public function render(): View
     {
         $committees = Committee::fromCommunity($this->uid)->recursive()->get()
             ->filter(fn (Committee $committee): bool => $committee->roles()->exists());
@@ -142,7 +145,7 @@ class EditIdentityProvider extends Component
         ])->title(__('identity_providers.edit_title'));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
 
@@ -156,7 +159,7 @@ class EditIdentityProvider extends Component
             'enforce_email_verified' => $this->enforce_email_verified,
             'groups_claim' => $this->groups_claim,
             'enabled' => $this->enabled,
-        ], fn ($value) => $value !== null));
+        ], fn (string|bool|null $value): bool => $value !== null));
         $provider->recordAction('updated');
 
         Flux::toast(variant: 'success', text: __('identity_providers.edit_success'));

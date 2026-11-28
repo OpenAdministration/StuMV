@@ -8,6 +8,7 @@ use App\Models\GroupMailmanListGroup;
 use App\Models\GroupMembership;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -34,7 +35,7 @@ class ListGroups extends Component
 
     public string $deleteConfirmText = '';
 
-    public function sortBy($field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -50,12 +51,12 @@ class ListGroups extends Component
         $this->resetPage();
     }
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->realm_uid = $realm->getShortCode();
     }
 
-    public function render()
+    public function render(): View
     {
         $groupsQuery = Group::query()->in(Group::dnRoot($this->realm_uid));
         if ($this->search) {
@@ -64,7 +65,7 @@ class ListGroups extends Component
                 ->orWhereContains('description', $search);
         }
         $sorted = $groupsQuery->get()
-            ->sortBy(fn ($group) => mb_strtolower((string) $group->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn ($group): string => mb_strtolower((string) $group->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
 
         // LdapRecord collections aren't Eloquent builders, so pagination is
@@ -83,7 +84,7 @@ class ListGroups extends Component
         ])->title(__('groups.list_title'));
     }
 
-    public function deletePrepare($uid, $cn): void
+    public function deletePrepare(string $uid, string $cn): void
     {
         // $uid is only ever the realm this page is already scoped to (see
         // list-group.blade.php) - always deriving the DN from realm_uid

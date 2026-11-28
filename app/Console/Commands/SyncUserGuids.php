@@ -45,7 +45,7 @@ class SyncUserGuids extends Command
         foreach ($query->orderBy('realm')->orderBy('username')->get() as $user) {
             $checked++;
 
-            $community = $communities[$user->realm] ??= Community::findByUid($user->realm);
+            $community = $user->realm === null ? null : ($communities[$user->realm] ??= Community::findByUid($user->realm));
 
             if (! $community) {
                 $this->warn("  ! {$user->realm}/{$user->username}: unknown realm");

@@ -53,7 +53,7 @@ use ReflectionProperty;
  */
 class CustomAuthCodeGrant extends BaseAuthCodeGrant
 {
-    public function __construct(...$args)
+    public function __construct(mixed ...$args)
     {
         parent::__construct(...$args);
 
@@ -85,7 +85,7 @@ class CustomAuthCodeGrant extends BaseAuthCodeGrant
 
         parse_str((string) parse_url($redirectUri, PHP_URL_QUERY), $query);
 
-        if (! isset($query['code'])) {
+        if (! isset($query['code']) || ! is_string($query['code'])) {
             return $response;
         }
 
@@ -104,7 +104,7 @@ class CustomAuthCodeGrant extends BaseAuthCodeGrant
 
         $newCode = $this->encrypt(json_encode($authCodePayload, JSON_THROW_ON_ERROR));
 
-        $response->setRedirectUri(preg_replace('/([?&]code=)[^&]+/', '$1'.rawurlencode($newCode), $redirectUri, 1));
+        $response->setRedirectUri(preg_replace('/([?&]code=)[^&]+/', '$1'.rawurlencode($newCode), $redirectUri, 1) ?? throw new \RuntimeException('Could not rewrite the authorization code.'));
 
         return $response;
     }

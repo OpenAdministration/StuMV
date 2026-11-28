@@ -27,11 +27,19 @@ class UserAdditionalEmail extends Model
         ];
     }
 
+    /**
+     * @param  Builder<UserAdditionalEmail>  $query
+     * @return Builder<UserAdditionalEmail>
+     */
     protected function scopeVerified(Builder $query): Builder
     {
         return $query->whereNotNull('verified_at');
     }
 
+    /**
+     * @param  Builder<UserAdditionalEmail>  $query
+     * @return Builder<UserAdditionalEmail>
+     */
     protected function scopeForAccount(Builder $query, string $username, string $realm): Builder
     {
         return $query->where('username', $username)->where('realm', $realm);

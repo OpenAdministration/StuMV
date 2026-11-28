@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Jobs\Oidc\SendBackChannelLogoutNotification;
+use App\Models\PassportClient;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Token as PassportToken;
@@ -58,11 +59,13 @@ class EndsAuthenticatedSession
             ->where('revoked', false)
             ->with('client')
             ->get()
-            ->filter(fn (PassportToken $token) => filled($token->client?->back_channel_logout_uri))
-            ->each(fn (PassportToken $token) => dispatch(new SendBackChannelLogoutNotification(
-                $token->client,
-                (string) $user->uid,
-                $token->getKey(),
-            ))->afterResponse());
+            ->each(function (PassportToken $token) use ($user): void {
+                $client = $token->client;
+                // always a PassportClient, see Passport::useClientModel() in AuthServiceProvider
+                if (! $client instanceof PassportClient || blank($client->back_channel_logout_uri)) {
+                    return;
+                }
+                dispatch(new SendBackChannelLogoutNotification($client, (string) $user->uid, $token->getKey()))->afterResponse();
+            });
     }
 }

@@ -5,24 +5,27 @@ namespace App\Livewire\Realm;
 use App\Ldap\Community;
 use App\Ldap\User;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 class NewAdmin extends Component
 {
+    /** @var array<int, string> */
     #[Rule('required|array')]
     public array $dn = [];
 
     #[Rule('required|string')]
     public string $realm_uid = '';
 
-    public function mount(Community $realm)
+    public function mount(Community $realm): void
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $userList = User::query()->in($community->peopleDn())->get();
@@ -38,6 +41,7 @@ class NewAdmin extends Component
         ])->title(__('realms.admins_new_title', ['realm' => $this->realm_uid]));
     }
 
+    /** @return false|RedirectResponse */
     public function save()
     {
         $this->validate();

@@ -14,11 +14,16 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 
 /**
- * @property int $role_id
- * @property int $user_id
- * @property string $from
- * @property string $until
- * @property Role $role
+ * @property int $id
+ * @property string $role_cn
+ * @property string $committee_dn
+ * @property ?string $realm
+ * @property string $username
+ * @property Carbon $from
+ * @property ?Carbon $until
+ * @property ?Carbon $decided
+ * @property ?string $comment
+ * @property ?string $identity_provider_id
  */
 class RoleMembership extends Model
 {
@@ -30,7 +35,7 @@ class RoleMembership extends Model
     protected $table = 'role_user_relation';
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'role_cn',
@@ -51,13 +56,14 @@ class RoleMembership extends Model
     }
 
     /**
-     * @return BelongsTo
+     * @return BelongsTo<Role, $this>
      */
     public function role(): Relation
     {
         return $this->belongsTo(Role::class);
     }
 
+    /** @return BelongsTo<RealmIdentityProvider, $this> */
     public function identityProvider(): BelongsTo
     {
         return $this->belongsTo(RealmIdentityProvider::class, 'identity_provider_id');
@@ -65,8 +71,7 @@ class RoleMembership extends Model
 
     public function isActive(): bool
     {
-        return $this->from !== null
-            && $this->from->lte(Date::today())
+        return $this->from->lte(Date::today())
             && ($this->until === null || $this->until->gte(Date::today()));
     }
 
@@ -107,15 +112,16 @@ class RoleMembership extends Model
             // entryUUID; a username alone is ambiguous across realms
             'person' => User::where('username', $this->username)->where('realm', $this->realm)->value('uid'),
             'role' => "cn={$this->role_cn},{$this->committee_dn}",
-            'from' => $this->from?->toDateString(),
+            'from' => $this->from->toDateString(),
             'until' => $this->until?->toDateString(),
             'decided' => $this->decided?->toDateString(),
             'comment' => $this->comment,
         ];
     }
 
+    /** @param Builder<RoleMembership> $query */
     #[Scope]
-    protected function active(Builder $query, ?Carbon $date = null)
+    protected function active(Builder $query, ?Carbon $date = null): void
     {
         $date ??= today();
         $query->whereDate('from', '<=', $date)

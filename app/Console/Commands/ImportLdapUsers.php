@@ -58,7 +58,7 @@ class ImportLdapUsers extends Command
                     ->orWhere(fn ($query) => $query->where('username', $username)->where('realm', $realm))
                     ->first();
 
-                if ($existing?->uid === $guid && $existing->realm === $realm) {
+                if ($existing !== null && $existing->uid === $guid && $existing->realm === $realm) {
                     continue;
                 }
 

@@ -2,13 +2,14 @@
 
 namespace App\View\Components;
 
+use App\Ldap\Community;
 use Illuminate\Support\Facades\Route;
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use LdapRecord\Models\OpenLDAP\Entry;
 
 class AppLayout extends Component
 {
+    /** @var array<string, mixed> */
     public array $routeParams;
 
     /**
@@ -26,7 +27,8 @@ class AppLayout extends Component
         // reached now from resources/views/errors/{404,403,500}.blade.php.
         $params = Route::current()?->parameters() ?? [];
         foreach ($params as $name => $entry) {
-            if ($entry instanceof Entry) {
+            // only {realm} is bound to an LDAP model (see RouteServiceProvider)
+            if ($entry instanceof Community) {
                 $params[$name] = $entry->getFirstAttribute($entry->getRouteKeyName());
             }
         }

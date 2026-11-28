@@ -9,7 +9,15 @@ use App\Models\Concerns\RecordsActions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-/** What a member can pick when exporting their memberships, set up by the realm admins. */
+/**
+ * What a member can pick when exporting their memberships, set up by the realm admins.
+ *
+ * @property bool $with_letter
+ * @property LetterSender $sender
+ * @property ExportDateFormat $date_format
+ * @property LetterRecipient $recipient_type
+ * @property ?array<string, mixed> $recipient
+ */
 class MembershipExportTemplate extends Model
 {
     use RecordsActions;

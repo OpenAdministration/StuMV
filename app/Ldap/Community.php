@@ -12,8 +12,8 @@ use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use LdapRecord\Query\Model\Builder;
 
 /**
- * @property ?array $ou
- * @property ?array $description
+ * @property ?array<int, string> $ou
+ * @property ?array<int, string> $description
  */
 class Community extends OrganizationalUnit implements LdapImportable
 {
@@ -31,7 +31,7 @@ class Community extends OrganizationalUnit implements LdapImportable
      */
     public const ADMIN_REALM_UID = 'admin';
 
-    public static function rootDn()
+    public static function rootDn(): string
     {
         // would be nice if we could substitute a bit more elegant
         return 'ou=Communities,'.config('ldap.connections.default.base_dn');
@@ -78,6 +78,8 @@ class Community extends OrganizationalUnit implements LdapImportable
      * token POST vs. a queued logout job with no request at all), so without
      * forcing it here centrally, whichever one happened not to be accessed
      * over https would disagree with the other two on scheme alone.
+     *
+     * @return non-empty-string
      */
     public static function issuerFor(string $uid): string
     {
@@ -85,14 +87,20 @@ class Community extends OrganizationalUnit implements LdapImportable
             URL::forceScheme('https');
         }
 
-        return rtrim(URL::to('/'.$uid), '/');
+        $issuer = rtrim(URL::to('/'.$uid), '/');
+        if ($issuer === '') {
+            throw new \RuntimeException("No issuer URL for realm {$uid}.");
+        }
+
+        return $issuer;
     }
 
-    public function getShortCode()
+    public function getShortCode(): string
     {
-        return $this->ou[0];
+        return $this->getFirstAttribute('ou') ?? throw new \LogicException('Community entry without ou.');
     }
 
+    /** @return string */
     public function getLongName()
     {
         return $this->description[0] ?? '';
@@ -153,12 +161,12 @@ class Community extends OrganizationalUnit implements LdapImportable
 
     public function moderatorsGroup(): Group
     {
-        return Group::query()->in($this->getDn())->where('cn', 'moderators')->first();
+        return Group::query()->in($this->getDn())->where('cn', 'moderators')->firstOrFail();
     }
 
     public function adminsGroup(): Group
     {
-        return Group::query()->in($this->getDn())->where('cn', 'admins')->first();
+        return Group::query()->in($this->getDn())->where('cn', 'admins')->firstOrFail();
     }
 
     /**
@@ -169,7 +177,7 @@ class Community extends OrganizationalUnit implements LdapImportable
      *                      get moderator/admin/superadmin rights everywhere
      *                      via CommunityPolicy, not through its own groups.
      */
-    public function generateSkeleton(bool $full = true)
+    public function generateSkeleton(bool $full = true): void
     {
         $this->save();
 

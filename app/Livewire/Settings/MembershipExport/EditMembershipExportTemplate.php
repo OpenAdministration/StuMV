@@ -11,6 +11,8 @@ use App\Models\RealmContact;
 use App\Support\CoverLetter;
 use App\Support\LetterPlaceholders;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -110,7 +112,7 @@ class EditMembershipExportTemplate extends Component
         $this->contactRoom = (string) $contact?->office_room;
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.membership-export.edit-membership-export-template', [
             'dateFormats' => ExportDateFormat::cases(),
@@ -120,7 +122,7 @@ class EditMembershipExportTemplate extends Component
         ])->title(__('realms.membership_export.title', ['realm' => $this->uid]));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $letter = 'exclude_unless:withLetter,true';
         $otherRecipient = 'exclude_unless:recipientType,'.LetterRecipient::Other->value;

@@ -43,11 +43,9 @@ class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     #[\Override]
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(RealmContext::class);
         // Scoped so one request's people share a single Mailman sync.
@@ -80,7 +78,7 @@ class AppServiceProvider extends ServiceProvider
         // registered before the deferred provider's own singleton() binding
         // actually runs, since extenders apply to whatever gets built,
         // whenever that happens to be.
-        $this->app->extend('auth.password', fn ($manager, $app) => new RealmScopedPasswordBrokerManager($app));
+        $this->app->extend('auth.password', fn ($manager, $app): RealmScopedPasswordBrokerManager => new RealmScopedPasswordBrokerManager($app));
 
         // OIDC clients (and their /oauth/* endpoints) are realm-bound now -
         // the package's global routes are replaced with realm-prefixed ones
@@ -93,10 +91,8 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         // Livewire actions are separate requests; re-run the authorization middleware there too
         Livewire::addPersistentMiddleware([
@@ -225,7 +221,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(fn (RequestHandled $event) => SetContentSecurityPolicy::apply($event->response));
 
         if ($this->app->hasDebugModeEnabled()) {
-            Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale) {
+            Lang::handleMissingKeysUsing(function (string $key, array $replacements, string $locale): string {
                 info("Missing translation key [$key] detected.");
 
                 return $key;

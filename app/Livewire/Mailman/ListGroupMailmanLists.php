@@ -9,6 +9,7 @@ use App\Models\GroupMailmanListGroup;
 use App\Models\MailmanDomainRealm;
 use App\Support\MailmanListSyncStatus;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +46,7 @@ class ListGroupMailmanLists extends Component
         $this->uid = $realm->getShortCode();
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
@@ -70,7 +71,7 @@ class ListGroupMailmanLists extends Component
         $this->statuses = $status->forMany($missing) + $this->statuses;
     }
 
-    public function render()
+    public function render(): View
     {
         $webUrl = rtrim((string) config('services.mailman.web_url'), '/');
         $existingGroupDns = Group::query()->in(Group::dnRoot($this->uid))->get()
@@ -100,6 +101,7 @@ class ListGroupMailmanLists extends Component
             ->title(__('group_mailman_lists.list_title'));
     }
 
+    /** @return LengthAwarePaginator<int, GroupMailmanList> */
     private function currentPage(): LengthAwarePaginator
     {
         $search = trim($this->search);

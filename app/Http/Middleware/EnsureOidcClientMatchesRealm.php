@@ -29,7 +29,7 @@ class EnsureOidcClientMatchesRealm
 
         $clientId = $request->input('client_id') ?? $request->getUser();
 
-        if ($clientId === null) {
+        if (! is_string($clientId) || $clientId === '') {
             Log::warning('OIDC request rejected: no client_id given', ['realm' => $realm->getShortCode(), 'path' => $request->path()]);
             abort(401);
         }

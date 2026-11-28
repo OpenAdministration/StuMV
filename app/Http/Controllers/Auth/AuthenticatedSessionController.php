@@ -7,8 +7,10 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Ldap\Community;
 use App\Models\RealmBranding;
 use App\Models\RealmIdentityProvider;
+use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use App\Support\EndsAuthenticatedSession;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +26,7 @@ class AuthenticatedSessionController extends Controller
      *
      * @return Redirector|RedirectResponse|View
      */
-    public function pickRealm()
+    public function pickRealm(): Redirector|RedirectResponse|Factory|View
     {
         if (! Auth::guest()) {
             return redirect(RouteServiceProvider::home());
@@ -51,7 +53,7 @@ class AuthenticatedSessionController extends Controller
      *
      * @return Redirector|RedirectResponse|View
      */
-    public function create(Community $realm)
+    public function create(Community $realm): Redirector|RedirectResponse|Factory|View
     {
         if (! Auth::guest()) {
             return redirect(RouteServiceProvider::home());
@@ -78,7 +80,7 @@ class AuthenticatedSessionController extends Controller
         // registration) - it's always trivially known here (the {realm}
         // route parameter the credentials were just validated against), so
         // this keeps App\Models\User.realm self-healing.
-        Auth::user()->update(['realm' => $realm->getShortCode()]);
+        User::current()->update(['realm' => $realm->getShortCode()]);
 
         $request->session()->regenerate();
 
@@ -98,7 +100,7 @@ class AuthenticatedSessionController extends Controller
      *
      * @return RedirectResponse
      */
-    public function destroy(Request $request, EndsAuthenticatedSession $endsSession, ?Community $realm = null)
+    public function destroy(Request $request, EndsAuthenticatedSession $endsSession, ?Community $realm = null): Redirector|RedirectResponse
     {
         $realmLoginUrl = $this->realmLoginUrl($realm, Auth::user());
 
@@ -107,7 +109,7 @@ class AuthenticatedSessionController extends Controller
         return redirect($request->input('redirect_uri', $realmLoginUrl));
     }
 
-    public function confirmLogout(Request $request, ?Community $realm = null)
+    public function confirmLogout(Request $request, ?Community $realm = null): Factory|View
     {
         $user = Auth::user();
 

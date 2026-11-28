@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\IdentityProviderRoleMapping;
 use App\Models\RealmIdentityProvider;
 use App\Models\RoleMembership;
 use Illuminate\Support\Collection;
@@ -24,6 +25,7 @@ class IdentityProviderGroupRoleSync
 {
     public function __construct(private readonly RoleMembershipLdapSync $ldapSync) {}
 
+    /** @param array<string, mixed> $claims */
     public function apply(RealmIdentityProvider $provider, string $username, array $claims): void
     {
         $claimKey = $provider->groups_claim ?: 'groups';
@@ -43,6 +45,7 @@ class IdentityProviderGroupRoleSync
         $this->grantMappedRoles($provider, $username, $mappings);
     }
 
+    /** @param Collection<int, IdentityProviderRoleMapping> $mappings */
     private function revokeStaleGrants(RealmIdentityProvider $provider, string $username, Collection $mappings): void
     {
         $grantedByThisProvider = RoleMembership::where('username', $username)
@@ -71,6 +74,7 @@ class IdentityProviderGroupRoleSync
         }
     }
 
+    /** @param Collection<int, IdentityProviderRoleMapping> $mappings */
     private function grantMappedRoles(RealmIdentityProvider $provider, string $username, Collection $mappings): void
     {
         foreach ($mappings as $mapping) {

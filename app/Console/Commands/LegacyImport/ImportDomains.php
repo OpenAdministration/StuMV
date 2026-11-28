@@ -26,14 +26,14 @@ class ImportDomains extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $domains = DB::connection('opa00-legacy')
             ->table('domain')
             ->get();
         $realms = [];
         foreach ($domains as $domain) {
-            $realms[$domain->realm_uid] ??= Community::findByUid($domain->realm_uid);
+            $realms[$domain->realm_uid] ??= Community::findOrFailByUid($domain->realm_uid);
             $this->comment('Importing Domain '.$domain->name.' to Realm '.$domain->realm_uid.' ...');
             $d = Domain::make([
                 'dc' => $domain->name,

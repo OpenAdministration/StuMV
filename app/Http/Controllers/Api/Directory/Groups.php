@@ -6,13 +6,14 @@ use App\Http\Controllers\Api\Directory\Concerns\AuthorizesDirectoryClient;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Ldap\Group;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class Groups extends Controller
 {
     use AuthorizesDirectoryClient;
 
-    public function index(Request $request, Community $realm)
+    public function index(Request $request, Community $realm): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -25,7 +26,7 @@ class Groups extends Controller
         ])->values());
     }
 
-    public function show(Request $request, Community $realm, string $cn)
+    public function show(Request $request, Community $realm, string $cn): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -37,7 +38,7 @@ class Groups extends Controller
         ]);
     }
 
-    public function members(Request $request, Community $realm, string $cn)
+    public function members(Request $request, Community $realm, string $cn): JsonResponse
     {
         $this->authorizeClientForCommunity($realm);
 
@@ -47,7 +48,7 @@ class Groups extends Controller
         // filter down to the actual people (entries carrying a uid).
         $usernames = $group->members()->get()
             ->filter(fn ($member) => $member->getFirstAttribute('uid'))
-            ->sortBy(fn ($member) => mb_strtolower((string) $member->getFirstAttribute('cn')), SORT_NATURAL)
+            ->sortBy(fn ($member): string => mb_strtolower((string) $member->getFirstAttribute('cn')), SORT_NATURAL)
             ->map(fn ($member) => $member->getFirstAttribute('uid'))
             ->values();
 

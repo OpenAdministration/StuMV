@@ -8,6 +8,8 @@ use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -44,7 +46,7 @@ class ListRoleMembers extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $realm, string $ou, string $cn)
+    public function mount(Community $realm, string $ou, string $cn): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
@@ -61,7 +63,7 @@ class ListRoleMembers extends Component
         $this->ready = true;
     }
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -82,19 +84,19 @@ class ListRoleMembers extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findOrFailByUid($this->uid);
-        $committee = Committee::findByName($this->uid, $this->ou);
-        $role = $committee?->roles()->where('cn', $this->cn)->first();
+        $committee = Committee::findByNameOrFail($this->uid, $this->ou);
+        $role = $committee->roles()->where('cn', $this->cn)->firstOrFail();
 
         // create/edit/delete on any membership of this role, and viewing any
         // member's profile, all resolve to the exact same checks regardless
         // of which row - computed once here (each involves an LDAP-hitting
         // ancestor walk) rather than once per row, which would otherwise
         // multiply that walk by the number of members shown.
-        $isModerator = auth()->user()->can('moderator', [$committee, $community]);
-        $isAdmin = auth()->user()->can('admin', [$community]);
+        $isModerator = \App\Models\User::current()->can('moderator', [$committee, $community]);
+        $isAdmin = \App\Models\User::current()->can('admin', [$community]);
 
         if (! $this->ready) {
             return view('livewire.committee.role-members', [
@@ -130,11 +132,11 @@ class ListRoleMembers extends Component
 
         if ($this->search !== '') {
             $search = mb_strtolower($this->search);
-            $members = $members->filter(fn ($member) => str_contains(mb_strtolower((string) $displayName($member)), $search))->values();
+            $members = $members->filter(fn ($member): bool => str_contains(mb_strtolower((string) $displayName($member)), $search))->values();
         }
 
         $sorted = (match ($this->sortField) {
-            'name' => $members->sortBy(fn ($member) => mb_strtolower((string) $displayName($member)), SORT_NATURAL, $this->sortDirection === 'desc'),
+            'name' => $members->sortBy(fn ($member): string => mb_strtolower((string) $displayName($member)), SORT_NATURAL, $this->sortDirection === 'desc'),
             default => $members->sortBy($this->sortField, SORT_REGULAR, $this->sortDirection === 'desc'),
         })->values();
 
@@ -153,9 +155,7 @@ class ListRoleMembers extends Component
         // RoleMembership::isPending(), which re-fetched the role and the
         // user fresh from LDAP and queried group membership every time -
         // fetch the role's group members once instead and check against it.
-        $roleMemberDns = $role
-            ? $role->members()->get()->map(fn ($u) => $u->getDn())->all()
-            : [];
+        $roleMemberDns = $role->members()->get()->map(fn ($u) => $u->getDn())->all();
 
         $memberStatuses = [];
         foreach ($members as $member) {
@@ -180,7 +180,7 @@ class ListRoleMembers extends Component
         ])->title(__('roles.membership_headline', ['name' => $role->getFirstAttribute('description')]));
     }
 
-    public function prepareDeletion($id)
+    public function prepareDeletion(int $id): void
     {
         $membership = RoleMembership::findOrFail($id);
         $committee = Committee::findByName($this->uid, $this->ou);
@@ -195,7 +195,7 @@ class ListRoleMembers extends Component
         $this->deleteId = $membership->id;
     }
 
-    public function commitDeletion()
+    public function commitDeletion(): RedirectResponse
     {
         $membership = RoleMembership::findOrFail($this->deleteId);
         $committee = Committee::findByName($this->uid, $this->ou);
@@ -214,7 +214,7 @@ class ListRoleMembers extends Component
         return to_route('committees.roles.members', ['realm' => $this->uid, 'ou' => $this->ou, 'cn' => $this->cn]);
     }
 
-    public function close()
+    public function close(): void
     {
         Flux::modal('delete')->close();
         $this->reset('deleteUsername', 'deleteId');

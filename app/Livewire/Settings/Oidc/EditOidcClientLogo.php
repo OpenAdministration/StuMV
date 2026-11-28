@@ -6,9 +6,12 @@ use App\Ldap\Community;
 use App\Livewire\Concerns\StoresOidcClientLogo;
 use App\Models\PassportClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 /**
@@ -32,6 +35,7 @@ class EditOidcClientLogo extends Component
     #[Locked]
     public string $realmUid;
 
+    /** @var TemporaryUploadedFile|null */
     #[Validate(['file', 'mimes:svg,png,jpg,jpeg,webp', 'max:5120'])]
     public $logo = null;
 
@@ -42,7 +46,7 @@ class EditOidcClientLogo extends Component
         $this->authorizeAdmin();
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.settings.oidc.edit-oidc-client-logo', [
             'logoId' => $this->client()->logo_id,
@@ -59,10 +63,14 @@ class EditOidcClientLogo extends Component
         // App\Livewire\Settings\EditRealmBranding::updatedLogo()).
         $this->validateOnly('logo');
         $this->authorizeAdmin();
+        $logo = $this->logo;
+        if (! $logo instanceof TemporaryUploadedFile) {
+            return;
+        }
 
         $client = $this->client();
         $this->deleteOidcClientLogo($client->logo_id);
-        $client->forceFill(['logo_id' => $this->storeOidcClientLogo($this->logo)])->save();
+        $client->forceFill(['logo_id' => $this->storeOidcClientLogo($logo)])->save();
         $client->recordAction('updated');
         $this->reset('logo');
 

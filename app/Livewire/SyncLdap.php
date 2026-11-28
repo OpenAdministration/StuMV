@@ -4,8 +4,11 @@ namespace App\Livewire;
 
 use App\Ldap\Community;
 use App\Ldap\User as LdapUser;
+use App\Models\User;
 use App\Support\LdapSyncDiff;
 use Flux\Flux;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Livewire\Attributes\Locked;
@@ -16,6 +19,7 @@ class SyncLdap extends Component
     #[Locked]
     public string $uid;
 
+    /** @var array{roles: array<int, array<string, mixed>>, groups: array<int, array<string, mixed>>} */
     public array $preview = ['roles' => [], 'groups' => []];
 
     /**
@@ -28,12 +32,12 @@ class SyncLdap extends Component
     public function mount(string $uid): void
     {
         $realm = Community::findByOrFail('ou', $uid);
-        abort_unless(auth()->user()->can('admin', $realm), 403);
+        abort_unless(User::current()->can('admin', $realm), 403);
 
         $this->uid = $uid;
     }
 
-    public function render()
+    public function render(): Factory|View
     {
         return view('livewire.sync-ldap');
     }
@@ -59,7 +63,7 @@ class SyncLdap extends Component
         ];
     }
 
-    public function syncLdap()
+    public function syncLdap(): void
     {
         $rolesExitCode = Artisan::call('ldap:sync-roles', ['community' => $this->uid]);
         $groupsExitCode = Artisan::call('ldap:sync-groups', ['community' => $this->uid]);
@@ -95,9 +99,10 @@ class SyncLdap extends Component
 
         return $uidsByDn->map(function (?string $uid, string $dn) use ($usersByUid): array {
             $user = $uid !== null ? $usersByUid->get($uid) : null;
+            $cn = $user?->getFirstAttribute('cn');
 
             return [
-                'name' => $user?->getFirstAttribute('cn') ?? $uid ?? $dn,
+                'name' => is_string($cn) ? $cn : ($uid ?? $dn),
                 'username' => $uid,
             ];
         });

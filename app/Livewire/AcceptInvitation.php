@@ -9,6 +9,8 @@ use App\Models\RoleMembership;
 use App\Rules\UniqueEmail;
 use App\Support\LdapAccountRegistrar;
 use App\Support\RoleMembershipLdapSync;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -60,10 +62,11 @@ class AcceptInvitation extends Component
         $this->invitation_id = $invitation->id;
         $this->email = $invitation->email;
 
-        $localPart = explode('@', $this->email)[0] ?? '';
+        $localPart = explode('@', $this->email)[0];
         $this->username = str_replace(['-', '_', '.'], '', $localPart);
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -78,7 +81,7 @@ class AcceptInvitation extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $branding = RealmBranding::forRealm($this->realm_uid);
 
@@ -87,7 +90,7 @@ class AcceptInvitation extends Component
             ->title(__('invitations.accept_title'));
     }
 
-    public function save()
+    public function save(): ?RedirectResponse
     {
         $this->validate();
 
@@ -136,5 +139,7 @@ class AcceptInvitation extends Component
             report($ldapRecordException);
             $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));
         }
+
+        return null;
     }
 }

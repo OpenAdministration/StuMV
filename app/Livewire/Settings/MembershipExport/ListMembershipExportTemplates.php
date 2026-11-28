@@ -5,6 +5,7 @@ namespace App\Livewire\Settings\MembershipExport;
 use App\Ldap\Community;
 use App\Models\MembershipExportTemplate;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -22,7 +23,7 @@ class ListMembershipExportTemplates extends Component
         $this->uid = $realm->getShortCode();
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.membership-export.list-membership-export-templates', [
             'templates' => MembershipExportTemplate::forRealm($this->uid)->get(),

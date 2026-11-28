@@ -23,8 +23,8 @@ class EnsureEmailIsVerified extends Middleware
     #[\Override]
     public function handle($request, Closure $next, $redirectToRoute = null)
     {
-        if (! $request->user() ||
-            ($request->user() instanceof MustVerifyEmail && ! $request->user()->hasVerifiedEmail())) {
+        $user = $request->user();
+        if (! $user instanceof MustVerifyEmail || ! $user->hasVerifiedEmail()) {
             return $request->expectsJson()
                 ? abort(403, 'Your email address is not verified.')
                 : Redirect::guest(URL::route($redirectToRoute ?: 'verification.notice', [

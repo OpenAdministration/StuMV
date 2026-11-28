@@ -33,9 +33,11 @@ class OidcProviderFactory
      *                         exact same config/issuer-validation logic below
      *                         instead of tests re-implementing (and risking
      *                         drifting from) it.
+     * @param  array<string, mixed>  $guzzle
      */
     public function __construct(private readonly array $guzzle = []) {}
 
+    /** @param array<string, mixed> $config */
     public function make(Request $request, array $config): Provider
     {
         $provider = new Provider(

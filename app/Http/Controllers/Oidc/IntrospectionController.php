@@ -72,6 +72,8 @@ class IntrospectionController extends Controller
      * token belonging to a realm A client is active, its scopes, its user,
      * etc., since access tokens are all signed with the same server-wide
      * key regardless of realm.
+     *
+     * @param  AccessToken<mixed>  $accessToken
      */
     private function belongsToRealm(AccessToken $accessToken, Community $realm): bool
     {
@@ -81,6 +83,7 @@ class IntrospectionController extends Controller
     }
 
     /**
+     * @param  AccessToken<mixed>  $accessToken
      * @return array<string, mixed>
      */
     private function activeResponse(AccessToken $accessToken, Community $realm): array
@@ -105,7 +108,7 @@ class IntrospectionController extends Controller
             }
         }
 
-        return array_filter($response, fn ($value) => $value !== null);
+        return array_filter($response, fn ($value): bool => $value !== null);
     }
 
     private function invalidClient(): JsonResponse

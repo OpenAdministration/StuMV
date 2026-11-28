@@ -7,6 +7,7 @@ use App\Ldap\Group;
 use App\Ldap\Role;
 use App\Ldap\User;
 use App\Models\GroupMembership;
+use Illuminate\Contracts\View\View;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -32,7 +33,7 @@ class ListGroupMembers extends Component
     #[Locked]
     public string $group_cn;
 
-    public function sortBy($field): void
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -48,13 +49,13 @@ class ListGroupMembers extends Component
         $this->resetPage();
     }
 
-    public function mount(Community $realm, $cn): void
+    public function mount(Community $realm, string $cn): void
     {
         $this->realm_uid = $realm->getFirstAttribute('ou');
         $this->group_cn = Group::findOrFail(Group::dnFrom($this->realm_uid, $cn))->getFirstAttribute('cn');
     }
 
-    public function render()
+    public function render(): View
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $group = Group::findOrFail(Group::dnFrom($this->realm_uid, $this->group_cn));
@@ -73,7 +74,7 @@ class ListGroupMembers extends Component
         $usernames = $desiredMemberships->pluck('username')->unique()->filter()->all();
         $ldapUsersByUsername = empty($usernames)
             ? collect()
-            : User::query()->in($community->peopleDn())->whereIn('uid', $usernames)->get()->keyBy(fn (User $user) => $user->getFirstAttribute('uid'));
+            : User::query()->in($community->peopleDn())->whereIn('uid', $usernames)->get()->keyBy(fn (User $user): mixed => $user->getFirstAttribute('uid'));
 
         // The actual LDAP state (what "ldap:sync-groups" last wrote), so we
         // can flag members that are desired but not yet synced ("pending")
@@ -108,7 +109,7 @@ class ListGroupMembers extends Component
         }
 
         $sorted = $rows
-            ->sortBy(fn (array $row) => mb_strtolower((string) $row['user']->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
+            ->sortBy(fn (array $row): string => mb_strtolower((string) $row['user']->getFirstAttribute($this->sortField)), SORT_NATURAL, $this->sortDirection === 'desc')
             ->values();
 
         $perPage = 10;

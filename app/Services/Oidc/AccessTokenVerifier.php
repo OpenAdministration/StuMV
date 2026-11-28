@@ -23,6 +23,7 @@ class AccessTokenVerifier
 {
     public function __construct(private readonly ResourceServer $resourceServer) {}
 
+    /** @return AccessToken<mixed> */
     public function verify(string $token): ?AccessToken
     {
         $psrRequest = (new PsrHttpFactory)->createRequest(

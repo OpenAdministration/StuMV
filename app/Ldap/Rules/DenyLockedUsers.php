@@ -2,6 +2,7 @@
 
 namespace App\Ldap\Rules;
 
+use App\Ldap\Dn;
 use App\Ldap\User;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use LdapRecord\Laravel\Auth\Rule;
@@ -11,6 +12,6 @@ class DenyLockedUsers implements Rule
 {
     public function passes(LdapRecord $user, ?Eloquent $model = null): bool
     {
-        return ! User::isLockedByUsername($user->getFirstAttribute('uid'), $user->getParentDn());
+        return ! User::isLockedByUsername($user->getFirstAttribute('uid'), Dn::parentOf($user));
     }
 }

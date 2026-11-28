@@ -3,26 +3,25 @@
 namespace App\Providers;
 
 use App\Ldap\Community;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use LdapRecord\Models\Model;
 
 class RouteServiceProvider extends ServiceProvider
 {
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
-     *
-     * @return void
      */
     #[\Override]
-    public function boot()
+    public function boot(): void
     {
         $this->configureRateLimiting();
 
-        Route::bind('realm', fn (string $value) => Community::findByOrFail('ou', $value));
+        Route::bind('realm', fn (string $value): Model => Community::findByOrFail('ou', $value));
         // $this->model('uid', Community::class);
 
         $this->routes(function (): void {
@@ -59,7 +58,7 @@ class RouteServiceProvider extends ServiceProvider
         ));
     }
 
-    public static function home($uid = null)
+    public static function home(?string $uid = null): string
     {
         if (! empty($uid)) {
             return route('realms.dashboard', $uid);
@@ -72,14 +71,15 @@ class RouteServiceProvider extends ServiceProvider
         // authenticated App\Models\User has a matching LDAP entry yet (e.g.
         // mid-registration/email-verification) - ldapOrNull() (unlike
         // ->ldap()) returns null instead of aborting for those.
-        $ldapUser = Auth::user()->ldapOrNull();
+        $user = User::current();
+        $ldapUser = $user->ldapOrNull();
 
         if ($ldapUser && $ldapUser->isSuperAdmin()) {
             return route('realms.pick');
         }
 
-        return Auth::user()->realm
-            ? route('realms.dashboard', Auth::user()->realm)
+        return $user->realm
+            ? route('realms.dashboard', $user->realm)
             : route('realms.pick');
     }
 }

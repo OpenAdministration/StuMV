@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
@@ -32,7 +33,7 @@ class MoveRoleToCommittee extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $community = Community::findByUid($this->argument('community'));
 
@@ -58,7 +59,7 @@ class MoveRoleToCommittee extends Command
             return self::FAILURE;
         }
 
-        if ($sourceCommittee->getDn() === $targetCommittee->getDn()) {
+        if (Dn::of($sourceCommittee) === Dn::of($targetCommittee)) {
             $this->error('The source and target committee are the same.');
 
             return self::FAILURE;
@@ -72,22 +73,22 @@ class MoveRoleToCommittee extends Command
             return self::FAILURE;
         }
 
-        $oldDn = $role->getDn();
-        $oldCommitteeDn = $sourceCommittee->getDn();
+        $oldDn = Dn::of($role);
+        $oldCommitteeDn = Dn::of($sourceCommittee);
 
         $this->comment('> '.$oldDn);
-        $this->comment('  |-> moving to '.$targetCommittee->getDn());
+        $this->comment('  |-> moving to '.Dn::of($targetCommittee));
 
         // Relocates the LDAP entry itself: same RDN (cn), new parent.
-        $role->move($targetCommittee->getDn());
+        $role->move(Dn::of($targetCommittee));
 
-        $newDn = $role->getDn();
+        $newDn = Dn::of($role);
 
         // The role's DB-tracked memberships are keyed by (committee_dn,
         // role_cn), not the role's DN - repoint them at the new committee.
         $updatedMemberships = RoleMembership::where('role_cn', $role->getFirstAttribute('cn'))
             ->where('committee_dn', $oldCommitteeDn)
-            ->update(['committee_dn' => $targetCommittee->getDn()]);
+            ->update(['committee_dn' => Dn::of($targetCommittee)]);
 
         // Group-role relations reference the role's own DN directly, which
         // just changed.

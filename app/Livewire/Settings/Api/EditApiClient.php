@@ -5,6 +5,7 @@ namespace App\Livewire\Settings\Api;
 use App\Ldap\Community;
 use App\Models\PassportClient;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Laravel\Passport\ClientRepository;
 use Livewire\Attributes\Locked;
@@ -19,9 +20,10 @@ class EditApiClient extends Component
 
     public string $name = '';
 
+    /** @var array<int, string> */
     public array $scopes = [];
 
-    public function mount(Community $realm, PassportClient $client)
+    public function mount(Community $realm, PassportClient $client): void
     {
         abort_if($realm->isAdminRealm(), 404);
         $this->uid = $realm->getFirstAttribute('ou');
@@ -35,6 +37,7 @@ class EditApiClient extends Component
         $this->scopes = $client->scopes ?? [];
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         return [
@@ -44,12 +47,12 @@ class EditApiClient extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.settings.api.edit-api-client')->title(__('api_clients.edit_title'));
     }
 
-    public function save(ClientRepository $clients)
+    public function save(ClientRepository $clients): void
     {
         $this->validate();
 

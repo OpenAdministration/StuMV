@@ -4,12 +4,15 @@ namespace App\Livewire\Committee;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Ldap\User;
 use App\Models\RoleMembership;
 use App\Rules\UserIsMember;
 use App\Support\DatabaseUserProvisioner;
 use App\Support\RoleMembershipLdapSync;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
@@ -26,6 +29,7 @@ class AddUserToRole extends Component
     #[Locked]
     public string $cn;
 
+    /** @var array<int, string> */
     #[Validate]
     public array $usernames = [];
 
@@ -41,7 +45,7 @@ class AddUserToRole extends Component
     #[Validate('string|nullable')]
     public string $comment = '';
 
-    public function mount(Community $realm, $ou, $cn)
+    public function mount(Community $realm, string $ou, string $cn): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
@@ -50,7 +54,8 @@ class AddUserToRole extends Component
         $this->decision_date = today()->format('Y-m-d');
     }
 
-    public function rules()
+    /** @return array<string, mixed> */
+    public function rules(): array
     {
         return [
             'usernames.*' => [
@@ -60,7 +65,7 @@ class AddUserToRole extends Component
         ];
     }
 
-    public function render()
+    public function render(): View
     {
         $c = Community::findByOrFail('ou', $this->uid);
         $users = User::query()->in($c->peopleDn())->get();
@@ -73,7 +78,7 @@ class AddUserToRole extends Component
         $existingUsernames = $role
             ? $role->dbMemberships()->active(today())->pluck('username')
             : collect();
-        $selectableUsers = $users->filter(fn ($user) => ! $existingUsernames->contains($user->getFirstAttribute('uid')))
+        $selectableUsers = $users->filter(fn ($user): bool => ! $existingUsernames->contains($user->getFirstAttribute('uid')))
             ->sortBy(fn ($user): string => mb_strtolower((string) $user->getFirstAttribute('cn')), SORT_NATURAL)
             ->values();
 
@@ -81,11 +86,11 @@ class AddUserToRole extends Component
             ->title(__('realms.add_members_to_role_title', ['role' => $roleName]));
     }
 
-    public function save()
+    public function save(): RedirectResponse
     {
         $this->validate();
 
-        $committee = Committee::findByName($this->uid, $this->ou);
+        $committee = Committee::findByNameOrFail($this->uid, $this->ou);
         $community = Community::findOrFailByUid($this->uid);
 
         foreach ($this->usernames as $username) {
@@ -96,7 +101,7 @@ class AddUserToRole extends Component
 
                 $membership = RoleMembership::create([
                     'role_cn' => $this->cn,
-                    'committee_dn' => $committee->getDn(),
+                    'committee_dn' => Dn::of($committee),
                     'realm' => $this->uid,
                     'username' => $username,
                     'from' => $this->start_date,
@@ -121,7 +126,7 @@ class AddUserToRole extends Component
         ]);
     }
 
-    public function updateDecisionDate()
+    public function updateDecisionDate(): void
     {
         if ($this->start_date) {
             $this->decision_date = $this->start_date;

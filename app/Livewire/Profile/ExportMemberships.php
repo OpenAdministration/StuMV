@@ -12,10 +12,12 @@ use App\Models\MembershipExportTemplate;
 use App\Models\RealmContact;
 use App\Support\CoverLetter;
 use App\Support\MembershipCertificate;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportMemberships extends Component
 {
@@ -49,7 +51,7 @@ class ExportMemberships extends Component
 
         $templates = $this->templates();
         if ($templates->count() === 1) {
-            $this->template = (string) $templates->first()->id;
+            $this->template = (string) $templates->sole()->id;
         }
 
         $this->selectAll();
@@ -68,7 +70,7 @@ class ExportMemberships extends Component
         $this->selected = [];
     }
 
-    public function render()
+    public function render(): View
     {
         $user = $this->member();
 
@@ -80,7 +82,7 @@ class ExportMemberships extends Component
         ])->title(__('profile.export_memberships_title'));
     }
 
-    public function export()
+    public function export(): StreamedResponse
     {
         $community = Community::findOrFailByUid($this->realm_uid);
         $this->authorizeExport($community, $this->currentUsername);
@@ -100,7 +102,7 @@ class ExportMemberships extends Component
 
         $template = $templates->find($this->template);
         $letter = $template?->with_letter
-            ? CoverLetter::fromTemplate($template, $community, $this->member(), auth()->user()->ldap())
+            ? CoverLetter::fromTemplate($template, $community, $this->member(), \App\Models\User::current()->ldap())
             : null;
 
         return MembershipCertificate::download(
@@ -110,7 +112,7 @@ class ExportMemberships extends Component
             strtolower(trans('profile.memberships')).'_'.$this->currentUsername.'.pdf',
             array_map(intval(...), $this->selected),
             $letter,
-            $template?->date_format ?? ExportDateFormat::Iso,
+            $template->date_format ?? ExportDateFormat::Iso,
         );
     }
 
@@ -136,7 +138,7 @@ class ExportMemberships extends Component
         $warnings = [];
 
         if ($template->sender === LetterSender::User) {
-            if (! $hasAddress(auth()->user()->ldap())) {
+            if (! $hasAddress(\App\Models\User::current()->ldap())) {
                 $warnings[] = __('profile.cover_letter_no_profile_address');
             }
         } elseif ($template->sender === LetterSender::Member) {
@@ -162,7 +164,7 @@ class ExportMemberships extends Component
     /** The member themselves, their realm's admins, or its moderators (member list export). */
     private function authorizeExport(Community $realm, string $username): void
     {
-        $user = auth()->user();
+        $user = \App\Models\User::current();
 
         abort_unless(
             $user->can('manageProfile', [User::class, $realm, $username]) || $user->can('moderator', $realm),

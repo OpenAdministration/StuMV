@@ -9,12 +9,14 @@ use Flux\Flux;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Rule;
 use Livewire\Component;
 
 class NewCommitteeModerator extends Component
 {
+    /** @var array<int, string> */
     #[Rule('required')]
     public array $dn = [];
 
@@ -50,6 +52,7 @@ class NewCommitteeModerator extends Component
         ]);
     }
 
+    /** @return false|RedirectResponse */
     public function save()
     {
         $this->validate();

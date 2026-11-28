@@ -10,6 +10,8 @@ use App\Models\GroupMembership;
 use App\Models\RoleMembership;
 use App\Support\ActivityLogger;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use LdapRecord\Models\Attributes\DistinguishedName;
 use Livewire\Attributes\Computed;
@@ -47,7 +49,7 @@ class ListRoles extends Component
 
     public bool $ready = false;
 
-    public function mount(Community $realm, $ou)
+    public function mount(Community $realm, string $ou): void
     {
         $this->uid = $realm->getFirstAttribute('ou');
         $this->ou = $ou;
@@ -58,7 +60,7 @@ class ListRoles extends Component
         $this->ready = true;
     }
 
-    public function sortBy($field)
+    public function sortBy(string $field): void
     {
         if ($this->sortField === $field) {
             // toggle direction
@@ -74,16 +76,16 @@ class ListRoles extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
-        $community = Community::findByUid($this->uid);
+        $community = $this->community();
         $committee = Committee::findByNameOrFail($this->uid, $this->ou);
         // Edit/delete/add-member on any role in this committee, and creating
         // a new one, all resolve to this exact same committee-scoped check
         // regardless of which role - computed once here (an ancestor walk
         // hitting LDAP per level) rather than once per role card, which
         // would otherwise multiply that walk by the number of roles shown.
-        $isModerator = auth()->user()->can('moderator', [$committee, $community]);
+        $isModerator = \App\Models\User::current()->can('moderator', [$committee, $community]);
 
         if (! $this->ready) {
             return view(
@@ -177,16 +179,16 @@ class ListRoles extends Component
     #[Computed]
     public function committee(): Committee
     {
-        return Committee::findByName($this->uid, $this->ou);
+        return Committee::findByNameOrFail($this->uid, $this->ou);
     }
 
     #[Computed]
     public function community(): Community
     {
-        return Community::findByUid($this->uid);
+        return Community::findOrFailByUid($this->uid);
     }
 
-    public function deletePrepare($cn): void
+    public function deletePrepare(string $cn): void
     {
         $r = $this->committee()->roles()->where('cn', $cn)->firstOrFail();
         $this->authorize('delete', [$r, $this->committee(), $this->community()]);
@@ -196,15 +198,16 @@ class ListRoles extends Component
         Flux::modal('delete')->show();
     }
 
+    /** @return RedirectResponse|null */
     public function deleteCommit()
     {
-        $role = $this->committee()?->roles()?->findByOrFail('cn', $this->deleteRoleCn);
+        $role = $this->committee()->roles()->findByOrFail('cn', $this->deleteRoleCn);
         $this->authorize('delete', [$role, $this->committee(), $this->community()]);
 
         if ($this->deleteConfirmText !== $this->deleteRoleCn) {
             $this->addError('deleteConfirmText', __('common.does_not_equal', ['text' => $this->deleteRoleCn]));
 
-            return;
+            return null;
         }
 
         // one by one, so each removed person stays in the activity log
@@ -229,7 +232,7 @@ class ListRoles extends Component
         ]);
     }
 
-    public function close()
+    public function close(): void
     {
         Flux::modal('delete')->close();
         $this->reset('deleteRoleCn', 'deleteRoleName');

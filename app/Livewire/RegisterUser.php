@@ -8,6 +8,8 @@ use App\Rules\DomainRegistrationRule;
 use App\Rules\UniqueEmail;
 use App\Support\LdapAccountRegistrar;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use LdapRecord\LdapRecordException;
 use Livewire\Attributes\Locked;
@@ -46,6 +48,7 @@ class RegisterUser extends Component
         $this->realm_uid = $realm->getShortCode();
     }
 
+    /** @return array<string, mixed> */
     protected function rules(): array
     {
         $community = Community::findOrFailByUid($this->realm_uid);
@@ -83,23 +86,23 @@ class RegisterUser extends Component
         $this->validateOnly('password');
     }
 
-    public function preFillFromMail()
+    public function preFillFromMail(): void
     {
         $split = explode('@', $this->email);
-        $this->username = str_replace(['-', '_', '.'], '', $split[0] ?? $this->username ?? '');
+        $this->username = str_replace(['-', '_', '.'], '', $split[0]);
         if (str_contains($split[0], '.')) {
             $nameParts = explode('.', $split[0], 2);
-            $this->first_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[0] ?? ''));
+            $this->first_name = ucwords(str_replace(['-', '_'], ' ', $nameParts[0]));
             $this->last_name = str_replace(' ', '-', ucwords(str_replace(['-', '_'], ' ', $nameParts[1] ?? '')));
         } else {
             $guessedName = explode(' ', ucwords(str_replace(['-', '_', '.'], ' ', $split[0])), 2);
-            $this->first_name = $guessedName[0] ?? $this->first_name ?? '';
-            $this->last_name = $guessedName[1] ?? $this->last_name ?? '';
+            $this->first_name = $guessedName[0];
+            $this->last_name = $guessedName[1] ?? $this->last_name;
         }
         $this->validateOnly('username');
     }
 
-    public function validateDomain()
+    public function validateDomain(): void
     {
         $this->validateOnly('email');
         $split = explode('@', $this->email);
@@ -107,7 +110,7 @@ class RegisterUser extends Component
         $this->validateOnly('domain');
     }
 
-    public function render()
+    public function render(): View
     {
         $branding = RealmBranding::forRealm($this->realm_uid);
 
@@ -116,7 +119,7 @@ class RegisterUser extends Component
             ->title(__('user.register'));
     }
 
-    public function save()
+    public function save(): ?RedirectResponse
     {
         $this->validateDomain();
         $this->validate();
@@ -152,5 +155,7 @@ class RegisterUser extends Component
             report($ldapRecordException);
             $this->addError('username', $ldapRecordException->getDetailedError()?->getErrorMessage() ?? __('user.error.registration_failed'));
         }
+
+        return null;
     }
 }

@@ -23,12 +23,10 @@ class DomainFactory extends Factory
         ];
     }
 
-    public function noRegistration()
+    public function noRegistration(): static
     {
-        return $this->state(function (array $attributes) {
-            return [
-                'for_registration' => false,
-            ];
-        });
+        return $this->state(fn (array $attributes) => [
+            'for_registration' => false,
+        ]);
     }
 }

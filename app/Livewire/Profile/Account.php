@@ -7,6 +7,7 @@ use App\Ldap\User;
 use App\Support\AccountPurger;
 use App\Support\EndsAuthenticatedSession;
 use Flux\Flux;
+use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -30,14 +31,14 @@ class Account extends Component
         $this->userIsActive = ! $this->isLocked($this->findUserWithLockStatus());
     }
 
-    public function render()
+    public function render(): View
     {
         $user = $this->findUserWithLockStatus();
 
         return view('livewire.profile.account', [
             'givenName' => $user->getFirstAttribute('givenName'),
             'sn' => $user->getFirstAttribute('sn'),
-            'canToggleActive' => auth()->user()->can('admin', $this->community()),
+            'canToggleActive' => \App\Models\User::current()->can('admin', $this->community()),
             'canDelete' => $this->canDelete(),
         ])->title(__('profile.account'));
     }
@@ -62,7 +63,7 @@ class Account extends Component
         Flux::toast(variant: 'success', text: __('common.saved'));
     }
 
-    public function deleteAccount(EndsAuthenticatedSession $session)
+    public function deleteAccount(EndsAuthenticatedSession $session): void
     {
         abort_unless($this->canDelete(), 403);
 
@@ -75,23 +76,25 @@ class Account extends Component
             $session->end();
             AccountPurger::purge($this->community(), $this->currentUsername);
 
-            return $this->redirect(route('realm.login', ['realm' => $this->realm_uid]));
+            $this->redirect(route('realm.login', ['realm' => $this->realm_uid]));
+
+            return;
         }
 
         AccountPurger::purge($this->community(), $this->currentUsername);
         Flux::toast(variant: 'success', text: __('profile.delete_account_success'));
 
-        return $this->redirect(route('realms.members', ['realm' => $this->realm_uid]), navigate: true);
+        $this->redirect(route('realms.members', ['realm' => $this->realm_uid]), navigate: true);
     }
 
     private function canDelete(): bool
     {
-        return $this->isOwnAccount() || auth()->user()->can('remove_member', $this->community());
+        return $this->isOwnAccount() || \App\Models\User::current()->can('remove_member', $this->community());
     }
 
     private function isOwnAccount(): bool
     {
-        $user = auth()->user();
+        $user = \App\Models\User::current();
 
         return $user->username === $this->currentUsername && $user->realm === $this->realm_uid;
     }

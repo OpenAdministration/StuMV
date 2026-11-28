@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Ldap\Committee;
 use App\Ldap\Community;
+use App\Ldap\Dn;
 use App\Models\ActivityLog;
 use App\Models\GroupMembership;
 use App\Models\RoleMembership;
@@ -31,7 +32,7 @@ class MoveCommittee extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         $community = Community::findByUid($this->argument('community'));
 
@@ -60,9 +61,9 @@ class MoveCommittee extends Command
                 return self::FAILURE;
             }
 
-            $newParentDn = $targetCommittee->getDn();
+            $newParentDn = Dn::of($targetCommittee);
 
-            if ($newParentDn === $committee->getDn() || str_ends_with((string) $newParentDn, ','.$committee->getDn())) {
+            if ($newParentDn === Dn::of($committee) || str_ends_with($newParentDn, ','.Dn::of($committee))) {
                 $this->error('Cannot move a committee into itself or one of its own descendants.');
 
                 return self::FAILURE;
@@ -77,7 +78,7 @@ class MoveCommittee extends Command
             return self::FAILURE;
         }
 
-        $oldCommitteeDn = $committee->getDn();
+        $oldCommitteeDn = Dn::of($committee);
 
         // Gather every role under this committee and its descendants before
         // moving anything - their DNs (and the committee_dn on their DB
@@ -90,8 +91,8 @@ class MoveCommittee extends Command
             foreach ($affectedCommittee->roles()->get() as $role) {
                 $roleUpdates[] = [
                     'role_cn' => $role->getFirstAttribute('cn'),
-                    'old_committee_dn' => $affectedCommittee->getDn(),
-                    'old_role_dn' => $role->getDn(),
+                    'old_committee_dn' => Dn::of($affectedCommittee),
+                    'old_role_dn' => Dn::of($role),
                 ];
             }
         }
@@ -104,7 +105,7 @@ class MoveCommittee extends Command
         // (computed from the new parent) changes.
         $committee->move($newParentDn);
 
-        $newCommitteeDn = $committee->getDn();
+        $newCommitteeDn = Dn::of($committee);
 
         $updatedMemberships = 0;
         $updatedGroupRelations = 0;

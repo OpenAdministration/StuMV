@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Oidc;
 use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Livewire\Settings\Oidc\NewOidcClient;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Laravel\Passport\Passport;
@@ -20,7 +21,7 @@ use Laravel\Passport\Passport;
  */
 class RealmDiscoveryController extends Controller
 {
-    public function __invoke(Request $request, Community $realm)
+    public function __invoke(Request $request, Community $realm): JsonResponse
     {
         if (config('openid.forceHttps', true)) {
             URL::forceScheme('https');
@@ -96,13 +97,15 @@ class RealmDiscoveryController extends Controller
      * interactive OIDC clients, shouldn't advertise. Narrowed down to
      * NewOidcClient::AVAILABLE_SCOPES, the same list an admin can actually
      * grant an OIDC client through its registration form.
+     *
+     * @return array<int, string>
      */
     private function getSupportedScopes(): array
     {
-        $scopes = array_values(array_intersect(
+        $scopes = array_values(array_filter(array_intersect(
             array_keys(config('openid.passport.tokens_can')),
             NewOidcClient::AVAILABLE_SCOPES
-        ));
+        ), is_string(...)));
 
         if (! config('openid.discovery.hide_scopes', false)) {
             return $scopes;
@@ -111,6 +114,7 @@ class RealmDiscoveryController extends Controller
         return array_values(array_intersect($scopes, ['openid', 'profile', 'email', 'address', 'phone']));
     }
 
+    /** @return array<int, string> */
     private function getSupportedGrantTypes(): array
     {
         $grants = [
@@ -130,6 +134,7 @@ class RealmDiscoveryController extends Controller
         return $grants;
     }
 
+    /** @return array<int, string> */
     private function getSupportedResponseTypes(): array
     {
         $responseTypes = ['code'];

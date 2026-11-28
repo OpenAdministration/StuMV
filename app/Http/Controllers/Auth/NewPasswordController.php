@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Ldap\Community;
 use App\Models\RealmBranding;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -21,7 +22,7 @@ class NewPasswordController extends Controller
      *
      * @return View
      */
-    public function create(Community $realm, Request $request)
+    public function create(Community $realm, Request $request): Factory|\Illuminate\Contracts\View\View
     {
         return view('auth.reset-password', [
             'realm' => $realm,

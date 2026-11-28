@@ -4,16 +4,15 @@ namespace App\Models;
 
 use App\Models\Concerns\RecordsActions;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RealmIdentityProvider extends Model
 {
-    use HasFactory, HasUuids, RecordsActions;
+    use HasUuids, RecordsActions;
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'realm',
@@ -31,7 +30,7 @@ class RealmIdentityProvider extends Model
      * Mirrors the column defaults, so a freshly created instance carries them
      * straight away rather than only after a refresh from the database.
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $attributes = [
         'scopes' => 'openid email profile',
@@ -49,11 +48,13 @@ class RealmIdentityProvider extends Model
         ];
     }
 
+    /** @return HasMany<IdentityProviderRoleMapping, $this> */
     public function roleMappings(): HasMany
     {
         return $this->hasMany(IdentityProviderRoleMapping::class, 'provider_id');
     }
 
+    /** @return HasMany<IdentityProviderGroupMapping, $this> */
     public function groupMappings(): HasMany
     {
         return $this->hasMany(IdentityProviderGroupMapping::class, 'provider_id');
@@ -64,7 +65,7 @@ class RealmIdentityProvider extends Model
         return 'identity_provider';
     }
 
-    /** @return array{role_mappings: list<array<string, mixed>>, group_mappings: list<array<string, mixed>>} */
+    /** @return array{role_mappings: array<int, mixed>, group_mappings: array<int, mixed>} */
     public function mappingsForActivityLog(): array
     {
         return [

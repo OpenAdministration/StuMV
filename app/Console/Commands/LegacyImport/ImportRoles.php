@@ -28,7 +28,7 @@ class ImportRoles extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $roles = DB::connection('opa00-legacy')
             ->table('role')
@@ -45,12 +45,12 @@ class ImportRoles extends Command
         $realms = [];
         $committees = [];
         foreach ($roles as $role) {
-            $realms[$role->realm_uid] ??= Community::findByUid($role->realm_uid);
+            $realms[$role->realm_uid] ??= Community::findOrFailByUid($role->realm_uid);
             $this->comment('Importing Com-Role '.$role->name.' to Realm '.$role->realm_uid.' ...');
 
-            $c = Committee::findByName($role->realm_uid, $role->gshort);
-            $r = $c?->roles()->where('cn', $role->rshort);
-            if (! $r?->exists()) {
+            $c = Committee::findByNameOrFail($role->realm_uid, $role->gshort);
+            $r = $c->roles()->where('cn', $role->rshort);
+            if (! $r->exists()) {
                 $r = Role::make([
                     'cn' => $role->rshort,
                     'description' => mb_convert_encoding($role->name, 'UTF-8'),

@@ -26,7 +26,7 @@ class ImportCommittees extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $gremien = DB::connection('opa00-legacy')
             ->table('gremium')
@@ -36,7 +36,7 @@ class ImportCommittees extends Command
         $realms = [];
         $committees = [];
         foreach ($gremien as $gremium) {
-            $realms[$gremium->realm_uid] ??= Community::findByUid($gremium->realm_uid);
+            $realms[$gremium->realm_uid] ??= Community::findOrFailByUid($gremium->realm_uid);
             $this->comment('Importing Com '.$gremium->name.' to Realm '.$gremium->realm_uid.' ...');
             $d = Committee::findByName($gremium->realm_uid, $gremium->short);
             if (! $d?->exists()) {

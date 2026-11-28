@@ -36,7 +36,7 @@ class LdapSyncRoles extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         if ($this->option('date') === 'today()') {
             $date = today();
