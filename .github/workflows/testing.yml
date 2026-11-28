@@ -10,8 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 8.4 is the minimum (symfony ^8.1 needs >= 8.4.1), 8.5 what the Docker stack runs.
-        php: ['8.4', '8.5']
+        php: ['8.4', '8.5', '8.6']
 
     services:
       # MariaDB for the Eloquent side (RefreshDatabase migrates stumv_testing).
