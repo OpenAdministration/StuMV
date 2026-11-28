@@ -10,7 +10,7 @@ info:
     Get a token:
 
     ```
-    curl -X POST /oauth/token \
+    curl -X POST /{realm}/oauth/token \
       -d grant_type=client_credentials \
       -d client_id=... \
       -d client_secret=... \
@@ -36,6 +36,7 @@ paths:
   /{realm}/committees:
     get:
       tags: [Committees]
+      operationId: listCommittees
       summary: List a community's committees
       security: [{ oauth2: [committees] }]
       parameters:
@@ -54,6 +55,7 @@ paths:
   /{realm}/committees/{ou}:
     get:
       tags: [Committees]
+      operationId: getCommittee
       summary: Look up a single committee
       security: [{ oauth2: [committees] }]
       parameters:
@@ -72,6 +74,7 @@ paths:
   /{realm}/committees/{ou}/roles:
     get:
       tags: [Committees]
+      operationId: listCommitteeRoles
       summary: List the roles of a committee
       security: [{ oauth2: [committees] }]
       parameters:
@@ -92,6 +95,7 @@ paths:
   /{realm}/committees/{ou}/roles/{cn}:
     get:
       tags: [Committees]
+      operationId: getRole
       summary: Look up a single role
       security: [{ oauth2: [committees] }]
       parameters:
@@ -111,6 +115,7 @@ paths:
   /{realm}/committees/{ou}/roles/{cn}/members:
     get:
       tags: [Committees]
+      operationId: listRoleMembers
       summary: List the usernames of a role's current members
       security: [{ oauth2: [committees] }]
       parameters:
@@ -133,6 +138,7 @@ paths:
   /{realm}/members:
     post:
       tags: [Committees]
+      operationId: listMembersOfRoles
       summary: List the members holding the role of one or more given committee/role entries
       description: |
         Give one or more `{ou, cn}` entries, each naming an exact committee
@@ -202,6 +208,7 @@ paths:
   /{realm}/groups:
     get:
       tags: [Groups]
+      operationId: listGroups
       summary: List a community's permission groups
       security: [{ oauth2: [groups] }]
       parameters:
@@ -220,6 +227,7 @@ paths:
   /{realm}/groups/{cn}:
     get:
       tags: [Groups]
+      operationId: getGroup
       summary: Look up a single group
       security: [{ oauth2: [groups] }]
       parameters:
@@ -238,6 +246,7 @@ paths:
   /{realm}/groups/{cn}/members:
     get:
       tags: [Groups]
+      operationId: listGroupMembers
       summary: List the usernames of a group's current members
       security: [{ oauth2: [groups] }]
       parameters:
@@ -259,6 +268,7 @@ paths:
   /{realm}/users/{uid}:
     get:
       tags: [Users]
+      operationId: getUser
       summary: Look up a single user
       description: Only users who are actually a member of this community can be looked up.
       security: [{ oauth2: [users] }]
@@ -278,6 +288,7 @@ paths:
   /{realm}/users/{uid}/roles:
     get:
       tags: [Users]
+      operationId: listUserRoles
       summary: List the roles a user currently holds
       description: |
         Roles anywhere in the community's committee tree (arbitrarily nested)
@@ -303,6 +314,7 @@ paths:
   /{realm}/users/{uid}/committees:
     get:
       tags: [Users]
+      operationId: listUserCommittees
       summary: List the committees a user currently has a role in
       description: |
         The short codes (`ou`) of committees where the user holds at least
@@ -328,6 +340,7 @@ paths:
   /{realm}/users/{uid}/groups:
     get:
       tags: [Users]
+      operationId: listUserGroups
       summary: List the permission groups a user is currently in
       description: |
         The short codes (`cn`) of groups the user is a member of. Look up
@@ -355,7 +368,8 @@ components:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: /oauth/token
+          # realm-scoped, replace {realm} with the client's community
+          tokenUrl: /{realm}/oauth/token
           scopes:
             committees: Read committees, roles and role members
             groups: Read permission groups and their members

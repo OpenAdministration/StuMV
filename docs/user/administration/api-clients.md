@@ -27,7 +27,7 @@ API-Clients sind Anwendungen, die das Verzeichnis eurer Studierendenschaft **ohn
 Das Client-Secret wird nur einmal angezeigt. Geht es verloren, widerrufe den Client und registriere einen neuen.
 :::
 
-Die technische Beschreibung der Schnittstelle (OpenAPI) findet ihr unter `https://<stumv-adresse>/api-docs/`.
+Wie Anwendungen die Schnittstelle nutzen, beschreibt die [Verzeichnis-API](/dev/api/) im Entwicklerhandbuch.
 
 ## Client bearbeiten, widerrufen, löschen
 

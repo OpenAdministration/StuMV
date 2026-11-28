@@ -1,14 +1,22 @@
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vitepress'
+import { parseSpec, useSidebar } from 'vitepress-openapi'
+
+// the directory API reference is generated from the spec the app serves
+const apiSpec = parseSpec(readFileSync(new URL('../public/openapi.yaml', import.meta.url), 'utf8'))
+const apiSidebar = useSidebar({ spec: apiSpec, linkPrefix: '/dev/api/' })
 
 export default defineConfig({
   lang: 'de-DE',
   title: 'StuMV',
-  description: 'Benutzerhandbuch der Studentischen Mitgliederverwaltung',
+  description: 'Dokumentation der Studentischen Mitgliederverwaltung',
   cleanUrls: true,
   lastUpdated: true,
   // developer docs, not part of the user manual
   srcExclude: ['install.md', 'install-dev.md', 'screenshots/**'],
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }]],
+  // vitepress-openapi's components need vitepress's client API during SSR
+  vite: { ssr: { noExternal: ['vitepress-openapi'] } },
 
   themeConfig: {
     logo: '/logo.svg',
@@ -16,6 +24,7 @@ export default defineConfig({
     nav: [
       { text: 'Benutzerhandbuch', link: '/user/einfuehrung/was-ist-stumv', activeMatch: '^/user/' },
       { text: 'Administrationshandbuch', link: '/admin/', activeMatch: '^/admin/' },
+      { text: 'Entwicklerhandbuch', link: '/dev/api/', activeMatch: '^/dev/' },
     ],
 
     sidebar: {
@@ -80,6 +89,13 @@ export default defineConfig({
             { text: 'Fehlerbehebung', link: '/admin/fehlerbehebung' },
           ],
         },
+      ],
+      '/dev/': [
+        {
+          text: 'Verzeichnis-API',
+          items: [{ text: 'Überblick', link: '/dev/api/' }],
+        },
+        ...apiSidebar.generateSidebarGroups(),
       ],
     },
 
