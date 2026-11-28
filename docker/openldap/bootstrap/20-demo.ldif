@@ -56,9 +56,9 @@ dn: uid=demo-hhv,ou=People,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: demo-hhv
-cn: Hanna Haushalt
+cn: Lena Haushalt
 sn: Haushalt
-givenName: Hanna
+givenName: Lena
 mail: demo-hhv@demo.stumv.de
 description: Demo: Haushaltsverantwortliche (Budget Manager)
 userPassword: Demo-password1
@@ -67,9 +67,9 @@ dn: uid=demo-kv,ou=People,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: demo-kv
-cn: Karl Kasse
+cn: Jonas Kasse
 sn: Kasse
-givenName: Karl
+givenName: Jonas
 mail: demo-kv@demo.stumv.de
 description: Demo: Kassenverantwortliche (Cashier)
 userPassword: Demo-password1
@@ -78,9 +78,9 @@ dn: uid=demo-revision,ou=People,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: demo-revision
-cn: Rita Revision
+cn: Mira Revision
 sn: Revision
-givenName: Rita
+givenName: Mira
 mail: demo-revision@demo.stumv.de
 description: Demo: Revision (Internal Auditor)
 userPassword: Demo-password1
@@ -89,9 +89,9 @@ dn: uid=demo-stura,ou=People,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: demo-stura
-cn: Stefan Studierendenrat
+cn: Tom Studierendenrat
 sn: Studierendenrat
-givenName: Stefan
+givenName: Tom
 mail: demo-stura@demo.stumv.de
 description: Demo: Studierendenrat (Student Council Member)
 userPassword: Demo-password1
@@ -100,9 +100,9 @@ dn: uid=demo-fsr,ou=People,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: demo-fsr
-cn: Frank Fachschaft
+cn: Paul Fachschaft
 sn: Fachschaft
-givenName: Frank
+givenName: Paul
 mail: demo-fsr@demo.stumv.de
 description: Demo: Fachschaftsrat (Department Council Member)
 userPassword: Demo-password1
@@ -111,9 +111,9 @@ dn: uid=demo-studi,ou=People,ou=demo,ou=Communities,dc=stumv,dc=de
 objectClass: inetOrgPerson
 objectClass: top
 uid: demo-studi
-cn: Sara Studentin
+cn: Emma Studentin
 sn: Studentin
-givenName: Sara
+givenName: Emma
 mail: demo-studi@demo.stumv.de
 description: Demo: Studentin (Guest/Student)
 userPassword: Demo-password1

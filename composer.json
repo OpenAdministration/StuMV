@@ -71,6 +71,11 @@
         "rector": "@php vendor/bin/rector process",
         "rector-dry": "@php vendor/bin/rector process --dry-run",
         "test": "@php vendor/bin/pest",
+        "test:parallel": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php vendor/bin/pest --parallel --exclude-group=ldap-global",
+            "@php vendor/bin/pest --group=ldap-global"
+        ],
         "lint": "@php vendor/bin/phpstan",
         "pint": "@php vendor/bin/pint",
         "fix": [

@@ -4,6 +4,9 @@ use App\Livewire\Realm\ListRealms;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
+// works on every realm in the directory, so it can't run alongside other tests
+pest()->group('ldap-global');
+
 /**
  * The realm picker (pick-realm) decides where a user lands: super admins get the
  * full list, while a normal user is routed by their LDAP `memberOf` groups — and

@@ -68,7 +68,7 @@ class ListOidcClients extends Component
     public function render()
     {
         $clients = $this->scopeToRealmOidcClients()
-            ->when($this->search !== '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
+            ->when($this->search !== '', fn ($query) => $query->whereLike('name', '%'.$this->search.'%'))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 

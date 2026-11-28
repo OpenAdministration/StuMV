@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\TestLdap;
 
+// works on every realm in the directory, so it can't run alongside other tests
+pest()->group('ldap-global');
+
 /**
  * The ldap:sync-* commands reconcile LDAP group/role uniqueMember lists with the
  * active memberships recorded in the database (the DB is the source of truth;
@@ -318,4 +321,20 @@ test('app:move-group-roles-from-ldap-to-database imports LDAP group roles into t
         'group_dn' => $group->getDn(),
         'role_dn' => $role->getDn(),
     ]);
+});
+
+test('app:move-group-roles-from-ldap-to-database imports each role once and skips people', function (): void {
+    $community = newCommunity();
+    newCommunity();
+    $committee = TestLdap::makeCommittee($community, 'fsr');
+    $role = TestLdap::makeRole($committee, 'mitglied');
+    $group = TestLdap::makeGroup($community, 'grp'.bin2hex(random_bytes(3)));
+    $group->members()->attach($role);
+    $group->members()->attach(TestLdap::makeUser(community: $community));
+
+    $this->artisan('app:move-group-roles-from-ldap-to-database')->assertExitCode(0);
+    $this->artisan('app:move-group-roles-from-ldap-to-database')->assertExitCode(0);
+
+    expect(GroupMembership::where('group_dn', $group->getDn())->pluck('role_dn')->all())
+        ->toBe([$role->getDn()]);
 });

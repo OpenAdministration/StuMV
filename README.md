@@ -115,6 +115,30 @@ For a **super-admin** login (member of `cn=super-admins`, full access across all
 communities), use the seeded `admin` account — username `admin`, password
 `admin-not-production` (from `10-sample.ldif`).
 
+### Tests
+
+The suite needs the dockerised OpenLDAP and MariaDB from the dev stack (see
+`.env.testing`). Run tests on the host, not inside the containers.
+
+| Command                  | What it does                                                    |
+| ------------------------ | --------------------------------------------------------------- |
+| `composer test`          | Run the whole suite in one process                              |
+| `composer test:parallel` | Run it in parallel, then the `ldap-global` group on its own     |
+
+Parallel runs give every process its own database (`stumv_testing_test_<n>`), so the
+test user needs to be allowed to create them once:
+
+```bash
+podman compose --env-file .env.docker -f docker-compose.dev.yaml exec mariadb \
+  mariadb -uroot -e "GRANT ALL PRIVILEGES ON \`stumv\\_testing%\`.* TO 'stumv'@'%'"
+```
+
+Tests that work on every realm in the directory (and would see other processes'
+fixtures) are tagged `pest()->group('ldap-global')` and always run serially. Tag new
+tests the same way if they iterate all communities or write outside their own fixtures.
+
+To run against PostgreSQL instead, override `DB_CONNECTION=pgsql` and `DB_PORT`.
+
 ### Code quality
 
 Composer scripts wrap the tooling. Run **`composer fix` before committing.**
@@ -129,9 +153,9 @@ Composer scripts wrap the tooling. Run **`composer fix` before committing.**
 
 ### Continuous Integration
 
-Every push and pull request runs four workflows in `.github/workflows/` (PHP 8.4):
+Every push and pull request runs four workflows in `.github/workflows/`:
 
-- **testing** — Pest against a dockerized OpenLDAP + MariaDB service
+- **testing** — Pest (in parallel) against a dockerized OpenLDAP and MariaDB or PostgreSQL
 - **lint** — Pint (`--test`)
 - **analysis** — PHPStan / Larastan
 - **rector** — Rector dry-run

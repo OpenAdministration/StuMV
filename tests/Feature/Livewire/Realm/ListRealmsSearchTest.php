@@ -6,6 +6,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Support\TestLdap;
 
+// works on every realm in the directory, so it can't run alongside other tests
+pest()->group('ldap-global');
+
 uses(RefreshDatabase::class);
 
 test('the search filters the community list by shortcode', function (): void {

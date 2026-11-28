@@ -94,7 +94,7 @@ class ListActivityLogs extends Component
     {
         return $this->scoped(ActivityLog::query())
             ->when($this->actions !== [], fn (Builder $q) => $q->whereIn('action', $this->actions))
-            ->when($this->search !== '', fn (Builder $q) => $q->where('subject_label', 'like', '%'.$this->search.'%'))
+            ->when($this->search !== '', fn (Builder $q) => $q->whereLike('subject_label', '%'.$this->search.'%'))
             ->when($this->filterTime($this->from), fn (Builder $q, CarbonImmutable $from) => $q->where('created_at', '>=', $from))
             // the whole minute given
             ->when($this->filterTime($this->until), fn (Builder $q, CarbonImmutable $until) => $q->where('created_at', '<', $until->addMinute()));

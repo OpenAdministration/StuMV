@@ -109,8 +109,8 @@ class ListGroupMailmanLists extends Component
         return GroupMailmanList::where('realm', $this->uid)
             ->with('groups')
             ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
-                ->where('mailman_list_id', 'like', "%{$search}%")
-                ->orWhereHas('groups', fn ($groups) => $groups->where('group_dn', 'like', "cn=%{$search}%,ou=Groups,%"))))
+                ->whereLike('mailman_list_id', "%{$search}%")
+                ->orWhereHas('groups', fn ($groups) => $groups->whereLike('group_dn', "cn=%{$search}%,ou=Groups,%"))))
             ->when(
                 $this->sortField === 'group',
                 fn ($query) => $query->orderBy(GroupMailmanListGroup::select('group_dn')

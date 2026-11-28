@@ -8,6 +8,9 @@ use LdapRecord\Models\OpenLDAP\Group;
 use LdapRecord\Models\OpenLDAP\OrganizationalUnit;
 use Tests\Support\TestLdap;
 
+// works on every realm in the directory, so it can't run alongside other tests
+pest()->group('ldap-global');
+
 /**
  * app:split-people-by-realm is the one-time migration that converts the old,
  * pre-split directory shape (one flat ou=People branch, membership expressed

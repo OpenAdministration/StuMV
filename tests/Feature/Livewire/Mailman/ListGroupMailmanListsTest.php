@@ -51,7 +51,10 @@ test('the search filters by list id and by group short name', function (): void 
         ->assertDontSee('info.lists.example.org')
         ->set('search', 'newslet')
         ->assertSee('info.lists.example.org')
-        ->assertDontSee('board.lists.example.org');
+        ->assertDontSee('board.lists.example.org')
+        ->set('search', 'BOARD')
+        ->assertSee('board.lists.example.org')
+        ->assertDontSee('info.lists.example.org');
 });
 
 test('the mapping list can be sorted by list id and by group', function (): void {

@@ -30,6 +30,9 @@ use LdapRecord\Models\Model as LdapModel;
  */
 class TestLdap
 {
+    /** Shared by all fixture users - nobody logs in with it, and argon2id costs ~0.3 s per hash. */
+    private static ?string $passwordHash = null;
+
     /** @var list<LdapUser> LDAP users to delete on teardown. */
     private static array $users = [];
 
@@ -62,7 +65,7 @@ class TestLdap
             'sn' => 'User',
             'givenName' => 'Test',
             'mail' => $uid.'@example.test',
-            'userPassword' => '{ARGON2}'.password_hash('Aa1!'.bin2hex(random_bytes(6)), PASSWORD_ARGON2ID),
+            'userPassword' => self::$passwordHash ??= '{ARGON2}'.password_hash('Aa1!'.bin2hex(random_bytes(6)), PASSWORD_ARGON2ID),
         ]);
         $ldap->setDn($community !== null ? "uid=$uid,".$community->peopleDn() : "uid=$uid,ou=People,{base}");
         $ldap->save();

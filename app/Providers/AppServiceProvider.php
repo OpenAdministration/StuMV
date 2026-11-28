@@ -196,7 +196,7 @@ class AppServiceProvider extends ServiceProvider
             ->symbols()
             ->uncompromised());
 
-        Builder::macro('search', fn ($field, $string) => $string ? $this->orWhere($field, 'like', '%'.$string.'%') : $this);
+        Builder::macro('search', fn ($field, $string) => $string ? $this->orWhereLike($field, '%'.$string.'%') : $this);
 
         // RequestHandled (not SetContentSecurityPolicy::handle() itself)
         // fires for every response, including one rendered by the exception

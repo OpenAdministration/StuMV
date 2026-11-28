@@ -32,6 +32,18 @@ test('only this realm\'s OIDC clients are listed, not its API clients or another
         ->assertDontSee('Directory API Client');
 });
 
+test('the search ignores case', function (): void {
+    $community = newCommunity();
+    makeOidcClient('Wiki', $community->getShortCode());
+    makeOidcClient('Cloud', $community->getShortCode());
+    actingAsAdmin($community);
+
+    Livewire::test(ListOidcClients::class, ['realm' => $community])
+        ->set('search', 'wIK')
+        ->assertSee('Wiki')
+        ->assertDontSee('Cloud');
+});
+
 test('a client can be revoked', function (): void {
     $community = newCommunity();
     $client = makeOidcClient('My SSO App', $community->getShortCode());

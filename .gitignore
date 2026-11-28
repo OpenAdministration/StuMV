@@ -16,3 +16,6 @@ yarn-error.log
 /.idea
 /.vscode
 auth.json
+
+/docs/.vitepress/cache
+/docs/.vitepress/dist

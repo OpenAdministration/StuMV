@@ -8,8 +8,8 @@ use App\Support\OidcProviderFactory;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use Tests\Support\TestLdap;
@@ -31,12 +31,11 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
+    // every feature test touches the database (sessions, users); parallel runs
+    // only give tests with a database trait their own database
+    ->use(RefreshDatabase::class)
     ->afterEach(function (): void {
         TestLdap::cleanup();
-        // tests without RefreshDatabase would leave their entries for the next ones
-        if (Schema::hasTable('activity_logs')) {
-            DB::table('activity_logs')->delete();
-        }
     })
     ->in('Feature');
 

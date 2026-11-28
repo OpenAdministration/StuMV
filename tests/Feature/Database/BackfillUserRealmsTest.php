@@ -23,6 +23,14 @@ function legacyMembership(string $username, string $realm): void
     ]);
 }
 
+function setForeignKeyChecks(bool $enabled): void
+{
+    // Schema::disableForeignKeyConstraints() only defers deferrable constraints on PostgreSQL
+    DB::statement(DB::getDriverName() === 'pgsql'
+        ? 'SET session_replication_role = '.($enabled ? 'DEFAULT' : 'replica')
+        : 'SET FOREIGN_KEY_CHECKS='.($enabled ? 1 : 0));
+}
+
 function runUserRealmBackfill(): void
 {
     $migration = require database_path('migrations/2026_07_20_000003_add_composite_fk_to_role_user_relation_table.php');
@@ -30,7 +38,7 @@ function runUserRealmBackfill(): void
 }
 
 test('every membership gets a user row for its realm', function (): void {
-    DB::statement('SET FOREIGN_KEY_CHECKS=0');
+    setForeignKeyChecks(false);
 
     // one realm, one account in two realms, and a user without memberships
     DB::table('user')->insert([
@@ -44,7 +52,7 @@ test('every membership gets a user row for its realm', function (): void {
     legacyMembership('shared', 'beta');
 
     runUserRealmBackfill();
-    DB::statement('SET FOREIGN_KEY_CHECKS=1');
+    setForeignKeyChecks(true);
 
     $orphans = DB::table('role_user_relation as r')
         ->leftJoin('user as u', fn ($join) => $join->on('u.username', '=', 'r.username')->on('u.realm', '=', 'r.realm'))

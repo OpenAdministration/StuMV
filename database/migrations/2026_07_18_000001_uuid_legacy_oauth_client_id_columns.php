@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -35,14 +35,14 @@ return new class extends Migration
             return;
         }
 
-        DB::connection($connection)->statement('ALTER TABLE oauth_clients MODIFY id CHAR(36) NOT NULL');
+        $this->convertToString($connection, 'oauth_clients', 'id');
 
         foreach ($this->clientIdColumns as $table => $column) {
             if (
                 Schema::connection($connection)->hasTable($table)
                 && $this->isNumericColumn($connection, $table, $column)
             ) {
-                DB::connection($connection)->statement("ALTER TABLE {$table} MODIFY {$column} CHAR(36) NOT NULL");
+                $this->convertToString($connection, $table, $column);
             }
         }
     }
@@ -62,13 +62,21 @@ return new class extends Migration
      */
     protected function isNumericColumn(?string $connection, string $table, string $column): bool
     {
-        $result = DB::connection($connection)->selectOne(
-            'select DATA_TYPE as `type` from information_schema.COLUMNS
-                where TABLE_SCHEMA = DATABASE() and TABLE_NAME = ? and COLUMN_NAME = ?',
-            [$table, $column]
-        );
+        $type = strtolower(Schema::connection($connection)->getColumnType($table, $column));
 
-        return $result && in_array(strtolower($result->type), ['tinyint', 'smallint', 'mediumint', 'int', 'bigint'], true);
+        // MySQL/MariaDB type names, then PostgreSQL's
+        return in_array($type, ['tinyint', 'smallint', 'mediumint', 'int', 'integer', 'bigint', 'int2', 'int4', 'int8'], true);
+    }
+
+    /**
+     * Turn an integer column into a non-null 36-char string, keeping its values.
+     */
+    protected function convertToString(?string $connection, string $table, string $column): void
+    {
+        Schema::connection($connection)->table($table, function (Blueprint $blueprint) use ($column): void {
+            // using() only matters for PostgreSQL, which won't cast integer to varchar implicitly
+            $blueprint->string($column, 36)->using("{$column}::varchar(36)")->change();
+        });
     }
 
     /**

@@ -30,6 +30,18 @@ test('only clients registered for this community are listed', function (): void 
         ->assertDontSee('Someone Elses Client');
 });
 
+test('the search ignores case', function (): void {
+    $community = newCommunity();
+    makeApiClient($community->getShortCode(), 'StuFiS');
+    makeApiClient($community->getShortCode(), 'Wiki');
+    actingAsAdmin($community);
+
+    Livewire::test(ListApiClients::class, ['realm' => $community])
+        ->set('search', 'stufis')
+        ->assertSee('StuFiS')
+        ->assertDontSee('Wiki');
+});
+
 test('a client can be revoked', function (): void {
     $community = newCommunity();
     $uid = $community->getShortCode();

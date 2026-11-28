@@ -4,13 +4,14 @@ on: push
 
 jobs:
   tests:
-    name: Pest (PHP ${{ matrix.php }})
+    name: Pest (PHP ${{ matrix.php }}, ${{ matrix.db }})
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         php: ['8.4', '8.5', '8.6']
+        db: [mariadb, pgsql]
 
     services:
       # MariaDB for the Eloquent side (RefreshDatabase migrates stumv_testing).
@@ -25,6 +26,21 @@ jobs:
           - 13306:3306
         options: >-
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      # PostgreSQL, used instead of MariaDB in the matrix.db == pgsql jobs.
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: stumv_testing
+          POSTGRES_USER: stumv
+          POSTGRES_PASSWORD: local_stumv_password
+        ports:
+          - 15432:5432
+        options: >-
+          --health-cmd="pg_isready -U stumv"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -44,7 +60,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: ldap, gd, pdo_mysql, zip, mbstring, intl, bcmath, curl
+          extensions: ldap, gd, pdo_mysql, pdo_pgsql, zip, mbstring, intl, bcmath, curl
           coverage: none
 
       - name: Prepare environment file
@@ -98,8 +114,24 @@ jobs:
           done
           echo "LDAP did not come up"; docker logs ldap; exit 1
 
-      - name: Run tests
-        run: ./vendor/bin/pest --no-coverage
+      - name: Point tests at PostgreSQL
+        # Real environment variables take precedence over .env.
+        if: matrix.db == 'pgsql'
+        run: |
+          echo "DB_CONNECTION=pgsql" >> "$GITHUB_ENV"
+          echo "DB_PORT=15432" >> "$GITHUB_ENV"
+
+      - name: Allow per-process test databases on MariaDB
+        # parallel runs create stumv_testing_test_<n> next to stumv_testing
+        if: matrix.db == 'mariadb'
+        run: mysql -h 127.0.0.1 -P 13306 -u root -e "GRANT ALL PRIVILEGES ON \`stumv\\_testing%\`.* TO 'stumv'@'%'"
+
+      - name: Run tests in parallel
+        run: ./vendor/bin/pest --no-coverage --parallel --exclude-group=ldap-global
+
+      - name: Run tests that work on every realm
+        # these see other processes' fixtures, so they run on their own
+        run: ./vendor/bin/pest --no-coverage --group=ldap-global
 
       - name: LDAP logs on failure
         if: failure()

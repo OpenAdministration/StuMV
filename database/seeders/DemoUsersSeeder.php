@@ -36,12 +36,12 @@ class DemoUsersSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            ['username' => 'demo-hhv',      'full_name' => 'Hanna Haushalt'],
-            ['username' => 'demo-kv',       'full_name' => 'Karl Kasse'],
-            ['username' => 'demo-revision', 'full_name' => 'Rita Revision'],
-            ['username' => 'demo-stura',    'full_name' => 'Stefan Studierendenrat'],
-            ['username' => 'demo-fsr',      'full_name' => 'Frank Fachschaft'],
-            ['username' => 'demo-studi',    'full_name' => 'Sara Studentin'],
+            ['username' => 'demo-hhv',      'full_name' => 'Lena Haushalt'],
+            ['username' => 'demo-kv',       'full_name' => 'Jonas Kasse'],
+            ['username' => 'demo-revision', 'full_name' => 'Mira Revision'],
+            ['username' => 'demo-stura',    'full_name' => 'Tom Studierendenrat'],
+            ['username' => 'demo-fsr',      'full_name' => 'Paul Fachschaft'],
+            ['username' => 'demo-studi',    'full_name' => 'Emma Studentin'],
         ];
 
         foreach ($users as $u) {
