@@ -34,7 +34,7 @@ class EndSessionController extends Controller
         $postLogoutRedirectUri = $this->validatedRedirectUri($request, $client);
 
         if (! Auth::guest()) {
-            $endsSession->end($request);
+            $endsSession->end();
         }
 
         if ($postLogoutRedirectUri === null) {

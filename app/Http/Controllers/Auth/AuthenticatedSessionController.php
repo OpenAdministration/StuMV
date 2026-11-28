@@ -102,7 +102,7 @@ class AuthenticatedSessionController extends Controller
     {
         $realmLoginUrl = $this->realmLoginUrl($realm, Auth::user());
 
-        $endsSession->end($request);
+        $endsSession->end();
 
         return redirect($request->input('redirect_uri', $realmLoginUrl));
     }

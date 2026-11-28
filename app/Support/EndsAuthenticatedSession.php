@@ -4,7 +4,6 @@ namespace App\Support;
 
 use App\Jobs\Oidc\SendBackChannelLogoutNotification;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Passport\Token as PassportToken;
 
@@ -19,15 +18,15 @@ use Laravel\Passport\Token as PassportToken;
  */
 class EndsAuthenticatedSession
 {
-    public function end(Request $request): void
+    public function end(): void
     {
         $this->notifyOidcClientsOfLogout(Auth::user());
 
         Auth::guard('web')->logout();
 
-        $request->session()->invalidate();
+        session()->invalidate();
 
-        $request->session()->regenerateToken();
+        session()->regenerateToken();
     }
 
     /**

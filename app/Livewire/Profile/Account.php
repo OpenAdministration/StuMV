@@ -72,7 +72,7 @@ class Account extends Component
         );
 
         if ($this->isOwnAccount()) {
-            $session->end(request());
+            $session->end();
             AccountPurger::purge($this->community(), $this->currentUsername);
 
             return $this->redirect(route('realm.login', ['realm' => $this->realm_uid]));
