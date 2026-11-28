@@ -1,8 +1,7 @@
 import DefaultTheme from 'vitepress/theme'
 import { locales, theme, useOpenapi } from 'vitepress-openapi/client'
 import 'vitepress-openapi/dist/style.css'
-// also published for download at /openapi.yaml
-import spec from '../../public/openapi.yaml?raw'
+import spec from '../../dev/api/openapi.yaml?raw'
 import de from './openapi-de.json'
 import './custom.css'
 

@@ -1,6 +1,6 @@
 # Synchronisation
 
-StuMV überträgt Rollen und Rechtegruppen in ein Verzeichnis (LDAP) und auf Mailinglisten, aus denen angeschlossene Anwendungen sie lesen. Das passiert **jede Nacht automatisch**:
+StuMV überträgt Rollen und Rechtegruppen in ein Verzeichnis (LDAP) und auf Mailinglisten, aus denen angeschlossene Anwendungen sie lesen. Ändert sich eine Mitgliedschaft, geschieht das **sofort**. Zusätzlich gleicht StuMV **jede Nacht** alles vollständig ab:
 
 | Uhrzeit | Was |
 | --- | --- |
@@ -8,7 +8,7 @@ StuMV überträgt Rollen und Rechtegruppen in ein Verzeichnis (LDAP) und auf Mai
 | 00:15 | Rechtegruppen |
 | 00:30 | Mailinglisten |
 
-Neue Zuordnungen sind deshalb manchmal erst am nächsten Tag in allen Anwendungen sichtbar.
+Der nächtliche Abgleich trägt Mitgliedschaften ein oder aus, deren Start- oder Enddatum erreicht ist, und holt Änderungen nach, die nicht sofort übertragen werden konnten.
 
 ## Sofort synchronisieren
 

@@ -1,3 +1,7 @@
+<script setup>
+import specUrl from './openapi.yaml?url'
+</script>
+
 # Verzeichnis-API
 
 Über die Verzeichnis-API können angebundene Anwendungen die Gremien, Rollen, Rechtegruppen und Mitglieder einer Studierendenschaft abfragen, etwa um Zugriffsrechte abzugleichen oder Gremienlisten anzuzeigen. Die API ist **nur lesend**.
@@ -59,4 +63,4 @@ Fragst du einen Endpunkt ohne passenden Scope ab, antwortet die API mit `403`.
 
 ## OpenAPI-Spezifikation
 
-Die vollständige Spezifikation kannst du als [openapi.yaml](/openapi.yaml){target="_blank" download} herunterladen, z. B. um daraus Client-Bibliotheken zu generieren oder sie in Werkzeuge wie Postman oder Bruno zu importieren.
+Die vollständige Spezifikation kannst du als <a :href="specUrl" download="openapi.yaml">openapi.yaml</a> herunterladen, z. B. um daraus Client-Bibliotheken zu generieren oder sie in Werkzeuge wie Postman oder Bruno zu importieren.

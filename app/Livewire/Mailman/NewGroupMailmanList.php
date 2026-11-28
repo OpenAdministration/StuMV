@@ -20,6 +20,9 @@ use Throwable;
 
 /**
  * Creates a mapping, or edits one when a listId is given.
+ *
+ * @property-read bool $canCreateList
+ * @property-read ?array $domains
  */
 class NewGroupMailmanList extends Component
 {

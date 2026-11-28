@@ -6,24 +6,27 @@ Die Anleitungen beziehen sich auf **Debian 13 (Trixie)**. Auf anderen Distributi
 
 ## Aufbau
 
-StuMV ist eine Laravel-Anwendung, die ihre Daten auf zwei Speicher verteilt:
+StuMV ist eine Laravel-Anwendung, die ihre Daten auf zwei Speicher verteilt. Gestrichelte Verbindungen sind optional.
 
-```
-                ┌──────────────────────────────┐
- Browser ──────▶│ nginx ─▶ PHP-FPM (StuMV)     │──▶ SMTP-Server
- OIDC-Clients ─▶│                              │──▶ Mailman 3 (optional)
- API-Clients ──▶│                              │──▶ Hochschul-LDAP (optional)
-                └──────┬───────────────┬───────┘
-                       │               │
-                 ┌─────▼─────┐   ┌─────▼──────┐
-                 │ OpenLDAP  │   │  MariaDB   │
-                 └───────────┘   └────────────┘
+```mermaid
+flowchart LR
+  browser[Browser] --> app
+  oidc[OIDC-Clients] --> app
+  api[API-Clients] --> app
+  subgraph server[StuMV-Server]
+    app[nginx + PHP-FPM<br/>StuMV]
+  end
+  app --> ldap[(OpenLDAP)]
+  app --> db[(Datenbank<br/>MariaDB oder PostgreSQL)]
+  app --> smtp[SMTP-Server]
+  app -.-> mailman[Mailman 3]
+  app -.-> uni[Hochschul-LDAP]
 ```
 
 | Speicher | Inhalt |
 | --- | --- |
 | **OpenLDAP** | Personen und Passwörter, Studierendenschaften, Gremien, Rollen, Rechtegruppen, Domains. Andere Dienste können das Verzeichnis direkt lesen. |
-| **MariaDB** | Rollenmitgliedschaften mit Zeiträumen, Sitzungen, OIDC- und API-Clients, Identity Provider, Einladungen, Aktivitätsprotokoll, Export-Vorlagen |
+| **Datenbank** | Rollenmitgliedschaften mit Zeiträumen, Sitzungen, OIDC- und API-Clients, Identity Provider, Einladungen, Aktivitätsprotokoll, Export-Vorlagen |
 | **Dateisystem** | Profilbilder, Logos, Hintergrundbilder, Logos von OIDC-Clients, Schlüssel für OIDC/OAuth |
 
 Was in der Datenbank steht, wird regelmäßig ins LDAP übertragen (siehe [Automatische Aufgaben](./wartung#automatische-aufgaben)). Deshalb braucht StuMV einen **Cronjob**.

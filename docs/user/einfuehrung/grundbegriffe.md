@@ -12,14 +12,14 @@ Eine Person mit einem Konto in einer Studierendenschaft. Mitglied wird man in de
 
 Ein Gremium, eine Organisation oder eine Gliederung, kurz: **Gremium**. Gremien können ineinander verschachtelt sein, z. B.:
 
-```
-Studierendenrat
-├── Referat Finanzen
-├── Referat Kultur
-│   └── AG Filmabend
-└── Fachschaftsräte
-    ├── FSR Informatik
-    └── FSR Maschinenbau
+```mermaid
+flowchart TD
+  stura[Studierendenrat] --> fin[Referat Finanzen]
+  stura --> kultur[Referat Kultur]
+  kultur --> film[AG Filmabend]
+  stura --> fsr[Fachschaftsräte]
+  fsr --> inf[FSR Informatik]
+  fsr --> mb[FSR Maschinenbau]
 ```
 
 ## Rolle
@@ -40,8 +40,11 @@ Liegt das Startdatum in der Zukunft, wird die Mitgliedschaft erst dann aktiv. Be
 
 Eine Gruppe, die Rechte in anderen Anwendungen bündelt, z. B. „darf im StuFiS Finanzanträge genehmigen“ oder „steht auf der Mailingliste des Vorstands“. Rechtegruppen werden **nicht direkt Personen**, sondern **Rollen** zugeordnet. Alle Personen, die aktuell eine dieser Rollen innehaben, sind damit Mitglied der Rechtegruppe.
 
-```
-Person ──(Mitgliedschaft)──▶ Rolle ──(Zuordnung)──▶ Rechtegruppe ──▶ andere Anwendung
+```mermaid
+flowchart LR
+  person([Person]) -- Mitgliedschaft --> rolle[Rolle]
+  rolle -- Zuordnung --> gruppe[Rechtegruppe]
+  gruppe --> app[andere Anwendung]
 ```
 
 Endet die Mitgliedschaft in der Rolle, endet automatisch auch die Mitgliedschaft in der Rechtegruppe.

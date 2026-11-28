@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AccountDeletionMark;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
 use App\Models\IdentityProviderRoleMapping;
@@ -18,6 +19,18 @@ use Illuminate\Support\Str;
 use Tests\Support\TestLdap;
 
 uses(RefreshDatabase::class);
+
+function deletionMark(string $realm, string $username): void
+{
+    AccountDeletionMark::create([
+        'ldap_uid' => (string) Str::uuid(),
+        'realm' => $realm,
+        'username' => $username,
+        'email' => $username.'@example.test',
+        'notified_at' => now(),
+        'delete_after' => now()->addMonth(),
+    ]);
+}
 
 test('purging a realm removes every DB row and file scoped to it', function (): void {
     Storage::fake('public');
@@ -72,6 +85,8 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         'expires_at' => now()->addMinutes(10),
     ]);
 
+    deletionMark($uid, $member->username);
+
     DB::table('password_reset_tokens')->insert([
         'email' => 'reset@example.org',
         'realm' => $uid,
@@ -97,6 +112,7 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
     ]);
     GroupMailmanList::createForGroups(['realm' => $otherUid, 'mailman_list_id' => 'other.lists.example.org'], [$otherGroup->getDn()]);
     MailmanDomainRealm::create(['mail_host' => 'lists.example.org', 'realm' => $otherUid]);
+    deletionMark($otherUid, $otherMember->username);
 
     RealmDataPurger::purge($uid);
 
@@ -115,13 +131,15 @@ test('purging a realm removes every DB row and file scoped to it', function (): 
         ->and($client->tokens()->find($token->id))->toBeNull()
         ->and($client->authCodes()->find($authCode->id))->toBeNull()
         ->and(User::where('realm', $uid)->exists())->toBeFalse()
-        ->and(DB::table('password_reset_tokens')->where('realm', $uid)->exists())->toBeFalse();
+        ->and(DB::table('password_reset_tokens')->where('realm', $uid)->exists())->toBeFalse()
+        ->and(AccountDeletionMark::where('realm', $uid)->exists())->toBeFalse();
 
     expect(RoleMembership::where('realm', $otherUid)->exists())->toBeTrue()
         ->and(GroupMembership::where('group_dn', $otherGroup->getDn())->exists())->toBeTrue()
         ->and(GroupMailmanList::where('realm', $otherUid)->exists())->toBeTrue()
         ->and(MailmanDomainRealm::where('realm', $otherUid)->exists())->toBeTrue()
-        ->and(User::where('realm', $otherUid)->exists())->toBeTrue();
+        ->and(User::where('realm', $otherUid)->exists())->toBeTrue()
+        ->and(AccountDeletionMark::where('realm', $otherUid)->exists())->toBeTrue();
 });
 
 test('purging a realm with no associated data does nothing', function (): void {

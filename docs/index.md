@@ -15,6 +15,9 @@ hero:
     - theme: alt
       text: Administrationshandbuch
       link: /admin/
+    - theme: alt
+      text: Entwicklerhandbuch
+      link: /dev/
 
 features:
   - title: Für Mitglieder
@@ -29,4 +32,7 @@ features:
   - title: Für Betreiber:innen
     details: StuMV auf Debian installieren, konfigurieren, aktualisieren und sichern.
     link: /admin/
+  - title: Für Entwickler:innen
+    details: Entwicklungsumgebung, Tests, Architektur nach arc42 und die Verzeichnis-API.
+    link: /dev/
 ---

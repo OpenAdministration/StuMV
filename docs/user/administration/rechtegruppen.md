@@ -2,10 +2,13 @@
 
 Rechtegruppen (in der Seitenleiste: **Rechte**) verbinden Rollen mit Berechtigungen in anderen Anwendungen. Statt einzelnen Personen Rechte zu geben, ordnest du einer Gruppe **Rollen** zu. Wer eine dieser Rollen innehat, ist automatisch Mitglied der Gruppe – und verliert die Mitgliedschaft automatisch, sobald die Rolle endet.
 
-```
-FSR Informatik / Finanzer:in ─┐
-Referat Finanzen / Referent:in ┼──▶ Rechtegruppe „ref-finanzen“ ──▶ StuFiS, Mailingliste, …
-StuRa / HHV ──────────────────┘
+```mermaid
+flowchart LR
+  r1[FSR Informatik<br/>Finanzer:in] --> g[Rechtegruppe<br/>ref-finanzen]
+  r2[Referat Finanzen<br/>Referent:in] --> g
+  r3[StuRa<br/>Haushaltsverantwortung] --> g
+  g --> stufis[StuFiS]
+  g --> list[Mailingliste]
 ```
 
 Rechtegruppen verwalten nur Administrator:innen.

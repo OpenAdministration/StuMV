@@ -9,7 +9,7 @@ Unter **Profil → Mitgliedschaften** findest du alle Rollen, die du innehast od
 Mitgliedschaften werden von [Moderator:innen](/user/moderation/rollenmitgliedschaften) eingetragen. Fehlt etwas oder ist ein Datum falsch, wende dich an die Moderator:innen deiner Studierendenschaft.
 
 ::: info
-Neue Zuordnungen sind in angeschlossenen Anwendungen manchmal erst am nächsten Tag wirksam.
+Neue Zuordnungen gelten in angeschlossenen Anwendungen in der Regel ab deiner nächsten Anmeldung dort. Beginnt eine Mitgliedschaft erst in der Zukunft, wird sie am Starttag wirksam.
 :::
 
 ## Tätigkeits-Bescheinigung erstellen

@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use App\Ldap\Committee;
+use App\Ldap\Community;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 class CommunityModerator
@@ -17,8 +17,13 @@ class CommunityModerator
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $community = Route::current()->parameter('realm');
-        $ou = Route::current()->parameter('ou');
+        // $request->route(), not Route::current(): Livewire replays this on its own endpoint
+        $community = $request->route('realm');
+        $ou = $request->route('ou');
+
+        if (! $community instanceof Community) {
+            abort(404);
+        }
 
         // Every route this middleware guards is a role/role-membership
         // action scoped to a specific committee - a committee moderator's

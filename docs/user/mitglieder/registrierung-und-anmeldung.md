@@ -14,7 +14,7 @@ Die Registrierung funktioniert nur mit einer E-Mail-Adresse, deren Domain bei de
 
 ### Anforderungen an das Passwort
 
-Dein Passwort muss mindestens **12 Zeichen** lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben und ein Sonderzeichen enthalten. Außerdem darf es nicht leicht zu erraten sein – Passwörter, die in bekannten Datenlecks vorkommen, werden abgelehnt.
+Dein Passwort muss mindestens **12 Zeichen** lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten. Außerdem darf es nicht leicht zu erraten sein – Passwörter, die in bekannten Datenlecks vorkommen, werden abgelehnt.
 
 ### Registrierung über eine Einladung
 

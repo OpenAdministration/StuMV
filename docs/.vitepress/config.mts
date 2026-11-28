@@ -1,22 +1,30 @@
 import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 import { parseSpec, useSidebar } from 'vitepress-openapi'
 
 // the directory API reference is generated from the spec the app serves
-const apiSpec = parseSpec(readFileSync(new URL('../public/openapi.yaml', import.meta.url), 'utf8'))
+const apiSpec = parseSpec(readFileSync(new URL('../dev/api/openapi.yaml', import.meta.url), 'utf8'))
 const apiSidebar = useSidebar({ spec: apiSpec, linkPrefix: '/dev/api/' })
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   lang: 'de-DE',
   title: 'StuMV',
   description: 'Dokumentation der Studentischen Mitgliederverwaltung',
   cleanUrls: true,
   lastUpdated: true,
+  // the dev handbook lists the local container stack's URLs
+  ignoreDeadLinks: 'localhostLinks',
   // developer docs, not part of the user manual
-  srcExclude: ['install.md', 'install-dev.md', 'screenshots/**'],
+  srcExclude: ['screenshots/**'],
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }]],
   // vitepress-openapi's components need vitepress's client API during SSR
-  vite: { ssr: { noExternal: ['vitepress-openapi'] } },
+  vite: {
+    ssr: { noExternal: ['vitepress-openapi'] },
+    // pre-bundle mermaid as a whole: newer releases pull in CommonJS deps (fastdom)
+    // the mermaid plugin's own include list doesn't know about
+    optimizeDeps: { include: ['mermaid'] },
+  },
 
   themeConfig: {
     logo: '/logo.svg',
@@ -24,7 +32,7 @@ export default defineConfig({
     nav: [
       { text: 'Benutzerhandbuch', link: '/user/einfuehrung/was-ist-stumv', activeMatch: '^/user/' },
       { text: 'Administrationshandbuch', link: '/admin/', activeMatch: '^/admin/' },
-      { text: 'Entwicklerhandbuch', link: '/dev/api/', activeMatch: '^/dev/' },
+      { text: 'Entwicklerhandbuch', link: '/dev/', activeMatch: '^/dev/' },
     ],
 
     sidebar: {
@@ -92,6 +100,33 @@ export default defineConfig({
       ],
       '/dev/': [
         {
+          text: 'Einstieg',
+          items: [
+            { text: 'Überblick', link: '/dev/' },
+            { text: 'Entwicklungsumgebung', link: '/dev/entwicklungsumgebung' },
+            { text: 'Tests', link: '/dev/tests' },
+            { text: 'Beitragen', link: '/dev/beitragen' },
+          ],
+        },
+        {
+          text: 'Architektur (arc42)',
+          collapsed: false,
+          items: [
+            { text: '1. Einführung und Ziele', link: '/dev/architektur/01-einfuehrung-und-ziele' },
+            { text: '2. Randbedingungen', link: '/dev/architektur/02-randbedingungen' },
+            { text: '3. Kontextabgrenzung', link: '/dev/architektur/03-kontextabgrenzung' },
+            { text: '4. Lösungsstrategie', link: '/dev/architektur/04-loesungsstrategie' },
+            { text: '5. Bausteinsicht', link: '/dev/architektur/05-bausteinsicht' },
+            { text: '6. Laufzeitsicht', link: '/dev/architektur/06-laufzeitsicht' },
+            { text: '7. Verteilungssicht', link: '/dev/architektur/07-verteilungssicht' },
+            { text: '8. Querschnittliche Konzepte', link: '/dev/architektur/08-querschnittliche-konzepte' },
+            { text: '9. Architekturentscheidungen', link: '/dev/architektur/09-architekturentscheidungen' },
+            { text: '10. Qualitätsanforderungen', link: '/dev/architektur/10-qualitaetsanforderungen' },
+            { text: '11. Risiken und technische Schulden', link: '/dev/architektur/11-risiken-und-technische-schulden' },
+            { text: '12. Glossar', link: '/dev/architektur/12-glossar' },
+          ],
+        },
+        {
           text: 'Verzeichnis-API',
           items: [{ text: 'Überblick', link: '/dev/api/' }],
         },
@@ -138,4 +173,4 @@ export default defineConfig({
       message: 'StuMV ist freie Software von Open Administration.',
     },
   },
-})
+}))

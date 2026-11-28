@@ -10,7 +10,7 @@ Weitere Informationen: [www.stufis.de/stumv](https://www.stufis.de/stumv)
 
 Zunächst müssen [OpenLDAP](https://www.openldap.org/) und eine [MariaDB](https://mariadb.org/)- oder [MySQL](https://www.mysql.com/)-Datenbank eingerichtet werden.
 
-[Infos zur Einrichtung von OpenLDAP](https://github.com/OpenAdministration/StuMV/blob/main/docs/install.md)
+[Infos zur Einrichtung von OpenLDAP](docs/admin/openldap.md)
 
 ```
 git clone https://github.com/OpenAdministration/StuMV
@@ -32,6 +32,8 @@ php artisan flux:activate
 Nun müssen in der Datei `.env` noch ein paar Einstellungen wie App-Einstellungen, die Zugangsdaten für die Datenbank und E-Mail-Versand gesetzt werden.
 
 ## Contributing
+
+The developer handbook (German) in [`docs/dev/`](docs/dev/index.md) covers the development setup, tests, conventions and the architecture (arc42). Build it with `npm run docs:dev`.
 
 ### Requirements
 

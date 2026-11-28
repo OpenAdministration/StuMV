@@ -25,7 +25,7 @@ Verwalten können sie Moderator:innen der Studierendenschaft sowie Moderator:inn
 ![Formular zum Zuordnen von Personen zu einer Rolle](/screenshots/add-role-member.png)
 
 ::: info Wann wird die Zuordnung wirksam?
-Liegt das Startdatum in der Zukunft, wird die Mitgliedschaft erst dann aktiv. Auch sonst kann es bis zum nächsten Tag dauern, bis angeschlossene Anwendungen die neuen Rechte kennen – der Abgleich läuft automatisch jede Nacht. Administrator:innen können ihn auch [sofort anstoßen](/user/administration/synchronisation).
+Gilt die Mitgliedschaft schon heute, überträgt StuMV sie sofort ins Verzeichnis; angeschlossene Anwendungen kennen die neuen Rechte damit spätestens bei der nächsten Anmeldung der Person. Liegt das Startdatum in der Zukunft, trägt der nächtliche Abgleich sie am Starttag ein. Erscheint beim Speichern ein Hinweis, dass das Verzeichnis nicht sofort aktualisiert werden konnte, holt der nächtliche Abgleich das nach – Administrator:innen können ihn auch [sofort anstoßen](/user/administration/synchronisation).
 :::
 
 ::: tip Person noch nicht in der Liste?

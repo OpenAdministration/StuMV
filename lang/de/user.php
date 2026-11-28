@@ -15,7 +15,7 @@ return [
 
     'register' => 'Registrieren',
     'help.only_uni_mail' => 'Bitte verwende deine E-Mail-Adresse deiner Hochschule.',
-    'help.password' => 'Dein Passwort muss mindestens 12 Zeichen enthalten, davon ein Sonderzeichen, ein Klein- und ein Großbuchstaben. Zusätzlich darf es nicht leicht zu erraten sein.',
+    'help.password' => 'Dein Passwort muss mindestens 12 Zeichen enthalten, davon ein Sonderzeichen, eine Ziffer sowie ein Klein- und ein Großbuchstabe. Zusätzlich darf es nicht leicht zu erraten sein.',
     'error.email_in_use' => 'Dieser Account existiert bereits.',
     'error.registration_failed' => 'Die Registrierung ist fehlgeschlagen. Bitte versuche einen anderen Benutzernamen oder wende dich an den Support, falls das Problem weiter besteht.',
     'email_verified_login' => 'Deine E-Mail-Adresse wurde erfolgreich verifiziert. Du kannst dich nun anmelden.',

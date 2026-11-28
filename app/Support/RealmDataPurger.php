@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Ldap\Group;
+use App\Models\AccountDeletionMark;
 use App\Models\ActivityLog;
 use App\Models\GroupMailmanList;
 use App\Models\GroupMembership;
@@ -50,6 +51,7 @@ class RealmDataPurger
             Invitation::where('realm', $uid)->delete();
 
             UserAdditionalEmail::where('realm', $uid)->delete();
+            AccountDeletionMark::where('realm', $uid)->delete();
 
             // Files go only once the surrounding transaction has committed.
             $files = [];

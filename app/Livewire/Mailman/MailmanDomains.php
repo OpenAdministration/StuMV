@@ -17,6 +17,9 @@ use Throwable;
 
 /**
  * Super admins decide which realm may create lists under which Mailman domain.
+ *
+ * @property-read ?array $domains
+ * @property-read array $communities
  */
 class MailmanDomains extends Component
 {

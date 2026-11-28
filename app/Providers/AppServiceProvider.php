@@ -3,7 +3,12 @@
 namespace App\Providers;
 
 use App\Auth\Passwords\RealmScopedPasswordBrokerManager;
+use App\Http\Middleware\CommunityAdmin;
+use App\Http\Middleware\CommunityMember;
+use App\Http\Middleware\CommunityModerator;
+use App\Http\Middleware\DenyAdminRealm;
 use App\Http\Middleware\SetContentSecurityPolicy;
+use App\Http\Middleware\SuperAdminMiddleware;
 use App\Models\AccountDeletionMark;
 use App\Models\PassportClient;
 use App\Models\User;
@@ -32,6 +37,7 @@ use Laravel\Passport\Events\AccessTokenCreated;
 use Laravel\Passport\Events\AccessTokenRevoked;
 use Laravel\Passport\Events\RefreshTokenCreated;
 use Laravel\Passport\Passport;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -92,6 +98,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Livewire actions are separate requests; re-run the authorization middleware there too
+        Livewire::addPersistentMiddleware([
+            CommunityMember::class,
+            CommunityModerator::class,
+            CommunityAdmin::class,
+            SuperAdminMiddleware::class,
+            DenyAdminRealm::class,
+        ]);
+
         // config/openid.php's tokens_can is the single source of truth for
         // scopes: the OpenID Connect package's discovery endpoint reads it
         // directly for scopes_supported, so any scope granted via Passport
